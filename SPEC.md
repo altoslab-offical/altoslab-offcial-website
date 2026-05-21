@@ -246,6 +246,50 @@ type ContactLead = {
 };
 ```
 
+## Core Entity: Blog Post
+
+Blog posts are required for SEO and GEO content operations. Blog content is managed by the admin backend, can be saved as draft, reviewed, published, archived, and rendered as public indexable pages.
+
+```ts
+type BlogPost = {
+  id: string;
+  slug: string;
+  status: PublishStatus;
+  sortOrder: number;
+
+  title: string;
+  seoTitle?: string;
+  seoDescription?: string;
+  excerpt: string;
+  topic: string;
+  audience: string;
+  geoSummary: string;
+  body: string;
+  keyTakeaways: string[];
+  faqs: { question: string; answer: string }[];
+  tags: string[];
+  author: string;
+  cover?: string;
+
+  createdAt: string;
+  updatedAt: string;
+  publishedAt?: string;
+  generatedAt?: string;
+  generatedBy?: string;
+};
+```
+
+Blog/GEO rules:
+
+- Public users only see `published` blog posts.
+- Each published article must have a descriptive slug, SEO title, SEO description, excerpt, visible article body, GEO answer summary, and FAQ content.
+- Blog detail pages should render `BlogPosting` structured data.
+- Blog FAQ content should render `FAQPage` structured data and match the visible FAQ text.
+- AI-generated articles must be saved as drafts first. Human review is required before publish.
+- AI-generated articles must not invent unverifiable client names, numbers, claims, or citations.
+- Articles should answer concrete business questions in visible text, not only in metadata.
+- Blog URLs should be included in `sitemap.xml` and linked internally from `/blog` and the home page.
+
 Field rules:
 
 - `who`: required. Company, team, or sender name.
@@ -436,6 +480,22 @@ GET /api/projects/:slug
 ```
 
 Only published projects should be publicly returned.
+
+### List Published Blog Posts
+
+```http
+GET /api/blog
+```
+
+Returns only published blog posts ordered by `sortOrder`.
+
+### Get Blog Post By Slug
+
+```http
+GET /api/blog/:slug
+```
+
+Only published blog posts should be publicly returned.
 
 ## Admin API
 
@@ -951,6 +1011,16 @@ Assets manager:
 - Delete unused asset.
 - Show usage references before deleting used assets.
 
+Blog manager:
+
+- Search and filter posts by status, topic, tag, and keyword.
+- Create blank draft posts.
+- Generate AI blog drafts from topic, keyword, audience, and search intent.
+- Edit title, slug, status, SEO title, SEO description, excerpt, GEO answer summary, body, takeaways, FAQ, tags, cover image, and author.
+- Preview the public article page before publishing.
+- Publish only after required SEO/GEO fields are valid.
+- Archive posts without deleting their historical content.
+
 Publishing workflow:
 
 - Editors can save drafts at any time.
@@ -989,6 +1059,15 @@ Project:
 - `desc`
 - At least one `metric`
 - At least one `tech`
+
+Blog post:
+
+- `slug`
+- `title`
+- `excerpt`
+- `body`
+- `geoSummary`
+- At least one FAQ item
 
 Drafts may be incomplete.
 
