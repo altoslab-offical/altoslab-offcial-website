@@ -1,7 +1,5 @@
 import { unstable_noStore as noStore } from "next/cache";
-import { promises as fs } from "fs";
-import path from "path";
-import { seedData } from "./seed";
+import { readCmsDataFromStorage, writeCmsDataToStorage } from "./cms-storage";
 import type {
   BlogPost,
   CmsData,
@@ -14,7 +12,6 @@ import type {
   SitePage
 } from "./types";
 
-const DATA_PATH = path.join(process.cwd(), "data", "cms.json");
 const PUBLIC_STATUSES = new Set(["published"]);
 
 export function nowIso() {
@@ -39,17 +36,11 @@ export function slugify(input: string) {
 
 export async function readCmsData(): Promise<CmsData> {
   noStore();
-  try {
-    const raw = await fs.readFile(DATA_PATH, "utf8");
-    return JSON.parse(raw) as CmsData;
-  } catch {
-    return JSON.parse(JSON.stringify(seedData)) as CmsData;
-  }
+  return readCmsDataFromStorage();
 }
 
 export async function writeCmsData(data: CmsData) {
-  await fs.mkdir(path.dirname(DATA_PATH), { recursive: true });
-  await fs.writeFile(DATA_PATH, `${JSON.stringify(data, null, 2)}\n`, "utf8");
+  await writeCmsDataToStorage(data);
 }
 
 export async function mutateCmsData<T>(mutator: (data: CmsData) => T | Promise<T>): Promise<T> {

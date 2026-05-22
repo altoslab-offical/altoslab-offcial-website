@@ -42,9 +42,20 @@ export async function POST(request: Request) {
   }
 
   const lead = createContactLead({ who, contact, message });
-  await mutateCmsData((data) => {
-    data.contactLeads.unshift(lead);
-  });
+
+  try {
+    await mutateCmsData((data) => {
+      data.contactLeads.unshift(lead);
+    });
+  } catch (error) {
+    return NextResponse.json(
+      {
+        ok: false,
+        error: error instanceof Error ? error.message : "Unable to save contact lead"
+      },
+      { status: 503 }
+    );
+  }
 
   return NextResponse.json({ ok: true, leadId: lead.id });
 }
