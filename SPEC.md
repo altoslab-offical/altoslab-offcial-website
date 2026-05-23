@@ -40,7 +40,7 @@ Public website rendering rule:
 
 ## Current State
 
-The current website is a static built artifact:
+The previous website was a static built artifact:
 
 - Main public site: `index.html`
 - Duplicate built copies: `altoslab-website.html`, `public/index.html`
@@ -48,7 +48,15 @@ The current website is a static built artifact:
 - Project images are in `public/`
 - Brand/design rules are documented in `DESIGN.md` and `design/`
 
-This means backend integration should not be done directly inside the current minified bundle. The recommended next step is to rebuild the source app and move project data into a clean data layer.
+The public homepage has now been rebuilt as a modular Next App Router page:
+
+- Route: `app/page.tsx`
+- Sections: `components/site/*`
+- Data access: `lib/cms.ts`
+- Seed content: `lib/seed.ts`
+- Design tokens: `design/tokens.css`, `design/tokens.json`
+
+Backend integration should target the clean data layer and TypeScript models, not the legacy minified bundle.
 
 ## Recommended Stack Boundary
 

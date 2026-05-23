@@ -16,7 +16,7 @@ Primary color: Signal lime `#C8FF00`
 Accent color: System orange `#FF5500`
 Background: Deep black / near-black technical canvas
 Typography: Inter + Noto Sans TC fallback
-Component base: Static React export with Tailwind/shadcn-style tokens embedded in `index.html`
+Component base: Next App Router homepage with modular React sections and CSS design tokens
 
 ## Design Positioning
 
@@ -162,22 +162,26 @@ Strengths:
 - Portfolio has visual assets and concrete project names, which builds credibility.
 - The lime signal color is memorable and already strongly associated with the brand.
 
-Risks to fix next:
+Resolved in the modular rebuild:
 
-- `index.html`, `altoslab-website.html`, and `public/index.html` are duplicate built artifacts. This makes maintenance easy to drift.
-- The HTML title is currently `altoslab-site2`, which should become a real brand/SEO title.
-- `html lang` is `en`, but the site is primarily Traditional Chinese with English labels. Use `zh-Hant-TW` or `zh-TW`.
-- There is no useful meta description in the static HTML.
-- Brand colors are hard-coded in the bundle instead of exposed as semantic tokens.
-- The source app is not present, only built output. Bigger edits will be safer if we recover or recreate the source structure.
+- The root page now renders from `app/page.tsx` instead of `app/route.ts` reading the bundled `index.html`.
+- Homepage sections are modularized under `components/site/`.
+- Public homepage content reads through `lib/cms.ts` and `lib/seed.ts`.
+- Brand tokens are exposed through `design/tokens.css` and `design/tokens.json`.
+- Metadata and language now come from the Next root layout and page metadata.
+
+Remaining risks:
+
+- `index.html`, `altoslab-website.html`, and `public/index.html` still exist as legacy artifacts and should eventually be removed or archived after deployment confidence.
+- Some admin/project subpages still use older global CSS class names; keep token aliases in `design/tokens.css` until those pages are also migrated.
 
 ## Token Adoption Plan
 
 1. Keep `design/tokens.css` and `design/tokens.json` as the source of truth.
-2. For small static edits, add a token override block near the existing CSS variables in `index.html`.
-3. For larger redesign work, recreate the source app with these tokens in `globals.css` and Tailwind config.
-4. Replace hard-coded `#C8FF00`, `#FF5500`, black, white, and translucent grays with semantic token usage.
-5. Update metadata and language attributes before public launch.
+2. Use semantic tokens in components and keep primitive tokens inside token files.
+3. Keep `app/globals.css` as the implementation layer for layout/component classes.
+4. Replace remaining hard-coded `#C8FF00`, `#FF5500`, black, white, and translucent grays when admin/project subpages are migrated.
+5. Keep `docs/FRONTEND_ARCHITECTURE.md` updated when changing section/component boundaries.
 
 ## Central References Used
 

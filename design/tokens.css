@@ -1,0 +1,107 @@
+:root {
+  /* Primitive color tokens */
+  --al-color-black: #030403;
+  --al-color-ink-950: #070807;
+  --al-color-ink-900: #0a0a0a;
+  --al-color-ink-850: #0f0f0f;
+  --al-color-ink-800: #111111;
+  --al-color-ink-760: #151515;
+  --al-color-white: #f7f7f2;
+  --al-color-lime-500: #c8ff00;
+  --al-color-lime-400: #d7ff3f;
+  --al-color-orange-500: #ff5500;
+  --al-color-red-500: #ff5c5c;
+
+  /* Semantic color tokens */
+  --al-color-bg-base: var(--al-color-black);
+  --al-color-bg-grid: rgba(247, 247, 242, 0.035);
+  --al-color-bg-surface: var(--al-color-ink-900);
+  --al-color-bg-elevated: var(--al-color-ink-800);
+  --al-color-bg-panel: var(--al-color-ink-760);
+  --al-color-text-primary: var(--al-color-white);
+  --al-color-text-secondary: rgba(247, 247, 242, 0.68);
+  --al-color-text-muted: rgba(247, 247, 242, 0.46);
+  --al-color-text-subtle: rgba(247, 247, 242, 0.28);
+  --al-color-border-subtle: rgba(247, 247, 242, 0.1);
+  --al-color-border-default: rgba(247, 247, 242, 0.13);
+  --al-color-border-strong: rgba(247, 247, 242, 0.22);
+  --al-color-action-primary: var(--al-color-lime-500);
+  --al-color-action-primary-hover: var(--al-color-lime-400);
+  --al-color-action-secondary: rgba(247, 247, 242, 0.06);
+  --al-color-accent-system: var(--al-color-orange-500);
+  --al-color-status-error: var(--al-color-red-500);
+  --al-color-focus-ring: rgba(200, 255, 0, 0.72);
+  --al-color-overlay-scrim: rgba(0, 0, 0, 0.82);
+
+  /* Typography tokens */
+  --al-font-body: var(--font-inter), var(--font-noto-tc), system-ui, sans-serif;
+  --al-font-mono: "SFMono-Regular", "Roboto Mono", "Noto Sans Mono", Consolas, monospace;
+  --al-text-display: clamp(4rem, 15vw, 12rem);
+  --al-text-hero: clamp(3.25rem, 9.5vw, 8.5rem);
+  --al-text-section: clamp(2.25rem, 6vw, 5rem);
+  --al-text-title: clamp(1.35rem, 2.4vw, 2rem);
+  --al-text-body: 1rem;
+  --al-text-body-lg: 1.125rem;
+  --al-text-small: 0.875rem;
+  --al-text-caption: 0.75rem;
+  --al-leading-display: 0.88;
+  --al-leading-title: 1.12;
+  --al-leading-body: 1.6;
+  --al-leading-longform: 1.75;
+
+  /* Spacing tokens */
+  --al-space-1: 0.25rem;
+  --al-space-2: 0.5rem;
+  --al-space-3: 0.75rem;
+  --al-space-4: 1rem;
+  --al-space-5: 1.25rem;
+  --al-space-6: 1.5rem;
+  --al-space-8: 2rem;
+  --al-space-10: 2.5rem;
+  --al-space-12: 3rem;
+  --al-space-16: 4rem;
+  --al-space-20: 5rem;
+  --al-space-section: clamp(5rem, 9vw, 8.5rem);
+  --al-container-max: 1180px;
+  --al-container-wide: 1440px;
+  --al-page-gutter: clamp(1.25rem, 3vw, 4rem);
+
+  /* Shape, shadow, motion */
+  --al-radius-xs: 2px;
+  --al-radius-sm: 4px;
+  --al-radius-md: 8px;
+  --al-radius-lg: 12px;
+  --al-radius-full: 999px;
+  --al-shadow-floating: 0 20px 60px rgba(0, 0, 0, 0.32);
+  --al-shadow-control: 0 10px 26px rgba(0, 0, 0, 0.24);
+  --al-motion-fast: 150ms ease;
+  --al-motion-base: 200ms ease;
+  --al-motion-section: 320ms ease;
+  --al-z-header: 40;
+  --al-z-modal: 80;
+
+  /* Component tokens */
+  --al-button-height-sm: 2.75rem;
+  --al-button-height-md: 3.25rem;
+  --al-button-padding-x: 1.5rem;
+  --al-input-bg: rgba(247, 247, 242, 0.06);
+  --al-input-border: rgba(247, 247, 242, 0.18);
+
+  /* Legacy aliases used by existing admin/project pages */
+  --al-bg: var(--al-color-bg-base);
+  --al-surface: var(--al-color-bg-surface);
+  --al-elevated: var(--al-color-bg-elevated);
+  --al-panel: var(--al-color-bg-panel);
+  --al-text: var(--al-color-text-primary);
+  --al-secondary: var(--al-color-text-secondary);
+  --al-muted: var(--al-color-text-muted);
+  --al-border: var(--al-color-border-default);
+  --al-border-strong: var(--al-color-border-strong);
+  --al-lime: var(--al-color-action-primary);
+  --al-lime-hover: var(--al-color-action-primary-hover);
+  --al-orange: var(--al-color-accent-system);
+  --al-red: var(--al-color-status-error);
+  --al-radius: var(--al-radius-md);
+  --al-max: var(--al-container-max);
+  --font-body: var(--al-font-body);
+}

@@ -93,12 +93,32 @@ export const seedData: CmsData = {
           key: "about",
           status: "published",
           sortOrder: 30,
-          eyebrow: "About · We Build Intelligence",
-          title: "把 AI 變成企業每天會用的系統",
-          accentText: "可部署、可衡量、可迭代",
+          eyebrow: "About · 關於我們",
+          title: "We Build",
+          accentText: "Intelligence.",
           body:
-            "ALTOS LAB 不是只交付簡報或 Prompt。我們從業務流程、知識資料、系統整合、權限與日常維運出發，打造能在真實團隊中持續運作的 AI 產品與自動化後台。",
-          items: [],
+            "ALTOS LAB 擁有一支經驗豐富的跨領域團隊，深耕互聯網產品開發與 AI 系統整合，深度參與過多個大型平台從 0 到 1 的完整建構過程。",
+          items: [
+            {
+              id: "item_about_systems",
+              sectionId: "sec_about",
+              status: "published",
+              sortOrder: 10,
+              body:
+                "我們將前沿的 AI 技術與深厚的系統整合能力結合，為各類企業提供從策略規劃到落地部署的完整 AI 解決方案，幫助客戶在智能化浪潮中建立真實競爭優勢。",
+              createdAt: timestamp,
+              updatedAt: timestamp
+            },
+            {
+              id: "item_about_note",
+              sectionId: "sec_about",
+              status: "published",
+              sortOrder: 20,
+              body: "From internet infrastructure to agentic AI — we've built it, shipped it, scaled it.",
+              createdAt: timestamp,
+              updatedAt: timestamp
+            }
+          ],
           createdAt: timestamp,
           updatedAt: timestamp,
           publishedAt: timestamp
@@ -300,19 +320,19 @@ export const seedData: CmsData = {
           key: "contact",
           status: "published",
           sortOrder: 90,
-          eyebrow: "Contact · OPEN FOR NEW PROJECTS",
-          title: "把你的 AI 想法變成可運作的系統",
-          accentText: "START",
+          eyebrow: "Contact · 聯絡我們",
+          title: "Let's Build",
+          accentText: "Together.",
           body: "告訴我們你的產業、現有流程與想優先解決的問題。我們會回覆最適合的 MVP 範圍與下一步。",
-          ctaPrimaryLabel: "送出需求",
-          ctaPrimaryUrl: "mailto:hello@altoslab.com",
+          ctaPrimaryLabel: "送出合作需求",
+          ctaPrimaryUrl: "mailto:hello@altoslab.ai",
           items: [],
           settings: {
-            email: "hello@altoslab.com",
+            email: "hello@altoslab.ai",
             formEnabled: true,
-            whoLabel: "公司 / 團隊 / 姓名",
-            contactLabel: "Email / LINE / 電話",
-            messageLabel: "想導入 AI 的場景"
+            whoLabel: "我們是誰",
+            contactLabel: "聯絡方式",
+            messageLabel: "希望有什麼可以協助的"
           },
           createdAt: timestamp,
           updatedAt: timestamp,
@@ -504,6 +524,134 @@ export const seedData: CmsData = {
       createdAt: timestamp,
       updatedAt: timestamp,
       publishedAt: timestamp
+    },
+    {
+      id: "proj_newsletter",
+      slug: "ai-work-newsletter",
+      status: "published",
+      sortOrder: 70,
+      tag: "Newsletter",
+      title: "AltosLab AI 工作情報電子報平台",
+      titleEn: "AltosLab AI Work Intelligence Newsletter",
+      url: "https://linear-hypothetical-melissa-lease.trycloudflare.com/",
+      cover: "/project-newsletter-cover.png",
+      gallery: ["/project-newsletter-cover.png"],
+      desc: "每天 5 分鐘，把 AI 變化翻成工作判斷的電子報平台。",
+      detail:
+        "平台以 AI 趨勢整理、工作應用拆解與可執行觀點為核心，協助讀者快速理解最新工具、產品更新與實務導入方向。",
+      productPage: {
+        heroTitle: "每天 5 分鐘的 AI 工作情報",
+        heroSubtitle: "把 AI 變化翻成工作判斷。",
+        heroBody: "整理 AI 產業變化、工具更新與實作觀點，讓內容成為可持續營運的知識入口。",
+        primaryCtaLabel: "查看電子報",
+        primaryCtaUrl: "https://linear-hypothetical-melissa-lease.trycloudflare.com/",
+        sections: []
+      },
+      metrics: [
+        { label: "閱讀節奏", value: "5 min" },
+        { label: "內容主題", value: "AI Work" },
+        { label: "發佈型態", value: "Newsletter" }
+      ],
+      tech: ["Newsletter", "Content CMS", "AI Curation", "Next.js"],
+      createdAt: timestamp,
+      updatedAt: timestamp,
+      publishedAt: timestamp
+    },
+    {
+      id: "proj_eternal_line",
+      slug: "eternal-line",
+      status: "published",
+      sortOrder: 80,
+      tag: "Care AI",
+      title: "Eternal Line — 紀念親人聊天與照護系統",
+      titleEn: "Eternal Line Memorial Chat and Care System",
+      url: "https://eternal-line-195010457818.asia-east1.run.app/",
+      cover: "/project-eternal-cover.png",
+      gallery: ["/project-eternal-cover.png"],
+      desc: "上傳已故家人的對話記錄與語音，讓 AI 延續珍貴的溫度，透過 LINE 持續連結。",
+      detail:
+        "系統支援紀念與照護兩種情境，將家人的對話、語音與個人記憶整理成可互動的 AI 角色，並透過 LINE Bot 降低使用門檻。",
+      productPage: {
+        heroTitle: "讓思念與照護持續在線",
+        heroSubtitle: "紀念、陪伴、提醒與家庭連結。",
+        heroBody: "把重要的記憶、語音與關懷流程轉成可長期互動的 LINE AI 系統。",
+        primaryCtaLabel: "查看 Eternal Line",
+        primaryCtaUrl: "https://eternal-line-195010457818.asia-east1.run.app/",
+        sections: []
+      },
+      metrics: [
+        { label: "互動入口", value: "LINE" },
+        { label: "資料類型", value: "對話 / 語音" },
+        { label: "使用模式", value: "紀念 / 照護" }
+      ],
+      tech: ["LINE Bot", "Memory AI", "RAG", "Care Workflow", "Google Cloud Run"],
+      createdAt: timestamp,
+      updatedAt: timestamp,
+      publishedAt: timestamp
+    },
+    {
+      id: "proj_fortune_master",
+      slug: "ai-fortune-master",
+      status: "published",
+      sortOrder: 90,
+      tag: "AI Fortune",
+      title: "玄衡命理館 — AI 算命大師",
+      titleEn: "AI Fortune Master",
+      url: "https://ai-fortune-master-982174173287.asia-east1.run.app/?manual-prod-00018=1",
+      cover: "/project-fortune-cover.png",
+      gallery: ["/project-fortune-cover.png"],
+      desc: "結合命理問答、占卜流程與 AI 對話的線上算命體驗。",
+      detail:
+        "產品將命理服務拆成清楚的使用流程，透過 AI 對話協助使用者描述問題、取得初步解析，並保留後續真人服務或付費升級的延伸空間。",
+      productPage: {
+        heroTitle: "線上 AI 命理互動體驗",
+        heroSubtitle: "問事、解析、引導下一步。",
+        heroBody: "以對話式體驗承接使用者問題，讓傳統命理服務更容易在線上被理解與使用。",
+        primaryCtaLabel: "查看算命大師",
+        primaryCtaUrl: "https://ai-fortune-master-982174173287.asia-east1.run.app/?manual-prod-00018=1",
+        sections: []
+      },
+      metrics: [
+        { label: "服務模式", value: "線上問事" },
+        { label: "互動方式", value: "AI 對話" },
+        { label: "產品類型", value: "命理諮詢" }
+      ],
+      tech: ["LLM", "Conversation UX", "Prompt Flow", "Google Cloud Run"],
+      createdAt: timestamp,
+      updatedAt: timestamp,
+      publishedAt: timestamp
+    },
+    {
+      id: "proj_koibito",
+      slug: "koibito-dating",
+      status: "published",
+      sortOrder: 100,
+      tag: "Dating",
+      title: "Koibito 約會平台",
+      titleEn: "Koibito Dating Platform",
+      url: "https://koibito-dating.vercel.app/",
+      cover: "/project-koibito-cover.png",
+      gallery: ["/project-koibito-cover.png"],
+      desc: "結合探索、個人檔案、私密內容、禮物與聊天的約會產品體驗。",
+      detail:
+        "Koibito 以探索與個人檔案為核心，搭配私密內容、禮物互動與聊天流程，建立可延伸會員、內容與社交互動的 dating product experience。",
+      productPage: {
+        heroTitle: "更完整的約會產品體驗",
+        heroSubtitle: "探索、檔案、聊天、禮物與私密內容。",
+        heroBody: "從使用者探索到互動轉換，建立可持續擴充的 dating platform。",
+        primaryCtaLabel: "查看 Koibito",
+        primaryCtaUrl: "https://koibito-dating.vercel.app/",
+        sections: []
+      },
+      metrics: [
+        { label: "核心功能", value: "配對 / 聊天" },
+        { label: "互動內容", value: "禮物 / 私密" },
+        { label: "體驗方向", value: "Mobile-first" }
+      ],
+      tech: ["Next.js", "Profile System", "Chat", "Gift Flow", "Vercel"],
+      createdAt: timestamp,
+      updatedAt: timestamp,
+      publishedAt: timestamp
     }
   ],
   blogPosts: [
@@ -576,6 +724,42 @@ export const seedData: CmsData = {
       url: "/proj4-cover.png",
       folder: "projects/workflow",
       filename: "proj4-cover.png",
+      mimeType: "image/png",
+      createdAt: timestamp,
+      updatedAt: timestamp
+    },
+    {
+      id: "asset_project_newsletter_cover",
+      url: "/project-newsletter-cover.png",
+      folder: "projects/ai-work-newsletter",
+      filename: "project-newsletter-cover.png",
+      mimeType: "image/png",
+      createdAt: timestamp,
+      updatedAt: timestamp
+    },
+    {
+      id: "asset_project_eternal_cover",
+      url: "/project-eternal-cover.png",
+      folder: "projects/eternal-line",
+      filename: "project-eternal-cover.png",
+      mimeType: "image/png",
+      createdAt: timestamp,
+      updatedAt: timestamp
+    },
+    {
+      id: "asset_project_fortune_cover",
+      url: "/project-fortune-cover.png",
+      folder: "projects/ai-fortune-master",
+      filename: "project-fortune-cover.png",
+      mimeType: "image/png",
+      createdAt: timestamp,
+      updatedAt: timestamp
+    },
+    {
+      id: "asset_project_koibito_cover",
+      url: "/project-koibito-cover.png",
+      folder: "projects/koibito-dating",
+      filename: "project-koibito-cover.png",
       mimeType: "image/png",
       createdAt: timestamp,
       updatedAt: timestamp
