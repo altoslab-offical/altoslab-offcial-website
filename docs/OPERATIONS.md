@@ -42,7 +42,7 @@ CMS_ENCRYPTION_KEY=<64-hex-random-secret>
 CMS_STORAGE_KEY=altoslab:cms:v1
 DEEPSEEK_API_KEY=<optional-for-ai-blog-generation>
 DEEPSEEK_BASE_URL=https://api.deepseek.com
-DEEPSEEK_CONTENT_MODEL=deepseek-v4-pro
+DEEPSEEK_CONTENT_MODEL=deepseek-v4-flash
 BLOG_TREND_SOURCES=https://developers.google.com/search/blog/rss.xml,https://vercel.com/blog/rss.xml,https://openai.com/news/rss.xml
 CRON_SECRET=<long-random-cron-secret>
 AUTO_PUBLISH_BLOG=false
@@ -57,6 +57,7 @@ Notes:
 - Without Vercel Blob or Upstash env vars, production can still render seed content, but admin edits and contact leads will not persist.
 - `AUTO_PUBLISH_BLOG` should stay `false` for v1. AI-generated content should be reviewed before publishing.
 - `CRON_SECRET` protects `/api/cron/blog-drafts`; Vercel Cron will call it daily when configured in `vercel.json`.
+- `DEEPSEEK_CONTENT_MODEL=deepseek-v4-flash` is the recommended default for daily draft generation because it is faster and more reliable for the admin/Cron workflow. Use `deepseek-v4-pro` only when slower, higher-effort drafting is acceptable.
 - Search verification env vars are optional until the matching Search Console/Webmaster account provides the token. Once set and redeployed, the homepage and App Router pages emit the required verification meta tags.
 
 ## Vercel Project Settings

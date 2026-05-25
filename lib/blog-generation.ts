@@ -27,6 +27,8 @@ type DeepSeekPair = {
   en?: DeepSeekPost;
 };
 
+type DeepSeekLanguage = Extract<BlogLanguage, "zh-Hant" | "en">;
+
 const FALLBACK_SOURCES: TrendCandidate[] = [
   {
     title: "Google Search Central guidance on helpful, people-first content",
@@ -151,6 +153,13 @@ function extractJson(text: string) {
 function assertDeepSeekPair(value: DeepSeekPair) {
   if (!value.zh?.title || !value.zh.body || !value.en?.title || !value.en.body) {
     throw new Error("DeepSeek JSON did not include complete zh/en article drafts");
+  }
+  return value;
+}
+
+function assertDeepSeekPost(value: DeepSeekPost, language: DeepSeekLanguage) {
+  if (!value.title || !value.body || !value.geoSummary) {
+    throw new Error(`DeepSeek JSON did not include a complete ${language} article draft`);
   }
   return value;
 }
@@ -349,16 +358,72 @@ async function generateWithDeepSeek(input: BlogGenerateInput, sources: BlogSourc
   if (!apiKey) return null;
 
   const baseUrl = (process.env.DEEPSEEK_BASE_URL || "https://api.deepseek.com").replace(/\/$/, "");
-  const model = process.env.DEEPSEEK_CONTENT_MODEL || "deepseek-v4-pro";
-  const timeoutMs = Number(process.env.DEEPSEEK_TIMEOUT_MS || 75_000);
+  const model = process.env.DEEPSEEK_CONTENT_MODEL || "deepseek-v4-flash";
+  const timeoutMs = Number(process.env.DEEPSEEK_TIMEOUT_MS || 45_000);
   const sourceBrief = sources
     .map((source, index) => `${index + 1}. ${source.title} (${source.publisher || "source"}) - ${source.url}`)
     .join("\n");
   const topic = input.topic || sources[0]?.title || "AI trends and search visibility";
 
-  const prompt = `You are writing for ALTOS LAB, an AI implementation studio.
+  async function requestJson(prompt: string, language: DeepSeekLanguage) {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), timeoutMs);
 
-Create a bilingual company-blog draft pair about the same topic.
+    try {
+      const response = await fetch(`${baseUrl}/chat/completions`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          "Content-Type": "application/json"
+        },
+        signal: controller.signal,
+        body: JSON.stringify({
+          model,
+          messages: [
+            {
+              role: "system",
+              content:
+                "You are a JSON API. Return only one valid JSON object matching the user's schema. Never include reasoning text outside JSON."
+            },
+            { role: "user", content: prompt }
+          ],
+          temperature: 0.2,
+          max_tokens: 2800,
+          response_format: { type: "json_object" }
+        })
+      });
+
+      if (!response.ok) {
+        const errorPayload = (await response.json().catch(() => null)) as { error?: { message?: string } } | null;
+        throw new Error(
+          `DeepSeek generation failed: ${response.status}${errorPayload?.error?.message ? ` ${errorPayload.error.message}` : ""}`
+        );
+      }
+
+      const data = await response.json();
+      const message = data.choices?.[0]?.message || {};
+      const content = message.content || message.reasoning_content || "";
+      return assertDeepSeekPost(extractJson(content) as DeepSeekPost, language);
+    } catch (error) {
+      if (error instanceof Error && error.name === "AbortError") {
+        throw new Error(`DeepSeek ${language} generation timed out after ${timeoutMs}ms`);
+      }
+      throw error;
+    } finally {
+      clearTimeout(timeout);
+    }
+  }
+
+  function languagePrompt(language: DeepSeekLanguage) {
+    const languageInstruction =
+      language === "zh-Hant"
+        ? "Write in Traditional Chinese for Taiwan. Use natural Taiwanese business language."
+        : "Write in natural business English.";
+    const languageLabel = language === "zh-Hant" ? "zh-Hant" : "en";
+
+    return `You are writing one ${languageLabel} company-blog draft for ALTOS LAB, an AI implementation studio.
+
+This is one side of a bilingual article pair. Use the same angle, claims and source-backed reasoning as the paired language version will use.
 
 Topic: ${topic}
 Primary keyword: ${input.keyword || topic}
@@ -368,94 +433,40 @@ Sources:
 ${sourceBrief}
 
 Return exactly one valid JSON object. Do not include Markdown, prose, comments, analysis, XML, YAML or code fences.
-Use this exact top-level shape and fill every string field:
+${languageInstruction}
+
+Use this exact shape and fill every string field:
 {
-  "zh": {
-    "title": "",
-    "seoTitle": "",
-    "seoDescription": "",
-    "excerpt": "",
-    "topic": "",
-    "audience": "",
-    "geoSummary": "",
-    "body": "",
-    "keyTakeaways": ["", "", ""],
-    "faqs": [{"question": "", "answer": ""}],
-    "tags": ["", "", ""],
-    "sourceLinks": [{"title": "", "url": "", "publisher": ""}]
-  },
-  "en": {
-    "title": "",
-    "seoTitle": "",
-    "seoDescription": "",
-    "excerpt": "",
-    "topic": "",
-    "audience": "",
-    "geoSummary": "",
-    "body": "",
-    "keyTakeaways": ["", "", ""],
-    "faqs": [{"question": "", "answer": ""}],
-    "tags": ["", "", ""],
-    "sourceLinks": [{"title": "", "url": "", "publisher": ""}]
-  }
+  "title": "",
+  "seoTitle": "",
+  "seoDescription": "",
+  "excerpt": "",
+  "topic": "",
+  "audience": "",
+  "geoSummary": "",
+  "body": "",
+  "keyTakeaways": ["", "", ""],
+  "faqs": [{"question": "", "answer": ""}],
+  "tags": ["", "", ""],
+  "sourceLinks": [{"title": "", "url": "", "publisher": ""}]
 }
 
 Rules:
-- zh must be Traditional Chinese for Taiwan. en must be natural business English.
-- Both articles must cover the same angle and claims.
 - Write for people first. No keyword stuffing.
 - Do not invent client names, statistics, dates or source claims.
 - Any claim tied to a trend must be supported by sourceLinks.
 - The first 50 words must directly answer the search intent.
 - Include 3-5 FAQs only if the article visibly covers the answer.
-- Body should use Markdown headings and paragraphs, about 450-800 words per language.
+- Body should use Markdown headings and paragraphs, about 350-650 words.
 - Keep status/review fields out of the JSON; the CMS will set them.`;
-
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), timeoutMs);
-  try {
-    const response = await fetch(`${baseUrl}/chat/completions`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json"
-      },
-      signal: controller.signal,
-      body: JSON.stringify({
-        model,
-        messages: [
-          {
-            role: "system",
-            content:
-              "You are a JSON API. Return only one valid JSON object matching the user's schema. Never include reasoning text outside JSON."
-          },
-          { role: "user", content: prompt }
-        ],
-        temperature: 0.2,
-        max_tokens: 6500,
-        response_format: { type: "json_object" }
-      })
-    });
-
-    if (!response.ok) {
-      const errorPayload = (await response.json().catch(() => null)) as { error?: { message?: string } } | null;
-      throw new Error(
-        `DeepSeek generation failed: ${response.status}${errorPayload?.error?.message ? ` ${errorPayload.error.message}` : ""}`
-      );
-    }
-
-    const data = await response.json();
-    const message = data.choices?.[0]?.message || {};
-    const content = message.content || message.reasoning_content || "";
-    return { pair: assertDeepSeekPair(extractJson(content) as DeepSeekPair), model };
-  } catch (error) {
-    if (error instanceof Error && error.name === "AbortError") {
-      throw new Error(`DeepSeek generation timed out after ${timeoutMs}ms`);
-    }
-    throw error;
-  } finally {
-    clearTimeout(timeout);
   }
+
+  const [zh, en] = await Promise.all([
+    requestJson(languagePrompt("zh-Hant"), "zh-Hant"),
+    requestJson(languagePrompt("en"), "en")
+  ]);
+
+  return { pair: assertDeepSeekPair({ zh, en }), model };
 }
 
 export async function generateBlogDraftPair(input: BlogGenerateInput = {}) {
