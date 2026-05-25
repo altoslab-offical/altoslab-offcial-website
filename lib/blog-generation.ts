@@ -141,9 +141,18 @@ export async function fetchTrendCandidates(input: BlogGenerateInput = {}): Promi
 function extractJson(text: string) {
   const trimmed = text.trim();
   if (trimmed.startsWith("{")) return JSON.parse(trimmed);
+  const fenced = trimmed.match(/```(?:json)?\s*([\s\S]*?)```/i);
+  if (fenced?.[1]) return extractJson(fenced[1]);
   const match = trimmed.match(/\{[\s\S]*\}/);
   if (!match) throw new Error("No JSON object found in model output");
   return JSON.parse(match[0]);
+}
+
+function assertDeepSeekPair(value: DeepSeekPair) {
+  if (!value.zh?.title || !value.zh.body || !value.en?.title || !value.en.body) {
+    throw new Error("DeepSeek JSON did not include complete zh/en article drafts");
+  }
+  return value;
 }
 
 function canonicalSources(candidates: TrendCandidate[]) {
@@ -341,6 +350,7 @@ async function generateWithDeepSeek(input: BlogGenerateInput, sources: BlogSourc
 
   const baseUrl = (process.env.DEEPSEEK_BASE_URL || "https://api.deepseek.com").replace(/\/$/, "");
   const model = process.env.DEEPSEEK_CONTENT_MODEL || "deepseek-v4-pro";
+  const timeoutMs = Number(process.env.DEEPSEEK_TIMEOUT_MS || 75_000);
   const sourceBrief = sources
     .map((source, index) => `${index + 1}. ${source.title} (${source.publisher || "source"}) - ${source.url}`)
     .join("\n");
@@ -357,10 +367,37 @@ Search intent: ${input.intent || "understand the trend and evaluate practical AI
 Sources:
 ${sourceBrief}
 
-Return only valid JSON with this shape:
+Return exactly one valid JSON object. Do not include Markdown, prose, comments, analysis, XML, YAML or code fences.
+Use this exact top-level shape and fill every string field:
 {
-  "zh": { "title": "", "seoTitle": "", "seoDescription": "", "excerpt": "", "topic": "", "audience": "", "geoSummary": "", "body": "", "keyTakeaways": [], "faqs": [{"question":"","answer":""}], "tags": [], "sourceLinks": [{"title":"","url":"","publisher":""}] },
-  "en": { same fields as zh }
+  "zh": {
+    "title": "",
+    "seoTitle": "",
+    "seoDescription": "",
+    "excerpt": "",
+    "topic": "",
+    "audience": "",
+    "geoSummary": "",
+    "body": "",
+    "keyTakeaways": ["", "", ""],
+    "faqs": [{"question": "", "answer": ""}],
+    "tags": ["", "", ""],
+    "sourceLinks": [{"title": "", "url": "", "publisher": ""}]
+  },
+  "en": {
+    "title": "",
+    "seoTitle": "",
+    "seoDescription": "",
+    "excerpt": "",
+    "topic": "",
+    "audience": "",
+    "geoSummary": "",
+    "body": "",
+    "keyTakeaways": ["", "", ""],
+    "faqs": [{"question": "", "answer": ""}],
+    "tags": ["", "", ""],
+    "sourceLinks": [{"title": "", "url": "", "publisher": ""}]
+  }
 }
 
 Rules:
@@ -371,33 +408,54 @@ Rules:
 - Any claim tied to a trend must be supported by sourceLinks.
 - The first 50 words must directly answer the search intent.
 - Include 3-5 FAQs only if the article visibly covers the answer.
+- Body should use Markdown headings and paragraphs, about 450-800 words per language.
 - Keep status/review fields out of the JSON; the CMS will set them.`;
 
-  const response = await fetch(`${baseUrl}/chat/completions`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      model,
-      messages: [
-        { role: "system", content: "Return strict JSON only. Do not wrap it in Markdown." },
-        { role: "user", content: prompt }
-      ],
-      temperature: 0.35,
-      max_tokens: 5000,
-      response_format: { type: "json_object" }
-    })
-  });
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const response = await fetch(`${baseUrl}/chat/completions`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json"
+      },
+      signal: controller.signal,
+      body: JSON.stringify({
+        model,
+        messages: [
+          {
+            role: "system",
+            content:
+              "You are a JSON API. Return only one valid JSON object matching the user's schema. Never include reasoning text outside JSON."
+          },
+          { role: "user", content: prompt }
+        ],
+        temperature: 0.2,
+        max_tokens: 6500,
+        response_format: { type: "json_object" }
+      })
+    });
 
-  if (!response.ok) {
-    throw new Error(`DeepSeek generation failed: ${response.status}`);
+    if (!response.ok) {
+      const errorPayload = (await response.json().catch(() => null)) as { error?: { message?: string } } | null;
+      throw new Error(
+        `DeepSeek generation failed: ${response.status}${errorPayload?.error?.message ? ` ${errorPayload.error.message}` : ""}`
+      );
+    }
+
+    const data = await response.json();
+    const message = data.choices?.[0]?.message || {};
+    const content = message.content || message.reasoning_content || "";
+    return { pair: assertDeepSeekPair(extractJson(content) as DeepSeekPair), model };
+  } catch (error) {
+    if (error instanceof Error && error.name === "AbortError") {
+      throw new Error(`DeepSeek generation timed out after ${timeoutMs}ms`);
+    }
+    throw error;
+  } finally {
+    clearTimeout(timeout);
   }
-
-  const data = await response.json();
-  const content = data.choices?.[0]?.message?.content || "";
-  return { pair: extractJson(content) as DeepSeekPair, model };
 }
 
 export async function generateBlogDraftPair(input: BlogGenerateInput = {}) {
