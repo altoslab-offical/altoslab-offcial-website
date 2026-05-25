@@ -1,0 +1,64 @@
+const GTM_ID_PATTERN = /^GTM-[A-Z0-9]+$/i;
+
+export const gtmId = process.env.NEXT_PUBLIC_GTM_ID?.trim();
+
+export function isGtmConfigured() {
+  return Boolean(gtmId && GTM_ID_PATTERN.test(gtmId));
+}
+
+export function gtmHeadSnippet() {
+  if (!isGtmConfigured()) return "";
+  return `<script>
+    window.dataLayer = window.dataLayer || [];
+    window.dataLayer.push({ event: "site_loaded", site: "altoslab" });
+    (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({"gtm.start":new Date().getTime(),event:"gtm.js"});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!="dataLayer"?"&l="+l:"";j.async=true;j.src="https://www.googletagmanager.com/gtm.js?id="+i+dl;f.parentNode.insertBefore(j,f);})(window,document,"script","dataLayer","${gtmId}");
+  </script>`;
+}
+
+export function gtmNoScriptSnippet() {
+  if (!isGtmConfigured()) return "";
+  return `<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=${gtmId}" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>`;
+}
+
+export function homepageAnalyticsSnippet() {
+  return `<script>
+    window.dataLayer = window.dataLayer || [];
+    window.altosTrack = function(event, payload) {
+      var clean = Object.assign({ event: event }, payload || {});
+      delete clean.email;
+      delete clean.phone;
+      delete clean.contact;
+      delete clean.message;
+      window.dataLayer.push(clean);
+    };
+    document.addEventListener("click", function(event) {
+      var link = event.target && event.target.closest ? event.target.closest("a[href]") : null;
+      if (!link) return;
+      var href = link.getAttribute("href") || "";
+      var label = (link.textContent || "").trim().slice(0, 80);
+      if (href.indexOf("#contact") >= 0 || href.indexOf("mailto:") === 0 || /contact|合作|諮詢|開始/i.test(label)) {
+        window.altosTrack("cta_clicked", { cta_label: label || href, cta_href: href, page_path: location.pathname });
+      }
+    }, { passive: true });
+    document.addEventListener("submit", function(event) {
+      var form = event.target;
+      if (!form || !form.matches || !form.matches("form")) return;
+      window.altosTrack("contact_form_submitted", {
+        form_id: form.id || "contact",
+        page_path: location.pathname
+      });
+    }, true);
+    if (window.fetch) {
+      var originalFetch = window.fetch;
+      window.fetch = function(input, init) {
+        return originalFetch(input, init).then(function(response) {
+          var url = typeof input === "string" ? input : input && input.url ? input.url : "";
+          if (url.indexOf("/api/contact") >= 0 && response.ok) {
+            window.altosTrack("lead_created", { page_path: location.pathname });
+          }
+          return response;
+        });
+      };
+    }
+  </script>`;
+}

@@ -1,38 +1,60 @@
 import type { MetadataRoute } from "next";
 import { siteUrl } from "@/lib/seo";
 
+const disallowPrivateSurfaces = ["/admin/", "/api/"];
+
 export default function robots(): MetadataRoute.Robots {
   return {
     rules: [
       {
         userAgent: "*",
         allow: "/",
-        disallow: ["/admin/", "/api/admin/"]
+        disallow: disallowPrivateSurfaces
       },
       {
         userAgent: "Googlebot",
         allow: "/",
-        disallow: ["/admin/", "/api/admin/"]
+        disallow: disallowPrivateSurfaces
       },
       {
         userAgent: "Bingbot",
         allow: "/",
-        disallow: ["/admin/", "/api/admin/"]
+        disallow: disallowPrivateSurfaces
       },
       {
         userAgent: "OAI-SearchBot",
         allow: "/",
-        disallow: ["/admin/", "/api/admin/"]
+        disallow: disallowPrivateSurfaces
       },
       {
         userAgent: "ChatGPT-User",
         allow: "/",
-        disallow: ["/admin/", "/api/admin/"]
+        disallow: disallowPrivateSurfaces
       },
       {
         userAgent: "GPTBot",
         allow: "/",
-        disallow: ["/admin/", "/api/admin/"]
+        disallow: disallowPrivateSurfaces
+      },
+      {
+        userAgent: "ClaudeBot",
+        allow: "/",
+        disallow: disallowPrivateSurfaces
+      },
+      {
+        userAgent: "Claude-SearchBot",
+        allow: "/",
+        disallow: disallowPrivateSurfaces
+      },
+      {
+        userAgent: "PerplexityBot",
+        allow: "/",
+        disallow: disallowPrivateSurfaces
+      },
+      {
+        userAgent: "Google-Extended",
+        allow: "/",
+        disallow: disallowPrivateSurfaces
       }
     ],
     sitemap: `${siteUrl}/sitemap.xml`,

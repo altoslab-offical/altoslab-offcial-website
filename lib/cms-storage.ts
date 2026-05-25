@@ -17,6 +17,13 @@ type UpstashConfig = {
   key: string;
 };
 
+export class CmsLockError extends Error {
+  constructor(message = "CMS lock is already held") {
+    super(message);
+    this.name = "CmsLockError";
+  }
+}
+
 function cloneSeedData(): CmsData {
   return JSON.parse(JSON.stringify(seedData)) as CmsData;
 }
@@ -93,6 +100,32 @@ async function upstashCommand<T>(config: UpstashConfig, command: unknown[]): Pro
   }
 
   return payload.result as T;
+}
+
+export async function withCmsStorageLock<T>(
+  name: string,
+  task: () => Promise<T>,
+  ttlMs = 120_000
+): Promise<T> {
+  const upstash = getUpstashConfig();
+  if (!upstash) return task();
+
+  const lockKey = `${upstash.key}:lock:${name}`;
+  const token = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+  const acquired = await upstashCommand<string | null>(upstash, ["SET", lockKey, token, "NX", "PX", ttlMs]);
+
+  if (acquired !== "OK") {
+    throw new CmsLockError();
+  }
+
+  try {
+    return await task();
+  } finally {
+    const currentToken = await upstashCommand<string | null>(upstash, ["GET", lockKey]).catch(() => null);
+    if (currentToken === token) {
+      await upstashCommand<number>(upstash, ["DEL", lockKey]).catch(() => 0);
+    }
+  }
 }
 
 export async function readCmsDataFromStorage(): Promise<CmsData> {

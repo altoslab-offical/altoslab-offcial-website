@@ -1,6 +1,10 @@
 import type { Metadata, Viewport } from "next";
+import { GoogleTagManager } from "@next/third-parties/google";
+import { headers } from "next/headers";
 import { Inter, Noto_Sans_TC } from "next/font/google";
 import "./globals.css";
+import { CtaAnalytics } from "@/components/AnalyticsEvents";
+import { gtmId, isGtmConfigured } from "@/lib/analytics";
 import { siteName, siteUrl } from "@/lib/seo";
 
 const inter = Inter({
@@ -26,6 +30,27 @@ export const metadata: Metadata = {
   authors: [{ name: siteName }],
   creator: siteName,
   publisher: siteName,
+  alternates: {
+    types: {
+      "application/rss+xml": `${siteUrl}/feed.xml`,
+      "text/plain": `${siteUrl}/llms.txt`
+    }
+  },
+  openGraph: {
+    title: "ALTOS LAB｜AI 自動化、AI Agent 與 GEO 顧問工作室",
+    description: "ALTOS LAB 協助企業導入 AI Agent、流程自動化、AI 客服、後台 CMS 與 GEO 內容系統。",
+    url: siteUrl,
+    siteName,
+    locale: "zh_TW",
+    type: "website",
+    images: [`${siteUrl}/geo-cover.png`]
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "ALTOS LAB｜AI 自動化、AI Agent 與 GEO 顧問工作室",
+    description: "ALTOS LAB 協助企業導入 AI Agent、流程自動化、AI 客服、後台 CMS 與 GEO 內容系統。",
+    images: [`${siteUrl}/geo-cover.png`]
+  },
   robots: {
     index: true,
     follow: true,
@@ -46,10 +71,17 @@ export const viewport: Viewport = {
   initialScale: 1
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const pathname = (await headers()).get("x-altos-pathname") || "";
+  const language = pathname.startsWith("/en") ? "en" : "zh-Hant-TW";
+
   return (
-    <html lang="zh-Hant-TW" className={`${inter.variable} ${notoSansTc.variable}`}>
-      <body>{children}</body>
+    <html lang={language} className={`${inter.variable} ${notoSansTc.variable}`}>
+      <body>
+        {children}
+        <CtaAnalytics />
+        {isGtmConfigured() && gtmId ? <GoogleTagManager gtmId={gtmId} /> : null}
+      </body>
     </html>
   );
 }

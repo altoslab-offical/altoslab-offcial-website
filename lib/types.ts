@@ -1,6 +1,8 @@
 export type PublishStatus = "draft" | "published" | "archived" | "deleted";
 export type ProjectStatus = "draft" | "published" | "archived";
 export type ContactLeadStatus = "new" | "contacted" | "qualified" | "closed" | "spam";
+export type BlogLanguage = "zh-Hant" | "en";
+export type BlogReviewStatus = "ai-draft" | "human-review" | "approved" | "needs-revision";
 
 export type PageSectionType =
   | "hero"
@@ -124,11 +126,29 @@ export type BlogFaq = {
   answer: string;
 };
 
+export type BlogSourceLink = {
+  title: string;
+  url: string;
+  publisher?: string;
+  publishedAt?: string;
+};
+
+export type BlogQualityChecks = {
+  hasHumanReview: boolean;
+  hasVisibleSources: boolean;
+  hasNoFabricatedClaims: boolean;
+  hasSearchIntentAnswer: boolean;
+  hasBilingualParity: boolean;
+  notes?: string;
+};
+
 export type BlogPost = {
   id: string;
   slug: string;
   status: PublishStatus;
   sortOrder: number;
+  language: BlogLanguage;
+  translationGroupId: string;
   title: string;
   seoTitle?: string;
   seoDescription?: string;
@@ -139,9 +159,16 @@ export type BlogPost = {
   body: string;
   keyTakeaways: string[];
   faqs: BlogFaq[];
+  sourceLinks: BlogSourceLink[];
   tags: string[];
   author: string;
   cover?: string;
+  readTimeMinutes: number;
+  featured: boolean;
+  reviewStatus: BlogReviewStatus;
+  qualityChecks: BlogQualityChecks;
+  aiDisclosure?: string;
+  generationDate?: string;
   createdAt: string;
   updatedAt: string;
   publishedAt?: string;
