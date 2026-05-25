@@ -5,7 +5,7 @@ import { Inter, Noto_Sans_TC } from "next/font/google";
 import "./globals.css";
 import { CtaAnalytics } from "@/components/AnalyticsEvents";
 import { gtmId, isGtmConfigured } from "@/lib/analytics";
-import { siteName, siteUrl } from "@/lib/seo";
+import { searchVerificationMetadata, siteName, siteUrl } from "@/lib/seo";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -18,6 +18,8 @@ const notoSansTc = Noto_Sans_TC({
   variable: "--font-noto-tc",
   display: "swap"
 });
+
+const verification = searchVerificationMetadata();
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -61,7 +63,8 @@ export const metadata: Metadata = {
       "max-image-preview": "large",
       "max-video-preview": -1
     }
-  }
+  },
+  ...(verification ? { verification } : {})
 };
 
 export const viewport: Viewport = {

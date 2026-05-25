@@ -1,7 +1,7 @@
 import { readFile } from "fs/promises";
 import path from "path";
 import { gtmHeadSnippet, gtmNoScriptSnippet, homepageAnalyticsSnippet } from "@/lib/analytics";
-import { organizationJsonLd, websiteJsonLd } from "@/lib/seo";
+import { organizationJsonLd, searchVerificationMetaTags, websiteJsonLd } from "@/lib/seo";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -21,6 +21,7 @@ function withLaunchMetadata(html: string) {
   const metadata = `<title>${title}</title>
     <meta name="description" content="${description}" />
     <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+    ${searchVerificationMetaTags()}
     <link rel="canonical" href="${siteUrl}" />
     <link rel="alternate" href="${siteUrl}" hreflang="zh-Hant-TW" />
     <link rel="alternate" href="${siteUrl}" hreflang="x-default" />

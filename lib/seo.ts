@@ -4,9 +4,79 @@ import type { BlogPost, Project, SitePage } from "./types";
 export const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || "https://altoslab.com").replace(/\/$/, "");
 export const siteName = "ALTOS LAB";
 
+const verificationEnv = {
+  google: "GOOGLE_SITE_VERIFICATION",
+  bing: "BING_SITE_VERIFICATION",
+  yandex: "YANDEX_SITE_VERIFICATION",
+  yahoo: "YAHOO_SITE_VERIFICATION",
+  pinterest: "PINTEREST_SITE_VERIFICATION",
+  facebook: "FACEBOOK_DOMAIN_VERIFICATION"
+} as const;
+
+function envValue(key: string) {
+  return process.env[key]?.trim() || "";
+}
+
+function escapeHtmlAttribute(value: string) {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/"/g, "&quot;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
 export function absoluteUrl(path = "/") {
   if (path.startsWith("http")) return path;
   return `${siteUrl}${path.startsWith("/") ? path : `/${path}`}`;
+}
+
+export function searchVerificationValues() {
+  return {
+    google: envValue(verificationEnv.google),
+    bing: envValue(verificationEnv.bing),
+    yandex: envValue(verificationEnv.yandex),
+    yahoo: envValue(verificationEnv.yahoo),
+    pinterest: envValue(verificationEnv.pinterest),
+    facebook: envValue(verificationEnv.facebook)
+  };
+}
+
+export function hasSearchVerificationConfigured() {
+  return Object.values(searchVerificationValues()).some(Boolean);
+}
+
+export function searchVerificationMetadata() {
+  const values = searchVerificationValues();
+  const other: Record<string, string> = {};
+
+  if (values.bing) other["msvalidate.01"] = values.bing;
+  if (values.pinterest) other["p:domain_verify"] = values.pinterest;
+  if (values.facebook) other["facebook-domain-verification"] = values.facebook;
+
+  const verification = {
+    ...(values.google ? { google: values.google } : {}),
+    ...(values.yandex ? { yandex: values.yandex } : {}),
+    ...(values.yahoo ? { yahoo: values.yahoo } : {}),
+    ...(Object.keys(other).length ? { other } : {})
+  };
+
+  return Object.keys(verification).length ? verification : undefined;
+}
+
+export function searchVerificationMetaTags() {
+  const values = searchVerificationValues();
+  const tags = [
+    values.google ? ["google-site-verification", values.google] : null,
+    values.bing ? ["msvalidate.01", values.bing] : null,
+    values.yandex ? ["yandex-verification", values.yandex] : null,
+    values.yahoo ? ["y_key", values.yahoo] : null,
+    values.pinterest ? ["p:domain_verify", values.pinterest] : null,
+    values.facebook ? ["facebook-domain-verification", values.facebook] : null
+  ].filter(Boolean) as Array<[string, string]>;
+
+  return tags
+    .map(([name, content]) => `<meta name="${name}" content="${escapeHtmlAttribute(content)}" />`)
+    .join("\n    ");
 }
 
 export function organizationJsonLd() {

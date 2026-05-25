@@ -26,11 +26,19 @@ Set these in Vercel Project Settings -> Environment Variables -> Production, the
 ```env
 NEXT_PUBLIC_SITE_URL=https://altoslab.com
 NEXT_PUBLIC_GTM_ID=GTM-XXXXXXX
+GOOGLE_SITE_VERIFICATION=<google-search-console-token>
+BING_SITE_VERIFICATION=<bing-webmaster-tools-token>
+YANDEX_SITE_VERIFICATION=<optional-yandex-token>
+YAHOO_SITE_VERIFICATION=<optional-yahoo-token>
+PINTEREST_SITE_VERIFICATION=<optional-pinterest-token>
+FACEBOOK_DOMAIN_VERIFICATION=<optional-meta-domain-token>
 ADMIN_PASSWORD=<strong-password>
 ADMIN_SESSION_TOKEN=<long-random-token>
 UPSTASH_REDIS_REST_URL=<upstash-rest-url>
 UPSTASH_REDIS_REST_TOKEN=<upstash-rest-token>
 BLOB_READ_WRITE_TOKEN=<vercel-blob-token>
+BLOB_ACCESS=public
+CMS_ENCRYPTION_KEY=<64-hex-random-secret>
 CMS_STORAGE_KEY=altoslab:cms:v1
 DEEPSEEK_API_KEY=<optional-for-ai-blog-generation>
 DEEPSEEK_BASE_URL=https://api.deepseek.com
@@ -44,10 +52,12 @@ Notes:
 
 - `ADMIN_SESSION_TOKEN` should be at least 32 random bytes.
 - Vercel Blob is the default durable CMS store. `BLOB_READ_WRITE_TOKEN` is created when the `altoslab-cms` Blob store is linked to the Vercel project.
+- The current Vercel Blob store is public-access, so `BLOB_ACCESS=public` and `CMS_ENCRYPTION_KEY` are required in production. CMS JSON is encrypted server-side before it is written to Blob.
 - Upstash Redis is also supported and takes priority when `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` are configured. The token must be the standard write token, not the read-only token.
 - Without Vercel Blob or Upstash env vars, production can still render seed content, but admin edits and contact leads will not persist.
 - `AUTO_PUBLISH_BLOG` should stay `false` for v1. AI-generated content should be reviewed before publishing.
 - `CRON_SECRET` protects `/api/cron/blog-drafts`; Vercel Cron will call it daily when configured in `vercel.json`.
+- Search verification env vars are optional until the matching Search Console/Webmaster account provides the token. Once set and redeployed, the homepage and App Router pages emit the required verification meta tags.
 
 ## Vercel Project Settings
 
@@ -101,6 +111,7 @@ Before promoting a deployment, verify:
 
 - Homepage source does not contain `altoslab-site2`.
 - Homepage has canonical, OpenGraph/Twitter image, Organization and WebSite JSON-LD, RSS and LLM alternate links.
+- Homepage and App Router pages expose Search Console/Webmaster verification meta tags when the corresponding verification env var is set.
 - `/robots.txt` references `/sitemap.xml`, allows public pages and answer-engine crawlers, and disallows private admin/API surfaces.
 - `/sitemap.xml` includes `/blog`, `/en/blog`, `/feed.xml`, `/llms.txt`, `/llms-full.txt`, projects and all published posts.
 - Blog post `hreflang` clusters include the current language, the paired translation and `x-default` pointing to the zh-Hant article.
