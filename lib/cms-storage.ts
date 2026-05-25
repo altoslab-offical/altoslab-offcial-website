@@ -1,6 +1,7 @@
 import { promises as fs } from "fs";
+import { createCipheriv, createDecipheriv, createHash, randomBytes } from "crypto";
 import path from "path";
-import { del, get, put } from "@vercel/blob";
+import { del, get, list, put } from "@vercel/blob";
 import { seedData } from "./seed";
 import type { CmsData } from "./types";
 
@@ -21,6 +22,16 @@ type UpstashConfig = {
 type BlobConfig = {
   key: string;
   pathname: string;
+  access: "public" | "private";
+  encrypted: boolean;
+};
+
+type EncryptedCmsBlob = {
+  encrypted: true;
+  algorithm: "aes-256-gcm";
+  iv: string;
+  tag: string;
+  data: string;
 };
 
 export class CmsLockError extends Error {
@@ -63,7 +74,9 @@ function getBlobConfig(): BlobConfig | null {
   const key = process.env.CMS_STORAGE_KEY || DEFAULT_STORAGE_KEY;
   return {
     key,
-    pathname: blobPathFromStorageKey(key)
+    pathname: blobPathFromStorageKey(key),
+    access: process.env.BLOB_ACCESS === "private" ? "private" : "public",
+    encrypted: Boolean(process.env.CMS_ENCRYPTION_KEY)
   };
 }
 
@@ -90,7 +103,9 @@ export function getCmsStorageStatus() {
       durable: true,
       writable: true,
       configured: true,
-      key: blob.key
+      key: blob.key,
+      access: blob.access,
+      encrypted: blob.encrypted
     };
   }
 
@@ -149,9 +164,71 @@ function isBlobPreconditionError(error: unknown) {
   return error instanceof Error && error.name === "BlobPreconditionFailedError";
 }
 
-async function readPrivateBlobText(pathname: string) {
+function cmsEncryptionKey() {
+  const secret = process.env.CMS_ENCRYPTION_KEY;
+  if (!secret) return null;
+  if (/^[a-f0-9]{64}$/i.test(secret)) return Buffer.from(secret, "hex");
+  return createHash("sha256").update(secret).digest();
+}
+
+function encryptCmsData(data: CmsData): CmsData | EncryptedCmsBlob {
+  const key = cmsEncryptionKey();
+  if (!key) return data;
+
+  const iv = randomBytes(12);
+  const cipher = createCipheriv("aes-256-gcm", key, iv);
+  const encrypted = Buffer.concat([cipher.update(JSON.stringify(data), "utf8"), cipher.final()]);
+
+  return {
+    encrypted: true,
+    algorithm: "aes-256-gcm",
+    iv: iv.toString("base64"),
+    tag: cipher.getAuthTag().toString("base64"),
+    data: encrypted.toString("base64")
+  };
+}
+
+function decryptCmsData(payload: EncryptedCmsBlob): CmsData {
+  const key = cmsEncryptionKey();
+  if (!key) throw new Error("CMS_ENCRYPTION_KEY is required to read encrypted CMS data.");
+
+  const decipher = createDecipheriv("aes-256-gcm", key, Buffer.from(payload.iv, "base64"));
+  decipher.setAuthTag(Buffer.from(payload.tag, "base64"));
+  const decrypted = Buffer.concat([
+    decipher.update(Buffer.from(payload.data, "base64")),
+    decipher.final()
+  ]).toString("utf8");
+
+  return JSON.parse(decrypted) as CmsData;
+}
+
+function parseCmsBlobText(text: string): CmsData {
+  const payload = JSON.parse(text) as CmsData | EncryptedCmsBlob;
+  if ((payload as EncryptedCmsBlob).encrypted) {
+    return decryptCmsData(payload as EncryptedCmsBlob);
+  }
+
+  return payload as CmsData;
+}
+
+async function readBlobText(config: BlobConfig, pathname: string) {
+  if (config.access === "public") {
+    const result = await list({ prefix: pathname, limit: 10 });
+    const blob = result.blobs.find((item) => item.pathname === pathname);
+    if (!blob) return null;
+
+    const response = await fetch(blob.url, { cache: "no-store" });
+    if (response.status === 404) return null;
+    if (!response.ok) throw new Error("Failed to fetch blob: " + response.status + " " + response.statusText);
+
+    return {
+      etag: blob.etag || response.headers.get("etag") || "",
+      text: await response.text()
+    };
+  }
+
   try {
-    const result = await get(pathname, { access: "private", useCache: false });
+    const result = await get(pathname, { access: config.access, useCache: false });
     if (!result || result.statusCode !== 200 || !result.stream) return null;
     return {
       etag: result.blob.etag,
@@ -163,9 +240,9 @@ async function readPrivateBlobText(pathname: string) {
   }
 }
 
-async function writePrivateBlobJson(pathname: string, value: unknown, ifMatch?: string) {
+async function writeBlobJson(config: BlobConfig, pathname: string, value: unknown, ifMatch?: string) {
   await put(pathname, JSON.stringify(value, null, 2), {
-    access: "private",
+    access: config.access,
     addRandomSuffix: false,
     allowOverwrite: true,
     cacheControlMaxAge: 60,
@@ -181,14 +258,18 @@ async function withBlobLock<T>(config: BlobConfig, name: string, task: () => Pro
 
   try {
     await put(lockPathname, JSON.stringify({ token, expiresAt }), {
-      access: "private",
+      access: config.access,
       addRandomSuffix: false,
       allowOverwrite: false,
       cacheControlMaxAge: 60,
       contentType: "application/json"
     });
   } catch (error) {
-    const existing = await readPrivateBlobText(lockPathname);
+    if (!(error instanceof Error && error.message.includes("blob already exists"))) {
+      throw error;
+    }
+
+    const existing = await readBlobText(config, lockPathname);
     if (!existing) throw new CmsLockError();
 
     const payload = JSON.parse(existing.text) as { expiresAt?: number };
@@ -197,7 +278,7 @@ async function withBlobLock<T>(config: BlobConfig, name: string, task: () => Pro
     }
 
     try {
-      await writePrivateBlobJson(lockPathname, { token, expiresAt }, existing.etag);
+      await writeBlobJson(config, lockPathname, { token, expiresAt }, existing.etag);
     } catch (overwriteError) {
       if (isBlobPreconditionError(overwriteError)) throw new CmsLockError();
       throw overwriteError;
@@ -207,7 +288,7 @@ async function withBlobLock<T>(config: BlobConfig, name: string, task: () => Pro
   try {
     return await task();
   } finally {
-    const current = await readPrivateBlobText(lockPathname).catch(() => null);
+    const current = await readBlobText(config, lockPathname).catch(() => null);
     if (current) {
       const payload = JSON.parse(current.text) as { token?: string };
       if (payload.token === token) {
@@ -256,9 +337,9 @@ export async function readCmsDataFromStorage(): Promise<CmsData> {
   }
 
   if (blob) {
-    const raw = await readPrivateBlobText(blob.pathname);
+    const raw = await readBlobText(blob, blob.pathname);
     if (!raw) return cloneSeedData();
-    return JSON.parse(raw.text) as CmsData;
+    return parseCmsBlobText(raw.text);
   }
 
   return readFileCmsData();
@@ -273,7 +354,7 @@ export async function writeCmsDataToStorage(data: CmsData) {
   }
 
   if (blob) {
-    await writePrivateBlobJson(blob.pathname, data);
+    await writeBlobJson(blob, blob.pathname, encryptCmsData(data));
     return;
   }
 
