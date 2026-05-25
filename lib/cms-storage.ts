@@ -137,7 +137,12 @@ async function upstashCommand<T>(config: UpstashConfig, command: unknown[]): Pro
 }
 
 function isBlobNotFoundError(error: unknown) {
-  return error instanceof Error && error.name === "BlobNotFoundError";
+  return (
+    error instanceof Error &&
+    (error.name === "BlobNotFoundError" ||
+      error.message.includes("Failed to fetch blob: 400 Bad Request") ||
+      error.message.includes("Failed to fetch blob: 404 Not Found"))
+  );
 }
 
 function isBlobPreconditionError(error: unknown) {
