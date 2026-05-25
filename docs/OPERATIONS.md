@@ -30,6 +30,7 @@ ADMIN_PASSWORD=<strong-password>
 ADMIN_SESSION_TOKEN=<long-random-token>
 UPSTASH_REDIS_REST_URL=<upstash-rest-url>
 UPSTASH_REDIS_REST_TOKEN=<upstash-rest-token>
+BLOB_READ_WRITE_TOKEN=<vercel-blob-token>
 CMS_STORAGE_KEY=altoslab:cms:v1
 DEEPSEEK_API_KEY=<optional-for-ai-blog-generation>
 DEEPSEEK_BASE_URL=https://api.deepseek.com
@@ -42,8 +43,9 @@ AUTO_PUBLISH_BLOG=false
 Notes:
 
 - `ADMIN_SESSION_TOKEN` should be at least 32 random bytes.
-- `UPSTASH_REDIS_REST_TOKEN` must be the standard write token, not the read-only token.
-- Without Upstash env vars, production can still render seed content, but admin edits and contact leads will not persist.
+- Vercel Blob is the default durable CMS store. `BLOB_READ_WRITE_TOKEN` is created when the `altoslab-cms` Blob store is linked to the Vercel project.
+- Upstash Redis is also supported and takes priority when `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` are configured. The token must be the standard write token, not the read-only token.
+- Without Vercel Blob or Upstash env vars, production can still render seed content, but admin edits and contact leads will not persist.
 - `AUTO_PUBLISH_BLOG` should stay `false` for v1. AI-generated content should be reviewed before publishing.
 - `CRON_SECRET` protects `/api/cron/blog-drafts`; Vercel Cron will call it daily when configured in `vercel.json`.
 
@@ -85,7 +87,7 @@ Expected results:
 
 - `/` returns 200 and preserves the original UI from `index.html`.
 - `/admin` redirects to `/admin/login` when not signed in.
-- `/api/health` reports `adminConfigured: true` and `cmsStorage.provider: upstash-redis` in production.
+- `/api/health` reports `adminConfigured: true` and `cmsStorage.provider` as `vercel-blob` or `upstash-redis` in production.
 - `/blog` returns 200 and remains indexable.
 - `/feed.xml` returns RSS XML for published blog posts.
 - `/llms.txt` returns a concise LLM-readable site map.

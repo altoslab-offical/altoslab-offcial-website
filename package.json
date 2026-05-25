@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@next/third-parties": "^16.2.6",
+    "@vercel/blob": "^2.4.0",
     "lucide-react": "latest",
     "next": "latest",
     "postcss": "^8.5.10",
