@@ -350,9 +350,9 @@ export const seedData: CmsData = {
       tag: "AI SaaS",
       title: "WonDa AI 智慧客服平台",
       titleEn: "WonDa AI Customer Service Platform",
-      url: "https://wonda.ai",
+      url: "https://wonda-web-972183966257.asia-east1.run.app/",
       cover: "/wonda-cover.png",
-      gallery: ["/wonda-cover.png", "/wonda-2.png", "/wonda-3.png"],
+      gallery: ["/wonda-official-01.png", "/wonda-official-02.png", "/wonda-official-03.png"],
       desc: "可上傳企業知識、設定品牌語氣並嵌入網站的 AI 客服平台。",
       detail:
         "WonDa AI 將 FAQ、產品資料、服務政策與客服紀錄整理成可檢索知識庫，並透過管理後台追蹤回答品質與潛在客戶需求。",
@@ -361,7 +361,7 @@ export const seedData: CmsData = {
         heroSubtitle: "上傳知識、設定個性、嵌入網站。",
         heroBody: "讓客服 AI 從每次對話中學習，降低重複詢問並提升轉換。",
         primaryCtaLabel: "了解 WonDa AI",
-        primaryCtaUrl: "https://wonda.ai",
+        primaryCtaUrl: "https://wonda-web-972183966257.asia-east1.run.app/",
         sections: [
           {
             id: "prod_wonda_section_knowledge",
@@ -477,8 +477,8 @@ export const seedData: CmsData = {
       tag: "Private AI",
       title: "龍蝦雲 — 私人 AI 員工平台",
       titleEn: "Lobster Cloud Private AI Staff",
-      cover: "/geo-2.png",
-      gallery: ["/geo-2.png", "/geo-3.png"],
+      cover: "/orclaw-cover.png",
+      gallery: ["/orclaw-cover.png", "/geo-3.png"],
       desc: "替個人與小團隊建立可長期記憶任務、知識與偏好的私人 AI 工作台。",
       detail:
         "龍蝦雲聚焦長期上下文、個人工作流與任務協作，讓 AI 成為能延續工作記憶的私人員工。",
@@ -630,8 +630,13 @@ export const seedData: CmsData = {
       title: "Koibito 約會平台",
       titleEn: "Koibito Dating Platform",
       url: "https://koibito-dating.vercel.app/",
-      cover: "/project-koibito-cover.png",
-      gallery: ["/project-koibito-cover.png"],
+      cover: "/korbito-cover.png",
+      gallery: [
+        "/koibito-dating-01.png",
+        "/koibito-dating-02.png",
+        "/koibito-dating-03.png",
+        "/koibito-dating-04.png"
+      ],
       desc: "結合探索、個人檔案、私密內容、禮物與聊天的約會產品體驗。",
       detail:
         "Koibito 以探索與個人檔案為核心，搭配私密內容、禮物互動與聊天流程，建立可延伸會員、內容與社交互動的 dating product experience。",
@@ -711,10 +716,37 @@ export const seedData: CmsData = {
       updatedAt: timestamp
     },
     {
+      id: "asset_wonda_official_02",
+      url: "/wonda-official-02.png",
+      folder: "projects/wonda-ai",
+      filename: "wonda-official-02.png",
+      mimeType: "image/png",
+      createdAt: timestamp,
+      updatedAt: timestamp
+    },
+    {
+      id: "asset_wonda_official_03",
+      url: "/wonda-official-03.png",
+      folder: "projects/wonda-ai",
+      filename: "wonda-official-03.png",
+      mimeType: "image/png",
+      createdAt: timestamp,
+      updatedAt: timestamp
+    },
+    {
       id: "asset_geo_cover",
       url: "/geo-cover.png",
       folder: "projects/geo-hero",
       filename: "geo-cover.png",
+      mimeType: "image/png",
+      createdAt: timestamp,
+      updatedAt: timestamp
+    },
+    {
+      id: "asset_orclaw_cover",
+      url: "/orclaw-cover.png",
+      folder: "projects/lobster-cloud",
+      filename: "orclaw-cover.png",
       mimeType: "image/png",
       createdAt: timestamp,
       updatedAt: timestamp
@@ -757,9 +789,45 @@ export const seedData: CmsData = {
     },
     {
       id: "asset_project_koibito_cover",
-      url: "/project-koibito-cover.png",
+      url: "/korbito-cover.png",
       folder: "projects/koibito-dating",
-      filename: "project-koibito-cover.png",
+      filename: "korbito-cover.png",
+      mimeType: "image/png",
+      createdAt: timestamp,
+      updatedAt: timestamp
+    },
+    {
+      id: "asset_koibito_dating_01",
+      url: "/koibito-dating-01.png",
+      folder: "projects/koibito-dating",
+      filename: "koibito-dating-01.png",
+      mimeType: "image/png",
+      createdAt: timestamp,
+      updatedAt: timestamp
+    },
+    {
+      id: "asset_koibito_dating_02",
+      url: "/koibito-dating-02.png",
+      folder: "projects/koibito-dating",
+      filename: "koibito-dating-02.png",
+      mimeType: "image/png",
+      createdAt: timestamp,
+      updatedAt: timestamp
+    },
+    {
+      id: "asset_koibito_dating_03",
+      url: "/koibito-dating-03.png",
+      folder: "projects/koibito-dating",
+      filename: "koibito-dating-03.png",
+      mimeType: "image/png",
+      createdAt: timestamp,
+      updatedAt: timestamp
+    },
+    {
+      id: "asset_koibito_dating_04",
+      url: "/koibito-dating-04.png",
+      folder: "projects/koibito-dating",
+      filename: "koibito-dating-04.png",
       mimeType: "image/png",
       createdAt: timestamp,
       updatedAt: timestamp

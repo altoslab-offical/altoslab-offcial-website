@@ -1,55 +1,80 @@
 :root {
   /* Primitive color tokens */
   --al-color-black: #030403;
+  --al-color-black-soft: #050505;
   --al-color-ink-950: #070807;
+  --al-color-ink-925: #090909;
   --al-color-ink-900: #0a0a0a;
+  --al-color-ink-875: #0d0d0d;
   --al-color-ink-850: #0f0f0f;
   --al-color-ink-800: #111111;
   --al-color-ink-760: #151515;
+  --al-color-ink-720: #181818;
+  --al-color-ink-680: #202020;
   --al-color-white: #f7f7f2;
+  --al-color-white-rgb: 247, 247, 242;
   --al-color-lime-500: #c8ff00;
   --al-color-lime-400: #d7ff3f;
   --al-color-orange-500: #ff5500;
   --al-color-red-500: #ff5c5c;
+  --al-color-red-100: #ffd7d7;
+  --al-color-media-neutral: #e6e6e6;
 
   /* Semantic color tokens */
   --al-color-bg-base: var(--al-color-black);
-  --al-color-bg-grid: rgba(247, 247, 242, 0.035);
+  --al-color-bg-canvas: var(--al-color-black-soft);
+  --al-color-bg-grid: rgba(var(--al-color-white-rgb), 0.035);
   --al-color-bg-surface: var(--al-color-ink-900);
   --al-color-bg-elevated: var(--al-color-ink-800);
-  --al-color-bg-panel: var(--al-color-ink-760);
+  --al-color-bg-panel: var(--al-color-ink-875);
+  --al-color-bg-field: var(--al-color-ink-720);
+  --al-color-bg-field-focus: var(--al-color-ink-680);
+  --al-color-bg-media: var(--al-color-media-neutral);
   --al-color-text-primary: var(--al-color-white);
-  --al-color-text-secondary: rgba(247, 247, 242, 0.68);
-  --al-color-text-muted: rgba(247, 247, 242, 0.46);
-  --al-color-text-subtle: rgba(247, 247, 242, 0.28);
-  --al-color-border-subtle: rgba(247, 247, 242, 0.1);
-  --al-color-border-default: rgba(247, 247, 242, 0.13);
-  --al-color-border-strong: rgba(247, 247, 242, 0.22);
+  --al-color-text-secondary: rgba(var(--al-color-white-rgb), 0.68);
+  --al-color-text-body: rgba(var(--al-color-white-rgb), 0.66);
+  --al-color-text-muted: rgba(var(--al-color-white-rgb), 0.46);
+  --al-color-text-subtle: rgba(var(--al-color-white-rgb), 0.34);
+  --al-color-text-ghost: rgba(var(--al-color-white-rgb), 0.25);
+  --al-color-text-disabled: rgba(var(--al-color-white-rgb), 0.18);
+  --al-color-border-subtle: rgba(var(--al-color-white-rgb), 0.1);
+  --al-color-border-default: rgba(var(--al-color-white-rgb), 0.13);
+  --al-color-border-input: rgba(var(--al-color-white-rgb), 0.16);
+  --al-color-border-strong: rgba(var(--al-color-white-rgb), 0.22);
+  --al-color-border-inverse: #000000;
   --al-color-action-primary: var(--al-color-lime-500);
   --al-color-action-primary-hover: var(--al-color-lime-400);
-  --al-color-action-secondary: rgba(247, 247, 242, 0.06);
+  --al-color-action-primary-text: var(--al-color-black-soft);
+  --al-color-action-secondary: rgba(var(--al-color-white-rgb), 0.06);
   --al-color-accent-system: var(--al-color-orange-500);
   --al-color-status-error: var(--al-color-red-500);
+  --al-color-status-error-soft: var(--al-color-red-100);
   --al-color-focus-ring: rgba(200, 255, 0, 0.72);
+  --al-color-focus-glow: rgba(200, 255, 0, 0.11);
   --al-color-overlay-scrim: rgba(0, 0, 0, 0.82);
+  --al-color-overlay-image: rgba(0, 0, 0, 0.65);
 
   /* Typography tokens */
-  --al-font-body: var(--font-inter), var(--font-noto-tc), system-ui, sans-serif;
-  --al-font-mono: "SFMono-Regular", "Roboto Mono", "Noto Sans Mono", Consolas, monospace;
+  --al-font-body: var(--font-inter, "Inter"), var(--font-noto-tc, "Noto Sans TC"), "PingFang TC", system-ui, sans-serif;
+  --al-font-mono: "SFMono-Regular", "Roboto Mono", "Noto Sans Mono", Consolas, "Liberation Mono", monospace;
   --al-text-display: clamp(4rem, 15vw, 12rem);
   --al-text-hero: clamp(3.25rem, 9.5vw, 8.5rem);
   --al-text-section: clamp(2.25rem, 6vw, 5rem);
   --al-text-title: clamp(1.35rem, 2.4vw, 2rem);
-  --al-text-body: 1rem;
   --al-text-body-lg: 1.125rem;
+  --al-text-body: 1rem;
   --al-text-small: 0.875rem;
   --al-text-caption: 0.75rem;
+  --al-text-kicker: 0.75rem;
   --al-leading-display: 0.88;
   --al-leading-title: 1.12;
   --al-leading-body: 1.6;
   --al-leading-longform: 1.75;
+  --al-tracking-label: 0.18em;
+  --al-tracking-wide: 0.4em;
 
-  /* Spacing tokens */
+  /* Spacing and layout tokens */
+  --al-space-0: 0;
   --al-space-1: 0.25rem;
   --al-space-2: 0.5rem;
   --al-space-3: 0.75rem;
@@ -61,31 +86,63 @@
   --al-space-12: 3rem;
   --al-space-16: 4rem;
   --al-space-20: 5rem;
+  --al-space-24: 6rem;
   --al-space-section: clamp(5rem, 9vw, 8.5rem);
+  --al-container-narrow: 900px;
   --al-container-max: 1180px;
   --al-container-wide: 1440px;
   --al-page-gutter: clamp(1.25rem, 3vw, 4rem);
+  --al-grid-gap: 1px;
 
-  /* Shape, shadow, motion */
+  /* Shape tokens */
   --al-radius-xs: 2px;
   --al-radius-sm: 4px;
   --al-radius-md: 8px;
   --al-radius-lg: 12px;
   --al-radius-full: 999px;
-  --al-shadow-floating: 0 20px 60px rgba(0, 0, 0, 0.32);
+
+  /* Elevation tokens */
+  --al-shadow-none: none;
   --al-shadow-control: 0 10px 26px rgba(0, 0, 0, 0.24);
+  --al-shadow-panel: 0 24px 70px rgba(0, 0, 0, 0.34);
+  --al-shadow-floating: 0 20px 60px rgba(0, 0, 0, 0.32);
+  --al-shadow-focus: 0 0 0 3px var(--al-color-focus-glow);
+  --al-shadow-inset-soft: inset 0 1px 0 rgba(255, 255, 255, 0.045);
+
+  /* Motion and z-index tokens */
   --al-motion-fast: 150ms ease;
   --al-motion-base: 200ms ease;
   --al-motion-section: 320ms ease;
+  --al-z-base: 0;
   --al-z-header: 40;
   --al-z-modal: 80;
+  --al-z-toast: 100;
 
   /* Component tokens */
   --al-button-height-sm: 2.75rem;
   --al-button-height-md: 3.25rem;
+  --al-button-height-lg: 4rem;
   --al-button-padding-x: 1.5rem;
-  --al-input-bg: rgba(247, 247, 242, 0.06);
-  --al-input-border: rgba(247, 247, 242, 0.18);
+  --al-button-padding-x-lg: 2rem;
+  --al-input-bg: rgba(var(--al-color-white-rgb), 0.06);
+  --al-input-bg-solid: var(--al-color-bg-field);
+  --al-input-bg-focus: var(--al-color-bg-field-focus);
+  --al-input-border: var(--al-color-border-input);
+  --al-input-border-focus: var(--al-color-focus-ring);
+  --al-input-height: 3.75rem;
+  --al-input-padding-x: 1.5rem;
+  --al-textarea-min-height: 12rem;
+  --al-card-border: var(--al-color-border-default);
+  --al-card-bg: var(--al-color-bg-surface);
+  --al-portfolio-image-opacity-rest: 0.6;
+  --al-portfolio-image-opacity-active: 0.85;
+  --al-thumb-border: var(--al-color-border-inverse);
+  --al-thumb-border-active: 2px;
+  --al-thumb-inner-gap-active: 2px;
+  --al-project-cover-ratio: 4 / 3;
+  --al-project-gallery-ratio: 16 / 10;
+  --al-project-gallery-max-images: 15;
+  --al-youtube-ratio: 16 / 9;
 
   /* Legacy aliases used by existing admin/project pages */
   --al-bg: var(--al-color-bg-base);

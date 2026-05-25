@@ -2,44 +2,38 @@
 
 ## Current Frontend Shape
 
-The public homepage is now a modular Next App Router page:
+The public homepage currently keeps the original static visual bundle:
 
-- Route: `app/page.tsx`
-- Page composition: `components/site/HomePage.tsx`
-- Section components: `components/site/*`
-- CMS data source: `lib/cms.ts` and `lib/seed.ts`
-- Design token source: `design/tokens.css` and `design/tokens.json`
-- Global implementation CSS: `app/globals.css`
+- Public homepage route: `app/route.ts`
+- Rendered source: root `index.html`
+- SEO metadata wrapper: `app/route.ts`
+- Main visual bundle mirrors: `altoslab-website.html` and `public/index.html`
 
-The previous static bundle files remain in the repo as legacy artifacts:
+This is intentional. The homepage should not be replaced with a new React implementation unless the migration is explicitly approved and visually checked against the current page.
 
-- `index.html`
-- `altoslab-website.html`
-- `public/index.html`
+## Active Next App Areas
 
-They are no longer the primary homepage route.
+These areas use the normal Next App Router surfaces and global CSS:
 
-## Component Boundaries
+- Admin pages: `app/admin/*`
+- Blog pages and APIs: `app/blog/*`, `app/api/blog/*`
+- Project pages and APIs: `app/projects/*`, `app/api/projects/*`
+- CMS/admin APIs: `app/api/admin/*`
+- Contact API: `app/api/contact/route.ts`
 
-- `SiteHeader`: primary navigation and cooperation CTA.
-- `HeroSection`: first viewport, CTA pair, system signal panel.
-- `StatsBand`: KPI strip from `PageSection.items`.
-- `AboutSection`: studio positioning copy.
-- `ServicesSection`: service rows from `PageSection.items`.
-- `PortfolioSection`: project grid and project modal from `Project[]`.
-- `ProofSections`: why-us and team modules.
-- `InsightsSection`: latest blog/SEO-GEO entries.
-- `ContactSection`: cooperation copy and lead form.
+`app/globals.css` imports `design/tokens.css`, so these pages can use the token contract immediately.
+
+## Inactive Prototype Components
+
+The repo currently contains `components/site/*` from a previous homepage modularization attempt. They are not the public homepage route right now.
+
+Rules:
+
+- Do not wire `components/site/*` to `/` without explicit approval.
+- Do not recreate `app/page.tsx` for the homepage as a shortcut.
+- If a future migration happens, first recreate the exact current `index.html` layout and screenshot-compare desktop/mobile before shipping.
 
 ## Data Flow
-
-`app/page.tsx` reads:
-
-- `getPublishedHomePage()`
-- `getPublishedProjects()`
-- `getPublishedBlogPosts()`
-
-Only `published` records render on the public homepage.
 
 The backend/database handoff should preserve the existing TypeScript models in `lib/types.ts`:
 
@@ -50,19 +44,32 @@ The backend/database handoff should preserve the existing TypeScript models in `
 - `BlogPost`
 - `ContactLead`
 
+The current CMS helpers remain useful for admin and future dynamic pages:
+
+- `lib/cms.ts`
+- `lib/cms-storage.ts`
+- `lib/seed.ts`
+
 ## Design Tokens
+
+Canonical token files:
+
+- CSS variables: `design/tokens.css`
+- DTCG-style exchange file: `design/tokens.json`
+- Human-readable rules: `design/visual-tokens.md`
 
 Token layers:
 
 - Primitive: raw values like `--al-color-lime-500`.
 - Semantic: UI roles like `--al-color-text-secondary`.
 - Component: stable control choices like `--al-button-height-md`.
+- Media: product image rules like `--al-project-gallery-max-images`.
 
 Implementation rule:
 
 - Components should use semantic tokens.
-- `app/globals.css` imports `design/tokens.css`.
-- `design/tokens.json` is the exchange format for future Figma / backend / design handoff work.
+- Static `index.html` can keep hard-coded values until a controlled visual parity pass.
+- Future replacements should be section-by-section, not a full homepage rewrite.
 
 ## Backend Handoff Notes
 
@@ -72,4 +79,4 @@ When connecting a database:
 - Keep `lib/cms.ts` as the public/admin data access boundary where possible.
 - Keep `lib/types.ts` stable unless the backend schema truly changes.
 - Gallery fields should support up to 15 images per project.
-- Product pages and modals already read project gallery, metrics, tech tags, CTA URL, and YouTube URL from `Project`.
+- Product detail fields should support cover image, gallery, metrics, tech tags, CTA URL, and YouTube URL.
