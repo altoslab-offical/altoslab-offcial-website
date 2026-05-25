@@ -3,7 +3,7 @@
 This project uses Ken's central Design Brain as reference:
 
 ```txt
-/Users/kenhuang/Desktop/CODEX/DesignAI/DESIGN-BRAIN.md
+/Users/kenhuang/Desktop/DesignAI/DESIGN-BRAIN.md
 ```
 
 ## Project Settings
@@ -16,7 +16,7 @@ Primary color: Signal lime `#C8FF00`
 Accent color: System orange `#FF5500`
 Background: Deep black / near-black technical canvas
 Typography: Inter + Noto Sans TC fallback
-Component base: Next App Router homepage with modular React sections and CSS design tokens
+Component base: Static homepage bundle served by `app/route.ts`; Next admin/project surfaces use CSS design tokens
 
 ## Design Positioning
 
@@ -36,8 +36,6 @@ Keep that direction. Do not flatten the brand into a generic black-and-white cor
 ## Color System
 
 Canonical tokens live in [design/tokens.css](/Users/kenhuang/Desktop/CODEX/ALTOSLAB_WEB/altoslab-offcial-website/design/tokens.css), [design/tokens.json](/Users/kenhuang/Desktop/CODEX/ALTOSLAB_WEB/altoslab-offcial-website/design/tokens.json), and [design/visual-tokens.md](/Users/kenhuang/Desktop/CODEX/ALTOSLAB_WEB/altoslab-offcial-website/design/visual-tokens.md).
-
-The one-page visual preview is [design/brand-preview.html](/Users/kenhuang/Desktop/CODEX/ALTOSLAB_WEB/altoslab-offcial-website/design/brand-preview.html).
 
 Core colors:
 
@@ -162,29 +160,31 @@ Strengths:
 - Portfolio has visual assets and concrete project names, which builds credibility.
 - The lime signal color is memorable and already strongly associated with the brand.
 
-Resolved in the modular rebuild:
+Current architecture:
 
-- The root page now renders from `app/page.tsx` instead of `app/route.ts` reading the bundled `index.html`.
-- Homepage sections are modularized under `components/site/`.
-- Public homepage content reads through `lib/cms.ts` and `lib/seed.ts`.
-- Brand tokens are exposed through `design/tokens.css` and `design/tokens.json`.
-- Metadata and language now come from the Next root layout and page metadata.
+- The public homepage renders through `app/route.ts`, which reads the root `index.html` static bundle.
+- `design/tokens.css` and `design/tokens.json` are the canonical token contract, but they should not force a visual rewrite of the current homepage.
+- `app/globals.css` imports the tokens for admin, blog, project pages, and future component work.
+- `components/site/*` exists as inactive prototype code and is not the public homepage route.
 
 Remaining risks:
 
-- `index.html`, `altoslab-website.html`, and `public/index.html` still exist as legacy artifacts and should eventually be removed or archived after deployment confidence.
-- Some admin/project subpages still use older global CSS class names; keep token aliases in `design/tokens.css` until those pages are also migrated.
+- `index.html`, `altoslab-website.html`, and `public/index.html` can drift from each other if edited separately.
+- The homepage bundle still contains hard-coded values. Replace them only section by section with screenshot parity checks.
+- Do not recreate `app/page.tsx` or wire `components/site/*` to `/` without explicit approval.
+- Some admin/project subpages still use older global CSS class names; keep token aliases in `design/tokens.css` until those pages are migrated.
 
 ## Token Adoption Plan
 
 1. Keep `design/tokens.css` and `design/tokens.json` as the source of truth.
 2. Use semantic tokens in components and keep primitive tokens inside token files.
-3. Keep `app/globals.css` as the implementation layer for layout/component classes.
-4. Replace remaining hard-coded `#C8FF00`, `#FF5500`, black, white, and translucent grays when admin/project subpages are migrated.
-5. Keep `docs/FRONTEND_ARCHITECTURE.md` updated when changing section/component boundaries.
+3. Keep `app/route.ts` + `index.html` as the public homepage entry until a visual parity migration is approved.
+4. Keep `app/globals.css` as the implementation layer for admin/project/blog pages.
+5. Replace remaining hard-coded `#C8FF00`, `#FF5500`, black, white, and translucent grays only during controlled section-level migration.
+6. Keep `docs/FRONTEND_ARCHITECTURE.md` updated when changing route/component boundaries.
 
 ## Central References Used
 
-- `/Users/kenhuang/Desktop/CODEX/DesignAI/01-color-tokens.md`
-- `/Users/kenhuang/Desktop/CODEX/DesignAI/02-typography.md`
-- `/Users/kenhuang/Desktop/CODEX/DesignAI/06-project-profiles.md`
+- `/Users/kenhuang/Desktop/DesignAI/DESIGN-BRAIN.md`
+- `/Users/kenhuang/Desktop/DesignAI/00-design-rule-hierarchy.md`
+- `/Users/kenhuang/Desktop/DesignAI/17-web-design-system-playbook.md`
