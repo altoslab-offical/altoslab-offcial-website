@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { getPublishedBlogPosts, getPublishedProjects } from "@/lib/cms";
+import { blogPostPath, metadataLanguageKey } from "@/lib/blog-utils";
 import { siteUrl } from "@/lib/seo";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
@@ -20,17 +21,53 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.8
     },
     {
+      url: `${siteUrl}/en/blog`,
+      lastModified: now,
+      changeFrequency: "weekly",
+      priority: 0.7
+    },
+    {
       url: `${siteUrl}/projects`,
       lastModified: now,
       changeFrequency: "monthly",
       priority: 0.8
     },
-    ...posts.map((post) => ({
-      url: `${siteUrl}/blog/${post.slug}`,
-      lastModified: new Date(post.updatedAt),
-      changeFrequency: "monthly" as const,
-      priority: 0.7
-    })),
+    {
+      url: `${siteUrl}/feed.xml`,
+      lastModified: now,
+      changeFrequency: "daily",
+      priority: 0.4
+    },
+    {
+      url: `${siteUrl}/llms.txt`,
+      lastModified: now,
+      changeFrequency: "weekly",
+      priority: 0.4
+    },
+    {
+      url: `${siteUrl}/llms-full.txt`,
+      lastModified: now,
+      changeFrequency: "weekly",
+      priority: 0.4
+    },
+    ...posts.map((post) => {
+      const alternates = posts.filter((alternate) => alternate.translationGroupId === post.translationGroupId);
+      const defaultPost = alternates.find((alternate) => alternate.language === "zh-Hant") || post;
+
+      return {
+        url: `${siteUrl}${blogPostPath(post)}`,
+        lastModified: new Date(post.updatedAt),
+        changeFrequency: "monthly" as const,
+        priority: 0.7,
+        alternates: {
+          languages: Object.fromEntries(
+            alternates
+              .map((alternate) => [metadataLanguageKey(alternate.language), `${siteUrl}${blogPostPath(alternate)}`])
+              .concat([["x-default", `${siteUrl}${blogPostPath(defaultPost)}`]])
+          )
+        }
+      };
+    }),
     ...projects.map((project) => ({
       url: `${siteUrl}/projects/${project.slug}`,
       lastModified: new Date(project.updatedAt),

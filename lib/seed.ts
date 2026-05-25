@@ -665,6 +665,8 @@ export const seedData: CmsData = {
       slug: "geo-ai-search-visibility-guide",
       status: "published",
       sortOrder: 10,
+      language: "zh-Hant",
+      translationGroupId: "tg_geo_ai_visibility_seed",
       title: "GEO 是什麼？企業如何讓 AI 搜尋更容易引用你的網站",
       seoTitle: "GEO 是什麼？AI 搜尋能見度與企業官網內容架構指南",
       seoDescription:
@@ -694,9 +696,102 @@ export const seedData: CmsData = {
             "目前沒有通用的 AI 搜尋專用 schema。比較穩健的做法是讓 Article、FAQ、Organization、Breadcrumb 等結構化資料與頁面可見內容一致。"
         }
       ],
+      sourceLinks: [
+        {
+          title: "Google Search Central：建立實用、以人為本的內容",
+          url: "https://developers.google.com/search/docs/fundamentals/creating-helpful-content",
+          publisher: "Google Search Central"
+        },
+        {
+          title: "Google Search Central：結構化資料簡介",
+          url: "https://developers.google.com/search/docs/appearance/structured-data/intro-structured-data",
+          publisher: "Google Search Central"
+        }
+      ],
       tags: ["GEO", "SEO", "AI 搜尋", "AI Overviews"],
       author: "ALTOS LAB",
       cover: "/geo-cover.png",
+      readTimeMinutes: 3,
+      featured: true,
+      reviewStatus: "approved",
+      qualityChecks: {
+        hasHumanReview: true,
+        hasVisibleSources: true,
+        hasNoFabricatedClaims: true,
+        hasSearchIntentAnswer: true,
+        hasBilingualParity: true,
+        notes: "Seed article reviewed as the first bilingual blog example."
+      },
+      aiDisclosure: "這篇文章為 ALTOS LAB 官網種子內容，未自動發布 AI 草稿。",
+      createdAt: timestamp,
+      updatedAt: timestamp,
+      publishedAt: timestamp,
+      generatedAt: timestamp,
+      generatedBy: "seed"
+    },
+    {
+      id: "post_geo_ai_visibility_en",
+      slug: "geo-ai-search-visibility-guide",
+      status: "published",
+      sortOrder: 11,
+      language: "en",
+      translationGroupId: "tg_geo_ai_visibility_seed",
+      title: "What is GEO? How companies can make AI search more likely to cite their website",
+      seoTitle: "What is GEO? AI Search Visibility and Company Website Content Architecture",
+      seoDescription:
+        "GEO does not replace SEO. It extends crawlable, trustworthy and structured content into AI Overviews, AI Mode and ChatGPT Search.",
+      excerpt:
+        "The core of GEO is not a trick. It is making services, cases, FAQs and expert points of view public in a way search engines and AI systems can understand.",
+      topic: "GEO for AI search",
+      audience: "B2B founders and marketing leaders who want better AI search visibility",
+      geoSummary:
+        "GEO should build on SEO foundations: crawlable pages, indexable text, clear explanations, internal links, structured data and FAQ content aligned with visible page copy.",
+      body:
+        "## GEO is not a mysterious second rulebook\nGEO, or Generative Engine Optimization, is often described as AI search optimization. In practice, it still depends on SEO basics: search engines need to crawl, index and understand your pages before AI search can cite them as supporting material.\n\n## A company website must answer clear questions\nIf a site only says \"we provide AI solutions,\" AI systems have little context for what the company can actually help with. A better approach is to break services into specific situations, such as AI customer service, AI agents, workflow automation, knowledge bases and GEO content systems, then answer the questions buyers actually ask.\n\n## Content must be citable\nAI answer systems prefer clear, concrete and verifiable passages. A company website should include cases, process explanations, FAQs, constraints, comparison tables and precise service descriptions instead of only abstract slogans.\n\n## A CMS makes GEO sustainable\nGEO is not a one-time project. As markets, services and customer questions change, the team needs a CMS to add articles, update FAQs, refine cases and publish new content quickly.",
+      keyTakeaways: [
+        "GEO builds on SEO foundations and does not require turning the website into a special AI-only file.",
+        "Articles, FAQs, cases and service pages should answer real questions in citable text.",
+        "A CMS helps the team keep producing, reviewing and updating AI-related content."
+      ],
+      faqs: [
+        {
+          question: "How is GEO different from SEO?",
+          answer:
+            "GEO focuses on discoverability and citation opportunities inside generative AI answers, but it still depends on SEO foundations like crawlability, indexability, content quality, internal links and structured data."
+        },
+        {
+          question: "Do companies need special schema for AI search?",
+          answer:
+            "There is no universal AI-search-specific schema today. A stable approach is to keep Article, FAQ, Organization and Breadcrumb structured data aligned with visible page content."
+        }
+      ],
+      sourceLinks: [
+        {
+          title: "Google Search Central: Creating helpful, people-first content",
+          url: "https://developers.google.com/search/docs/fundamentals/creating-helpful-content",
+          publisher: "Google Search Central"
+        },
+        {
+          title: "Google Search Central: Structured data introduction",
+          url: "https://developers.google.com/search/docs/appearance/structured-data/intro-structured-data",
+          publisher: "Google Search Central"
+        }
+      ],
+      tags: ["GEO", "SEO", "AI search", "AI Overviews"],
+      author: "ALTOS LAB",
+      cover: "/geo-cover.png",
+      readTimeMinutes: 3,
+      featured: true,
+      reviewStatus: "approved",
+      qualityChecks: {
+        hasHumanReview: true,
+        hasVisibleSources: true,
+        hasNoFabricatedClaims: true,
+        hasSearchIntentAnswer: true,
+        hasBilingualParity: true,
+        notes: "Seed article reviewed as the first bilingual blog example."
+      },
+      aiDisclosure: "This is seed website content for ALTOS LAB, not an automatically published AI draft.",
       createdAt: timestamp,
       updatedAt: timestamp,
       publishedAt: timestamp,

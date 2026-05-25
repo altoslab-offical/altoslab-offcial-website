@@ -1,5 +1,11 @@
 {
   "framework": "nextjs",
+  "crons": [
+    {
+      "path": "/api/cron/blog-drafts",
+      "schedule": "0 1 * * *"
+    }
+  ],
   "headers": [
     {
       "source": "/(.*)",
@@ -15,6 +21,69 @@
         {
           "key": "Permissions-Policy",
           "value": "camera=(), microphone=(), geolocation=()"
+        }
+      ]
+    },
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow, noarchive"
+        }
+      ]
+    },
+    {
+      "source": "/admin/(.*)",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow, noarchive"
+        }
+      ]
+    },
+    {
+      "source": "/blog",
+      "headers": [
+        {
+          "key": "Content-Language",
+          "value": "zh-Hant-TW"
+        }
+      ]
+    },
+    {
+      "source": "/blog/(.*)",
+      "headers": [
+        {
+          "key": "Content-Language",
+          "value": "zh-Hant-TW"
+        }
+      ]
+    },
+    {
+      "source": "/en/(.*)",
+      "headers": [
+        {
+          "key": "Content-Language",
+          "value": "en"
+        }
+      ]
+    },
+    {
+      "source": "/projects",
+      "headers": [
+        {
+          "key": "Content-Language",
+          "value": "zh-Hant-TW"
+        }
+      ]
+    },
+    {
+      "source": "/projects/(.*)",
+      "headers": [
+        {
+          "key": "Content-Language",
+          "value": "zh-Hant-TW"
         }
       ]
     }

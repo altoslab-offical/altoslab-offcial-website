@@ -1,6 +1,16 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { adminCookieName, getAdminSessionToken } from "./lib/auth";
 
+function nextWithPathname(request: NextRequest) {
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set("x-altos-pathname", request.nextUrl.pathname);
+  return NextResponse.next({
+    request: {
+      headers: requestHeaders
+    }
+  });
+}
+
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const isAdminPage = pathname.startsWith("/admin");
@@ -11,14 +21,14 @@ export function proxy(request: NextRequest) {
     pathname === "/api/admin/auth/logout";
 
   if ((!isAdminPage && !isAdminApi) || isPublicAuthRoute) {
-    return NextResponse.next();
+    return nextWithPathname(request);
   }
 
   const token = request.cookies.get(adminCookieName)?.value;
   const expected = getAdminSessionToken();
 
   if (token && expected && token === expected) {
-    return NextResponse.next();
+    return nextWithPathname(request);
   }
 
   if (isAdminApi) {
@@ -32,5 +42,5 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/admin/:path*", "/api/admin/:path*"]
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|.*\\..*).*)"]
 };

@@ -7,7 +7,11 @@ The public homepage currently keeps the original static visual bundle:
 - Public homepage route: `app/route.ts`
 - Rendered source: root `index.html`
 - SEO metadata wrapper: `app/route.ts`
-- Main visual bundle mirrors: `altoslab-website.html` and `public/index.html`
+- Main visual bundle mirrors: `altoslab-website.html`
+
+Do not keep a `public/index.html` file. On Vercel it can take precedence over the
+App Router root route and cause `/` to serve the stale static title instead of
+the SEO metadata wrapper.
 
 This is intentional. The homepage should not be replaced with a new React implementation unless the migration is explicitly approved and visually checked against the current page.
 
@@ -16,10 +20,11 @@ This is intentional. The homepage should not be replaced with a new React implem
 These areas use the normal Next App Router surfaces and global CSS:
 
 - Admin pages: `app/admin/*`
-- Blog pages and APIs: `app/blog/*`, `app/api/blog/*`
+- Blog pages and APIs: `app/blog/*`, `app/en/blog/*`, `app/feed.xml/route.ts`, `app/llms.txt/route.ts`, `app/api/blog/*`
 - Project pages and APIs: `app/projects/*`, `app/api/projects/*`
 - CMS/admin APIs: `app/api/admin/*`
 - Contact API: `app/api/contact/route.ts`
+- Blog AI automation: `app/api/admin/blog/generate/route.ts`, `app/api/cron/blog-drafts/route.ts`, `lib/blog-generation.ts`
 
 `app/globals.css` imports `design/tokens.css`, so these pages can use the token contract immediately.
 
@@ -49,6 +54,14 @@ The current CMS helpers remain useful for admin and future dynamic pages:
 - `lib/cms.ts`
 - `lib/cms-storage.ts`
 - `lib/seed.ts`
+
+Blog posts now include bilingual and AI-review fields:
+
+- `language`: `zh-Hant` or `en`
+- `translationGroupId`: connects bilingual pairs for hreflang
+- `sourceLinks`: visible sources for SEO/GEO and AI-generated drafts
+- `reviewStatus`, `qualityChecks`, `aiDisclosure`: human review and trust controls
+- `generationDate`: Taiwan-date idempotency for daily cron drafts
 
 ## Design Tokens
 

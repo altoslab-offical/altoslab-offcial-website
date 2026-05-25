@@ -1,3 +1,4 @@
+import { blogPostPath, htmlLanguage } from "./blog-utils";
 import type { BlogPost, Project, SitePage } from "./types";
 
 export const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || "https://altoslab.com").replace(/\/$/, "");
@@ -17,7 +18,8 @@ export function organizationJsonLd() {
     email: "hello@altoslab.com",
     description: "AI implementation studio for AI agents, automation, CMS, SEO and GEO content systems.",
     areaServed: ["Taiwan", "APAC"],
-    knowsAbout: ["AI Agent", "AI customer service", "workflow automation", "SEO", "GEO", "generative AI"]
+    knowsAbout: ["AI Agent", "AI customer service", "workflow automation", "SEO", "GEO", "generative AI"],
+    sameAs: ["https://github.com/altoslab-offical"]
   };
 }
 
@@ -81,6 +83,14 @@ export function pageMetadata(page: SitePage | null) {
 }
 
 export function articleJsonLd(post: BlogPost) {
+  const sourceCitations = post.sourceLinks.map((source) => ({
+    "@type": "CreativeWork",
+    name: source.title,
+    url: source.url,
+    publisher: source.publisher ? { "@type": "Organization", name: source.publisher } : undefined,
+    datePublished: source.publishedAt
+  }));
+
   return {
     "@context": "https://schema.org",
     "@type": "BlogPosting",
@@ -91,9 +101,12 @@ export function articleJsonLd(post: BlogPost) {
     publisher: { "@type": "Organization", name: siteName },
     datePublished: post.publishedAt || post.createdAt,
     dateModified: post.updatedAt,
-    mainEntityOfPage: absoluteUrl(`/blog/${post.slug}`),
-    inLanguage: "zh-Hant-TW",
-    keywords: post.tags.join(", ")
+    mainEntityOfPage: absoluteUrl(blogPostPath(post)),
+    inLanguage: htmlLanguage(post.language),
+    keywords: post.tags.join(", "),
+    about: post.topic,
+    citation: sourceCitations.length ? sourceCitations : undefined,
+    isAccessibleForFree: true
   };
 }
 

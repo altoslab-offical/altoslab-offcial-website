@@ -13,7 +13,7 @@ type PageProps = {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
-  const post = await getPublishedBlogPost(slug, "zh-Hant");
+  const post = await getPublishedBlogPost(slug, "en");
   if (!post) return {};
   const alternates = await getPublishedBlogAlternates(post);
 
@@ -25,7 +25,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       languages: Object.fromEntries(
         [post, ...alternates]
           .map((alternate) => [metadataLanguageKey(alternate.language), absoluteUrl(blogPostPath(alternate))])
-          .concat([["x-default", absoluteUrl(blogPostPath(post))]])
+          .concat([["x-default", absoluteUrl(blogPostPath(alternates.find((item) => item.language === "zh-Hant") || post))]])
       )
     },
     openGraph: {
@@ -35,7 +35,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       publishedTime: post.publishedAt,
       modifiedTime: post.updatedAt,
       url: absoluteUrl(blogPostPath(post)),
-      locale: "zh_TW",
+      locale: "en_US",
       images: post.cover ? [absoluteUrl(post.cover)] : undefined
     },
     twitter: {
@@ -47,9 +47,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   };
 }
 
-export default async function BlogPostPage({ params }: PageProps) {
+export default async function EnglishBlogPostPage({ params }: PageProps) {
   const { slug } = await params;
-  const post = await getPublishedBlogPost(slug, "zh-Hant");
+  const post = await getPublishedBlogPost(slug, "en");
   if (!post) notFound();
 
   return <BlogArticle post={post} />;

@@ -2,9 +2,11 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { sendGTMEvent } from "@next/third-parties/google";
 import {
   FileText,
   Gauge,
+  Languages,
   LayoutDashboard,
   LogOut,
   Newspaper,
@@ -13,6 +15,7 @@ import {
   Sparkles,
   Users
 } from "lucide-react";
+import { blogPostPath, languageLabel } from "@/lib/blog-utils";
 import type { BlogPost, CmsData, ContactLeadStatus, Project, SitePage } from "@/lib/types";
 
 type Tab = "dashboard" | "pages" | "projects" | "blog" | "leads";
@@ -37,6 +40,14 @@ function makeSlug(input: string) {
     .replace(/[^a-z0-9\u4e00-\u9fff]+/g, "-")
     .replace(/^-+|-+$/g, "")
     .slice(0, 80);
+}
+
+function trackAdminBlogEvent(event: "blog_post_published" | "ai_blog_draft_generated", payload: Record<string, unknown>) {
+  sendGTMEvent({
+    event,
+    admin_surface: "blog",
+    ...payload
+  });
 }
 
 async function api<T>(url: string, init?: RequestInit): Promise<T> {
@@ -229,32 +240,94 @@ export function AdminShell({ initialTab = "dashboard" }: AdminShellProps) {
     setData((current) => ({ ...current, blogPosts: [payload.post, ...current.blogPosts] }));
     setSelectedPostId(payload.post.id);
     setTab("blog");
+    return payload.post;
   }
 
   async function generatePost() {
-    setMessage("正在產生部落格草稿...");
+    setMessage("正在產生成對中英文部落格草稿...");
     setError("");
     try {
-      const payload = await api<{ post: BlogPost; warning?: string }>("/api/admin/blog/generate", {
-        method: "POST",
-        body: JSON.stringify(generator)
+      const payload = await api<{ posts: BlogPost[]; post?: BlogPost; provider?: string; warning?: string }>(
+        "/api/admin/blog/generate",
+        {
+          method: "POST",
+          body: JSON.stringify(generator)
+        }
+      );
+      const created: BlogPost[] = [];
+      for (const post of payload.posts || (payload.post ? [payload.post] : [])) {
+        created.push(await createPost(post));
+      }
+      setSelectedPostId(created[0]?.id || selectedPostId);
+      trackAdminBlogEvent("ai_blog_draft_generated", {
+        post_count: created.length,
+        provider: payload.provider || "unknown",
+        languages: created.map((post) => post.language).join(","),
+        translation_group_id: created[0]?.translationGroupId || ""
       });
-      await createPost(payload.post);
-      setMessage(payload.warning || "已產生 AI 部落格草稿，請審稿後再發佈。");
+      setMessage(
+        payload.warning ||
+          `已產生 ${created.length} 篇 ${payload.provider || "AI"} 部落格草稿，請完成審稿後再發佈。`
+      );
     } catch (err) {
       setError(err instanceof Error ? err.message : "產生失敗");
     }
   }
 
+  async function duplicateTranslation(post: BlogPost) {
+    const language = post.language === "en" ? "zh-Hant" : "en";
+    const payload = await api<{ post: BlogPost }>("/api/admin/blog", {
+      method: "POST",
+      body: JSON.stringify({
+        ...post,
+        id: undefined,
+        status: "draft",
+        language,
+        title: `${post.title} (${languageLabel(language)})`,
+        slug: `${post.slug}-${language === "en" ? "en" : "zh"}`,
+        reviewStatus: "human-review",
+        featured: false,
+        publishedAt: undefined
+      })
+    });
+    setData((current) => ({ ...current, blogPosts: [payload.post, ...current.blogPosts] }));
+    setSelectedPostId(payload.post.id);
+    setMessage("已複製一篇翻譯草稿，請改寫後再發佈。");
+  }
+
+  function previewPath(post: BlogPost) {
+    return blogPostPath(post);
+  }
+
+  function statusSummary(post: BlogPost) {
+    return `${post.status} · ${languageLabel(post.language)} · ${post.reviewStatus}`;
+  }
+
+  function updateSourceLinks(post: BlogPost, value: unknown) {
+    updatePost(post.id, { sourceLinks: value as BlogPost["sourceLinks"] });
+  }
+
+  function updateQualityChecks(post: BlogPost, value: unknown) {
+    updatePost(post.id, { qualityChecks: value as BlogPost["qualityChecks"] });
+  }
+
   async function savePost(post: BlogPost) {
     setMessage("");
     setError("");
+    const isPublishingForFirstTime = post.status === "published" && !post.publishedAt;
     try {
       const payload = await api<{ post: BlogPost }>(`/api/admin/blog/${post.id}`, {
         method: "PATCH",
         body: JSON.stringify(post)
       });
       updatePost(post.id, payload.post);
+      if (isPublishingForFirstTime) {
+        trackAdminBlogEvent("blog_post_published", {
+          blog_slug: payload.post.slug,
+          blog_language: payload.post.language,
+          translation_group_id: payload.post.translationGroupId
+        });
+      }
       setMessage("文章已儲存。");
     } catch (err) {
       setError(err instanceof Error ? err.message : "儲存失敗");
@@ -514,6 +587,7 @@ export function AdminShell({ initialTab = "dashboard" }: AdminShellProps) {
           <section className="admin-grid">
             <aside className="admin-card">
               <h2>AI Blog Generator</h2>
+              <p className="muted">產生一組同主題的中文與英文草稿；預設不自動發布。</p>
               <div className="admin-form">
                 <label>
                   <span>Topic</span>
@@ -527,9 +601,17 @@ export function AdminShell({ initialTab = "dashboard" }: AdminShellProps) {
                   <span>Audience</span>
                   <input value={generator.audience} onChange={(event) => setGenerator({ ...generator, audience: event.target.value })} />
                 </label>
+                <label>
+                  <span>Search intent</span>
+                  <textarea
+                    rows={2}
+                    value={generator.intent}
+                    onChange={(event) => setGenerator({ ...generator, intent: event.target.value })}
+                  />
+                </label>
                 <button className="button primary" onClick={generatePost} type="button">
                   <Sparkles size={16} />
-                  Generate draft
+                  Generate zh/en drafts
                 </button>
                 <button className="button" onClick={() => createPost()} type="button">
                   <Plus size={16} />
@@ -547,7 +629,7 @@ export function AdminShell({ initialTab = "dashboard" }: AdminShellProps) {
                   >
                     <strong>{post.title}</strong>
                     <br />
-                    <span className={`status-pill ${post.status}`}>{post.status}</span>
+                    <span className={`status-pill ${post.status}`}>{statusSummary(post)}</span>
                   </button>
                 ))}
               </div>
@@ -601,6 +683,91 @@ export function AdminShell({ initialTab = "dashboard" }: AdminShellProps) {
                       />
                     </label>
                   </div>
+                  <div className="form-row">
+                    <label>
+                      <span>Language</span>
+                      <select
+                        value={selectedPost.language}
+                        onChange={(event) => updatePost(selectedPost.id, { language: event.target.value as BlogPost["language"] })}
+                      >
+                        <option value="zh-Hant">zh-Hant</option>
+                        <option value="en">en</option>
+                      </select>
+                    </label>
+                    <label>
+                      <span>Review status</span>
+                      <select
+                        value={selectedPost.reviewStatus}
+                        onChange={(event) =>
+                          updatePost(selectedPost.id, { reviewStatus: event.target.value as BlogPost["reviewStatus"] })
+                        }
+                      >
+                        <option value="ai-draft">ai-draft</option>
+                        <option value="human-review">human-review</option>
+                        <option value="needs-revision">needs-revision</option>
+                        <option value="approved">approved</option>
+                      </select>
+                    </label>
+                  </div>
+                  <div className="form-row">
+                    <label>
+                      <span>Translation group ID</span>
+                      <input
+                        value={selectedPost.translationGroupId}
+                        onChange={(event) => updatePost(selectedPost.id, { translationGroupId: event.target.value })}
+                      />
+                    </label>
+                    <label>
+                      <span>Sort order</span>
+                      <input
+                        type="number"
+                        value={selectedPost.sortOrder}
+                        onChange={(event) => updatePost(selectedPost.id, { sortOrder: Number(event.target.value) })}
+                      />
+                    </label>
+                  </div>
+                  <div className="form-row">
+                    <label>
+                      <span>Topic</span>
+                      <input
+                        value={selectedPost.topic}
+                        onChange={(event) => updatePost(selectedPost.id, { topic: event.target.value })}
+                      />
+                    </label>
+                    <label>
+                      <span>Audience</span>
+                      <input
+                        value={selectedPost.audience}
+                        onChange={(event) => updatePost(selectedPost.id, { audience: event.target.value })}
+                      />
+                    </label>
+                  </div>
+                  <div className="form-row">
+                    <label>
+                      <span>Read time minutes</span>
+                      <input
+                        type="number"
+                        min={1}
+                        value={selectedPost.readTimeMinutes}
+                        onChange={(event) => updatePost(selectedPost.id, { readTimeMinutes: Number(event.target.value) })}
+                      />
+                    </label>
+                    <label className="checkbox-label">
+                      <input
+                        type="checkbox"
+                        checked={selectedPost.featured}
+                        onChange={(event) => updatePost(selectedPost.id, { featured: event.target.checked })}
+                      />
+                      <span>Featured article</span>
+                    </label>
+                  </div>
+                  <label>
+                    <span>Cover URL</span>
+                    <input
+                      value={selectedPost.cover || ""}
+                      onChange={(event) => updatePost(selectedPost.id, { cover: event.target.value })}
+                    />
+                  </label>
                   <label>
                     <span>SEO Title</span>
                     <input
@@ -650,12 +817,34 @@ export function AdminShell({ initialTab = "dashboard" }: AdminShellProps) {
                     value={selectedPost.faqs}
                     onChange={(value) => updatePost(selectedPost.id, { faqs: value as BlogPost["faqs"] })}
                   />
+                  <JsonField
+                    label="Source links JSON（AI 草稿發布前必須有來源）"
+                    value={selectedPost.sourceLinks}
+                    onChange={(value) => updateSourceLinks(selectedPost, value)}
+                  />
+                  <JsonField
+                    label="Quality checks JSON（審稿、來源、無捏造、搜尋意圖、雙語對齊）"
+                    value={selectedPost.qualityChecks}
+                    onChange={(value) => updateQualityChecks(selectedPost, value)}
+                  />
+                  <label>
+                    <span>AI disclosure</span>
+                    <textarea
+                      rows={2}
+                      value={selectedPost.aiDisclosure || ""}
+                      onChange={(event) => updatePost(selectedPost.id, { aiDisclosure: event.target.value })}
+                    />
+                  </label>
                   <div className="form-actions">
                     <button className="button primary" onClick={() => savePost(selectedPost)} type="button">
                       <Save size={16} />
                       Save post
                     </button>
-                    <Link className="button" href={`/blog/${selectedPost.slug}`} target="_blank">
+                    <button className="button" onClick={() => duplicateTranslation(selectedPost)} type="button">
+                      <Languages size={16} />
+                      Duplicate translation
+                    </button>
+                    <Link className="button" href={previewPath(selectedPost)} target="_blank">
                       Preview
                     </Link>
                   </div>

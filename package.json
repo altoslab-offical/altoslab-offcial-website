@@ -9,6 +9,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@next/third-parties": "^16.2.6",
     "lucide-react": "latest",
     "next": "latest",
     "postcss": "^8.5.10",
