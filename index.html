@@ -4391,6 +4391,16 @@ void main() {
         display: block;
       }
 
+      .altos-contact-error.is-success {
+        color: rgba(247, 247, 242, 0.7);
+      }
+
+      .altos-contact-submit:disabled {
+        cursor: progress;
+        opacity: 0.72;
+        transform: none;
+      }
+
       @media (max-width: 900px) {
         .altos-contact-layout {
           grid-template-columns: 1fr;
@@ -4406,8 +4416,6 @@ void main() {
     </style>
     <script>
       (() => {
-        const mailTo = "hello@altoslab.ai";
-
         function enhanceContactSection() {
           const section = document.querySelector("#contact");
           if (!section || section.querySelector(".altos-contact-panel")) return;
@@ -4443,8 +4451,17 @@ void main() {
           inner.appendChild(panel);
 
           const form = panel.querySelector("form");
-          const error = panel.querySelector(".altos-contact-error");
-          form.addEventListener("submit", event => {
+          const status = panel.querySelector(".altos-contact-error");
+          const submit = panel.querySelector(".altos-contact-submit");
+          const submitLabel = submit.querySelector("span");
+
+          function showStatus(message, isSuccess) {
+            status.textContent = message;
+            status.classList.toggle("is-success", Boolean(isSuccess));
+            status.classList.add("is-visible");
+          }
+
+          form.addEventListener("submit", async event => {
             event.preventDefault();
             const data = new FormData(form);
             const who = String(data.get("who") || "").trim();
@@ -4452,24 +4469,31 @@ void main() {
             const message = String(data.get("message") || "").trim();
 
             if (!who || !contact || !message) {
-              error.classList.add("is-visible");
+              showStatus("請先填完三個欄位，我們才能整理成完整訊息。", false);
               return;
             }
 
-            error.classList.remove("is-visible");
-            const subject = `ALTOS LAB 合作需求｜${who}`;
-            const body = [
-              "我們是誰：",
-              who,
-              "",
-              "聯絡方式：",
-              contact,
-              "",
-              "希望有什麼可以協助的：",
-              message
-            ].join("\n");
+            status.classList.remove("is-visible", "is-success");
+            submit.disabled = true;
+            submitLabel.textContent = "送出中";
 
-            window.location.href = `mailto:${mailTo}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+            try {
+              const response = await fetch("/api/contact", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ who, contact, message })
+              });
+              const payload = await response.json().catch(() => ({}));
+              if (!response.ok) throw new Error(payload.error || "送出失敗，請稍後再試。");
+
+              form.reset();
+              showStatus("已收到需求，我們會盡快回覆。", true);
+            } catch (error) {
+              showStatus(error instanceof Error ? error.message : "送出失敗，請稍後再試。", false);
+            } finally {
+              submit.disabled = false;
+              submitLabel.textContent = "送出合作需求";
+            }
           });
         }
 
