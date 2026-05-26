@@ -43,7 +43,7 @@ CMS_STORAGE_KEY=altoslab:cms:v1
 DEEPSEEK_API_KEY=<optional-for-ai-blog-generation>
 DEEPSEEK_BASE_URL=https://api.deepseek.com
 DEEPSEEK_CONTENT_MODEL=deepseek-v4-flash
-BLOG_TREND_SOURCES=https://developers.google.com/search/blog/rss.xml,https://vercel.com/blog/rss.xml,https://openai.com/news/rss.xml
+BLOG_TREND_SOURCES=https://openai.com/news/rss.xml,https://blog.google/innovation-and-ai/technology/ai/rss/,https://deepmind.google/blog/rss.xml,https://huggingface.co/blog/feed.xml,https://feeds.feedburner.com/blogspot/amDG,https://vercel.com/blog/rss.xml
 CRON_SECRET=<long-random-cron-secret>
 AUTO_PUBLISH_BLOG=false
 ```
@@ -58,6 +58,7 @@ Notes:
 - `AUTO_PUBLISH_BLOG` should stay `false` for v1. AI-generated content should be reviewed before publishing.
 - `CRON_SECRET` protects `/api/cron/blog-drafts`; Vercel Cron will call it daily when configured in `vercel.json`.
 - `DEEPSEEK_CONTENT_MODEL=deepseek-v4-flash` is the recommended default for daily draft generation because it is faster and more reliable for the admin/Cron workflow. Use `deepseek-v4-pro` only when slower, higher-effort drafting is acceptable.
+- `BLOG_TREND_SOURCES` should contain only live RSS/Atom feeds. The generator samples across feeds in round-robin order so a daily draft can reference multiple AI/search sources instead of overfitting to the first feed.
 - Search verification env vars are optional until the matching Search Console/Webmaster account provides the token. Once set and redeployed, the homepage and App Router pages emit the required verification meta tags.
 
 ## Vercel Project Settings

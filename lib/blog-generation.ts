@@ -53,9 +53,12 @@ const FALLBACK_SOURCES: TrendCandidate[] = [
 ];
 
 const DEFAULT_RSS_SOURCES = [
-  "https://developers.google.com/search/blog/rss.xml",
+  "https://openai.com/news/rss.xml",
+  "https://blog.google/innovation-and-ai/technology/ai/rss/",
+  "https://deepmind.google/blog/rss.xml",
+  "https://huggingface.co/blog/feed.xml",
+  "https://feeds.feedburner.com/blogspot/amDG",
   "https://vercel.com/blog/rss.xml",
-  "https://openai.com/news/rss.xml"
 ];
 
 function sourceListFromEnv() {
@@ -136,7 +139,20 @@ export async function fetchTrendCandidates(input: BlogGenerateInput = {}): Promi
       return xml ? parseFeed(xml, url) : [];
     })
   );
-  const candidates = feeds.flat();
+
+  const candidates: TrendCandidate[] = [];
+  const maxFeedLength = Math.max(0, ...feeds.map((feed) => feed.length));
+  for (let index = 0; index < maxFeedLength; index += 1) {
+    for (const feed of feeds) {
+      const candidate = feed[index];
+      if (candidate && !candidates.some((item) => item.url === candidate.url)) {
+        candidates.push(candidate);
+      }
+      if (candidates.length >= 8) break;
+    }
+    if (candidates.length >= 8) break;
+  }
+
   return candidates.length ? candidates.slice(0, 8) : FALLBACK_SOURCES;
 }
 
