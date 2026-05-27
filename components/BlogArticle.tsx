@@ -11,6 +11,7 @@ const copy = {
   "zh-Hant": {
     back: "← Blog",
     updated: "更新",
+    readTime: (minutes: number) => `${minutes} 分鐘閱讀`,
     geoSummary: "GEO answer summary",
     takeaways: "Key Takeaways",
     faq: "常見問題",
@@ -22,6 +23,7 @@ const copy = {
   en: {
     back: "← Blog",
     updated: "Updated",
+    readTime: (minutes: number) => `${minutes} min read`,
     geoSummary: "GEO answer summary",
     takeaways: "Key Takeaways",
     faq: "FAQ",
@@ -69,7 +71,7 @@ export async function BlogArticle({ post }: { post: BlogPost }) {
             ))}
           </div>
           <p className="eyebrow">
-            {post.tags.slice(0, 3).join(" / ")} · {post.readTimeMinutes} min
+            {post.tags.slice(0, 3).join(" / ")} · {dictionary.readTime(post.readTimeMinutes)}
           </p>
           <h1>{post.title}</h1>
           <div className="article-meta">

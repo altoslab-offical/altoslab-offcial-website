@@ -21,6 +21,7 @@ const copy = {
     all: "全部",
     read: "閱讀文章",
     updated: "更新",
+    readTime: (minutes: number) => `${minutes} 分鐘閱讀`,
     empty: "目前沒有符合條件的文章。",
     ctaTitle: "想把 AI 內容變成長期 SEO / GEO 引擎？",
     ctaBody: "ALTOS LAB 可以協助你建立網站、CMS、審稿流程、追蹤事件與 AI 草稿自動化。",
@@ -36,6 +37,7 @@ const copy = {
     all: "All",
     read: "Read article",
     updated: "Updated",
+    readTime: (minutes: number) => `${minutes} min read`,
     empty: "No matching articles yet.",
     ctaTitle: "Want AI content to become a durable SEO / GEO engine?",
     ctaBody: "ALTOS LAB can help you build the site, CMS, review workflow, tracking events and AI draft automation.",
@@ -109,7 +111,7 @@ export async function BlogIndex({ language, tag, query }: BlogIndexProps) {
           ) : null}
           <div className="blog-featured-body">
             <p className="eyebrow">
-              {dictionary.featured} · {languageLabel(featured.language)} · {featured.readTimeMinutes} min
+              {dictionary.featured} · {languageLabel(featured.language)} · {dictionary.readTime(featured.readTimeMinutes)}
             </p>
             <h2>{featured.title}</h2>
             <p>{featured.excerpt}</p>
@@ -138,7 +140,7 @@ export async function BlogIndex({ language, tag, query }: BlogIndexProps) {
             ) : null}
             <div className="blog-body">
               <p className="eyebrow">
-                {post.tags.slice(0, 3).join(" / ")} · {post.readTimeMinutes} min
+                {post.tags.slice(0, 3).join(" / ")} · {dictionary.readTime(post.readTimeMinutes)}
               </p>
               <h2>{post.title}</h2>
               <p>{post.excerpt}</p>
