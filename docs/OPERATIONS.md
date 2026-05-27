@@ -40,12 +40,13 @@ BLOB_READ_WRITE_TOKEN=<vercel-blob-token>
 BLOB_ACCESS=public
 CMS_ENCRYPTION_KEY=<64-hex-random-secret>
 CMS_STORAGE_KEY=altoslab:cms:v1
-DEEPSEEK_API_KEY=<optional-for-ai-blog-generation>
+DEEPSEEK_API_KEY=<required-for-ai-blog-generation>
 DEEPSEEK_BASE_URL=https://api.deepseek.com
-DEEPSEEK_CONTENT_MODEL=deepseek-v4-flash
+DEEPSEEK_CONTENT_MODEL=deepseek-v4-pro
+DEEPSEEK_MAX_TOKENS=7600
 BLOG_TREND_SOURCES=https://openai.com/news/rss.xml,https://blog.google/innovation-and-ai/technology/ai/rss/,https://deepmind.google/blog/rss.xml,https://huggingface.co/blog/feed.xml,https://feeds.feedburner.com/blogspot/amDG,https://vercel.com/blog/rss.xml
 CRON_SECRET=<long-random-cron-secret>
-AUTO_PUBLISH_BLOG=false
+AUTO_PUBLISH_BLOG=true
 ```
 
 Notes:
@@ -55,10 +56,11 @@ Notes:
 - The current Vercel Blob store is public-access, so `BLOB_ACCESS=public` and `CMS_ENCRYPTION_KEY` are required in production. CMS JSON is encrypted server-side before it is written to Blob.
 - Upstash Redis is also supported and takes priority when `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` are configured. The token must be the standard write token, not the read-only token.
 - Without Vercel Blob or Upstash env vars, production can still render seed content, but admin edits and contact leads will not persist.
-- `AUTO_PUBLISH_BLOG` should stay `false` for v1. AI-generated content should be reviewed before publishing to avoid low-value scaled-content risk.
+- `AUTO_PUBLISH_BLOG=true` allows cron-generated posts to publish automatically only after the deterministic quality reviewer approves the bilingual pair. Fallback template output, malformed model output, thin content, missing sources, missing images, invalid HTTPS links or failed bilingual pairing stay draft/needs-revision.
 - `CRON_SECRET` protects `/api/cron/blog-drafts`, `/api/cron/blog-drafts/morning` and `/api/cron/blog-drafts/afternoon`.
-- Vercel Cron runs twice daily: `0 1 * * *` UTC = 09:00 Asia/Taipei, and `0 7 * * *` UTC = 15:00 Asia/Taipei. Each slot creates one bilingual zh/en draft pair and is idempotent by `generationDate + generationSlot`.
-- `DEEPSEEK_CONTENT_MODEL=deepseek-v4-flash` is the recommended default for daily draft generation because it is faster and more reliable for the admin/Cron workflow. Use `deepseek-v4-pro` only when slower, higher-effort drafting is acceptable.
+- Vercel Cron runs twice daily: `0 1 * * *` UTC = 09:00 Asia/Taipei, and `0 7 * * *` UTC = 15:00 Asia/Taipei. Each slot creates one bilingual zh/en article pair, publishes only if the quality gate passes, and is idempotent by `generationDate + generationSlot`.
+- `DEEPSEEK_CONTENT_MODEL=deepseek-v4-pro` is the recommended default when article quality is the priority. `deepseek-v4-flash` can be used for faster lower-cost drafting, but production auto-publishing should keep the quality gate enabled either way.
+- `DEEPSEEK_MAX_TOKENS=7600` gives the model enough room to return valid JSON and complete 4-6 section bilingual-quality drafts. The generator retries once with a stricter format-repair prompt if JSON validation fails.
 - `BLOG_TREND_SOURCES` should contain only live RSS/Atom feeds. The generator samples across feeds in round-robin order so a daily draft can reference multiple AI/search sources instead of overfitting to the first feed.
 - Search verification env vars are optional until the matching Search Console/Webmaster account provides the token. Once set and redeployed, the homepage and App Router pages emit the required verification meta tags.
 
@@ -106,7 +108,8 @@ Expected results:
 - `/llms.txt` returns a concise LLM-readable site map.
 - `/llms-full.txt` returns expanded answer-engine context for services, projects and published articles.
 - `/api/*` and `/admin/*` return `X-Robots-Tag: noindex, nofollow, noarchive`.
-- `/api/cron/blog-drafts` returns 401 without `CRON_SECRET`; `/api/cron/blog-drafts/morning` and `/api/cron/blog-drafts/afternoon` create one zh/en draft pair per slot, and reruns for the same Taiwan date + slot skip.
+- `/api/cron/blog-drafts` returns 401 without `CRON_SECRET`; `/api/cron/blog-drafts/morning` and `/api/cron/blog-drafts/afternoon` create one zh/en pair per slot, publish only when `qualityReview.approved=true`, and reruns for the same Taiwan date + slot skip.
+- Authenticated dry-run checks are available with `?dryRun=1`. Dry-run runs source collection, DeepSeek generation and quality review, but does not write to CMS or publish.
 
 ## SEO / GEO Release Checks
 
@@ -119,22 +122,23 @@ Before promoting a deployment, verify:
 - `/sitemap.xml` includes `/blog`, `/en/blog`, `/feed.xml`, `/llms.txt`, `/llms-full.txt`, projects and all published posts.
 - Blog post `hreflang` clusters include the current language, the paired translation and `x-default` pointing to the zh-Hant article.
 - FAQ JSON-LD appears only when the FAQ content is visible on the page.
-- Published AI-assisted posts have visible source links, human review, no fabricated claims, a direct GEO summary and bilingual parity.
+- Published AI-assisted posts have visible source links, an approved quality review or human review, no fabricated claims, a direct GEO summary, bilingual parity, approved internal cover image and meaningful alt text.
 - GTM dataLayer events are present for `cta_clicked`, `contact_form_submitted`, `lead_created`, `blog_post_viewed`, `blog_post_published` and `ai_blog_draft_generated`.
 
 ## Content Operations
 
 1. Log in at `/admin`.
 2. Use the Blog CMS workbench to generate drafts, filter by language/status/review state, edit SEO/GEO fields, manage source links and run the publishing checklist.
-3. Keep generated blog posts as drafts until reviewed.
-4. Before publishing a blog post, confirm:
+3. Cron-generated posts publish automatically only when the quality reviewer approves the bilingual pair. If a post is held as `needs-revision`, review the listed quality issues before manual publishing.
+4. Before manually publishing or overriding a held post, confirm:
    - SEO title and description are specific.
    - GEO summary directly answers the search intent.
    - Article body contains visible answer paragraphs, not only keywords.
    - Source links support trend claims.
    - FAQ answers are present in the article and mirrored in structured data.
-   - `qualityChecks.hasHumanReview=true` and `reviewStatus=approved`.
-5. Publish only after brand review.
+   - Cover image is one of the approved ALTOS LAB assets and alt text describes the article context.
+   - `qualityChecks.hasHumanReview=true` or `qualityChecks.hasQualityReviewerApproval=true`, and `reviewStatus=approved`.
+5. Do not manually publish fallback template output without rewriting it into a real article.
 
 ## Rollback
 
