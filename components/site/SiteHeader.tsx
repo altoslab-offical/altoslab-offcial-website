@@ -15,14 +15,22 @@ function readStoredLanguage(): BlogLanguage {
   return window.localStorage.getItem(STORAGE_KEY) === "en" ? "en" : "zh-Hant";
 }
 
+function languageFromPath(pathname: string | null): BlogLanguage | null {
+  if (!pathname) return null;
+  if (pathname.startsWith("/en")) return "en";
+  if (pathname.startsWith("/blog")) return "zh-Hant";
+  return null;
+}
+
 export function SiteHeader() {
   const [language, setLanguage] = useState<BlogLanguage>("zh-Hant");
   const pathname = usePathname();
   const isHomePage = pathname === "/";
+  const routeLanguage = languageFromPath(pathname);
 
   useEffect(() => {
-    setLanguage(readStoredLanguage());
-  }, []);
+    setLanguage(routeLanguage ?? readStoredLanguage());
+  }, [routeLanguage]);
 
   const navigation = useMemo(
     () =>
@@ -45,6 +53,14 @@ export function SiteHeader() {
     setLanguage(nextLanguage);
     window.localStorage.setItem(STORAGE_KEY, nextLanguage);
     window.dispatchEvent(new CustomEvent(LANGUAGE_EVENT, { detail: { language: nextLanguage } }));
+
+    if (pathname === "/blog" && nextLanguage === "en") {
+      window.location.assign("/en/blog");
+    }
+
+    if (pathname === "/en/blog" && nextLanguage === "zh-Hant") {
+      window.location.assign("/blog");
+    }
   }
 
   return (
