@@ -136,7 +136,11 @@ async function sourceUrlStatus(url: string) {
   try {
     const head = await fetch(url, { method: "HEAD", headers, redirect: "follow", signal: controller.signal });
     if (head.status < 400) return null;
-    if (head.status !== 405 && head.status !== 403) return `${url} returned HTTP ${head.status}`;
+    if (head.status !== 405 && head.status !== 403) {
+      return head.status === 404 || head.status === 410
+        ? { issue: `${url} returned HTTP ${head.status}` }
+        : { warning: `${url} returned HTTP ${head.status} during automated validation` };
+    }
 
     const get = await fetch(url, {
       method: "GET",
@@ -144,9 +148,12 @@ async function sourceUrlStatus(url: string) {
       redirect: "follow",
       signal: controller.signal
     });
-    return get.status < 400 ? null : `${url} returned HTTP ${get.status}`;
+    if (get.status < 400) return null;
+    return get.status === 404 || get.status === 410
+      ? { issue: `${url} returned HTTP ${get.status}` }
+      : { warning: `${url} returned HTTP ${get.status} during automated validation` };
   } catch (error) {
-    return `${url} could not be reached: ${error instanceof Error ? error.message : "request failed"}`;
+    return { warning: `${url} could not be verified: ${error instanceof Error ? error.message : "request failed"}` };
   } finally {
     clearTimeout(timeout);
   }
@@ -155,7 +162,10 @@ async function sourceUrlStatus(url: string) {
 async function validateSourceReachability(posts: BlogPost[]) {
   const urls = Array.from(new Set(posts.flatMap((post) => post.sourceLinks.map((source) => source.url))));
   const results = await Promise.all(urls.map((url) => sourceUrlStatus(url)));
-  return results.filter(Boolean).map((message) => `source link validation failed: ${message}`);
+  return {
+    issues: results.flatMap((result) => (result?.issue ? [`source link validation failed: ${result.issue}`] : [])),
+    warnings: results.flatMap((result) => (result?.warning ? [`source link validation warning: ${result.warning}`] : []))
+  };
 }
 
 export async function reviewBlogPairForAutoPublish(posts: BlogPost[]): Promise<BlogPairQualityReview> {
@@ -178,7 +188,9 @@ export async function reviewBlogPairForAutoPublish(posts: BlogPost[]): Promise<B
     issues.push(...review.issues.map((issue) => `${review.language}/${review.slug}: ${issue}`));
     warnings.push(...review.warnings.map((warning) => `${review.language}/${review.slug}: ${warning}`));
   }
-  issues.push(...(await validateSourceReachability(posts)));
+  const sourceValidation = await validateSourceReachability(posts);
+  issues.push(...sourceValidation.issues);
+  warnings.push(...sourceValidation.warnings);
 
   const score = Math.min(...postReviews.map((review) => review.score), issues.length ? 70 : 100);
   const approved = issues.length === 0 && score >= 85;

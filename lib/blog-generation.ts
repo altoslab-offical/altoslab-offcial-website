@@ -263,7 +263,7 @@ function singleLine(input = "") {
 function fitSeoDescription(value = "", fallback = "") {
   const text = singleLine(value);
   const backup = singleLine(fallback);
-  const source = text.length >= 70 ? text : backup || text;
+  const source = text.length >= 70 ? text : singleLine([text, backup].filter(Boolean).join(" ")) || text;
   if (source.length <= 180) return source;
 
   const clipped = source.slice(0, 157).replace(/\s+\S*$/, "").trim();
@@ -481,9 +481,18 @@ function normalizeGeneratedPost({
   }
 
   const body = String(generated.body);
+  const seoFallback = [
+    generated.title,
+    generated.excerpt,
+    generated.geoSummary,
+    input.intent,
+    language === "en"
+      ? "ALTOS LAB explains the SEO, GEO and implementation decisions operators should make next."
+      : "ALTOS LAB 說明企業如何判讀 AI 趨勢，並轉成 SEO、GEO 與實際導入決策。"
+  ].filter(Boolean).join(" ");
   const seoDescription = fitSeoDescription(
     generated.seoDescription,
-    generated.excerpt || generated.geoSummary || generated.title
+    seoFallback
   );
 
   return normalizeBlogPostInput({
