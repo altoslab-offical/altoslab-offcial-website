@@ -4,7 +4,7 @@ import { applyQualityReview, reviewBlogPairForAutoPublish } from "@/lib/blog-qua
 import { taiwanDate } from "@/lib/blog-utils";
 import { mutateCmsData, nowIso, readCmsData } from "@/lib/cms";
 import { CmsLockError, withCmsStorageLock } from "@/lib/cms-storage";
-import type { BlogGenerationSlot } from "@/lib/types";
+import type { BlogGenerationSlot, BlogPost } from "@/lib/types";
 
 type CronSlot = Extract<BlogGenerationSlot, "morning" | "afternoon">;
 
@@ -52,6 +52,19 @@ function shouldAutoPublish() {
   return process.env.AUTO_PUBLISH_BLOG === "true";
 }
 
+function isSlotCronPost(post: BlogPost, date: string, slot: CronSlot) {
+  return post.generationDate === date && post.generationSlot === slot && post.generatedBy?.startsWith("cron:");
+}
+
+function isReplaceableAutoDraft(post: BlogPost) {
+  return (
+    post.status === "draft" &&
+    post.reviewStatus === "ai-draft" &&
+    !post.qualityChecks.hasHumanReview &&
+    !post.qualityChecks.hasQualityReviewerApproval
+  );
+}
+
 export async function runBlogDraftCron(request: Request, forcedSlot?: CronSlot) {
   const configuredSecret = process.env.CRON_SECRET;
   if (!configuredSecret) return unauthorized("CRON_SECRET is not configured");
@@ -66,14 +79,12 @@ export async function runBlogDraftCron(request: Request, forcedSlot?: CronSlot) 
     const result = await withCmsStorageLock(`blog-drafts-${slot}`, async () => {
       const date = taiwanDate();
       const data = await readCmsData();
-      const existingCount = data.blogPosts.filter(
-        (post) =>
-          post.generationDate === date &&
-          post.generationSlot === slot &&
-          post.generatedBy?.startsWith("cron:")
-      ).length;
+      const existingSlotPosts = data.blogPosts.filter((post) => isSlotCronPost(post, date, slot));
+      const existingCount = existingSlotPosts.length;
+      const canReplaceExistingAutoDrafts =
+        existingCount >= 2 && existingSlotPosts.every((post) => isReplaceableAutoDraft(post));
 
-      if (existingCount >= 2 && !dryRun) {
+      if (existingCount >= 2 && !dryRun && !canReplaceExistingAutoDrafts) {
         return {
           ok: true,
           skipped: true,
@@ -137,17 +148,19 @@ export async function runBlogDraftCron(request: Request, forcedSlot?: CronSlot) 
 
       let created = 0;
       let published = 0;
+      let replaced = 0;
       let publishMode: "draft-review" | "auto-published" | "quality-held" = "draft-review";
 
       await mutateCmsData((current) => {
-        const hasSlotPair = current.blogPosts.filter(
-          (post) =>
-            post.generationDate === date &&
-            post.generationSlot === slot &&
-            post.generatedBy?.startsWith("cron:")
-        ).length;
+        const currentSlotPosts = current.blogPosts.filter((post) => isSlotCronPost(post, date, slot));
+        const shouldReplace =
+          currentSlotPosts.length >= 2 && currentSlotPosts.every((post) => isReplaceableAutoDraft(post));
 
-        if (hasSlotPair >= 2) return;
+        if (currentSlotPosts.length >= 2 && !shouldReplace) return;
+        if (shouldReplace) {
+          current.blogPosts = current.blogPosts.filter((post) => !isSlotCronPost(post, date, slot));
+          replaced = currentSlotPosts.length;
+        }
 
         const posts = preparedPosts.map((post) => applyQualityReview(post, qualityReview, canPublish));
         current.blogPosts.unshift(...posts);
@@ -163,6 +176,7 @@ export async function runBlogDraftCron(request: Request, forcedSlot?: CronSlot) 
         generationSlot: slot,
         scheduledFor: scheduledFor(date, slot),
         created,
+        replaced,
         published,
         provider: generated.provider,
         warning: generated.warning,
