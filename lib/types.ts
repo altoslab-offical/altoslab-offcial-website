@@ -136,10 +136,13 @@ export type BlogSourceLink = {
 
 export type BlogQualityChecks = {
   hasHumanReview: boolean;
+  hasQualityReviewerApproval: boolean;
   hasVisibleSources: boolean;
   hasNoFabricatedClaims: boolean;
   hasSearchIntentAnswer: boolean;
   hasBilingualParity: boolean;
+  qualityScore?: number;
+  qualityIssues?: string[];
   notes?: string;
 };
 

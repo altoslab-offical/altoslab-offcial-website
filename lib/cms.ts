@@ -81,10 +81,13 @@ function hydrateBlogPost(post: BlogPost): BlogPost {
     reviewStatus: post.reviewStatus || (post.generatedBy ? "ai-draft" : "approved"),
     qualityChecks: defaultQualityChecks({
       hasHumanReview: Boolean(post.qualityChecks?.hasHumanReview ?? !post.generatedBy),
+      hasQualityReviewerApproval: Boolean(post.qualityChecks?.hasQualityReviewerApproval ?? false),
       hasVisibleSources: Boolean(post.qualityChecks?.hasVisibleSources ?? sourceLinks.length > 0),
       hasNoFabricatedClaims: Boolean(post.qualityChecks?.hasNoFabricatedClaims ?? !post.generatedBy),
       hasSearchIntentAnswer: Boolean(post.qualityChecks?.hasSearchIntentAnswer ?? post.geoSummary),
       hasBilingualParity: Boolean(post.qualityChecks?.hasBilingualParity ?? false),
+      qualityScore: post.qualityChecks?.qualityScore,
+      qualityIssues: post.qualityChecks?.qualityIssues,
       notes: post.qualityChecks?.notes
     }),
     aiDisclosure: post.aiDisclosure,
@@ -323,8 +326,12 @@ export function publishValidationForBlogPost(post: BlogPost) {
   if (!post.readTimeMinutes) errors.push("readTimeMinutes is required");
   if (!post.faqs.length) errors.push("at least one visible FAQ is required for GEO");
   if (post.generatedBy && !post.sourceLinks.length) errors.push("AI-generated posts require at least one source link");
-  if (post.generatedBy && !post.qualityChecks.hasHumanReview) {
-    errors.push("AI-generated posts require human review before publishing");
+  if (
+    post.generatedBy &&
+    !post.qualityChecks.hasHumanReview &&
+    !post.qualityChecks.hasQualityReviewerApproval
+  ) {
+    errors.push("AI-generated posts require human review or quality reviewer approval before publishing");
   }
   return errors;
 }

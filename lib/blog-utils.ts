@@ -45,6 +45,7 @@ export function estimateReadTimeMinutes(text: string, language: BlogLanguage = "
 export function defaultQualityChecks(patch?: Partial<BlogQualityChecks>): BlogQualityChecks {
   return {
     hasHumanReview: false,
+    hasQualityReviewerApproval: false,
     hasVisibleSources: false,
     hasNoFabricatedClaims: false,
     hasSearchIntentAnswer: false,

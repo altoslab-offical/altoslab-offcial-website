@@ -409,6 +409,7 @@ Source links 提供證據鏈，但文章仍然要加入 ALTOS LAB 的實作觀�
     reviewStatus: "ai-draft",
     qualityChecks: {
       hasHumanReview: false,
+      hasQualityReviewerApproval: false,
       hasVisibleSources: sources.length > 0,
       hasNoFabricatedClaims: false,
       hasSearchIntentAnswer: true,
@@ -464,6 +465,7 @@ function normalizeGeneratedPost({
     reviewStatus: "ai-draft",
     qualityChecks: {
       hasHumanReview: false,
+      hasQualityReviewerApproval: false,
       hasVisibleSources: sources.length > 0,
       hasNoFabricatedClaims: false,
       hasSearchIntentAnswer: Boolean(generated.geoSummary),

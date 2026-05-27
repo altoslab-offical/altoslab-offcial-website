@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { generateBlogDraftPair } from "@/lib/blog-generation";
+import { applyQualityReview, reviewBlogPairForAutoPublish } from "@/lib/blog-quality";
 import { taiwanDate } from "@/lib/blog-utils";
 import { mutateCmsData, nowIso, readCmsData } from "@/lib/cms";
 import { CmsLockError, withCmsStorageLock } from "@/lib/cms-storage";
@@ -47,6 +48,10 @@ function scheduledFor(date: string, slot: CronSlot) {
   return `${date}T${SLOT_CONFIG[slot].hour}:00+08:00`;
 }
 
+function shouldAutoPublish() {
+  return process.env.AUTO_PUBLISH_BLOG === "true";
+}
+
 export async function runBlogDraftCron(request: Request, forcedSlot?: CronSlot) {
   const configuredSecret = process.env.CRON_SECRET;
   if (!configuredSecret) return unauthorized("CRON_SECRET is not configured");
@@ -86,6 +91,10 @@ export async function runBlogDraftCron(request: Request, forcedSlot?: CronSlot) 
       });
 
       let created = 0;
+      let published = 0;
+      let publishMode: "draft-review" | "auto-published" | "quality-held" = "draft-review";
+      let qualityReview = reviewBlogPairForAutoPublish(generated.posts);
+
       await mutateCmsData((current) => {
         const hasSlotPair = current.blogPosts.filter(
           (post) =>
@@ -96,7 +105,7 @@ export async function runBlogDraftCron(request: Request, forcedSlot?: CronSlot) 
 
         if (hasSlotPair >= 2) return;
 
-        const posts = generated.posts.map((post) => ({
+        const preparedPosts = generated.posts.map((post) => ({
           ...post,
           status: "draft" as const,
           generationSlot: slot,
@@ -104,8 +113,14 @@ export async function runBlogDraftCron(request: Request, forcedSlot?: CronSlot) 
           generatedAt: post.generatedAt || nowIso(),
           generatedBy: `cron:${slot}:${post.generatedBy || generated.provider}`
         }));
+
+        qualityReview = reviewBlogPairForAutoPublish(preparedPosts);
+        const canPublish = shouldAutoPublish() && qualityReview.approved;
+        const posts = preparedPosts.map((post) => applyQualityReview(post, qualityReview, canPublish));
         current.blogPosts.unshift(...posts);
         created = posts.length;
+        published = posts.filter((post) => post.status === "published").length;
+        publishMode = canPublish ? "auto-published" : shouldAutoPublish() ? "quality-held" : "draft-review";
       });
 
       return {
@@ -115,11 +130,18 @@ export async function runBlogDraftCron(request: Request, forcedSlot?: CronSlot) 
         generationSlot: slot,
         scheduledFor: scheduledFor(date, slot),
         created,
+        published,
         provider: generated.provider,
         warning: generated.warning,
         sourceCount: generated.sources.length,
-        publishMode: "draft-review",
-        event: "ai_blog_draft_generated"
+        publishMode,
+        qualityReview: {
+          approved: qualityReview.approved,
+          score: qualityReview.score,
+          issues: qualityReview.issues,
+          warnings: qualityReview.warnings
+        },
+        event: published ? "blog_post_published" : "ai_blog_draft_generated"
       };
     });
 

@@ -716,6 +716,7 @@ export const seedData: CmsData = {
       reviewStatus: "approved",
       qualityChecks: {
         hasHumanReview: true,
+        hasQualityReviewerApproval: false,
         hasVisibleSources: true,
         hasNoFabricatedClaims: true,
         hasSearchIntentAnswer: true,
@@ -785,6 +786,7 @@ export const seedData: CmsData = {
       reviewStatus: "approved",
       qualityChecks: {
         hasHumanReview: true,
+        hasQualityReviewerApproval: false,
         hasVisibleSources: true,
         hasNoFabricatedClaims: true,
         hasSearchIntentAnswer: true,

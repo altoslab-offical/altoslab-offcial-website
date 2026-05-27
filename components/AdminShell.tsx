@@ -424,6 +424,7 @@ export function AdminShell({ initialTab = "dashboard" }: AdminShellProps) {
   }
 
   function publishReadiness(post: BlogPost) {
+    const hasReviewApproval = post.qualityChecks.hasHumanReview || post.qualityChecks.hasQualityReviewerApproval;
     return [
       { label: "有文章標題與 slug", ok: Boolean(post.title && post.slug) },
       { label: "有 SEO title / description", ok: Boolean(post.seoTitle && post.seoDescription) },
@@ -431,7 +432,7 @@ export function AdminShell({ initialTab = "dashboard" }: AdminShellProps) {
       { label: "有封面圖與 alt", ok: Boolean(post.cover && post.coverAlt) },
       { label: "有可見 FAQ", ok: post.faqs.length > 0 },
       { label: "AI 草稿有來源連結", ok: !post.generatedBy || post.sourceLinks.length > 0 },
-      { label: "人工已審稿", ok: !post.generatedBy || post.qualityChecks.hasHumanReview }
+      { label: "人工或品質審核已通過", ok: !post.generatedBy || hasReviewApproval }
     ];
   }
 
@@ -1173,6 +1174,7 @@ export function AdminShell({ initialTab = "dashboard" }: AdminShellProps) {
                         <div className="quality-check-grid">
                           {[
                             ["hasHumanReview", "人工已審稿"],
+                            ["hasQualityReviewerApproval", "品質審核通過"],
                             ["hasVisibleSources", "來源可見"],
                             ["hasNoFabricatedClaims", "無捏造宣稱"],
                             ["hasSearchIntentAnswer", "有回答搜尋意圖"],
@@ -1202,6 +1204,20 @@ export function AdminShell({ initialTab = "dashboard" }: AdminShellProps) {
                             onChange={(event) => updateQualityCheckField(selectedPost, "notes", event.target.value)}
                           />
                         </label>
+                        {typeof selectedPost.qualityChecks.qualityScore === "number" ? (
+                          <div className="quality-review-summary">
+                            <strong>品質分數 {selectedPost.qualityChecks.qualityScore}</strong>
+                            {selectedPost.qualityChecks.qualityIssues?.length ? (
+                              <ul>
+                                {selectedPost.qualityChecks.qualityIssues.map((issue) => (
+                                  <li key={issue}>{issue}</li>
+                                ))}
+                              </ul>
+                            ) : (
+                              <span>沒有阻擋發布的品質問題。</span>
+                            )}
+                          </div>
+                        ) : null}
                         <div className="publish-readiness">
                           {publishReadiness(selectedPost).map((item) => (
                             <span className={item.ok ? "ready" : "missing"} key={item.label}>

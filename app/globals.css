@@ -1655,6 +1655,26 @@ img {
   gap: 10px;
 }
 
+.quality-review-summary {
+  display: grid;
+  gap: 8px;
+  border: 1px solid rgba(200, 255, 0, 0.2);
+  border-radius: var(--al-radius);
+  padding: 12px;
+  background: rgba(200, 255, 0, 0.05);
+  color: var(--al-muted);
+  font-size: 13px;
+}
+
+.quality-review-summary strong {
+  color: var(--al-text);
+}
+
+.quality-review-summary ul {
+  margin: 0;
+  padding-left: 18px;
+}
+
 .publish-readiness {
   flex-wrap: wrap;
   gap: 8px;
