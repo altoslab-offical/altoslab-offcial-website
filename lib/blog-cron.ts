@@ -57,6 +57,8 @@ export async function runBlogDraftCron(request: Request, forcedSlot?: CronSlot) 
   if (!configuredSecret) return unauthorized("CRON_SECRET is not configured");
   if (requestSecret(request) !== configuredSecret) return unauthorized();
 
+  const url = new URL(request.url);
+  const dryRun = url.searchParams.get("dryRun") === "1";
   const slot = forcedSlot || inferSlot(request);
   const slotConfig = SLOT_CONFIG[slot];
 
@@ -71,7 +73,7 @@ export async function runBlogDraftCron(request: Request, forcedSlot?: CronSlot) 
           post.generatedBy?.startsWith("cron:")
       ).length;
 
-      if (existingCount >= 2) {
+      if (existingCount >= 2 && !dryRun) {
         return {
           ok: true,
           skipped: true,
@@ -90,10 +92,52 @@ export async function runBlogDraftCron(request: Request, forcedSlot?: CronSlot) 
         generationDate: date
       });
 
+      const preparedPosts = generated.posts.map((post) => ({
+        ...post,
+        status: "draft" as const,
+        generationSlot: slot,
+        scheduledFor: scheduledFor(date, slot),
+        generatedAt: post.generatedAt || nowIso(),
+        generatedBy: `cron:${slot}:${post.generatedBy || generated.provider}`
+      }));
+      const qualityReview = reviewBlogPairForAutoPublish(preparedPosts);
+      const canPublish = shouldAutoPublish() && qualityReview.approved;
+
+      if (dryRun) {
+        return {
+          ok: true,
+          dryRun: true,
+          skipped: false,
+          generationDate: date,
+          generationSlot: slot,
+          scheduledFor: scheduledFor(date, slot),
+          created: 0,
+          published: 0,
+          wouldPublish: canPublish,
+          provider: generated.provider,
+          warning: generated.warning,
+          sourceCount: generated.sources.length,
+          publishMode: canPublish ? "auto-published" : shouldAutoPublish() ? "quality-held" : "draft-review",
+          qualityReview: {
+            approved: qualityReview.approved,
+            score: qualityReview.score,
+            issues: qualityReview.issues,
+            warnings: qualityReview.warnings
+          },
+          posts: preparedPosts.map((post) => ({
+            title: post.title,
+            language: post.language,
+            slug: post.slug,
+            readTimeMinutes: post.readTimeMinutes,
+            sourceLinks: post.sourceLinks.length,
+            cover: post.cover
+          }))
+        };
+      }
+
       let created = 0;
       let published = 0;
       let publishMode: "draft-review" | "auto-published" | "quality-held" = "draft-review";
-      let qualityReview = reviewBlogPairForAutoPublish(generated.posts);
 
       await mutateCmsData((current) => {
         const hasSlotPair = current.blogPosts.filter(
@@ -105,17 +149,6 @@ export async function runBlogDraftCron(request: Request, forcedSlot?: CronSlot) 
 
         if (hasSlotPair >= 2) return;
 
-        const preparedPosts = generated.posts.map((post) => ({
-          ...post,
-          status: "draft" as const,
-          generationSlot: slot,
-          scheduledFor: scheduledFor(date, slot),
-          generatedAt: post.generatedAt || nowIso(),
-          generatedBy: `cron:${slot}:${post.generatedBy || generated.provider}`
-        }));
-
-        qualityReview = reviewBlogPairForAutoPublish(preparedPosts);
-        const canPublish = shouldAutoPublish() && qualityReview.approved;
         const posts = preparedPosts.map((post) => applyQualityReview(post, qualityReview, canPublish));
         current.blogPosts.unshift(...posts);
         created = posts.length;
