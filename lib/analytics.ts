@@ -23,6 +23,7 @@ export function gtmNoScriptSnippet() {
 export function homepageAnalyticsSnippet() {
   return `<script>
     window.dataLayer = window.dataLayer || [];
+    window.gtag = window.gtag || function(){ window.dataLayer.push(arguments); };
     window.altosTrack = function(event, payload) {
       var clean = Object.assign({ event: event }, payload || {});
       delete clean.email;
@@ -30,6 +31,9 @@ export function homepageAnalyticsSnippet() {
       delete clean.contact;
       delete clean.message;
       window.dataLayer.push(clean);
+      var gaPayload = Object.assign({}, clean);
+      delete gaPayload.event;
+      window.gtag("event", event, gaPayload);
     };
     document.addEventListener("click", function(event) {
       var link = event.target && event.target.closest ? event.target.closest("a[href]") : null;
