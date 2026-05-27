@@ -35,7 +35,7 @@ export async function GET() {
     <channel>
       <title>${escapeXml(siteName)} Blog</title>
       <link>${siteUrl}/blog</link>
-      <description>${escapeXml("AI Agent, SEO, GEO and automation insights from ALTOS LAB.")}</description>
+      <description>${escapeXml("AI products, agents, automation, SEO/GEO, case studies and market signals from ALTOS LAB.")}</description>
       <language>zh-TW</language>
       <lastBuildDate>${new Date().toUTCString()}</lastBuildDate>
       ${items}

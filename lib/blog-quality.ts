@@ -117,7 +117,7 @@ function reviewPost(post: BlogPost): PostReview {
   if (blocked.length) issues.push(`blocked placeholder or AI disclaimer phrase found: ${blocked.join(", ")}`);
   if (post.geoSummary.includes("...")) issues.push("geoSummary should not contain truncation ellipsis");
 
-  if (post.generatedBy?.includes("local-bilingual-geo-template")) {
+  if (post.generatedBy?.includes("local-bilingual-geo-template") || post.generatedBy?.includes("local-bilingual-lab-template")) {
     issues.push("local fallback template cannot auto-publish");
   }
   if (!post.generatedBy?.includes("deepseek")) {

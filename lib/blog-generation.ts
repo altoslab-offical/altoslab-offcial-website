@@ -303,27 +303,27 @@ function buildFallbackPost({
   sources: BlogSourceLink[];
   generationDate: string;
 }) {
-  const topic = input.topic?.trim() || "AI 搜尋與企業內容自動化";
-  const keyword = input.keyword?.trim() || (language === "en" ? "AI search visibility" : "AI 搜尋能見度");
+  const topic = input.topic?.trim() || "AI 產品、Agent 與企業自動化趨勢";
+  const keyword = input.keyword?.trim() || (language === "en" ? "AI implementation lab" : "AI 實驗室與企業導入");
   const audience =
     input.audience?.trim() ||
     (language === "en" ? "founders, operators and marketing teams" : "企業主、營運主管與行銷負責人");
   const title =
     language === "en"
-      ? `${keyword}: a practical playbook for AI-visible company content`
-      : `${keyword}實戰：企業如何用可信內容提升 AI 搜尋能見度`;
+      ? `${keyword}: turning AI trends into shippable systems`
+      : `${keyword}觀察：企業如何把 AI 趨勢變成可落地系統`;
   const body =
     language === "en"
       ? `## The short answer
-AI search visibility improves when a company publishes clear, source-backed, human-reviewed pages that answer real buying and implementation questions. The goal is not to flood the site with generic content, but to make expertise easier for search engines and AI answer systems to cite.
+ALTOS LAB should publish like an AI implementation lab, not like a single SEO tool. Strong articles should translate market signals into product, workflow, agent, automation and visibility decisions that a business can act on.
 
 ## What strong AI company blogs have in common
 The best AI blogs usually do three things well. First, they explain a timely shift in plain language instead of repeating a press release. Second, they connect the shift to a concrete operating decision: budget, workflow design, data readiness, customer experience, compliance or measurement. Third, they show an evidence trail through visible sources, examples and clear update dates.
 
-That pattern matters for SEO and GEO. Traditional search still needs crawlable text, clean metadata, internal links and structured data. Generative answer systems also look for passages that can be summarized, attributed and compared with other sources. A company article should therefore be written like a useful briefing, not like a keyword container.
+That pattern also matters for SEO and GEO. Traditional search still needs crawlable text, clean metadata, internal links and structured data. Generative answer systems also look for passages that can be summarized, attributed and compared with other sources. A company article should therefore be written like a useful lab briefing, not like a keyword container.
 
 ## Start from one decision your buyer needs to make
-Choose a question that matters before a prospect contacts ALTOS LAB: what process should be automated first, what data is needed, how risk is controlled, how a team should evaluate an AI agent, or how SEO and GEO work together. A useful article should help the reader make that decision with less uncertainty.
+Choose a question that matters before a prospect contacts ALTOS LAB: what product should be built first, what process should be automated, what data is needed, how risk is controlled, how a team should evaluate an AI agent, or how SEO and GEO support the go-to-market loop. A useful article should help the reader make that decision with less uncertainty.
 
 For a practical article, the opening should answer the search intent quickly. The middle should explain context, tradeoffs and implementation sequence. The end should give the reader a next step: audit a workflow, prepare source material, define review ownership, or talk to a specialist.
 
@@ -338,17 +338,17 @@ The safe workflow is: collect trend sources, generate a bilingual draft, attach 
 This cadence supports momentum without sacrificing quality. It gives the team a daily queue of usable ideas while protecting the site from thin, repetitive or unsupported AI content.
 
 ## Keep AI drafts in review
-Daily AI-assisted drafts are useful for momentum, but they should stay unpublished until a human adds brand context, removes unsupported claims, confirms source links, and checks bilingual parity. The operating goal is not simply to publish more. It is to build a searchable, citable knowledge base that makes ALTOS LAB easier to understand, compare and trust.`
+Daily AI-assisted drafts are useful for momentum, but they should stay unpublished until a human adds brand context, removes unsupported claims, confirms source links, and checks bilingual parity. The operating goal is not simply to publish more. It is to build a searchable, citable knowledge base that makes ALTOS LAB easier to understand as an AI lab, compare as an implementation partner and trust as a builder.`
       : `## 直接回答
-企業要提升 AI 搜尋能見度，重點不是大量灌水文章，而是持續發布清楚、有來源、經人工審稿、能回答真實採購與導入問題的內容。這些內容要讓搜尋引擎與 AI 回答系統都容易理解與引用。
+ALTOS LAB 的內容不應該像單一 SEO 工具頁，而要像 AI 實驗室的研究出版。好的文章要把市場訊號翻成企業能採取的產品、流程、Agent、自動化與搜尋能見度決策。
 
 ## 好的 AI 公司部落格通常怎麼寫
 市場上做得好的 AI 部落格，通常不是只轉貼新聞或堆熱門關鍵字，而是把一個趨勢翻成可執行的商業判斷。第一步是用白話說明發生了什麼變化。第二步是連到企業會在意的決策：預算、流程設計、資料準備、客戶體驗、風險控管或成效衡量。第三步是把來源、案例、更新日期與觀點放清楚，讓讀者和 AI 系統都能追溯這篇文章的可信度。
 
-這也是 SEO 和 GEO 的交會點。傳統搜尋需要可爬取的文字、清楚 metadata、內部連結與結構化資料。生成式搜尋則更需要能被摘要、引用、比較的段落。企業文章不應該只是關鍵字容器，而要像一份有證據的決策簡報。
+這也會反過來支援 SEO 和 GEO。傳統搜尋需要可爬取的文字、清楚 metadata、內部連結與結構化資料。生成式搜尋則更需要能被摘要、引用、比較的段落。企業文章不應該只是關鍵字容器，而要像一份有證據的實驗室決策簡報。
 
 ## 從客戶真正要做的決策開始
-先選一個潛在客戶會問的問題：第一個該自動化的流程是什麼、需要哪些資料、如何控管風險、該怎麼評估 AI Agent、SEO 和 GEO 怎麼搭配。好文章要幫讀者降低不確定性，而不是只把資訊堆滿。
+先選一個潛在客戶會問的問題：第一個該做的 AI 產品是什麼、第一個該自動化的流程是什麼、需要哪些資料、如何控管風險、該怎麼評估 AI Agent、SEO 和 GEO 如何支援商業成長。好文章要幫讀者降低不確定性，而不是只把資訊堆滿。
 
 實務上，開頭要快速回答搜尋意圖；中段說明背景、取捨和導入順序；結尾給讀者下一步，例如盤點流程、準備知識來源、定義審稿負責人，或和專業團隊討論。
 
@@ -363,19 +363,19 @@ Source links 提供證據鏈，但文章仍然要加入 ALTOS LAB 的實作觀�
 這樣可以保留每日內容節奏，也避免網站累積薄內容、重複內容或沒有證據的 AI 文章。
 
 ## AI 草稿要留在審稿流程
-每日 AI 草稿可以提高內容節奏，但不應直接發布。人工需要補品牌脈絡、移除無根據宣稱、確認來源連結，並檢查中英文內容對齊。真正的目標不是單純發更多文章，而是建立一個可搜尋、可引用、能讓 ALTOS LAB 更容易被理解與信任的知識庫。`;
+每日 AI 草稿可以提高內容節奏，但不應直接發布。人工需要補品牌脈絡、移除無根據宣稱、確認來源連結，並檢查中英文內容對齊。真正的目標不是單純發更多文章，而是建立一個可搜尋、可引用、能讓 ALTOS LAB 作為 AI 實驗室更容易被理解、比較與信任的知識庫。`;
   const keyTakeaways =
     language === "en"
       ? [
-          "AI-visible content should answer a real decision, not only target a keyword.",
+          "ALTOS LAB content should answer a real implementation decision, not only target a keyword.",
           "Source links and visible summaries help SEO and GEO systems understand trust signals.",
-          "Strong company blogs connect AI trends to operating decisions, tradeoffs and next steps.",
+          "Strong lab journals connect AI trends to products, agents, workflows, tradeoffs and next steps.",
           "AI-assisted drafts should remain drafts until human review approves accuracy and brand fit."
         ]
       : [
-          "GEO 內容要回答真實決策，不只是塞關鍵字。",
+          "ALTOS LAB 內容要回答真實導入決策，不只是塞關鍵字。",
           "可見來源與摘要能幫助搜尋與 AI 系統理解可信度。",
-          "好的企業部落格會把 AI 趨勢翻成營運決策、取捨與下一步。",
+          "好的實驗室筆記會把 AI 趨勢翻成產品、Agent、流程、取捨與下一步。",
           "AI 產生內容應先保持草稿，通過人工審稿後再發布。"
         ];
   const faqs =
@@ -387,9 +387,9 @@ Source links 提供證據鏈，但文章仍然要加入 ALTOS LAB 的實作觀�
               "No. They should remain drafts until a human reviews sources, accuracy, brand perspective and unsupported claims."
           },
           {
-            question: "How does GEO relate to SEO?",
+            question: "How does GEO fit inside a broader AI lab journal?",
             answer:
-              "GEO builds on SEO foundations: crawlable pages, clear headings, structured data, source-backed content and useful answers."
+              "GEO is one visibility lane. The broader journal should also cover AI products, agents, automation, case studies and operational decisions."
           },
           {
             question: "What should a reviewer check before publishing?",
@@ -408,8 +408,8 @@ Source links 提供證據鏈，但文章仍然要加入 ALTOS LAB 的實作觀�
             answer: "不建議。AI 草稿應先由人工檢查來源、正確性、品牌觀點與是否有無根據宣稱。"
           },
           {
-            question: "GEO 和 SEO 是分開的嗎？",
-            answer: "GEO 建立在 SEO 基礎上：可爬取頁面、清楚標題、結構化資料、有來源的內容與有用答案。"
+            question: "GEO 在 ALTOS LAB 部落格裡扮演什麼角色？",
+            answer: "GEO 是搜尋能見度的一條內容線，但部落格同時應該涵蓋 AI 產品、Agent、自動化、案例與營運決策。"
           },
           {
             question: "發布前審稿要檢查什麼？",
@@ -427,26 +427,26 @@ Source links 提供證據鏈，但文章仍然要加入 ALTOS LAB 的實作觀�
     status: "draft",
     language,
     translationGroupId,
-    seoTitle: language === "en" ? `${keyword} for AI Search Visibility | ALTOS LAB` : `${keyword}與 AI 搜尋能見度指南｜ALTOS LAB`,
+    seoTitle: language === "en" ? `${keyword} and AI Implementation | ALTOS LAB` : `${keyword}與 AI 企業導入指南｜ALTOS LAB`,
     seoDescription:
       language === "en"
-        ? `A source-backed ALTOS LAB draft on ${keyword}, SEO, GEO and human-reviewed AI content operations.`
-        : `ALTOS LAB 針對${keyword}、SEO、GEO 與 AI 草稿審稿流程的來源化內容指南。`,
+        ? `A source-backed ALTOS LAB draft on ${keyword}, AI products, agents, automation and search visibility.`
+        : `ALTOS LAB 針對${keyword}、AI 產品、Agent、自動化與搜尋能見度的來源化內容指南。`,
     excerpt:
       language === "en"
-        ? "A practical, source-backed draft on turning AI trend monitoring into reviewable company blog content."
-        : "這篇草稿說明如何把 AI 趨勢監測轉成可審稿、可索引、可被 AI 搜尋理解的企業內容。",
+        ? "A practical, source-backed draft on turning AI trend monitoring into shippable product, workflow and visibility decisions."
+        : "這篇草稿說明如何把 AI 趨勢監測轉成可審稿、可索引，也能支援產品與流程導入的實驗室內容。",
     topic,
     audience,
     geoSummary:
       language === "en"
-        ? "AI search visibility comes from crawlable, source-backed, human-reviewed content that answers real implementation and buying questions."
-        : "AI 搜尋能見度來自可爬取、有來源、經人工審稿，並能回答真實導入與採購問題的內容。",
+        ? "AI visibility improves when a lab publishes crawlable, source-backed, human-reviewed content about real product, workflow and buying decisions."
+        : "AI 能見度來自實驗室持續發布可爬取、有來源、經人工審稿，並回答真實產品、流程與採購決策的內容。",
     body,
     keyTakeaways,
     faqs,
     sourceLinks: sources,
-    tags: language === "en" ? ["AI search", "GEO", "SEO", "AI content"] : ["AI 搜尋", "GEO", "SEO", "AI 內容"],
+    tags: language === "en" ? ["AI products", "AI agents", "Automation", "GEO"] : ["AI 產品", "AI Agent", "自動化", "GEO"],
     author: "ALTOS LAB",
     cover: chooseBlogCover(input, language),
     coverAlt: chooseBlogCoverAlt(input, language),
@@ -469,7 +469,7 @@ Source links 提供證據鏈，但文章仍然要加入 ALTOS LAB 的實作觀�
     generationDate,
     generationSlot: input.slot,
     generatedAt: nowIso(),
-    generatedBy: "local-bilingual-geo-template"
+    generatedBy: "local-bilingual-lab-template"
   });
 }
 
@@ -499,10 +499,10 @@ function normalizeGeneratedPost({
     generated.title,
     generated.excerpt,
     generated.geoSummary,
-    language === "en" ? input.intent : "協助經營者判斷 AI 趨勢、搜尋能見度與企業導入下一步",
+    language === "en" ? input.intent : "協助經營者判斷 AI 趨勢、產品機會、自動化流程、搜尋能見度與企業導入下一步",
     language === "en"
-      ? "ALTOS LAB explains the SEO, GEO and implementation decisions operators should make next."
-      : "ALTOS LAB 說明企業如何判讀 AI 趨勢，並轉成 SEO、GEO 與實際導入決策。"
+      ? "ALTOS LAB explains the product, agent, automation, SEO, GEO and implementation decisions operators should make next."
+      : "ALTOS LAB 說明企業如何判讀 AI 趨勢，並轉成產品、Agent、自動化、SEO、GEO 與實際導入決策。"
   ].filter(Boolean).join(" ");
   const seoDescription = fitSeoDescription(
     generated.seoDescription,
@@ -513,7 +513,7 @@ function normalizeGeneratedPost({
     [
       generated.title,
       generated.geoSummary,
-      language === "en" ? input.intent : "協助經營者判斷 AI 趨勢、搜尋能見度與企業導入下一步",
+      language === "en" ? input.intent : "協助經營者判斷 AI 趨勢、產品機會、自動化流程、搜尋能見度與企業導入下一步",
       language === "en"
         ? "A source-backed ALTOS LAB briefing for operators evaluating AI implementation."
         : "這是 ALTOS LAB 給企業營運者的來源化 AI 導入判斷摘要。"
@@ -523,7 +523,7 @@ function normalizeGeneratedPost({
   );
   const geoSummary = fitSummaryField(
     generated.geoSummary,
-    [excerpt, language === "en" ? input.intent : "協助經營者判斷 AI 趨勢、搜尋能見度與企業導入下一步"].filter(Boolean).join(" "),
+    [excerpt, language === "en" ? input.intent : "協助經營者判斷 AI 趨勢、產品機會、自動化流程、搜尋能見度與企業導入下一步"].filter(Boolean).join(" "),
     90,
     260
   );
@@ -538,7 +538,7 @@ function normalizeGeneratedPost({
     excerpt,
     geoSummary,
     sourceLinks: sources.length ? sources : normalizeSourceLinks(generated.sourceLinks || []),
-    tags: generated.tags?.length ? generated.tags : language === "en" ? ["AI", "GEO", "SEO"] : ["AI", "GEO", "SEO"],
+    tags: generated.tags?.length ? generated.tags : language === "en" ? ["AI products", "AI agents", "Automation", "GEO"] : ["AI 產品", "AI Agent", "自動化", "GEO"],
     author: generated.author || "ALTOS LAB",
     cover: generated.cover?.startsWith("/") ? generated.cover : chooseBlogCover(input, language),
     coverAlt: generated.coverAlt || chooseBlogCoverAlt(input, language),
@@ -679,14 +679,14 @@ Format repair instruction:
         : "Write in natural business English.";
     const languageLabel = language === "zh-Hant" ? "zh-Hant" : "en";
 
-    return `You are writing one ${languageLabel} company-blog draft for ALTOS LAB, an AI implementation studio.
+    return `You are writing one ${languageLabel} company-blog draft for ALTOS LAB, an AI implementation lab and product studio.
 
 This is one side of a bilingual article pair. Use the same angle, claims and source-backed reasoning as the paired language version will use.
 
 Topic: ${topic}
 Primary keyword: ${input.keyword || topic}
 Audience: ${input.audience || "business owners, operators, marketing teams and AI implementation buyers"}
-Search intent: ${input.intent || "understand the trend and evaluate practical AI implementation steps"}
+Search intent: ${input.intent || "understand the trend and evaluate practical AI product, agent, automation and implementation steps"}
 Sources:
 ${sourceBrief}
 
@@ -711,6 +711,8 @@ Use this exact shape and fill every string field:
 
 Quality rules:
 - Write for people first. No keyword stuffing.
+- Position ALTOS LAB as an AI lab that researches, builds and publishes across AI products, agents, workflow automation, AI operations, case studies and search visibility.
+- SEO/GEO is one visibility lane, not the whole brand. Do not frame ALTOS LAB as only an SEO/GEO product.
 - Do not invent client names, statistics, dates or source claims.
 - Any claim tied to a trend must be supported by sourceLinks.
 - The first 50 words must directly answer the search intent.

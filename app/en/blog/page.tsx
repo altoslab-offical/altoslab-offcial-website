@@ -5,8 +5,8 @@ import { siteUrl } from "@/lib/seo";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "AI Implementation and GEO Blog",
-  description: "ALTOS LAB articles on AI agents, automation, SEO and generative search visibility.",
+  title: "AI Lab Notes | ALTOS LAB Journal",
+  description: "ALTOS LAB journal on AI products, agents, automation, SEO/GEO, case studies and market signals.",
   alternates: {
     canonical: `${siteUrl}/en/blog`,
     languages: {
@@ -16,8 +16,8 @@ export const metadata: Metadata = {
     }
   },
   openGraph: {
-    title: "AI Implementation and GEO Blog",
-    description: "Practical AI implementation, SEO and GEO articles from ALTOS LAB.",
+    title: "AI Lab Notes | ALTOS LAB Journal",
+    description: "ALTOS LAB journal on AI products, agents, automation, SEO/GEO, case studies and market signals.",
     url: `${siteUrl}/en/blog`,
     siteName: "ALTOS LAB",
     locale: "en_US",
@@ -26,8 +26,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "AI Implementation and GEO Blog",
-    description: "Practical AI implementation, SEO and GEO articles from ALTOS LAB.",
+    title: "AI Lab Notes | ALTOS LAB Journal",
+    description: "ALTOS LAB journal on AI products, agents, automation, SEO/GEO, case studies and market signals.",
     images: [`${siteUrl}/geo-cover.png`]
   }
 };
