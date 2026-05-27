@@ -44,6 +44,7 @@ DEEPSEEK_API_KEY=<required-for-ai-blog-generation>
 DEEPSEEK_BASE_URL=https://api.deepseek.com
 DEEPSEEK_CONTENT_MODEL=deepseek-v4-pro
 DEEPSEEK_MAX_TOKENS=7600
+DEEPSEEK_TIMEOUT_MS=90000
 BLOG_TREND_SOURCES=https://openai.com/news/rss.xml,https://blog.google/innovation-and-ai/technology/ai/rss/,https://deepmind.google/blog/rss.xml,https://huggingface.co/blog/feed.xml,https://feeds.feedburner.com/blogspot/amDG,https://vercel.com/blog/rss.xml
 CRON_SECRET=<long-random-cron-secret>
 AUTO_PUBLISH_BLOG=true
@@ -61,6 +62,7 @@ Notes:
 - Vercel Cron runs twice daily: `0 1 * * *` UTC = 09:00 Asia/Taipei, and `0 7 * * *` UTC = 15:00 Asia/Taipei. Each slot creates one bilingual zh/en article pair, publishes only if the quality gate passes, and is idempotent by `generationDate + generationSlot`.
 - `DEEPSEEK_CONTENT_MODEL=deepseek-v4-pro` is the recommended default when article quality is the priority. `deepseek-v4-flash` can be used for faster lower-cost drafting, but production auto-publishing should keep the quality gate enabled either way.
 - `DEEPSEEK_MAX_TOKENS=7600` gives the model enough room to return valid JSON and complete 4-6 section bilingual-quality drafts. The generator retries once with a stricter format-repair prompt if JSON validation fails.
+- `DEEPSEEK_TIMEOUT_MS=90000` gives `deepseek-v4-pro` enough time to return complete article JSON. If cron reliability becomes more important than model depth, switch the model back to `deepseek-v4-flash` and keep the same quality gate.
 - `BLOG_TREND_SOURCES` should contain only live RSS/Atom feeds. The generator samples across feeds in round-robin order so a daily draft can reference multiple AI/search sources instead of overfitting to the first feed.
 - Search verification env vars are optional until the matching Search Console/Webmaster account provides the token. Once set and redeployed, the homepage and App Router pages emit the required verification meta tags.
 
