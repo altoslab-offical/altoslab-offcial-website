@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Send } from "lucide-react";
+import { sendGTMEvent } from "@next/third-parties/google";
 
 type ContactFormLabels = {
   who?: string;
@@ -37,6 +38,7 @@ export function ContactForm({ labels = {} }: { labels?: ContactFormLabels }) {
 
     setStatus("sent");
     setMessage("已收到需求，我們會盡快回覆。");
+    sendGTMEvent({ event: "lead_created", page_path: window.location.pathname });
   }
 
   return (
