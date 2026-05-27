@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { sendGTMEvent } from "@next/third-parties/google";
+import { sendAnalyticsEvent } from "@/components/AnalyticsEvents";
 import {
   CalendarClock,
   CheckCircle2,
@@ -87,7 +87,7 @@ function makeSlug(input: string) {
 }
 
 function trackAdminBlogEvent(event: "blog_post_published" | "ai_blog_draft_generated", payload: Record<string, unknown>) {
-  sendGTMEvent({
+  sendAnalyticsEvent({
     event,
     admin_surface: "blog",
     ...payload
