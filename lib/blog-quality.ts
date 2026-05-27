@@ -41,6 +41,7 @@ const blockedPhrases = [
   "undefined",
   "as an ai language model",
   "i cannot browse",
+  "quickly understand the latest",
   "我無法瀏覽",
   "作為一個 ai"
 ];
@@ -111,9 +112,10 @@ function reviewPost(post: BlogPost): PostReview {
   if (post.sourceLinks.some((source) => !source.title?.trim())) issues.push("all source links need visible titles");
   if (post.sourceLinks.some((source) => !source.publisher?.trim())) warnings.push("some source links are missing publisher labels");
 
-  const lower = `${post.title}\n${post.excerpt}\n${post.body}`.toLowerCase();
+  const lower = `${post.title}\n${post.excerpt}\n${post.geoSummary}\n${post.body}`.toLowerCase();
   const blocked = blockedPhrases.filter((phrase) => lower.includes(phrase));
   if (blocked.length) issues.push(`blocked placeholder or AI disclaimer phrase found: ${blocked.join(", ")}`);
+  if (post.geoSummary.includes("...")) issues.push("geoSummary should not contain truncation ellipsis");
 
   if (post.generatedBy?.includes("local-bilingual-geo-template")) {
     issues.push("local fallback template cannot auto-publish");
@@ -221,6 +223,11 @@ export function applyQualityReview(post: BlogPost, review: BlogPairQualityReview
       qualityIssues,
       notes: review.notes
     }),
+    aiDisclosure: publish
+      ? post.language === "en"
+        ? "AI-assisted article reviewed by ALTOS LAB's automated quality gate before publication."
+        : "本文章由 AI 協助產生，發布前已通過 ALTOS LAB 自動品質審核與來源檢查。"
+      : post.aiDisclosure,
     publishedAt: publish ? post.publishedAt || now : post.publishedAt,
     updatedAt: now
   };

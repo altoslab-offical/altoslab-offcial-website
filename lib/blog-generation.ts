@@ -276,8 +276,12 @@ function fitSummaryField(value = "", fallback = "", minLength: number, maxLength
   const source = text.length >= minLength ? text : singleLine([text, backup].filter(Boolean).join(" ")) || text;
   if (source.length <= maxLength) return source;
 
-  const clipped = source.slice(0, maxLength - 3).replace(/\s+\S*$/, "").trim();
-  return `${clipped || source.slice(0, maxLength - 3).trim()}...`;
+  const clipped = source
+    .slice(0, maxLength)
+    .replace(/[，,。.;；:：]\s*[^，,。.;；:：]*$/, "")
+    .replace(/\s+\S*$/, "")
+    .trim();
+  return clipped || source.slice(0, maxLength).trim();
 }
 
 function deepSeekMaxTokens() {
@@ -495,7 +499,7 @@ function normalizeGeneratedPost({
     generated.title,
     generated.excerpt,
     generated.geoSummary,
-    input.intent,
+    language === "en" ? input.intent : "協助經營者判斷 AI 趨勢、搜尋能見度與企業導入下一步",
     language === "en"
       ? "ALTOS LAB explains the SEO, GEO and implementation decisions operators should make next."
       : "ALTOS LAB 說明企業如何判讀 AI 趨勢，並轉成 SEO、GEO 與實際導入決策。"
@@ -509,7 +513,7 @@ function normalizeGeneratedPost({
     [
       generated.title,
       generated.geoSummary,
-      input.intent,
+      language === "en" ? input.intent : "協助經營者判斷 AI 趨勢、搜尋能見度與企業導入下一步",
       language === "en"
         ? "A source-backed ALTOS LAB briefing for operators evaluating AI implementation."
         : "這是 ALTOS LAB 給企業營運者的來源化 AI 導入判斷摘要。"
@@ -519,7 +523,7 @@ function normalizeGeneratedPost({
   );
   const geoSummary = fitSummaryField(
     generated.geoSummary,
-    [excerpt, input.intent].filter(Boolean).join(" "),
+    [excerpt, language === "en" ? input.intent : "協助經營者判斷 AI 趨勢、搜尋能見度與企業導入下一步"].filter(Boolean).join(" "),
     90,
     260
   );
