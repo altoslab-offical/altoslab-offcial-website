@@ -1,7 +1,7 @@
 import { promises as fs } from "fs";
 import { createCipheriv, createDecipheriv, createHash, randomBytes } from "crypto";
 import path from "path";
-import { del, get, list, put } from "@vercel/blob";
+import { del, get, put } from "@vercel/blob";
 import { seedData } from "./seed";
 import type { CmsData } from "./types";
 
@@ -212,21 +212,6 @@ function parseCmsBlobText(text: string): CmsData {
 }
 
 async function readBlobText(config: BlobConfig, pathname: string) {
-  if (config.access === "public") {
-    const result = await list({ prefix: pathname, limit: 10 });
-    const blob = result.blobs.find((item) => item.pathname === pathname);
-    if (!blob) return null;
-
-    const response = await fetch(blob.url, { cache: "no-store" });
-    if (response.status === 404) return null;
-    if (!response.ok) throw new Error("Failed to fetch blob: " + response.status + " " + response.statusText);
-
-    return {
-      etag: blob.etag || response.headers.get("etag") || "",
-      text: await response.text()
-    };
-  }
-
   try {
     const result = await get(pathname, { access: config.access, useCache: false });
     if (!result || result.statusCode !== 200 || !result.stream) return null;
