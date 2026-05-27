@@ -59,7 +59,7 @@ Notes:
 - Without Vercel Blob or Upstash env vars, production can still render seed content, but admin edits and contact leads will not persist.
 - `AUTO_PUBLISH_BLOG=true` allows cron-generated posts to publish automatically only after the deterministic quality reviewer approves the bilingual pair. Fallback template output, malformed model output, thin content, missing sources, missing images, invalid HTTPS links or failed bilingual pairing stay draft/needs-revision.
 - `CRON_SECRET` protects `/api/cron/blog-drafts`, `/api/cron/blog-drafts/morning` and `/api/cron/blog-drafts/afternoon`.
-- Vercel Cron runs twice daily: `0 1 * * *` UTC = 09:00 Asia/Taipei, and `0 7 * * *` UTC = 15:00 Asia/Taipei. Each slot creates one bilingual zh/en article pair, publishes only if the quality gate passes, and is idempotent by `generationDate + generationSlot`.
+- Vercel Cron runs once daily: `0 1 * * *` UTC = 09:00 Asia/Taipei. The scheduled job creates one bilingual zh/en article pair, publishes only if the quality gate passes, and is idempotent by `generationDate + generationSlot`. The afternoon endpoint remains available for authenticated manual QA, but it is not scheduled.
 - `DEEPSEEK_CONTENT_MODEL=deepseek-v4-pro` is the recommended default when article quality is the priority. `deepseek-v4-flash` can be used for faster lower-cost drafting, but production auto-publishing should keep the quality gate enabled either way.
 - `DEEPSEEK_MAX_TOKENS=7600` gives the model enough room to return valid JSON and complete 4-6 section bilingual-quality drafts. The generator retries once with a stricter format-repair prompt if JSON validation fails.
 - `DEEPSEEK_TIMEOUT_MS=90000` gives `deepseek-v4-pro` enough time to return complete article JSON. If cron reliability becomes more important than model depth, switch the model back to `deepseek-v4-flash` and keep the same quality gate.
@@ -110,7 +110,7 @@ Expected results:
 - `/llms.txt` returns a concise LLM-readable site map.
 - `/llms-full.txt` returns expanded answer-engine context for services, projects and published articles.
 - `/api/*` and `/admin/*` return `X-Robots-Tag: noindex, nofollow, noarchive`.
-- `/api/cron/blog-drafts` returns 401 without `CRON_SECRET`; `/api/cron/blog-drafts/morning` and `/api/cron/blog-drafts/afternoon` create one zh/en pair per slot, publish only when `qualityReview.approved=true`, and reruns for the same Taiwan date + slot skip.
+- `/api/cron/blog-drafts` returns 401 without `CRON_SECRET`; `/api/cron/blog-drafts/morning` creates the scheduled zh/en pair, publishes only when `qualityReview.approved=true`, and reruns for the same Taiwan date + slot skip. `/api/cron/blog-drafts/afternoon` is available for authenticated manual QA.
 - Authenticated dry-run checks are available with `?dryRun=1`. Dry-run runs source collection, DeepSeek generation and quality review, but does not write to CMS or publish.
 
 ## SEO / GEO Release Checks
