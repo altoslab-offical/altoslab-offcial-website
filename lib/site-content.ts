@@ -4,6 +4,7 @@ export const homeNavigation = [
   { label: "關於我們", href: "#about" },
   { label: "服務項目", href: "#services" },
   { label: "專案介紹", href: "#portfolio" },
+  { label: "部落格", href: "/blog" },
   { label: "合作洽談", href: "#contact" }
 ];
 

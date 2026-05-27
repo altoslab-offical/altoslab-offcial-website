@@ -104,7 +104,7 @@ export async function BlogIndex({ language, tag, query }: BlogIndexProps) {
         <article className="blog-featured">
           {featured.cover ? (
             <Link className="blog-featured-image" href={blogPostPath(featured)}>
-              <img src={featured.cover} alt={`${featured.title} cover`} loading="eager" />
+              <img src={featured.cover} alt={featured.coverAlt || `${featured.title} cover`} loading="eager" />
             </Link>
           ) : null}
           <div className="blog-featured-body">
@@ -133,7 +133,7 @@ export async function BlogIndex({ language, tag, query }: BlogIndexProps) {
           <article className="blog-card" key={post.id}>
             {post.cover ? (
               <Link className="blog-image" href={blogPostPath(post)}>
-                <img src={post.cover} alt={`${post.title} cover`} loading="lazy" />
+                <img src={post.cover} alt={post.coverAlt || `${post.title} cover`} loading="lazy" />
               </Link>
             ) : null}
             <div className="blog-body">

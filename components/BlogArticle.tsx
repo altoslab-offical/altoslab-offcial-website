@@ -80,7 +80,9 @@ export async function BlogArticle({ post }: { post: BlogPost }) {
             <span>{languageLabel(post.language)}</span>
           </div>
           <p className="hero-copy">{post.excerpt}</p>
-          {post.cover ? <img className="article-cover" src={post.cover} alt={`${post.title} cover`} /> : null}
+          {post.cover ? (
+            <img className="article-cover" src={post.cover} alt={post.coverAlt || `${post.title} cover`} />
+          ) : null}
         </header>
 
         <aside className="geo-summary">

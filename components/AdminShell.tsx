@@ -4,21 +4,45 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { sendGTMEvent } from "@next/third-parties/google";
 import {
+  CalendarClock,
+  CheckCircle2,
+  Clock3,
+  Eye,
   FileText,
   Gauge,
+  ImageIcon,
   Languages,
   LayoutDashboard,
+  Link2,
+  ListChecks,
   LogOut,
   Newspaper,
+  PenLine,
   Plus,
   Save,
+  Search,
+  ShieldCheck,
   Sparkles,
   Users
 } from "lucide-react";
 import { blogPostPath, languageLabel } from "@/lib/blog-utils";
-import type { BlogPost, CmsData, ContactLeadStatus, Project, SitePage } from "@/lib/types";
+import type {
+  BlogGenerationSlot,
+  BlogLanguage,
+  BlogPost,
+  BlogReviewStatus,
+  CmsData,
+  ContactLeadStatus,
+  Project,
+  PublishStatus,
+  SitePage
+} from "@/lib/types";
 
 type Tab = "dashboard" | "pages" | "projects" | "blog" | "leads";
+type BlogEditorTab = "content" | "seo" | "sources" | "publish";
+type BlogFilterLanguage = "all" | BlogLanguage;
+type BlogFilterStatus = "all" | PublishStatus;
+type BlogFilterReview = "all" | BlogReviewStatus;
 
 type AdminShellProps = {
   initialTab?: Tab;
@@ -30,6 +54,26 @@ const emptyData: CmsData = {
   blogPosts: [],
   contactLeads: [],
   assets: []
+};
+
+const statusLabels: Record<PublishStatus, string> = {
+  draft: "草稿",
+  published: "已發布",
+  archived: "封存",
+  deleted: "已刪除"
+};
+
+const reviewLabels: Record<BlogReviewStatus, string> = {
+  "ai-draft": "AI 草稿",
+  "human-review": "人工審稿",
+  approved: "已核准",
+  "needs-revision": "需修改"
+};
+
+const slotLabels: Record<BlogGenerationSlot, string> = {
+  manual: "手動",
+  morning: "早上 09:00",
+  afternoon: "下午 15:00"
 };
 
 function makeSlug(input: string) {
@@ -119,6 +163,18 @@ export function AdminShell({ initialTab = "dashboard" }: AdminShellProps) {
     audience: "台灣中小企業主與營運主管",
     intent: "評估是否需要導入 AI 自動化"
   });
+  const [blogFilters, setBlogFilters] = useState<{
+    language: BlogFilterLanguage;
+    status: BlogFilterStatus;
+    review: BlogFilterReview;
+    query: string;
+  }>({
+    language: "all",
+    status: "all",
+    review: "all",
+    query: ""
+  });
+  const [blogEditorTab, setBlogEditorTab] = useState<BlogEditorTab>("content");
 
   async function refresh() {
     setLoading(true);
@@ -159,6 +215,41 @@ export function AdminShell({ initialTab = "dashboard" }: AdminShellProps) {
     }),
     [data]
   );
+
+  const blogStats = useMemo(
+    () => ({
+      total: data.blogPosts.length,
+      published: data.blogPosts.filter((post) => post.status === "published").length,
+      drafts: data.blogPosts.filter((post) => post.status === "draft").length,
+      zh: data.blogPosts.filter((post) => post.language === "zh-Hant").length,
+      en: data.blogPosts.filter((post) => post.language === "en").length,
+      needsReview: data.blogPosts.filter(
+        (post) => post.reviewStatus === "ai-draft" || post.reviewStatus === "needs-revision"
+      ).length
+    }),
+    [data.blogPosts]
+  );
+
+  const filteredBlogPosts = useMemo(() => {
+    const query = blogFilters.query.trim().toLowerCase();
+    return [...data.blogPosts]
+      .filter((post) => {
+        const matchesLanguage = blogFilters.language === "all" || post.language === blogFilters.language;
+        const matchesStatus = blogFilters.status === "all" || post.status === blogFilters.status;
+        const matchesReview = blogFilters.review === "all" || post.reviewStatus === blogFilters.review;
+        const matchesQuery = query
+          ? [post.title, post.slug, post.topic, post.excerpt, post.tags.join(" ")]
+              .join(" ")
+              .toLowerCase()
+              .includes(query)
+          : true;
+        return matchesLanguage && matchesStatus && matchesReview && matchesQuery;
+      })
+      .sort(
+        (a, b) =>
+          new Date(b.updatedAt || b.createdAt).getTime() - new Date(a.updatedAt || a.createdAt).getTime()
+      );
+  }, [blogFilters, data.blogPosts]);
 
   function updatePage(id: string, patch: Partial<SitePage>) {
     setData((current) => ({
@@ -235,7 +326,15 @@ export function AdminShell({ initialTab = "dashboard" }: AdminShellProps) {
   async function createPost(input?: Partial<BlogPost>) {
     const payload = await api<{ post: BlogPost }>("/api/admin/blog", {
       method: "POST",
-      body: JSON.stringify(input || { title: "New AI Blog Post", status: "draft" })
+      body: JSON.stringify(
+        input || {
+          title: "未命名 AI 文章",
+          status: "draft",
+          language: "zh-Hant",
+          cover: "/geo-cover.png",
+          coverAlt: "ALTOS LAB AI 文章主視覺"
+        }
+      )
     });
     setData((current) => ({ ...current, blogPosts: [payload.post, ...current.blogPosts] }));
     setSelectedPostId(payload.post.id);
@@ -300,7 +399,7 @@ export function AdminShell({ initialTab = "dashboard" }: AdminShellProps) {
   }
 
   function statusSummary(post: BlogPost) {
-    return `${post.status} · ${languageLabel(post.language)} · ${post.reviewStatus}`;
+    return `${statusLabels[post.status]} · ${languageLabel(post.language)} · ${reviewLabels[post.reviewStatus]}`;
   }
 
   function updateSourceLinks(post: BlogPost, value: unknown) {
@@ -309,6 +408,31 @@ export function AdminShell({ initialTab = "dashboard" }: AdminShellProps) {
 
   function updateQualityChecks(post: BlogPost, value: unknown) {
     updatePost(post.id, { qualityChecks: value as BlogPost["qualityChecks"] });
+  }
+
+  function updateQualityCheckField<K extends keyof BlogPost["qualityChecks"]>(
+    post: BlogPost,
+    field: K,
+    value: BlogPost["qualityChecks"][K]
+  ) {
+    updatePost(post.id, {
+      qualityChecks: {
+        ...post.qualityChecks,
+        [field]: value
+      }
+    });
+  }
+
+  function publishReadiness(post: BlogPost) {
+    return [
+      { label: "有文章標題與 slug", ok: Boolean(post.title && post.slug) },
+      { label: "有 SEO title / description", ok: Boolean(post.seoTitle && post.seoDescription) },
+      { label: "有 GEO 回答摘要", ok: Boolean(post.geoSummary) },
+      { label: "有封面圖與 alt", ok: Boolean(post.cover && post.coverAlt) },
+      { label: "有可見 FAQ", ok: post.faqs.length > 0 },
+      { label: "AI 草稿有來源連結", ok: !post.generatedBy || post.sourceLinks.length > 0 },
+      { label: "人工已審稿", ok: !post.generatedBy || post.qualityChecks.hasHumanReview }
+    ];
   }
 
   async function savePost(post: BlogPost) {
@@ -356,11 +480,11 @@ export function AdminShell({ initialTab = "dashboard" }: AdminShellProps) {
         <div className="admin-header-inner">
           <Link className="brand" href="/">
             <span className="brand-mark">A</span>
-            <span>ALTOS LAB Admin</span>
+            <span>ALTOS LAB 後台</span>
           </Link>
           <button className="button" onClick={logout} type="button">
             <LogOut size={16} />
-            Logout
+            登出
           </button>
         </div>
       </header>
@@ -368,11 +492,11 @@ export function AdminShell({ initialTab = "dashboard" }: AdminShellProps) {
       <main className="admin-main">
         <div className="admin-tabs">
           {[
-            ["dashboard", "Dashboard", LayoutDashboard],
-            ["pages", "Pages", FileText],
-            ["projects", "Projects", Gauge],
-            ["blog", "Blog", Newspaper],
-            ["leads", "Leads", Users]
+            ["dashboard", "總覽", LayoutDashboard],
+            ["pages", "頁面", FileText],
+            ["projects", "專案", Gauge],
+            ["blog", "部落格", Newspaper],
+            ["leads", "表單名單", Users]
           ].map(([key, label, Icon]) => (
             <button
               className={`admin-tab ${tab === key ? "active" : ""}`}
@@ -387,17 +511,17 @@ export function AdminShell({ initialTab = "dashboard" }: AdminShellProps) {
 
         {message ? <p className="form-message sent">{message}</p> : null}
         {error ? <p className="form-message error">{error}</p> : null}
-        {loading ? <p className="muted">Loading CMS data...</p> : null}
+        {loading ? <p className="muted">正在載入 CMS 資料...</p> : null}
 
         {tab === "dashboard" ? (
           <section className="stats-grid">
             {[
-              ["Pages", counts.pages],
-              ["Projects", counts.projects],
-              ["Published projects", counts.publishedProjects],
-              ["Drafts", counts.drafts],
-              ["Blog posts", counts.posts],
-              ["Contact leads", counts.leads]
+              ["頁面", counts.pages],
+              ["專案", counts.projects],
+              ["已發布專案", counts.publishedProjects],
+              ["草稿", counts.drafts],
+              ["部落格文章", counts.posts],
+              ["表單名單", counts.leads]
             ].map(([label, value]) => (
               <article className="stat-card" key={String(label)}>
                 <div className="stat-value">{value}</div>
@@ -584,273 +708,530 @@ export function AdminShell({ initialTab = "dashboard" }: AdminShellProps) {
         ) : null}
 
         {tab === "blog" ? (
-          <section className="admin-grid">
-            <aside className="admin-card">
-              <h2>AI Blog Generator</h2>
-              <p className="muted">產生一組同主題的中文與英文草稿；預設不自動發布。</p>
-              <div className="admin-form">
-                <label>
-                  <span>Topic</span>
-                  <input value={generator.topic} onChange={(event) => setGenerator({ ...generator, topic: event.target.value })} />
-                </label>
-                <label>
-                  <span>Primary keyword</span>
-                  <input value={generator.keyword} onChange={(event) => setGenerator({ ...generator, keyword: event.target.value })} />
-                </label>
-                <label>
-                  <span>Audience</span>
-                  <input value={generator.audience} onChange={(event) => setGenerator({ ...generator, audience: event.target.value })} />
-                </label>
-                <label>
-                  <span>Search intent</span>
-                  <textarea
-                    rows={2}
-                    value={generator.intent}
-                    onChange={(event) => setGenerator({ ...generator, intent: event.target.value })}
-                  />
-                </label>
+          <section className="blog-workbench">
+            <header className="blog-workbench-header">
+              <div>
+                <p className="eyebrow">Blog CMS · SEO / GEO</p>
+                <h1>部落格內容營運台</h1>
+                <p className="muted">
+                  參考 Ghost 與 Medium 的寫作流程，把產文、審稿、SEO/GEO、來源、預覽與發布檢查拆成可操作的工作區。
+                </p>
+              </div>
+              <div className="admin-actions-stack">
                 <button className="button primary" onClick={generatePost} type="button">
                   <Sparkles size={16} />
-                  Generate zh/en drafts
+                  AI 產生中英草稿
                 </button>
                 <button className="button" onClick={() => createPost()} type="button">
                   <Plus size={16} />
-                  Blank post
+                  新增空白文章
                 </button>
               </div>
-              <hr style={{ borderColor: "var(--al-border)", margin: "20px 0" }} />
-              <div className="admin-list">
-                {data.blogPosts.map((post) => (
-                  <button
-                    className={post.id === selectedPost?.id ? "active" : ""}
-                    key={post.id}
-                    onClick={() => setSelectedPostId(post.id)}
-                    type="button"
-                  >
-                    <strong>{post.title}</strong>
-                    <br />
-                    <span className={`status-pill ${post.status}`}>{statusSummary(post)}</span>
-                  </button>
-                ))}
-              </div>
-            </aside>
-            {selectedPost ? (
-              <section className="admin-card">
-                <h2>Blog Editor</h2>
-                <div className="admin-form">
-                  <div className="form-row">
-                    <label>
-                      <span>Title</span>
-                      <input
-                        value={selectedPost.title}
-                        onChange={(event) =>
-                          updatePost(selectedPost.id, {
-                            title: event.target.value,
-                            slug: selectedPost.slug || makeSlug(event.target.value)
-                          })
-                        }
-                      />
-                    </label>
-                    <label>
-                      <span>Slug</span>
-                      <input
-                        value={selectedPost.slug}
-                        onChange={(event) => updatePost(selectedPost.id, { slug: event.target.value })}
-                      />
-                    </label>
-                  </div>
-                  <div className="form-row">
-                    <label>
-                      <span>Status</span>
-                      <select
-                        value={selectedPost.status}
-                        onChange={(event) => updatePost(selectedPost.id, { status: event.target.value as BlogPost["status"] })}
-                      >
-                        <option value="draft">draft</option>
-                        <option value="published">published</option>
-                        <option value="archived">archived</option>
-                      </select>
-                    </label>
-                    <label>
-                      <span>Tags (comma separated)</span>
-                      <input
-                        value={selectedPost.tags.join(", ")}
-                        onChange={(event) =>
-                          updatePost(selectedPost.id, {
-                            tags: event.target.value.split(",").map((tag) => tag.trim()).filter(Boolean)
-                          })
-                        }
-                      />
-                    </label>
-                  </div>
-                  <div className="form-row">
-                    <label>
-                      <span>Language</span>
-                      <select
-                        value={selectedPost.language}
-                        onChange={(event) => updatePost(selectedPost.id, { language: event.target.value as BlogPost["language"] })}
-                      >
-                        <option value="zh-Hant">zh-Hant</option>
-                        <option value="en">en</option>
-                      </select>
-                    </label>
-                    <label>
-                      <span>Review status</span>
-                      <select
-                        value={selectedPost.reviewStatus}
-                        onChange={(event) =>
-                          updatePost(selectedPost.id, { reviewStatus: event.target.value as BlogPost["reviewStatus"] })
-                        }
-                      >
-                        <option value="ai-draft">ai-draft</option>
-                        <option value="human-review">human-review</option>
-                        <option value="needs-revision">needs-revision</option>
-                        <option value="approved">approved</option>
-                      </select>
-                    </label>
-                  </div>
-                  <div className="form-row">
-                    <label>
-                      <span>Translation group ID</span>
-                      <input
-                        value={selectedPost.translationGroupId}
-                        onChange={(event) => updatePost(selectedPost.id, { translationGroupId: event.target.value })}
-                      />
-                    </label>
-                    <label>
-                      <span>Sort order</span>
-                      <input
-                        type="number"
-                        value={selectedPost.sortOrder}
-                        onChange={(event) => updatePost(selectedPost.id, { sortOrder: Number(event.target.value) })}
-                      />
-                    </label>
-                  </div>
-                  <div className="form-row">
-                    <label>
-                      <span>Topic</span>
-                      <input
-                        value={selectedPost.topic}
-                        onChange={(event) => updatePost(selectedPost.id, { topic: event.target.value })}
-                      />
-                    </label>
-                    <label>
-                      <span>Audience</span>
-                      <input
-                        value={selectedPost.audience}
-                        onChange={(event) => updatePost(selectedPost.id, { audience: event.target.value })}
-                      />
-                    </label>
-                  </div>
-                  <div className="form-row">
-                    <label>
-                      <span>Read time minutes</span>
-                      <input
-                        type="number"
-                        min={1}
-                        value={selectedPost.readTimeMinutes}
-                        onChange={(event) => updatePost(selectedPost.id, { readTimeMinutes: Number(event.target.value) })}
-                      />
-                    </label>
-                    <label className="checkbox-label">
-                      <input
-                        type="checkbox"
-                        checked={selectedPost.featured}
-                        onChange={(event) => updatePost(selectedPost.id, { featured: event.target.checked })}
-                      />
-                      <span>Featured article</span>
-                    </label>
-                  </div>
-                  <label>
-                    <span>Cover URL</span>
-                    <input
-                      value={selectedPost.cover || ""}
-                      onChange={(event) => updatePost(selectedPost.id, { cover: event.target.value })}
-                    />
-                  </label>
-                  <label>
-                    <span>SEO Title</span>
-                    <input
-                      value={selectedPost.seoTitle || ""}
-                      onChange={(event) => updatePost(selectedPost.id, { seoTitle: event.target.value })}
-                    />
-                  </label>
-                  <label>
-                    <span>SEO Description</span>
-                    <textarea
-                      rows={3}
-                      value={selectedPost.seoDescription || ""}
-                      onChange={(event) => updatePost(selectedPost.id, { seoDescription: event.target.value })}
-                    />
-                  </label>
-                  <label>
-                    <span>Excerpt</span>
-                    <textarea
-                      rows={3}
-                      value={selectedPost.excerpt}
-                      onChange={(event) => updatePost(selectedPost.id, { excerpt: event.target.value })}
-                    />
-                  </label>
-                  <label>
-                    <span>GEO answer summary</span>
-                    <textarea
-                      rows={3}
-                      value={selectedPost.geoSummary}
-                      onChange={(event) => updatePost(selectedPost.id, { geoSummary: event.target.value })}
-                    />
-                  </label>
-                  <label>
-                    <span>Body (Markdown-lite: use ## headings)</span>
-                    <textarea
-                      rows={14}
-                      value={selectedPost.body}
-                      onChange={(event) => updatePost(selectedPost.id, { body: event.target.value })}
-                    />
-                  </label>
-                  <JsonField
-                    label="Key takeaways JSON"
-                    value={selectedPost.keyTakeaways}
-                    onChange={(value) => updatePost(selectedPost.id, { keyTakeaways: value as string[] })}
-                  />
-                  <JsonField
-                    label="FAQ JSON（會產生 FAQPage structured data）"
-                    value={selectedPost.faqs}
-                    onChange={(value) => updatePost(selectedPost.id, { faqs: value as BlogPost["faqs"] })}
-                  />
-                  <JsonField
-                    label="Source links JSON（AI 草稿發布前必須有來源）"
-                    value={selectedPost.sourceLinks}
-                    onChange={(value) => updateSourceLinks(selectedPost, value)}
-                  />
-                  <JsonField
-                    label="Quality checks JSON（審稿、來源、無捏造、搜尋意圖、雙語對齊）"
-                    value={selectedPost.qualityChecks}
-                    onChange={(value) => updateQualityChecks(selectedPost, value)}
-                  />
-                  <label>
-                    <span>AI disclosure</span>
-                    <textarea
-                      rows={2}
-                      value={selectedPost.aiDisclosure || ""}
-                      onChange={(event) => updatePost(selectedPost.id, { aiDisclosure: event.target.value })}
-                    />
-                  </label>
-                  <div className="form-actions">
-                    <button className="button primary" onClick={() => savePost(selectedPost)} type="button">
-                      <Save size={16} />
-                      Save post
-                    </button>
-                    <button className="button" onClick={() => duplicateTranslation(selectedPost)} type="button">
-                      <Languages size={16} />
-                      Duplicate translation
-                    </button>
-                    <Link className="button" href={previewPath(selectedPost)} target="_blank">
-                      Preview
-                    </Link>
-                  </div>
+            </header>
+
+            <div className="blog-ops-strip">
+              <article>
+                <CalendarClock size={17} />
+                <div>
+                  <strong>每日早晚自動產文</strong>
+                  <span>09:00 / 15:00 台灣時間，各產生一組中英文草稿</span>
                 </div>
-              </section>
-            ) : null}
+              </article>
+              <article>
+                <ShieldCheck size={17} />
+                <div>
+                  <strong>安全審稿模式</strong>
+                  <span>AI 文章預設是草稿，發布前需要人工確認來源與品牌觀點</span>
+                </div>
+              </article>
+              <article>
+                <ImageIcon size={17} />
+                <div>
+                  <strong>圖文完整</strong>
+                  <span>自動草稿會套用 ALTOS LAB 自有封面素材與 alt text</span>
+                </div>
+              </article>
+            </div>
+
+            <section className="blog-workbench-grid">
+              <aside className="blog-sidebar">
+                <section className="admin-card blog-generator-panel">
+                  <h2>AI 草稿設定</h2>
+                  <p className="muted">手動產生時可指定主題；每日排程會自動從 AI / 搜尋 / 產品趨勢來源抓題材。</p>
+                  <div className="admin-form">
+                    <label>
+                      <span>主題</span>
+                      <input
+                        value={generator.topic}
+                        onChange={(event) => setGenerator({ ...generator, topic: event.target.value })}
+                      />
+                    </label>
+                    <label>
+                      <span>主要關鍵字</span>
+                      <input
+                        value={generator.keyword}
+                        onChange={(event) => setGenerator({ ...generator, keyword: event.target.value })}
+                      />
+                    </label>
+                    <label>
+                      <span>目標讀者</span>
+                      <input
+                        value={generator.audience}
+                        onChange={(event) => setGenerator({ ...generator, audience: event.target.value })}
+                      />
+                    </label>
+                    <label>
+                      <span>搜尋意圖</span>
+                      <textarea
+                        rows={2}
+                        value={generator.intent}
+                        onChange={(event) => setGenerator({ ...generator, intent: event.target.value })}
+                      />
+                    </label>
+                    <button className="button primary" onClick={generatePost} type="button">
+                      <Sparkles size={16} />
+                      產生中英草稿
+                    </button>
+                  </div>
+                </section>
+
+                <section className="admin-card">
+                  <div className="blog-filter-title">
+                    <Search size={16} />
+                    <h2>文章列表</h2>
+                  </div>
+                  <div className="blog-stat-row">
+                    <span>{blogStats.total} 全部</span>
+                    <span>{blogStats.drafts} 草稿</span>
+                    <span>{blogStats.published} 已發布</span>
+                    <span>{blogStats.needsReview} 待審</span>
+                  </div>
+                  <div className="admin-form compact">
+                    <label>
+                      <span>搜尋</span>
+                      <input
+                        value={blogFilters.query}
+                        onChange={(event) => setBlogFilters({ ...blogFilters, query: event.target.value })}
+                        placeholder="標題、slug、主題或標籤"
+                      />
+                    </label>
+                    <div className="form-row">
+                      <label>
+                        <span>語言</span>
+                        <select
+                          value={blogFilters.language}
+                          onChange={(event) =>
+                            setBlogFilters({ ...blogFilters, language: event.target.value as BlogFilterLanguage })
+                          }
+                        >
+                          <option value="all">全部</option>
+                          <option value="zh-Hant">繁體中文</option>
+                          <option value="en">English</option>
+                        </select>
+                      </label>
+                      <label>
+                        <span>狀態</span>
+                        <select
+                          value={blogFilters.status}
+                          onChange={(event) =>
+                            setBlogFilters({ ...blogFilters, status: event.target.value as BlogFilterStatus })
+                          }
+                        >
+                          <option value="all">全部</option>
+                          <option value="draft">草稿</option>
+                          <option value="published">已發布</option>
+                          <option value="archived">封存</option>
+                        </select>
+                      </label>
+                    </div>
+                    <label>
+                      <span>審稿狀態</span>
+                      <select
+                        value={blogFilters.review}
+                        onChange={(event) =>
+                          setBlogFilters({ ...blogFilters, review: event.target.value as BlogFilterReview })
+                        }
+                      >
+                        <option value="all">全部</option>
+                        <option value="ai-draft">AI 草稿</option>
+                        <option value="human-review">人工審稿</option>
+                        <option value="needs-revision">需修改</option>
+                        <option value="approved">已核准</option>
+                      </select>
+                    </label>
+                  </div>
+
+                  <div className="admin-list blog-post-list">
+                    {filteredBlogPosts.length ? (
+                      filteredBlogPosts.map((post) => (
+                        <button
+                          className={post.id === selectedPost?.id ? "active" : ""}
+                          key={post.id}
+                          onClick={() => setSelectedPostId(post.id)}
+                          type="button"
+                        >
+                          <span className="blog-list-row-top">
+                            <strong>{post.title}</strong>
+                            <span className={`status-pill ${post.status}`}>{statusLabels[post.status]}</span>
+                          </span>
+                          <span className="blog-list-meta">
+                            {languageLabel(post.language)} · {reviewLabels[post.reviewStatus]} ·{" "}
+                            {slotLabels[post.generationSlot || "manual"]}
+                          </span>
+                        </button>
+                      ))
+                    ) : (
+                      <p className="muted">目前沒有符合條件的文章。</p>
+                    )}
+                  </div>
+                </section>
+              </aside>
+
+              {selectedPost ? (
+                <section className="admin-card blog-editor-panel">
+                  <header className="blog-editor-header">
+                    <div>
+                      <p className="eyebrow">{statusSummary(selectedPost)}</p>
+                      <h2>{selectedPost.title || "未命名文章"}</h2>
+                      <p className="muted">
+                        {selectedPost.generatedBy ? `AI 來源：${selectedPost.generatedBy}` : "手動文章"} ·{" "}
+                        {selectedPost.scheduledFor
+                          ? `排程：${new Date(selectedPost.scheduledFor).toLocaleString("zh-TW")}`
+                          : "未設定排程"}
+                      </p>
+                    </div>
+                    <div className="form-actions">
+                      <Link className="button" href={previewPath(selectedPost)} target="_blank">
+                        <Eye size={16} />
+                        預覽前台
+                      </Link>
+                      <button className="button primary" onClick={() => savePost(selectedPost)} type="button">
+                        <Save size={16} />
+                        儲存
+                      </button>
+                    </div>
+                  </header>
+
+                  <nav className="editor-tabs" aria-label="Blog editor sections">
+                    {[
+                      ["content", "內容", PenLine],
+                      ["seo", "SEO / GEO", Search],
+                      ["sources", "來源 / FAQ", Link2],
+                      ["publish", "發布檢查", ListChecks]
+                    ].map(([key, label, Icon]) => (
+                      <button
+                        className={blogEditorTab === key ? "active" : ""}
+                        key={String(key)}
+                        onClick={() => setBlogEditorTab(key as BlogEditorTab)}
+                        type="button"
+                      >
+                        <Icon size={15} />
+                        {String(label)}
+                      </button>
+                    ))}
+                  </nav>
+
+                  <div className="admin-form blog-editor-form">
+                    {blogEditorTab === "content" ? (
+                      <>
+                        <div className="form-row">
+                          <label>
+                            <span>文章標題</span>
+                            <input
+                              value={selectedPost.title}
+                              onChange={(event) =>
+                                updatePost(selectedPost.id, {
+                                  title: event.target.value,
+                                  slug: selectedPost.slug || makeSlug(event.target.value)
+                                })
+                              }
+                            />
+                          </label>
+                          <label>
+                            <span>Slug</span>
+                            <input
+                              value={selectedPost.slug}
+                              onChange={(event) => updatePost(selectedPost.id, { slug: event.target.value })}
+                            />
+                          </label>
+                        </div>
+                        <div className="form-row">
+                          <label>
+                            <span>語言</span>
+                            <select
+                              value={selectedPost.language}
+                              onChange={(event) =>
+                                updatePost(selectedPost.id, { language: event.target.value as BlogPost["language"] })
+                              }
+                            >
+                              <option value="zh-Hant">繁體中文</option>
+                              <option value="en">English</option>
+                            </select>
+                          </label>
+                          <label>
+                            <span>標籤（逗號分隔）</span>
+                            <input
+                              value={selectedPost.tags.join(", ")}
+                              onChange={(event) =>
+                                updatePost(selectedPost.id, {
+                                  tags: event.target.value
+                                    .split(",")
+                                    .map((tag) => tag.trim())
+                                    .filter(Boolean)
+                                })
+                              }
+                            />
+                          </label>
+                        </div>
+                        <div className="form-row">
+                          <label>
+                            <span>主題</span>
+                            <input
+                              value={selectedPost.topic}
+                              onChange={(event) => updatePost(selectedPost.id, { topic: event.target.value })}
+                            />
+                          </label>
+                          <label>
+                            <span>讀者</span>
+                            <input
+                              value={selectedPost.audience}
+                              onChange={(event) => updatePost(selectedPost.id, { audience: event.target.value })}
+                            />
+                          </label>
+                        </div>
+                        <label>
+                          <span>摘要</span>
+                          <textarea
+                            rows={3}
+                            value={selectedPost.excerpt}
+                            onChange={(event) => updatePost(selectedPost.id, { excerpt: event.target.value })}
+                          />
+                        </label>
+                        <label>
+                          <span>正文（支援 ## 標題）</span>
+                          <textarea
+                            rows={18}
+                            value={selectedPost.body}
+                            onChange={(event) => updatePost(selectedPost.id, { body: event.target.value })}
+                          />
+                        </label>
+                        <JsonField
+                          label="重點摘要 JSON"
+                          value={selectedPost.keyTakeaways}
+                          onChange={(value) => updatePost(selectedPost.id, { keyTakeaways: value as string[] })}
+                        />
+                      </>
+                    ) : null}
+
+                    {blogEditorTab === "seo" ? (
+                      <>
+                        <label>
+                          <span>SEO Title</span>
+                          <input
+                            value={selectedPost.seoTitle || ""}
+                            onChange={(event) => updatePost(selectedPost.id, { seoTitle: event.target.value })}
+                          />
+                        </label>
+                        <label>
+                          <span>SEO Description</span>
+                          <textarea
+                            rows={3}
+                            value={selectedPost.seoDescription || ""}
+                            onChange={(event) => updatePost(selectedPost.id, { seoDescription: event.target.value })}
+                          />
+                        </label>
+                        <label>
+                          <span>GEO 回答摘要</span>
+                          <textarea
+                            rows={4}
+                            value={selectedPost.geoSummary}
+                            onChange={(event) => updatePost(selectedPost.id, { geoSummary: event.target.value })}
+                          />
+                        </label>
+                        <div className="form-row">
+                          <label>
+                            <span>封面 URL</span>
+                            <input
+                              value={selectedPost.cover || ""}
+                              onChange={(event) => updatePost(selectedPost.id, { cover: event.target.value })}
+                            />
+                          </label>
+                          <label>
+                            <span>封面 alt text</span>
+                            <input
+                              value={selectedPost.coverAlt || ""}
+                              onChange={(event) => updatePost(selectedPost.id, { coverAlt: event.target.value })}
+                            />
+                          </label>
+                        </div>
+                        {selectedPost.cover ? (
+                          <img className="admin-cover-preview" src={selectedPost.cover} alt={selectedPost.coverAlt || ""} />
+                        ) : null}
+                        <label>
+                          <span>AI 內容揭露</span>
+                          <textarea
+                            rows={2}
+                            value={selectedPost.aiDisclosure || ""}
+                            onChange={(event) => updatePost(selectedPost.id, { aiDisclosure: event.target.value })}
+                          />
+                        </label>
+                      </>
+                    ) : null}
+
+                    {blogEditorTab === "sources" ? (
+                      <>
+                        <JsonField
+                          label="FAQ JSON（頁面可見時才會輸出 FAQ schema）"
+                          value={selectedPost.faqs}
+                          onChange={(value) => updatePost(selectedPost.id, { faqs: value as BlogPost["faqs"] })}
+                        />
+                        <JsonField
+                          label="Source links JSON（AI 草稿發布前必須有來源）"
+                          value={selectedPost.sourceLinks}
+                          onChange={(value) => updateSourceLinks(selectedPost, value)}
+                        />
+                        <button className="button" onClick={() => duplicateTranslation(selectedPost)} type="button">
+                          <Languages size={16} />
+                          複製成另一語言草稿
+                        </button>
+                      </>
+                    ) : null}
+
+                    {blogEditorTab === "publish" ? (
+                      <>
+                        <div className="form-row">
+                          <label>
+                            <span>發布狀態</span>
+                            <select
+                              value={selectedPost.status}
+                              onChange={(event) =>
+                                updatePost(selectedPost.id, { status: event.target.value as BlogPost["status"] })
+                              }
+                            >
+                              <option value="draft">草稿</option>
+                              <option value="published">已發布</option>
+                              <option value="archived">封存</option>
+                            </select>
+                          </label>
+                          <label>
+                            <span>審稿狀態</span>
+                            <select
+                              value={selectedPost.reviewStatus}
+                              onChange={(event) =>
+                                updatePost(selectedPost.id, {
+                                  reviewStatus: event.target.value as BlogPost["reviewStatus"]
+                                })
+                              }
+                            >
+                              <option value="ai-draft">AI 草稿</option>
+                              <option value="human-review">人工審稿</option>
+                              <option value="needs-revision">需修改</option>
+                              <option value="approved">已核准</option>
+                            </select>
+                          </label>
+                        </div>
+                        <div className="form-row">
+                          <label>
+                            <span>Translation group ID</span>
+                            <input
+                              value={selectedPost.translationGroupId}
+                              onChange={(event) =>
+                                updatePost(selectedPost.id, { translationGroupId: event.target.value })
+                              }
+                            />
+                          </label>
+                          <label>
+                            <span>閱讀分鐘</span>
+                            <input
+                              type="number"
+                              min={1}
+                              value={selectedPost.readTimeMinutes}
+                              onChange={(event) =>
+                                updatePost(selectedPost.id, { readTimeMinutes: Number(event.target.value) })
+                              }
+                            />
+                          </label>
+                        </div>
+                        <div className="form-row">
+                          <label className="checkbox-label">
+                            <input
+                              type="checkbox"
+                              checked={selectedPost.featured}
+                              onChange={(event) => updatePost(selectedPost.id, { featured: event.target.checked })}
+                            />
+                            <span>設為精選文章</span>
+                          </label>
+                          <label>
+                            <span>排序</span>
+                            <input
+                              type="number"
+                              value={selectedPost.sortOrder}
+                              onChange={(event) => updatePost(selectedPost.id, { sortOrder: Number(event.target.value) })}
+                            />
+                          </label>
+                        </div>
+                        <div className="quality-check-grid">
+                          {[
+                            ["hasHumanReview", "人工已審稿"],
+                            ["hasVisibleSources", "來源可見"],
+                            ["hasNoFabricatedClaims", "無捏造宣稱"],
+                            ["hasSearchIntentAnswer", "有回答搜尋意圖"],
+                            ["hasBilingualParity", "中英文對齊"]
+                          ].map(([field, label]) => (
+                            <label className="checkbox-label" key={field}>
+                              <input
+                                type="checkbox"
+                                checked={Boolean(selectedPost.qualityChecks[field as keyof BlogPost["qualityChecks"]])}
+                                onChange={(event) =>
+                                  updateQualityCheckField(
+                                    selectedPost,
+                                    field as keyof BlogPost["qualityChecks"],
+                                    event.target.checked as never
+                                  )
+                                }
+                              />
+                              <span>{label}</span>
+                            </label>
+                          ))}
+                        </div>
+                        <label>
+                          <span>審稿備註</span>
+                          <textarea
+                            rows={3}
+                            value={selectedPost.qualityChecks.notes || ""}
+                            onChange={(event) => updateQualityCheckField(selectedPost, "notes", event.target.value)}
+                          />
+                        </label>
+                        <div className="publish-readiness">
+                          {publishReadiness(selectedPost).map((item) => (
+                            <span className={item.ok ? "ready" : "missing"} key={item.label}>
+                              {item.ok ? <CheckCircle2 size={15} /> : <Clock3 size={15} />}
+                              {item.label}
+                            </span>
+                          ))}
+                        </div>
+                      </>
+                    ) : null}
+
+                    <div className="form-actions">
+                      <button className="button primary" onClick={() => savePost(selectedPost)} type="button">
+                        <Save size={16} />
+                        儲存文章
+                      </button>
+                      <Link className="button" href={previewPath(selectedPost)} target="_blank">
+                        <Eye size={16} />
+                        預覽
+                      </Link>
+                    </div>
+                  </div>
+                </section>
+              ) : (
+                <section className="admin-card blog-editor-panel empty">
+                  <h2>尚未選取文章</h2>
+                  <p className="muted">請從左側列表選一篇文章，或建立新的草稿。</p>
+                </section>
+              )}
+            </section>
           </section>
         ) : null}
 

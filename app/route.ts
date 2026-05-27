@@ -41,12 +41,105 @@ function withLaunchMetadata(html: string) {
     <meta name="twitter:image" content="${image}" />
     ${jsonLd}
     ${gtmHeadSnippet()}`;
+  const homepageBlogNavigation = `
+    <style>
+      .altos-home-language-toggle {
+        display: inline-flex;
+        align-items: center;
+        gap: 2px;
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        border-radius: 999px;
+        padding: 3px;
+        background: rgba(0, 0, 0, 0.28);
+      }
+
+      .altos-home-language-toggle button {
+        min-height: 2rem;
+        border: 0;
+        border-radius: 999px;
+        background: transparent;
+        color: rgba(255, 255, 255, 0.48);
+        cursor: pointer;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+        font-size: 0.7rem;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        padding: 0 0.7rem;
+      }
+
+      .altos-home-language-toggle button.is-active {
+        background: #c8ff00;
+        color: #030403;
+      }
+
+      @media (max-width: 760px) {
+        .altos-home-language-toggle {
+          transform: scale(0.9);
+          transform-origin: right center;
+        }
+      }
+    </style>
+    <script>
+      (() => {
+        const storageKey = "altoslab:language";
+
+        function currentLanguage() {
+          return localStorage.getItem(storageKey) === "en" ? "en" : "zh-Hant";
+        }
+
+        function applyHomepageBlogNavigation() {
+          const nav = document.querySelector("nav.fixed.top-0");
+          if (!nav) return;
+          const language = currentLanguage();
+          const isEnglish = language === "en";
+
+          let blogLink = nav.querySelector("a[data-altos-blog-nav]");
+          if (!blogLink) {
+            blogLink = document.createElement("a");
+            blogLink.dataset.altosBlogNav = "true";
+            const contactLink = nav.querySelector('a[href="#contact"]');
+            if (contactLink) contactLink.insertAdjacentElement("beforebegin", blogLink);
+            else nav.appendChild(blogLink);
+          }
+          blogLink.href = isEnglish ? "/en/blog" : "/blog";
+          blogLink.textContent = isEnglish ? "Blog" : "部落格";
+
+          let switcher = nav.querySelector(".altos-home-language-toggle");
+          if (!switcher) {
+            switcher = document.createElement("div");
+            switcher.className = "altos-home-language-toggle";
+            switcher.setAttribute("aria-label", "Language switcher");
+            switcher.innerHTML = '<button type="button" data-lang="zh-Hant">中文</button><button type="button" data-lang="en">EN</button>';
+            switcher.addEventListener("click", (event) => {
+              const target = event.target;
+              const button = target instanceof Element ? target.closest("button[data-lang]") : null;
+              if (!button) return;
+              localStorage.setItem(storageKey, button.dataset.lang);
+              applyHomepageBlogNavigation();
+            });
+            const menuButton = nav.querySelector('button[aria-label="Menu"]');
+            if (menuButton) menuButton.insertAdjacentElement("beforebegin", switcher);
+            else nav.appendChild(switcher);
+          }
+
+          switcher.querySelectorAll("button[data-lang]").forEach((button) => {
+            button.classList.toggle("is-active", button.dataset.lang === language);
+          });
+        }
+
+        const observer = new MutationObserver(applyHomepageBlogNavigation);
+        observer.observe(document.documentElement, { childList: true, subtree: true });
+        window.addEventListener("load", applyHomepageBlogNavigation);
+        document.addEventListener("DOMContentLoaded", applyHomepageBlogNavigation);
+        applyHomepageBlogNavigation();
+      })();
+    </script>`;
 
   return html
     .replace('<html lang="en">', '<html lang="zh-Hant-TW">')
     .replace(/<title>[\s\S]*?<\/title>/, metadata)
     .replace("<body>", `<body>${gtmNoScriptSnippet()}`)
-    .replace("</body>", `${homepageAnalyticsSnippet()}</body>`);
+    .replace("</body>", `${homepageBlogNavigation}${homepageAnalyticsSnippet()}</body>`);
 }
 
 export async function GET() {

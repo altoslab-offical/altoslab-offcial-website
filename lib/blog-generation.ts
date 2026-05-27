@@ -1,6 +1,6 @@
 import { estimateReadTimeMinutes, normalizeSourceLinks, taiwanDate } from "./blog-utils";
 import { normalizeBlogPostInput, nowIso, slugify } from "./cms";
-import type { BlogLanguage, BlogPost, BlogSourceLink } from "./types";
+import type { BlogGenerationSlot, BlogLanguage, BlogPost, BlogSourceLink } from "./types";
 
 export type BlogGenerateInput = {
   topic?: string;
@@ -8,6 +8,8 @@ export type BlogGenerateInput = {
   keyword?: string;
   intent?: string;
   sourceLinks?: BlogSourceLink[];
+  slot?: BlogGenerationSlot;
+  generationDate?: string;
 };
 
 type TrendCandidate = {
@@ -59,6 +61,33 @@ const DEFAULT_RSS_SOURCES = [
   "https://huggingface.co/blog/feed.xml",
   "https://feeds.feedburner.com/blogspot/amDG",
   "https://vercel.com/blog/rss.xml",
+];
+
+const BLOG_COVER_POOL = [
+  {
+    src: "/geo-cover.png",
+    keywords: ["geo", "seo", "search", "搜尋", "能見度", "內容", "google"]
+  },
+  {
+    src: "/project-newsletter-cover.png",
+    keywords: ["content", "newsletter", "行銷", "營運", "automation", "自動化"]
+  },
+  {
+    src: "/orclaw-cover.png",
+    keywords: ["agent", "agents", "ai agent", "workflow", "coding", "代理", "流程"]
+  },
+  {
+    src: "/proj4-cover.png",
+    keywords: ["data", "dashboard", "analytics", "數據", "儀表板", "平台"]
+  },
+  {
+    src: "/wonda-cover.png",
+    keywords: ["customer", "support", "conversation", "crm", "客服", "對話"]
+  },
+  {
+    src: "/project-fortune-cover.png",
+    keywords: ["strategy", "trend", "market", "趨勢", "策略", "企業"]
+  }
 ];
 
 function sourceListFromEnv() {
@@ -184,6 +213,23 @@ function canonicalSources(candidates: TrendCandidate[]) {
   return normalizeSourceLinks(candidates.map(({ title, url, publisher, publishedAt }) => ({ title, url, publisher, publishedAt })));
 }
 
+function chooseBlogCover(input: BlogGenerateInput, language: BlogLanguage) {
+  const haystack = `${input.topic || ""} ${input.keyword || ""} ${input.intent || ""}`.toLowerCase();
+  const matched = BLOG_COVER_POOL.find((cover) => cover.keywords.some((keyword) => haystack.includes(keyword.toLowerCase())));
+  if (matched) return matched.src;
+
+  const seed = `${haystack}:${language}:${input.slot || "manual"}`;
+  const index = Array.from(seed).reduce((sum, char) => sum + char.charCodeAt(0), 0) % BLOG_COVER_POOL.length;
+  return BLOG_COVER_POOL[index].src;
+}
+
+function chooseBlogCoverAlt(input: BlogGenerateInput, language: BlogLanguage) {
+  const topic = input.topic?.trim() || (language === "en" ? "AI trend analysis" : "AI 趨勢分析");
+  return language === "en"
+    ? `ALTOS LAB visual for ${topic}`
+    : `ALTOS LAB ${topic} 文章主視覺`;
+}
+
 function buildFallbackPost({
   input,
   language,
@@ -294,7 +340,8 @@ Source links 提供證據鏈，但文章仍然要加入 ALTOS LAB 的實作觀�
     sourceLinks: sources,
     tags: language === "en" ? ["AI search", "GEO", "SEO", "AI content"] : ["AI 搜尋", "GEO", "SEO", "AI 內容"],
     author: "ALTOS LAB",
-    cover: "/geo-cover.png",
+    cover: chooseBlogCover(input, language),
+    coverAlt: chooseBlogCoverAlt(input, language),
     readTimeMinutes: estimateReadTimeMinutes(body, language),
     featured: false,
     reviewStatus: "ai-draft",
@@ -311,6 +358,7 @@ Source links 提供證據鏈，但文章仍然要加入 ALTOS LAB 的實作觀�
         ? "AI-assisted draft. Human review is required before publication."
         : "AI 協助產生的草稿，發布前必須經人工審稿。",
     generationDate,
+    generationSlot: input.slot,
     generatedAt: nowIso(),
     generatedBy: "local-bilingual-geo-template"
   });
@@ -347,7 +395,8 @@ function normalizeGeneratedPost({
     sourceLinks: normalizeSourceLinks(generated.sourceLinks?.length ? generated.sourceLinks : sources),
     tags: generated.tags?.length ? generated.tags : language === "en" ? ["AI", "GEO", "SEO"] : ["AI", "GEO", "SEO"],
     author: generated.author || "ALTOS LAB",
-    cover: generated.cover || "/geo-cover.png",
+    cover: generated.cover?.startsWith("/") ? generated.cover : chooseBlogCover(input, language),
+    coverAlt: generated.coverAlt || chooseBlogCoverAlt(input, language),
     readTimeMinutes: generated.readTimeMinutes || estimateReadTimeMinutes(body, language),
     featured: false,
     reviewStatus: "ai-draft",
@@ -364,6 +413,7 @@ function normalizeGeneratedPost({
         ? "AI-assisted draft. Human review is required before publication."
         : "AI 協助產生的草稿，發布前必須經人工審稿。",
     generationDate,
+    generationSlot: input.slot,
     generatedAt: nowIso(),
     generatedBy: model
   });
@@ -488,8 +538,9 @@ Rules:
 export async function generateBlogDraftPair(input: BlogGenerateInput = {}) {
   const candidates = await fetchTrendCandidates(input);
   const sources = canonicalSources(candidates);
-  const generationDate = taiwanDate();
-  const translationGroupId = `tg_${generationDate.replace(/-/g, "")}_${Date.now().toString(36)}`;
+  const generationDate = input.generationDate || taiwanDate();
+  const slotSuffix = input.slot ? `_${input.slot}` : "";
+  const translationGroupId = `tg_${generationDate.replace(/-/g, "")}${slotSuffix}_${Date.now().toString(36)}`;
 
   try {
     const generated = await generateWithDeepSeek(input, sources);

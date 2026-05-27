@@ -55,8 +55,9 @@ Notes:
 - The current Vercel Blob store is public-access, so `BLOB_ACCESS=public` and `CMS_ENCRYPTION_KEY` are required in production. CMS JSON is encrypted server-side before it is written to Blob.
 - Upstash Redis is also supported and takes priority when `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` are configured. The token must be the standard write token, not the read-only token.
 - Without Vercel Blob or Upstash env vars, production can still render seed content, but admin edits and contact leads will not persist.
-- `AUTO_PUBLISH_BLOG` should stay `false` for v1. AI-generated content should be reviewed before publishing.
-- `CRON_SECRET` protects `/api/cron/blog-drafts`; Vercel Cron will call it daily when configured in `vercel.json`.
+- `AUTO_PUBLISH_BLOG` should stay `false` for v1. AI-generated content should be reviewed before publishing to avoid low-value scaled-content risk.
+- `CRON_SECRET` protects `/api/cron/blog-drafts`, `/api/cron/blog-drafts/morning` and `/api/cron/blog-drafts/afternoon`.
+- Vercel Cron runs twice daily: `0 1 * * *` UTC = 09:00 Asia/Taipei, and `0 7 * * *` UTC = 15:00 Asia/Taipei. Each slot creates one bilingual zh/en draft pair and is idempotent by `generationDate + generationSlot`.
 - `DEEPSEEK_CONTENT_MODEL=deepseek-v4-flash` is the recommended default for daily draft generation because it is faster and more reliable for the admin/Cron workflow. Use `deepseek-v4-pro` only when slower, higher-effort drafting is acceptable.
 - `BLOG_TREND_SOURCES` should contain only live RSS/Atom feeds. The generator samples across feeds in round-robin order so a daily draft can reference multiple AI/search sources instead of overfitting to the first feed.
 - Search verification env vars are optional until the matching Search Console/Webmaster account provides the token. Once set and redeployed, the homepage and App Router pages emit the required verification meta tags.
@@ -105,7 +106,7 @@ Expected results:
 - `/llms.txt` returns a concise LLM-readable site map.
 - `/llms-full.txt` returns expanded answer-engine context for services, projects and published articles.
 - `/api/*` and `/admin/*` return `X-Robots-Tag: noindex, nofollow, noarchive`.
-- `/api/cron/blog-drafts` returns 401 without `CRON_SECRET`; with the correct secret it creates one zh/en draft pair, and reruns for the same Taiwan date skip.
+- `/api/cron/blog-drafts` returns 401 without `CRON_SECRET`; `/api/cron/blog-drafts/morning` and `/api/cron/blog-drafts/afternoon` create one zh/en draft pair per slot, and reruns for the same Taiwan date + slot skip.
 
 ## SEO / GEO Release Checks
 
@@ -124,15 +125,16 @@ Before promoting a deployment, verify:
 ## Content Operations
 
 1. Log in at `/admin`.
-2. Keep generated blog posts as drafts until reviewed.
-3. Before publishing a blog post, confirm:
+2. Use the Blog CMS workbench to generate drafts, filter by language/status/review state, edit SEO/GEO fields, manage source links and run the publishing checklist.
+3. Keep generated blog posts as drafts until reviewed.
+4. Before publishing a blog post, confirm:
    - SEO title and description are specific.
    - GEO summary directly answers the search intent.
    - Article body contains visible answer paragraphs, not only keywords.
    - Source links support trend claims.
    - FAQ answers are present in the article and mirrored in structured data.
    - `qualityChecks.hasHumanReview=true` and `reviewStatus=approved`.
-4. Publish only after brand review.
+5. Publish only after brand review.
 
 ## Rollback
 

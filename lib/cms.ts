@@ -88,7 +88,10 @@ function hydrateBlogPost(post: BlogPost): BlogPost {
       notes: post.qualityChecks?.notes
     }),
     aiDisclosure: post.aiDisclosure,
-    generationDate: post.generationDate
+    generationDate: post.generationDate,
+    generationSlot: post.generationSlot,
+    scheduledFor: post.scheduledFor,
+    coverAlt: post.coverAlt
   };
 }
 
@@ -249,6 +252,7 @@ export function normalizeBlogPostInput(input: Partial<BlogPost>, existing?: Blog
     tags: input.tags ?? existing?.tags ?? ["AI", "GEO"],
     author: input.author ?? existing?.author ?? "ALTOS LAB",
     cover: input.cover ?? existing?.cover ?? "/geo-cover.png",
+    coverAlt: input.coverAlt ?? existing?.coverAlt ?? `${title} cover image`,
     readTimeMinutes: Number(
       input.readTimeMinutes ?? existing?.readTimeMinutes ?? estimateReadTimeMinutes(body, language)
     ),
@@ -260,6 +264,8 @@ export function normalizeBlogPostInput(input: Partial<BlogPost>, existing?: Blog
       existing?.aiDisclosure ??
       "This draft may be assisted by AI and should be reviewed by ALTOS LAB before publication.",
     generationDate: input.generationDate ?? existing?.generationDate,
+    generationSlot: input.generationSlot ?? existing?.generationSlot,
+    scheduledFor: input.scheduledFor ?? existing?.scheduledFor,
     createdAt: existing?.createdAt ?? time,
     updatedAt: time,
     publishedAt: status === "published" ? existing?.publishedAt ?? time : existing?.publishedAt,
@@ -311,6 +317,7 @@ export function publishValidationForBlogPost(post: BlogPost) {
   if (!post.excerpt) errors.push("excerpt is required");
   if (!post.body) errors.push("body is required");
   if (!post.geoSummary) errors.push("geoSummary is required");
+  if (!post.cover) errors.push("cover is required");
   if (!post.language) errors.push("language is required");
   if (!post.translationGroupId) errors.push("translationGroupId is required");
   if (!post.readTimeMinutes) errors.push("readTimeMinutes is required");

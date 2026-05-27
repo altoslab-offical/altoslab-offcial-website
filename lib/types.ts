@@ -3,6 +3,7 @@ export type ProjectStatus = "draft" | "published" | "archived";
 export type ContactLeadStatus = "new" | "contacted" | "qualified" | "closed" | "spam";
 export type BlogLanguage = "zh-Hant" | "en";
 export type BlogReviewStatus = "ai-draft" | "human-review" | "approved" | "needs-revision";
+export type BlogGenerationSlot = "manual" | "morning" | "afternoon";
 
 export type PageSectionType =
   | "hero"
@@ -163,12 +164,15 @@ export type BlogPost = {
   tags: string[];
   author: string;
   cover?: string;
+  coverAlt?: string;
   readTimeMinutes: number;
   featured: boolean;
   reviewStatus: BlogReviewStatus;
   qualityChecks: BlogQualityChecks;
   aiDisclosure?: string;
   generationDate?: string;
+  generationSlot?: BlogGenerationSlot;
+  scheduledFor?: string;
   createdAt: string;
   updatedAt: string;
   publishedAt?: string;
