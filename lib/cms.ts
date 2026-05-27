@@ -155,12 +155,28 @@ export async function getPublishedBlogPostsByLanguage(language?: BlogLanguage) {
   );
 }
 
+function decodeSlugCandidate(slug: string) {
+  try {
+    return decodeURIComponent(slug);
+  } catch {
+    return slug;
+  }
+}
+
+function matchesBlogSlug(postSlug: string, requestedSlug: string) {
+  return (
+    postSlug === requestedSlug ||
+    postSlug === decodeSlugCandidate(requestedSlug) ||
+    encodeURIComponent(postSlug) === requestedSlug
+  );
+}
+
 export async function getPublishedBlogPost(slug: string, language?: BlogLanguage) {
   const data = await readCmsData();
   return (
     data.blogPosts.find(
       (post) =>
-        post.slug === slug &&
+        matchesBlogSlug(post.slug, slug) &&
         post.status === "published" &&
         (!language || normalizeBlogLanguage(post.language) === language)
     ) ?? null

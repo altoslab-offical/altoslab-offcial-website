@@ -2,10 +2,15 @@ import type { BlogLanguage, BlogPost, BlogQualityChecks, BlogSourceLink } from "
 
 export const BLOG_LANGUAGES: BlogLanguage[] = ["zh-Hant", "en"];
 
+export function blogSlugPathSegment(slug: string) {
+  return encodeURIComponent(slug);
+}
+
 export function blogPostPath(postOrSlug: BlogPost | string, language?: BlogLanguage) {
   const slug = typeof postOrSlug === "string" ? postOrSlug : postOrSlug.slug;
   const lang = language ?? (typeof postOrSlug === "string" ? "zh-Hant" : postOrSlug.language);
-  return lang === "en" ? `/en/blog/${slug}` : `/blog/${slug}`;
+  const pathSlug = blogSlugPathSegment(slug);
+  return lang === "en" ? `/en/blog/${pathSlug}` : `/blog/${pathSlug}`;
 }
 
 export function blogIndexPath(language: BlogLanguage) {
