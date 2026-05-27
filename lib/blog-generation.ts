@@ -203,8 +203,22 @@ function assertDeepSeekPair(value: DeepSeekPair) {
 }
 
 function assertDeepSeekPost(value: DeepSeekPost, language: DeepSeekLanguage) {
-  if (!value.title || !value.body || !value.geoSummary) {
+  if (!value.title || !value.body) {
     throw new Error(`DeepSeek JSON did not include a complete ${language} article draft`);
+  }
+  if (!value.geoSummary) {
+    const excerpt = value.excerpt?.trim();
+    const firstBodyParagraph = String(value.body)
+      .replace(/^#+\s+/gm, "")
+      .split(/\n{2,}/)
+      .map((part) => part.trim())
+      .find(Boolean);
+    value.geoSummary =
+      excerpt ||
+      firstBodyParagraph ||
+      (language === "en"
+        ? "This source-backed ALTOS LAB draft summarizes an AI trend and translates it into practical SEO, GEO and implementation decisions."
+        : "這篇 ALTOS LAB 來源化草稿整理 AI 趨勢，並轉成 SEO、GEO 與企業導入決策。");
   }
   return value;
 }
@@ -454,7 +468,7 @@ async function generateWithDeepSeek(input: BlogGenerateInput, sources: BlogSourc
             { role: "user", content: prompt }
           ],
           temperature: 0.2,
-          max_tokens: 2800,
+          max_tokens: 4200,
           response_format: { type: "json_object" }
         })
       });
