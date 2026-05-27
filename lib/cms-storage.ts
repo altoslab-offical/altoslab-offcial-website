@@ -155,6 +155,7 @@ function isBlobNotFoundError(error: unknown) {
   return (
     error instanceof Error &&
     (error.name === "BlobNotFoundError" ||
+      error.message.includes("Failed to fetch blob: 400 Bad Request") ||
       error.message.includes("Failed to fetch blob: 404 Not Found"))
   );
 }
@@ -210,28 +211,28 @@ function parseCmsBlobText(text: string): CmsData {
   return payload as CmsData;
 }
 
-async function readBlobText(config: BlobConfig, pathname: string) {
-  if (config.access === "public") {
-    const result = await list({ prefix: pathname, limit: 10 });
-    const blob = result.blobs.find((item) => item.pathname === pathname);
-    if (!blob) return null;
+async function readPublicBlobText(pathname: string) {
+  const result = await list({ prefix: pathname, limit: 10 });
+  const blob = result.blobs.find((item) => item.pathname === pathname);
+  if (!blob) return null;
 
-    const url = new URL(blob.url);
-    url.searchParams.set("cmsCacheBust", String(Date.now()));
+  const url = new URL(blob.url);
+  url.searchParams.set("cmsCacheBust", String(Date.now()));
 
-    const response = await fetch(url, {
-      cache: "no-store",
-      headers: { "Cache-Control": "no-cache" }
-    });
-    if (response.status === 404) return null;
-    if (!response.ok) throw new Error("Failed to fetch blob: " + response.status + " " + response.statusText);
+  const response = await fetch(url, {
+    cache: "no-store",
+    headers: { "Cache-Control": "no-cache" }
+  });
+  if (response.status === 404) return null;
+  if (!response.ok) throw new Error("Failed to fetch blob: " + response.status + " " + response.statusText);
 
-    return {
-      etag: blob.etag || response.headers.get("etag") || "",
-      text: await response.text()
-    };
-  }
+  return {
+    etag: blob.etag || response.headers.get("etag") || "",
+    text: await response.text()
+  };
+}
 
+async function readPrivateBlobText(config: BlobConfig, pathname: string) {
   try {
     const result = await get(pathname, { access: config.access, useCache: false });
     if (!result || result.statusCode !== 200 || !result.stream) return null;
@@ -243,6 +244,13 @@ async function readBlobText(config: BlobConfig, pathname: string) {
     if (isBlobNotFoundError(error)) return null;
     throw error;
   }
+}
+
+async function readBlobText(config: BlobConfig, pathname: string) {
+  if (config.access === "public") return readPublicBlobText(pathname);
+
+  const privateBlob = await readPrivateBlobText(config, pathname);
+  return privateBlob ?? readPublicBlobText(pathname);
 }
 
 async function writeBlobJson(config: BlobConfig, pathname: string, value: unknown, ifMatch?: string) {

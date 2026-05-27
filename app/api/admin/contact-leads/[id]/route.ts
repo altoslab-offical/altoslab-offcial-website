@@ -10,13 +10,20 @@ export async function PATCH(request: Request, context: Params) {
   const status = String(body.status || "new") as ContactLeadStatus;
   const note = body.note ? String(body.note) : undefined;
 
-  const lead = await mutateCmsData((data) => {
-    const index = data.contactLeads.findIndex((item) => item.id === id);
-    if (index === -1) return null;
-    data.contactLeads[index] = updateLeadStatus(data.contactLeads[index], status, note);
-    return data.contactLeads[index];
-  });
+  let lead;
+  try {
+    lead = await mutateCmsData((data) => {
+      const index = data.contactLeads.findIndex((item) => item.id === id);
+      if (index === -1) throw new Error("CONTACT_LEAD_NOT_FOUND");
+      data.contactLeads[index] = updateLeadStatus(data.contactLeads[index], status, note);
+      return data.contactLeads[index];
+    });
+  } catch (error) {
+    if (error instanceof Error && error.message === "CONTACT_LEAD_NOT_FOUND") {
+      return NextResponse.json({ error: "Not found" }, { status: 404 });
+    }
+    throw error;
+  }
 
-  if (!lead) return NextResponse.json({ error: "Not found" }, { status: 404 });
   return NextResponse.json({ lead });
 }
