@@ -211,11 +211,7 @@ function parseCmsBlobText(text: string): CmsData {
   return payload as CmsData;
 }
 
-async function readPublicBlobText(pathname: string) {
-  const result = await list({ prefix: pathname, limit: 10 });
-  const blob = result.blobs.find((item) => item.pathname === pathname);
-  if (!blob) return null;
-
+async function readPublicListedBlob(blob: { url: string; etag?: string }) {
   const url = new URL(blob.url);
   url.searchParams.set("cmsCacheBust", String(Date.now()));
 
@@ -230,6 +226,31 @@ async function readPublicBlobText(pathname: string) {
     etag: blob.etag || response.headers.get("etag") || "",
     text: await response.text()
   };
+}
+
+async function readPublicBlobText(pathname: string) {
+  const result = await list({ prefix: pathname, limit: 10 });
+  const blob = result.blobs.find((item) => item.pathname === pathname);
+  return blob ? readPublicListedBlob(blob) : null;
+}
+
+function cmsVersionPrefix(pathname: string) {
+  return pathname.replace(/\.json$/, ".versions/");
+}
+
+function cmsVersionPathname(pathname: string) {
+  const stamp = new Date().toISOString().replace(/[:.]/g, "-");
+  return `${cmsVersionPrefix(pathname)}${stamp}-${randomBytes(4).toString("hex")}.json`;
+}
+
+async function readVersionedPublicCmsBlobText(pathname: string) {
+  const result = await list({ prefix: cmsVersionPrefix(pathname), limit: 1000 });
+  const latest = result.blobs
+    .filter((item) => item.pathname.endsWith(".json"))
+    .sort((a, b) => new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime())[0];
+
+  if (latest) return readPublicListedBlob(latest);
+  return readPublicBlobText(pathname);
 }
 
 async function readPrivateBlobText(config: BlobConfig, pathname: string) {
@@ -247,17 +268,21 @@ async function readPrivateBlobText(config: BlobConfig, pathname: string) {
 }
 
 async function readBlobText(config: BlobConfig, pathname: string) {
-  if (config.access === "public") return readPublicBlobText(pathname);
+  if (config.access === "public") {
+    return pathname === config.pathname ? readVersionedPublicCmsBlobText(pathname) : readPublicBlobText(pathname);
+  }
 
   const privateBlob = await readPrivateBlobText(config, pathname);
-  return privateBlob ?? readPublicBlobText(pathname);
+  return privateBlob ?? readVersionedPublicCmsBlobText(pathname);
 }
 
 async function writeBlobJson(config: BlobConfig, pathname: string, value: unknown, ifMatch?: string) {
-  await put(pathname, JSON.stringify(value, null, 2), {
+  const shouldWriteVersion = config.access === "public" && pathname === config.pathname && !ifMatch;
+
+  await put(shouldWriteVersion ? cmsVersionPathname(pathname) : pathname, JSON.stringify(value, null, 2), {
     access: config.access,
     addRandomSuffix: false,
-    allowOverwrite: true,
+    allowOverwrite: !shouldWriteVersion,
     cacheControlMaxAge: 60,
     contentType: "application/json",
     ...(ifMatch ? { ifMatch } : {})
