@@ -24,6 +24,16 @@ const MIN_TAKEAWAYS = 3;
 const MIN_READ_TIME = 2;
 const MAX_SEO_DESCRIPTION = 180;
 const MIN_SEO_DESCRIPTION = 70;
+const SOURCE_LINK_TIMEOUT_MS = 4500;
+
+const allowedCoverPaths = new Set([
+  "/geo-cover.png",
+  "/project-newsletter-cover.png",
+  "/orclaw-cover.png",
+  "/proj4-cover.png",
+  "/wonda-cover.png",
+  "/project-fortune-cover.png"
+]);
 
 const blockedPhrases = [
   "lorem ipsum",
@@ -81,7 +91,12 @@ function reviewPost(post: BlogPost): PostReview {
   if (post.faqs.length < MIN_FAQS) issues.push("needs at least two visible FAQs");
   if (post.sourceLinks.length < MIN_SOURCES) issues.push("needs at least four source links");
   if (uniqueSourceHosts(post) < 2) issues.push("source links need at least two unique domains");
-  if (!post.cover || !post.coverAlt) issues.push("cover image and alt text are required");
+  if (!post.cover || !post.coverAlt) {
+    issues.push("cover image and alt text are required");
+  } else {
+    if (!allowedCoverPaths.has(post.cover)) issues.push("cover image must use an approved ALTOS LAB asset");
+    if (post.coverAlt.trim().length < 18) issues.push("cover alt text is too thin");
+  }
   if (!post.tags.length) issues.push("tags are required");
 
   const invalidSources = post.sourceLinks.filter((source) => {
@@ -93,6 +108,8 @@ function reviewPost(post: BlogPost): PostReview {
     }
   });
   if (invalidSources.length) issues.push("all source links must be valid https URLs");
+  if (post.sourceLinks.some((source) => !source.title?.trim())) issues.push("all source links need visible titles");
+  if (post.sourceLinks.some((source) => !source.publisher?.trim())) warnings.push("some source links are missing publisher labels");
 
   const lower = `${post.title}\n${post.excerpt}\n${post.body}`.toLowerCase();
   const blocked = blockedPhrases.filter((phrase) => lower.includes(phrase));
@@ -109,7 +126,39 @@ function reviewPost(post: BlogPost): PostReview {
   return { language: post.language, slug: post.slug, score, issues, warnings };
 }
 
-export function reviewBlogPairForAutoPublish(posts: BlogPost[]): BlogPairQualityReview {
+async function sourceUrlStatus(url: string) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), SOURCE_LINK_TIMEOUT_MS);
+  const headers = {
+    "User-Agent": "ALTOS LAB quality reviewer; https://altoslab.com"
+  };
+
+  try {
+    const head = await fetch(url, { method: "HEAD", headers, redirect: "follow", signal: controller.signal });
+    if (head.status < 400) return null;
+    if (head.status !== 405 && head.status !== 403) return `${url} returned HTTP ${head.status}`;
+
+    const get = await fetch(url, {
+      method: "GET",
+      headers: { ...headers, Range: "bytes=0-1024" },
+      redirect: "follow",
+      signal: controller.signal
+    });
+    return get.status < 400 ? null : `${url} returned HTTP ${get.status}`;
+  } catch (error) {
+    return `${url} could not be reached: ${error instanceof Error ? error.message : "request failed"}`;
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+async function validateSourceReachability(posts: BlogPost[]) {
+  const urls = Array.from(new Set(posts.flatMap((post) => post.sourceLinks.map((source) => source.url))));
+  const results = await Promise.all(urls.map((url) => sourceUrlStatus(url)));
+  return results.filter(Boolean).map((message) => `source link validation failed: ${message}`);
+}
+
+export async function reviewBlogPairForAutoPublish(posts: BlogPost[]): Promise<BlogPairQualityReview> {
   const issues: string[] = [];
   const warnings: string[] = [];
   const postReviews = posts.map(reviewPost);
@@ -129,6 +178,7 @@ export function reviewBlogPairForAutoPublish(posts: BlogPost[]): BlogPairQuality
     issues.push(...review.issues.map((issue) => `${review.language}/${review.slug}: ${issue}`));
     warnings.push(...review.warnings.map((warning) => `${review.language}/${review.slug}: ${warning}`));
   }
+  issues.push(...(await validateSourceReachability(posts)));
 
   const score = Math.min(...postReviews.map((review) => review.score), issues.length ? 70 : 100);
   const approved = issues.length === 0 && score >= 85;

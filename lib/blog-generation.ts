@@ -31,6 +31,18 @@ type DeepSeekPair = {
 
 type DeepSeekLanguage = Extract<BlogLanguage, "zh-Hant" | "en">;
 
+type DeepSeekChatChoice = {
+  finish_reason?: "stop" | "length" | "content_filter" | "tool_calls" | "insufficient_system_resource" | string;
+  message?: {
+    content?: string;
+    reasoning_content?: string;
+  };
+};
+
+type DeepSeekChatResponse = {
+  choices?: DeepSeekChatChoice[];
+};
+
 const FALLBACK_SOURCES: TrendCandidate[] = [
   {
     title: "Google Search Central guidance on helpful, people-first content",
@@ -258,6 +270,12 @@ function fitSeoDescription(value = "", fallback = "") {
   return `${clipped || source.slice(0, 157).trim()}...`;
 }
 
+function deepSeekMaxTokens() {
+  const configured = Number(process.env.DEEPSEEK_MAX_TOKENS || 7600);
+  if (!Number.isFinite(configured)) return 7600;
+  return Math.min(8000, Math.max(4200, Math.floor(configured)));
+}
+
 function buildFallbackPost({
   input,
   language,
@@ -475,7 +493,7 @@ function normalizeGeneratedPost({
     language,
     translationGroupId,
     seoDescription,
-    sourceLinks: normalizeSourceLinks(generated.sourceLinks?.length ? generated.sourceLinks : sources),
+    sourceLinks: sources.length ? sources : normalizeSourceLinks(generated.sourceLinks || []),
     tags: generated.tags?.length ? generated.tags : language === "en" ? ["AI", "GEO", "SEO"] : ["AI", "GEO", "SEO"],
     author: generated.author || "ALTOS LAB",
     cover: generated.cover?.startsWith("/") ? generated.cover : chooseBlogCover(input, language),
@@ -510,12 +528,21 @@ async function generateWithDeepSeek(input: BlogGenerateInput, sources: BlogSourc
   const baseUrl = (process.env.DEEPSEEK_BASE_URL || "https://api.deepseek.com").replace(/\/$/, "");
   const model = process.env.DEEPSEEK_CONTENT_MODEL || "deepseek-v4-flash";
   const timeoutMs = Number(process.env.DEEPSEEK_TIMEOUT_MS || 45_000);
+  const maxTokens = deepSeekMaxTokens();
   const sourceBrief = sources
     .map((source, index) => `${index + 1}. ${source.title} (${source.publisher || "source"}) - ${source.url}`)
     .join("\n");
   const topic = input.topic || sources[0]?.title || "AI trends and search visibility";
 
-  async function requestJson(prompt: string, language: DeepSeekLanguage) {
+  async function requestJsonOnce({
+    prompt,
+    language,
+    temperature
+  }: {
+    prompt: string;
+    language: DeepSeekLanguage;
+    temperature: number;
+  }) {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), timeoutMs);
 
@@ -537,8 +564,9 @@ async function generateWithDeepSeek(input: BlogGenerateInput, sources: BlogSourc
             },
             { role: "user", content: prompt }
           ],
-          temperature: 0.2,
-          max_tokens: 4200,
+          thinking: { type: "disabled" },
+          temperature,
+          max_tokens: maxTokens,
           response_format: { type: "json_object" }
         })
       });
@@ -550,8 +578,17 @@ async function generateWithDeepSeek(input: BlogGenerateInput, sources: BlogSourc
         );
       }
 
-      const data = await response.json();
-      const message = data.choices?.[0]?.message || {};
+      const data = (await response.json()) as DeepSeekChatResponse;
+      const choice = data.choices?.[0];
+      if (!choice) throw new Error(`DeepSeek ${language} response did not include choices`);
+      if (choice.finish_reason === "length") {
+        throw new Error(`DeepSeek ${language} response was truncated at max_tokens=${maxTokens}`);
+      }
+      if (choice.finish_reason && choice.finish_reason !== "stop") {
+        throw new Error(`DeepSeek ${language} stopped with finish_reason=${choice.finish_reason}`);
+      }
+
+      const message = choice.message || {};
       const content = message.content || message.reasoning_content || "";
       return assertDeepSeekPost(extractJson(content) as DeepSeekPost, language);
     } catch (error) {
@@ -562,6 +599,33 @@ async function generateWithDeepSeek(input: BlogGenerateInput, sources: BlogSourc
     } finally {
       clearTimeout(timeout);
     }
+  }
+
+  async function requestJson(prompt: string, language: DeepSeekLanguage) {
+    const attempts = [
+      { prompt, temperature: 0.2 },
+      {
+        prompt: `${prompt}
+
+Format repair instruction:
+- The previous attempt failed validation.
+- Return one complete, valid JSON object only.
+- Keep the article concise enough to avoid truncation.
+- Do not add any field outside the requested schema.`,
+        temperature: 0.1
+      }
+    ];
+    let lastError: unknown;
+
+    for (const attempt of attempts) {
+      try {
+        return await requestJsonOnce({ ...attempt, language });
+      } catch (error) {
+        lastError = error;
+      }
+    }
+
+    throw lastError instanceof Error ? lastError : new Error(`DeepSeek ${language} generation failed`);
   }
 
   function languagePrompt(language: DeepSeekLanguage) {
@@ -601,13 +665,20 @@ Use this exact shape and fill every string field:
   "sourceLinks": [{"title": "", "url": "", "publisher": ""}]
 }
 
-Rules:
+Quality rules:
 - Write for people first. No keyword stuffing.
 - Do not invent client names, statistics, dates or source claims.
 - Any claim tied to a trend must be supported by sourceLinks.
 - The first 50 words must directly answer the search intent.
-- Include 3-5 FAQs only if the article visibly covers the answer.
-- Body should use Markdown headings and paragraphs, about 350-650 words.
+- seoDescription must be 80-150 characters.
+- excerpt must be 80-160 characters.
+- geoSummary must be 120-220 characters.
+- keyTakeaways must contain 4 concrete, non-generic bullets.
+- faqs must contain 3-5 visible questions and answers covered by the article.
+- sourceLinks must reuse only the URLs listed in Sources.
+- Body must use 4-6 Markdown H2 headings and practical paragraphs.
+- For zh-Hant, body should be 900-1400 Traditional Chinese characters.
+- For en, body should be 550-750 English words.
 - Keep status/review fields out of the JSON; the CMS will set them.`;
   }
 

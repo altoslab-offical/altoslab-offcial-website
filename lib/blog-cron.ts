@@ -100,7 +100,7 @@ export async function runBlogDraftCron(request: Request, forcedSlot?: CronSlot) 
         generatedAt: post.generatedAt || nowIso(),
         generatedBy: `cron:${slot}:${post.generatedBy || generated.provider}`
       }));
-      const qualityReview = reviewBlogPairForAutoPublish(preparedPosts);
+      const qualityReview = await reviewBlogPairForAutoPublish(preparedPosts);
       const canPublish = shouldAutoPublish() && qualityReview.approved;
 
       if (dryRun) {
