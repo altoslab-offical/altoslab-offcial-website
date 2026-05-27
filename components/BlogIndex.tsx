@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { JsonLd } from "@/components/JsonLd";
+import { SiteFooter } from "@/components/site/SiteFooter";
+import { SiteHeader } from "@/components/site/SiteHeader";
 import { blogIndexPath, blogPostPath, languageLabel } from "@/lib/blog-utils";
 import { getPublishedBlogPostsByLanguage } from "@/lib/cms";
 import { breadcrumbJsonLd } from "@/lib/seo";
@@ -88,131 +90,136 @@ export async function BlogIndex({ language, tag, query }: BlogIndexProps) {
   const otherLanguage = language === "en" ? "zh-Hant" : "en";
 
   return (
-    <main className="blog-page blog-index-page">
-      <JsonLd
-        data={breadcrumbJsonLd([
-          { name: "Home", url: "/" },
-          { name: "Blog", url: blogIndexPath(language) }
-        ])}
-      />
-      <header className="blog-index-hero">
-        <div className="blog-hero-copy-stack">
-          <p className="eyebrow">{dictionary.eyebrow}</p>
-          <h1>{dictionary.title}</h1>
-          <p className="hero-copy">{dictionary.description}</p>
-          <div className="blog-hero-actions">
-            <Link className="button primary" href="/#contact">
-              {dictionary.cta}
-            </Link>
-            <Link className="button" href={blogIndexPath(otherLanguage)}>
-              {dictionary.otherLanguage}
-            </Link>
-          </div>
-        </div>
-        <aside className="blog-lab-card" aria-label="ALTOS LAB journal scope">
-          <p className="eyebrow">ALTOS LAB</p>
-          <h2>{dictionary.labTitle}</h2>
-          <p>{dictionary.labBody}</p>
-          <div className="blog-lab-lanes">
-            {dictionary.lanes.map((lane) => (
-              <div key={lane.label}>
-                <span>{lane.label}</span>
-                <p>{lane.body}</p>
-              </div>
-            ))}
-          </div>
-        </aside>
-      </header>
-
-      <section className="blog-lane-strip" aria-label="ALTOS LAB content lanes">
-        {dictionary.lanes.map((lane, index) => (
-          <article className="blog-lane-item" key={lane.label}>
-            <span>{String(index + 1).padStart(2, "0")}</span>
-            <strong>{lane.label}</strong>
-            <p>{lane.body}</p>
-          </article>
-        ))}
-      </section>
-
-      <nav className="blog-filter-bar" aria-label="Blog topics">
-        <Link className={`tag ${!normalizedTag ? "active" : ""}`} href={blogIndexPath(language)}>
-          {dictionary.all}
-        </Link>
-        {tags.map((item) => (
-          <Link
-            className={`tag ${normalizedTag === item.toLowerCase() ? "active" : ""}`}
-            href={`${blogIndexPath(language)}?tag=${encodeURIComponent(item)}`}
-            key={item}
-          >
-            {item}
-          </Link>
-        ))}
-      </nav>
-
-      {featured ? (
-        <article className="blog-featured">
-          <div className="blog-featured-body">
-            <p className="eyebrow">
-              {dictionary.featured} · {languageLabel(featured.language)} · {dictionary.readTime(featured.readTimeMinutes)}
-            </p>
-            <h2>{featured.title}</h2>
-            <p>{featured.excerpt}</p>
-            <div className="article-meta">
-              <span>
-                {dictionary.updated} {new Date(featured.updatedAt).toLocaleDateString(language === "en" ? "en" : "zh-TW")}
-              </span>
-              <span>{featured.topic}</span>
-            </div>
-            <Link className="card-link" href={blogPostPath(featured)}>
-              {dictionary.read}
-            </Link>
-          </div>
-          {featured.cover ? (
-            <Link className="blog-featured-image" href={blogPostPath(featured)}>
-              <img src={featured.cover} alt={featured.coverAlt || `${featured.title} cover`} loading="eager" />
-              <span className="blog-image-caption">
-                <small>{dictionary.visualContext}</small>
-                <strong>{featured.coverAlt || featured.topic}</strong>
-              </span>
-            </Link>
-          ) : null}
-        </article>
-      ) : (
-        <p className="muted">{dictionary.empty}</p>
-      )}
-
-      <div className="blog-grid blog-index-grid">
-        {rest.map((post) => (
-          <article className="blog-card" key={post.id}>
-            {post.cover ? (
-              <Link className="blog-image" href={blogPostPath(post)}>
-                <img src={post.cover} alt={post.coverAlt || `${post.title} cover`} loading="lazy" />
+    <div className="site-home blog-site-shell">
+      <SiteHeader />
+      <main className="blog-page blog-index-page">
+        <JsonLd
+          data={breadcrumbJsonLd([
+            { name: "Home", url: "/" },
+            { name: "Blog", url: blogIndexPath(language) }
+          ])}
+        />
+        <header className="blog-index-hero">
+          <div className="blog-hero-copy-stack">
+            <p className="eyebrow">{dictionary.eyebrow}</p>
+            <h1>{dictionary.title}</h1>
+            <p className="hero-copy">{dictionary.description}</p>
+            <div className="blog-hero-actions">
+              <Link className="button primary" href="/#contact">
+                {dictionary.cta}
               </Link>
-            ) : null}
-            <div className="blog-body">
+              <Link className="button" href={blogIndexPath(otherLanguage)}>
+                {dictionary.otherLanguage}
+              </Link>
+            </div>
+          </div>
+          <aside className="blog-lab-card" aria-label="ALTOS LAB journal scope">
+            <p className="eyebrow">ALTOS LAB</p>
+            <h2>{dictionary.labTitle}</h2>
+            <p>{dictionary.labBody}</p>
+            <div className="blog-lab-lanes">
+              {dictionary.lanes.map((lane) => (
+                <div key={lane.label}>
+                  <span>{lane.label}</span>
+                  <p>{lane.body}</p>
+                </div>
+              ))}
+            </div>
+          </aside>
+        </header>
+
+        <section className="blog-lane-strip" aria-label="ALTOS LAB content lanes">
+          {dictionary.lanes.map((lane, index) => (
+            <article className="blog-lane-item" key={lane.label}>
+              <span>{String(index + 1).padStart(2, "0")}</span>
+              <strong>{lane.label}</strong>
+              <p>{lane.body}</p>
+            </article>
+          ))}
+        </section>
+
+        <nav className="blog-filter-bar" aria-label="Blog topics">
+          <Link className={`tag ${!normalizedTag ? "active" : ""}`} href={blogIndexPath(language)}>
+            {dictionary.all}
+          </Link>
+          {tags.map((item) => (
+            <Link
+              className={`tag ${normalizedTag === item.toLowerCase() ? "active" : ""}`}
+              href={`${blogIndexPath(language)}?tag=${encodeURIComponent(item)}`}
+              key={item}
+            >
+              {item}
+            </Link>
+          ))}
+        </nav>
+
+        {featured ? (
+          <article className="blog-featured">
+            <div className="blog-featured-body">
               <p className="eyebrow">
-                {post.tags.slice(0, 3).join(" / ")} · {dictionary.readTime(post.readTimeMinutes)}
+                {dictionary.featured} · {languageLabel(featured.language)} · {dictionary.readTime(featured.readTimeMinutes)}
               </p>
-              <h2>{post.title}</h2>
-              <p>{post.excerpt}</p>
-              <Link className="card-link" href={blogPostPath(post)}>
+              <h2>{featured.title}</h2>
+              <p>{featured.excerpt}</p>
+              <div className="article-meta">
+                <span>
+                  {dictionary.updated}{" "}
+                  {new Date(featured.updatedAt).toLocaleDateString(language === "en" ? "en" : "zh-TW")}
+                </span>
+                <span>{featured.topic}</span>
+              </div>
+              <Link className="card-link" href={blogPostPath(featured)}>
                 {dictionary.read}
               </Link>
             </div>
+            {featured.cover ? (
+              <Link className="blog-featured-image" href={blogPostPath(featured)}>
+                <img src={featured.cover} alt={featured.coverAlt || `${featured.title} cover`} loading="eager" />
+                <span className="blog-image-caption">
+                  <small>{dictionary.visualContext}</small>
+                  <strong>{featured.coverAlt || featured.topic}</strong>
+                </span>
+              </Link>
+            ) : null}
           </article>
-        ))}
-      </div>
+        ) : (
+          <p className="muted">{dictionary.empty}</p>
+        )}
 
-      <section className="blog-cta-panel">
-        <div>
-          <p className="eyebrow">ALTOS LAB</p>
-          <h2>{dictionary.ctaTitle}</h2>
-          <p>{dictionary.ctaBody}</p>
+        <div className="blog-grid blog-index-grid">
+          {rest.map((post) => (
+            <article className="blog-card" key={post.id}>
+              {post.cover ? (
+                <Link className="blog-image" href={blogPostPath(post)}>
+                  <img src={post.cover} alt={post.coverAlt || `${post.title} cover`} loading="lazy" />
+                </Link>
+              ) : null}
+              <div className="blog-body">
+                <p className="eyebrow">
+                  {post.tags.slice(0, 3).join(" / ")} · {dictionary.readTime(post.readTimeMinutes)}
+                </p>
+                <h2>{post.title}</h2>
+                <p>{post.excerpt}</p>
+                <Link className="card-link" href={blogPostPath(post)}>
+                  {dictionary.read}
+                </Link>
+              </div>
+            </article>
+          ))}
         </div>
-        <Link className="button primary" href="/#contact">
-          {dictionary.cta}
-        </Link>
-      </section>
-    </main>
+
+        <section className="blog-cta-panel">
+          <div>
+            <p className="eyebrow">ALTOS LAB</p>
+            <h2>{dictionary.ctaTitle}</h2>
+            <p>{dictionary.ctaBody}</p>
+          </div>
+          <Link className="button primary" href="/#contact">
+            {dictionary.cta}
+          </Link>
+        </section>
+      </main>
+      <SiteFooter />
+    </div>
   );
 }

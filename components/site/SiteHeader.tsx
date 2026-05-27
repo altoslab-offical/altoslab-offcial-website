@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { ArrowUpRight } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { homeNavigation } from "@/lib/site-content";
@@ -16,6 +17,8 @@ function readStoredLanguage(): BlogLanguage {
 
 export function SiteHeader() {
   const [language, setLanguage] = useState<BlogLanguage>("zh-Hant");
+  const pathname = usePathname();
+  const isHomePage = pathname === "/";
 
   useEffect(() => {
     setLanguage(readStoredLanguage());
@@ -33,6 +36,11 @@ export function SiteHeader() {
     [language]
   );
 
+  function siteHref(href: string) {
+    if (!href.startsWith("#")) return href;
+    return isHomePage ? href : `/${href}`;
+  }
+
   function chooseLanguage(nextLanguage: BlogLanguage) {
     setLanguage(nextLanguage);
     window.localStorage.setItem(STORAGE_KEY, nextLanguage);
@@ -46,7 +54,7 @@ export function SiteHeader() {
       </Link>
       <nav aria-label="Main navigation">
         {navigation.map((item) => (
-          <a href={item.href} key={item.href}>
+          <a href={siteHref(item.href)} key={item.href}>
             {item.label}
           </a>
         ))}
@@ -70,7 +78,7 @@ export function SiteHeader() {
             EN
           </button>
         </div>
-        <a className="site-nav-cta" href="#contact">
+        <a className="site-nav-cta" href={siteHref("#contact")}>
           <span className="site-nav-cta-label">{language === "en" ? "Talk" : "合作洽談"}</span>
           <ArrowUpRight size={16} strokeWidth={2.5} />
         </a>
