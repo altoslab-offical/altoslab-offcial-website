@@ -270,6 +270,16 @@ function fitSeoDescription(value = "", fallback = "") {
   return `${clipped || source.slice(0, 157).trim()}...`;
 }
 
+function fitSummaryField(value = "", fallback = "", minLength: number, maxLength: number) {
+  const text = singleLine(value);
+  const backup = singleLine(fallback);
+  const source = text.length >= minLength ? text : singleLine([text, backup].filter(Boolean).join(" ")) || text;
+  if (source.length <= maxLength) return source;
+
+  const clipped = source.slice(0, maxLength - 3).replace(/\s+\S*$/, "").trim();
+  return `${clipped || source.slice(0, maxLength - 3).trim()}...`;
+}
+
 function deepSeekMaxTokens() {
   const configured = Number(process.env.DEEPSEEK_MAX_TOKENS || 7600);
   if (!Number.isFinite(configured)) return 7600;
@@ -494,6 +504,25 @@ function normalizeGeneratedPost({
     generated.seoDescription,
     seoFallback
   );
+  const excerpt = fitSummaryField(
+    generated.excerpt,
+    [
+      generated.title,
+      generated.geoSummary,
+      input.intent,
+      language === "en"
+        ? "A source-backed ALTOS LAB briefing for operators evaluating AI implementation."
+        : "這是 ALTOS LAB 給企業營運者的來源化 AI 導入判斷摘要。"
+    ].filter(Boolean).join(" "),
+    70,
+    220
+  );
+  const geoSummary = fitSummaryField(
+    generated.geoSummary,
+    [excerpt, input.intent].filter(Boolean).join(" "),
+    90,
+    260
+  );
 
   return normalizeBlogPostInput({
     ...generated,
@@ -502,6 +531,8 @@ function normalizeGeneratedPost({
     language,
     translationGroupId,
     seoDescription,
+    excerpt,
+    geoSummary,
     sourceLinks: sources.length ? sources : normalizeSourceLinks(generated.sourceLinks || []),
     tags: generated.tags?.length ? generated.tags : language === "en" ? ["AI", "GEO", "SEO"] : ["AI", "GEO", "SEO"],
     author: generated.author || "ALTOS LAB",
