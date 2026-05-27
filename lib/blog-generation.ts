@@ -244,6 +244,20 @@ function chooseBlogCoverAlt(input: BlogGenerateInput, language: BlogLanguage) {
     : `ALTOS LAB ${topic} 文章主視覺`;
 }
 
+function singleLine(input = "") {
+  return input.replace(/\s+/g, " ").trim();
+}
+
+function fitSeoDescription(value = "", fallback = "") {
+  const text = singleLine(value);
+  const backup = singleLine(fallback);
+  const source = text.length >= 70 ? text : backup || text;
+  if (source.length <= 180) return source;
+
+  const clipped = source.slice(0, 157).replace(/\s+\S*$/, "").trim();
+  return `${clipped || source.slice(0, 157).trim()}...`;
+}
+
 function buildFallbackPost({
   input,
   language,
@@ -449,12 +463,18 @@ function normalizeGeneratedPost({
   }
 
   const body = String(generated.body);
+  const seoDescription = fitSeoDescription(
+    generated.seoDescription,
+    generated.excerpt || generated.geoSummary || generated.title
+  );
+
   return normalizeBlogPostInput({
     ...generated,
     slug: generated.slug || slugify(`${generated.title} ${language}`),
     status: "draft",
     language,
     translationGroupId,
+    seoDescription,
     sourceLinks: normalizeSourceLinks(generated.sourceLinks?.length ? generated.sourceLinks : sources),
     tags: generated.tags?.length ? generated.tags : language === "en" ? ["AI", "GEO", "SEO"] : ["AI", "GEO", "SEO"],
     author: generated.author || "ALTOS LAB",
