@@ -734,15 +734,15 @@ export function AdminShell({ initialTab = "dashboard" }: AdminShellProps) {
               <article>
                 <CalendarClock size={17} />
                 <div>
-                  <strong>每日早晚自動產文</strong>
-                  <span>09:00 / 15:00 台灣時間，各產生一組中英文草稿</span>
+                  <strong>每日自動發布一組中英文章</strong>
+                  <span>09:00 台灣時間產生同主題 zh/en pair，通過品質審核才發布</span>
                 </div>
               </article>
               <article>
                 <ShieldCheck size={17} />
                 <div>
-                  <strong>安全審稿模式</strong>
-                  <span>AI 文章預設是草稿，發布前需要人工確認來源與品牌觀點</span>
+                  <strong>品質審核員把關</strong>
+                  <span>檢查來源、GEO 摘要、FAQ、圖文、雙語對齊與發布門檻</span>
                 </div>
               </article>
               <article>
