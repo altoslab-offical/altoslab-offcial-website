@@ -133,6 +133,13 @@ export function servicesJsonLd(projects: Project[]) {
 }
 
 export function pageMetadata(page: SitePage | null) {
+  const image = {
+    url: absoluteUrl("/geo-cover.png"),
+    width: 1200,
+    height: 630,
+    alt: "ALTOS LAB AI implementation and GEO studio"
+  };
+
   return {
     title: page?.seoTitle || "ALTOS LAB｜AI 自動化、AI Agent 與 GEO 顧問工作室",
     description:
@@ -147,7 +154,16 @@ export function pageMetadata(page: SitePage | null) {
       url: siteUrl,
       siteName,
       locale: "zh_TW",
-      type: "website"
+      type: "website",
+      images: [image]
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: page?.seoTitle || "ALTOS LAB｜AI 自動化、AI Agent 與 GEO 顧問工作室",
+      description:
+        page?.seoDescription ||
+        "ALTOS LAB 協助企業導入 AI Agent、流程自動化、AI 客服、後台 CMS 與 GEO 內容系統。",
+      images: [image]
     }
   };
 }
