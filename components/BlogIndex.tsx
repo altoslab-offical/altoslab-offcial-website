@@ -1,9 +1,10 @@
 import Link from "next/link";
+import { BlogEditorialVisual } from "@/components/BlogEditorialVisual";
 import { renderBrandText } from "@/components/BrandText";
 import { JsonLd } from "@/components/JsonLd";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { SiteHeader } from "@/components/site/SiteHeader";
-import { blogIndexPath, blogPostPath } from "@/lib/blog-utils";
+import { BLOG_LANGUAGES, blogIndexPath, blogPostPath, languageShortLabel } from "@/lib/blog-utils";
 import { getPublishedBlogPostsByLanguage } from "@/lib/cms";
 import { breadcrumbJsonLd } from "@/lib/seo";
 import type { BlogLanguage } from "@/lib/types";
@@ -49,7 +50,7 @@ const copy = {
     otherLanguage: "English",
     mobileTopicTitle: "Tech",
     mobileTopicDescription: "AI 實作、工具與產品筆記。",
-    sidebarTopics: ["Latest", "Notion HQ", "For Teams", "Inspiration", "Builders", "Pioneers", "Tech", "Mail", "First Block"]
+    sidebarTopics: ["Latest", "Breaking", "Column", "Feature", "AI Trends", "Agents", "Automation", "GEO", "Build Notes"]
   },
   en: {
     eyebrow: "ALTOS LAB Journal · Research / Build / Growth",
@@ -86,9 +87,103 @@ const copy = {
     otherLanguage: "繁體中文",
     mobileTopicTitle: "Tech",
     mobileTopicDescription: "How we build AI systems, product by product.",
-    sidebarTopics: ["Latest", "Notion HQ", "For Teams", "Inspiration", "Builders", "Pioneers", "Tech", "Mail", "First Block"]
+    sidebarTopics: ["Latest", "Breaking", "Column", "Feature", "AI Trends", "Agents", "Automation", "GEO", "Build Notes"]
+  },
+  ja: {
+    eyebrow: "ALTOS LAB Journal · Research / Build / Growth",
+    title: "AI Lab Notes",
+    brandTitle: "AI",
+    brandScript: "& Craft",
+    description: "AI を研究し、作り、運用へ落とし込むための実験室ノート。",
+    labTitle: "私たちは研究し、作り、その学びを引用できる知識として公開します。",
+    labBody:
+      "このジャーナルは、AI システム設計、企業ワークフロー、コンテンツ、検索可視性、出荷できるプロダクト実験を扱います。",
+    lanes: [
+      { label: "AI Products", body: "プロダクト化、MVP、ユーザーフロー、納品の学び" },
+      { label: "Agents & Automation", body: "AI Agent、ワークフロー、ナレッジベース、運用自動化" },
+      { label: "Search & GEO", body: "SEO 基礎、生成 AI 検索、引用される構造" },
+      { label: "Build Notes", body: "事例分解、設計判断、ツール、市場観測" }
+    ],
+    featured: "注目記事",
+    visualContext: "記事画像",
+    latest: "最新記事",
+    categories: "カテゴリー",
+    categoriesHint: "読みたいテーマをすばやく探せます。",
+    startHere: "まずはこちら",
+    postsLabel: "記事",
+    topicsLabel: "テーマ",
+    all: "すべて",
+    read: "読む",
+    updated: "更新",
+    readTime: (minutes: number) => `${minutes} 分で読めます`,
+    empty: "該当する記事はまだありません。",
+    ctaTitle: "AI 実験を運用できるシステムに変えたいですか？",
+    ctaBody:
+      "ALTOS LAB は AI プロダクト、社内ワークフロー、CMS、計測、自動公開フローを一つの運用能力として接続します。",
+    cta: "相談する",
+    otherLanguage: "繁體中文",
+    mobileTopicTitle: "Tech",
+    mobileTopicDescription: "AI 実装、ツール、プロダクトのノート。",
+    sidebarTopics: ["Latest", "Breaking", "Column", "Feature", "AI Trends", "Agents", "Automation", "GEO", "Build Notes"]
+  },
+  ko: {
+    eyebrow: "ALTOS LAB Journal · Research / Build / Growth",
+    title: "AI Lab Notes",
+    brandTitle: "AI",
+    brandScript: "& Craft",
+    description: "AI를 연구하고 만들고 운영으로 옮기는 실험실 노트.",
+    labTitle: "우리는 연구하고 만들며, 그 경험을 인용 가능한 지식으로 공개합니다.",
+    labBody:
+      "이 저널은 AI 시스템 설계, 기업 워크플로, 콘텐츠, 검색 가시성, 출시 가능한 제품 실험을 다룹니다.",
+    lanes: [
+      { label: "AI Products", body: "제품화, MVP, 사용자 흐름, 실행 경험" },
+      { label: "Agents & Automation", body: "AI Agent, 워크플로, 지식베이스, 운영 자동화" },
+      { label: "Search & GEO", body: "SEO 기초, 생성형 검색, 인용 가능한 콘텐츠 구조" },
+      { label: "Build Notes", body: "사례 분석, 아키텍처 판단, 도구와 시장 관찰" }
+    ],
+    featured: "추천 글",
+    visualContext: "글 이미지",
+    latest: "최신 글",
+    categories: "카테고리",
+    categoriesHint: "관심 있는 주제를 빠르게 찾을 수 있습니다.",
+    startHere: "여기서 시작",
+    postsLabel: "글",
+    topicsLabel: "주제",
+    all: "전체",
+    read: "읽기",
+    updated: "업데이트",
+    readTime: (minutes: number) => `${minutes}분 읽기`,
+    empty: "조건에 맞는 글이 아직 없습니다.",
+    ctaTitle: "AI 실험을 운영 가능한 시스템으로 바꾸고 싶나요?",
+    ctaBody:
+      "ALTOS LAB은 AI 제품, 내부 워크플로, CMS, 추적 이벤트, 자동 발행 흐름을 유지 가능한 운영 능력으로 연결합니다.",
+    cta: "상담하기",
+    otherLanguage: "繁體中文",
+    mobileTopicTitle: "Tech",
+    mobileTopicDescription: "AI 구현, 도구, 제품 노트.",
+    sidebarTopics: ["Latest", "Breaking", "Column", "Feature", "AI Trends", "Agents", "Automation", "GEO", "Build Notes"]
   }
 };
+
+const topicAliases: Record<string, string[]> = {
+  latest: [],
+  breaking: ["breaking", "快訊", "速報", "속보"],
+  column: ["column", "專欄", "コラム", "칼럼"],
+  feature: ["feature", "專題", "特集", "기획"],
+  "ai trends": ["ai trends", "ai 趨勢", "aiトレンド", "ai 트렌드", "ai 平台趨勢"],
+  agents: ["agent", "agents", "ai agent", "エージェント", "에이전트"],
+  automation: ["automation", "自動化", "자동화"],
+  geo: ["geo", "seo", "搜尋", "検索", "검색"],
+  "build notes": ["build notes", "build", "case", "案例", "構築", "빌드"]
+};
+
+function matchesTopic(post: Awaited<ReturnType<typeof getPublishedBlogPostsByLanguage>>[number], item: string) {
+  const key = item.toLowerCase();
+  if (key === "latest") return true;
+  const aliases = topicAliases[key] || [key];
+  const haystack = [post.contentType, post.newsCategory, post.topic, ...post.tags].join(" ").toLowerCase();
+  return aliases.some((alias) => haystack.includes(alias.toLowerCase()));
+}
 
 export async function BlogIndex({ language, tag, query }: BlogIndexProps) {
   const dictionary = copy[language];
@@ -96,7 +191,7 @@ export async function BlogIndex({ language, tag, query }: BlogIndexProps) {
   const normalizedTag = tag?.trim().toLowerCase();
   const normalizedQuery = query?.trim().toLowerCase();
   const filtered = posts.filter((post) => {
-    const matchesTag = normalizedTag ? post.tags.some((item) => item.toLowerCase() === normalizedTag) : true;
+    const matchesTag = normalizedTag ? matchesTopic(post, tag || "") : true;
     const matchesQuery = normalizedQuery
       ? [post.title, post.excerpt, post.topic, post.geoSummary, post.tags.join(" ")]
           .join(" ")
@@ -105,7 +200,6 @@ export async function BlogIndex({ language, tag, query }: BlogIndexProps) {
       : true;
     return matchesTag && matchesQuery;
   });
-  const otherLanguage = language === "en" ? "zh-Hant" : "en";
 
   return (
     <div className="site-home blog-site-shell">
@@ -130,7 +224,7 @@ export async function BlogIndex({ language, tag, query }: BlogIndexProps) {
             <nav className="blog-craft-nav" aria-label="Blog topics">
               {dictionary.sidebarTopics.map((item) => (
                 <Link
-                  className={normalizedTag === item.toLowerCase() || (!normalizedTag && item === "Tech") ? "active" : ""}
+                  className={normalizedTag === item.toLowerCase() || (!normalizedTag && item === "Latest") ? "active" : ""}
                   href={item === "Latest" ? blogIndexPath(language) : `${blogIndexPath(language)}?tag=${encodeURIComponent(item)}`}
                   key={item}
                 >
@@ -143,7 +237,13 @@ export async function BlogIndex({ language, tag, query }: BlogIndexProps) {
               <span>
                 <strong>{posts.length}</strong> {dictionary.postsLabel}
               </span>
-              <Link href={blogIndexPath(otherLanguage)}>{dictionary.otherLanguage}</Link>
+              <span className="blog-language-links">
+                {BLOG_LANGUAGES.filter((item) => item !== language).map((item) => (
+                  <Link href={blogIndexPath(item)} key={item}>
+                    {languageShortLabel(item)}
+                  </Link>
+                ))}
+              </span>
             </div>
           </aside>
 
@@ -161,11 +261,13 @@ export async function BlogIndex({ language, tag, query }: BlogIndexProps) {
             <div className="blog-craft-grid">
               {filtered.map((post) => (
                 <article className="blog-craft-card" key={post.id}>
-                  {post.cover ? (
-                    <Link className="blog-craft-card-image" href={blogPostPath(post)}>
+                  <Link className="blog-craft-card-image" href={blogPostPath(post)}>
+                    {post.cover ? (
                       <img src={post.cover} alt={post.coverAlt || `${post.title} cover`} loading="lazy" />
-                    </Link>
-                  ) : null}
+                    ) : (
+                      <BlogEditorialVisual compact post={post} />
+                    )}
+                  </Link>
                   <div className="blog-craft-card-body">
                     <h3>
                       <Link href={blogPostPath(post)}>{renderBrandText(post.title)}</Link>
@@ -176,7 +278,8 @@ export async function BlogIndex({ language, tag, query }: BlogIndexProps) {
                       <div>
                         <strong>{renderBrandText(post.author)}</strong>
                         <small>
-                          {post.tags.slice(0, 2).join(" / ")} · {dictionary.readTime(post.readTimeMinutes)}
+                          {[post.contentType, post.newsCategory || post.tags[0]].filter(Boolean).join(" / ")} ·{" "}
+                          {dictionary.readTime(post.readTimeMinutes)}
                         </small>
                       </div>
                     </div>

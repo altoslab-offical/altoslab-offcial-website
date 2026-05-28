@@ -13,21 +13,27 @@ const LANGUAGE_EVENT = "altoslab:languagechange";
 
 function readStoredLanguage(): BlogLanguage {
   if (typeof window === "undefined") return "zh-Hant";
-  return window.localStorage.getItem(STORAGE_KEY) === "en" ? "en" : "zh-Hant";
+  const storedLanguage = window.localStorage.getItem(STORAGE_KEY);
+  if (storedLanguage === "en" || storedLanguage === "ja" || storedLanguage === "ko") {
+    return storedLanguage;
+  }
+  return "zh-Hant";
 }
 
 function languageFromPath(pathname: string | null): BlogLanguage | null {
   if (!pathname) return null;
   if (pathname.startsWith("/en")) return "en";
+  if (pathname.startsWith("/ja")) return "ja";
+  if (pathname.startsWith("/ko")) return "ko";
   if (pathname.startsWith("/blog")) return "zh-Hant";
   return null;
 }
 
 export function SiteHeader() {
-  const [language, setLanguage] = useState<BlogLanguage>("zh-Hant");
   const pathname = usePathname();
   const isHomePage = pathname === "/";
   const routeLanguage = languageFromPath(pathname);
+  const [language, setLanguage] = useState<BlogLanguage>(routeLanguage ?? "zh-Hant");
 
   useEffect(() => {
     setLanguage(routeLanguage ?? readStoredLanguage());
@@ -39,8 +45,17 @@ export function SiteHeader() {
         if (language === "en" && item.href === "#about") return { label: "About", href: item.href };
         if (language === "en" && item.href === "#services") return { label: "Services", href: item.href };
         if (language === "en" && item.href === "#portfolio") return { label: "Work", href: item.href };
+        if (language === "ja" && item.href === "#about") return { label: "About", href: item.href };
+        if (language === "ja" && item.href === "#services") return { label: "Services", href: item.href };
+        if (language === "ja" && item.href === "#portfolio") return { label: "Work", href: item.href };
+        if (language === "ko" && item.href === "#about") return { label: "About", href: item.href };
+        if (language === "ko" && item.href === "#services") return { label: "Services", href: item.href };
+        if (language === "ko" && item.href === "#portfolio") return { label: "Work", href: item.href };
         if (item.href !== "/blog") return item;
-        return language === "en" ? { label: "Blog", href: "/en/blog" } : item;
+        if (language === "en") return { label: "Blog", href: "/en/blog" };
+        if (language === "ja") return { label: "Blog", href: "/ja/blog" };
+        if (language === "ko") return { label: "Blog", href: "/ko/blog" };
+        return item;
       }),
     [language]
   );
@@ -58,9 +73,39 @@ export function SiteHeader() {
     if (pathname === "/blog" && nextLanguage === "en") {
       window.location.assign("/en/blog");
     }
+    if (pathname === "/blog" && nextLanguage === "ja") {
+      window.location.assign("/ja/blog");
+    }
+    if (pathname === "/blog" && nextLanguage === "ko") {
+      window.location.assign("/ko/blog");
+    }
 
     if (pathname === "/en/blog" && nextLanguage === "zh-Hant") {
       window.location.assign("/blog");
+    }
+    if (pathname === "/en/blog" && nextLanguage === "ja") {
+      window.location.assign("/ja/blog");
+    }
+    if (pathname === "/en/blog" && nextLanguage === "ko") {
+      window.location.assign("/ko/blog");
+    }
+    if (pathname === "/ja/blog" && nextLanguage === "zh-Hant") {
+      window.location.assign("/blog");
+    }
+    if (pathname === "/ja/blog" && nextLanguage === "en") {
+      window.location.assign("/en/blog");
+    }
+    if (pathname === "/ja/blog" && nextLanguage === "ko") {
+      window.location.assign("/ko/blog");
+    }
+    if (pathname === "/ko/blog" && nextLanguage === "zh-Hant") {
+      window.location.assign("/blog");
+    }
+    if (pathname === "/ko/blog" && nextLanguage === "en") {
+      window.location.assign("/en/blog");
+    }
+    if (pathname === "/ko/blog" && nextLanguage === "ja") {
+      window.location.assign("/ja/blog");
     }
   }
 
@@ -94,9 +139,25 @@ export function SiteHeader() {
           >
             EN
           </button>
+          <button
+            aria-pressed={language === "ja"}
+            className={language === "ja" ? "is-active" : undefined}
+            onClick={() => chooseLanguage("ja")}
+            type="button"
+          >
+            JP
+          </button>
+          <button
+            aria-pressed={language === "ko"}
+            className={language === "ko" ? "is-active" : undefined}
+            onClick={() => chooseLanguage("ko")}
+            type="button"
+          >
+            KR
+          </button>
         </div>
         <a className="site-nav-cta" href={siteHref("#contact")}>
-          <span className="site-nav-cta-label">{language === "en" ? "Talk" : "合作洽談"}</span>
+          <span className="site-nav-cta-label">{language === "zh-Hant" ? "合作洽談" : "Talk"}</span>
           <ArrowUpRight size={16} strokeWidth={2.5} />
         </a>
       </div>

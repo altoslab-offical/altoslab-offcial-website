@@ -25,7 +25,8 @@ export async function GET() {
         <guid isPermaLink="true">${url}</guid>
         <description>${escapeXml(post.excerpt)}</description>
         <pubDate>${new Date(post.publishedAt || post.createdAt).toUTCString()}</pubDate>
-        <category>${escapeXml(post.topic)}</category>
+        <category>${escapeXml(post.contentType || "column")}</category>
+        <category>${escapeXml(post.newsCategory || post.topic)}</category>
       </item>`;
     })
     .join("\n");

@@ -1,6 +1,8 @@
-import { estimateReadTimeMinutes, normalizeSourceLinks, taiwanDate } from "./blog-utils";
+import { BLOG_LANGUAGES, blogCoverForLanguage, estimateReadTimeMinutes, normalizeSourceLinks, taiwanDate } from "./blog-utils";
 import { normalizeBlogPostInput, nowIso, slugify } from "./cms";
-import type { BlogGenerationSlot, BlogLanguage, BlogPost, BlogSourceLink } from "./types";
+import { generateBlogCovers } from "./blog-cover-generation";
+import type { BlogPairQualityReview } from "./blog-quality";
+import type { BlogContentType, BlogGenerationSlot, BlogLanguage, BlogPost, BlogSourceLink } from "./types";
 
 export type BlogGenerateInput = {
   topic?: string;
@@ -9,6 +11,8 @@ export type BlogGenerateInput = {
   intent?: string;
   sourceLinks?: BlogSourceLink[];
   slot?: BlogGenerationSlot;
+  contentType?: BlogContentType;
+  newsCategory?: string;
   generationDate?: string;
 };
 
@@ -24,12 +28,9 @@ type DeepSeekPost = Partial<BlogPost> & {
   sourceLinks?: BlogSourceLink[];
 };
 
-type DeepSeekPair = {
-  zh?: DeepSeekPost;
-  en?: DeepSeekPost;
-};
+type DeepSeekPair = Partial<Record<BlogLanguage, DeepSeekPost>>;
 
-type DeepSeekLanguage = Extract<BlogLanguage, "zh-Hant" | "en">;
+type DeepSeekLanguage = BlogLanguage;
 
 type DeepSeekChatChoice = {
   finish_reason?: "stop" | "length" | "content_filter" | "tool_calls" | "insufficient_system_resource" | string;
@@ -208,8 +209,10 @@ function extractJson(text: string) {
 }
 
 function assertDeepSeekPair(value: DeepSeekPair) {
-  if (!value.zh?.title || !value.zh.body || !value.en?.title || !value.en.body) {
-    throw new Error("DeepSeek JSON did not include complete zh/en article drafts");
+  for (const language of BLOG_LANGUAGES) {
+    if (!value[language]?.title || !value[language]?.body) {
+      throw new Error(`DeepSeek JSON did not include complete ${language} article draft`);
+    }
   }
   return value;
 }
@@ -230,7 +233,11 @@ function assertDeepSeekPost(value: DeepSeekPost, language: DeepSeekLanguage) {
       firstBodyParagraph ||
       (language === "en"
         ? "This source-backed ALTOS LAB draft summarizes an AI trend and translates it into practical SEO, GEO and implementation decisions."
-        : "這篇 ALTOS LAB 來源化草稿整理 AI 趨勢，並轉成 SEO、GEO 與企業導入決策。");
+        : language === "ja"
+          ? "この ALTOS LAB の下書きは、AI トレンドを実務、SEO、GEO、導入判断に翻訳するためのソース付きブリーフです。"
+          : language === "ko"
+            ? "이 ALTOS LAB 초안은 AI 트렌드를 실무, SEO, GEO, 도입 판단으로 바꾸기 위한 출처 기반 브리프입니다."
+            : "這篇 ALTOS LAB 來源化草稿整理 AI 趨勢，並轉成 SEO、GEO 與企業導入決策。");
   }
   return value;
 }
@@ -240,6 +247,8 @@ function canonicalSources(candidates: TrendCandidate[]) {
 }
 
 function chooseBlogCover(input: BlogGenerateInput, language: BlogLanguage) {
+  if (BLOG_LANGUAGES.includes(language)) return blogCoverForLanguage(language);
+
   const haystack = `${input.topic || ""} ${input.keyword || ""} ${input.intent || ""}`.toLowerCase();
   const matched = BLOG_COVER_POOL.find((cover) => cover.keywords.some((keyword) => haystack.includes(keyword.toLowerCase())));
   if (matched) return matched.src;
@@ -251,13 +260,50 @@ function chooseBlogCover(input: BlogGenerateInput, language: BlogLanguage) {
 
 function chooseBlogCoverAlt(input: BlogGenerateInput, language: BlogLanguage) {
   const topic = input.topic?.trim() || (language === "en" ? "AI trend analysis" : "AI 趨勢分析");
-  return language === "en"
-    ? `ALTOS LAB visual for ${topic}`
-    : `ALTOS LAB ${topic} 文章主視覺`;
+  if (language === "en") return `ALTOS LAB visual for ${topic}`;
+  if (language === "ja") return `ALTOS LAB ${topic} 記事のメインビジュアル`;
+  if (language === "ko") return `ALTOS LAB ${topic} 글의 대표 이미지`;
+  return `ALTOS LAB ${topic} 文章主視覺`;
 }
 
 function singleLine(input = "") {
   return input.replace(/\s+/g, " ").trim();
+}
+
+function contentTypeFromInput(input: BlogGenerateInput): BlogContentType {
+  if (input.contentType === "breaking" || input.contentType === "feature") return input.contentType;
+  if (input.slot === "afternoon") return "feature";
+  return "column";
+}
+
+function localizedDefaultTag(language: BlogLanguage) {
+  if (language === "en") return ["AI products", "AI agents", "Automation", "AI trends"];
+  if (language === "ja") return ["AIプロダクト", "AIエージェント", "自動化", "AIトレンド"];
+  if (language === "ko") return ["AI 제품", "AI 에이전트", "자동화", "AI 트렌드"];
+  return ["AI 產品", "AI Agent", "自動化", "AI 趨勢"];
+}
+
+function localizedAudience(input: BlogGenerateInput, language: BlogLanguage) {
+  if (input.audience?.trim()) return input.audience.trim();
+  if (language === "en") return "founders, operators and marketing teams";
+  if (language === "ja") return "AI 導入を検討する経営者、事業責任者、マーケティングチーム";
+  if (language === "ko") return "AI 도입을 검토하는 경영진, 운영 리더, 마케팅 팀";
+  return "企業主、營運主管與行銷負責人";
+}
+
+function localizedDisclosure(language: BlogLanguage) {
+  if (language === "en") return "AI-assisted draft. ALTOS LAB quality review is required before publication.";
+  if (language === "ja") return "AI の支援で作成された下書きです。公開前に ALTOS LAB の品質審査が必要です。";
+  if (language === "ko") return "AI의 도움으로 작성된 초안입니다. 공개 전 ALTOS LAB 품질 검토가 필요합니다.";
+  return "AI 協助產生的草稿，發布前必須經 ALTOS LAB 品質審核。";
+}
+
+function localizedNewsCategory(input: BlogGenerateInput, language: BlogLanguage) {
+  if (input.newsCategory?.trim()) return input.newsCategory.trim();
+  if (language === "en") return "AI trends";
+  if (language === "ja") return "AIトレンド";
+  if (language === "ko") return "AI 트렌드";
+  return "AI 趨勢";
 }
 
 function fitSeoDescription(value = "", fallback = "") {
@@ -305,9 +351,9 @@ function buildFallbackPost({
 }) {
   const topic = input.topic?.trim() || "AI 產品、Agent 與企業自動化趨勢";
   const keyword = input.keyword?.trim() || (language === "en" ? "AI implementation lab" : "AI 實驗室與企業導入");
-  const audience =
-    input.audience?.trim() ||
-    (language === "en" ? "founders, operators and marketing teams" : "企業主、營運主管與行銷負責人");
+  const audience = localizedAudience(input, language);
+  const contentType = contentTypeFromInput(input);
+  const newsCategory = localizedNewsCategory(input, language);
   const title =
     language === "en"
       ? `${keyword}: turning AI trends into shippable systems`
@@ -436,6 +482,8 @@ Source links 提供證據鏈，但文章仍然要加入 ALTOS LAB 的實作觀�
       language === "en"
         ? "A practical, source-backed draft on turning AI trend monitoring into shippable product, workflow and visibility decisions."
         : "這篇草稿說明如何把 AI 趨勢監測轉成可審稿、可索引，也能支援產品與流程導入的實驗室內容。",
+    contentType,
+    newsCategory,
     topic,
     audience,
     geoSummary:
@@ -446,10 +494,11 @@ Source links 提供證據鏈，但文章仍然要加入 ALTOS LAB 的實作觀�
     keyTakeaways,
     faqs,
     sourceLinks: sources,
-    tags: language === "en" ? ["AI products", "AI agents", "Automation", "GEO"] : ["AI 產品", "AI Agent", "自動化", "GEO"],
+    tags: localizedDefaultTag(language),
     author: "ALTOS LAB",
     cover: chooseBlogCover(input, language),
     coverAlt: chooseBlogCoverAlt(input, language),
+    coverSource: "fallback",
     readTimeMinutes: estimateReadTimeMinutes(body, language),
     featured: false,
     reviewStatus: "ai-draft",
@@ -462,10 +511,7 @@ Source links 提供證據鏈，但文章仍然要加入 ALTOS LAB 的實作觀�
       hasBilingualParity: true,
       notes: "Fallback template. Human review required before publish."
     },
-    aiDisclosure:
-      language === "en"
-        ? "AI-assisted draft. Human review is required before publication."
-        : "AI 協助產生的草稿，發布前必須經人工審稿。",
+    aiDisclosure: localizedDisclosure(language),
     generationDate,
     generationSlot: input.slot,
     generatedAt: nowIso(),
@@ -495,6 +541,8 @@ function normalizeGeneratedPost({
   }
 
   const body = String(generated.body);
+  const contentType = generated.contentType || contentTypeFromInput(input);
+  const newsCategory = generated.newsCategory || localizedNewsCategory(input, language);
   const seoFallback = [
     generated.title,
     generated.excerpt,
@@ -536,12 +584,17 @@ function normalizeGeneratedPost({
     translationGroupId,
     seoDescription,
     excerpt,
+    contentType,
+    newsCategory,
     geoSummary,
     sourceLinks: sources.length ? sources : normalizeSourceLinks(generated.sourceLinks || []),
-    tags: generated.tags?.length ? generated.tags : language === "en" ? ["AI products", "AI agents", "Automation", "GEO"] : ["AI 產品", "AI Agent", "自動化", "GEO"],
+    tags: generated.tags?.length ? generated.tags : localizedDefaultTag(language),
     author: generated.author || "ALTOS LAB",
-    cover: generated.cover?.startsWith("/") ? generated.cover : chooseBlogCover(input, language),
+    cover: generated.cover?.startsWith("/") || generated.cover?.startsWith("http") ? generated.cover : chooseBlogCover(input, language),
     coverAlt: generated.coverAlt || chooseBlogCoverAlt(input, language),
+    coverPrompt: generated.coverPrompt,
+    coverSource: generated.coverSource || "fallback",
+    coverGeneration: generated.coverGeneration,
     readTimeMinutes: generated.readTimeMinutes || estimateReadTimeMinutes(body, language),
     featured: false,
     reviewStatus: "ai-draft",
@@ -552,12 +605,9 @@ function normalizeGeneratedPost({
       hasNoFabricatedClaims: false,
       hasSearchIntentAnswer: Boolean(generated.geoSummary),
       hasBilingualParity: true,
-      notes: "Generated by DeepSeek. Human review required before publish."
+      notes: "Generated by DeepSeek. ALTOS LAB quality gate required before publish."
     },
-    aiDisclosure:
-      language === "en"
-        ? "AI-assisted draft. Human review is required before publication."
-        : "AI 協助產生的草稿，發布前必須經人工審稿。",
+    aiDisclosure: localizedDisclosure(language),
     generationDate,
     generationSlot: input.slot,
     generatedAt: nowIso(),
@@ -676,17 +726,31 @@ Format repair instruction:
     const languageInstruction =
       language === "zh-Hant"
         ? "Write in Traditional Chinese for Taiwan. Use natural Taiwanese business language."
-        : "Write in natural business English.";
-    const languageLabel = language === "zh-Hant" ? "zh-Hant" : "en";
+        : language === "ja"
+          ? "Write in natural Japanese for business readers in Japan. Do not sound like a literal translation."
+          : language === "ko"
+            ? "Write in natural Korean for business readers in Korea. Do not sound like a literal translation."
+            : "Write in natural business English.";
+    const languageLabel = language;
+    const contentType = contentTypeFromInput(input);
+    const newsCategory = localizedNewsCategory(input, language);
+    const bodyLengthRule =
+      contentType === "breaking"
+        ? "Body should be short and fast: 260-420 English words or equivalent local-language length."
+        : contentType === "feature"
+          ? "Body should be deep: 900-1200 English words or equivalent local-language length, and include a Markdown comparison table."
+          : "Body should be substantial: 650-850 English words or equivalent local-language length.";
 
     return `You are writing one ${languageLabel} company-blog draft for ALTOS LAB, an AI implementation lab and product studio.
 
-This is one side of a bilingual article pair. Use the same angle, claims and source-backed reasoning as the paired language version will use.
+This is one side of a multilingual article set for zh-Hant, en, ja and ko. Use the same angle, claims and source-backed reasoning as the paired language versions will use, while making the language sound native.
 
 Topic: ${topic}
 Primary keyword: ${input.keyword || topic}
 Audience: ${input.audience || "business owners, operators, marketing teams and AI implementation buyers"}
 Search intent: ${input.intent || "understand the trend and evaluate practical AI product, agent, automation and implementation steps"}
+Content type: ${contentType}
+News category: ${newsCategory}
 Sources:
 ${sourceBrief}
 
@@ -699,6 +763,8 @@ Use this exact shape and fill every string field:
   "seoTitle": "",
   "seoDescription": "",
   "excerpt": "",
+  "contentType": "${contentType}",
+  "newsCategory": "${newsCategory}",
   "topic": "",
   "audience": "",
   "geoSummary": "",
@@ -713,6 +779,10 @@ Quality rules:
 - Write for people first. No keyword stuffing.
 - Position ALTOS LAB as an AI lab that researches, builds and publishes across AI products, agents, workflow automation, AI operations, case studies and search visibility.
 - SEO/GEO is one visibility lane, not the whole brand. Do not frame ALTOS LAB as only an SEO/GEO product.
+- Use the listed RSS/source items as factual references only. Do not copy source wording, paragraphs, structure, images, charts, screenshots or article art.
+- The article must be an original ALTOS LAB synthesis: summarize facts in your own words, cite the source URLs, and add implementation judgment.
+- Make readers feel ALTOS LAB is a serious lab: source-grounded, practical, original, careful with uncertainty and useful for decision makers.
+- Every article needs one fresh angle: a counterintuitive point, implementation framework, case breakdown, risk warning or decision matrix.
 - Do not invent client names, statistics, dates or source claims.
 - Any claim tied to a trend must be supported by sourceLinks.
 - The first 50 words must directly answer the search intent.
@@ -723,17 +793,158 @@ Quality rules:
 - faqs must contain 3-5 visible questions and answers covered by the article.
 - sourceLinks must reuse only the URLs listed in Sources.
 - Body must use 4-6 Markdown H2 headings and practical paragraphs.
-- For zh-Hant, body should be 900-1400 Traditional Chinese characters.
-- For en, body should be 550-750 English words.
+- ${bodyLengthRule}
+- If contentType is "feature", include one Markdown comparison table and one step-by-step framework.
+- If contentType is "column", answer one concrete operator question and include tradeoffs plus next steps.
+- If contentType is "breaking", keep it timely and factual: what happened, why it matters, what remains uncertain, sources.
 - Keep status/review fields out of the JSON; the CMS will set them.`;
   }
 
-  const [zh, en] = await Promise.all([
-    requestJson(languagePrompt("zh-Hant"), "zh-Hant"),
-    requestJson(languagePrompt("en"), "en")
-  ]);
+  const entries = await Promise.all(
+    BLOG_LANGUAGES.map(async (language) => [language, await requestJson(languagePrompt(language), language)] as const)
+  );
 
-  return { pair: assertDeepSeekPair({ zh, en }), model };
+  return { pair: assertDeepSeekPair(Object.fromEntries(entries) as DeepSeekPair), model };
+}
+
+export async function repairBlogPostsWithDeepSeek(
+  posts: BlogPost[],
+  review: BlogPairQualityReview,
+  input: BlogGenerateInput = {}
+) {
+  const apiKey = process.env.DEEPSEEK_API_KEY;
+  if (!apiKey) return { posts, repaired: false, warning: "DEEPSEEK_API_KEY is not configured" };
+
+  const baseUrl = (process.env.DEEPSEEK_BASE_URL || "https://api.deepseek.com").replace(/\/$/, "");
+  const model = process.env.DEEPSEEK_CONTENT_MODEL || "deepseek-v4-flash";
+  const timeoutMs = Number(process.env.DEEPSEEK_TIMEOUT_MS || 45_000);
+  const maxTokens = deepSeekMaxTokens();
+
+  async function repairOne(post: BlogPost) {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), timeoutMs);
+    const languageIssues = review.issues
+      .filter((issue) => issue.startsWith(`${post.language}/${post.slug}:`) || !issue.includes("/"))
+      .concat(review.warnings.filter((warning) => warning.startsWith(`${post.language}/${post.slug}:`)))
+      .slice(0, 12);
+
+    const prompt = `You are ALTOS LAB's automated quality editor.
+
+Repair only the quality issues listed below. Do not rewrite the whole article if a targeted edit is enough.
+Preserve the same source URLs, same contentType, same newsCategory, same translationGroupId semantics and the same main angle.
+Do not invent clients, private data, statistics or dates.
+Make ALTOS LAB sound like a serious AI implementation lab and product studio, not only an SEO/GEO tool.
+
+Language: ${post.language}
+Content type: ${post.contentType || contentTypeFromInput(input)}
+News category: ${post.newsCategory || localizedNewsCategory(input, post.language)}
+Quality issues:
+${languageIssues.map((issue, index) => `${index + 1}. ${issue}`).join("\n") || "Improve source-grounded clarity, Labs POV, GEO structure, image/alt fit and readability."}
+
+Return one valid JSON object with this exact shape:
+{
+  "title": "",
+  "seoTitle": "",
+  "seoDescription": "",
+  "excerpt": "",
+  "contentType": "${post.contentType || contentTypeFromInput(input)}",
+  "newsCategory": "${post.newsCategory || localizedNewsCategory(input, post.language)}",
+  "topic": "",
+  "audience": "",
+  "geoSummary": "",
+  "body": "",
+  "keyTakeaways": ["", "", "", ""],
+  "faqs": [{"question": "", "answer": ""}],
+  "tags": ["", "", ""],
+  "coverAlt": ""
+}
+
+Current article JSON:
+${JSON.stringify(
+  {
+    title: post.title,
+    seoTitle: post.seoTitle,
+    seoDescription: post.seoDescription,
+    excerpt: post.excerpt,
+    contentType: post.contentType,
+    newsCategory: post.newsCategory,
+    topic: post.topic,
+    audience: post.audience,
+    geoSummary: post.geoSummary,
+    body: post.body,
+    keyTakeaways: post.keyTakeaways,
+    faqs: post.faqs,
+    tags: post.tags,
+    coverAlt: post.coverAlt,
+    sourceLinks: post.sourceLinks
+  },
+  null,
+  2
+)}`;
+
+    try {
+      const response = await fetch(`${baseUrl}/chat/completions`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          "Content-Type": "application/json"
+        },
+        signal: controller.signal,
+        body: JSON.stringify({
+          model,
+          messages: [
+            {
+              role: "system",
+              content:
+                "You are a JSON API and senior editor. Return only one valid JSON object. Never include reasoning text outside JSON."
+            },
+            { role: "user", content: prompt }
+          ],
+          thinking: { type: "disabled" },
+          temperature: 0.15,
+          max_tokens: maxTokens,
+          response_format: { type: "json_object" }
+        })
+      });
+
+      if (!response.ok) throw new Error(`DeepSeek repair failed: ${response.status}`);
+      const data = (await response.json()) as DeepSeekChatResponse;
+      const content = data.choices?.[0]?.message?.content || data.choices?.[0]?.message?.reasoning_content || "";
+      const generated = assertDeepSeekPost(extractJson(content) as DeepSeekPost, post.language);
+      return normalizeGeneratedPost({
+        generated: {
+          ...generated,
+          slug: post.slug,
+          sourceLinks: post.sourceLinks,
+          cover: post.cover,
+          coverPrompt: post.coverPrompt,
+          coverSource: post.coverSource,
+          coverGeneration: post.coverGeneration,
+          contentType: generated.contentType || post.contentType,
+          newsCategory: generated.newsCategory || post.newsCategory
+        },
+        input: { ...input, contentType: post.contentType || input.contentType, newsCategory: post.newsCategory || input.newsCategory },
+        language: post.language,
+        translationGroupId: post.translationGroupId,
+        sources: post.sourceLinks,
+        generationDate: post.generationDate || input.generationDate || taiwanDate(),
+        model: `${model}:quality-repair`
+      });
+    } finally {
+      clearTimeout(timeout);
+    }
+  }
+
+  try {
+    const repairedPosts = await Promise.all(posts.map(repairOne));
+    return { posts: repairedPosts, repaired: true };
+  } catch (error) {
+    return {
+      posts,
+      repaired: false,
+      warning: error instanceof Error ? error.message : "DeepSeek quality repair failed"
+    };
+  }
 }
 
 export async function generateBlogDraftPair(input: BlogGenerateInput = {}) {
@@ -746,48 +957,47 @@ export async function generateBlogDraftPair(input: BlogGenerateInput = {}) {
   try {
     const generated = await generateWithDeepSeek(input, sources);
     if (!generated) {
+      const fallbackPosts = BLOG_LANGUAGES.map((language) =>
+        buildFallbackPost({ input, language, translationGroupId, sources, generationDate })
+      );
+      const fallbackCovers = await generateBlogCovers(fallbackPosts);
       return {
-        posts: [
-          buildFallbackPost({ input, language: "zh-Hant", translationGroupId, sources, generationDate }),
-          buildFallbackPost({ input, language: "en", translationGroupId, sources, generationDate })
-        ],
+        posts: fallbackCovers.posts,
         sources,
-        provider: "fallback" as const
+        provider: "fallback" as const,
+        coverGeneration: fallbackCovers
       };
     }
 
+    const normalizedPosts = BLOG_LANGUAGES.map((language) =>
+      normalizeGeneratedPost({
+        generated: generated.pair[language],
+        input,
+        language,
+        translationGroupId,
+        sources,
+        generationDate,
+        model: generated.model
+      })
+    );
+    const generatedCovers = await generateBlogCovers(normalizedPosts);
+
     return {
-      posts: [
-        normalizeGeneratedPost({
-          generated: generated.pair.zh,
-          input,
-          language: "zh-Hant",
-          translationGroupId,
-          sources,
-          generationDate,
-          model: generated.model
-        }),
-        normalizeGeneratedPost({
-          generated: generated.pair.en,
-          input,
-          language: "en",
-          translationGroupId,
-          sources,
-          generationDate,
-          model: generated.model
-        })
-      ],
+      posts: generatedCovers.posts,
       sources,
-      provider: "deepseek" as const
+      provider: "deepseek" as const,
+      coverGeneration: generatedCovers
     };
   } catch (error) {
+    const fallbackPosts = BLOG_LANGUAGES.map((language) =>
+      buildFallbackPost({ input, language, translationGroupId, sources, generationDate })
+    );
+    const fallbackCovers = await generateBlogCovers(fallbackPosts);
     return {
-      posts: [
-        buildFallbackPost({ input, language: "zh-Hant", translationGroupId, sources, generationDate }),
-        buildFallbackPost({ input, language: "en", translationGroupId, sources, generationDate })
-      ],
+      posts: fallbackCovers.posts,
       sources,
       provider: "fallback" as const,
+      coverGeneration: fallbackCovers,
       warning: error instanceof Error ? error.message : "DeepSeek provider failed; used local fallback"
     };
   }

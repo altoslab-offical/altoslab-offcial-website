@@ -1,5 +1,19 @@
-import { defaultQualityChecks } from "./blog-utils";
-import type { BlogLanguage, BlogPost } from "./types";
+import { BLOG_LANGUAGES, defaultQualityChecks } from "./blog-utils";
+import type { BlogContentType, BlogLanguage, BlogPost } from "./types";
+
+type ReviewArea =
+  | "sourceTrust"
+  | "labsPointOfView"
+  | "seoGeoStructure"
+  | "readability"
+  | "imageFit"
+  | "multilingualParity";
+
+type ReviewResult = {
+  score: number;
+  issues: string[];
+  warnings: string[];
+};
 
 type PostReview = {
   language: BlogLanguage;
@@ -7,26 +21,44 @@ type PostReview = {
   score: number;
   issues: string[];
   warnings: string[];
+  breakdown: Record<ReviewArea, number>;
 };
 
 export type BlogPairQualityReview = {
   approved: boolean;
   score: number;
+  threshold: number;
+  contentType: BlogContentType;
   issues: string[];
   warnings: string[];
   postReviews: PostReview[];
   notes: string;
 };
 
-const MIN_SOURCES = 4;
-const MIN_FAQS = 2;
-const MIN_TAKEAWAYS = 3;
-const MIN_READ_TIME = 2;
+const CONTENT_TYPE_THRESHOLDS: Record<BlogContentType, number> = {
+  breaking: 82,
+  column: 88,
+  feature: 92
+};
+
+const CONTENT_TYPE_MINIMUMS: Record<
+  BlogContentType,
+  { sources: number; hosts: number; faqs: number; takeaways: number; h2: number; minReadTime: number }
+> = {
+  breaking: { sources: 2, hosts: 1, faqs: 1, takeaways: 2, h2: 2, minReadTime: 1 },
+  column: { sources: 4, hosts: 2, faqs: 2, takeaways: 3, h2: 3, minReadTime: 2 },
+  feature: { sources: 4, hosts: 2, faqs: 3, takeaways: 4, h2: 4, minReadTime: 4 }
+};
+
 const MAX_SEO_DESCRIPTION = 180;
 const MIN_SEO_DESCRIPTION = 70;
 const SOURCE_LINK_TIMEOUT_MS = 4500;
 
 const allowedCoverPaths = new Set([
+  "/blog-cover-zh-hant.png",
+  "/blog-cover-en.png",
+  "/blog-cover-ja.png",
+  "/blog-cover-ko.png",
   "/geo-cover.png",
   "/project-newsletter-cover.png",
   "/orclaw-cover.png",
@@ -34,6 +66,49 @@ const allowedCoverPaths = new Set([
   "/wonda-cover.png",
   "/project-fortune-cover.png"
 ]);
+
+const defaultTrustedHostFragments = [
+  "openai.com",
+  "deepmind.google",
+  "blog.google",
+  "developers.google.com",
+  "ai.google.dev",
+  "anthropic.com",
+  "mistral.ai",
+  "deepseek.com",
+  "api-docs.deepseek.com",
+  "huggingface.co",
+  "vercel.com",
+  "linear.app",
+  "notion.com",
+  "stripe.com",
+  "microsoft.com",
+  "github.blog",
+  "nvidia.com",
+  "semianalysis.com",
+  "theverge.com",
+  "techcrunch.com"
+];
+
+function isApprovedCoverUrl(url: string) {
+  if (allowedCoverPaths.has(url)) return true;
+  if (!/^https:\/\//.test(url)) return false;
+
+  try {
+    const host = new URL(url).hostname;
+    return (
+      host.endsWith(".blob.vercel-storage.com") ||
+      host.endsWith(".public.blob.vercel-storage.com") ||
+      host.endsWith("api.openverse.org") ||
+      host.endsWith("openverse.org") ||
+      host.endsWith("staticflickr.com") ||
+      host.endsWith("wikimedia.org") ||
+      host.endsWith("wikimedia.com")
+    );
+  } catch {
+    return false;
+  }
+}
 
 const blockedPhrases = [
   "lorem ipsum",
@@ -43,8 +118,61 @@ const blockedPhrases = [
   "i cannot browse",
   "quickly understand the latest",
   "我無法瀏覽",
-  "作為一個 ai"
+  "作為一個 ai",
+  "作為一個 AI",
+  "人工智慧語言模型"
 ];
+
+const labsSignals = [
+  "ALTOS LAB",
+  "implementation",
+  "product studio",
+  "lab",
+  "實驗室",
+  "導入",
+  "產品化",
+  "工作流",
+  "Agent",
+  "automation",
+  "自動化",
+  "決策",
+  "運營",
+  "運用",
+  "実装",
+  "運用",
+  "도입",
+  "운영"
+];
+
+const creativeSignals = [
+  "反直覺",
+  "框架",
+  "取捨",
+  "風險",
+  "矩陣",
+  "案例",
+  "method",
+  "framework",
+  "tradeoff",
+  "risk",
+  "matrix",
+  "case",
+  "counterintuitive",
+  "フレームワーク",
+  "リスク",
+  "判断",
+  "프레임워크",
+  "리스크",
+  "판단"
+];
+
+function trustedHostFragments() {
+  const configured = (process.env.BLOG_SOURCE_WHITELIST || "")
+    .split(",")
+    .map((item) => item.trim())
+    .filter(Boolean);
+  return [...new Set([...defaultTrustedHostFragments, ...configured])];
+}
 
 function plainText(markdown: string) {
   return markdown
@@ -54,51 +182,123 @@ function plainText(markdown: string) {
     .trim();
 }
 
-function uniqueSourceHosts(post: BlogPost) {
-  return new Set(
-    post.sourceLinks
-      .map((source) => {
-        try {
-          return new URL(source.url).hostname.replace(/^www\./, "");
-        } catch {
-          return "";
-        }
-      })
-      .filter(Boolean)
-  ).size;
+function wordishLength(markdown: string, language: BlogLanguage) {
+  const text = plainText(markdown);
+  if (language === "en") return text.split(/\s+/).filter(Boolean).length;
+  if (language === "zh-Hant") return (text.match(/[\u4e00-\u9fff]/g) || []).length;
+  if (language === "ja") return (text.match(/[\u3040-\u30ff\u4e00-\u9fff]/g) || []).length;
+  return (text.match(/[\uac00-\ud7af]/g) || []).length;
+}
+
+function minimumBodyLength(contentType: BlogContentType, language: BlogLanguage) {
+  if (contentType === "breaking") {
+    return language === "en" ? 260 : 360;
+  }
+  if (contentType === "feature") {
+    return language === "en" ? 900 : 1300;
+  }
+  return language === "en" ? 620 : 900;
 }
 
 function markdownHeadingCount(body: string) {
   return (body.match(/^##\s+/gm) || []).length;
 }
 
-function reviewPost(post: BlogPost): PostReview {
+function firstAnswerBlock(body: string) {
+  return plainText(body).slice(0, 360);
+}
+
+function postHostnames(post: BlogPost) {
+  return post.sourceLinks
+    .map((source) => {
+      try {
+        return new URL(source.url).hostname.replace(/^www\./, "");
+      } catch {
+        return "";
+      }
+    })
+    .filter(Boolean);
+}
+
+function uniqueSourceHosts(post: BlogPost) {
+  return new Set(postHostnames(post)).size;
+}
+
+function isTrustedSourceHost(host: string) {
+  return trustedHostFragments().some((fragment) => host === fragment || host.endsWith(`.${fragment}`) || host.includes(fragment));
+}
+
+function clampScore(score: number, max: number) {
+  return Math.max(0, Math.min(max, Math.round(score)));
+}
+
+function reviewWeighted(max: number, issues: string[], warnings: string[], base = max): ReviewResult {
+  return {
+    score: clampScore(base - issues.length * 6 - warnings.length * 2, max),
+    issues,
+    warnings
+  };
+}
+
+function contentTypeFor(posts: BlogPost[]): BlogContentType {
+  const contentType = posts.find((post) => post.contentType)?.contentType;
+  if (contentType === "breaking" || contentType === "feature") return contentType;
+  return "column";
+}
+
+export function reviewContentTypeFit(post: BlogPost): ReviewResult {
+  const contentType = post.contentType || "column";
+  const minimums = CONTENT_TYPE_MINIMUMS[contentType];
   const issues: string[] = [];
   const warnings: string[] = [];
-  const text = plainText(post.body);
-  const seoDescriptionLength = post.seoDescription?.trim().length || 0;
+  const body = plainText(post.body);
+  const length = wordishLength(post.body, post.language);
+  const minBody = minimumBodyLength(contentType, post.language);
+  const h2Count = markdownHeadingCount(post.body);
 
-  if (!post.title || post.title.length < 12) issues.push("title is too short");
-  if (!post.slug) issues.push("slug is missing");
-  if (seoDescriptionLength < MIN_SEO_DESCRIPTION || seoDescriptionLength > MAX_SEO_DESCRIPTION) {
-    issues.push("seoDescription must be 70-180 characters");
+  if (!post.contentType) issues.push("contentType is required");
+  if (!post.newsCategory?.trim()) issues.push("newsCategory is required");
+  if (post.readTimeMinutes < minimums.minReadTime) issues.push(`${contentType} read time is too short`);
+  if (length < minBody) issues.push(`${contentType} body is too short for ${post.language}`);
+  if (h2Count < minimums.h2) issues.push(`${contentType} needs at least ${minimums.h2} H2 sections`);
+  if (post.keyTakeaways.length < minimums.takeaways) issues.push(`${contentType} needs at least ${minimums.takeaways} takeaways`);
+  if (post.faqs.length < minimums.faqs) issues.push(`${contentType} needs at least ${minimums.faqs} visible FAQs`);
+
+  if (contentType === "breaking") {
+    if (body.length > 3600) warnings.push("breaking article may be too long for a fast news format");
+  } else if (contentType === "column") {
+    if (!creativeSignals.some((signal) => body.includes(signal))) {
+      issues.push("column needs a clear angle, framework, tradeoff or decision lens");
+    }
+  } else if (contentType === "feature") {
+    const hasTable = /\|.+\|/.test(post.body);
+    const hasSteps = /(^|\n)(\d+\.|- )/.test(post.body);
+    if (!hasTable) issues.push("feature needs a comparison table");
+    if (!hasSteps) issues.push("feature needs a step-by-step framework or list");
   }
-  if (!post.excerpt || post.excerpt.length < 50) issues.push("excerpt is too thin");
-  if (!post.geoSummary || post.geoSummary.length < 80) issues.push("geoSummary is too thin");
-  if (post.readTimeMinutes < MIN_READ_TIME) issues.push("read time is below 2 minutes");
-  if (text.length < (post.language === "en" ? 1800 : 700)) issues.push("body is too short for auto-publish");
-  if (markdownHeadingCount(post.body) < 2) issues.push("body needs at least two H2 sections");
-  if (post.keyTakeaways.length < MIN_TAKEAWAYS) issues.push("needs at least three key takeaways");
-  if (post.faqs.length < MIN_FAQS) issues.push("needs at least two visible FAQs");
-  if (post.sourceLinks.length < MIN_SOURCES) issues.push("needs at least four source links");
-  if (uniqueSourceHosts(post) < 2) issues.push("source links need at least two unique domains");
-  if (!post.cover || !post.coverAlt) {
-    issues.push("cover image and alt text are required");
-  } else {
-    if (!allowedCoverPaths.has(post.cover)) issues.push("cover image must use an approved ALTOS LAB asset");
-    if (post.coverAlt.trim().length < 18) issues.push("cover alt text is too thin");
+
+  return reviewWeighted(15, issues, warnings);
+}
+
+export function reviewSourceTrust(post: BlogPost): ReviewResult {
+  const contentType = post.contentType || "column";
+  const minimums = CONTENT_TYPE_MINIMUMS[contentType];
+  const issues: string[] = [];
+  const warnings: string[] = [];
+  const hosts = postHostnames(post);
+  const trustedHosts = hosts.filter(isTrustedSourceHost);
+
+  if (post.sourceLinks.length < minimums.sources) {
+    issues.push(`${contentType} needs at least ${minimums.sources} source links`);
   }
-  if (!post.tags.length) issues.push("tags are required");
+  if (uniqueSourceHosts(post) < minimums.hosts) {
+    issues.push(`${contentType} needs at least ${minimums.hosts} unique source domains`);
+  }
+  if (trustedHosts.length < Math.min(post.sourceLinks.length, minimums.sources)) {
+    issues.push("sources must come from the trusted RSS/source whitelist");
+  }
+  if (post.sourceLinks.some((source) => !source.title?.trim())) issues.push("all source links need visible titles");
+  if (post.sourceLinks.some((source) => !source.publisher?.trim())) warnings.push("some source links are missing publisher labels");
 
   const invalidSources = post.sourceLinks.filter((source) => {
     try {
@@ -109,13 +309,180 @@ function reviewPost(post: BlogPost): PostReview {
     }
   });
   if (invalidSources.length) issues.push("all source links must be valid https URLs");
-  if (post.sourceLinks.some((source) => !source.title?.trim())) issues.push("all source links need visible titles");
-  if (post.sourceLinks.some((source) => !source.publisher?.trim())) warnings.push("some source links are missing publisher labels");
+
+  return reviewWeighted(25, issues, warnings);
+}
+
+export function reviewLabsPointOfView(post: BlogPost): ReviewResult {
+  const issues: string[] = [];
+  const warnings: string[] = [];
+  const text = `${post.title}\n${post.excerpt}\n${post.geoSummary}\n${post.body}`;
+  const hitCount = labsSignals.filter((signal) => text.includes(signal)).length;
+  const lower = text.toLowerCase();
+
+  if (hitCount < 4) issues.push("article does not carry enough ALTOS LAB lab/product studio perspective");
+  if (!/ALTOS LAB/i.test(text)) issues.push("article should name ALTOS LAB as the publishing lab");
+  if (lower.includes("seo") && lower.includes("geo") && hitCount < 6) {
+    warnings.push("article risks sounding like an SEO/GEO tool page instead of a broader AI lab note");
+  }
+  if (!/(agent|automation|workflow|product|implementation|導入|產品|流程|自動化|実装|運用|도입|자동화)/i.test(text)) {
+    issues.push("article needs implementation, product, agent or workflow implications");
+  }
+
+  return reviewWeighted(20, issues, warnings);
+}
+
+export function reviewCreativity(post: BlogPost): ReviewResult {
+  const text = `${post.title}\n${post.excerpt}\n${post.body}`;
+  const hits = creativeSignals.filter((signal) => text.includes(signal));
+  const issues: string[] = [];
+  const warnings: string[] = [];
+
+  if (hits.length < 2) issues.push("article needs a fresher angle: framework, risk lens, case breakdown or decision matrix");
+  if (/最新|latest|trend|趨勢|トレンド|트렌드/i.test(post.title) && hits.length < 3) {
+    warnings.push("trend headline should be anchored by a more specific creative POV");
+  }
+
+  return reviewWeighted(10, issues, warnings);
+}
+
+function reviewSeoGeoStructure(post: BlogPost): ReviewResult {
+  const issues: string[] = [];
+  const warnings: string[] = [];
+  const seoDescriptionLength = post.seoDescription?.trim().length || 0;
+
+  if (!post.title || post.title.length < 12) issues.push("title is too short");
+  if (!post.slug) issues.push("slug is missing");
+  if (seoDescriptionLength < MIN_SEO_DESCRIPTION || seoDescriptionLength > MAX_SEO_DESCRIPTION) {
+    issues.push("seoDescription must be 70-180 characters");
+  }
+  if (!post.excerpt || post.excerpt.length < 50) issues.push("excerpt is too thin");
+  if (!post.geoSummary || post.geoSummary.length < 80) issues.push("geoSummary is too thin");
+  if (!post.tags.length) issues.push("tags are required");
+  if (!firstAnswerBlock(post.body)) issues.push("body needs a direct answer opening");
+  if (post.geoSummary.includes("...")) issues.push("geoSummary should not contain truncation ellipsis");
+  if (post.faqs.some((faq) => !faq.question || !faq.answer)) issues.push("FAQ entries must include question and answer");
+  if (!post.author?.trim()) issues.push("author is required");
 
   const lower = `${post.title}\n${post.excerpt}\n${post.geoSummary}\n${post.body}`.toLowerCase();
-  const blocked = blockedPhrases.filter((phrase) => lower.includes(phrase));
+  const blocked = blockedPhrases.filter((phrase) => lower.includes(phrase.toLowerCase()));
   if (blocked.length) issues.push(`blocked placeholder or AI disclaimer phrase found: ${blocked.join(", ")}`);
-  if (post.geoSummary.includes("...")) issues.push("geoSummary should not contain truncation ellipsis");
+
+  return reviewWeighted(20, issues, warnings);
+}
+
+function reviewReadability(post: BlogPost): ReviewResult {
+  const issues: string[] = [];
+  const warnings: string[] = [];
+  const body = plainText(post.body);
+  const paragraphs = post.body.split(/\n{2,}/).map((item) => item.trim()).filter(Boolean);
+
+  if (paragraphs.length < 4) issues.push("body needs more scannable paragraphs");
+  if (paragraphs.some((paragraph) => paragraph.length > 900)) warnings.push("some paragraphs are too long for mobile reading");
+  if (body.length && post.excerpt && body.includes(post.excerpt) && post.excerpt.length > 180) {
+    warnings.push("excerpt may be copied too directly into the article body");
+  }
+
+  return reviewWeighted(15, issues, warnings);
+}
+
+export function reviewImageFit(post: BlogPost): ReviewResult {
+  const issues: string[] = [];
+  const warnings: string[] = [];
+
+  if (!post.cover || !post.coverAlt) {
+    issues.push("cover image and alt text are required");
+  } else {
+    if (!isApprovedCoverUrl(post.cover)) issues.push("cover image must use an approved ALTOS LAB asset or Vercel Blob URL");
+    if (post.coverAlt.trim().length < 18) issues.push("cover alt text is too thin");
+    if (post.generatedBy && post.coverSource !== "curated") {
+      issues.push("AI generated articles require a topic-matched legally sourced cover before auto-publish");
+    }
+    if (post.coverSource === "curated" && !post.coverCredit) {
+      issues.push("curated cover images require visible attribution metadata");
+    }
+    const topicWords = `${post.topic} ${post.newsCategory} ${post.tags.join(" ")}`.toLowerCase();
+    const imageContext = `${post.coverAlt} ${post.coverPrompt || ""}`.toLowerCase();
+    if (!topicWords.split(/\s+|、|\/|,|，/).some((word) => word.length > 2 && imageContext.includes(word))) {
+      warnings.push("cover prompt or alt text should describe the article topic more clearly");
+    }
+  }
+
+  return reviewWeighted(10, issues, warnings);
+}
+
+export function reviewMultilingualParity(posts: BlogPost[]): ReviewResult {
+  const issues: string[] = [];
+  const warnings: string[] = [];
+  const languages = new Set(posts.map((post) => post.language));
+  const translationGroups = new Set(posts.map((post) => post.translationGroupId).filter(Boolean));
+  const sourceSets = posts.map((post) => new Set(post.sourceLinks.map((source) => source.url)));
+  const contentTypes = new Set(posts.map((post) => post.contentType || "column"));
+  const categories = new Set(posts.map((post) => post.newsCategory || ""));
+
+  if (posts.length !== BLOG_LANGUAGES.length) issues.push("auto-publish requires zh-Hant, en, ja and ko posts");
+  for (const language of BLOG_LANGUAGES) {
+    if (!languages.has(language)) issues.push(`missing ${language} article in multilingual group`);
+  }
+  if (translationGroups.size !== 1) issues.push("translationGroupId must match across the multilingual group");
+  if (contentTypes.size !== 1) issues.push("contentType must match across languages");
+  if (categories.size > 1) warnings.push("newsCategory differs across languages; keep taxonomy aligned");
+
+  const titles = posts.map((post) => post.title.trim()).filter(Boolean);
+  if (new Set(titles).size !== titles.length) warnings.push("some multilingual titles are identical");
+
+  const referenceSources = sourceSets[0] || new Set<string>();
+  for (const sourceSet of sourceSets.slice(1)) {
+    if (sourceSet.size !== referenceSources.size || [...referenceSources].some((url) => !sourceSet.has(url))) {
+      issues.push("sourceLinks must match across multilingual versions");
+      break;
+    }
+  }
+
+  const lengths = posts.map((post) => wordishLength(post.body, post.language)).filter(Boolean);
+  const max = Math.max(...lengths, 0);
+  const min = Math.min(...lengths, Number.POSITIVE_INFINITY);
+  if (Number.isFinite(min) && max > 0 && min / max < 0.35) {
+    warnings.push("one language version appears much thinner than the others");
+  }
+
+  return reviewWeighted(10, issues, warnings);
+}
+
+function reviewPost(post: BlogPost, multilingual: ReviewResult): PostReview {
+  const contentType = reviewContentTypeFit(post);
+  const sourceTrust = reviewSourceTrust(post);
+  const labsPointOfView = reviewLabsPointOfView(post);
+  const creativity = reviewCreativity(post);
+  const seoGeoStructure = reviewSeoGeoStructure(post);
+  const readability = reviewReadability(post);
+  const imageFit = reviewImageFit(post);
+  const breakdown: Record<ReviewArea, number> = {
+    sourceTrust: sourceTrust.score,
+    labsPointOfView: Math.max(0, labsPointOfView.score - Math.max(0, 10 - creativity.score)),
+    seoGeoStructure: seoGeoStructure.score,
+    readability: Math.max(0, Math.min(15, readability.score - Math.max(0, 12 - contentType.score))),
+    imageFit: imageFit.score,
+    multilingualParity: multilingual.score
+  };
+  const issues = [
+    ...contentType.issues,
+    ...sourceTrust.issues,
+    ...labsPointOfView.issues,
+    ...creativity.issues,
+    ...seoGeoStructure.issues,
+    ...readability.issues,
+    ...imageFit.issues
+  ];
+  const warnings = [
+    ...contentType.warnings,
+    ...sourceTrust.warnings,
+    ...labsPointOfView.warnings,
+    ...creativity.warnings,
+    ...seoGeoStructure.warnings,
+    ...readability.warnings,
+    ...imageFit.warnings
+  ];
 
   if (post.generatedBy?.includes("local-bilingual-geo-template") || post.generatedBy?.includes("local-bilingual-lab-template")) {
     issues.push("local fallback template cannot auto-publish");
@@ -124,8 +491,8 @@ function reviewPost(post: BlogPost): PostReview {
     warnings.push("provider is not DeepSeek; auto-publish should be conservative");
   }
 
-  const score = Math.max(0, 100 - issues.length * 12 - warnings.length * 3);
-  return { language: post.language, slug: post.slug, score, issues, warnings };
+  const score = Object.values(breakdown).reduce((sum, value) => sum + value, 0);
+  return { language: post.language, slug: post.slug, score, issues, warnings, breakdown };
 }
 
 async function sourceUrlStatus(url: string) {
@@ -173,39 +540,37 @@ async function validateSourceReachability(posts: BlogPost[]) {
 export async function reviewBlogPairForAutoPublish(posts: BlogPost[]): Promise<BlogPairQualityReview> {
   const issues: string[] = [];
   const warnings: string[] = [];
-  const postReviews = posts.map(reviewPost);
-  const languages = new Set(posts.map((post) => post.language));
-  const translationGroups = new Set(posts.map((post) => post.translationGroupId).filter(Boolean));
+  const contentType = contentTypeFor(posts);
+  const threshold = CONTENT_TYPE_THRESHOLDS[contentType];
+  const multilingual = reviewMultilingualParity(posts);
+  const postReviews = posts.map((post) => reviewPost(post, multilingual));
 
-  if (posts.length !== 2) issues.push("auto-publish requires exactly two posts");
-  if (!languages.has("zh-Hant") || !languages.has("en")) issues.push("auto-publish requires zh-Hant and en pair");
-  if (translationGroups.size !== 1) issues.push("translationGroupId must match across the pair");
-
-  const [first, second] = posts;
-  if (first && second && first.title.trim() === second.title.trim()) {
-    issues.push("bilingual pair titles are identical");
-  }
+  issues.push(...multilingual.issues);
+  warnings.push(...multilingual.warnings);
 
   for (const review of postReviews) {
     issues.push(...review.issues.map((issue) => `${review.language}/${review.slug}: ${issue}`));
     warnings.push(...review.warnings.map((warning) => `${review.language}/${review.slug}: ${warning}`));
   }
+
   const sourceValidation = await validateSourceReachability(posts);
   issues.push(...sourceValidation.issues);
   warnings.push(...sourceValidation.warnings);
 
-  const score = Math.min(...postReviews.map((review) => review.score), issues.length ? 70 : 100);
-  const approved = issues.length === 0 && score >= 85;
+  const baseScore = Math.min(...postReviews.map((review) => review.score), 100);
+  const score = Math.max(0, Math.min(100, baseScore - sourceValidation.issues.length * 10 - sourceValidation.warnings.length * 1));
+  const approved = issues.length === 0 && score >= threshold;
   const notes = approved
-    ? `Auto quality reviewer approved bilingual publish. Score ${score}.`
-    : `Auto quality reviewer held publish. Score ${score}. Issues: ${issues.join("; ")}`;
+    ? `ALTOS LAB quality reviewer approved ${contentType} auto-publish. Score ${score}/${threshold}.`
+    : `ALTOS LAB quality reviewer held publish. Score ${score}/${threshold}. Issues: ${issues.join("; ")}`;
 
-  return { approved, score, issues, warnings, postReviews, notes };
+  return { approved, score, threshold, contentType, issues, warnings, postReviews, notes };
 }
 
 export function applyQualityReview(post: BlogPost, review: BlogPairQualityReview, publish: boolean): BlogPost {
   const now = new Date().toISOString();
   const qualityIssues = [...review.issues, ...review.warnings];
+  const postReview = review.postReviews.find((item) => item.slug === post.slug && item.language === post.language);
 
   return {
     ...post,
@@ -215,10 +580,17 @@ export function applyQualityReview(post: BlogPost, review: BlogPairQualityReview
       ...post.qualityChecks,
       hasHumanReview: Boolean(post.qualityChecks.hasHumanReview),
       hasQualityReviewerApproval: publish,
-      hasVisibleSources: post.sourceLinks.length >= MIN_SOURCES,
+      hasVisibleSources: post.sourceLinks.length >= CONTENT_TYPE_MINIMUMS[review.contentType].sources,
       hasNoFabricatedClaims: publish,
       hasSearchIntentAnswer: Boolean(post.geoSummary),
-      hasBilingualParity: review.issues.every((issue) => !issue.includes("bilingual") && !issue.includes("translationGroupId")),
+      hasBilingualParity: review.issues.every(
+        (issue) => !issue.includes("multilingual") && !issue.includes("translationGroupId") && !issue.includes("sourceLinks must match")
+      ),
+      hasSourceTrust: postReview ? postReview.breakdown.sourceTrust >= 20 : publish,
+      hasLabsPointOfView: postReview ? postReview.breakdown.labsPointOfView >= 15 : publish,
+      hasCreativeAngle: postReview ? reviewCreativity(post).score >= 7 : publish,
+      hasImageFit: postReview ? postReview.breakdown.imageFit >= 8 : publish,
+      qualityScoreBreakdown: postReview?.breakdown,
       qualityScore: review.score,
       qualityIssues,
       notes: review.notes
@@ -226,7 +598,11 @@ export function applyQualityReview(post: BlogPost, review: BlogPairQualityReview
     aiDisclosure: publish
       ? post.language === "en"
         ? "AI-assisted article reviewed by ALTOS LAB's automated quality gate before publication."
-        : "本文章由 AI 協助產生，發布前已通過 ALTOS LAB 自動品質審核與來源檢查。"
+        : post.language === "ja"
+          ? "この記事は AI の支援で作成され、公開前に ALTOS LAB の自動品質審査を通過しています。"
+          : post.language === "ko"
+            ? "이 글은 AI의 도움으로 작성되었으며 공개 전 ALTOS LAB 자동 품질 검토를 통과했습니다."
+            : "本文章由 AI 協助產生，發布前已通過 ALTOS LAB 自動品質審核與來源檢查。"
       : post.aiDisclosure,
     publishedAt: publish ? post.publishedAt || now : post.publishedAt,
     updatedAt: now

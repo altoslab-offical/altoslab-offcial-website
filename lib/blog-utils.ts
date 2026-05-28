@@ -1,6 +1,44 @@
 import type { BlogLanguage, BlogPost, BlogQualityChecks, BlogSourceLink } from "./types";
 
-export const BLOG_LANGUAGES: BlogLanguage[] = ["zh-Hant", "en"];
+export const BLOG_LANGUAGES: BlogLanguage[] = ["zh-Hant", "en", "ja", "ko"];
+
+const BLOG_LANGUAGE_CONFIG: Record<
+  BlogLanguage,
+  { indexPath: string; html: string; metadata: string; label: string; shortLabel: string; cover: string }
+> = {
+  "zh-Hant": {
+    indexPath: "/blog",
+    html: "zh-Hant-TW",
+    metadata: "zh-Hant-TW",
+    label: "繁體中文",
+    shortLabel: "中文",
+    cover: "/blog-cover-zh-hant.png"
+  },
+  en: {
+    indexPath: "/en/blog",
+    html: "en",
+    metadata: "en",
+    label: "English",
+    shortLabel: "EN",
+    cover: "/blog-cover-en.png"
+  },
+  ja: {
+    indexPath: "/ja/blog",
+    html: "ja",
+    metadata: "ja",
+    label: "日本語",
+    shortLabel: "日本語",
+    cover: "/blog-cover-ja.png"
+  },
+  ko: {
+    indexPath: "/ko/blog",
+    html: "ko",
+    metadata: "ko",
+    label: "한국어",
+    shortLabel: "한국어",
+    cover: "/blog-cover-ko.png"
+  }
+};
 
 export function blogSlugPathSegment(slug: string) {
   return encodeURIComponent(slug);
@@ -10,27 +48,35 @@ export function blogPostPath(postOrSlug: BlogPost | string, language?: BlogLangu
   const slug = typeof postOrSlug === "string" ? postOrSlug : postOrSlug.slug;
   const lang = language ?? (typeof postOrSlug === "string" ? "zh-Hant" : postOrSlug.language);
   const pathSlug = blogSlugPathSegment(slug);
-  return lang === "en" ? `/en/blog/${pathSlug}` : `/blog/${pathSlug}`;
+  return `${BLOG_LANGUAGE_CONFIG[lang].indexPath}/${pathSlug}`;
 }
 
 export function blogIndexPath(language: BlogLanguage) {
-  return language === "en" ? "/en/blog" : "/blog";
+  return BLOG_LANGUAGE_CONFIG[language].indexPath;
 }
 
 export function alternateBlogLanguage(language: BlogLanguage): BlogLanguage {
-  return language === "en" ? "zh-Hant" : "en";
+  return language === "zh-Hant" ? "en" : "zh-Hant";
 }
 
 export function languageLabel(language: BlogLanguage) {
-  return language === "en" ? "English" : "繁體中文";
+  return BLOG_LANGUAGE_CONFIG[language].label;
+}
+
+export function languageShortLabel(language: BlogLanguage) {
+  return BLOG_LANGUAGE_CONFIG[language].shortLabel;
 }
 
 export function htmlLanguage(language: BlogLanguage) {
-  return language === "en" ? "en" : "zh-Hant-TW";
+  return BLOG_LANGUAGE_CONFIG[language].html;
 }
 
 export function metadataLanguageKey(language: BlogLanguage) {
-  return language === "en" ? "en" : "zh-Hant-TW";
+  return BLOG_LANGUAGE_CONFIG[language].metadata;
+}
+
+export function blogCoverForLanguage(language: BlogLanguage) {
+  return BLOG_LANGUAGE_CONFIG[language].cover;
 }
 
 export function estimateReadTimeMinutes(text: string, language: BlogLanguage = "zh-Hant") {
@@ -42,8 +88,8 @@ export function estimateReadTimeMinutes(text: string, language: BlogLanguage = "
     return Math.max(1, Math.ceil(words / 220));
   }
 
-  const cjkChars = (trimmed.match(/[\u4e00-\u9fff]/g) || []).length;
-  const latinWords = (trimmed.replace(/[\u4e00-\u9fff]/g, " ").match(/[a-z0-9]+/gi) || []).length;
+  const cjkChars = (trimmed.match(/[\u3040-\u30ff\u3400-\u9fff\uf900-\ufaff\uac00-\ud7af]/g) || []).length;
+  const latinWords = (trimmed.replace(/[\u3040-\u30ff\u3400-\u9fff\uf900-\ufaff\uac00-\ud7af]/g, " ").match(/[a-z0-9]+/gi) || []).length;
   return Math.max(1, Math.ceil((cjkChars + latinWords * 1.4) / 500));
 }
 

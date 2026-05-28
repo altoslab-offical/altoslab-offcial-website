@@ -1,11 +1,13 @@
 import { unstable_noStore as noStore } from "next/cache";
 import {
   BLOG_LANGUAGES,
+  blogCoverForLanguage,
   defaultQualityChecks,
   estimateReadTimeMinutes,
   normalizeSourceLinks
 } from "./blog-utils";
 import { readCmsDataFromStorage, writeCmsDataToStorage } from "./cms-storage";
+import { seedData } from "./seed";
 import type {
   BlogLanguage,
   BlogPost,
@@ -47,6 +49,22 @@ export async function readCmsData(): Promise<CmsData> {
   return hydrateCmsData(data);
 }
 
+function cloneSeedData(): CmsData {
+  return JSON.parse(JSON.stringify(seedData)) as CmsData;
+}
+
+async function readPublicCmsData(): Promise<CmsData> {
+  try {
+    return await readCmsData();
+  } catch (error) {
+    console.warn(
+      "[cms] Falling back to seed CMS data for public read:",
+      error instanceof Error ? error.message : error
+    );
+    return hydrateCmsData(cloneSeedData());
+  }
+}
+
 export async function writeCmsData(data: CmsData) {
   await writeCmsDataToStorage(data);
 }
@@ -86,6 +104,11 @@ function hydrateBlogPost(post: BlogPost): BlogPost {
       hasNoFabricatedClaims: Boolean(post.qualityChecks?.hasNoFabricatedClaims ?? !post.generatedBy),
       hasSearchIntentAnswer: Boolean(post.qualityChecks?.hasSearchIntentAnswer ?? post.geoSummary),
       hasBilingualParity: Boolean(post.qualityChecks?.hasBilingualParity ?? false),
+      hasSourceTrust: Boolean(post.qualityChecks?.hasSourceTrust ?? false),
+      hasLabsPointOfView: Boolean(post.qualityChecks?.hasLabsPointOfView ?? false),
+      hasCreativeAngle: Boolean(post.qualityChecks?.hasCreativeAngle ?? false),
+      hasImageFit: Boolean(post.qualityChecks?.hasImageFit ?? Boolean(post.cover && post.coverAlt)),
+      qualityScoreBreakdown: post.qualityChecks?.qualityScoreBreakdown,
       qualityScore: post.qualityChecks?.qualityScore,
       qualityIssues: post.qualityChecks?.qualityIssues,
       notes: post.qualityChecks?.notes
@@ -94,7 +117,14 @@ function hydrateBlogPost(post: BlogPost): BlogPost {
     generationDate: post.generationDate,
     generationSlot: post.generationSlot,
     scheduledFor: post.scheduledFor,
-    coverAlt: post.coverAlt
+    coverAlt: post.coverAlt,
+    coverPrompt: post.coverPrompt,
+    coverSource: post.coverSource ?? (post.generatedBy ? "fallback" : "manual"),
+    coverGeneration: post.coverGeneration,
+    coverCredit: post.coverCredit,
+    coverCreditUrl: post.coverCreditUrl,
+    coverLicense: post.coverLicense,
+    coverLicenseUrl: post.coverLicenseUrl
   };
 }
 
@@ -120,34 +150,34 @@ export function toPublicPage(page: SitePage): SitePage {
 }
 
 export async function getPublishedHomePage() {
-  const data = await readCmsData();
+  const data = await readPublicCmsData();
   const page = data.sitePages.find((item) => item.slug === "home" && item.status === "published");
   return page ? toPublicPage(page) : null;
 }
 
 export async function getPublishedPage(slug: string) {
-  const data = await readCmsData();
+  const data = await readPublicCmsData();
   const page = data.sitePages.find((item) => item.slug === slug && item.status === "published");
   return page ? toPublicPage(page) : null;
 }
 
 export async function getPublishedProjects() {
-  const data = await readCmsData();
+  const data = await readPublicCmsData();
   return sortedByOrder(data.projects.filter((project) => project.status === "published"));
 }
 
 export async function getPublishedProject(slug: string) {
-  const data = await readCmsData();
+  const data = await readPublicCmsData();
   return data.projects.find((project) => project.slug === slug && project.status === "published") ?? null;
 }
 
 export async function getPublishedBlogPosts() {
-  const data = await readCmsData();
+  const data = await readPublicCmsData();
   return sortedByOrder(data.blogPosts.filter((post) => post.status === "published"));
 }
 
 export async function getPublishedBlogPostsByLanguage(language?: BlogLanguage) {
-  const data = await readCmsData();
+  const data = await readPublicCmsData();
   return sortedByOrder(
     data.blogPosts.filter(
       (post) => post.status === "published" && (!language || normalizeBlogLanguage(post.language) === language)
@@ -172,7 +202,7 @@ function matchesBlogSlug(postSlug: string, requestedSlug: string) {
 }
 
 export async function getPublishedBlogPost(slug: string, language?: BlogLanguage) {
-  const data = await readCmsData();
+  const data = await readPublicCmsData();
   return (
     data.blogPosts.find(
       (post) =>
@@ -184,7 +214,7 @@ export async function getPublishedBlogPost(slug: string, language?: BlogLanguage
 }
 
 export async function getPublishedBlogAlternates(post: BlogPost) {
-  const data = await readCmsData();
+  const data = await readPublicCmsData();
   return data.blogPosts.filter(
     (item) =>
       item.status === "published" &&
@@ -261,6 +291,8 @@ export function normalizeBlogPostInput(input: Partial<BlogPost>, existing?: Blog
     seoTitle: input.seoTitle ?? existing?.seoTitle ?? title,
     seoDescription: input.seoDescription ?? existing?.seoDescription ?? input.excerpt ?? existing?.excerpt ?? "",
     excerpt: input.excerpt ?? existing?.excerpt ?? "",
+    contentType: input.contentType ?? existing?.contentType ?? "column",
+    newsCategory: input.newsCategory ?? existing?.newsCategory ?? "AI 趨勢",
     topic: input.topic ?? existing?.topic ?? "AI transformation",
     audience: input.audience ?? existing?.audience ?? "企業主與營運團隊",
     geoSummary: input.geoSummary ?? existing?.geoSummary ?? "",
@@ -270,8 +302,15 @@ export function normalizeBlogPostInput(input: Partial<BlogPost>, existing?: Blog
     sourceLinks,
     tags: input.tags ?? existing?.tags ?? ["AI", "GEO"],
     author: input.author ?? existing?.author ?? "ALTOS LAB",
-    cover: input.cover ?? existing?.cover ?? "/geo-cover.png",
+    cover: input.cover ?? existing?.cover ?? blogCoverForLanguage(language),
     coverAlt: input.coverAlt ?? existing?.coverAlt ?? `${title} cover image`,
+    coverPrompt: input.coverPrompt ?? existing?.coverPrompt,
+    coverSource: input.coverSource ?? existing?.coverSource ?? "manual",
+    coverGeneration: input.coverGeneration ?? existing?.coverGeneration,
+    coverCredit: input.coverCredit ?? existing?.coverCredit,
+    coverCreditUrl: input.coverCreditUrl ?? existing?.coverCreditUrl,
+    coverLicense: input.coverLicense ?? existing?.coverLicense,
+    coverLicenseUrl: input.coverLicenseUrl ?? existing?.coverLicenseUrl,
     readTimeMinutes: Number(
       input.readTimeMinutes ?? existing?.readTimeMinutes ?? estimateReadTimeMinutes(body, language)
     ),
@@ -334,6 +373,8 @@ export function publishValidationForBlogPost(post: BlogPost) {
   if (!post.slug) errors.push("slug is required");
   if (!post.title) errors.push("title is required");
   if (!post.excerpt) errors.push("excerpt is required");
+  if (!post.contentType) errors.push("contentType is required");
+  if (!post.newsCategory) errors.push("newsCategory is required");
   if (!post.body) errors.push("body is required");
   if (!post.geoSummary) errors.push("geoSummary is required");
   if (!post.cover) errors.push("cover is required");

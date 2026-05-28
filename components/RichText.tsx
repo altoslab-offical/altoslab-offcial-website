@@ -6,6 +6,7 @@ export function RichText({ text }: { text: string }) {
   const elements: ReactNode[] = [];
   let bullets: string[] = [];
   let orderedItems: string[] = [];
+  let tableRows: string[][] = [];
 
   function inlineMarkdown(value: string) {
     const parts = value.split(/(\*\*[^*]+\*\*)/g).filter(Boolean);
@@ -39,14 +40,54 @@ export function RichText({ text }: { text: string }) {
     orderedItems = [];
   }
 
+  function flushTable() {
+    if (tableRows.length < 2) {
+      tableRows = [];
+      return;
+    }
+
+    const [head, maybeSeparator, ...body] = tableRows;
+    const rows = maybeSeparator.every((cell) => /^:?-{3,}:?$/.test(cell)) ? body : [maybeSeparator, ...body];
+    elements.push(
+      <div className="rich-table-wrap" key={`table-${elements.length}`}>
+        <table>
+          <thead>
+            <tr>
+              {head.map((cell) => (
+                <th key={cell}>{inlineMarkdown(cell)}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((row, rowIndex) => (
+              <tr key={`${row.join("-")}-${rowIndex}`}>
+                {row.map((cell, cellIndex) => (
+                  <td key={`${cell}-${cellIndex}`}>{inlineMarkdown(cell)}</td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    );
+    tableRows = [];
+  }
+
   function flushLists() {
     flushBullets();
     flushOrderedItems();
+    flushTable();
   }
 
   lines.forEach((line, index) => {
     if (!line) {
       flushLists();
+      return;
+    }
+    if (line.startsWith("|") && line.endsWith("|")) {
+      flushBullets();
+      flushOrderedItems();
+      tableRows.push(line.split("|").slice(1, -1).map((cell) => cell.trim()));
       return;
     }
     if (line.startsWith("## ")) {

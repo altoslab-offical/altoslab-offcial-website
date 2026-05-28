@@ -82,7 +82,13 @@ export const viewport: Viewport = {
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const pathname = (await headers()).get("x-altos-pathname") || "";
-  const language = pathname.startsWith("/en") ? "en" : "zh-Hant-TW";
+  const language = pathname.startsWith("/en")
+    ? "en"
+    : pathname.startsWith("/ja")
+      ? "ja"
+      : pathname.startsWith("/ko")
+        ? "ko"
+        : "zh-Hant-TW";
 
   return (
     <html lang={language} className={`${inter.variable} ${notoSansTc.variable} ${spaceGrotesk.variable}`}>

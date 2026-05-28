@@ -7,9 +7,9 @@ export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "AI Lab Notes | ALTOS LAB Journal",
-  description: "ALTOS LAB journal on AI products, agents, automation, SEO/GEO, case studies and market signals.",
+  description: "ALTOS LAB の AI プロダクト、エージェント、自動化、SEO/GEO、事例、AI 市場観測ノート。",
   alternates: {
-    canonical: `${siteUrl}/en/blog`,
+    canonical: `${siteUrl}/ja/blog`,
     languages: {
       "zh-Hant-TW": `${siteUrl}/blog`,
       en: `${siteUrl}/en/blog`,
@@ -20,18 +20,18 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: "AI Lab Notes | ALTOS LAB Journal",
-    description: "ALTOS LAB journal on AI products, agents, automation, SEO/GEO, case studies and market signals.",
-    url: `${siteUrl}/en/blog`,
+    description: "ALTOS LAB の AI プロダクト、エージェント、自動化、SEO/GEO、事例、AI 市場観測ノート。",
+    url: `${siteUrl}/ja/blog`,
     siteName: "ALTOS LAB",
-    locale: "en_US",
+    locale: "ja_JP",
     type: "website",
-    images: [`${siteUrl}${blogCoverForLanguage("en")}`]
+    images: [`${siteUrl}${blogCoverForLanguage("ja")}`]
   },
   twitter: {
     card: "summary_large_image",
     title: "AI Lab Notes | ALTOS LAB Journal",
-    description: "ALTOS LAB journal on AI products, agents, automation, SEO/GEO, case studies and market signals.",
-    images: [`${siteUrl}${blogCoverForLanguage("en")}`]
+    description: "ALTOS LAB の AI プロダクト、エージェント、自動化、SEO/GEO、事例、AI 市場観測ノート。",
+    images: [`${siteUrl}${blogCoverForLanguage("ja")}`]
   }
 };
 
@@ -39,7 +39,7 @@ type PageProps = {
   searchParams?: Promise<{ tag?: string; query?: string }> | { tag?: string; query?: string };
 };
 
-export default async function EnglishBlogIndexPage({ searchParams }: PageProps) {
+export default async function JapaneseBlogIndexPage({ searchParams }: PageProps) {
   const params = searchParams ? await searchParams : {};
-  return <BlogIndex language="en" tag={params.tag} query={params.query} />;
+  return <BlogIndex language="ja" tag={params.tag} query={params.query} />;
 }

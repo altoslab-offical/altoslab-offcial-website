@@ -26,10 +26,11 @@ import {
   Sparkles,
   Users
 } from "lucide-react";
-import { blogPostPath, languageLabel } from "@/lib/blog-utils";
+import { BLOG_LANGUAGES, blogCoverForLanguage, blogPostPath, languageLabel } from "@/lib/blog-utils";
 import type {
   BlogGenerationSlot,
   BlogLanguage,
+  BlogContentType,
   BlogPost,
   BlogReviewStatus,
   CmsData,
@@ -44,6 +45,7 @@ type BlogEditorTab = "content" | "seo" | "sources" | "publish";
 type BlogFilterLanguage = "all" | BlogLanguage;
 type BlogFilterStatus = "all" | PublishStatus;
 type BlogFilterReview = "all" | BlogReviewStatus;
+type BlogFilterContentType = "all" | BlogContentType;
 
 type AdminShellProps = {
   initialTab?: Tab;
@@ -75,6 +77,12 @@ const slotLabels: Record<BlogGenerationSlot, string> = {
   manual: "手動",
   morning: "早上 09:00",
   afternoon: "下午 15:00"
+};
+
+const contentTypeLabels: Record<BlogContentType, string> = {
+  breaking: "快訊",
+  column: "專欄",
+  feature: "專題"
 };
 
 function makeSlug(input: string) {
@@ -159,20 +167,24 @@ export function AdminShell({ initialTab = "dashboard" }: AdminShellProps) {
   const [selectedProjectId, setSelectedProjectId] = useState("");
   const [selectedPostId, setSelectedPostId] = useState("");
   const [generator, setGenerator] = useState({
-    topic: "AI Agent 導入",
-    keyword: "AI Agent",
-    audience: "台灣中小企業主與營運主管",
-    intent: "評估是否需要導入 AI 自動化"
+    topic: "AI 平台趨勢與企業導入決策",
+    keyword: "AI implementation lab",
+    audience: "各國企業主、營運主管與行銷團隊",
+    intent: "判斷今日 AI 趨勢如何影響產品、流程、自動化與搜尋能見度",
+    contentType: "column" as BlogContentType,
+    newsCategory: "AI 平台趨勢"
   });
   const [blogFilters, setBlogFilters] = useState<{
     language: BlogFilterLanguage;
     status: BlogFilterStatus;
     review: BlogFilterReview;
+    contentType: BlogFilterContentType;
     query: string;
   }>({
     language: "all",
     status: "all",
     review: "all",
+    contentType: "all",
     query: ""
   });
   const [blogEditorTab, setBlogEditorTab] = useState<BlogEditorTab>("content");
@@ -224,9 +236,12 @@ export function AdminShell({ initialTab = "dashboard" }: AdminShellProps) {
       drafts: data.blogPosts.filter((post) => post.status === "draft").length,
       zh: data.blogPosts.filter((post) => post.language === "zh-Hant").length,
       en: data.blogPosts.filter((post) => post.language === "en").length,
+      ja: data.blogPosts.filter((post) => post.language === "ja").length,
+      ko: data.blogPosts.filter((post) => post.language === "ko").length,
       needsReview: data.blogPosts.filter(
         (post) => post.reviewStatus === "ai-draft" || post.reviewStatus === "needs-revision"
-      ).length
+      ).length,
+      qualityApproved: data.blogPosts.filter((post) => post.qualityChecks.hasQualityReviewerApproval).length
     }),
     [data.blogPosts]
   );
@@ -238,13 +253,14 @@ export function AdminShell({ initialTab = "dashboard" }: AdminShellProps) {
         const matchesLanguage = blogFilters.language === "all" || post.language === blogFilters.language;
         const matchesStatus = blogFilters.status === "all" || post.status === blogFilters.status;
         const matchesReview = blogFilters.review === "all" || post.reviewStatus === blogFilters.review;
+        const matchesContentType = blogFilters.contentType === "all" || post.contentType === blogFilters.contentType;
         const matchesQuery = query
-          ? [post.title, post.slug, post.topic, post.excerpt, post.tags.join(" ")]
+          ? [post.title, post.slug, post.topic, post.newsCategory, post.excerpt, post.tags.join(" ")]
               .join(" ")
               .toLowerCase()
               .includes(query)
           : true;
-        return matchesLanguage && matchesStatus && matchesReview && matchesQuery;
+        return matchesLanguage && matchesStatus && matchesReview && matchesContentType && matchesQuery;
       })
       .sort(
         (a, b) =>
@@ -332,8 +348,10 @@ export function AdminShell({ initialTab = "dashboard" }: AdminShellProps) {
           title: "未命名 AI 文章",
           status: "draft",
           language: "zh-Hant",
-          cover: "/geo-cover.png",
-          coverAlt: "ALTOS LAB AI 文章主視覺"
+          contentType: "column",
+          newsCategory: "AI 趨勢",
+          cover: blogCoverForLanguage("zh-Hant"),
+          coverAlt: "ALTOS LAB AI 實驗室文章抽象主視覺"
         }
       )
     });
@@ -344,7 +362,7 @@ export function AdminShell({ initialTab = "dashboard" }: AdminShellProps) {
   }
 
   async function generatePost() {
-    setMessage("正在產生成對中英文部落格草稿...");
+    setMessage("正在產生四語同主題部落格草稿...");
     setError("");
     try {
       const payload = await api<{ posts: BlogPost[]; post?: BlogPost; provider?: string; warning?: string }>(
@@ -367,7 +385,7 @@ export function AdminShell({ initialTab = "dashboard" }: AdminShellProps) {
       });
       setMessage(
         payload.warning ||
-          `已產生 ${created.length} 篇 ${payload.provider || "AI"} 部落格草稿，請完成審稿後再發佈。`
+          `已產生 ${created.length} 篇 ${payload.provider || "AI"} 部落格草稿，排程自動發文仍會以品質審核員分數決定是否發布。`
       );
     } catch (err) {
       setError(err instanceof Error ? err.message : "產生失敗");
@@ -375,7 +393,10 @@ export function AdminShell({ initialTab = "dashboard" }: AdminShellProps) {
   }
 
   async function duplicateTranslation(post: BlogPost) {
-    const language = post.language === "en" ? "zh-Hant" : "en";
+    const groupLanguages = data.blogPosts
+      .filter((item) => item.translationGroupId === post.translationGroupId)
+      .map((item) => item.language);
+    const language = BLOG_LANGUAGES.find((item) => !groupLanguages.includes(item)) || (post.language === "en" ? "zh-Hant" : "en");
     const payload = await api<{ post: BlogPost }>("/api/admin/blog", {
       method: "POST",
       body: JSON.stringify({
@@ -384,7 +405,8 @@ export function AdminShell({ initialTab = "dashboard" }: AdminShellProps) {
         status: "draft",
         language,
         title: `${post.title} (${languageLabel(language)})`,
-        slug: `${post.slug}-${language === "en" ? "en" : "zh"}`,
+        slug: `${post.slug}-${language === "zh-Hant" ? "zh" : language}`,
+        cover: blogCoverForLanguage(language),
         reviewStatus: "human-review",
         featured: false,
         publishedAt: undefined
@@ -400,7 +422,7 @@ export function AdminShell({ initialTab = "dashboard" }: AdminShellProps) {
   }
 
   function statusSummary(post: BlogPost) {
-    return `${statusLabels[post.status]} · ${languageLabel(post.language)} · ${reviewLabels[post.reviewStatus]}`;
+    return `${statusLabels[post.status]} · ${languageLabel(post.language)} · ${contentTypeLabels[post.contentType || "column"]} · ${reviewLabels[post.reviewStatus]}`;
   }
 
   function updateSourceLinks(post: BlogPost, value: unknown) {
@@ -428,11 +450,14 @@ export function AdminShell({ initialTab = "dashboard" }: AdminShellProps) {
     const hasReviewApproval = post.qualityChecks.hasHumanReview || post.qualityChecks.hasQualityReviewerApproval;
     return [
       { label: "有文章標題與 slug", ok: Boolean(post.title && post.slug) },
+      { label: "有文章型態與消息分類", ok: Boolean(post.contentType && post.newsCategory) },
       { label: "有 SEO title / description", ok: Boolean(post.seoTitle && post.seoDescription) },
       { label: "有 GEO 回答摘要", ok: Boolean(post.geoSummary) },
       { label: "有封面圖與 alt", ok: Boolean(post.cover && post.coverAlt) },
+      { label: "AI 草稿有合法主題配圖", ok: !post.generatedBy || post.coverSource === "curated" },
       { label: "有可見 FAQ", ok: post.faqs.length > 0 },
       { label: "AI 草稿有來源連結", ok: !post.generatedBy || post.sourceLinks.length > 0 },
+      { label: "來源可信與圖文符合", ok: Boolean(post.qualityChecks.hasSourceTrust && post.qualityChecks.hasImageFit) },
       { label: "人工或品質審核已通過", ok: !post.generatedBy || hasReviewApproval }
     ];
   }
@@ -718,13 +743,13 @@ export function AdminShell({ initialTab = "dashboard" }: AdminShellProps) {
                 <p className="eyebrow">Blog CMS · SEO / GEO</p>
                 <h1>部落格內容營運台</h1>
                 <p className="muted">
-                  參考 Ghost 與 Medium 的寫作流程，把產文、審稿、SEO/GEO、來源、預覽與發布檢查拆成可操作的工作區。
+                  ALTOS LAB 編輯台會把 AI 趨勢整理成快訊、專欄與專題，並用品質審核員確保內容有來源、有觀點、有圖文，能長期養 SEO / GEO。
                 </p>
               </div>
               <div className="admin-actions-stack">
                 <button className="button primary" onClick={generatePost} type="button">
                   <Sparkles size={16} />
-                  AI 產生中英草稿
+                  AI 產生四語草稿
                 </button>
                 <button className="button" onClick={() => createPost()} type="button">
                   <Plus size={16} />
@@ -737,22 +762,22 @@ export function AdminShell({ initialTab = "dashboard" }: AdminShellProps) {
               <article>
                 <CalendarClock size={17} />
                 <div>
-                  <strong>每日自動發布一組中英文章</strong>
-                  <span>09:00 台灣時間產生同主題 zh/en pair，通過品質審核才發布</span>
+                  <strong>每日兩批四語自動發文</strong>
+                  <span>09:00 專欄、15:00 專題；zh/en/ja/ko 同主題，達標才發布</span>
                 </div>
               </article>
               <article>
                 <ShieldCheck size={17} />
                 <div>
                   <strong>品質審核員把關</strong>
-                  <span>檢查來源、GEO 摘要、FAQ、圖文、雙語對齊與發布門檻</span>
+                  <span>檢查來源可信、Labs 觀點、GEO 摘要、FAQ、圖文、多語對齊與發布門檻</span>
                 </div>
               </article>
               <article>
                 <ImageIcon size={17} />
                 <div>
                   <strong>圖文完整</strong>
-                  <span>{renderBrandText("自動草稿會套用 ALTOS LAB 自有封面素材與 alt text")}</span>
+                  <span>{renderBrandText("自動草稿會根據文章主題配合法授權圖片、寫入 alt text，並保留圖片來源與授權")}</span>
                 </div>
               </article>
             </div>
@@ -792,9 +817,31 @@ export function AdminShell({ initialTab = "dashboard" }: AdminShellProps) {
                         onChange={(event) => setGenerator({ ...generator, intent: event.target.value })}
                       />
                     </label>
+                    <div className="form-row">
+                      <label>
+                        <span>文章型態</span>
+                        <select
+                          value={generator.contentType}
+                          onChange={(event) =>
+                            setGenerator({ ...generator, contentType: event.target.value as BlogContentType })
+                          }
+                        >
+                          <option value="breaking">快訊</option>
+                          <option value="column">專欄</option>
+                          <option value="feature">專題</option>
+                        </select>
+                      </label>
+                      <label>
+                        <span>消息分類</span>
+                        <input
+                          value={generator.newsCategory}
+                          onChange={(event) => setGenerator({ ...generator, newsCategory: event.target.value })}
+                        />
+                      </label>
+                    </div>
                     <button className="button primary" onClick={generatePost} type="button">
                       <Sparkles size={16} />
-                      產生中英草稿
+                      產生四語草稿
                     </button>
                   </div>
                 </section>
@@ -809,6 +856,7 @@ export function AdminShell({ initialTab = "dashboard" }: AdminShellProps) {
                     <span>{blogStats.drafts} 草稿</span>
                     <span>{blogStats.published} 已發布</span>
                     <span>{blogStats.needsReview} 待審</span>
+                    <span>{blogStats.qualityApproved} 品質通過</span>
                   </div>
                   <div className="admin-form compact">
                     <label>
@@ -829,8 +877,11 @@ export function AdminShell({ initialTab = "dashboard" }: AdminShellProps) {
                           }
                         >
                           <option value="all">全部</option>
-                          <option value="zh-Hant">繁體中文</option>
-                          <option value="en">English</option>
+                          {BLOG_LANGUAGES.map((item) => (
+                            <option value={item} key={item}>
+                              {languageLabel(item)}
+                            </option>
+                          ))}
                         </select>
                       </label>
                       <label>
@@ -848,6 +899,20 @@ export function AdminShell({ initialTab = "dashboard" }: AdminShellProps) {
                         </select>
                       </label>
                     </div>
+                    <label>
+                      <span>文章型態</span>
+                      <select
+                        value={blogFilters.contentType}
+                        onChange={(event) =>
+                          setBlogFilters({ ...blogFilters, contentType: event.target.value as BlogFilterContentType })
+                        }
+                      >
+                        <option value="all">全部</option>
+                        <option value="breaking">快訊</option>
+                        <option value="column">專欄</option>
+                        <option value="feature">專題</option>
+                      </select>
+                    </label>
                     <label>
                       <span>審稿狀態</span>
                       <select
@@ -879,7 +944,8 @@ export function AdminShell({ initialTab = "dashboard" }: AdminShellProps) {
                             <span className={`status-pill ${post.status}`}>{statusLabels[post.status]}</span>
                           </span>
                           <span className="blog-list-meta">
-                            {languageLabel(post.language)} · {reviewLabels[post.reviewStatus]} ·{" "}
+                            {languageLabel(post.language)} · {contentTypeLabels[post.contentType || "column"]} ·{" "}
+                            {reviewLabels[post.reviewStatus]} ·{" "}
                             {slotLabels[post.generationSlot || "manual"]}
                           </span>
                         </button>
@@ -965,11 +1031,17 @@ export function AdminShell({ initialTab = "dashboard" }: AdminShellProps) {
                             <select
                               value={selectedPost.language}
                               onChange={(event) =>
-                                updatePost(selectedPost.id, { language: event.target.value as BlogPost["language"] })
+                                updatePost(selectedPost.id, {
+                                  language: event.target.value as BlogPost["language"],
+                                  cover: blogCoverForLanguage(event.target.value as BlogPost["language"])
+                                })
                               }
                             >
-                              <option value="zh-Hant">繁體中文</option>
-                              <option value="en">English</option>
+                              {BLOG_LANGUAGES.map((item) => (
+                                <option value={item} key={item}>
+                                  {languageLabel(item)}
+                                </option>
+                              ))}
                             </select>
                           </label>
                           <label>
@@ -984,6 +1056,28 @@ export function AdminShell({ initialTab = "dashboard" }: AdminShellProps) {
                                     .filter(Boolean)
                                 })
                               }
+                            />
+                          </label>
+                        </div>
+                        <div className="form-row">
+                          <label>
+                            <span>文章型態</span>
+                            <select
+                              value={selectedPost.contentType || "column"}
+                              onChange={(event) =>
+                                updatePost(selectedPost.id, { contentType: event.target.value as BlogContentType })
+                              }
+                            >
+                              <option value="breaking">快訊</option>
+                              <option value="column">專欄</option>
+                              <option value="feature">專題</option>
+                            </select>
+                          </label>
+                          <label>
+                            <span>消息分類</span>
+                            <input
+                              value={selectedPost.newsCategory || ""}
+                              onChange={(event) => updatePost(selectedPost.id, { newsCategory: event.target.value })}
                             />
                           </label>
                         </div>
@@ -1070,6 +1164,31 @@ export function AdminShell({ initialTab = "dashboard" }: AdminShellProps) {
                         </div>
                         {selectedPost.cover ? (
                           <img className="admin-cover-preview" src={selectedPost.cover} alt={selectedPost.coverAlt || ""} />
+                        ) : null}
+                        {selectedPost.coverPrompt || selectedPost.coverGeneration ? (
+                          <div className="quality-panel">
+                            <p className="eyebrow">Cover generation</p>
+                            <p>
+                              來源：{selectedPost.coverSource || "manual"} · 狀態：
+                              {selectedPost.coverGeneration?.status || "manual"} · 模型：
+                              {selectedPost.coverGeneration?.model || selectedPost.coverGeneration?.provider || "n/a"}
+                            </p>
+                            {selectedPost.coverCredit ? (
+                              <p>
+                                圖片來源：
+                                {selectedPost.coverCreditUrl ? (
+                                  <a href={selectedPost.coverCreditUrl} target="_blank" rel="noreferrer">
+                                    {selectedPost.coverCredit}
+                                  </a>
+                                ) : (
+                                  selectedPost.coverCredit
+                                )}
+                                {selectedPost.coverLicense ? ` · ${selectedPost.coverLicense}` : ""}
+                              </p>
+                            ) : null}
+                            {selectedPost.coverGeneration?.error ? <p className="danger-text">{selectedPost.coverGeneration.error}</p> : null}
+                            {selectedPost.coverPrompt ? <textarea readOnly rows={5} value={selectedPost.coverPrompt} /> : null}
+                          </div>
                         ) : null}
                         <label>
                           <span>AI 內容揭露</span>
@@ -1179,9 +1298,13 @@ export function AdminShell({ initialTab = "dashboard" }: AdminShellProps) {
                             ["hasHumanReview", "人工已審稿"],
                             ["hasQualityReviewerApproval", "品質審核通過"],
                             ["hasVisibleSources", "來源可見"],
+                            ["hasSourceTrust", "來源可信"],
                             ["hasNoFabricatedClaims", "無捏造宣稱"],
                             ["hasSearchIntentAnswer", "有回答搜尋意圖"],
-                            ["hasBilingualParity", "中英文對齊"]
+                            ["hasLabsPointOfView", "Labs 觀點"],
+                            ["hasCreativeAngle", "創意角度"],
+                            ["hasImageFit", "圖文符合"],
+                            ["hasBilingualParity", "多語對齊"]
                           ].map(([field, label]) => (
                             <label className="checkbox-label" key={field}>
                               <input
@@ -1210,6 +1333,15 @@ export function AdminShell({ initialTab = "dashboard" }: AdminShellProps) {
                         {typeof selectedPost.qualityChecks.qualityScore === "number" ? (
                           <div className="quality-review-summary">
                             <strong>品質分數 {selectedPost.qualityChecks.qualityScore}</strong>
+                            {selectedPost.qualityChecks.qualityScoreBreakdown ? (
+                              <div className="quality-score-breakdown">
+                                {Object.entries(selectedPost.qualityChecks.qualityScoreBreakdown).map(([key, value]) => (
+                                  <span key={key}>
+                                    {key}: {value}
+                                  </span>
+                                ))}
+                              </div>
+                            ) : null}
                             {selectedPost.qualityChecks.qualityIssues?.length ? (
                               <ul>
                                 {selectedPost.qualityChecks.qualityIssues.map((issue) => (

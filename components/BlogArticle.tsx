@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { AnalyticsEvent } from "@/components/AnalyticsEvents";
+import { BlogEditorialVisual } from "@/components/BlogEditorialVisual";
 import { renderBrandText } from "@/components/BrandText";
 import { JsonLd } from "@/components/JsonLd";
 import { RichText } from "@/components/RichText";
@@ -34,6 +35,30 @@ const copy = {
     disclosure: "AI disclosure",
     ctaTitle: "Need this content system wired into your company website?",
     cta: "Talk to ALTOS LAB"
+  },
+  ja: {
+    back: "← Blog",
+    updated: "更新",
+    readTime: (minutes: number) => `${minutes} 分で読めます`,
+    geoSummary: "GEO answer summary",
+    takeaways: "Key Takeaways",
+    faq: "FAQ",
+    sources: "Sources",
+    disclosure: "AI disclosure",
+    ctaTitle: "このコンテンツ運用を自社サイトに接続しますか？",
+    cta: "ALTOS LAB に相談"
+  },
+  ko: {
+    back: "← Blog",
+    updated: "업데이트",
+    readTime: (minutes: number) => `${minutes}분 읽기`,
+    geoSummary: "GEO answer summary",
+    takeaways: "Key Takeaways",
+    faq: "FAQ",
+    sources: "Sources",
+    disclosure: "AI disclosure",
+    ctaTitle: "이 콘텐츠 운영 시스템을 회사 웹사이트에 연결할까요?",
+    cta: "ALTOS LAB에 상담"
   }
 };
 
@@ -76,7 +101,8 @@ export async function BlogArticle({ post }: { post: BlogPost }) {
               ))}
             </div>
             <p className="eyebrow">
-              {post.tags.slice(0, 3).join(" / ")} · {dictionary.readTime(post.readTimeMinutes)}
+              {[post.contentType, post.newsCategory, ...post.tags.slice(0, 2)].filter(Boolean).join(" / ")} ·{" "}
+              {dictionary.readTime(post.readTimeMinutes)}
             </p>
             <h1>{renderBrandText(post.title)}</h1>
             <div className="article-meta">
@@ -88,8 +114,37 @@ export async function BlogArticle({ post }: { post: BlogPost }) {
             </div>
             <p className="hero-copy">{renderBrandText(post.excerpt)}</p>
             {post.cover ? (
-              <img className="article-cover" src={post.cover} alt={post.coverAlt || `${post.title} cover`} />
-            ) : null}
+              <>
+                <img className="article-cover" src={post.cover} alt={post.coverAlt || `${post.title} cover`} />
+                {post.coverCredit ? (
+                  <p className="article-cover-credit">
+                    Cover image:{" "}
+                    {post.coverCreditUrl ? (
+                      <a href={post.coverCreditUrl} target="_blank" rel="noreferrer">
+                        {renderBrandText(post.coverCredit)}
+                      </a>
+                    ) : (
+                      renderBrandText(post.coverCredit)
+                    )}
+                    {post.coverLicense ? (
+                      <>
+                        {" "}
+                        ·{" "}
+                        {post.coverLicenseUrl ? (
+                          <a href={post.coverLicenseUrl} target="_blank" rel="noreferrer">
+                            {post.coverLicense}
+                          </a>
+                        ) : (
+                          post.coverLicense
+                        )}
+                      </>
+                    ) : null}
+                  </p>
+                ) : null}
+              </>
+            ) : (
+              <BlogEditorialVisual post={post} />
+            )}
           </header>
 
           <aside className="geo-summary">

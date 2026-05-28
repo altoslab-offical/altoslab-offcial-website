@@ -1,9 +1,10 @@
 export type PublishStatus = "draft" | "published" | "archived" | "deleted";
 export type ProjectStatus = "draft" | "published" | "archived";
 export type ContactLeadStatus = "new" | "contacted" | "qualified" | "closed" | "spam";
-export type BlogLanguage = "zh-Hant" | "en";
+export type BlogLanguage = "zh-Hant" | "en" | "ja" | "ko";
 export type BlogReviewStatus = "ai-draft" | "human-review" | "approved" | "needs-revision";
 export type BlogGenerationSlot = "manual" | "morning" | "afternoon";
+export type BlogContentType = "breaking" | "column" | "feature";
 
 export type PageSectionType =
   | "hero"
@@ -141,9 +142,34 @@ export type BlogQualityChecks = {
   hasNoFabricatedClaims: boolean;
   hasSearchIntentAnswer: boolean;
   hasBilingualParity: boolean;
+  hasSourceTrust?: boolean;
+  hasLabsPointOfView?: boolean;
+  hasCreativeAngle?: boolean;
+  hasImageFit?: boolean;
+  qualityScoreBreakdown?: {
+    sourceTrust: number;
+    labsPointOfView: number;
+    seoGeoStructure: number;
+    readability: number;
+    imageFit: number;
+    multilingualParity: number;
+  };
   qualityScore?: number;
   qualityIssues?: string[];
   notes?: string;
+};
+
+export type BlogCoverSource = "curated" | "manual" | "fallback";
+
+export type BlogCoverGeneration = {
+  source: BlogCoverSource;
+  provider?: string;
+  model?: string;
+  prompt?: string;
+  style?: string;
+  generatedAt?: string;
+  status?: "generated" | "skipped" | "failed";
+  error?: string;
 };
 
 export type BlogPost = {
@@ -157,6 +183,8 @@ export type BlogPost = {
   seoTitle?: string;
   seoDescription?: string;
   excerpt: string;
+  contentType?: BlogContentType;
+  newsCategory?: string;
   topic: string;
   audience: string;
   geoSummary: string;
@@ -168,6 +196,13 @@ export type BlogPost = {
   author: string;
   cover?: string;
   coverAlt?: string;
+  coverPrompt?: string;
+  coverSource?: BlogCoverSource;
+  coverGeneration?: BlogCoverGeneration;
+  coverCredit?: string;
+  coverCreditUrl?: string;
+  coverLicense?: string;
+  coverLicenseUrl?: string;
   readTimeMinutes: number;
   featured: boolean;
   reviewStatus: BlogReviewStatus;

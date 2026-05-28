@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { BlogArticle } from "@/components/BlogArticle";
-import { blogPostPath, metadataLanguageKey } from "@/lib/blog-utils";
+import { blogCoverForLanguage, blogPostPath, metadataLanguageKey } from "@/lib/blog-utils";
 import { getPublishedBlogAlternates, getPublishedBlogPost } from "@/lib/cms";
 import { absoluteUrl } from "@/lib/seo";
 
@@ -16,6 +16,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const post = await getPublishedBlogPost(slug, "zh-Hant");
   if (!post) return {};
   const alternates = await getPublishedBlogAlternates(post);
+  const image = absoluteUrl(post.cover || blogCoverForLanguage(post.language));
 
   return {
     title: post.seoTitle || post.title,
@@ -36,13 +37,13 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       modifiedTime: post.updatedAt,
       url: absoluteUrl(blogPostPath(post)),
       locale: "zh_TW",
-      images: post.cover ? [absoluteUrl(post.cover)] : undefined
+      images: [image]
     },
     twitter: {
       card: "summary_large_image",
       title: post.title,
       description: post.seoDescription || post.excerpt,
-      images: post.cover ? [absoluteUrl(post.cover)] : undefined
+      images: [image]
     }
   };
 }

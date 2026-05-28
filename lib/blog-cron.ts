@@ -1,23 +1,27 @@
 import { NextResponse } from "next/server";
-import { generateBlogDraftPair } from "@/lib/blog-generation";
+import { generateBlogDraftPair, repairBlogPostsWithDeepSeek } from "@/lib/blog-generation";
 import { applyQualityReview, reviewBlogPairForAutoPublish } from "@/lib/blog-quality";
-import { taiwanDate } from "@/lib/blog-utils";
+import { BLOG_LANGUAGES, taiwanDate } from "@/lib/blog-utils";
 import { mutateCmsData, nowIso, readCmsData } from "@/lib/cms";
 import { CmsLockError, withCmsStorageLock } from "@/lib/cms-storage";
-import type { BlogGenerationSlot, BlogPost } from "@/lib/types";
+import type { BlogContentType, BlogGenerationSlot, BlogPost } from "@/lib/types";
 
 type CronSlot = Extract<BlogGenerationSlot, "morning" | "afternoon">;
 
-const SLOT_CONFIG: Record<CronSlot, { hour: string; topic: string; intent: string }> = {
+const SLOT_CONFIG: Record<CronSlot, { hour: string; topic: string; intent: string; contentType: BlogContentType; newsCategory: string }> = {
   morning: {
     hour: "09:00",
-    topic: "AI platform trends, search visibility and executive implementation decisions",
-    intent: "quickly understand the latest AI/search trend and decide whether it matters for business implementation"
+    topic: "AI platform trends and implementation decisions for serious labs",
+    intent: "understand which AI platform trend matters today and how an implementation lab should translate it into product, workflow and market decisions",
+    contentType: "column",
+    newsCategory: "AI 平台趨勢"
   },
   afternoon: {
     hour: "15:00",
-    topic: "Enterprise AI automation, agent workflows and SEO/GEO operating playbooks",
-    intent: "turn AI trend signals into practical workflow, content and measurement decisions for an operator"
+    topic: "Enterprise AI automation, agent workflows and GEO knowledge systems",
+    intent: "turn AI trend signals into a durable framework for workflow automation, content authority, SEO/GEO visibility and operating measurement",
+    contentType: "feature",
+    newsCategory: "AI 專題研究"
   }
 };
 
@@ -49,7 +53,7 @@ function scheduledFor(date: string, slot: CronSlot) {
 }
 
 function shouldAutoPublish() {
-  return process.env.AUTO_PUBLISH_BLOG === "true";
+  return process.env.AUTO_PUBLISH_BLOG !== "false";
 }
 
 function isSlotCronPost(post: BlogPost, date: string, slot: CronSlot) {
@@ -63,6 +67,15 @@ function isReplaceableAutoDraft(post: BlogPost) {
     !post.qualityChecks.hasHumanReview &&
     !post.qualityChecks.hasQualityReviewerApproval
   );
+}
+
+function coverGenerationSummary(generated: Awaited<ReturnType<typeof generateBlogDraftPair>>["coverGeneration"]) {
+  if (!generated) return undefined;
+  return {
+    generated: generated.generated,
+    failed: generated.failed,
+    warnings: generated.warnings
+  };
 }
 
 export async function runBlogDraftCron(request: Request, forcedSlot?: CronSlot) {
@@ -82,13 +95,13 @@ export async function runBlogDraftCron(request: Request, forcedSlot?: CronSlot) 
       const existingSlotPosts = data.blogPosts.filter((post) => isSlotCronPost(post, date, slot));
       const existingCount = existingSlotPosts.length;
       const canReplaceExistingAutoDrafts =
-        existingCount >= 2 && existingSlotPosts.every((post) => isReplaceableAutoDraft(post));
+        existingCount >= BLOG_LANGUAGES.length && existingSlotPosts.every((post) => isReplaceableAutoDraft(post));
 
-      if (existingCount >= 2 && !dryRun && !canReplaceExistingAutoDrafts) {
+      if (existingCount >= BLOG_LANGUAGES.length && !dryRun && !canReplaceExistingAutoDrafts) {
         return {
           ok: true,
           skipped: true,
-          reason: `${slot} bilingual draft pair already exists`,
+          reason: `${slot} multilingual article set already exists`,
           generationDate: date,
           generationSlot: slot,
           created: 0
@@ -100,10 +113,12 @@ export async function runBlogDraftCron(request: Request, forcedSlot?: CronSlot) 
         audience: "business owners, operators and marketing teams evaluating AI implementation",
         intent: slotConfig.intent,
         slot,
+        contentType: slotConfig.contentType,
+        newsCategory: slotConfig.newsCategory,
         generationDate: date
       });
 
-      const preparedPosts = generated.posts.map((post) => ({
+      let preparedPosts = generated.posts.map((post) => ({
         ...post,
         status: "draft" as const,
         generationSlot: slot,
@@ -111,7 +126,35 @@ export async function runBlogDraftCron(request: Request, forcedSlot?: CronSlot) 
         generatedAt: post.generatedAt || nowIso(),
         generatedBy: `cron:${slot}:${post.generatedBy || generated.provider}`
       }));
-      const qualityReview = await reviewBlogPairForAutoPublish(preparedPosts);
+      let qualityReview = await reviewBlogPairForAutoPublish(preparedPosts);
+      let repairAttempts = 0;
+      const repairWarnings: string[] = [];
+
+      while (shouldAutoPublish() && !qualityReview.approved && repairAttempts < 2 && generated.provider === "deepseek") {
+        repairAttempts += 1;
+        const repaired = await repairBlogPostsWithDeepSeek(preparedPosts, qualityReview, {
+          topic: slotConfig.topic,
+          audience: "business owners, operators and marketing teams evaluating AI implementation",
+          intent: slotConfig.intent,
+          slot,
+          contentType: slotConfig.contentType,
+          newsCategory: slotConfig.newsCategory,
+          generationDate: date
+        });
+        if (!repaired.repaired) {
+          if (repaired.warning) repairWarnings.push(repaired.warning);
+          break;
+        }
+        preparedPosts = repaired.posts.map((post) => ({
+          ...post,
+          status: "draft" as const,
+          generationSlot: slot,
+          scheduledFor: scheduledFor(date, slot),
+          generatedAt: post.generatedAt || nowIso(),
+          generatedBy: `cron:${slot}:${post.generatedBy || generated.provider}:repair-${repairAttempts}`
+        }));
+        qualityReview = await reviewBlogPairForAutoPublish(preparedPosts);
+      }
       const canPublish = shouldAutoPublish() && qualityReview.approved;
 
       if (dryRun) {
@@ -127,7 +170,10 @@ export async function runBlogDraftCron(request: Request, forcedSlot?: CronSlot) 
           wouldPublish: canPublish,
           provider: generated.provider,
           warning: generated.warning,
+          coverGeneration: coverGenerationSummary(generated.coverGeneration),
           sourceCount: generated.sources.length,
+          repairAttempts,
+          repairWarnings,
           publishMode: canPublish ? "auto-published" : shouldAutoPublish() ? "quality-held" : "draft-review",
           qualityReview: {
             approved: qualityReview.approved,
@@ -141,7 +187,10 @@ export async function runBlogDraftCron(request: Request, forcedSlot?: CronSlot) 
             slug: post.slug,
             readTimeMinutes: post.readTimeMinutes,
             sourceLinks: post.sourceLinks.length,
-            cover: post.cover
+            cover: post.cover,
+            coverSource: post.coverSource,
+            coverCredit: post.coverCredit,
+            coverLicense: post.coverLicense
           }))
         };
       }
@@ -154,9 +203,9 @@ export async function runBlogDraftCron(request: Request, forcedSlot?: CronSlot) 
       await mutateCmsData((current) => {
         const currentSlotPosts = current.blogPosts.filter((post) => isSlotCronPost(post, date, slot));
         const shouldReplace =
-          currentSlotPosts.length >= 2 && currentSlotPosts.every((post) => isReplaceableAutoDraft(post));
+          currentSlotPosts.length >= BLOG_LANGUAGES.length && currentSlotPosts.every((post) => isReplaceableAutoDraft(post));
 
-        if (currentSlotPosts.length >= 2 && !shouldReplace) return;
+        if (currentSlotPosts.length >= BLOG_LANGUAGES.length && !shouldReplace) return;
         if (shouldReplace) {
           current.blogPosts = current.blogPosts.filter((post) => !isSlotCronPost(post, date, slot));
           replaced = currentSlotPosts.length;
@@ -180,7 +229,10 @@ export async function runBlogDraftCron(request: Request, forcedSlot?: CronSlot) 
         published,
         provider: generated.provider,
         warning: generated.warning,
+        coverGeneration: coverGenerationSummary(generated.coverGeneration),
         sourceCount: generated.sources.length,
+        repairAttempts,
+        repairWarnings,
         publishMode,
         qualityReview: {
           approved: qualityReview.approved,

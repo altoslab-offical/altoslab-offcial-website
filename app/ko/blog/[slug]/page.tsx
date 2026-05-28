@@ -13,7 +13,7 @@ type PageProps = {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
-  const post = await getPublishedBlogPost(slug, "en");
+  const post = await getPublishedBlogPost(slug, "ko");
   if (!post) return {};
   const alternates = await getPublishedBlogAlternates(post);
   const image = absoluteUrl(post.cover || blogCoverForLanguage(post.language));
@@ -36,7 +36,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       publishedTime: post.publishedAt,
       modifiedTime: post.updatedAt,
       url: absoluteUrl(blogPostPath(post)),
-      locale: "en_US",
+      locale: "ko_KR",
       images: [image]
     },
     twitter: {
@@ -48,9 +48,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   };
 }
 
-export default async function EnglishBlogPostPage({ params }: PageProps) {
+export default async function KoreanBlogPostPage({ params }: PageProps) {
   const { slug } = await params;
-  const post = await getPublishedBlogPost(slug, "en");
+  const post = await getPublishedBlogPost(slug, "ko");
   if (!post) notFound();
 
   return <BlogArticle post={post} />;

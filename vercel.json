@@ -4,6 +4,10 @@
     {
       "path": "/api/cron/blog-drafts/morning",
       "schedule": "0 1 * * *"
+    },
+    {
+      "path": "/api/cron/blog-drafts/afternoon",
+      "schedule": "0 7 * * *"
     }
   ],
   "headers": [
@@ -66,6 +70,24 @@
         {
           "key": "Content-Language",
           "value": "en"
+        }
+      ]
+    },
+    {
+      "source": "/ja/(.*)",
+      "headers": [
+        {
+          "key": "Content-Language",
+          "value": "ja"
+        }
+      ]
+    },
+    {
+      "source": "/ko/(.*)",
+      "headers": [
+        {
+          "key": "Content-Language",
+          "value": "ko"
         }
       ]
     },

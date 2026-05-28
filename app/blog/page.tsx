@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { BlogIndex } from "@/components/BlogIndex";
+import { blogCoverForLanguage } from "@/lib/blog-utils";
 import { siteUrl } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
@@ -12,6 +13,8 @@ export const metadata: Metadata = {
     languages: {
       "zh-Hant-TW": `${siteUrl}/blog`,
       en: `${siteUrl}/en/blog`,
+      ja: `${siteUrl}/ja/blog`,
+      ko: `${siteUrl}/ko/blog`,
       "x-default": `${siteUrl}/blog`
     }
   },
@@ -22,13 +25,13 @@ export const metadata: Metadata = {
     siteName: "ALTOS LAB",
     locale: "zh_TW",
     type: "website",
-    images: [`${siteUrl}/geo-cover.png`]
+    images: [`${siteUrl}${blogCoverForLanguage("zh-Hant")}`]
   },
   twitter: {
     card: "summary_large_image",
     title: "AI 實驗室筆記｜ALTOS LAB Journal",
     description: "ALTOS LAB 的 AI 產品、Agent、自動化、SEO/GEO、案例與市場觀察研究筆記。",
-    images: [`${siteUrl}/geo-cover.png`]
+    images: [`${siteUrl}${blogCoverForLanguage("zh-Hant")}`]
   }
 };
 

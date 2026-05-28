@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { isGtmConfigured } from "@/lib/analytics";
 import { isAdminConfigured } from "@/lib/auth";
+import { isBlogImageGenerationConfigured } from "@/lib/blog-cover-generation";
 import { getCmsStorageStatus } from "@/lib/cms-storage";
 import { hasSearchVerificationConfigured, siteUrl } from "@/lib/seo";
 
@@ -15,7 +16,11 @@ export async function GET() {
     integrations: {
       gtmConfigured: isGtmConfigured(),
       deepSeekConfigured: Boolean(process.env.DEEPSEEK_API_KEY?.trim()),
+      legalImageSourcingConfigured: isBlogImageGenerationConfigured(),
       cronConfigured: Boolean(process.env.CRON_SECRET?.trim()),
+      autoPublishBlog: process.env.AUTO_PUBLISH_BLOG !== "false",
+      blogLanguages: ["zh-Hant", "en", "ja", "ko"],
+      dailyBlogSlots: ["morning", "afternoon"],
       searchVerificationConfigured: hasSearchVerificationConfigured()
     },
     commit: process.env.VERCEL_GIT_COMMIT_SHA || null,

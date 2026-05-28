@@ -1,4 +1,4 @@
-import { blogPostPath, htmlLanguage } from "./blog-utils";
+import { blogCoverForLanguage, blogPostPath, htmlLanguage } from "./blog-utils";
 import type { BlogPost, Project, SitePage } from "./types";
 
 export const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || "https://altoslab.com").replace(/\/$/, "");
@@ -86,9 +86,9 @@ export function organizationJsonLd() {
     name: siteName,
     url: siteUrl,
     email: "hello@altoslab.com",
-    description: "AI implementation studio for AI agents, automation, CMS, SEO and GEO content systems.",
+    description: "AI implementation lab and product studio for agents, automation, AI products, CMS, SEO/GEO content systems and applied AI research.",
     areaServed: ["Taiwan", "APAC"],
-    knowsAbout: ["AI Agent", "AI customer service", "workflow automation", "SEO", "GEO", "generative AI"],
+    knowsAbout: ["AI Agent", "AI product studio", "workflow automation", "AI operations", "SEO", "GEO", "generative AI"],
     sameAs: ["https://github.com/altoslab-offical"]
   };
 }
@@ -115,7 +115,7 @@ export function servicesJsonLd(projects: Project[]) {
     name: siteName,
     url: siteUrl,
     areaServed: "Taiwan and APAC",
-    serviceType: ["AI implementation", "AI automation", "GEO content operations", "CMS development"],
+    serviceType: ["AI implementation", "AI product studio", "AI automation", "GEO content operations", "CMS development"],
     hasOfferCatalog: {
       "@type": "OfferCatalog",
       name: "ALTOS LAB AI services",
@@ -182,7 +182,7 @@ export function articleJsonLd(post: BlogPost) {
     "@type": "BlogPosting",
     headline: post.title,
     description: post.seoDescription || post.excerpt,
-    image: post.cover ? [absoluteUrl(post.cover)] : undefined,
+    image: [absoluteUrl(post.cover || blogCoverForLanguage(post.language))],
     author: { "@type": "Organization", name: post.author || siteName },
     publisher: { "@type": "Organization", name: siteName },
     datePublished: post.publishedAt || post.createdAt,
