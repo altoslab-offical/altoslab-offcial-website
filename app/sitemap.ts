@@ -6,6 +6,9 @@ import { siteUrl } from "@/lib/seo";
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const [posts, projects] = await Promise.all([getPublishedBlogPosts(), getPublishedProjects()]);
   const now = new Date();
+  const uniquePosts = Array.from(
+    new Map(posts.map((post) => [`${siteUrl}${blogPostPath(post)}`, post])).values()
+  );
 
   return [
     {
@@ -62,7 +65,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "weekly",
       priority: 0.4
     },
-    ...posts.map((post) => {
+    ...uniquePosts.map((post) => {
       const alternates = posts.filter((alternate) => alternate.translationGroupId === post.translationGroupId);
       const defaultPost = alternates.find((alternate) => alternate.language === "zh-Hant") || post;
 

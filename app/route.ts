@@ -18,6 +18,17 @@ function withLaunchMetadata(html: string) {
         `<script type="application/ld+json">${JSON.stringify(data).replace(/</g, "\\u003c")}</script>`
     )
     .join("\n");
+  const seoNoScriptFallback = `<noscript>
+      <main>
+        <h1>ALTOS LAB AI Studio 人工智慧工作室</h1>
+        <p>ALTOS LAB 深耕互聯網產品開發與 AI 系統整合，協助企業導入 AI Skill、AI Agent、系統串接、後台 CMS、SEO/GEO 內容系統與智能行銷。</p>
+        <nav aria-label="ALTOS LAB key pages">
+          <a href="/blog">AI 實驗室筆記</a>
+          <a href="/projects">專案案例</a>
+          <a href="#contact">合作洽談</a>
+        </nav>
+      </main>
+    </noscript>`;
   const metadata = `<title>${title}</title>
     <meta name="description" content="${description}" />
     <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
@@ -347,7 +358,7 @@ function withLaunchMetadata(html: string) {
   return html
     .replace('<html lang="en">', '<html lang="zh-Hant-TW">')
     .replace(/<title>[\s\S]*?<\/title>/, metadata)
-    .replace("<body>", `<body>${gtmNoScriptSnippet()}`)
+    .replace("<body>", `<body>${gtmNoScriptSnippet()}${seoNoScriptFallback}`)
     .replace("</body>", `${homepageHeader}${homepageAnalyticsSnippet()}</body>`);
 }
 
