@@ -2,6 +2,7 @@ import Link from "next/link";
 import { BlogEditorialVisual } from "@/components/BlogEditorialVisual";
 import { renderBrandText } from "@/components/BrandText";
 import { JsonLd } from "@/components/JsonLd";
+import { SafeBlogImage } from "@/components/SafeBlogImage";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { SiteHeader } from "@/components/site/SiteHeader";
 import { BLOG_LANGUAGES, blogIndexPath, blogPostPath, languageShortLabel } from "@/lib/blog-utils";
@@ -307,7 +308,7 @@ export async function BlogIndex({ language, tag, query }: BlogIndexProps) {
                 <article className="blog-craft-card" key={post.id}>
                   <Link className="blog-craft-card-image" href={blogPostPath(post)}>
                     {post.cover ? (
-                      <img src={post.cover} alt={post.coverAlt || `${post.title} cover`} loading="lazy" />
+                      <SafeBlogImage compact post={post} />
                     ) : (
                       <BlogEditorialVisual compact post={post} />
                     )}

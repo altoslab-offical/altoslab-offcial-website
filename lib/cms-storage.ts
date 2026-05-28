@@ -253,6 +253,53 @@ async function readVersionedPublicCmsBlobText(pathname: string) {
   return readPublicBlobText(pathname);
 }
 
+async function readVersionedPublicCmsData(pathname: string) {
+  const primaryProbe = await readPublicBlobText(pathname).catch((error) => {
+    if (error instanceof Error && error.message.includes("403")) {
+      console.warn("[cms] Public CMS blob read is blocked; using seed data fallback.");
+      return "blocked" as const;
+    }
+    return null;
+  });
+
+  if (primaryProbe === "blocked") return null;
+
+  const result = await list({ prefix: cmsVersionPrefix(pathname), limit: 1000 });
+  const versions = result.blobs
+    .filter((item) => item.pathname.endsWith(".json"))
+    .sort((a, b) => new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime());
+
+  let publicReadBlocked = false;
+
+  for (const version of versions.slice(0, 20)) {
+    const raw = await readPublicListedBlob(version).catch((error) => {
+      if (error instanceof Error && error.message.includes("403")) {
+        console.warn("[cms] Public CMS blob read is blocked; using seed data fallback.");
+        publicReadBlocked = true;
+      }
+      return null;
+    });
+    if (publicReadBlocked) break;
+    if (!raw) continue;
+
+    try {
+      return parseCmsBlobText(raw.text);
+    } catch (error) {
+      console.warn(
+        "[cms] Skipping unreadable CMS version:",
+        version.pathname,
+        error instanceof Error ? error.message : error
+      );
+    }
+  }
+
+  if (publicReadBlocked) return null;
+
+  const primary = await readPublicBlobText(pathname).catch(() => null);
+  if (!primary) return null;
+  return parseCmsBlobText(primary.text);
+}
+
 async function readPrivateBlobText(config: BlobConfig, pathname: string) {
   try {
     const result = await get(pathname, { access: config.access, useCache: false });
@@ -375,6 +422,12 @@ export async function readCmsDataFromStorage(): Promise<CmsData> {
   }
 
   if (blob) {
+    if (blob.access === "public") {
+      const versioned = await readVersionedPublicCmsData(blob.pathname);
+      if (versioned) return versioned;
+      return cloneSeedData();
+    }
+
     const raw = await readBlobText(blob, blob.pathname);
     if (!raw) return cloneSeedData();
     return parseCmsBlobText(raw.text);

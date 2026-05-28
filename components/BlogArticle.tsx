@@ -4,6 +4,7 @@ import { BlogEditorialVisual } from "@/components/BlogEditorialVisual";
 import { renderBrandText } from "@/components/BrandText";
 import { JsonLd } from "@/components/JsonLd";
 import { RichText } from "@/components/RichText";
+import { SafeBlogImage } from "@/components/SafeBlogImage";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { SiteHeader } from "@/components/site/SiteHeader";
 import { blogIndexPath, blogPostPath, languageLabel } from "@/lib/blog-utils";
@@ -115,7 +116,7 @@ export async function BlogArticle({ post }: { post: BlogPost }) {
             <p className="hero-copy">{renderBrandText(post.excerpt)}</p>
             {post.cover ? (
               <>
-                <img className="article-cover" src={post.cover} alt={post.coverAlt || `${post.title} cover`} />
+                <SafeBlogImage className="article-cover" loading="eager" post={post} />
                 {post.coverCredit ? (
                   <p className="article-cover-credit">
                     Cover image:{" "}

@@ -2035,9 +2035,11 @@ img {
 
 .article-cover {
   max-height: 440px;
+  min-height: min(440px, 48vw);
   border: 1px solid var(--al-border);
   border-radius: var(--al-radius);
   margin-top: 24px;
+  background: #090909;
 }
 
 .article-nav-row {
@@ -3054,6 +3056,15 @@ img {
   object-fit: cover;
   object-position: center;
   transition: transform var(--al-motion-section), filter var(--al-motion-section);
+}
+
+.blog-craft-card-image .blog-editorial-visual {
+  border: 0;
+  border-radius: 0;
+}
+
+.article-hero > .blog-editorial-visual {
+  margin-top: 24px;
 }
 
 .blog-craft-card:hover .blog-craft-card-image .blog-editorial-visual {

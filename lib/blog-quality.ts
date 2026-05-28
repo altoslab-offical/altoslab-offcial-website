@@ -100,6 +100,7 @@ const defaultTrustedHostFragments = [
   "cisco.com",
   "github.blog",
   "nvidia.com",
+  "technologyreview.com",
   "semianalysis.com",
   "theverge.com",
   "techcrunch.com"
@@ -115,7 +116,9 @@ function isApprovedCoverUrl(url: string) {
       host.endsWith(".blob.vercel-storage.com") ||
       host.endsWith(".public.blob.vercel-storage.com") ||
       host.endsWith("api.openverse.org") ||
+      host.endsWith("api.openverse.engineering") ||
       host.endsWith("openverse.org") ||
+      host.endsWith("openverse.engineering") ||
       host.endsWith("staticflickr.com") ||
       host.endsWith("wikimedia.org") ||
       host.endsWith("wikimedia.com")
