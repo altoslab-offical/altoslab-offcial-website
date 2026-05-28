@@ -243,6 +243,9 @@ const labsPointOfViewPattern =
 const genericCoverWords =
   /(dashboard|analytics dashboard|team meeting|server room|workspace|generic|seo analytics|儀表板|會議|伺服器機房|ワークスペース|회의|서버룸)/i;
 
+const rejectedCoverWords =
+  /(dead|corpse|prisoner|concentration camp|nazi|war crime|weapon|gun|blood|accident|disaster|protest|politician|minister|government|military|army|anti-aircraft|air defense|defense computer|radarno|usdagov|john lennon|austen|desire screenshot|unabridged|dead prisoners|robot arm picks up|shixart|malaria|microscopy training|nigeria)/i;
+
 const antiSlopRules: Array<{
   dimension: AntiSlopDimension;
   label: string;
@@ -650,6 +653,9 @@ export function reviewImageFit(post: BlogPost): ReviewResult {
     }
     const topicWords = `${post.topic} ${post.newsCategory} ${post.tags.join(" ")}`.toLowerCase();
     const imageContext = `${post.coverAlt} ${post.coverPrompt || ""}`.toLowerCase();
+    if (rejectedCoverWords.test(imageContext)) {
+      issues.push("cover image is unsafe, off-brand or visually mismatched for ALTOS LAB editorial quality");
+    }
     if (!topicWords.split(/\s+|、|\/|,|，/).some((word) => word.length > 2 && imageContext.includes(word))) {
       warnings.push("cover prompt or alt text should describe the article topic more clearly");
     }

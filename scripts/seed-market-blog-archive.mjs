@@ -188,7 +188,8 @@ const SOURCES = {
 const VISUAL_QUERY_BANK = {
   agents: [
     "automation control panel",
-    "workflow sticky notes wall",
+    "workflow dashboard screen",
+    "industrial control panel close up",
     "computer code terminal close up",
     "circuit board microchip macro",
     "mechanical keyboard software development",
@@ -243,7 +244,7 @@ const VISUAL_OBJECT_PATTERN =
   /(robot|automation|keyboard|code|terminal|server|data center|rack|cable|fiber|chip|circuit|screen|dashboard|chart|interface|wireframe|prototype|library|archive|book|document|notebook|checklist|map|network|lock|security|factory|warehouse|sensor|machine|control|device|laptop|computer|software|database|search|magnifying)/i;
 
 const UNSAFE_OR_OFF_BRAND_IMAGE_PATTERN =
-  /(dead|corpse|prisoner|concentration camp|nazi|war crime|weapon|gun|blood|accident|disaster|protest|politician|minister|government|military|anti-aircraft|radarno|usdagov|john lennon|austen|desire screenshot|unabridged|dead prisoners)/i;
+  /(dead|corpse|prisoner|concentration camp|nazi|war crime|weapon|gun|blood|accident|disaster|protest|politician|minister|government|military|army|anti-aircraft|air defense|defense computer|radarno|usdagov|john lennon|austen|desire screenshot|unabridged|dead prisoners|robot arm picks up|shixart|malaria|microscopy training|nigeria)/i;
 
 function idea(slug, type, category, sourceKeys, coverQuery, line) {
   return { slug, type, category, sourceKeys, coverQuery, line };
@@ -1560,6 +1561,8 @@ async function imageLoads(url) {
 }
 
 const usedCoverUrls = new Set();
+const usedCoverCreators = new Map();
+const usedCoverThemes = new Map();
 
 function isPeopleHeavyImage(image) {
   const text = [image.title, image.creator, image.source, image.foreign_landing_url].filter(Boolean).join(" ");
@@ -1574,6 +1577,30 @@ function isRelevantObjectImage(image) {
 function isUnsafeOrOffBrandImage(image) {
   const text = [image.title, image.creator, image.source, image.foreign_landing_url, image.url].filter(Boolean).join(" ");
   return UNSAFE_OR_OFF_BRAND_IMAGE_PATTERN.test(text);
+}
+
+function imageTheme(image) {
+  const text = [image.title, image.creator, image.source, image.foreign_landing_url, image.url].filter(Boolean).join(" ").toLowerCase();
+  if (/(computer board|technology motherboard|circuit board|motherboard|ccd chip)/i.test(text)) return "circuit-board";
+  if (/(server|data center|rack|network integration)/i.test(text)) return "data-center";
+  if (/(library|archive|book|notebook|document)/i.test(text)) return "research-docs";
+  if (/(control panel|automation|sensor|factory|industrial)/i.test(text)) return "automation";
+  if (/(code|terminal|keyboard|software)/i.test(text)) return "code";
+  return "";
+}
+
+function isOverusedImageSource(image) {
+  const creator = String(image.creator || "").trim().toLowerCase();
+  const theme = imageTheme(image);
+  return (creator && (usedCoverCreators.get(creator) || 0) >= 3) || (theme && (usedCoverThemes.get(theme) || 0) >= 12);
+}
+
+function rememberImageUse(image, url) {
+  usedCoverUrls.add(url);
+  const creator = String(image.creator || "").trim().toLowerCase();
+  const theme = imageTheme(image);
+  if (creator) usedCoverCreators.set(creator, (usedCoverCreators.get(creator) || 0) + 1);
+  if (theme) usedCoverThemes.set(theme, (usedCoverThemes.get(theme) || 0) + 1);
 }
 
 function imageDiversityScore(image) {
@@ -1620,6 +1647,7 @@ async function searchOpenverse(query, offset) {
     .filter((image) => !isPeopleHeavyImage(image))
     .filter((image) => !isUnsafeOrOffBrandImage(image))
     .filter((image) => isRelevantObjectImage(image))
+    .filter((image) => !isOverusedImageSource(image))
     .filter((image) => !usedCoverUrls.has(image.thumbnail || image.url))
     .filter((image) => imageDiversityScore(image) >= 0)
     .sort((a, b) => imageDiversityScore(b) - imageDiversityScore(a));
@@ -1630,7 +1658,7 @@ async function searchOpenverse(query, offset) {
     for (const candidateUrl of urls) {
       if (!candidateUrl || usedCoverUrls.has(candidateUrl)) continue;
       if (!(await imageLoads(candidateUrl))) continue;
-      usedCoverUrls.add(candidateUrl);
+      rememberImageUse(selected, candidateUrl);
       return { ...selected, url: candidateUrl };
     }
   }
@@ -1663,7 +1691,7 @@ async function coverFor(ideaItem, language, index) {
     "data center server rack",
     "computer code terminal close up",
     "library archive research documents",
-    "robot arm automation factory"
+    "automation control panel"
   ];
 
   for (let queryIndex = 0; queryIndex < queries.length; queryIndex += 1) {

@@ -82,7 +82,7 @@ export const marketBlogPosts = [
       "provider": "openverse",
       "prompt": "automation control panel",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:02:29.519Z",
+      "generatedAt": "2026-05-28T19:22:42.451Z",
       "status": "generated"
     },
     "coverCredit": "BMA Automation Allen Bradley PLC 3 by Elmschrat Coaching-Blog",
@@ -122,11 +122,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "morning",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:02:29.519Z",
+    "generatedAt": "2026-05-28T19:22:42.451Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:02:29.519Z",
-    "updatedAt": "2026-05-28T19:02:29.519Z",
-    "publishedAt": "2026-05-28T19:02:29.519Z"
+    "createdAt": "2026-05-28T19:22:42.451Z",
+    "updatedAt": "2026-05-28T19:22:42.451Z",
+    "publishedAt": "2026-05-28T19:22:42.451Z"
   },
   {
     "id": "post_market_agent_pilot_scorecard_en",
@@ -209,7 +209,7 @@ export const marketBlogPosts = [
       "provider": "openverse",
       "prompt": "circuit board microchip macro",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:02:30.004Z",
+      "generatedAt": "2026-05-28T19:22:43.047Z",
       "status": "generated"
     },
     "coverCredit": "Computer Board by Lenharth Systems",
@@ -249,11 +249,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "morning",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:02:30.004Z",
+    "generatedAt": "2026-05-28T19:22:43.047Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:02:30.004Z",
-    "updatedAt": "2026-05-28T19:02:30.004Z",
-    "publishedAt": "2026-05-28T19:02:30.004Z"
+    "createdAt": "2026-05-28T19:22:43.047Z",
+    "updatedAt": "2026-05-28T19:22:43.047Z",
+    "publishedAt": "2026-05-28T19:22:43.047Z"
   },
   {
     "id": "post_market_agent_pilot_scorecard_ja",
@@ -327,22 +327,22 @@ export const marketBlogPosts = [
       "市場ブリーフ"
     ],
     "author": "ALTOS LAB Editorial Lab",
-    "cover": "https://api.openverse.org/v1/images/7a846e4a-ac1f-4c6a-bb6f-6bda00738fec/thumb/",
-    "coverAlt": "市場ブリーフ：AIエージェント試験導入がAIチームに変えること - Technology Motherboard by Lenharth Systems",
-    "coverPrompt": "circuit board microchip macro",
+    "cover": "https://api.openverse.org/v1/images/6add89f1-be3a-404e-be12-6596ab6b54a4/thumb/",
+    "coverAlt": "市場ブリーフ：AIエージェント試験導入がAIチームに変えること - The control building, Fawley Power Station by Jim Champion",
+    "coverPrompt": "industrial control panel close up",
     "coverSource": "curated",
     "coverGeneration": {
       "source": "curated",
       "provider": "openverse",
-      "prompt": "circuit board microchip macro",
+      "prompt": "industrial control panel close up",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:02:30.449Z",
+      "generatedAt": "2026-05-28T19:22:43.324Z",
       "status": "generated"
     },
-    "coverCredit": "Technology Motherboard by Lenharth Systems",
-    "coverCreditUrl": "https://stocksnap.io/photo/technology-motherboard-OHPHM6IETL",
-    "coverLicense": "CC0",
-    "coverLicenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "coverCredit": "The control building, Fawley Power Station by Jim Champion",
+    "coverCreditUrl": "https://www.geograph.org.uk/photo/307037",
+    "coverLicense": "CC BY-SA 2.0",
+    "coverLicenseUrl": "https://creativecommons.org/licenses/by-sa/2.0/",
     "readTimeMinutes": 2,
     "featured": true,
     "reviewStatus": "approved",
@@ -376,11 +376,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "morning",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:02:30.449Z",
+    "generatedAt": "2026-05-28T19:22:43.324Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:02:30.449Z",
-    "updatedAt": "2026-05-28T19:02:30.449Z",
-    "publishedAt": "2026-05-28T19:02:30.449Z"
+    "createdAt": "2026-05-28T19:22:43.324Z",
+    "updatedAt": "2026-05-28T19:22:43.324Z",
+    "publishedAt": "2026-05-28T19:22:43.324Z"
   },
   {
     "id": "post_market_agent_pilot_scorecard_ko",
@@ -454,7 +454,7 @@ export const marketBlogPosts = [
       "시장 브리프"
     ],
     "author": "ALTOS LAB Editorial Lab",
-    "cover": "https://api.openverse.org/v1/images/93dc10ac-5ca2-479b-920c-574c356c3c31/thumb/",
+    "cover": "https://api.openverse.org/v1/images/0d73a8f3-c8c5-4d79-9381-0ae3eecc45fe/thumb/",
     "coverAlt": "시장 브리프: AI Agent 파일럿가 AI 팀에 바꾸는 것 - Technology Motherboard by Lenharth Systems",
     "coverPrompt": "circuit board microchip macro",
     "coverSource": "curated",
@@ -463,11 +463,11 @@ export const marketBlogPosts = [
       "provider": "openverse",
       "prompt": "circuit board microchip macro",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:02:30.711Z",
+      "generatedAt": "2026-05-28T19:22:43.826Z",
       "status": "generated"
     },
     "coverCredit": "Technology Motherboard by Lenharth Systems",
-    "coverCreditUrl": "https://stocksnap.io/photo/technology-motherboard-S1CE3IDD7Z",
+    "coverCreditUrl": "https://stocksnap.io/photo/technology-motherboard-P5KFLBAYR2",
     "coverLicense": "CC0",
     "coverLicenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
     "readTimeMinutes": 2,
@@ -503,11 +503,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "morning",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:02:30.711Z",
+    "generatedAt": "2026-05-28T19:22:43.826Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:02:30.711Z",
-    "updatedAt": "2026-05-28T19:02:30.711Z",
-    "publishedAt": "2026-05-28T19:02:30.711Z"
+    "createdAt": "2026-05-28T19:22:43.826Z",
+    "updatedAt": "2026-05-28T19:22:43.826Z",
+    "publishedAt": "2026-05-28T19:22:43.826Z"
   },
   {
     "id": "post_market_coding_agent_review_loop_zh_hant",
@@ -581,7 +581,7 @@ export const marketBlogPosts = [
       "研究解讀"
     ],
     "author": "ALTOS LAB Editorial Lab",
-    "cover": "https://api.openverse.org/v1/images/0d73a8f3-c8c5-4d79-9381-0ae3eecc45fe/thumb/",
+    "cover": "https://api.openverse.org/v1/images/4aaba1b0-0811-4492-8871-71667fb67b6b/thumb/",
     "coverAlt": "Coding Agent 審稿循環研究解讀：機制、限制與市場訊號 - Technology Motherboard by Lenharth Systems",
     "coverPrompt": "circuit board microchip macro",
     "coverSource": "curated",
@@ -590,11 +590,11 @@ export const marketBlogPosts = [
       "provider": "openverse",
       "prompt": "circuit board microchip macro",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:02:31.193Z",
+      "generatedAt": "2026-05-28T19:22:44.423Z",
       "status": "generated"
     },
     "coverCredit": "Technology Motherboard by Lenharth Systems",
-    "coverCreditUrl": "https://stocksnap.io/photo/technology-motherboard-P5KFLBAYR2",
+    "coverCreditUrl": "https://stocksnap.io/photo/technology-motherboard-WPVZRVZJTB",
     "coverLicense": "CC0",
     "coverLicenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
     "readTimeMinutes": 2,
@@ -630,11 +630,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "afternoon",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:02:31.193Z",
+    "generatedAt": "2026-05-28T19:22:44.423Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:02:31.193Z",
-    "updatedAt": "2026-05-28T19:02:31.193Z",
-    "publishedAt": "2026-05-28T19:02:31.193Z"
+    "createdAt": "2026-05-28T19:22:44.423Z",
+    "updatedAt": "2026-05-28T19:22:44.423Z",
+    "publishedAt": "2026-05-28T19:22:44.423Z"
   },
   {
     "id": "post_market_coding_agent_review_loop_en",
@@ -708,22 +708,22 @@ export const marketBlogPosts = [
       "Research explainer"
     ],
     "author": "ALTOS LAB Editorial Lab",
-    "cover": "https://api.openverse.org/v1/images/14a9e8fc-7143-40a3-99f8-8e0f898703a1/thumb/",
-    "coverAlt": "Coding agent review loops explained: mechanisms, limits and market signals - Computer Board by Lenharth Systems",
-    "coverPrompt": "circuit board microchip macro",
+    "cover": "https://upload.wikimedia.org/wikipedia/commons/2/24/Ampex_model_1250_%C2%BC_inch_4-track_Stereo_and_Monaural_Tube_Tape_Recorder_%281963-1966%29_for_the_high-end_consumer_market_%282019-04-20_10.23.53_piqsels.com_en%29.jpg",
+    "coverAlt": "Coding agent review loops explained: mechanisms, limits and market signals - Ampex model 1250 ¼ inch 4-track Stereo and Monaural Tube Tape Recorder (1963-1966) for the high-end consumer market (2019-04-20 10.23.53 piqsels.com en) by Unknown authorUnknown author",
+    "coverPrompt": "industrial control panel close up",
     "coverSource": "curated",
     "coverGeneration": {
       "source": "curated",
       "provider": "openverse",
-      "prompt": "circuit board microchip macro",
+      "prompt": "industrial control panel close up",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:02:31.594Z",
+      "generatedAt": "2026-05-28T19:22:45.793Z",
       "status": "generated"
     },
-    "coverCredit": "Computer Board by Lenharth Systems",
-    "coverCreditUrl": "https://stocksnap.io/photo/computer-board-TK6RYMYOFD",
+    "coverCredit": "Ampex model 1250 ¼ inch 4-track Stereo and Monaural Tube Tape Recorder (1963-1966) for the high-end consumer market (2019-04-20 10.23.53 piqsels.com en) by Unknown authorUnknown author",
+    "coverCreditUrl": "https://commons.wikimedia.org/w/index.php?curid=116026548",
     "coverLicense": "CC0",
-    "coverLicenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "coverLicenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/deed.en",
     "readTimeMinutes": 2,
     "featured": false,
     "reviewStatus": "approved",
@@ -757,11 +757,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "afternoon",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:02:31.594Z",
+    "generatedAt": "2026-05-28T19:22:45.793Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:02:31.594Z",
-    "updatedAt": "2026-05-28T19:02:31.594Z",
-    "publishedAt": "2026-05-28T19:02:31.594Z"
+    "createdAt": "2026-05-28T19:22:45.793Z",
+    "updatedAt": "2026-05-28T19:22:45.793Z",
+    "publishedAt": "2026-05-28T19:22:45.793Z"
   },
   {
     "id": "post_market_coding_agent_review_loop_ja",
@@ -835,8 +835,8 @@ export const marketBlogPosts = [
       "研究解説"
     ],
     "author": "ALTOS LAB Editorial Lab",
-    "cover": "https://api.openverse.org/v1/images/868eb49d-8f12-4ae0-a8d7-6c0fac9d7712/thumb/",
-    "coverAlt": "Coding Agentレビュー循環研究解説：仕組み・限界・市場シグナル - Computer Board by Lenharth Systems",
+    "cover": "https://api.openverse.org/v1/images/cb67e216-2f0f-43c7-bec3-2a49ea5a1861/thumb/",
+    "coverAlt": "Coding Agentレビュー循環研究解説：仕組み・限界・市場シグナル - green circuit board II by BotheredByBees",
     "coverPrompt": "circuit board microchip macro",
     "coverSource": "curated",
     "coverGeneration": {
@@ -844,13 +844,13 @@ export const marketBlogPosts = [
       "provider": "openverse",
       "prompt": "circuit board microchip macro",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:02:32.036Z",
+      "generatedAt": "2026-05-28T19:22:46.290Z",
       "status": "generated"
     },
-    "coverCredit": "Computer Board by Lenharth Systems",
-    "coverCreditUrl": "https://stocksnap.io/photo/computer-board-KCA166HNVD",
-    "coverLicense": "CC0",
-    "coverLicenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "coverCredit": "green circuit board II by BotheredByBees",
+    "coverCreditUrl": "https://www.flickr.com/photos/87273935@N00/2389301870",
+    "coverLicense": "CC BY 2.0",
+    "coverLicenseUrl": "https://creativecommons.org/licenses/by/2.0/",
     "readTimeMinutes": 2,
     "featured": false,
     "reviewStatus": "approved",
@@ -884,11 +884,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "afternoon",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:02:32.036Z",
+    "generatedAt": "2026-05-28T19:22:46.290Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:02:32.036Z",
-    "updatedAt": "2026-05-28T19:02:32.036Z",
-    "publishedAt": "2026-05-28T19:02:32.036Z"
+    "createdAt": "2026-05-28T19:22:46.290Z",
+    "updatedAt": "2026-05-28T19:22:46.290Z",
+    "publishedAt": "2026-05-28T19:22:46.290Z"
   },
   {
     "id": "post_market_coding_agent_review_loop_ko",
@@ -962,8 +962,8 @@ export const marketBlogPosts = [
       "리서치 해설"
     ],
     "author": "ALTOS LAB Editorial Lab",
-    "cover": "https://api.openverse.org/v1/images/01ef3472-57af-4fd4-b9b8-c09518b4a0bf/thumb/",
-    "coverAlt": "Coding Agent 리뷰 루프 리서치 해설: 메커니즘, 한계, 시장 신호 - Computer Board by Lenharth Systems",
+    "cover": "https://api.openverse.org/v1/images/8d895e1e-f393-4c59-ba5b-71eaad11f32e/thumb/",
+    "coverAlt": "Coding Agent 리뷰 루프 리서치 해설: 메커니즘, 한계, 시장 신호 - CCD Chip by fox-orian",
     "coverPrompt": "circuit board microchip macro",
     "coverSource": "curated",
     "coverGeneration": {
@@ -971,13 +971,13 @@ export const marketBlogPosts = [
       "provider": "openverse",
       "prompt": "circuit board microchip macro",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:02:32.736Z",
+      "generatedAt": "2026-05-28T19:22:46.620Z",
       "status": "generated"
     },
-    "coverCredit": "Computer Board by Lenharth Systems",
-    "coverCreditUrl": "https://stocksnap.io/photo/computer-board-CGZ3XDOZHV",
-    "coverLicense": "CC0",
-    "coverLicenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "coverCredit": "CCD Chip by fox-orian",
+    "coverCreditUrl": "https://www.flickr.com/photos/7493873@N02/1234526868",
+    "coverLicense": "CC BY-SA 2.0",
+    "coverLicenseUrl": "https://creativecommons.org/licenses/by-sa/2.0/",
     "readTimeMinutes": 2,
     "featured": false,
     "reviewStatus": "approved",
@@ -1011,11 +1011,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "afternoon",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:02:32.736Z",
+    "generatedAt": "2026-05-28T19:22:46.620Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:02:32.736Z",
-    "updatedAt": "2026-05-28T19:02:32.736Z",
-    "publishedAt": "2026-05-28T19:02:32.736Z"
+    "createdAt": "2026-05-28T19:22:46.620Z",
+    "updatedAt": "2026-05-28T19:22:46.620Z",
+    "publishedAt": "2026-05-28T19:22:46.620Z"
   },
   {
     "id": "post_market_sales_ops_agent_boundaries_zh_hant",
@@ -1089,22 +1089,22 @@ export const marketBlogPosts = [
       "操作手冊"
     ],
     "author": "ALTOS LAB Editorial Lab",
-    "cover": "https://api.openverse.org/v1/images/4ea54225-cbd9-4759-9bb0-480b1e2fa8e3/thumb/",
-    "coverAlt": "Sales Ops Agent操作手冊：先定義權限邊界再談自動成交 - Computer Board by Lenharth Systems",
-    "coverPrompt": "circuit board microchip macro",
+    "cover": "https://api.openverse.org/v1/images/b0ecf1b8-cff7-43f7-9c19-38cefc377635/thumb/",
+    "coverAlt": "Sales Ops Agent操作手冊：先定義權限邊界再談自動成交 - 4-IMG_7685 - Front door sensors by Solarbotics",
+    "coverPrompt": "industrial control panel close up",
     "coverSource": "curated",
     "coverGeneration": {
       "source": "curated",
       "provider": "openverse",
-      "prompt": "circuit board microchip macro",
+      "prompt": "industrial control panel close up",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:02:33.270Z",
+      "generatedAt": "2026-05-28T19:22:47.256Z",
       "status": "generated"
     },
-    "coverCredit": "Computer Board by Lenharth Systems",
-    "coverCreditUrl": "https://stocksnap.io/photo/computer-board-DWVHX92TAL",
-    "coverLicense": "CC0",
-    "coverLicenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "coverCredit": "4-IMG_7685 - Front door sensors by Solarbotics",
+    "coverCreditUrl": "https://www.flickr.com/photos/46265243@N00/6015302790",
+    "coverLicense": "CC BY 2.0",
+    "coverLicenseUrl": "https://creativecommons.org/licenses/by/2.0/",
     "readTimeMinutes": 2,
     "featured": false,
     "reviewStatus": "approved",
@@ -1138,11 +1138,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "morning",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:02:33.270Z",
+    "generatedAt": "2026-05-28T19:22:47.256Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:02:33.270Z",
-    "updatedAt": "2026-05-28T19:02:33.270Z",
-    "publishedAt": "2026-05-28T19:02:33.270Z"
+    "createdAt": "2026-05-28T19:22:47.256Z",
+    "updatedAt": "2026-05-28T19:22:47.256Z",
+    "publishedAt": "2026-05-28T19:22:47.256Z"
   },
   {
     "id": "post_market_sales_ops_agent_boundaries_en",
@@ -1216,22 +1216,22 @@ export const marketBlogPosts = [
       "Operator playbook"
     ],
     "author": "ALTOS LAB Editorial Lab",
-    "cover": "https://api.openverse.org/v1/images/8d895e1e-f393-4c59-ba5b-71eaad11f32e/thumb/",
-    "coverAlt": "Sales ops agents playbook: how to define permission boundaries before automating revenue work - CCD Chip by fox-orian",
-    "coverPrompt": "circuit board microchip macro",
+    "cover": "https://api.openverse.org/v1/images/447f81ed-261c-466e-bf7c-54d057698d16/thumb/",
+    "coverAlt": "Sales ops agents playbook: how to define permission boundaries before automating revenue work - San Antonio data center by Robert Scoble",
+    "coverPrompt": "data center server rack",
     "coverSource": "curated",
     "coverGeneration": {
       "source": "curated",
       "provider": "openverse",
-      "prompt": "circuit board microchip macro",
+      "prompt": "data center server rack",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:02:33.628Z",
+      "generatedAt": "2026-05-28T19:22:47.753Z",
       "status": "generated"
     },
-    "coverCredit": "CCD Chip by fox-orian",
-    "coverCreditUrl": "https://www.flickr.com/photos/7493873@N02/1234526868",
-    "coverLicense": "CC BY-SA 2.0",
-    "coverLicenseUrl": "https://creativecommons.org/licenses/by-sa/2.0/",
+    "coverCredit": "San Antonio data center by Robert Scoble",
+    "coverCreditUrl": "https://www.flickr.com/photos/35034363287@N01/2340202215",
+    "coverLicense": "CC BY 2.0",
+    "coverLicenseUrl": "https://creativecommons.org/licenses/by/2.0/",
     "readTimeMinutes": 2,
     "featured": false,
     "reviewStatus": "approved",
@@ -1265,11 +1265,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "morning",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:02:33.628Z",
+    "generatedAt": "2026-05-28T19:22:47.753Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:02:33.628Z",
-    "updatedAt": "2026-05-28T19:02:33.628Z",
-    "publishedAt": "2026-05-28T19:02:33.628Z"
+    "createdAt": "2026-05-28T19:22:47.753Z",
+    "updatedAt": "2026-05-28T19:22:47.753Z",
+    "publishedAt": "2026-05-28T19:22:47.753Z"
   },
   {
     "id": "post_market_sales_ops_agent_boundaries_ja",
@@ -1343,22 +1343,22 @@ export const marketBlogPosts = [
       "運用プレイブック"
     ],
     "author": "ALTOS LAB Editorial Lab",
-    "cover": "https://api.openverse.org/v1/images/cb67e216-2f0f-43c7-bec3-2a49ea5a1861/thumb/",
-    "coverAlt": "Sales Ops Agentプレイブック：売上業務の自動化前に権限境界を決める - green circuit board II by BotheredByBees",
-    "coverPrompt": "circuit board microchip macro",
+    "cover": "https://api.openverse.org/v1/images/ff557761-9e96-4f9d-b63e-7bd50fd9c87c/thumb/",
+    "coverAlt": "Sales Ops Agentプレイブック：売上業務の自動化前に権限境界を決める - Rear of rack at NERSC data center - closeup by D Coetzee",
+    "coverPrompt": "data center server rack",
     "coverSource": "curated",
     "coverGeneration": {
       "source": "curated",
       "provider": "openverse",
-      "prompt": "circuit board microchip macro",
+      "prompt": "data center server rack",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:02:34.123Z",
+      "generatedAt": "2026-05-28T19:22:48.354Z",
       "status": "generated"
     },
-    "coverCredit": "green circuit board II by BotheredByBees",
-    "coverCreditUrl": "https://www.flickr.com/photos/87273935@N00/2389301870",
-    "coverLicense": "CC BY 2.0",
-    "coverLicenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "coverCredit": "Rear of rack at NERSC data center - closeup by D Coetzee",
+    "coverCreditUrl": "https://www.flickr.com/photos/29507259@N02/6271241131",
+    "coverLicense": "CC0",
+    "coverLicenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
     "readTimeMinutes": 2,
     "featured": false,
     "reviewStatus": "approved",
@@ -1392,11 +1392,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "morning",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:02:34.123Z",
+    "generatedAt": "2026-05-28T19:22:48.354Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:02:34.123Z",
-    "updatedAt": "2026-05-28T19:02:34.123Z",
-    "publishedAt": "2026-05-28T19:02:34.123Z"
+    "createdAt": "2026-05-28T19:22:48.354Z",
+    "updatedAt": "2026-05-28T19:22:48.354Z",
+    "publishedAt": "2026-05-28T19:22:48.354Z"
   },
   {
     "id": "post_market_sales_ops_agent_boundaries_ko",
@@ -1470,20 +1470,20 @@ export const marketBlogPosts = [
       "운영 플레이북"
     ],
     "author": "ALTOS LAB Editorial Lab",
-    "cover": "https://api.openverse.org/v1/images/41bee98e-5a3a-493b-bd63-f8e70d9870cf/thumb/",
-    "coverAlt": "Sales Ops Agent 플레이북: 매출 업무 자동화 전에 권한 경계를 정하기 - Network Integration Center by NASA Goddard Space Flight Center",
-    "coverPrompt": "network operations center screens",
+    "cover": "https://api.openverse.org/v1/images/a66c5af0-00c5-4778-a1ef-7404a97cbadf/thumb/",
+    "coverAlt": "Sales Ops Agent 플레이북: 매출 업무 자동화 전에 권한 경계를 정하기 - Awaiting servers by bugeaters",
+    "coverPrompt": "data center server rack",
     "coverSource": "curated",
     "coverGeneration": {
       "source": "curated",
       "provider": "openverse",
-      "prompt": "network operations center screens",
+      "prompt": "data center server rack",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:02:34.429Z",
+      "generatedAt": "2026-05-28T19:22:48.851Z",
       "status": "generated"
     },
-    "coverCredit": "Network Integration Center by NASA Goddard Space Flight Center",
-    "coverCreditUrl": "https://www.flickr.com/photos/35278629@N08/5244136990",
+    "coverCredit": "Awaiting servers by bugeaters",
+    "coverCreditUrl": "https://www.flickr.com/photos/45778851@N00/3025911233",
     "coverLicense": "CC BY 2.0",
     "coverLicenseUrl": "https://creativecommons.org/licenses/by/2.0/",
     "readTimeMinutes": 2,
@@ -1519,11 +1519,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "morning",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:02:34.429Z",
+    "generatedAt": "2026-05-28T19:22:48.851Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:02:34.429Z",
-    "updatedAt": "2026-05-28T19:02:34.429Z",
-    "publishedAt": "2026-05-28T19:02:34.429Z"
+    "createdAt": "2026-05-28T19:22:48.851Z",
+    "updatedAt": "2026-05-28T19:22:48.851Z",
+    "publishedAt": "2026-05-28T19:22:48.851Z"
   },
   {
     "id": "post_market_support_agent_knowledge_quality_zh_hant",
@@ -1597,22 +1597,22 @@ export const marketBlogPosts = [
       "觀點專欄"
     ],
     "author": "ALTOS LAB Editorial Lab",
-    "cover": "https://api.openverse.org/v1/images/d343e798-ef63-45d8-a66e-49cde30fecb9/thumb/",
-    "coverAlt": "客服 Agent 知識庫的盲點：企業容易誤判哪一步 - Technology Motherboard by Lenharth Systems",
-    "coverPrompt": "circuit board microchip macro",
+    "cover": "https://api.openverse.org/v1/images/f4145f2d-1002-4947-b5dd-fe3ca07148ac/thumb/",
+    "coverAlt": "客服 Agent 知識庫的盲點：企業容易誤判哪一步 - Google First Production Server by Takuya Oikawa",
+    "coverPrompt": "data center server rack",
     "coverSource": "curated",
     "coverGeneration": {
       "source": "curated",
       "provider": "openverse",
-      "prompt": "circuit board microchip macro",
+      "prompt": "data center server rack",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:02:34.704Z",
+      "generatedAt": "2026-05-28T19:22:49.412Z",
       "status": "generated"
     },
-    "coverCredit": "Technology Motherboard by Lenharth Systems",
-    "coverCreditUrl": "https://stocksnap.io/photo/technology-motherboard-0LZZDFJTFM",
-    "coverLicense": "CC0",
-    "coverLicenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "coverCredit": "Google First Production Server by Takuya Oikawa",
+    "coverCreditUrl": "https://www.flickr.com/photos/34597916@N00/313528682",
+    "coverLicense": "CC BY-SA 2.0",
+    "coverLicenseUrl": "https://creativecommons.org/licenses/by-sa/2.0/",
     "readTimeMinutes": 2,
     "featured": false,
     "reviewStatus": "approved",
@@ -1646,11 +1646,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "afternoon",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:02:34.704Z",
+    "generatedAt": "2026-05-28T19:22:49.412Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:02:34.704Z",
-    "updatedAt": "2026-05-28T19:02:34.704Z",
-    "publishedAt": "2026-05-28T19:02:34.704Z"
+    "createdAt": "2026-05-28T19:22:49.412Z",
+    "updatedAt": "2026-05-28T19:22:49.412Z",
+    "publishedAt": "2026-05-28T19:22:49.412Z"
   },
   {
     "id": "post_market_support_agent_knowledge_quality_en",
@@ -1724,22 +1724,22 @@ export const marketBlogPosts = [
       "Column"
     ],
     "author": "ALTOS LAB Editorial Lab",
-    "cover": "https://api.openverse.org/v1/images/24b91015-ea07-40b9-ae02-8bd075e231eb/thumb/",
-    "coverAlt": "The overlooked risk inside Support agent knowledge bases - Technology Motherboard by Lenharth Systems",
-    "coverPrompt": "circuit board microchip macro",
+    "cover": "https://api.openverse.org/v1/images/d0046237-f569-47ee-a812-fa9b0d140e73/thumb/",
+    "coverAlt": "The overlooked risk inside Support agent knowledge bases - Freedom Center Library, Knott's Berry Farm by Orange County Archives",
+    "coverPrompt": "data center server rack",
     "coverSource": "curated",
     "coverGeneration": {
       "source": "curated",
       "provider": "openverse",
-      "prompt": "circuit board microchip macro",
+      "prompt": "data center server rack",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:02:35.241Z",
+      "generatedAt": "2026-05-28T19:22:50.101Z",
       "status": "generated"
     },
-    "coverCredit": "Technology Motherboard by Lenharth Systems",
-    "coverCreditUrl": "https://stocksnap.io/photo/technology-motherboard-PUWNNLCU1C",
-    "coverLicense": "CC0",
-    "coverLicenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "coverCredit": "Freedom Center Library, Knott's Berry Farm by Orange County Archives",
+    "coverCreditUrl": "https://www.flickr.com/photos/30346812@N07/16851335246",
+    "coverLicense": "CC BY 2.0",
+    "coverLicenseUrl": "https://creativecommons.org/licenses/by/2.0/",
     "readTimeMinutes": 2,
     "featured": false,
     "reviewStatus": "approved",
@@ -1773,11 +1773,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "afternoon",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:02:35.241Z",
+    "generatedAt": "2026-05-28T19:22:50.101Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:02:35.241Z",
-    "updatedAt": "2026-05-28T19:02:35.241Z",
-    "publishedAt": "2026-05-28T19:02:35.241Z"
+    "createdAt": "2026-05-28T19:22:50.101Z",
+    "updatedAt": "2026-05-28T19:22:50.101Z",
+    "publishedAt": "2026-05-28T19:22:50.101Z"
   },
   {
     "id": "post_market_support_agent_knowledge_quality_ja",
@@ -1851,22 +1851,22 @@ export const marketBlogPosts = [
       "視点コラム"
     ],
     "author": "ALTOS LAB Editorial Lab",
-    "cover": "https://api.openverse.org/v1/images/4aaba1b0-0811-4492-8871-71667fb67b6b/thumb/",
-    "coverAlt": "サポートAgentのナレッジベースで見落とされやすいリスク - Technology Motherboard by Lenharth Systems",
-    "coverPrompt": "circuit board microchip macro",
+    "cover": "https://api.openverse.org/v1/images/81351986-cac1-4ca4-bdaf-2e22ff7ca3e2/thumb/",
+    "coverAlt": "サポートAgentのナレッジベースで見落とされやすいリスク - Virginia Tech - data center by cbowns",
+    "coverPrompt": "data center server rack",
     "coverSource": "curated",
     "coverGeneration": {
       "source": "curated",
       "provider": "openverse",
-      "prompt": "circuit board microchip macro",
+      "prompt": "data center server rack",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:02:35.712Z",
+      "generatedAt": "2026-05-28T19:22:50.702Z",
       "status": "generated"
     },
-    "coverCredit": "Technology Motherboard by Lenharth Systems",
-    "coverCreditUrl": "https://stocksnap.io/photo/technology-motherboard-WPVZRVZJTB",
-    "coverLicense": "CC0",
-    "coverLicenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "coverCredit": "Virginia Tech - data center by cbowns",
+    "coverCreditUrl": "https://www.flickr.com/photos/15417585@N00/2414578731",
+    "coverLicense": "CC BY-SA 2.0",
+    "coverLicenseUrl": "https://creativecommons.org/licenses/by-sa/2.0/",
     "readTimeMinutes": 2,
     "featured": false,
     "reviewStatus": "approved",
@@ -1900,11 +1900,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "afternoon",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:02:35.712Z",
+    "generatedAt": "2026-05-28T19:22:50.702Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:02:35.712Z",
-    "updatedAt": "2026-05-28T19:02:35.712Z",
-    "publishedAt": "2026-05-28T19:02:35.712Z"
+    "createdAt": "2026-05-28T19:22:50.702Z",
+    "updatedAt": "2026-05-28T19:22:50.702Z",
+    "publishedAt": "2026-05-28T19:22:50.702Z"
   },
   {
     "id": "post_market_support_agent_knowledge_quality_ko",
@@ -1978,22 +1978,22 @@ export const marketBlogPosts = [
       "관점 칼럼"
     ],
     "author": "ALTOS LAB Editorial Lab",
-    "cover": "https://api.openverse.org/v1/images/89c64b36-9685-48bd-8896-208c8209a4e4/thumb/",
-    "coverAlt": "지원 Agent 지식베이스에서 놓치기 쉬운 리스크 - Computer Board by Lenharth Systems",
-    "coverPrompt": "circuit board microchip macro",
+    "cover": "https://api.openverse.org/v1/images/41bee98e-5a3a-493b-bd63-f8e70d9870cf/thumb/",
+    "coverAlt": "지원 Agent 지식베이스에서 놓치기 쉬운 리스크 - Network Integration Center by NASA Goddard Space Flight Center",
+    "coverPrompt": "network operations center screens",
     "coverSource": "curated",
     "coverGeneration": {
       "source": "curated",
       "provider": "openverse",
-      "prompt": "circuit board microchip macro",
+      "prompt": "network operations center screens",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:02:36.918Z",
+      "generatedAt": "2026-05-28T19:22:51.057Z",
       "status": "generated"
     },
-    "coverCredit": "Computer Board by Lenharth Systems",
-    "coverCreditUrl": "https://stocksnap.io/photo/computer-board-VEZBQZBINB",
-    "coverLicense": "CC0",
-    "coverLicenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "coverCredit": "Network Integration Center by NASA Goddard Space Flight Center",
+    "coverCreditUrl": "https://www.flickr.com/photos/35278629@N08/5244136990",
+    "coverLicense": "CC BY 2.0",
+    "coverLicenseUrl": "https://creativecommons.org/licenses/by/2.0/",
     "readTimeMinutes": 2,
     "featured": false,
     "reviewStatus": "approved",
@@ -2027,11 +2027,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "afternoon",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:02:36.918Z",
+    "generatedAt": "2026-05-28T19:22:51.057Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:02:36.918Z",
-    "updatedAt": "2026-05-28T19:02:36.918Z",
-    "publishedAt": "2026-05-28T19:02:36.918Z"
+    "createdAt": "2026-05-28T19:22:51.057Z",
+    "updatedAt": "2026-05-28T19:22:51.057Z",
+    "publishedAt": "2026-05-28T19:22:51.057Z"
   },
   {
     "id": "post_market_agent_observability_dashboard_zh_hant",
@@ -2105,22 +2105,22 @@ export const marketBlogPosts = [
       "訊號圖"
     ],
     "author": "ALTOS LAB Editorial Lab",
-    "cover": "https://api.openverse.org/v1/images/45d889ef-a493-47b9-8356-80e610f34959/thumb/",
-    "coverAlt": "Agent 可觀測性訊號圖：四個指標看懂導入壓力 - Computer Board by Lenharth Systems",
-    "coverPrompt": "circuit board microchip macro",
+    "cover": "https://api.openverse.org/v1/images/bea3b47f-b666-4324-8c9b-c337dd269050/thumb/",
+    "coverAlt": "Agent 可觀測性訊號圖：四個指標看懂導入壓力 - The Archives by FDR Presidential Library & Museum",
+    "coverPrompt": "library archive research documents",
     "coverSource": "curated",
     "coverGeneration": {
       "source": "curated",
       "provider": "openverse",
-      "prompt": "circuit board microchip macro",
+      "prompt": "library archive research documents",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:02:37.336Z",
+      "generatedAt": "2026-05-28T19:22:51.724Z",
       "status": "generated"
     },
-    "coverCredit": "Computer Board by Lenharth Systems",
-    "coverCreditUrl": "https://stocksnap.io/photo/computer-board-BQJLBU4C0A",
-    "coverLicense": "CC0",
-    "coverLicenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "coverCredit": "The Archives by FDR Presidential Library & Museum",
+    "coverCreditUrl": "https://www.flickr.com/photos/54078784@N08/4998248427",
+    "coverLicense": "CC BY 2.0",
+    "coverLicenseUrl": "https://creativecommons.org/licenses/by/2.0/",
     "readTimeMinutes": 2,
     "featured": false,
     "reviewStatus": "approved",
@@ -2154,11 +2154,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "morning",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:02:37.336Z",
+    "generatedAt": "2026-05-28T19:22:51.724Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:02:37.336Z",
-    "updatedAt": "2026-05-28T19:02:37.336Z",
-    "publishedAt": "2026-05-28T19:02:37.336Z"
+    "createdAt": "2026-05-28T19:22:51.724Z",
+    "updatedAt": "2026-05-28T19:22:51.724Z",
+    "publishedAt": "2026-05-28T19:22:51.724Z"
   },
   {
     "id": "post_market_agent_observability_dashboard_en",
@@ -2232,22 +2232,22 @@ export const marketBlogPosts = [
       "Signal map"
     ],
     "author": "ALTOS LAB Editorial Lab",
-    "cover": "https://api.openverse.org/v1/images/89b57b13-93e5-4add-9c7c-3d96f804f2c0/thumb/",
-    "coverAlt": "Agent observability signal map: four pressures to watch - Computer Board by Lenharth Systems",
-    "coverPrompt": "circuit board microchip macro",
-    "coverSource": "curated",
+    "cover": "/blog-cover-en.png",
+    "coverAlt": "Agent observability signal map: four pressures to watch - ALTOS LAB",
+    "coverPrompt": "AI observability control room fallback",
+    "coverSource": "manual",
     "coverGeneration": {
-      "source": "curated",
-      "provider": "openverse",
-      "prompt": "circuit board microchip macro",
+      "source": "manual",
+      "provider": "local",
+      "prompt": "AI observability control room fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:02:37.777Z",
-      "status": "generated"
+      "generatedAt": "2026-05-28T19:22:53.241Z",
+      "status": "skipped"
     },
-    "coverCredit": "Computer Board by Lenharth Systems",
-    "coverCreditUrl": "https://stocksnap.io/photo/computer-board-9GATPVCRX0",
-    "coverLicense": "CC0",
-    "coverLicenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "coverCredit": "ALTOS LAB",
+    "coverCreditUrl": "https://altoslab-ai.cc",
+    "coverLicense": "Internal asset",
+    "coverLicenseUrl": "https://altoslab-ai.cc",
     "readTimeMinutes": 2,
     "featured": false,
     "reviewStatus": "approved",
@@ -2281,11 +2281,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "morning",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:02:37.777Z",
+    "generatedAt": "2026-05-28T19:22:53.241Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:02:37.777Z",
-    "updatedAt": "2026-05-28T19:02:37.777Z",
-    "publishedAt": "2026-05-28T19:02:37.777Z"
+    "createdAt": "2026-05-28T19:22:53.241Z",
+    "updatedAt": "2026-05-28T19:22:53.241Z",
+    "publishedAt": "2026-05-28T19:22:53.241Z"
   },
   {
     "id": "post_market_agent_observability_dashboard_ja",
@@ -2359,22 +2359,22 @@ export const marketBlogPosts = [
       "シグナルマップ"
     ],
     "author": "ALTOS LAB Editorial Lab",
-    "cover": "https://api.openverse.org/v1/images/d0046237-f569-47ee-a812-fa9b0d140e73/thumb/",
-    "coverAlt": "Agentの可観測性シグナルマップ：見るべき4つの圧力 - Freedom Center Library, Knott's Berry Farm by Orange County Archives",
-    "coverPrompt": "data center server rack",
-    "coverSource": "curated",
+    "cover": "/blog-cover-ja.png",
+    "coverAlt": "Agentの可観測性シグナルマップ：見るべき4つの圧力 - ALTOS LAB",
+    "coverPrompt": "AI observability control room fallback",
+    "coverSource": "manual",
     "coverGeneration": {
-      "source": "curated",
-      "provider": "openverse",
-      "prompt": "data center server rack",
+      "source": "manual",
+      "provider": "local",
+      "prompt": "AI observability control room fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:02:39.105Z",
-      "status": "generated"
+      "generatedAt": "2026-05-28T19:22:54.600Z",
+      "status": "skipped"
     },
-    "coverCredit": "Freedom Center Library, Knott's Berry Farm by Orange County Archives",
-    "coverCreditUrl": "https://www.flickr.com/photos/30346812@N07/16851335246",
-    "coverLicense": "CC BY 2.0",
-    "coverLicenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "coverCredit": "ALTOS LAB",
+    "coverCreditUrl": "https://altoslab-ai.cc",
+    "coverLicense": "Internal asset",
+    "coverLicenseUrl": "https://altoslab-ai.cc",
     "readTimeMinutes": 2,
     "featured": false,
     "reviewStatus": "approved",
@@ -2408,11 +2408,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "morning",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:02:39.105Z",
+    "generatedAt": "2026-05-28T19:22:54.600Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:02:39.105Z",
-    "updatedAt": "2026-05-28T19:02:39.105Z",
-    "publishedAt": "2026-05-28T19:02:39.105Z"
+    "createdAt": "2026-05-28T19:22:54.600Z",
+    "updatedAt": "2026-05-28T19:22:54.600Z",
+    "publishedAt": "2026-05-28T19:22:54.600Z"
   },
   {
     "id": "post_market_agent_observability_dashboard_ko",
@@ -2486,22 +2486,22 @@ export const marketBlogPosts = [
       "시그널 맵"
     ],
     "author": "ALTOS LAB Editorial Lab",
-    "cover": "https://api.openverse.org/v1/images/81351986-cac1-4ca4-bdaf-2e22ff7ca3e2/thumb/",
-    "coverAlt": "Agent 관측성 시그널 맵: 주목할 네 가지 압력 - Virginia Tech - data center by cbowns",
-    "coverPrompt": "data center server rack",
-    "coverSource": "curated",
+    "cover": "/blog-cover-ko.png",
+    "coverAlt": "Agent 관측성 시그널 맵: 주목할 네 가지 압력 - ALTOS LAB",
+    "coverPrompt": "AI observability control room fallback",
+    "coverSource": "manual",
     "coverGeneration": {
-      "source": "curated",
-      "provider": "openverse",
-      "prompt": "data center server rack",
+      "source": "manual",
+      "provider": "local",
+      "prompt": "AI observability control room fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:02:39.815Z",
-      "status": "generated"
+      "generatedAt": "2026-05-28T19:22:56.723Z",
+      "status": "skipped"
     },
-    "coverCredit": "Virginia Tech - data center by cbowns",
-    "coverCreditUrl": "https://www.flickr.com/photos/15417585@N00/2414578731",
-    "coverLicense": "CC BY-SA 2.0",
-    "coverLicenseUrl": "https://creativecommons.org/licenses/by-sa/2.0/",
+    "coverCredit": "ALTOS LAB",
+    "coverCreditUrl": "https://altoslab-ai.cc",
+    "coverLicense": "Internal asset",
+    "coverLicenseUrl": "https://altoslab-ai.cc",
     "readTimeMinutes": 2,
     "featured": false,
     "reviewStatus": "approved",
@@ -2535,11 +2535,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "morning",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:02:39.815Z",
+    "generatedAt": "2026-05-28T19:22:56.723Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:02:39.815Z",
-    "updatedAt": "2026-05-28T19:02:39.815Z",
-    "publishedAt": "2026-05-28T19:02:39.815Z"
+    "createdAt": "2026-05-28T19:22:56.723Z",
+    "updatedAt": "2026-05-28T19:22:56.723Z",
+    "publishedAt": "2026-05-28T19:22:56.723Z"
   },
   {
     "id": "post_market_agent_permission_model_zh_hant",
@@ -2613,22 +2613,22 @@ export const marketBlogPosts = [
       "現場筆記"
     ],
     "author": "ALTOS LAB Editorial Lab",
-    "cover": "https://api.openverse.org/v1/images/ff557761-9e96-4f9d-b63e-7bd50fd9c87c/thumb/",
-    "coverAlt": "Agent 權限模型現場筆記：市場正在往哪裡移動 - Rear of rack at NERSC data center - closeup by D Coetzee",
-    "coverPrompt": "data center server rack",
-    "coverSource": "curated",
+    "cover": "/blog-cover-zh-hant.png",
+    "coverAlt": "Agent 權限模型現場筆記：市場正在往哪裡移動 - ALTOS LAB",
+    "coverPrompt": "security access control artificial intelligence fallback",
+    "coverSource": "manual",
     "coverGeneration": {
-      "source": "curated",
-      "provider": "openverse",
-      "prompt": "data center server rack",
+      "source": "manual",
+      "provider": "local",
+      "prompt": "security access control artificial intelligence fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:02:40.472Z",
-      "status": "generated"
+      "generatedAt": "2026-05-28T19:22:58.057Z",
+      "status": "skipped"
     },
-    "coverCredit": "Rear of rack at NERSC data center - closeup by D Coetzee",
-    "coverCreditUrl": "https://www.flickr.com/photos/29507259@N02/6271241131",
-    "coverLicense": "CC0",
-    "coverLicenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "coverCredit": "ALTOS LAB",
+    "coverCreditUrl": "https://altoslab-ai.cc",
+    "coverLicense": "Internal asset",
+    "coverLicenseUrl": "https://altoslab-ai.cc",
     "readTimeMinutes": 2,
     "featured": false,
     "reviewStatus": "approved",
@@ -2662,11 +2662,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "afternoon",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:02:40.472Z",
+    "generatedAt": "2026-05-28T19:22:58.057Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:02:40.472Z",
-    "updatedAt": "2026-05-28T19:02:40.472Z",
-    "publishedAt": "2026-05-28T19:02:40.472Z"
+    "createdAt": "2026-05-28T19:22:58.057Z",
+    "updatedAt": "2026-05-28T19:22:58.057Z",
+    "publishedAt": "2026-05-28T19:22:58.057Z"
   },
   {
     "id": "post_market_agent_permission_model_en",
@@ -2740,22 +2740,22 @@ export const marketBlogPosts = [
       "Field note"
     ],
     "author": "ALTOS LAB Editorial Lab",
-    "cover": "https://api.openverse.org/v1/images/447f81ed-261c-466e-bf7c-54d057698d16/thumb/",
-    "coverAlt": "Inside the Agent permission models workflow: where the market is moving - San Antonio data center by Robert Scoble",
-    "coverPrompt": "data center server rack",
-    "coverSource": "curated",
+    "cover": "/blog-cover-en.png",
+    "coverAlt": "Inside the Agent permission models workflow: where the market is moving - ALTOS LAB",
+    "coverPrompt": "security access control artificial intelligence fallback",
+    "coverSource": "manual",
     "coverGeneration": {
-      "source": "curated",
-      "provider": "openverse",
-      "prompt": "data center server rack",
+      "source": "manual",
+      "provider": "local",
+      "prompt": "security access control artificial intelligence fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:02:41.722Z",
-      "status": "generated"
+      "generatedAt": "2026-05-28T19:22:59.718Z",
+      "status": "skipped"
     },
-    "coverCredit": "San Antonio data center by Robert Scoble",
-    "coverCreditUrl": "https://www.flickr.com/photos/35034363287@N01/2340202215",
-    "coverLicense": "CC BY 2.0",
-    "coverLicenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "coverCredit": "ALTOS LAB",
+    "coverCreditUrl": "https://altoslab-ai.cc",
+    "coverLicense": "Internal asset",
+    "coverLicenseUrl": "https://altoslab-ai.cc",
     "readTimeMinutes": 2,
     "featured": false,
     "reviewStatus": "approved",
@@ -2789,11 +2789,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "afternoon",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:02:41.722Z",
+    "generatedAt": "2026-05-28T19:22:59.718Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:02:41.722Z",
-    "updatedAt": "2026-05-28T19:02:41.722Z",
-    "publishedAt": "2026-05-28T19:02:41.722Z"
+    "createdAt": "2026-05-28T19:22:59.718Z",
+    "updatedAt": "2026-05-28T19:22:59.718Z",
+    "publishedAt": "2026-05-28T19:22:59.718Z"
   },
   {
     "id": "post_market_agent_permission_model_ja",
@@ -2867,22 +2867,22 @@ export const marketBlogPosts = [
       "現場メモ"
     ],
     "author": "ALTOS LAB Editorial Lab",
-    "cover": "https://api.openverse.org/v1/images/a66c5af0-00c5-4778-a1ef-7404a97cbadf/thumb/",
-    "coverAlt": "Agent権限モデルの現場メモ：市場はどこへ動くか - Awaiting servers by bugeaters",
-    "coverPrompt": "data center server rack",
-    "coverSource": "curated",
+    "cover": "/blog-cover-ja.png",
+    "coverAlt": "Agent権限モデルの現場メモ：市場はどこへ動くか - ALTOS LAB",
+    "coverPrompt": "security access control artificial intelligence fallback",
+    "coverSource": "manual",
     "coverGeneration": {
-      "source": "curated",
-      "provider": "openverse",
-      "prompt": "data center server rack",
+      "source": "manual",
+      "provider": "local",
+      "prompt": "security access control artificial intelligence fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:02:42.254Z",
-      "status": "generated"
+      "generatedAt": "2026-05-28T19:23:02.067Z",
+      "status": "skipped"
     },
-    "coverCredit": "Awaiting servers by bugeaters",
-    "coverCreditUrl": "https://www.flickr.com/photos/45778851@N00/3025911233",
-    "coverLicense": "CC BY 2.0",
-    "coverLicenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "coverCredit": "ALTOS LAB",
+    "coverCreditUrl": "https://altoslab-ai.cc",
+    "coverLicense": "Internal asset",
+    "coverLicenseUrl": "https://altoslab-ai.cc",
     "readTimeMinutes": 2,
     "featured": false,
     "reviewStatus": "approved",
@@ -2916,11 +2916,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "afternoon",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:02:42.254Z",
+    "generatedAt": "2026-05-28T19:23:02.067Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:02:42.254Z",
-    "updatedAt": "2026-05-28T19:02:42.254Z",
-    "publishedAt": "2026-05-28T19:02:42.254Z"
+    "createdAt": "2026-05-28T19:23:02.067Z",
+    "updatedAt": "2026-05-28T19:23:02.067Z",
+    "publishedAt": "2026-05-28T19:23:02.067Z"
   },
   {
     "id": "post_market_agent_permission_model_ko",
@@ -2994,22 +2994,22 @@ export const marketBlogPosts = [
       "현장 노트"
     ],
     "author": "ALTOS LAB Editorial Lab",
-    "cover": "https://api.openverse.org/v1/images/f4145f2d-1002-4947-b5dd-fe3ca07148ac/thumb/",
-    "coverAlt": "Agent 권한 모델 현장 노트: 시장은 어디로 움직이나 - Google First Production Server by Takuya Oikawa",
-    "coverPrompt": "data center server rack",
-    "coverSource": "curated",
+    "cover": "/blog-cover-ko.png",
+    "coverAlt": "Agent 권한 모델 현장 노트: 시장은 어디로 움직이나 - ALTOS LAB",
+    "coverPrompt": "security access control artificial intelligence fallback",
+    "coverSource": "manual",
     "coverGeneration": {
-      "source": "curated",
-      "provider": "openverse",
-      "prompt": "data center server rack",
+      "source": "manual",
+      "provider": "local",
+      "prompt": "security access control artificial intelligence fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:02:42.808Z",
-      "status": "generated"
+      "generatedAt": "2026-05-28T19:23:03.765Z",
+      "status": "skipped"
     },
-    "coverCredit": "Google First Production Server by Takuya Oikawa",
-    "coverCreditUrl": "https://www.flickr.com/photos/34597916@N00/313528682",
-    "coverLicense": "CC BY-SA 2.0",
-    "coverLicenseUrl": "https://creativecommons.org/licenses/by-sa/2.0/",
+    "coverCredit": "ALTOS LAB",
+    "coverCreditUrl": "https://altoslab-ai.cc",
+    "coverLicense": "Internal asset",
+    "coverLicenseUrl": "https://altoslab-ai.cc",
     "readTimeMinutes": 2,
     "featured": false,
     "reviewStatus": "approved",
@@ -3043,11 +3043,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "afternoon",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:02:42.808Z",
+    "generatedAt": "2026-05-28T19:23:03.765Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:02:42.808Z",
-    "updatedAt": "2026-05-28T19:02:42.808Z",
-    "publishedAt": "2026-05-28T19:02:42.808Z"
+    "createdAt": "2026-05-28T19:23:03.765Z",
+    "updatedAt": "2026-05-28T19:23:03.765Z",
+    "publishedAt": "2026-05-28T19:23:03.765Z"
   },
   {
     "id": "post_market_multi_agent_handoff_zh_hant",
@@ -3121,22 +3121,22 @@ export const marketBlogPosts = [
       "市場快訊"
     ],
     "author": "ALTOS LAB Editorial Lab",
-    "cover": "https://api.openverse.org/v1/images/bea3b47f-b666-4324-8c9b-c337dd269050/thumb/",
-    "coverAlt": "市場快訊：多 Agent 協作正在改變 AI 團隊的判斷 - The Archives by FDR Presidential Library & Museum",
-    "coverPrompt": "library archive research documents",
-    "coverSource": "curated",
+    "cover": "/blog-cover-zh-hant.png",
+    "coverAlt": "市場快訊：多 Agent 協作正在改變 AI 團隊的判斷 - ALTOS LAB",
+    "coverPrompt": "multi agent workflow whiteboard fallback",
+    "coverSource": "manual",
     "coverGeneration": {
-      "source": "curated",
-      "provider": "openverse",
-      "prompt": "library archive research documents",
+      "source": "manual",
+      "provider": "local",
+      "prompt": "multi agent workflow whiteboard fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:02:44.294Z",
-      "status": "generated"
+      "generatedAt": "2026-05-28T19:23:05.121Z",
+      "status": "skipped"
     },
-    "coverCredit": "The Archives by FDR Presidential Library & Museum",
-    "coverCreditUrl": "https://www.flickr.com/photos/54078784@N08/4998248427",
-    "coverLicense": "CC BY 2.0",
-    "coverLicenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "coverCredit": "ALTOS LAB",
+    "coverCreditUrl": "https://altoslab-ai.cc",
+    "coverLicense": "Internal asset",
+    "coverLicenseUrl": "https://altoslab-ai.cc",
     "readTimeMinutes": 2,
     "featured": false,
     "reviewStatus": "approved",
@@ -3170,11 +3170,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "morning",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:02:44.294Z",
+    "generatedAt": "2026-05-28T19:23:05.121Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:02:44.294Z",
-    "updatedAt": "2026-05-28T19:02:44.294Z",
-    "publishedAt": "2026-05-28T19:02:44.294Z"
+    "createdAt": "2026-05-28T19:23:05.121Z",
+    "updatedAt": "2026-05-28T19:23:05.121Z",
+    "publishedAt": "2026-05-28T19:23:05.121Z"
   },
   {
     "id": "post_market_multi_agent_handoff_en",
@@ -3248,22 +3248,22 @@ export const marketBlogPosts = [
       "Market brief"
     ],
     "author": "ALTOS LAB Editorial Lab",
-    "cover": "https://upload.wikimedia.org/wikipedia/commons/0/01/Robot_arm_picks_up_cylindrical_objects_in_a_factory_setting.jpg",
-    "coverAlt": "Market brief: what Multi-agent collaboration changes for AI teams - Robot arm picks up cylindrical objects in a factory setting by Shixart1985",
-    "coverPrompt": "robot arm automation factory",
-    "coverSource": "curated",
+    "cover": "/blog-cover-en.png",
+    "coverAlt": "Market brief: what Multi-agent collaboration changes for AI teams - ALTOS LAB",
+    "coverPrompt": "multi agent workflow whiteboard fallback",
+    "coverSource": "manual",
     "coverGeneration": {
-      "source": "curated",
-      "provider": "openverse",
-      "prompt": "robot arm automation factory",
+      "source": "manual",
+      "provider": "local",
+      "prompt": "multi agent workflow whiteboard fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:02:46.019Z",
-      "status": "generated"
+      "generatedAt": "2026-05-28T19:23:07.129Z",
+      "status": "skipped"
     },
-    "coverCredit": "Robot arm picks up cylindrical objects in a factory setting by Shixart1985",
-    "coverCreditUrl": "https://commons.wikimedia.org/w/index.php?curid=192654851",
-    "coverLicense": "CC BY 2.0",
-    "coverLicenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "coverCredit": "ALTOS LAB",
+    "coverCreditUrl": "https://altoslab-ai.cc",
+    "coverLicense": "Internal asset",
+    "coverLicenseUrl": "https://altoslab-ai.cc",
     "readTimeMinutes": 2,
     "featured": false,
     "reviewStatus": "approved",
@@ -3297,11 +3297,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "morning",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:02:46.019Z",
+    "generatedAt": "2026-05-28T19:23:07.129Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:02:46.019Z",
-    "updatedAt": "2026-05-28T19:02:46.019Z",
-    "publishedAt": "2026-05-28T19:02:46.019Z"
+    "createdAt": "2026-05-28T19:23:07.129Z",
+    "updatedAt": "2026-05-28T19:23:07.129Z",
+    "publishedAt": "2026-05-28T19:23:07.129Z"
   },
   {
     "id": "post_market_multi_agent_handoff_ja",
@@ -3384,7 +3384,7 @@ export const marketBlogPosts = [
       "provider": "local",
       "prompt": "multi agent workflow whiteboard fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:02:47.373Z",
+      "generatedAt": "2026-05-28T19:23:08.481Z",
       "status": "skipped"
     },
     "coverCredit": "ALTOS LAB",
@@ -3424,11 +3424,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "morning",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:02:47.373Z",
+    "generatedAt": "2026-05-28T19:23:08.481Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:02:47.373Z",
-    "updatedAt": "2026-05-28T19:02:47.373Z",
-    "publishedAt": "2026-05-28T19:02:47.373Z"
+    "createdAt": "2026-05-28T19:23:08.481Z",
+    "updatedAt": "2026-05-28T19:23:08.481Z",
+    "publishedAt": "2026-05-28T19:23:08.481Z"
   },
   {
     "id": "post_market_multi_agent_handoff_ko",
@@ -3511,7 +3511,7 @@ export const marketBlogPosts = [
       "provider": "local",
       "prompt": "multi agent workflow whiteboard fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:02:48.455Z",
+      "generatedAt": "2026-05-28T19:23:10.183Z",
       "status": "skipped"
     },
     "coverCredit": "ALTOS LAB",
@@ -3551,11 +3551,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "morning",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:02:48.455Z",
+    "generatedAt": "2026-05-28T19:23:10.183Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:02:48.455Z",
-    "updatedAt": "2026-05-28T19:02:48.455Z",
-    "publishedAt": "2026-05-28T19:02:48.455Z"
+    "createdAt": "2026-05-28T19:23:10.183Z",
+    "updatedAt": "2026-05-28T19:23:10.183Z",
+    "publishedAt": "2026-05-28T19:23:10.183Z"
   },
   {
     "id": "post_market_agent_roi_metrics_zh_hant",
@@ -3638,7 +3638,7 @@ export const marketBlogPosts = [
       "provider": "local",
       "prompt": "business analytics AI automation ROI fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:02:49.381Z",
+      "generatedAt": "2026-05-28T19:23:12.163Z",
       "status": "skipped"
     },
     "coverCredit": "ALTOS LAB",
@@ -3678,11 +3678,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "afternoon",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:02:49.381Z",
+    "generatedAt": "2026-05-28T19:23:12.163Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:02:49.381Z",
-    "updatedAt": "2026-05-28T19:02:49.381Z",
-    "publishedAt": "2026-05-28T19:02:49.381Z"
+    "createdAt": "2026-05-28T19:23:12.163Z",
+    "updatedAt": "2026-05-28T19:23:12.163Z",
+    "publishedAt": "2026-05-28T19:23:12.163Z"
   },
   {
     "id": "post_market_agent_roi_metrics_en",
@@ -3765,7 +3765,7 @@ export const marketBlogPosts = [
       "provider": "local",
       "prompt": "business analytics AI automation ROI fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:02:50.389Z",
+      "generatedAt": "2026-05-28T19:23:13.600Z",
       "status": "skipped"
     },
     "coverCredit": "ALTOS LAB",
@@ -3805,11 +3805,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "afternoon",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:02:50.389Z",
+    "generatedAt": "2026-05-28T19:23:13.600Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:02:50.389Z",
-    "updatedAt": "2026-05-28T19:02:50.389Z",
-    "publishedAt": "2026-05-28T19:02:50.389Z"
+    "createdAt": "2026-05-28T19:23:13.600Z",
+    "updatedAt": "2026-05-28T19:23:13.600Z",
+    "publishedAt": "2026-05-28T19:23:13.600Z"
   },
   {
     "id": "post_market_agent_roi_metrics_ja",
@@ -3892,7 +3892,7 @@ export const marketBlogPosts = [
       "provider": "local",
       "prompt": "business analytics AI automation ROI fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:02:51.332Z",
+      "generatedAt": "2026-05-28T19:23:15.321Z",
       "status": "skipped"
     },
     "coverCredit": "ALTOS LAB",
@@ -3932,11 +3932,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "afternoon",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:02:51.332Z",
+    "generatedAt": "2026-05-28T19:23:15.321Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:02:51.332Z",
-    "updatedAt": "2026-05-28T19:02:51.332Z",
-    "publishedAt": "2026-05-28T19:02:51.332Z"
+    "createdAt": "2026-05-28T19:23:15.321Z",
+    "updatedAt": "2026-05-28T19:23:15.321Z",
+    "publishedAt": "2026-05-28T19:23:15.321Z"
   },
   {
     "id": "post_market_agent_roi_metrics_ko",
@@ -4019,7 +4019,7 @@ export const marketBlogPosts = [
       "provider": "local",
       "prompt": "business analytics AI automation ROI fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:02:52.247Z",
+      "generatedAt": "2026-05-28T19:23:16.699Z",
       "status": "skipped"
     },
     "coverCredit": "ALTOS LAB",
@@ -4059,11 +4059,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "afternoon",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:02:52.247Z",
+    "generatedAt": "2026-05-28T19:23:16.699Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:02:52.247Z",
-    "updatedAt": "2026-05-28T19:02:52.247Z",
-    "publishedAt": "2026-05-28T19:02:52.247Z"
+    "createdAt": "2026-05-28T19:23:16.699Z",
+    "updatedAt": "2026-05-28T19:23:16.699Z",
+    "publishedAt": "2026-05-28T19:23:16.699Z"
   },
   {
     "id": "post_market_ai_overviews_content_architecture_zh_hant",
@@ -4146,7 +4146,7 @@ export const marketBlogPosts = [
       "provider": "openverse",
       "prompt": "web code search engine",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:02:53.561Z",
+      "generatedAt": "2026-05-28T19:23:17.920Z",
       "status": "generated"
     },
     "coverCredit": "File:Japan-qr-code-billboard.jpg by Nicolas1981",
@@ -4186,11 +4186,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "morning",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:02:53.561Z",
+    "generatedAt": "2026-05-28T19:23:17.920Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:02:53.561Z",
-    "updatedAt": "2026-05-28T19:02:53.561Z",
-    "publishedAt": "2026-05-28T19:02:53.561Z"
+    "createdAt": "2026-05-28T19:23:17.920Z",
+    "updatedAt": "2026-05-28T19:23:17.920Z",
+    "publishedAt": "2026-05-28T19:23:17.920Z"
   },
   {
     "id": "post_market_ai_overviews_content_architecture_en",
@@ -4273,7 +4273,7 @@ export const marketBlogPosts = [
       "provider": "openverse",
       "prompt": "network map data visualization",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:02:53.874Z",
+      "generatedAt": "2026-05-28T19:23:18.313Z",
       "status": "generated"
     },
     "coverCredit": "20120106-NodeXL-Twitter-gatesfoundation network graph by Marc_Smith",
@@ -4313,11 +4313,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "morning",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:02:53.874Z",
+    "generatedAt": "2026-05-28T19:23:18.313Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:02:53.874Z",
-    "updatedAt": "2026-05-28T19:02:53.874Z",
-    "publishedAt": "2026-05-28T19:02:53.874Z"
+    "createdAt": "2026-05-28T19:23:18.313Z",
+    "updatedAt": "2026-05-28T19:23:18.313Z",
+    "publishedAt": "2026-05-28T19:23:18.313Z"
   },
   {
     "id": "post_market_ai_overviews_content_architecture_ja",
@@ -4400,7 +4400,7 @@ export const marketBlogPosts = [
       "provider": "openverse",
       "prompt": "bookshelf research notes",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:02:54.641Z",
+      "generatedAt": "2026-05-28T19:23:18.745Z",
       "status": "generated"
     },
     "coverCredit": "book shelf project 2 ~ striatic {notes} by striatic",
@@ -4440,11 +4440,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "morning",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:02:54.641Z",
+    "generatedAt": "2026-05-28T19:23:18.745Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:02:54.641Z",
-    "updatedAt": "2026-05-28T19:02:54.641Z",
-    "publishedAt": "2026-05-28T19:02:54.641Z"
+    "createdAt": "2026-05-28T19:23:18.745Z",
+    "updatedAt": "2026-05-28T19:23:18.745Z",
+    "publishedAt": "2026-05-28T19:23:18.745Z"
   },
   {
     "id": "post_market_ai_overviews_content_architecture_ko",
@@ -4527,7 +4527,7 @@ export const marketBlogPosts = [
       "provider": "openverse",
       "prompt": "magnifying glass documents",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:02:55.538Z",
+      "generatedAt": "2026-05-28T19:23:18.990Z",
       "status": "generated"
     },
     "coverCredit": "Malicious Act Definition Dictionary Magnifying Glass by allenallen1910",
@@ -4567,11 +4567,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "morning",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:02:55.538Z",
+    "generatedAt": "2026-05-28T19:23:18.990Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:02:55.538Z",
-    "updatedAt": "2026-05-28T19:02:55.538Z",
-    "publishedAt": "2026-05-28T19:02:55.538Z"
+    "createdAt": "2026-05-28T19:23:18.990Z",
+    "updatedAt": "2026-05-28T19:23:18.990Z",
+    "publishedAt": "2026-05-28T19:23:18.990Z"
   },
   {
     "id": "post_market_llms_txt_operating_policy_zh_hant",
@@ -4654,7 +4654,7 @@ export const marketBlogPosts = [
       "provider": "openverse",
       "prompt": "network map data visualization",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:02:55.855Z",
+      "generatedAt": "2026-05-28T19:23:19.224Z",
       "status": "generated"
     },
     "coverCredit": "20120227-NodeXL-Twitter-#NICAR network graph by Marc_Smith",
@@ -4694,11 +4694,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "afternoon",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:02:55.855Z",
+    "generatedAt": "2026-05-28T19:23:19.224Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:02:55.855Z",
-    "updatedAt": "2026-05-28T19:02:55.855Z",
-    "publishedAt": "2026-05-28T19:02:55.855Z"
+    "createdAt": "2026-05-28T19:23:19.224Z",
+    "updatedAt": "2026-05-28T19:23:19.224Z",
+    "publishedAt": "2026-05-28T19:23:19.224Z"
   },
   {
     "id": "post_market_llms_txt_operating_policy_en",
@@ -4781,7 +4781,7 @@ export const marketBlogPosts = [
       "provider": "openverse",
       "prompt": "bookshelf research notes",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:02:56.132Z",
+      "generatedAt": "2026-05-28T19:23:19.496Z",
       "status": "generated"
     },
     "coverCredit": "Remnants from my bookshelves by illustir",
@@ -4821,11 +4821,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "afternoon",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:02:56.132Z",
+    "generatedAt": "2026-05-28T19:23:19.496Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:02:56.132Z",
-    "updatedAt": "2026-05-28T19:02:56.132Z",
-    "publishedAt": "2026-05-28T19:02:56.132Z"
+    "createdAt": "2026-05-28T19:23:19.496Z",
+    "updatedAt": "2026-05-28T19:23:19.496Z",
+    "publishedAt": "2026-05-28T19:23:19.496Z"
   },
   {
     "id": "post_market_llms_txt_operating_policy_ja",
@@ -4908,7 +4908,7 @@ export const marketBlogPosts = [
       "provider": "openverse",
       "prompt": "magnifying glass documents",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:02:56.617Z",
+      "generatedAt": "2026-05-28T19:23:19.865Z",
       "status": "generated"
     },
     "coverCredit": "Magnifying glass by Siri Hardeland",
@@ -4948,11 +4948,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "afternoon",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:02:56.617Z",
+    "generatedAt": "2026-05-28T19:23:19.865Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:02:56.617Z",
-    "updatedAt": "2026-05-28T19:02:56.617Z",
-    "publishedAt": "2026-05-28T19:02:56.617Z"
+    "createdAt": "2026-05-28T19:23:19.865Z",
+    "updatedAt": "2026-05-28T19:23:19.865Z",
+    "publishedAt": "2026-05-28T19:23:19.865Z"
   },
   {
     "id": "post_market_llms_txt_operating_policy_ko",
@@ -5035,7 +5035,7 @@ export const marketBlogPosts = [
       "provider": "local",
       "prompt": "website robots llms file code fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:02:57.571Z",
+      "generatedAt": "2026-05-28T19:23:21.496Z",
       "status": "skipped"
     },
     "coverCredit": "ALTOS LAB",
@@ -5075,11 +5075,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "afternoon",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:02:57.571Z",
+    "generatedAt": "2026-05-28T19:23:21.496Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:02:57.571Z",
-    "updatedAt": "2026-05-28T19:02:57.571Z",
-    "publishedAt": "2026-05-28T19:02:57.571Z"
+    "createdAt": "2026-05-28T19:23:21.496Z",
+    "updatedAt": "2026-05-28T19:23:21.496Z",
+    "publishedAt": "2026-05-28T19:23:21.496Z"
   },
   {
     "id": "post_market_source_backed_blog_system_zh_hant",
@@ -5162,7 +5162,7 @@ export const marketBlogPosts = [
       "provider": "openverse",
       "prompt": "bookshelf research notes",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:02:57.850Z",
+      "generatedAt": "2026-05-28T19:23:21.851Z",
       "status": "generated"
     },
     "coverCredit": "book shelf project 1 ~ striatic {notes} by striatic",
@@ -5202,11 +5202,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "morning",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:02:57.850Z",
+    "generatedAt": "2026-05-28T19:23:21.851Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:02:57.850Z",
-    "updatedAt": "2026-05-28T19:02:57.850Z",
-    "publishedAt": "2026-05-28T19:02:57.850Z"
+    "createdAt": "2026-05-28T19:23:21.851Z",
+    "updatedAt": "2026-05-28T19:23:21.851Z",
+    "publishedAt": "2026-05-28T19:23:21.851Z"
   },
   {
     "id": "post_market_source_backed_blog_system_en",
@@ -5289,7 +5289,7 @@ export const marketBlogPosts = [
       "provider": "openverse",
       "prompt": "magnifying glass documents",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:02:58.172Z",
+      "generatedAt": "2026-05-28T19:23:22.153Z",
       "status": "generated"
     },
     "coverCredit": "Magnifying glass by Kai Hendry",
@@ -5329,11 +5329,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "morning",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:02:58.172Z",
+    "generatedAt": "2026-05-28T19:23:22.153Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:02:58.172Z",
-    "updatedAt": "2026-05-28T19:02:58.172Z",
-    "publishedAt": "2026-05-28T19:02:58.172Z"
+    "createdAt": "2026-05-28T19:23:22.153Z",
+    "updatedAt": "2026-05-28T19:23:22.153Z",
+    "publishedAt": "2026-05-28T19:23:22.153Z"
   },
   {
     "id": "post_market_source_backed_blog_system_ja",
@@ -5416,7 +5416,7 @@ export const marketBlogPosts = [
       "provider": "local",
       "prompt": "editorial desk research sources fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:02:59.110Z",
+      "generatedAt": "2026-05-28T19:23:23.482Z",
       "status": "skipped"
     },
     "coverCredit": "ALTOS LAB",
@@ -5456,11 +5456,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "morning",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:02:59.110Z",
+    "generatedAt": "2026-05-28T19:23:23.482Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:02:59.110Z",
-    "updatedAt": "2026-05-28T19:02:59.110Z",
-    "publishedAt": "2026-05-28T19:02:59.110Z"
+    "createdAt": "2026-05-28T19:23:23.482Z",
+    "updatedAt": "2026-05-28T19:23:23.482Z",
+    "publishedAt": "2026-05-28T19:23:23.482Z"
   },
   {
     "id": "post_market_source_backed_blog_system_ko",
@@ -5543,7 +5543,7 @@ export const marketBlogPosts = [
       "provider": "local",
       "prompt": "editorial desk research sources fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:03:01.306Z",
+      "generatedAt": "2026-05-28T19:23:26.204Z",
       "status": "skipped"
     },
     "coverCredit": "ALTOS LAB",
@@ -5583,11 +5583,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "morning",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:03:01.306Z",
+    "generatedAt": "2026-05-28T19:23:26.204Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:03:01.306Z",
-    "updatedAt": "2026-05-28T19:03:01.306Z",
-    "publishedAt": "2026-05-28T19:03:01.306Z"
+    "createdAt": "2026-05-28T19:23:26.204Z",
+    "updatedAt": "2026-05-28T19:23:26.204Z",
+    "publishedAt": "2026-05-28T19:23:26.204Z"
   },
   {
     "id": "post_market_brand_entity_consistency_zh_hant",
@@ -5670,7 +5670,7 @@ export const marketBlogPosts = [
       "provider": "openverse",
       "prompt": "magnifying glass documents",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:03:01.599Z",
+      "generatedAt": "2026-05-28T19:23:26.552Z",
       "status": "generated"
     },
     "coverCredit": "Magnifying glass by joebeone",
@@ -5710,11 +5710,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "afternoon",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:03:01.599Z",
+    "generatedAt": "2026-05-28T19:23:26.552Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:03:01.599Z",
-    "updatedAt": "2026-05-28T19:03:01.599Z",
-    "publishedAt": "2026-05-28T19:03:01.599Z"
+    "createdAt": "2026-05-28T19:23:26.552Z",
+    "updatedAt": "2026-05-28T19:23:26.552Z",
+    "publishedAt": "2026-05-28T19:23:26.552Z"
   },
   {
     "id": "post_market_brand_entity_consistency_en",
@@ -5797,7 +5797,7 @@ export const marketBlogPosts = [
       "provider": "local",
       "prompt": "brand knowledge graph entity fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:03:02.719Z",
+      "generatedAt": "2026-05-28T19:23:28.006Z",
       "status": "skipped"
     },
     "coverCredit": "ALTOS LAB",
@@ -5837,11 +5837,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "afternoon",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:03:02.719Z",
+    "generatedAt": "2026-05-28T19:23:28.006Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:03:02.719Z",
-    "updatedAt": "2026-05-28T19:03:02.719Z",
-    "publishedAt": "2026-05-28T19:03:02.719Z"
+    "createdAt": "2026-05-28T19:23:28.006Z",
+    "updatedAt": "2026-05-28T19:23:28.006Z",
+    "publishedAt": "2026-05-28T19:23:28.006Z"
   },
   {
     "id": "post_market_brand_entity_consistency_ja",
@@ -5924,7 +5924,7 @@ export const marketBlogPosts = [
       "provider": "local",
       "prompt": "brand knowledge graph entity fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:03:04.910Z",
+      "generatedAt": "2026-05-28T19:23:30.011Z",
       "status": "skipped"
     },
     "coverCredit": "ALTOS LAB",
@@ -5964,11 +5964,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "afternoon",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:03:04.910Z",
+    "generatedAt": "2026-05-28T19:23:30.011Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:03:04.910Z",
-    "updatedAt": "2026-05-28T19:03:04.910Z",
-    "publishedAt": "2026-05-28T19:03:04.910Z"
+    "createdAt": "2026-05-28T19:23:30.011Z",
+    "updatedAt": "2026-05-28T19:23:30.011Z",
+    "publishedAt": "2026-05-28T19:23:30.011Z"
   },
   {
     "id": "post_market_brand_entity_consistency_ko",
@@ -6051,7 +6051,7 @@ export const marketBlogPosts = [
       "provider": "local",
       "prompt": "brand knowledge graph entity fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:03:06.150Z",
+      "generatedAt": "2026-05-28T19:23:31.707Z",
       "status": "skipped"
     },
     "coverCredit": "ALTOS LAB",
@@ -6091,11 +6091,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "afternoon",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:03:06.150Z",
+    "generatedAt": "2026-05-28T19:23:31.707Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:03:06.150Z",
-    "updatedAt": "2026-05-28T19:03:06.150Z",
-    "publishedAt": "2026-05-28T19:03:06.150Z"
+    "createdAt": "2026-05-28T19:23:31.707Z",
+    "updatedAt": "2026-05-28T19:23:31.707Z",
+    "publishedAt": "2026-05-28T19:23:31.707Z"
   },
   {
     "id": "post_market_visible_faq_schema_zh_hant",
@@ -6178,7 +6178,7 @@ export const marketBlogPosts = [
       "provider": "local",
       "prompt": "FAQ structured data website fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:03:07.126Z",
+      "generatedAt": "2026-05-28T19:23:33.168Z",
       "status": "skipped"
     },
     "coverCredit": "ALTOS LAB",
@@ -6218,11 +6218,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "morning",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:03:07.126Z",
+    "generatedAt": "2026-05-28T19:23:33.168Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:03:07.126Z",
-    "updatedAt": "2026-05-28T19:03:07.126Z",
-    "publishedAt": "2026-05-28T19:03:07.126Z"
+    "createdAt": "2026-05-28T19:23:33.168Z",
+    "updatedAt": "2026-05-28T19:23:33.168Z",
+    "publishedAt": "2026-05-28T19:23:33.168Z"
   },
   {
     "id": "post_market_visible_faq_schema_en",
@@ -6305,7 +6305,7 @@ export const marketBlogPosts = [
       "provider": "local",
       "prompt": "FAQ structured data website fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:03:08.843Z",
+      "generatedAt": "2026-05-28T19:23:35.140Z",
       "status": "skipped"
     },
     "coverCredit": "ALTOS LAB",
@@ -6345,11 +6345,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "morning",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:03:08.843Z",
+    "generatedAt": "2026-05-28T19:23:35.140Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:03:08.843Z",
-    "updatedAt": "2026-05-28T19:03:08.843Z",
-    "publishedAt": "2026-05-28T19:03:08.843Z"
+    "createdAt": "2026-05-28T19:23:35.140Z",
+    "updatedAt": "2026-05-28T19:23:35.140Z",
+    "publishedAt": "2026-05-28T19:23:35.140Z"
   },
   {
     "id": "post_market_visible_faq_schema_ja",
@@ -6432,7 +6432,7 @@ export const marketBlogPosts = [
       "provider": "local",
       "prompt": "FAQ structured data website fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:03:10.099Z",
+      "generatedAt": "2026-05-28T19:23:36.748Z",
       "status": "skipped"
     },
     "coverCredit": "ALTOS LAB",
@@ -6472,11 +6472,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "morning",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:03:10.099Z",
+    "generatedAt": "2026-05-28T19:23:36.748Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:03:10.099Z",
-    "updatedAt": "2026-05-28T19:03:10.099Z",
-    "publishedAt": "2026-05-28T19:03:10.099Z"
+    "createdAt": "2026-05-28T19:23:36.748Z",
+    "updatedAt": "2026-05-28T19:23:36.748Z",
+    "publishedAt": "2026-05-28T19:23:36.748Z"
   },
   {
     "id": "post_market_visible_faq_schema_ko",
@@ -6559,7 +6559,7 @@ export const marketBlogPosts = [
       "provider": "openverse",
       "prompt": "network map data visualization",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:03:10.371Z",
+      "generatedAt": "2026-05-28T19:23:37.031Z",
       "status": "generated"
     },
     "coverCredit": "20120214-NodeXL-Twitter-#linkedin network graph by Marc_Smith",
@@ -6599,11 +6599,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "morning",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:03:10.371Z",
+    "generatedAt": "2026-05-28T19:23:37.031Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:03:10.371Z",
-    "updatedAt": "2026-05-28T19:03:10.371Z",
-    "publishedAt": "2026-05-28T19:03:10.371Z"
+    "createdAt": "2026-05-28T19:23:37.031Z",
+    "updatedAt": "2026-05-28T19:23:37.031Z",
+    "publishedAt": "2026-05-28T19:23:37.031Z"
   },
   {
     "id": "post_market_ai_crawler_log_analysis_zh_hant",
@@ -6686,7 +6686,7 @@ export const marketBlogPosts = [
       "provider": "local",
       "prompt": "web server logs search crawler fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:03:11.976Z",
+      "generatedAt": "2026-05-28T19:23:38.893Z",
       "status": "skipped"
     },
     "coverCredit": "ALTOS LAB",
@@ -6726,11 +6726,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "afternoon",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:03:11.976Z",
+    "generatedAt": "2026-05-28T19:23:38.893Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:03:11.976Z",
-    "updatedAt": "2026-05-28T19:03:11.976Z",
-    "publishedAt": "2026-05-28T19:03:11.976Z"
+    "createdAt": "2026-05-28T19:23:38.893Z",
+    "updatedAt": "2026-05-28T19:23:38.893Z",
+    "publishedAt": "2026-05-28T19:23:38.893Z"
   },
   {
     "id": "post_market_ai_crawler_log_analysis_en",
@@ -6813,7 +6813,7 @@ export const marketBlogPosts = [
       "provider": "local",
       "prompt": "web server logs search crawler fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:03:13.300Z",
+      "generatedAt": "2026-05-28T19:23:40.469Z",
       "status": "skipped"
     },
     "coverCredit": "ALTOS LAB",
@@ -6853,11 +6853,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "afternoon",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:03:13.300Z",
+    "generatedAt": "2026-05-28T19:23:40.469Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:03:13.300Z",
-    "updatedAt": "2026-05-28T19:03:13.300Z",
-    "publishedAt": "2026-05-28T19:03:13.300Z"
+    "createdAt": "2026-05-28T19:23:40.469Z",
+    "updatedAt": "2026-05-28T19:23:40.469Z",
+    "publishedAt": "2026-05-28T19:23:40.469Z"
   },
   {
     "id": "post_market_ai_crawler_log_analysis_ja",
@@ -6931,8 +6931,8 @@ export const marketBlogPosts = [
       "運用プレイブック"
     ],
     "author": "ALTOS LAB Editorial Lab",
-    "cover": "https://api.openverse.org/v1/images/2c5e7a7a-4b8b-4290-b434-469922615d29/thumb/",
-    "coverAlt": "AIクローラーログ分析プレイブック：クロール信号で更新頻度を調整する - 20120227-NodeXL-Twitter-bigdata network graph by Marc_Smith",
+    "cover": "https://api.openverse.org/v1/images/78133892-9d72-4657-9c47-8f692d291f43/thumb/",
+    "coverAlt": "AIクローラーログ分析プレイブック：クロール信号で更新頻度を調整する - Linkedin maps data visualization by luc legay",
     "coverPrompt": "network map data visualization",
     "coverSource": "curated",
     "coverGeneration": {
@@ -6940,13 +6940,13 @@ export const marketBlogPosts = [
       "provider": "openverse",
       "prompt": "network map data visualization",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:03:13.939Z",
+      "generatedAt": "2026-05-28T19:23:42.299Z",
       "status": "generated"
     },
-    "coverCredit": "20120227-NodeXL-Twitter-bigdata network graph by Marc_Smith",
-    "coverCreditUrl": "https://www.flickr.com/photos/49503165485@N01/6792756018",
-    "coverLicense": "CC BY 2.0",
-    "coverLicenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "coverCredit": "Linkedin maps data visualization by luc legay",
+    "coverCreditUrl": "https://www.flickr.com/photos/49503019876@N01/5418037955",
+    "coverLicense": "CC BY-SA 2.0",
+    "coverLicenseUrl": "https://creativecommons.org/licenses/by-sa/2.0/",
     "readTimeMinutes": 2,
     "featured": false,
     "reviewStatus": "approved",
@@ -6980,11 +6980,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "afternoon",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:03:13.939Z",
+    "generatedAt": "2026-05-28T19:23:42.299Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:03:13.939Z",
-    "updatedAt": "2026-05-28T19:03:13.939Z",
-    "publishedAt": "2026-05-28T19:03:13.939Z"
+    "createdAt": "2026-05-28T19:23:42.299Z",
+    "updatedAt": "2026-05-28T19:23:42.299Z",
+    "publishedAt": "2026-05-28T19:23:42.299Z"
   },
   {
     "id": "post_market_ai_crawler_log_analysis_ko",
@@ -7067,7 +7067,7 @@ export const marketBlogPosts = [
       "provider": "local",
       "prompt": "web server logs search crawler fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:03:15.155Z",
+      "generatedAt": "2026-05-28T19:23:43.680Z",
       "status": "skipped"
     },
     "coverCredit": "ALTOS LAB",
@@ -7107,11 +7107,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "afternoon",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:03:15.155Z",
+    "generatedAt": "2026-05-28T19:23:43.680Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:03:15.155Z",
-    "updatedAt": "2026-05-28T19:03:15.155Z",
-    "publishedAt": "2026-05-28T19:03:15.155Z"
+    "createdAt": "2026-05-28T19:23:43.680Z",
+    "updatedAt": "2026-05-28T19:23:43.680Z",
+    "publishedAt": "2026-05-28T19:23:43.680Z"
   },
   {
     "id": "post_market_content_refresh_cadence_zh_hant",
@@ -7194,7 +7194,7 @@ export const marketBlogPosts = [
       "provider": "local",
       "prompt": "calendar editorial workflow fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:03:16.353Z",
+      "generatedAt": "2026-05-28T19:23:45.331Z",
       "status": "skipped"
     },
     "coverCredit": "ALTOS LAB",
@@ -7234,11 +7234,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "morning",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:03:16.353Z",
+    "generatedAt": "2026-05-28T19:23:45.331Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:03:16.353Z",
-    "updatedAt": "2026-05-28T19:03:16.353Z",
-    "publishedAt": "2026-05-28T19:03:16.353Z"
+    "createdAt": "2026-05-28T19:23:45.331Z",
+    "updatedAt": "2026-05-28T19:23:45.331Z",
+    "publishedAt": "2026-05-28T19:23:45.331Z"
   },
   {
     "id": "post_market_content_refresh_cadence_en",
@@ -7312,22 +7312,22 @@ export const marketBlogPosts = [
       "Column"
     ],
     "author": "ALTOS LAB Editorial Lab",
-    "cover": "https://api.openverse.org/v1/images/a8d330a0-142f-4e2f-89ad-7e2af43de1d7/thumb/",
-    "coverAlt": "The overlooked risk inside AI search refresh cadence - 20120705-NodeXL-Twitter-bain -de -le -la Network by Marc_Smith",
-    "coverPrompt": "network map data visualization",
-    "coverSource": "curated",
+    "cover": "/blog-cover-en.png",
+    "coverAlt": "The overlooked risk inside AI search refresh cadence - ALTOS LAB",
+    "coverPrompt": "calendar editorial workflow fallback",
+    "coverSource": "manual",
     "coverGeneration": {
-      "source": "curated",
-      "provider": "openverse",
-      "prompt": "network map data visualization",
+      "source": "manual",
+      "provider": "local",
+      "prompt": "calendar editorial workflow fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:03:16.635Z",
-      "status": "generated"
+      "generatedAt": "2026-05-28T19:23:46.738Z",
+      "status": "skipped"
     },
-    "coverCredit": "20120705-NodeXL-Twitter-bain -de -le -la Network by Marc_Smith",
-    "coverCreditUrl": "https://www.flickr.com/photos/49503165485@N01/7515649644",
-    "coverLicense": "CC BY 2.0",
-    "coverLicenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "coverCredit": "ALTOS LAB",
+    "coverCreditUrl": "https://altoslab-ai.cc",
+    "coverLicense": "Internal asset",
+    "coverLicenseUrl": "https://altoslab-ai.cc",
     "readTimeMinutes": 2,
     "featured": false,
     "reviewStatus": "approved",
@@ -7361,11 +7361,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "morning",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:03:16.635Z",
+    "generatedAt": "2026-05-28T19:23:46.738Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:03:16.635Z",
-    "updatedAt": "2026-05-28T19:03:16.635Z",
-    "publishedAt": "2026-05-28T19:03:16.635Z"
+    "createdAt": "2026-05-28T19:23:46.738Z",
+    "updatedAt": "2026-05-28T19:23:46.738Z",
+    "publishedAt": "2026-05-28T19:23:46.738Z"
   },
   {
     "id": "post_market_content_refresh_cadence_ja",
@@ -7448,7 +7448,7 @@ export const marketBlogPosts = [
       "provider": "local",
       "prompt": "calendar editorial workflow fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:03:17.712Z",
+      "generatedAt": "2026-05-28T19:23:48.010Z",
       "status": "skipped"
     },
     "coverCredit": "ALTOS LAB",
@@ -7488,11 +7488,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "morning",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:03:17.712Z",
+    "generatedAt": "2026-05-28T19:23:48.010Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:03:17.712Z",
-    "updatedAt": "2026-05-28T19:03:17.712Z",
-    "publishedAt": "2026-05-28T19:03:17.712Z"
+    "createdAt": "2026-05-28T19:23:48.010Z",
+    "updatedAt": "2026-05-28T19:23:48.010Z",
+    "publishedAt": "2026-05-28T19:23:48.010Z"
   },
   {
     "id": "post_market_content_refresh_cadence_ko",
@@ -7575,7 +7575,7 @@ export const marketBlogPosts = [
       "provider": "local",
       "prompt": "calendar editorial workflow fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:03:18.756Z",
+      "generatedAt": "2026-05-28T19:23:49.683Z",
       "status": "skipped"
     },
     "coverCredit": "ALTOS LAB",
@@ -7615,11 +7615,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "morning",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:03:18.756Z",
+    "generatedAt": "2026-05-28T19:23:49.683Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:03:18.756Z",
-    "updatedAt": "2026-05-28T19:03:18.756Z",
-    "publishedAt": "2026-05-28T19:03:18.756Z"
+    "createdAt": "2026-05-28T19:23:49.683Z",
+    "updatedAt": "2026-05-28T19:23:49.683Z",
+    "publishedAt": "2026-05-28T19:23:49.683Z"
   },
   {
     "id": "post_market_multilingual_hreflang_geo_zh_hant",
@@ -7693,22 +7693,22 @@ export const marketBlogPosts = [
       "訊號圖"
     ],
     "author": "ALTOS LAB Editorial Lab",
-    "cover": "https://api.openverse.org/v1/images/658d5ce1-574b-474a-b606-ee3cb21bf933/thumb/",
-    "coverAlt": "多語 hreflang 與 GEO訊號圖：四個指標看懂導入壓力 - 20120212-NodeXL-Twitter-socbiz network graph by Marc_Smith",
-    "coverPrompt": "network map data visualization",
-    "coverSource": "curated",
+    "cover": "/blog-cover-zh-hant.png",
+    "coverAlt": "多語 hreflang 與 GEO訊號圖：四個指標看懂導入壓力 - ALTOS LAB",
+    "coverPrompt": "multilingual website localization fallback",
+    "coverSource": "manual",
     "coverGeneration": {
-      "source": "curated",
-      "provider": "openverse",
-      "prompt": "network map data visualization",
+      "source": "manual",
+      "provider": "local",
+      "prompt": "multilingual website localization fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:03:19.101Z",
-      "status": "generated"
+      "generatedAt": "2026-05-28T19:23:51.507Z",
+      "status": "skipped"
     },
-    "coverCredit": "20120212-NodeXL-Twitter-socbiz network graph by Marc_Smith",
-    "coverCreditUrl": "https://www.flickr.com/photos/49503165485@N01/6871711979",
-    "coverLicense": "CC BY 2.0",
-    "coverLicenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "coverCredit": "ALTOS LAB",
+    "coverCreditUrl": "https://altoslab-ai.cc",
+    "coverLicense": "Internal asset",
+    "coverLicenseUrl": "https://altoslab-ai.cc",
     "readTimeMinutes": 2,
     "featured": false,
     "reviewStatus": "approved",
@@ -7742,11 +7742,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "afternoon",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:03:19.101Z",
+    "generatedAt": "2026-05-28T19:23:51.507Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:03:19.101Z",
-    "updatedAt": "2026-05-28T19:03:19.101Z",
-    "publishedAt": "2026-05-28T19:03:19.101Z"
+    "createdAt": "2026-05-28T19:23:51.507Z",
+    "updatedAt": "2026-05-28T19:23:51.507Z",
+    "publishedAt": "2026-05-28T19:23:51.507Z"
   },
   {
     "id": "post_market_multilingual_hreflang_geo_en",
@@ -7829,7 +7829,7 @@ export const marketBlogPosts = [
       "provider": "local",
       "prompt": "multilingual website localization fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:03:20.401Z",
+      "generatedAt": "2026-05-28T19:23:53.123Z",
       "status": "skipped"
     },
     "coverCredit": "ALTOS LAB",
@@ -7869,11 +7869,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "afternoon",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:03:20.401Z",
+    "generatedAt": "2026-05-28T19:23:53.123Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:03:20.401Z",
-    "updatedAt": "2026-05-28T19:03:20.401Z",
-    "publishedAt": "2026-05-28T19:03:20.401Z"
+    "createdAt": "2026-05-28T19:23:53.123Z",
+    "updatedAt": "2026-05-28T19:23:53.123Z",
+    "publishedAt": "2026-05-28T19:23:53.123Z"
   },
   {
     "id": "post_market_multilingual_hreflang_geo_ja",
@@ -7956,7 +7956,7 @@ export const marketBlogPosts = [
       "provider": "local",
       "prompt": "multilingual website localization fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:03:21.453Z",
+      "generatedAt": "2026-05-28T19:23:54.461Z",
       "status": "skipped"
     },
     "coverCredit": "ALTOS LAB",
@@ -7996,11 +7996,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "afternoon",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:03:21.453Z",
+    "generatedAt": "2026-05-28T19:23:54.461Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:03:21.453Z",
-    "updatedAt": "2026-05-28T19:03:21.453Z",
-    "publishedAt": "2026-05-28T19:03:21.453Z"
+    "createdAt": "2026-05-28T19:23:54.461Z",
+    "updatedAt": "2026-05-28T19:23:54.461Z",
+    "publishedAt": "2026-05-28T19:23:54.461Z"
   },
   {
     "id": "post_market_multilingual_hreflang_geo_ko",
@@ -8083,7 +8083,7 @@ export const marketBlogPosts = [
       "provider": "local",
       "prompt": "multilingual website localization fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:03:22.571Z",
+      "generatedAt": "2026-05-28T19:23:56.004Z",
       "status": "skipped"
     },
     "coverCredit": "ALTOS LAB",
@@ -8123,11 +8123,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "afternoon",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:03:22.571Z",
+    "generatedAt": "2026-05-28T19:23:56.004Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:03:22.571Z",
-    "updatedAt": "2026-05-28T19:03:22.571Z",
-    "publishedAt": "2026-05-28T19:03:22.571Z"
+    "createdAt": "2026-05-28T19:23:56.004Z",
+    "updatedAt": "2026-05-28T19:23:56.004Z",
+    "publishedAt": "2026-05-28T19:23:56.004Z"
   },
   {
     "id": "post_market_ai_search_brand_monitoring_zh_hant",
@@ -8210,7 +8210,7 @@ export const marketBlogPosts = [
       "provider": "local",
       "prompt": "AI search brand monitoring fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:03:23.683Z",
+      "generatedAt": "2026-05-28T19:23:57.374Z",
       "status": "skipped"
     },
     "coverCredit": "ALTOS LAB",
@@ -8250,11 +8250,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "morning",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:03:23.683Z",
+    "generatedAt": "2026-05-28T19:23:57.374Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:03:23.683Z",
-    "updatedAt": "2026-05-28T19:03:23.683Z",
-    "publishedAt": "2026-05-28T19:03:23.683Z"
+    "createdAt": "2026-05-28T19:23:57.374Z",
+    "updatedAt": "2026-05-28T19:23:57.374Z",
+    "publishedAt": "2026-05-28T19:23:57.374Z"
   },
   {
     "id": "post_market_ai_search_brand_monitoring_en",
@@ -8337,7 +8337,7 @@ export const marketBlogPosts = [
       "provider": "local",
       "prompt": "AI search brand monitoring fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:03:24.700Z",
+      "generatedAt": "2026-05-28T19:23:59.064Z",
       "status": "skipped"
     },
     "coverCredit": "ALTOS LAB",
@@ -8377,11 +8377,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "morning",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:03:24.700Z",
+    "generatedAt": "2026-05-28T19:23:59.064Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:03:24.700Z",
-    "updatedAt": "2026-05-28T19:03:24.700Z",
-    "publishedAt": "2026-05-28T19:03:24.700Z"
+    "createdAt": "2026-05-28T19:23:59.064Z",
+    "updatedAt": "2026-05-28T19:23:59.064Z",
+    "publishedAt": "2026-05-28T19:23:59.064Z"
   },
   {
     "id": "post_market_ai_search_brand_monitoring_ja",
@@ -8464,7 +8464,7 @@ export const marketBlogPosts = [
       "provider": "local",
       "prompt": "AI search brand monitoring fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:03:25.762Z",
+      "generatedAt": "2026-05-28T19:24:00.558Z",
       "status": "skipped"
     },
     "coverCredit": "ALTOS LAB",
@@ -8504,11 +8504,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "morning",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:03:25.762Z",
+    "generatedAt": "2026-05-28T19:24:00.558Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:03:25.762Z",
-    "updatedAt": "2026-05-28T19:03:25.762Z",
-    "publishedAt": "2026-05-28T19:03:25.762Z"
+    "createdAt": "2026-05-28T19:24:00.558Z",
+    "updatedAt": "2026-05-28T19:24:00.558Z",
+    "publishedAt": "2026-05-28T19:24:00.558Z"
   },
   {
     "id": "post_market_ai_search_brand_monitoring_ko",
@@ -8591,7 +8591,7 @@ export const marketBlogPosts = [
       "provider": "local",
       "prompt": "AI search brand monitoring fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:03:27.484Z",
+      "generatedAt": "2026-05-28T19:24:02.475Z",
       "status": "skipped"
     },
     "coverCredit": "ALTOS LAB",
@@ -8631,11 +8631,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "morning",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:03:27.484Z",
+    "generatedAt": "2026-05-28T19:24:02.475Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:03:27.484Z",
-    "updatedAt": "2026-05-28T19:03:27.484Z",
-    "publishedAt": "2026-05-28T19:03:27.484Z"
+    "createdAt": "2026-05-28T19:24:02.475Z",
+    "updatedAt": "2026-05-28T19:24:02.475Z",
+    "publishedAt": "2026-05-28T19:24:02.475Z"
   },
   {
     "id": "post_market_ai_policy_to_workflow_zh_hant",
@@ -8718,7 +8718,7 @@ export const marketBlogPosts = [
       "provider": "local",
       "prompt": "AI governance policy workflow fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:03:28.599Z",
+      "generatedAt": "2026-05-28T19:24:03.776Z",
       "status": "skipped"
     },
     "coverCredit": "ALTOS LAB",
@@ -8758,11 +8758,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "afternoon",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:03:28.599Z",
+    "generatedAt": "2026-05-28T19:24:03.776Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:03:28.599Z",
-    "updatedAt": "2026-05-28T19:03:28.599Z",
-    "publishedAt": "2026-05-28T19:03:28.599Z"
+    "createdAt": "2026-05-28T19:24:03.776Z",
+    "updatedAt": "2026-05-28T19:24:03.776Z",
+    "publishedAt": "2026-05-28T19:24:03.776Z"
   },
   {
     "id": "post_market_ai_policy_to_workflow_en",
@@ -8845,7 +8845,7 @@ export const marketBlogPosts = [
       "provider": "local",
       "prompt": "AI governance policy workflow fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:03:29.837Z",
+      "generatedAt": "2026-05-28T19:24:05.259Z",
       "status": "skipped"
     },
     "coverCredit": "ALTOS LAB",
@@ -8885,11 +8885,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "afternoon",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:03:29.837Z",
+    "generatedAt": "2026-05-28T19:24:05.259Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:03:29.837Z",
-    "updatedAt": "2026-05-28T19:03:29.837Z",
-    "publishedAt": "2026-05-28T19:03:29.837Z"
+    "createdAt": "2026-05-28T19:24:05.259Z",
+    "updatedAt": "2026-05-28T19:24:05.259Z",
+    "publishedAt": "2026-05-28T19:24:05.259Z"
   },
   {
     "id": "post_market_ai_policy_to_workflow_ja",
@@ -8972,7 +8972,7 @@ export const marketBlogPosts = [
       "provider": "local",
       "prompt": "AI governance policy workflow fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:03:30.887Z",
+      "generatedAt": "2026-05-28T19:24:06.544Z",
       "status": "skipped"
     },
     "coverCredit": "ALTOS LAB",
@@ -9012,11 +9012,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "afternoon",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:03:30.887Z",
+    "generatedAt": "2026-05-28T19:24:06.544Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:03:30.887Z",
-    "updatedAt": "2026-05-28T19:03:30.887Z",
-    "publishedAt": "2026-05-28T19:03:30.887Z"
+    "createdAt": "2026-05-28T19:24:06.544Z",
+    "updatedAt": "2026-05-28T19:24:06.544Z",
+    "publishedAt": "2026-05-28T19:24:06.544Z"
   },
   {
     "id": "post_market_ai_policy_to_workflow_ko",
@@ -9099,7 +9099,7 @@ export const marketBlogPosts = [
       "provider": "openverse",
       "prompt": "access card security system",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:03:31.208Z",
+      "generatedAt": "2026-05-28T19:24:06.831Z",
       "status": "generated"
     },
     "coverCredit": "Key card entry system installed on wall in a hotel room for guest access and security by nenadstojkovicart",
@@ -9139,11 +9139,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "afternoon",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:03:31.208Z",
+    "generatedAt": "2026-05-28T19:24:06.831Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:03:31.208Z",
-    "updatedAt": "2026-05-28T19:03:31.208Z",
-    "publishedAt": "2026-05-28T19:03:31.208Z"
+    "createdAt": "2026-05-28T19:24:06.831Z",
+    "updatedAt": "2026-05-28T19:24:06.831Z",
+    "publishedAt": "2026-05-28T19:24:06.831Z"
   },
   {
     "id": "post_market_shadow_ai_operating_risk_zh_hant",
@@ -9226,7 +9226,7 @@ export const marketBlogPosts = [
       "provider": "local",
       "prompt": "shadow AI employee tools fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:03:32.537Z",
+      "generatedAt": "2026-05-28T19:24:08.183Z",
       "status": "skipped"
     },
     "coverCredit": "ALTOS LAB",
@@ -9266,11 +9266,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "morning",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:03:32.537Z",
+    "generatedAt": "2026-05-28T19:24:08.183Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:03:32.537Z",
-    "updatedAt": "2026-05-28T19:03:32.537Z",
-    "publishedAt": "2026-05-28T19:03:32.537Z"
+    "createdAt": "2026-05-28T19:24:08.183Z",
+    "updatedAt": "2026-05-28T19:24:08.183Z",
+    "publishedAt": "2026-05-28T19:24:08.183Z"
   },
   {
     "id": "post_market_shadow_ai_operating_risk_en",
@@ -9353,7 +9353,7 @@ export const marketBlogPosts = [
       "provider": "local",
       "prompt": "shadow AI employee tools fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:03:33.707Z",
+      "generatedAt": "2026-05-28T19:24:09.628Z",
       "status": "skipped"
     },
     "coverCredit": "ALTOS LAB",
@@ -9393,11 +9393,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "morning",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:03:33.707Z",
+    "generatedAt": "2026-05-28T19:24:09.628Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:03:33.707Z",
-    "updatedAt": "2026-05-28T19:03:33.707Z",
-    "publishedAt": "2026-05-28T19:03:33.707Z"
+    "createdAt": "2026-05-28T19:24:09.628Z",
+    "updatedAt": "2026-05-28T19:24:09.628Z",
+    "publishedAt": "2026-05-28T19:24:09.628Z"
   },
   {
     "id": "post_market_shadow_ai_operating_risk_ja",
@@ -9480,7 +9480,7 @@ export const marketBlogPosts = [
       "provider": "local",
       "prompt": "shadow AI employee tools fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:03:34.794Z",
+      "generatedAt": "2026-05-28T19:24:11.035Z",
       "status": "skipped"
     },
     "coverCredit": "ALTOS LAB",
@@ -9520,11 +9520,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "morning",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:03:34.794Z",
+    "generatedAt": "2026-05-28T19:24:11.035Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:03:34.794Z",
-    "updatedAt": "2026-05-28T19:03:34.794Z",
-    "publishedAt": "2026-05-28T19:03:34.794Z"
+    "createdAt": "2026-05-28T19:24:11.035Z",
+    "updatedAt": "2026-05-28T19:24:11.035Z",
+    "publishedAt": "2026-05-28T19:24:11.035Z"
   },
   {
     "id": "post_market_shadow_ai_operating_risk_ko",
@@ -9607,7 +9607,7 @@ export const marketBlogPosts = [
       "provider": "local",
       "prompt": "shadow AI employee tools fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:03:36.073Z",
+      "generatedAt": "2026-05-28T19:24:12.407Z",
       "status": "skipped"
     },
     "coverCredit": "ALTOS LAB",
@@ -9647,11 +9647,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "morning",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:03:36.073Z",
+    "generatedAt": "2026-05-28T19:24:12.407Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:03:36.073Z",
-    "updatedAt": "2026-05-28T19:03:36.073Z",
-    "publishedAt": "2026-05-28T19:03:36.073Z"
+    "createdAt": "2026-05-28T19:24:12.407Z",
+    "updatedAt": "2026-05-28T19:24:12.407Z",
+    "publishedAt": "2026-05-28T19:24:12.407Z"
   },
   {
     "id": "post_market_data_readiness_before_agents_zh_hant",
@@ -9734,7 +9734,7 @@ export const marketBlogPosts = [
       "provider": "local",
       "prompt": "data readiness AI workflow fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:03:37.130Z",
+      "generatedAt": "2026-05-28T19:24:14.036Z",
       "status": "skipped"
     },
     "coverCredit": "ALTOS LAB",
@@ -9774,11 +9774,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "afternoon",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:03:37.130Z",
+    "generatedAt": "2026-05-28T19:24:14.036Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:03:37.130Z",
-    "updatedAt": "2026-05-28T19:03:37.130Z",
-    "publishedAt": "2026-05-28T19:03:37.130Z"
+    "createdAt": "2026-05-28T19:24:14.036Z",
+    "updatedAt": "2026-05-28T19:24:14.036Z",
+    "publishedAt": "2026-05-28T19:24:14.036Z"
   },
   {
     "id": "post_market_data_readiness_before_agents_en",
@@ -9861,7 +9861,7 @@ export const marketBlogPosts = [
       "provider": "local",
       "prompt": "data readiness AI workflow fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:03:38.121Z",
+      "generatedAt": "2026-05-28T19:24:15.500Z",
       "status": "skipped"
     },
     "coverCredit": "ALTOS LAB",
@@ -9901,11 +9901,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "afternoon",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:03:38.121Z",
+    "generatedAt": "2026-05-28T19:24:15.500Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:03:38.121Z",
-    "updatedAt": "2026-05-28T19:03:38.121Z",
-    "publishedAt": "2026-05-28T19:03:38.121Z"
+    "createdAt": "2026-05-28T19:24:15.500Z",
+    "updatedAt": "2026-05-28T19:24:15.500Z",
+    "publishedAt": "2026-05-28T19:24:15.500Z"
   },
   {
     "id": "post_market_data_readiness_before_agents_ja",
@@ -9988,7 +9988,7 @@ export const marketBlogPosts = [
       "provider": "local",
       "prompt": "data readiness AI workflow fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:03:39.107Z",
+      "generatedAt": "2026-05-28T19:24:16.800Z",
       "status": "skipped"
     },
     "coverCredit": "ALTOS LAB",
@@ -10028,11 +10028,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "afternoon",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:03:39.107Z",
+    "generatedAt": "2026-05-28T19:24:16.800Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:03:39.107Z",
-    "updatedAt": "2026-05-28T19:03:39.107Z",
-    "publishedAt": "2026-05-28T19:03:39.107Z"
+    "createdAt": "2026-05-28T19:24:16.800Z",
+    "updatedAt": "2026-05-28T19:24:16.800Z",
+    "publishedAt": "2026-05-28T19:24:16.800Z"
   },
   {
     "id": "post_market_data_readiness_before_agents_ko",
@@ -10115,7 +10115,7 @@ export const marketBlogPosts = [
       "provider": "openverse",
       "prompt": "server rack security",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:03:39.418Z",
+      "generatedAt": "2026-05-28T19:24:17.060Z",
       "status": "generated"
     },
     "coverCredit": "Server Porn: Netapp 3050c by Paul Hammond",
@@ -10155,11 +10155,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "afternoon",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:03:39.418Z",
+    "generatedAt": "2026-05-28T19:24:17.060Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:03:39.418Z",
-    "updatedAt": "2026-05-28T19:03:39.418Z",
-    "publishedAt": "2026-05-28T19:03:39.418Z"
+    "createdAt": "2026-05-28T19:24:17.060Z",
+    "updatedAt": "2026-05-28T19:24:17.060Z",
+    "publishedAt": "2026-05-28T19:24:17.060Z"
   },
   {
     "id": "post_market_model_risk_register_zh_hant",
@@ -10242,7 +10242,7 @@ export const marketBlogPosts = [
       "provider": "local",
       "prompt": "risk register compliance AI fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:03:40.554Z",
+      "generatedAt": "2026-05-28T19:24:18.369Z",
       "status": "skipped"
     },
     "coverCredit": "ALTOS LAB",
@@ -10282,11 +10282,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "morning",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:03:40.554Z",
+    "generatedAt": "2026-05-28T19:24:18.369Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:03:40.554Z",
-    "updatedAt": "2026-05-28T19:03:40.554Z",
-    "publishedAt": "2026-05-28T19:03:40.554Z"
+    "createdAt": "2026-05-28T19:24:18.369Z",
+    "updatedAt": "2026-05-28T19:24:18.369Z",
+    "publishedAt": "2026-05-28T19:24:18.369Z"
   },
   {
     "id": "post_market_model_risk_register_en",
@@ -10369,7 +10369,7 @@ export const marketBlogPosts = [
       "provider": "local",
       "prompt": "risk register compliance AI fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:03:41.841Z",
+      "generatedAt": "2026-05-28T19:24:19.711Z",
       "status": "skipped"
     },
     "coverCredit": "ALTOS LAB",
@@ -10409,11 +10409,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "morning",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:03:41.841Z",
+    "generatedAt": "2026-05-28T19:24:19.711Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:03:41.841Z",
-    "updatedAt": "2026-05-28T19:03:41.841Z",
-    "publishedAt": "2026-05-28T19:03:41.841Z"
+    "createdAt": "2026-05-28T19:24:19.711Z",
+    "updatedAt": "2026-05-28T19:24:19.711Z",
+    "publishedAt": "2026-05-28T19:24:19.711Z"
   },
   {
     "id": "post_market_model_risk_register_ja",
@@ -10496,7 +10496,7 @@ export const marketBlogPosts = [
       "provider": "openverse",
       "prompt": "server rack security",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:03:42.405Z",
+      "generatedAt": "2026-05-28T19:24:19.976Z",
       "status": "generated"
     },
     "coverCredit": "Network Storage Server: VIA NSD7800 (case open) by viagallery.com",
@@ -10536,11 +10536,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "morning",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:03:42.405Z",
+    "generatedAt": "2026-05-28T19:24:19.976Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:03:42.405Z",
-    "updatedAt": "2026-05-28T19:03:42.405Z",
-    "publishedAt": "2026-05-28T19:03:42.405Z"
+    "createdAt": "2026-05-28T19:24:19.976Z",
+    "updatedAt": "2026-05-28T19:24:19.976Z",
+    "publishedAt": "2026-05-28T19:24:19.976Z"
   },
   {
     "id": "post_market_model_risk_register_ko",
@@ -10623,7 +10623,7 @@ export const marketBlogPosts = [
       "provider": "local",
       "prompt": "risk register compliance AI fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:03:43.431Z",
+      "generatedAt": "2026-05-28T19:24:21.306Z",
       "status": "skipped"
     },
     "coverCredit": "ALTOS LAB",
@@ -10663,11 +10663,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "morning",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:03:43.431Z",
+    "generatedAt": "2026-05-28T19:24:21.306Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:03:43.431Z",
-    "updatedAt": "2026-05-28T19:03:43.431Z",
-    "publishedAt": "2026-05-28T19:03:43.431Z"
+    "createdAt": "2026-05-28T19:24:21.306Z",
+    "updatedAt": "2026-05-28T19:24:21.306Z",
+    "publishedAt": "2026-05-28T19:24:21.306Z"
   },
   {
     "id": "post_market_human_review_cost_model_zh_hant",
@@ -10750,7 +10750,7 @@ export const marketBlogPosts = [
       "provider": "local",
       "prompt": "human in the loop review process fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:03:44.411Z",
+      "generatedAt": "2026-05-28T19:24:22.741Z",
       "status": "skipped"
     },
     "coverCredit": "ALTOS LAB",
@@ -10790,11 +10790,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "afternoon",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:03:44.411Z",
+    "generatedAt": "2026-05-28T19:24:22.741Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:03:44.411Z",
-    "updatedAt": "2026-05-28T19:03:44.411Z",
-    "publishedAt": "2026-05-28T19:03:44.411Z"
+    "createdAt": "2026-05-28T19:24:22.741Z",
+    "updatedAt": "2026-05-28T19:24:22.741Z",
+    "publishedAt": "2026-05-28T19:24:22.741Z"
   },
   {
     "id": "post_market_human_review_cost_model_en",
@@ -10877,7 +10877,7 @@ export const marketBlogPosts = [
       "provider": "openverse",
       "prompt": "server rack security",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:03:44.700Z",
+      "generatedAt": "2026-05-28T19:24:23.026Z",
       "status": "generated"
     },
     "coverCredit": "High school lockers by vauvau",
@@ -10917,11 +10917,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "afternoon",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:03:44.700Z",
+    "generatedAt": "2026-05-28T19:24:23.026Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:03:44.700Z",
-    "updatedAt": "2026-05-28T19:03:44.700Z",
-    "publishedAt": "2026-05-28T19:03:44.700Z"
+    "createdAt": "2026-05-28T19:24:23.026Z",
+    "updatedAt": "2026-05-28T19:24:23.026Z",
+    "publishedAt": "2026-05-28T19:24:23.026Z"
   },
   {
     "id": "post_market_human_review_cost_model_ja",
@@ -11004,7 +11004,7 @@ export const marketBlogPosts = [
       "provider": "local",
       "prompt": "human in the loop review process fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:03:45.671Z",
+      "generatedAt": "2026-05-28T19:24:24.419Z",
       "status": "skipped"
     },
     "coverCredit": "ALTOS LAB",
@@ -11044,11 +11044,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "afternoon",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:03:45.671Z",
+    "generatedAt": "2026-05-28T19:24:24.419Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:03:45.671Z",
-    "updatedAt": "2026-05-28T19:03:45.671Z",
-    "publishedAt": "2026-05-28T19:03:45.671Z"
+    "createdAt": "2026-05-28T19:24:24.419Z",
+    "updatedAt": "2026-05-28T19:24:24.419Z",
+    "publishedAt": "2026-05-28T19:24:24.419Z"
   },
   {
     "id": "post_market_human_review_cost_model_ko",
@@ -11131,7 +11131,7 @@ export const marketBlogPosts = [
       "provider": "local",
       "prompt": "human in the loop review process fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:03:46.667Z",
+      "generatedAt": "2026-05-28T19:24:25.897Z",
       "status": "skipped"
     },
     "coverCredit": "ALTOS LAB",
@@ -11171,11 +11171,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "afternoon",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:03:46.667Z",
+    "generatedAt": "2026-05-28T19:24:25.897Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:03:46.667Z",
-    "updatedAt": "2026-05-28T19:03:46.667Z",
-    "publishedAt": "2026-05-28T19:03:46.667Z"
+    "createdAt": "2026-05-28T19:24:25.897Z",
+    "updatedAt": "2026-05-28T19:24:25.897Z",
+    "publishedAt": "2026-05-28T19:24:25.897Z"
   },
   {
     "id": "post_market_vendor_model_switching_zh_hant",
@@ -11258,7 +11258,7 @@ export const marketBlogPosts = [
       "provider": "openverse",
       "prompt": "server rack security",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:03:46.994Z",
+      "generatedAt": "2026-05-28T19:24:26.232Z",
       "status": "generated"
     },
     "coverCredit": "Servers by Yandle",
@@ -11298,11 +11298,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "morning",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:03:46.994Z",
+    "generatedAt": "2026-05-28T19:24:26.232Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:03:46.994Z",
-    "updatedAt": "2026-05-28T19:03:46.994Z",
-    "publishedAt": "2026-05-28T19:03:46.994Z"
+    "createdAt": "2026-05-28T19:24:26.232Z",
+    "updatedAt": "2026-05-28T19:24:26.232Z",
+    "publishedAt": "2026-05-28T19:24:26.232Z"
   },
   {
     "id": "post_market_vendor_model_switching_en",
@@ -11385,7 +11385,7 @@ export const marketBlogPosts = [
       "provider": "local",
       "prompt": "AI model vendor comparison fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:03:48.055Z",
+      "generatedAt": "2026-05-28T19:24:27.540Z",
       "status": "skipped"
     },
     "coverCredit": "ALTOS LAB",
@@ -11425,11 +11425,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "morning",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:03:48.055Z",
+    "generatedAt": "2026-05-28T19:24:27.540Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:03:48.055Z",
-    "updatedAt": "2026-05-28T19:03:48.055Z",
-    "publishedAt": "2026-05-28T19:03:48.055Z"
+    "createdAt": "2026-05-28T19:24:27.540Z",
+    "updatedAt": "2026-05-28T19:24:27.540Z",
+    "publishedAt": "2026-05-28T19:24:27.540Z"
   },
   {
     "id": "post_market_vendor_model_switching_ja",
@@ -11512,7 +11512,7 @@ export const marketBlogPosts = [
       "provider": "local",
       "prompt": "AI model vendor comparison fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:03:49.192Z",
+      "generatedAt": "2026-05-28T19:24:28.984Z",
       "status": "skipped"
     },
     "coverCredit": "ALTOS LAB",
@@ -11552,11 +11552,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "morning",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:03:49.192Z",
+    "generatedAt": "2026-05-28T19:24:28.984Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:03:49.192Z",
-    "updatedAt": "2026-05-28T19:03:49.192Z",
-    "publishedAt": "2026-05-28T19:03:49.192Z"
+    "createdAt": "2026-05-28T19:24:28.984Z",
+    "updatedAt": "2026-05-28T19:24:28.984Z",
+    "publishedAt": "2026-05-28T19:24:28.984Z"
   },
   {
     "id": "post_market_vendor_model_switching_ko",
@@ -11639,7 +11639,7 @@ export const marketBlogPosts = [
       "provider": "local",
       "prompt": "AI model vendor comparison fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:03:50.254Z",
+      "generatedAt": "2026-05-28T19:24:30.453Z",
       "status": "skipped"
     },
     "coverCredit": "ALTOS LAB",
@@ -11679,11 +11679,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "morning",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:03:50.254Z",
+    "generatedAt": "2026-05-28T19:24:30.453Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:03:50.254Z",
-    "updatedAt": "2026-05-28T19:03:50.254Z",
-    "publishedAt": "2026-05-28T19:03:50.254Z"
+    "createdAt": "2026-05-28T19:24:30.453Z",
+    "updatedAt": "2026-05-28T19:24:30.453Z",
+    "publishedAt": "2026-05-28T19:24:30.453Z"
   },
   {
     "id": "post_market_prompt_injection_security_zh_hant",
@@ -11766,7 +11766,7 @@ export const marketBlogPosts = [
       "provider": "local",
       "prompt": "AI security prompt injection fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:03:51.672Z",
+      "generatedAt": "2026-05-28T19:24:31.959Z",
       "status": "skipped"
     },
     "coverCredit": "ALTOS LAB",
@@ -11806,11 +11806,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "afternoon",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:03:51.672Z",
+    "generatedAt": "2026-05-28T19:24:31.959Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:03:51.672Z",
-    "updatedAt": "2026-05-28T19:03:51.672Z",
-    "publishedAt": "2026-05-28T19:03:51.672Z"
+    "createdAt": "2026-05-28T19:24:31.959Z",
+    "updatedAt": "2026-05-28T19:24:31.959Z",
+    "publishedAt": "2026-05-28T19:24:31.959Z"
   },
   {
     "id": "post_market_prompt_injection_security_en",
@@ -11893,7 +11893,7 @@ export const marketBlogPosts = [
       "provider": "local",
       "prompt": "AI security prompt injection fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:03:52.586Z",
+      "generatedAt": "2026-05-28T19:24:33.561Z",
       "status": "skipped"
     },
     "coverCredit": "ALTOS LAB",
@@ -11933,11 +11933,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "afternoon",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:03:52.586Z",
+    "generatedAt": "2026-05-28T19:24:33.561Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:03:52.586Z",
-    "updatedAt": "2026-05-28T19:03:52.586Z",
-    "publishedAt": "2026-05-28T19:03:52.586Z"
+    "createdAt": "2026-05-28T19:24:33.561Z",
+    "updatedAt": "2026-05-28T19:24:33.561Z",
+    "publishedAt": "2026-05-28T19:24:33.561Z"
   },
   {
     "id": "post_market_prompt_injection_security_ja",
@@ -12020,7 +12020,7 @@ export const marketBlogPosts = [
       "provider": "local",
       "prompt": "AI security prompt injection fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:03:53.505Z",
+      "generatedAt": "2026-05-28T19:24:34.890Z",
       "status": "skipped"
     },
     "coverCredit": "ALTOS LAB",
@@ -12060,11 +12060,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "afternoon",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:03:53.505Z",
+    "generatedAt": "2026-05-28T19:24:34.890Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:03:53.505Z",
-    "updatedAt": "2026-05-28T19:03:53.505Z",
-    "publishedAt": "2026-05-28T19:03:53.505Z"
+    "createdAt": "2026-05-28T19:24:34.890Z",
+    "updatedAt": "2026-05-28T19:24:34.890Z",
+    "publishedAt": "2026-05-28T19:24:34.890Z"
   },
   {
     "id": "post_market_prompt_injection_security_ko",
@@ -12147,7 +12147,7 @@ export const marketBlogPosts = [
       "provider": "local",
       "prompt": "AI security prompt injection fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:03:54.448Z",
+      "generatedAt": "2026-05-28T19:24:36.828Z",
       "status": "skipped"
     },
     "coverCredit": "ALTOS LAB",
@@ -12187,11 +12187,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "afternoon",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:03:54.448Z",
+    "generatedAt": "2026-05-28T19:24:36.828Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:03:54.448Z",
-    "updatedAt": "2026-05-28T19:03:54.448Z",
-    "publishedAt": "2026-05-28T19:03:54.448Z"
+    "createdAt": "2026-05-28T19:24:36.828Z",
+    "updatedAt": "2026-05-28T19:24:36.828Z",
+    "publishedAt": "2026-05-28T19:24:36.828Z"
   },
   {
     "id": "post_market_ai_evals_before_launch_zh_hant",
@@ -12274,7 +12274,7 @@ export const marketBlogPosts = [
       "provider": "openverse",
       "prompt": "mobile app prototype screen",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:03:54.931Z",
+      "generatedAt": "2026-05-28T19:24:37.325Z",
       "status": "generated"
     },
     "coverCredit": "Paper prototype by betsyweber",
@@ -12314,11 +12314,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "morning",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:03:54.931Z",
+    "generatedAt": "2026-05-28T19:24:37.325Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:03:54.931Z",
-    "updatedAt": "2026-05-28T19:03:54.931Z",
-    "publishedAt": "2026-05-28T19:03:54.931Z"
+    "createdAt": "2026-05-28T19:24:37.325Z",
+    "updatedAt": "2026-05-28T19:24:37.325Z",
+    "publishedAt": "2026-05-28T19:24:37.325Z"
   },
   {
     "id": "post_market_ai_evals_before_launch_en",
@@ -12401,7 +12401,7 @@ export const marketBlogPosts = [
       "provider": "local",
       "prompt": "AI evaluation scorecard fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:03:55.862Z",
+      "generatedAt": "2026-05-28T19:24:39.129Z",
       "status": "skipped"
     },
     "coverCredit": "ALTOS LAB",
@@ -12441,11 +12441,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "morning",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:03:55.862Z",
+    "generatedAt": "2026-05-28T19:24:39.129Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:03:55.862Z",
-    "updatedAt": "2026-05-28T19:03:55.862Z",
-    "publishedAt": "2026-05-28T19:03:55.862Z"
+    "createdAt": "2026-05-28T19:24:39.129Z",
+    "updatedAt": "2026-05-28T19:24:39.129Z",
+    "publishedAt": "2026-05-28T19:24:39.129Z"
   },
   {
     "id": "post_market_ai_evals_before_launch_ja",
@@ -12528,7 +12528,7 @@ export const marketBlogPosts = [
       "provider": "local",
       "prompt": "AI evaluation scorecard fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:03:56.901Z",
+      "generatedAt": "2026-05-28T19:24:40.692Z",
       "status": "skipped"
     },
     "coverCredit": "ALTOS LAB",
@@ -12568,11 +12568,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "morning",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:03:56.901Z",
+    "generatedAt": "2026-05-28T19:24:40.692Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:03:56.901Z",
-    "updatedAt": "2026-05-28T19:03:56.901Z",
-    "publishedAt": "2026-05-28T19:03:56.901Z"
+    "createdAt": "2026-05-28T19:24:40.692Z",
+    "updatedAt": "2026-05-28T19:24:40.692Z",
+    "publishedAt": "2026-05-28T19:24:40.692Z"
   },
   {
     "id": "post_market_ai_evals_before_launch_ko",
@@ -12655,7 +12655,7 @@ export const marketBlogPosts = [
       "provider": "local",
       "prompt": "AI evaluation scorecard fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:03:57.899Z",
+      "generatedAt": "2026-05-28T19:24:42.133Z",
       "status": "skipped"
     },
     "coverCredit": "ALTOS LAB",
@@ -12695,11 +12695,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "morning",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:03:57.899Z",
+    "generatedAt": "2026-05-28T19:24:42.133Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:03:57.899Z",
-    "updatedAt": "2026-05-28T19:03:57.899Z",
-    "publishedAt": "2026-05-28T19:03:57.899Z"
+    "createdAt": "2026-05-28T19:24:42.133Z",
+    "updatedAt": "2026-05-28T19:24:42.133Z",
+    "publishedAt": "2026-05-28T19:24:42.133Z"
   },
   {
     "id": "post_market_confidence_ui_for_ai_zh_hant",
@@ -12782,7 +12782,7 @@ export const marketBlogPosts = [
       "provider": "local",
       "prompt": "AI product interface confidence fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:03:59.356Z",
+      "generatedAt": "2026-05-28T19:24:43.558Z",
       "status": "skipped"
     },
     "coverCredit": "ALTOS LAB",
@@ -12822,11 +12822,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "afternoon",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:03:59.356Z",
+    "generatedAt": "2026-05-28T19:24:43.558Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:03:59.356Z",
-    "updatedAt": "2026-05-28T19:03:59.356Z",
-    "publishedAt": "2026-05-28T19:03:59.356Z"
+    "createdAt": "2026-05-28T19:24:43.558Z",
+    "updatedAt": "2026-05-28T19:24:43.558Z",
+    "publishedAt": "2026-05-28T19:24:43.558Z"
   },
   {
     "id": "post_market_confidence_ui_for_ai_en",
@@ -12909,7 +12909,7 @@ export const marketBlogPosts = [
       "provider": "local",
       "prompt": "AI product interface confidence fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:04:00.332Z",
+      "generatedAt": "2026-05-28T19:24:44.904Z",
       "status": "skipped"
     },
     "coverCredit": "ALTOS LAB",
@@ -12949,11 +12949,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "afternoon",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:04:00.332Z",
+    "generatedAt": "2026-05-28T19:24:44.904Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:04:00.332Z",
-    "updatedAt": "2026-05-28T19:04:00.332Z",
-    "publishedAt": "2026-05-28T19:04:00.332Z"
+    "createdAt": "2026-05-28T19:24:44.904Z",
+    "updatedAt": "2026-05-28T19:24:44.904Z",
+    "publishedAt": "2026-05-28T19:24:44.904Z"
   },
   {
     "id": "post_market_confidence_ui_for_ai_ja",
@@ -13036,7 +13036,7 @@ export const marketBlogPosts = [
       "provider": "local",
       "prompt": "AI product interface confidence fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:04:01.491Z",
+      "generatedAt": "2026-05-28T19:24:46.499Z",
       "status": "skipped"
     },
     "coverCredit": "ALTOS LAB",
@@ -13076,11 +13076,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "afternoon",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:04:01.491Z",
+    "generatedAt": "2026-05-28T19:24:46.499Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:04:01.491Z",
-    "updatedAt": "2026-05-28T19:04:01.491Z",
-    "publishedAt": "2026-05-28T19:04:01.491Z"
+    "createdAt": "2026-05-28T19:24:46.499Z",
+    "updatedAt": "2026-05-28T19:24:46.499Z",
+    "publishedAt": "2026-05-28T19:24:46.499Z"
   },
   {
     "id": "post_market_confidence_ui_for_ai_ko",
@@ -13163,7 +13163,7 @@ export const marketBlogPosts = [
       "provider": "local",
       "prompt": "AI product interface confidence fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:04:02.721Z",
+      "generatedAt": "2026-05-28T19:24:47.977Z",
       "status": "skipped"
     },
     "coverCredit": "ALTOS LAB",
@@ -13203,11 +13203,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "afternoon",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:04:02.721Z",
+    "generatedAt": "2026-05-28T19:24:47.977Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:04:02.721Z",
-    "updatedAt": "2026-05-28T19:04:02.721Z",
-    "publishedAt": "2026-05-28T19:04:02.721Z"
+    "createdAt": "2026-05-28T19:24:47.977Z",
+    "updatedAt": "2026-05-28T19:24:47.977Z",
+    "publishedAt": "2026-05-28T19:24:47.977Z"
   },
   {
     "id": "post_market_rag_answer_quality_zh_hant",
@@ -13290,7 +13290,7 @@ export const marketBlogPosts = [
       "provider": "local",
       "prompt": "RAG answer quality documents fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:04:03.738Z",
+      "generatedAt": "2026-05-28T19:24:49.304Z",
       "status": "skipped"
     },
     "coverCredit": "ALTOS LAB",
@@ -13330,11 +13330,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "morning",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:04:03.738Z",
+    "generatedAt": "2026-05-28T19:24:49.304Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:04:03.738Z",
-    "updatedAt": "2026-05-28T19:04:03.738Z",
-    "publishedAt": "2026-05-28T19:04:03.738Z"
+    "createdAt": "2026-05-28T19:24:49.304Z",
+    "updatedAt": "2026-05-28T19:24:49.304Z",
+    "publishedAt": "2026-05-28T19:24:49.304Z"
   },
   {
     "id": "post_market_rag_answer_quality_en",
@@ -13417,7 +13417,7 @@ export const marketBlogPosts = [
       "provider": "local",
       "prompt": "RAG answer quality documents fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:04:04.854Z",
+      "generatedAt": "2026-05-28T19:24:50.904Z",
       "status": "skipped"
     },
     "coverCredit": "ALTOS LAB",
@@ -13457,11 +13457,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "morning",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:04:04.854Z",
+    "generatedAt": "2026-05-28T19:24:50.904Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:04:04.854Z",
-    "updatedAt": "2026-05-28T19:04:04.854Z",
-    "publishedAt": "2026-05-28T19:04:04.854Z"
+    "createdAt": "2026-05-28T19:24:50.904Z",
+    "updatedAt": "2026-05-28T19:24:50.904Z",
+    "publishedAt": "2026-05-28T19:24:50.904Z"
   },
   {
     "id": "post_market_rag_answer_quality_ja",
@@ -13544,7 +13544,7 @@ export const marketBlogPosts = [
       "provider": "local",
       "prompt": "RAG answer quality documents fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:04:05.823Z",
+      "generatedAt": "2026-05-28T19:24:52.422Z",
       "status": "skipped"
     },
     "coverCredit": "ALTOS LAB",
@@ -13584,11 +13584,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "morning",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:04:05.823Z",
+    "generatedAt": "2026-05-28T19:24:52.422Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:04:05.823Z",
-    "updatedAt": "2026-05-28T19:04:05.823Z",
-    "publishedAt": "2026-05-28T19:04:05.823Z"
+    "createdAt": "2026-05-28T19:24:52.422Z",
+    "updatedAt": "2026-05-28T19:24:52.422Z",
+    "publishedAt": "2026-05-28T19:24:52.422Z"
   },
   {
     "id": "post_market_rag_answer_quality_ko",
@@ -13671,7 +13671,7 @@ export const marketBlogPosts = [
       "provider": "openverse",
       "prompt": "usability test notes",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:04:06.129Z",
+      "generatedAt": "2026-05-28T19:24:52.757Z",
       "status": "generated"
     },
     "coverCredit": "Reviewing the prototype by juhansonin",
@@ -13711,11 +13711,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "morning",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:04:06.129Z",
+    "generatedAt": "2026-05-28T19:24:52.757Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:04:06.129Z",
-    "updatedAt": "2026-05-28T19:04:06.129Z",
-    "publishedAt": "2026-05-28T19:04:06.129Z"
+    "createdAt": "2026-05-28T19:24:52.757Z",
+    "updatedAt": "2026-05-28T19:24:52.757Z",
+    "publishedAt": "2026-05-28T19:24:52.757Z"
   },
   {
     "id": "post_market_ai_product_activation_zh_hant",
@@ -13798,7 +13798,7 @@ export const marketBlogPosts = [
       "provider": "local",
       "prompt": "AI product onboarding activation fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:04:07.234Z",
+      "generatedAt": "2026-05-28T19:24:54.138Z",
       "status": "skipped"
     },
     "coverCredit": "ALTOS LAB",
@@ -13838,11 +13838,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "afternoon",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:04:07.234Z",
+    "generatedAt": "2026-05-28T19:24:54.138Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:04:07.234Z",
-    "updatedAt": "2026-05-28T19:04:07.234Z",
-    "publishedAt": "2026-05-28T19:04:07.234Z"
+    "createdAt": "2026-05-28T19:24:54.138Z",
+    "updatedAt": "2026-05-28T19:24:54.138Z",
+    "publishedAt": "2026-05-28T19:24:54.138Z"
   },
   {
     "id": "post_market_ai_product_activation_en",
@@ -13925,7 +13925,7 @@ export const marketBlogPosts = [
       "provider": "local",
       "prompt": "AI product onboarding activation fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:04:08.313Z",
+      "generatedAt": "2026-05-28T19:24:55.493Z",
       "status": "skipped"
     },
     "coverCredit": "ALTOS LAB",
@@ -13965,11 +13965,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "afternoon",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:04:08.313Z",
+    "generatedAt": "2026-05-28T19:24:55.493Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:04:08.313Z",
-    "updatedAt": "2026-05-28T19:04:08.313Z",
-    "publishedAt": "2026-05-28T19:04:08.313Z"
+    "createdAt": "2026-05-28T19:24:55.493Z",
+    "updatedAt": "2026-05-28T19:24:55.493Z",
+    "publishedAt": "2026-05-28T19:24:55.493Z"
   },
   {
     "id": "post_market_ai_product_activation_ja",
@@ -14052,7 +14052,7 @@ export const marketBlogPosts = [
       "provider": "local",
       "prompt": "AI product onboarding activation fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:04:09.313Z",
+      "generatedAt": "2026-05-28T19:24:57.183Z",
       "status": "skipped"
     },
     "coverCredit": "ALTOS LAB",
@@ -14092,11 +14092,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "afternoon",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:04:09.313Z",
+    "generatedAt": "2026-05-28T19:24:57.183Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:04:09.313Z",
-    "updatedAt": "2026-05-28T19:04:09.313Z",
-    "publishedAt": "2026-05-28T19:04:09.313Z"
+    "createdAt": "2026-05-28T19:24:57.183Z",
+    "updatedAt": "2026-05-28T19:24:57.183Z",
+    "publishedAt": "2026-05-28T19:24:57.183Z"
   },
   {
     "id": "post_market_ai_product_activation_ko",
@@ -14179,7 +14179,7 @@ export const marketBlogPosts = [
       "provider": "local",
       "prompt": "AI product onboarding activation fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:04:10.262Z",
+      "generatedAt": "2026-05-28T19:24:58.668Z",
       "status": "skipped"
     },
     "coverCredit": "ALTOS LAB",
@@ -14219,11 +14219,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "afternoon",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:04:10.262Z",
+    "generatedAt": "2026-05-28T19:24:58.668Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:04:10.262Z",
-    "updatedAt": "2026-05-28T19:04:10.262Z",
-    "publishedAt": "2026-05-28T19:04:10.262Z"
+    "createdAt": "2026-05-28T19:24:58.668Z",
+    "updatedAt": "2026-05-28T19:24:58.668Z",
+    "publishedAt": "2026-05-28T19:24:58.668Z"
   },
   {
     "id": "post_market_hallucination_recovery_design_zh_hant",
@@ -14306,7 +14306,7 @@ export const marketBlogPosts = [
       "provider": "local",
       "prompt": "AI error recovery interface fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:04:11.248Z",
+      "generatedAt": "2026-05-28T19:25:00.117Z",
       "status": "skipped"
     },
     "coverCredit": "ALTOS LAB",
@@ -14346,11 +14346,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "morning",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:04:11.248Z",
+    "generatedAt": "2026-05-28T19:25:00.117Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:04:11.248Z",
-    "updatedAt": "2026-05-28T19:04:11.248Z",
-    "publishedAt": "2026-05-28T19:04:11.248Z"
+    "createdAt": "2026-05-28T19:25:00.117Z",
+    "updatedAt": "2026-05-28T19:25:00.117Z",
+    "publishedAt": "2026-05-28T19:25:00.117Z"
   },
   {
     "id": "post_market_hallucination_recovery_design_en",
@@ -14433,7 +14433,7 @@ export const marketBlogPosts = [
       "provider": "local",
       "prompt": "AI error recovery interface fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:04:12.205Z",
+      "generatedAt": "2026-05-28T19:25:01.733Z",
       "status": "skipped"
     },
     "coverCredit": "ALTOS LAB",
@@ -14473,11 +14473,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "morning",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:04:12.205Z",
+    "generatedAt": "2026-05-28T19:25:01.733Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:04:12.205Z",
-    "updatedAt": "2026-05-28T19:04:12.205Z",
-    "publishedAt": "2026-05-28T19:04:12.205Z"
+    "createdAt": "2026-05-28T19:25:01.733Z",
+    "updatedAt": "2026-05-28T19:25:01.733Z",
+    "publishedAt": "2026-05-28T19:25:01.733Z"
   },
   {
     "id": "post_market_hallucination_recovery_design_ja",
@@ -14560,7 +14560,7 @@ export const marketBlogPosts = [
       "provider": "local",
       "prompt": "AI error recovery interface fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:04:13.206Z",
+      "generatedAt": "2026-05-28T19:25:03.263Z",
       "status": "skipped"
     },
     "coverCredit": "ALTOS LAB",
@@ -14600,11 +14600,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "morning",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:04:13.206Z",
+    "generatedAt": "2026-05-28T19:25:03.263Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:04:13.206Z",
-    "updatedAt": "2026-05-28T19:04:13.206Z",
-    "publishedAt": "2026-05-28T19:04:13.206Z"
+    "createdAt": "2026-05-28T19:25:03.263Z",
+    "updatedAt": "2026-05-28T19:25:03.263Z",
+    "publishedAt": "2026-05-28T19:25:03.263Z"
   },
   {
     "id": "post_market_hallucination_recovery_design_ko",
@@ -14687,7 +14687,7 @@ export const marketBlogPosts = [
       "provider": "local",
       "prompt": "AI error recovery interface fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:04:14.357Z",
+      "generatedAt": "2026-05-28T19:25:04.751Z",
       "status": "skipped"
     },
     "coverCredit": "ALTOS LAB",
@@ -14727,11 +14727,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "morning",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:04:14.357Z",
+    "generatedAt": "2026-05-28T19:25:04.751Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:04:14.357Z",
-    "updatedAt": "2026-05-28T19:04:14.357Z",
-    "publishedAt": "2026-05-28T19:04:14.357Z"
+    "createdAt": "2026-05-28T19:25:04.751Z",
+    "updatedAt": "2026-05-28T19:25:04.751Z",
+    "publishedAt": "2026-05-28T19:25:04.751Z"
   },
   {
     "id": "post_market_ai_feature_kill_criteria_zh_hant",
@@ -14814,7 +14814,7 @@ export const marketBlogPosts = [
       "provider": "local",
       "prompt": "product feature decision matrix fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:04:15.320Z",
+      "generatedAt": "2026-05-28T19:25:06.300Z",
       "status": "skipped"
     },
     "coverCredit": "ALTOS LAB",
@@ -14854,11 +14854,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "afternoon",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:04:15.320Z",
+    "generatedAt": "2026-05-28T19:25:06.300Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:04:15.320Z",
-    "updatedAt": "2026-05-28T19:04:15.320Z",
-    "publishedAt": "2026-05-28T19:04:15.320Z"
+    "createdAt": "2026-05-28T19:25:06.300Z",
+    "updatedAt": "2026-05-28T19:25:06.300Z",
+    "publishedAt": "2026-05-28T19:25:06.300Z"
   },
   {
     "id": "post_market_ai_feature_kill_criteria_en",
@@ -14941,7 +14941,7 @@ export const marketBlogPosts = [
       "provider": "local",
       "prompt": "product feature decision matrix fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:04:16.455Z",
+      "generatedAt": "2026-05-28T19:25:07.887Z",
       "status": "skipped"
     },
     "coverCredit": "ALTOS LAB",
@@ -14981,11 +14981,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "afternoon",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:04:16.455Z",
+    "generatedAt": "2026-05-28T19:25:07.887Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:04:16.455Z",
-    "updatedAt": "2026-05-28T19:04:16.455Z",
-    "publishedAt": "2026-05-28T19:04:16.455Z"
+    "createdAt": "2026-05-28T19:25:07.887Z",
+    "updatedAt": "2026-05-28T19:25:07.887Z",
+    "publishedAt": "2026-05-28T19:25:07.887Z"
   },
   {
     "id": "post_market_ai_feature_kill_criteria_ja",
@@ -15068,7 +15068,7 @@ export const marketBlogPosts = [
       "provider": "local",
       "prompt": "product feature decision matrix fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:04:17.454Z",
+      "generatedAt": "2026-05-28T19:25:09.652Z",
       "status": "skipped"
     },
     "coverCredit": "ALTOS LAB",
@@ -15108,11 +15108,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "afternoon",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:04:17.454Z",
+    "generatedAt": "2026-05-28T19:25:09.652Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:04:17.454Z",
-    "updatedAt": "2026-05-28T19:04:17.454Z",
-    "publishedAt": "2026-05-28T19:04:17.454Z"
+    "createdAt": "2026-05-28T19:25:09.652Z",
+    "updatedAt": "2026-05-28T19:25:09.652Z",
+    "publishedAt": "2026-05-28T19:25:09.652Z"
   },
   {
     "id": "post_market_ai_feature_kill_criteria_ko",
@@ -15195,7 +15195,7 @@ export const marketBlogPosts = [
       "provider": "local",
       "prompt": "product feature decision matrix fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:04:18.634Z",
+      "generatedAt": "2026-05-28T19:25:11.143Z",
       "status": "skipped"
     },
     "coverCredit": "ALTOS LAB",
@@ -15235,11 +15235,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "afternoon",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:04:18.634Z",
+    "generatedAt": "2026-05-28T19:25:11.143Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:04:18.634Z",
-    "updatedAt": "2026-05-28T19:04:18.634Z",
-    "publishedAt": "2026-05-28T19:04:18.634Z"
+    "createdAt": "2026-05-28T19:25:11.143Z",
+    "updatedAt": "2026-05-28T19:25:11.143Z",
+    "publishedAt": "2026-05-28T19:25:11.143Z"
   },
   {
     "id": "post_market_prompt_to_product_ops_zh_hant",
@@ -15322,7 +15322,7 @@ export const marketBlogPosts = [
       "provider": "local",
       "prompt": "prompt engineering product operations fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:04:19.619Z",
+      "generatedAt": "2026-05-28T19:25:12.504Z",
       "status": "skipped"
     },
     "coverCredit": "ALTOS LAB",
@@ -15362,11 +15362,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "morning",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:04:19.619Z",
+    "generatedAt": "2026-05-28T19:25:12.504Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:04:19.619Z",
-    "updatedAt": "2026-05-28T19:04:19.619Z",
-    "publishedAt": "2026-05-28T19:04:19.619Z"
+    "createdAt": "2026-05-28T19:25:12.504Z",
+    "updatedAt": "2026-05-28T19:25:12.504Z",
+    "publishedAt": "2026-05-28T19:25:12.504Z"
   },
   {
     "id": "post_market_prompt_to_product_ops_en",
@@ -15449,7 +15449,7 @@ export const marketBlogPosts = [
       "provider": "local",
       "prompt": "prompt engineering product operations fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:04:20.558Z",
+      "generatedAt": "2026-05-28T19:25:13.979Z",
       "status": "skipped"
     },
     "coverCredit": "ALTOS LAB",
@@ -15489,11 +15489,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "morning",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:04:20.558Z",
+    "generatedAt": "2026-05-28T19:25:13.979Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:04:20.558Z",
-    "updatedAt": "2026-05-28T19:04:20.558Z",
-    "publishedAt": "2026-05-28T19:04:20.558Z"
+    "createdAt": "2026-05-28T19:25:13.979Z",
+    "updatedAt": "2026-05-28T19:25:13.979Z",
+    "publishedAt": "2026-05-28T19:25:13.979Z"
   },
   {
     "id": "post_market_prompt_to_product_ops_ja",
@@ -15576,7 +15576,7 @@ export const marketBlogPosts = [
       "provider": "local",
       "prompt": "prompt engineering product operations fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:04:21.653Z",
+      "generatedAt": "2026-05-28T19:25:15.553Z",
       "status": "skipped"
     },
     "coverCredit": "ALTOS LAB",
@@ -15616,11 +15616,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "morning",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:04:21.653Z",
+    "generatedAt": "2026-05-28T19:25:15.553Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:04:21.653Z",
-    "updatedAt": "2026-05-28T19:04:21.653Z",
-    "publishedAt": "2026-05-28T19:04:21.653Z"
+    "createdAt": "2026-05-28T19:25:15.553Z",
+    "updatedAt": "2026-05-28T19:25:15.553Z",
+    "publishedAt": "2026-05-28T19:25:15.553Z"
   },
   {
     "id": "post_market_prompt_to_product_ops_ko",
@@ -15703,7 +15703,7 @@ export const marketBlogPosts = [
       "provider": "local",
       "prompt": "prompt engineering product operations fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:04:22.665Z",
+      "generatedAt": "2026-05-28T19:25:17.179Z",
       "status": "skipped"
     },
     "coverCredit": "ALTOS LAB",
@@ -15743,11 +15743,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "morning",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:04:22.665Z",
+    "generatedAt": "2026-05-28T19:25:17.179Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:04:22.665Z",
-    "updatedAt": "2026-05-28T19:04:22.665Z",
-    "publishedAt": "2026-05-28T19:04:22.665Z"
+    "createdAt": "2026-05-28T19:25:17.179Z",
+    "updatedAt": "2026-05-28T19:25:17.179Z",
+    "publishedAt": "2026-05-28T19:25:17.179Z"
   },
   {
     "id": "post_market_agent_user_feedback_loop_zh_hant",
@@ -15830,7 +15830,7 @@ export const marketBlogPosts = [
       "provider": "local",
       "prompt": "user feedback AI agent product fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:04:23.594Z",
+      "generatedAt": "2026-05-28T19:25:18.730Z",
       "status": "skipped"
     },
     "coverCredit": "ALTOS LAB",
@@ -15870,11 +15870,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "afternoon",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:04:23.594Z",
+    "generatedAt": "2026-05-28T19:25:18.730Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:04:23.594Z",
-    "updatedAt": "2026-05-28T19:04:23.594Z",
-    "publishedAt": "2026-05-28T19:04:23.594Z"
+    "createdAt": "2026-05-28T19:25:18.730Z",
+    "updatedAt": "2026-05-28T19:25:18.730Z",
+    "publishedAt": "2026-05-28T19:25:18.730Z"
   },
   {
     "id": "post_market_agent_user_feedback_loop_en",
@@ -15957,7 +15957,7 @@ export const marketBlogPosts = [
       "provider": "local",
       "prompt": "user feedback AI agent product fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:04:24.862Z",
+      "generatedAt": "2026-05-28T19:25:20.268Z",
       "status": "skipped"
     },
     "coverCredit": "ALTOS LAB",
@@ -15997,11 +15997,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "afternoon",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:04:24.862Z",
+    "generatedAt": "2026-05-28T19:25:20.268Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:04:24.862Z",
-    "updatedAt": "2026-05-28T19:04:24.862Z",
-    "publishedAt": "2026-05-28T19:04:24.862Z"
+    "createdAt": "2026-05-28T19:25:20.268Z",
+    "updatedAt": "2026-05-28T19:25:20.268Z",
+    "publishedAt": "2026-05-28T19:25:20.268Z"
   },
   {
     "id": "post_market_agent_user_feedback_loop_ja",
@@ -16084,7 +16084,7 @@ export const marketBlogPosts = [
       "provider": "local",
       "prompt": "user feedback AI agent product fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:04:25.807Z",
+      "generatedAt": "2026-05-28T19:25:21.760Z",
       "status": "skipped"
     },
     "coverCredit": "ALTOS LAB",
@@ -16124,11 +16124,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "afternoon",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:04:25.807Z",
+    "generatedAt": "2026-05-28T19:25:21.760Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:04:25.807Z",
-    "updatedAt": "2026-05-28T19:04:25.807Z",
-    "publishedAt": "2026-05-28T19:04:25.807Z"
+    "createdAt": "2026-05-28T19:25:21.760Z",
+    "updatedAt": "2026-05-28T19:25:21.760Z",
+    "publishedAt": "2026-05-28T19:25:21.760Z"
   },
   {
     "id": "post_market_agent_user_feedback_loop_ko",
@@ -16211,7 +16211,7 @@ export const marketBlogPosts = [
       "provider": "local",
       "prompt": "user feedback AI agent product fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:04:26.865Z",
+      "generatedAt": "2026-05-28T19:25:23.172Z",
       "status": "skipped"
     },
     "coverCredit": "ALTOS LAB",
@@ -16251,11 +16251,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "afternoon",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:04:26.865Z",
+    "generatedAt": "2026-05-28T19:25:23.172Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:04:26.865Z",
-    "updatedAt": "2026-05-28T19:04:26.865Z",
-    "publishedAt": "2026-05-28T19:04:26.865Z"
+    "createdAt": "2026-05-28T19:25:23.172Z",
+    "updatedAt": "2026-05-28T19:25:23.172Z",
+    "publishedAt": "2026-05-28T19:25:23.172Z"
   },
   {
     "id": "post_market_open_source_model_selection_zh_hant",
@@ -16338,7 +16338,7 @@ export const marketBlogPosts = [
       "provider": "openverse",
       "prompt": "fiber optic cables",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:04:27.187Z",
+      "generatedAt": "2026-05-28T19:25:23.517Z",
       "status": "generated"
     },
     "coverCredit": "Installing fiber optic cables. by MTA C&D - EAST SIDE ACCESS",
@@ -16378,11 +16378,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "morning",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:04:27.187Z",
+    "generatedAt": "2026-05-28T19:25:23.517Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:04:27.187Z",
-    "updatedAt": "2026-05-28T19:04:27.187Z",
-    "publishedAt": "2026-05-28T19:04:27.187Z"
+    "createdAt": "2026-05-28T19:25:23.517Z",
+    "updatedAt": "2026-05-28T19:25:23.517Z",
+    "publishedAt": "2026-05-28T19:25:23.517Z"
   },
   {
     "id": "post_market_open_source_model_selection_en",
@@ -16465,7 +16465,7 @@ export const marketBlogPosts = [
       "provider": "openverse",
       "prompt": "gpu computer hardware",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:04:27.509Z",
+      "generatedAt": "2026-05-28T19:25:23.780Z",
       "status": "generated"
     },
     "coverCredit": "Breaking a Nvidia GeForce 4 Ti : Bending GPU Chip 2/2 by qubodup",
@@ -16505,11 +16505,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "morning",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:04:27.509Z",
+    "generatedAt": "2026-05-28T19:25:23.780Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:04:27.509Z",
-    "updatedAt": "2026-05-28T19:04:27.509Z",
-    "publishedAt": "2026-05-28T19:04:27.509Z"
+    "createdAt": "2026-05-28T19:25:23.780Z",
+    "updatedAt": "2026-05-28T19:25:23.780Z",
+    "publishedAt": "2026-05-28T19:25:23.780Z"
   },
   {
     "id": "post_market_open_source_model_selection_ja",
@@ -16592,7 +16592,7 @@ export const marketBlogPosts = [
       "provider": "openverse",
       "prompt": "edge device sensor",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:04:27.819Z",
+      "generatedAt": "2026-05-28T19:25:24.045Z",
       "status": "generated"
     },
     "coverCredit": "The codependency of AI and the Edge by jurvetson",
@@ -16632,11 +16632,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "morning",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:04:27.819Z",
+    "generatedAt": "2026-05-28T19:25:24.045Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:04:27.819Z",
-    "updatedAt": "2026-05-28T19:04:27.819Z",
-    "publishedAt": "2026-05-28T19:04:27.819Z"
+    "createdAt": "2026-05-28T19:25:24.045Z",
+    "updatedAt": "2026-05-28T19:25:24.045Z",
+    "publishedAt": "2026-05-28T19:25:24.045Z"
   },
   {
     "id": "post_market_open_source_model_selection_ko",
@@ -16719,7 +16719,7 @@ export const marketBlogPosts = [
       "provider": "openverse",
       "prompt": "network switch cables",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:04:28.088Z",
+      "generatedAt": "2026-05-28T19:25:24.326Z",
       "status": "generated"
     },
     "coverCredit": "network by twicepix",
@@ -16759,11 +16759,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "morning",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:04:28.088Z",
+    "generatedAt": "2026-05-28T19:25:24.326Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:04:28.088Z",
-    "updatedAt": "2026-05-28T19:04:28.088Z",
-    "publishedAt": "2026-05-28T19:04:28.088Z"
+    "createdAt": "2026-05-28T19:25:24.326Z",
+    "updatedAt": "2026-05-28T19:25:24.326Z",
+    "publishedAt": "2026-05-28T19:25:24.326Z"
   },
   {
     "id": "post_market_inference_cost_dashboard_zh_hant",
@@ -16846,7 +16846,7 @@ export const marketBlogPosts = [
       "provider": "openverse",
       "prompt": "gpu computer hardware",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:04:28.471Z",
+      "generatedAt": "2026-05-28T19:25:24.601Z",
       "status": "generated"
     },
     "coverCredit": "Broken Nvidia GeForce 4 Ti : Broken GPU Chip 2/4 by qubodup",
@@ -16886,11 +16886,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "afternoon",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:04:28.471Z",
+    "generatedAt": "2026-05-28T19:25:24.601Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:04:28.471Z",
-    "updatedAt": "2026-05-28T19:04:28.471Z",
-    "publishedAt": "2026-05-28T19:04:28.471Z"
+    "createdAt": "2026-05-28T19:25:24.601Z",
+    "updatedAt": "2026-05-28T19:25:24.601Z",
+    "publishedAt": "2026-05-28T19:25:24.601Z"
   },
   {
     "id": "post_market_inference_cost_dashboard_en",
@@ -16973,7 +16973,7 @@ export const marketBlogPosts = [
       "provider": "local",
       "prompt": "AI inference cost dashboard fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:04:29.455Z",
+      "generatedAt": "2026-05-28T19:25:26.002Z",
       "status": "skipped"
     },
     "coverCredit": "ALTOS LAB",
@@ -17013,11 +17013,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "afternoon",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:04:29.455Z",
+    "generatedAt": "2026-05-28T19:25:26.002Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:04:29.455Z",
-    "updatedAt": "2026-05-28T19:04:29.455Z",
-    "publishedAt": "2026-05-28T19:04:29.455Z"
+    "createdAt": "2026-05-28T19:25:26.002Z",
+    "updatedAt": "2026-05-28T19:25:26.002Z",
+    "publishedAt": "2026-05-28T19:25:26.002Z"
   },
   {
     "id": "post_market_inference_cost_dashboard_ja",
@@ -17100,7 +17100,7 @@ export const marketBlogPosts = [
       "provider": "openverse",
       "prompt": "network switch cables",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:04:29.759Z",
+      "generatedAt": "2026-05-28T19:25:26.263Z",
       "status": "generated"
     },
     "coverCredit": "My Three Networks by cogdogblog",
@@ -17140,11 +17140,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "afternoon",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:04:29.759Z",
+    "generatedAt": "2026-05-28T19:25:26.263Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:04:29.759Z",
-    "updatedAt": "2026-05-28T19:04:29.759Z",
-    "publishedAt": "2026-05-28T19:04:29.759Z"
+    "createdAt": "2026-05-28T19:25:26.263Z",
+    "updatedAt": "2026-05-28T19:25:26.263Z",
+    "publishedAt": "2026-05-28T19:25:26.263Z"
   },
   {
     "id": "post_market_inference_cost_dashboard_ko",
@@ -17227,7 +17227,7 @@ export const marketBlogPosts = [
       "provider": "local",
       "prompt": "AI inference cost dashboard fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:04:30.944Z",
+      "generatedAt": "2026-05-28T19:25:27.613Z",
       "status": "skipped"
     },
     "coverCredit": "ALTOS LAB",
@@ -17267,11 +17267,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "afternoon",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:04:30.944Z",
+    "generatedAt": "2026-05-28T19:25:27.613Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:04:30.944Z",
-    "updatedAt": "2026-05-28T19:04:30.944Z",
-    "publishedAt": "2026-05-28T19:04:30.944Z"
+    "createdAt": "2026-05-28T19:25:27.613Z",
+    "updatedAt": "2026-05-28T19:25:27.613Z",
+    "publishedAt": "2026-05-28T19:25:27.613Z"
   },
   {
     "id": "post_market_context_engineering_zh_hant",
@@ -17354,7 +17354,7 @@ export const marketBlogPosts = [
       "provider": "local",
       "prompt": "context engineering AI documents fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:04:32.049Z",
+      "generatedAt": "2026-05-28T19:25:29.106Z",
       "status": "skipped"
     },
     "coverCredit": "ALTOS LAB",
@@ -17394,11 +17394,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "morning",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:04:32.049Z",
+    "generatedAt": "2026-05-28T19:25:29.106Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:04:32.049Z",
-    "updatedAt": "2026-05-28T19:04:32.049Z",
-    "publishedAt": "2026-05-28T19:04:32.049Z"
+    "createdAt": "2026-05-28T19:25:29.106Z",
+    "updatedAt": "2026-05-28T19:25:29.106Z",
+    "publishedAt": "2026-05-28T19:25:29.106Z"
   },
   {
     "id": "post_market_context_engineering_en",
@@ -17481,7 +17481,7 @@ export const marketBlogPosts = [
       "provider": "openverse",
       "prompt": "network switch cables",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:04:32.328Z",
+      "generatedAt": "2026-05-28T19:25:29.467Z",
       "status": "generated"
     },
     "coverCredit": "network by sethstoll",
@@ -17521,11 +17521,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "morning",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:04:32.328Z",
+    "generatedAt": "2026-05-28T19:25:29.467Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:04:32.328Z",
-    "updatedAt": "2026-05-28T19:04:32.328Z",
-    "publishedAt": "2026-05-28T19:04:32.328Z"
+    "createdAt": "2026-05-28T19:25:29.467Z",
+    "updatedAt": "2026-05-28T19:25:29.467Z",
+    "publishedAt": "2026-05-28T19:25:29.467Z"
   },
   {
     "id": "post_market_context_engineering_ja",
@@ -17608,7 +17608,7 @@ export const marketBlogPosts = [
       "provider": "local",
       "prompt": "context engineering AI documents fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:04:33.305Z",
+      "generatedAt": "2026-05-28T19:25:30.917Z",
       "status": "skipped"
     },
     "coverCredit": "ALTOS LAB",
@@ -17648,11 +17648,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "morning",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:04:33.305Z",
+    "generatedAt": "2026-05-28T19:25:30.917Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:04:33.305Z",
-    "updatedAt": "2026-05-28T19:04:33.305Z",
-    "publishedAt": "2026-05-28T19:04:33.305Z"
+    "createdAt": "2026-05-28T19:25:30.917Z",
+    "updatedAt": "2026-05-28T19:25:30.917Z",
+    "publishedAt": "2026-05-28T19:25:30.917Z"
   },
   {
     "id": "post_market_context_engineering_ko",
@@ -17735,7 +17735,7 @@ export const marketBlogPosts = [
       "provider": "local",
       "prompt": "context engineering AI documents fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:04:34.271Z",
+      "generatedAt": "2026-05-28T19:25:32.270Z",
       "status": "skipped"
     },
     "coverCredit": "ALTOS LAB",
@@ -17775,11 +17775,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "morning",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:04:34.271Z",
+    "generatedAt": "2026-05-28T19:25:32.270Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:04:34.271Z",
-    "updatedAt": "2026-05-28T19:04:34.271Z",
-    "publishedAt": "2026-05-28T19:04:34.271Z"
+    "createdAt": "2026-05-28T19:25:32.270Z",
+    "updatedAt": "2026-05-28T19:25:32.270Z",
+    "publishedAt": "2026-05-28T19:25:32.270Z"
   },
   {
     "id": "post_market_vector_database_architecture_zh_hant",
@@ -17862,7 +17862,7 @@ export const marketBlogPosts = [
       "provider": "openverse",
       "prompt": "network switch cables",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:04:34.560Z",
+      "generatedAt": "2026-05-28T19:25:32.558Z",
       "status": "generated"
     },
     "coverCredit": "Cables - The Missing Link - Desktop Audio Upgrade Part 2 by Jordanhill School D&T Dept",
@@ -17902,11 +17902,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "afternoon",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:04:34.560Z",
+    "generatedAt": "2026-05-28T19:25:32.558Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:04:34.560Z",
-    "updatedAt": "2026-05-28T19:04:34.560Z",
-    "publishedAt": "2026-05-28T19:04:34.560Z"
+    "createdAt": "2026-05-28T19:25:32.558Z",
+    "updatedAt": "2026-05-28T19:25:32.558Z",
+    "publishedAt": "2026-05-28T19:25:32.558Z"
   },
   {
     "id": "post_market_vector_database_architecture_en",
@@ -17989,7 +17989,7 @@ export const marketBlogPosts = [
       "provider": "local",
       "prompt": "vector database architecture diagram fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:04:36.882Z",
+      "generatedAt": "2026-05-28T19:25:33.888Z",
       "status": "skipped"
     },
     "coverCredit": "ALTOS LAB",
@@ -18029,11 +18029,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "afternoon",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:04:36.882Z",
+    "generatedAt": "2026-05-28T19:25:33.888Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:04:36.882Z",
-    "updatedAt": "2026-05-28T19:04:36.882Z",
-    "publishedAt": "2026-05-28T19:04:36.882Z"
+    "createdAt": "2026-05-28T19:25:33.888Z",
+    "updatedAt": "2026-05-28T19:25:33.888Z",
+    "publishedAt": "2026-05-28T19:25:33.888Z"
   },
   {
     "id": "post_market_vector_database_architecture_ja",
@@ -18116,7 +18116,7 @@ export const marketBlogPosts = [
       "provider": "local",
       "prompt": "vector database architecture diagram fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:04:38.237Z",
+      "generatedAt": "2026-05-28T19:25:35.221Z",
       "status": "skipped"
     },
     "coverCredit": "ALTOS LAB",
@@ -18156,11 +18156,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "afternoon",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:04:38.237Z",
+    "generatedAt": "2026-05-28T19:25:35.221Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:04:38.237Z",
-    "updatedAt": "2026-05-28T19:04:38.237Z",
-    "publishedAt": "2026-05-28T19:04:38.237Z"
+    "createdAt": "2026-05-28T19:25:35.221Z",
+    "updatedAt": "2026-05-28T19:25:35.221Z",
+    "publishedAt": "2026-05-28T19:25:35.221Z"
   },
   {
     "id": "post_market_vector_database_architecture_ko",
@@ -18243,7 +18243,7 @@ export const marketBlogPosts = [
       "provider": "openverse",
       "prompt": "fiber optic cables",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:04:38.675Z",
+      "generatedAt": "2026-05-28T19:25:35.628Z",
       "status": "generated"
     },
     "coverCredit": "Corning fiber optic cable by Wesley Fryer",
@@ -18283,11 +18283,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "afternoon",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:04:38.675Z",
+    "generatedAt": "2026-05-28T19:25:35.628Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:04:38.675Z",
-    "updatedAt": "2026-05-28T19:04:38.675Z",
-    "publishedAt": "2026-05-28T19:04:38.675Z"
+    "createdAt": "2026-05-28T19:25:35.628Z",
+    "updatedAt": "2026-05-28T19:25:35.628Z",
+    "publishedAt": "2026-05-28T19:25:35.628Z"
   },
   {
     "id": "post_market_edge_ai_deployment_zh_hant",
@@ -18370,7 +18370,7 @@ export const marketBlogPosts = [
       "provider": "local",
       "prompt": "edge AI device deployment fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:04:39.802Z",
+      "generatedAt": "2026-05-28T19:25:37.029Z",
       "status": "skipped"
     },
     "coverCredit": "ALTOS LAB",
@@ -18410,11 +18410,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "morning",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:04:39.802Z",
+    "generatedAt": "2026-05-28T19:25:37.029Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:04:39.802Z",
-    "updatedAt": "2026-05-28T19:04:39.802Z",
-    "publishedAt": "2026-05-28T19:04:39.802Z"
+    "createdAt": "2026-05-28T19:25:37.029Z",
+    "updatedAt": "2026-05-28T19:25:37.029Z",
+    "publishedAt": "2026-05-28T19:25:37.029Z"
   },
   {
     "id": "post_market_edge_ai_deployment_en",
@@ -18497,7 +18497,7 @@ export const marketBlogPosts = [
       "provider": "local",
       "prompt": "edge AI device deployment fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:04:41.011Z",
+      "generatedAt": "2026-05-28T19:25:38.414Z",
       "status": "skipped"
     },
     "coverCredit": "ALTOS LAB",
@@ -18537,11 +18537,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "morning",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:04:41.011Z",
+    "generatedAt": "2026-05-28T19:25:38.414Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:04:41.011Z",
-    "updatedAt": "2026-05-28T19:04:41.011Z",
-    "publishedAt": "2026-05-28T19:04:41.011Z"
+    "createdAt": "2026-05-28T19:25:38.414Z",
+    "updatedAt": "2026-05-28T19:25:38.414Z",
+    "publishedAt": "2026-05-28T19:25:38.414Z"
   },
   {
     "id": "post_market_edge_ai_deployment_ja",
@@ -18624,7 +18624,7 @@ export const marketBlogPosts = [
       "provider": "openverse",
       "prompt": "fiber optic cables",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:04:41.348Z",
+      "generatedAt": "2026-05-28T19:25:38.674Z",
       "status": "generated"
     },
     "coverCredit": "SRNL Fiber Optic Cable Installation by Savannah River Site",
@@ -18664,11 +18664,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "morning",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:04:41.348Z",
+    "generatedAt": "2026-05-28T19:25:38.674Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:04:41.348Z",
-    "updatedAt": "2026-05-28T19:04:41.348Z",
-    "publishedAt": "2026-05-28T19:04:41.348Z"
+    "createdAt": "2026-05-28T19:25:38.674Z",
+    "updatedAt": "2026-05-28T19:25:38.674Z",
+    "publishedAt": "2026-05-28T19:25:38.674Z"
   },
   {
     "id": "post_market_edge_ai_deployment_ko",
@@ -18751,7 +18751,7 @@ export const marketBlogPosts = [
       "provider": "openverse",
       "prompt": "gpu computer hardware",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:04:41.663Z",
+      "generatedAt": "2026-05-28T19:25:38.977Z",
       "status": "generated"
     },
     "coverCredit": "Broken Nvidia GeForce 4 Ti : Broken GPU Chip 3/4 by qubodup",
@@ -18791,11 +18791,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "morning",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:04:41.663Z",
+    "generatedAt": "2026-05-28T19:25:38.977Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:04:41.663Z",
-    "updatedAt": "2026-05-28T19:04:41.663Z",
-    "publishedAt": "2026-05-28T19:04:41.663Z"
+    "createdAt": "2026-05-28T19:25:38.977Z",
+    "updatedAt": "2026-05-28T19:25:38.977Z",
+    "publishedAt": "2026-05-28T19:25:38.977Z"
   },
   {
     "id": "post_market_gpu_capacity_planning_zh_hant",
@@ -18878,7 +18878,7 @@ export const marketBlogPosts = [
       "provider": "local",
       "prompt": "GPU server data center fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:04:42.899Z",
+      "generatedAt": "2026-05-28T19:25:44.761Z",
       "status": "skipped"
     },
     "coverCredit": "ALTOS LAB",
@@ -18918,11 +18918,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "afternoon",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:04:42.899Z",
+    "generatedAt": "2026-05-28T19:25:44.761Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:04:42.899Z",
-    "updatedAt": "2026-05-28T19:04:42.899Z",
-    "publishedAt": "2026-05-28T19:04:42.899Z"
+    "createdAt": "2026-05-28T19:25:44.761Z",
+    "updatedAt": "2026-05-28T19:25:44.761Z",
+    "publishedAt": "2026-05-28T19:25:44.761Z"
   },
   {
     "id": "post_market_gpu_capacity_planning_en",
@@ -19005,7 +19005,7 @@ export const marketBlogPosts = [
       "provider": "openverse",
       "prompt": "fiber optic cables",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:04:43.457Z",
+      "generatedAt": "2026-05-28T19:25:45.114Z",
       "status": "generated"
     },
     "coverCredit": "Ball Aerospace Engineer Larkin Carey Connects Fiber Optic Cables by James Webb Space Telescope",
@@ -19045,11 +19045,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "afternoon",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:04:43.457Z",
+    "generatedAt": "2026-05-28T19:25:45.114Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:04:43.457Z",
-    "updatedAt": "2026-05-28T19:04:43.457Z",
-    "publishedAt": "2026-05-28T19:04:43.457Z"
+    "createdAt": "2026-05-28T19:25:45.114Z",
+    "updatedAt": "2026-05-28T19:25:45.114Z",
+    "publishedAt": "2026-05-28T19:25:45.114Z"
   },
   {
     "id": "post_market_gpu_capacity_planning_ja",
@@ -19132,7 +19132,7 @@ export const marketBlogPosts = [
       "provider": "local",
       "prompt": "GPU server data center fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:04:44.704Z",
+      "generatedAt": "2026-05-28T19:25:46.331Z",
       "status": "skipped"
     },
     "coverCredit": "ALTOS LAB",
@@ -19172,11 +19172,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "afternoon",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:04:44.704Z",
+    "generatedAt": "2026-05-28T19:25:46.331Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:04:44.704Z",
-    "updatedAt": "2026-05-28T19:04:44.704Z",
-    "publishedAt": "2026-05-28T19:04:44.704Z"
+    "createdAt": "2026-05-28T19:25:46.331Z",
+    "updatedAt": "2026-05-28T19:25:46.331Z",
+    "publishedAt": "2026-05-28T19:25:46.331Z"
   },
   {
     "id": "post_market_gpu_capacity_planning_ko",
@@ -19259,7 +19259,7 @@ export const marketBlogPosts = [
       "provider": "local",
       "prompt": "GPU server data center fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:04:45.964Z",
+      "generatedAt": "2026-05-28T19:25:47.709Z",
       "status": "skipped"
     },
     "coverCredit": "ALTOS LAB",
@@ -19299,11 +19299,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "afternoon",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:04:45.964Z",
+    "generatedAt": "2026-05-28T19:25:47.709Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:04:45.964Z",
-    "updatedAt": "2026-05-28T19:04:45.964Z",
-    "publishedAt": "2026-05-28T19:04:45.964Z"
+    "createdAt": "2026-05-28T19:25:47.709Z",
+    "updatedAt": "2026-05-28T19:25:47.709Z",
+    "publishedAt": "2026-05-28T19:25:47.709Z"
   },
   {
     "id": "post_market_model_routing_strategy_zh_hant",
@@ -19386,7 +19386,7 @@ export const marketBlogPosts = [
       "provider": "openverse",
       "prompt": "fiber optic cables",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:04:46.505Z",
+      "generatedAt": "2026-05-28T19:25:47.984Z",
       "status": "generated"
     },
     "coverCredit": "Pulling of Fiber Optic Cable through inner duct. These Fiber Optic Cables will remotely control the electrically operated switches inside the Signal Power Cases which provide Signal Power to six CIL huts. (Force Account, 02-26-2018) by MTA C&D - EAST SIDE ACCESS",
@@ -19426,11 +19426,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "morning",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:04:46.505Z",
+    "generatedAt": "2026-05-28T19:25:47.984Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:04:46.505Z",
-    "updatedAt": "2026-05-28T19:04:46.505Z",
-    "publishedAt": "2026-05-28T19:04:46.505Z"
+    "createdAt": "2026-05-28T19:25:47.984Z",
+    "updatedAt": "2026-05-28T19:25:47.984Z",
+    "publishedAt": "2026-05-28T19:25:47.984Z"
   },
   {
     "id": "post_market_model_routing_strategy_en",
@@ -19513,7 +19513,7 @@ export const marketBlogPosts = [
       "provider": "local",
       "prompt": "AI model routing architecture fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:04:47.671Z",
+      "generatedAt": "2026-05-28T19:25:49.303Z",
       "status": "skipped"
     },
     "coverCredit": "ALTOS LAB",
@@ -19553,11 +19553,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "morning",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:04:47.671Z",
+    "generatedAt": "2026-05-28T19:25:49.303Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:04:47.671Z",
-    "updatedAt": "2026-05-28T19:04:47.671Z",
-    "publishedAt": "2026-05-28T19:04:47.671Z"
+    "createdAt": "2026-05-28T19:25:49.303Z",
+    "updatedAt": "2026-05-28T19:25:49.303Z",
+    "publishedAt": "2026-05-28T19:25:49.303Z"
   },
   {
     "id": "post_market_model_routing_strategy_ja",
@@ -19640,7 +19640,7 @@ export const marketBlogPosts = [
       "provider": "local",
       "prompt": "AI model routing architecture fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:04:48.902Z",
+      "generatedAt": "2026-05-28T19:25:50.651Z",
       "status": "skipped"
     },
     "coverCredit": "ALTOS LAB",
@@ -19680,11 +19680,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "morning",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:04:48.902Z",
+    "generatedAt": "2026-05-28T19:25:50.651Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:04:48.902Z",
-    "updatedAt": "2026-05-28T19:04:48.902Z",
-    "publishedAt": "2026-05-28T19:04:48.902Z"
+    "createdAt": "2026-05-28T19:25:50.651Z",
+    "updatedAt": "2026-05-28T19:25:50.651Z",
+    "publishedAt": "2026-05-28T19:25:50.651Z"
   },
   {
     "id": "post_market_model_routing_strategy_ko",
@@ -19767,7 +19767,7 @@ export const marketBlogPosts = [
       "provider": "openverse",
       "prompt": "network switch cables",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:04:49.238Z",
+      "generatedAt": "2026-05-28T19:25:50.918Z",
       "status": "generated"
     },
     "coverCredit": "network by twicepix",
@@ -19807,11 +19807,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "morning",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:04:49.238Z",
+    "generatedAt": "2026-05-28T19:25:50.918Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:04:49.238Z",
-    "updatedAt": "2026-05-28T19:04:49.238Z",
-    "publishedAt": "2026-05-28T19:04:49.238Z"
+    "createdAt": "2026-05-28T19:25:50.918Z",
+    "updatedAt": "2026-05-28T19:25:50.918Z",
+    "publishedAt": "2026-05-28T19:25:50.918Z"
   },
   {
     "id": "post_market_ai_sandbox_environments_zh_hant",
@@ -19894,7 +19894,7 @@ export const marketBlogPosts = [
       "provider": "local",
       "prompt": "AI sandbox environment testing fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:04:50.454Z",
+      "generatedAt": "2026-05-28T19:25:52.243Z",
       "status": "skipped"
     },
     "coverCredit": "ALTOS LAB",
@@ -19934,11 +19934,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "afternoon",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:04:50.454Z",
+    "generatedAt": "2026-05-28T19:25:52.243Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:04:50.454Z",
-    "updatedAt": "2026-05-28T19:04:50.454Z",
-    "publishedAt": "2026-05-28T19:04:50.454Z"
+    "createdAt": "2026-05-28T19:25:52.243Z",
+    "updatedAt": "2026-05-28T19:25:52.243Z",
+    "publishedAt": "2026-05-28T19:25:52.243Z"
   },
   {
     "id": "post_market_ai_sandbox_environments_en",
@@ -20021,7 +20021,7 @@ export const marketBlogPosts = [
       "provider": "local",
       "prompt": "AI sandbox environment testing fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:04:51.634Z",
+      "generatedAt": "2026-05-28T19:25:53.554Z",
       "status": "skipped"
     },
     "coverCredit": "ALTOS LAB",
@@ -20061,11 +20061,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "afternoon",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:04:51.634Z",
+    "generatedAt": "2026-05-28T19:25:53.554Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:04:51.634Z",
-    "updatedAt": "2026-05-28T19:04:51.634Z",
-    "publishedAt": "2026-05-28T19:04:51.634Z"
+    "createdAt": "2026-05-28T19:25:53.554Z",
+    "updatedAt": "2026-05-28T19:25:53.554Z",
+    "publishedAt": "2026-05-28T19:25:53.554Z"
   },
   {
     "id": "post_market_ai_sandbox_environments_ja",
@@ -20148,7 +20148,7 @@ export const marketBlogPosts = [
       "provider": "openverse",
       "prompt": "network switch cables",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:04:52.012Z",
+      "generatedAt": "2026-05-28T19:25:53.881Z",
       "status": "generated"
     },
     "coverCredit": "Cable closet by sampsyo",
@@ -20188,11 +20188,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "afternoon",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:04:52.012Z",
+    "generatedAt": "2026-05-28T19:25:53.881Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:04:52.012Z",
-    "updatedAt": "2026-05-28T19:04:52.012Z",
-    "publishedAt": "2026-05-28T19:04:52.012Z"
+    "createdAt": "2026-05-28T19:25:53.881Z",
+    "updatedAt": "2026-05-28T19:25:53.881Z",
+    "publishedAt": "2026-05-28T19:25:53.881Z"
   },
   {
     "id": "post_market_ai_sandbox_environments_ko",
@@ -20275,7 +20275,7 @@ export const marketBlogPosts = [
       "provider": "local",
       "prompt": "AI sandbox environment testing fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:04:53.338Z",
+      "generatedAt": "2026-05-28T19:25:55.310Z",
       "status": "skipped"
     },
     "coverCredit": "ALTOS LAB",
@@ -20315,11 +20315,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "afternoon",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:04:53.338Z",
+    "generatedAt": "2026-05-28T19:25:55.310Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:04:53.338Z",
-    "updatedAt": "2026-05-28T19:04:53.338Z",
-    "publishedAt": "2026-05-28T19:04:53.338Z"
+    "createdAt": "2026-05-28T19:25:55.310Z",
+    "updatedAt": "2026-05-28T19:25:55.310Z",
+    "publishedAt": "2026-05-28T19:25:55.310Z"
   },
   {
     "id": "post_market_customer_service_quality_loop_zh_hant",
@@ -20402,7 +20402,7 @@ export const marketBlogPosts = [
       "provider": "local",
       "prompt": "customer service quality loop fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:04:54.393Z",
+      "generatedAt": "2026-05-28T19:25:56.655Z",
       "status": "skipped"
     },
     "coverCredit": "ALTOS LAB",
@@ -20442,11 +20442,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "morning",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:04:54.393Z",
+    "generatedAt": "2026-05-28T19:25:56.655Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:04:54.393Z",
-    "updatedAt": "2026-05-28T19:04:54.393Z",
-    "publishedAt": "2026-05-28T19:04:54.393Z"
+    "createdAt": "2026-05-28T19:25:56.655Z",
+    "updatedAt": "2026-05-28T19:25:56.655Z",
+    "publishedAt": "2026-05-28T19:25:56.655Z"
   },
   {
     "id": "post_market_customer_service_quality_loop_en",
@@ -20529,7 +20529,7 @@ export const marketBlogPosts = [
       "provider": "openverse",
       "prompt": "industrial control room",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:04:54.685Z",
+      "generatedAt": "2026-05-28T19:25:56.953Z",
       "status": "generated"
     },
     "coverCredit": "Soft Robots and Bionic Arms by jurvetson",
@@ -20569,11 +20569,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "morning",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:04:54.685Z",
+    "generatedAt": "2026-05-28T19:25:56.953Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:04:54.685Z",
-    "updatedAt": "2026-05-28T19:04:54.685Z",
-    "publishedAt": "2026-05-28T19:04:54.685Z"
+    "createdAt": "2026-05-28T19:25:56.953Z",
+    "updatedAt": "2026-05-28T19:25:56.953Z",
+    "publishedAt": "2026-05-28T19:25:56.953Z"
   },
   {
     "id": "post_market_customer_service_quality_loop_ja",
@@ -20656,7 +20656,7 @@ export const marketBlogPosts = [
       "provider": "openverse",
       "prompt": "factory automation machinery",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:04:55.025Z",
+      "generatedAt": "2026-05-28T19:25:57.210Z",
       "status": "generated"
     },
     "coverCredit": "Automatic machine for filling and capping bottles of milk, Cohocton, New York by Aussie~mobs",
@@ -20696,11 +20696,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "morning",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:04:55.025Z",
+    "generatedAt": "2026-05-28T19:25:57.210Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:04:55.025Z",
-    "updatedAt": "2026-05-28T19:04:55.025Z",
-    "publishedAt": "2026-05-28T19:04:55.025Z"
+    "createdAt": "2026-05-28T19:25:57.210Z",
+    "updatedAt": "2026-05-28T19:25:57.210Z",
+    "publishedAt": "2026-05-28T19:25:57.210Z"
   },
   {
     "id": "post_market_customer_service_quality_loop_ko",
@@ -20783,7 +20783,7 @@ export const marketBlogPosts = [
       "provider": "local",
       "prompt": "customer service quality loop fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:04:56.126Z",
+      "generatedAt": "2026-05-28T19:25:58.587Z",
       "status": "skipped"
     },
     "coverCredit": "ALTOS LAB",
@@ -20823,11 +20823,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "morning",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:04:56.126Z",
+    "generatedAt": "2026-05-28T19:25:58.587Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:04:56.126Z",
-    "updatedAt": "2026-05-28T19:04:56.126Z",
-    "publishedAt": "2026-05-28T19:04:56.126Z"
+    "createdAt": "2026-05-28T19:25:58.587Z",
+    "updatedAt": "2026-05-28T19:25:58.587Z",
+    "publishedAt": "2026-05-28T19:25:58.587Z"
   },
   {
     "id": "post_market_cms_backoffice_automation_zh_hant",
@@ -20910,7 +20910,7 @@ export const marketBlogPosts = [
       "provider": "openverse",
       "prompt": "industrial control room",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:04:56.396Z",
+      "generatedAt": "2026-05-28T19:25:58.856Z",
       "status": "generated"
     },
     "coverCredit": "Laboratory: computers by towo™",
@@ -20950,11 +20950,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "afternoon",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:04:56.396Z",
+    "generatedAt": "2026-05-28T19:25:58.856Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:04:56.396Z",
-    "updatedAt": "2026-05-28T19:04:56.396Z",
-    "publishedAt": "2026-05-28T19:04:56.396Z"
+    "createdAt": "2026-05-28T19:25:58.856Z",
+    "updatedAt": "2026-05-28T19:25:58.856Z",
+    "publishedAt": "2026-05-28T19:25:58.856Z"
   },
   {
     "id": "post_market_cms_backoffice_automation_en",
@@ -21037,7 +21037,7 @@ export const marketBlogPosts = [
       "provider": "openverse",
       "prompt": "factory automation machinery",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:04:56.691Z",
+      "generatedAt": "2026-05-28T19:25:59.121Z",
       "status": "generated"
     },
     "coverCredit": "Mauna Loa Macadamia Nut Factory by ewen and donabel",
@@ -21077,11 +21077,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "afternoon",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:04:56.691Z",
+    "generatedAt": "2026-05-28T19:25:59.121Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:04:56.691Z",
-    "updatedAt": "2026-05-28T19:04:56.691Z",
-    "publishedAt": "2026-05-28T19:04:56.691Z"
+    "createdAt": "2026-05-28T19:25:59.121Z",
+    "updatedAt": "2026-05-28T19:25:59.121Z",
+    "publishedAt": "2026-05-28T19:25:59.121Z"
   },
   {
     "id": "post_market_cms_backoffice_automation_ja",
@@ -21164,7 +21164,7 @@ export const marketBlogPosts = [
       "provider": "local",
       "prompt": "content management system automation fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:04:57.758Z",
+      "generatedAt": "2026-05-28T19:26:00.600Z",
       "status": "skipped"
     },
     "coverCredit": "ALTOS LAB",
@@ -21204,11 +21204,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "afternoon",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:04:57.758Z",
+    "generatedAt": "2026-05-28T19:26:00.600Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:04:57.758Z",
-    "updatedAt": "2026-05-28T19:04:57.758Z",
-    "publishedAt": "2026-05-28T19:04:57.758Z"
+    "createdAt": "2026-05-28T19:26:00.600Z",
+    "updatedAt": "2026-05-28T19:26:00.600Z",
+    "publishedAt": "2026-05-28T19:26:00.600Z"
   },
   {
     "id": "post_market_cms_backoffice_automation_ko",
@@ -21291,7 +21291,7 @@ export const marketBlogPosts = [
       "provider": "local",
       "prompt": "content management system automation fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:04:58.806Z",
+      "generatedAt": "2026-05-28T19:26:01.951Z",
       "status": "skipped"
     },
     "coverCredit": "ALTOS LAB",
@@ -21331,11 +21331,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "afternoon",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:04:58.806Z",
+    "generatedAt": "2026-05-28T19:26:01.951Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:04:58.806Z",
-    "updatedAt": "2026-05-28T19:04:58.806Z",
-    "publishedAt": "2026-05-28T19:04:58.806Z"
+    "createdAt": "2026-05-28T19:26:01.951Z",
+    "updatedAt": "2026-05-28T19:26:01.951Z",
+    "publishedAt": "2026-05-28T19:26:01.951Z"
   },
   {
     "id": "post_market_executive_ai_briefing_system_zh_hant",
@@ -21418,7 +21418,7 @@ export const marketBlogPosts = [
       "provider": "local",
       "prompt": "executive AI briefing desk fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:04:59.897Z",
+      "generatedAt": "2026-05-28T19:26:03.577Z",
       "status": "skipped"
     },
     "coverCredit": "ALTOS LAB",
@@ -21458,11 +21458,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "morning",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:04:59.897Z",
+    "generatedAt": "2026-05-28T19:26:03.577Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:04:59.897Z",
-    "updatedAt": "2026-05-28T19:04:59.897Z",
-    "publishedAt": "2026-05-28T19:04:59.897Z"
+    "createdAt": "2026-05-28T19:26:03.577Z",
+    "updatedAt": "2026-05-28T19:26:03.577Z",
+    "publishedAt": "2026-05-28T19:26:03.577Z"
   },
   {
     "id": "post_market_executive_ai_briefing_system_en",
@@ -21545,7 +21545,7 @@ export const marketBlogPosts = [
       "provider": "local",
       "prompt": "executive AI briefing desk fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:05:00.916Z",
+      "generatedAt": "2026-05-28T19:26:04.933Z",
       "status": "skipped"
     },
     "coverCredit": "ALTOS LAB",
@@ -21585,11 +21585,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "morning",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:05:00.916Z",
+    "generatedAt": "2026-05-28T19:26:04.933Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:05:00.916Z",
-    "updatedAt": "2026-05-28T19:05:00.916Z",
-    "publishedAt": "2026-05-28T19:05:00.916Z"
+    "createdAt": "2026-05-28T19:26:04.933Z",
+    "updatedAt": "2026-05-28T19:26:04.933Z",
+    "publishedAt": "2026-05-28T19:26:04.933Z"
   },
   {
     "id": "post_market_executive_ai_briefing_system_ja",
@@ -21672,7 +21672,7 @@ export const marketBlogPosts = [
       "provider": "local",
       "prompt": "executive AI briefing desk fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:05:02.112Z",
+      "generatedAt": "2026-05-28T19:26:06.448Z",
       "status": "skipped"
     },
     "coverCredit": "ALTOS LAB",
@@ -21712,11 +21712,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "morning",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:05:02.112Z",
+    "generatedAt": "2026-05-28T19:26:06.448Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:05:02.112Z",
-    "updatedAt": "2026-05-28T19:05:02.112Z",
-    "publishedAt": "2026-05-28T19:05:02.112Z"
+    "createdAt": "2026-05-28T19:26:06.448Z",
+    "updatedAt": "2026-05-28T19:26:06.448Z",
+    "publishedAt": "2026-05-28T19:26:06.448Z"
   },
   {
     "id": "post_market_executive_ai_briefing_system_ko",
@@ -21799,7 +21799,7 @@ export const marketBlogPosts = [
       "provider": "openverse",
       "prompt": "research desk documents",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:05:02.380Z",
+      "generatedAt": "2026-05-28T19:26:06.742Z",
       "status": "generated"
     },
     "coverCredit": "notebook by waferboard",
@@ -21839,11 +21839,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "morning",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:05:02.380Z",
+    "generatedAt": "2026-05-28T19:26:06.742Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:05:02.380Z",
-    "updatedAt": "2026-05-28T19:05:02.380Z",
-    "publishedAt": "2026-05-28T19:05:02.380Z"
+    "createdAt": "2026-05-28T19:26:06.742Z",
+    "updatedAt": "2026-05-28T19:26:06.742Z",
+    "publishedAt": "2026-05-28T19:26:06.742Z"
   },
   {
     "id": "post_market_marketing_research_desk_zh_hant",
@@ -21926,7 +21926,7 @@ export const marketBlogPosts = [
       "provider": "local",
       "prompt": "market research desk AI fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:05:03.494Z",
+      "generatedAt": "2026-05-28T19:26:08.064Z",
       "status": "skipped"
     },
     "coverCredit": "ALTOS LAB",
@@ -21966,11 +21966,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "afternoon",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:05:03.494Z",
+    "generatedAt": "2026-05-28T19:26:08.064Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:05:03.494Z",
-    "updatedAt": "2026-05-28T19:05:03.494Z",
-    "publishedAt": "2026-05-28T19:05:03.494Z"
+    "createdAt": "2026-05-28T19:26:08.064Z",
+    "updatedAt": "2026-05-28T19:26:08.064Z",
+    "publishedAt": "2026-05-28T19:26:08.064Z"
   },
   {
     "id": "post_market_marketing_research_desk_en",
@@ -22053,7 +22053,7 @@ export const marketBlogPosts = [
       "provider": "local",
       "prompt": "market research desk AI fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:05:04.673Z",
+      "generatedAt": "2026-05-28T19:26:09.480Z",
       "status": "skipped"
     },
     "coverCredit": "ALTOS LAB",
@@ -22093,11 +22093,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "afternoon",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:05:04.673Z",
+    "generatedAt": "2026-05-28T19:26:09.480Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:05:04.673Z",
-    "updatedAt": "2026-05-28T19:05:04.673Z",
-    "publishedAt": "2026-05-28T19:05:04.673Z"
+    "createdAt": "2026-05-28T19:26:09.480Z",
+    "updatedAt": "2026-05-28T19:26:09.480Z",
+    "publishedAt": "2026-05-28T19:26:09.480Z"
   },
   {
     "id": "post_market_marketing_research_desk_ja",
@@ -22180,7 +22180,7 @@ export const marketBlogPosts = [
       "provider": "local",
       "prompt": "market research desk AI fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:05:05.799Z",
+      "generatedAt": "2026-05-28T19:26:10.775Z",
       "status": "skipped"
     },
     "coverCredit": "ALTOS LAB",
@@ -22220,11 +22220,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "afternoon",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:05:05.799Z",
+    "generatedAt": "2026-05-28T19:26:10.775Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:05:05.799Z",
-    "updatedAt": "2026-05-28T19:05:05.799Z",
-    "publishedAt": "2026-05-28T19:05:05.799Z"
+    "createdAt": "2026-05-28T19:26:10.775Z",
+    "updatedAt": "2026-05-28T19:26:10.775Z",
+    "publishedAt": "2026-05-28T19:26:10.775Z"
   },
   {
     "id": "post_market_marketing_research_desk_ko",
@@ -22307,7 +22307,7 @@ export const marketBlogPosts = [
       "provider": "local",
       "prompt": "market research desk AI fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:05:06.867Z",
+      "generatedAt": "2026-05-28T19:26:12.273Z",
       "status": "skipped"
     },
     "coverCredit": "ALTOS LAB",
@@ -22347,11 +22347,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "afternoon",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:05:06.867Z",
+    "generatedAt": "2026-05-28T19:26:12.273Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:05:06.867Z",
-    "updatedAt": "2026-05-28T19:05:06.867Z",
-    "publishedAt": "2026-05-28T19:05:06.867Z"
+    "createdAt": "2026-05-28T19:26:12.273Z",
+    "updatedAt": "2026-05-28T19:26:12.273Z",
+    "publishedAt": "2026-05-28T19:26:12.273Z"
   },
   {
     "id": "post_market_vertical_ai_workflows_zh_hant",
@@ -22434,7 +22434,7 @@ export const marketBlogPosts = [
       "provider": "local",
       "prompt": "industry AI workflow factory fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:05:07.839Z",
+      "generatedAt": "2026-05-28T19:26:13.520Z",
       "status": "skipped"
     },
     "coverCredit": "ALTOS LAB",
@@ -22474,11 +22474,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "morning",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:05:07.839Z",
+    "generatedAt": "2026-05-28T19:26:13.520Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:05:07.839Z",
-    "updatedAt": "2026-05-28T19:05:07.839Z",
-    "publishedAt": "2026-05-28T19:05:07.839Z"
+    "createdAt": "2026-05-28T19:26:13.520Z",
+    "updatedAt": "2026-05-28T19:26:13.520Z",
+    "publishedAt": "2026-05-28T19:26:13.520Z"
   },
   {
     "id": "post_market_vertical_ai_workflows_en",
@@ -22561,7 +22561,7 @@ export const marketBlogPosts = [
       "provider": "local",
       "prompt": "industry AI workflow factory fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:05:08.826Z",
+      "generatedAt": "2026-05-28T19:26:14.863Z",
       "status": "skipped"
     },
     "coverCredit": "ALTOS LAB",
@@ -22601,11 +22601,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "morning",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:05:08.826Z",
+    "generatedAt": "2026-05-28T19:26:14.863Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:05:08.826Z",
-    "updatedAt": "2026-05-28T19:05:08.826Z",
-    "publishedAt": "2026-05-28T19:05:08.826Z"
+    "createdAt": "2026-05-28T19:26:14.863Z",
+    "updatedAt": "2026-05-28T19:26:14.863Z",
+    "publishedAt": "2026-05-28T19:26:14.863Z"
   },
   {
     "id": "post_market_vertical_ai_workflows_ja",
@@ -22688,7 +22688,7 @@ export const marketBlogPosts = [
       "provider": "local",
       "prompt": "industry AI workflow factory fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:05:09.816Z",
+      "generatedAt": "2026-05-28T19:26:16.381Z",
       "status": "skipped"
     },
     "coverCredit": "ALTOS LAB",
@@ -22728,11 +22728,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "morning",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:05:09.816Z",
+    "generatedAt": "2026-05-28T19:26:16.381Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:05:09.816Z",
-    "updatedAt": "2026-05-28T19:05:09.816Z",
-    "publishedAt": "2026-05-28T19:05:09.816Z"
+    "createdAt": "2026-05-28T19:26:16.381Z",
+    "updatedAt": "2026-05-28T19:26:16.381Z",
+    "publishedAt": "2026-05-28T19:26:16.381Z"
   },
   {
     "id": "post_market_vertical_ai_workflows_ko",
@@ -22806,8 +22806,8 @@ export const marketBlogPosts = [
       "리서치 해설"
     ],
     "author": "ALTOS LAB Editorial Lab",
-    "cover": "https://api.openverse.org/v1/images/02faacba-38aa-4802-8387-c458de43bb74/thumb/",
-    "coverAlt": "Vertical AI 워크플로 리서치 해설: 메커니즘, 한계, 시장 신호 - Air Defense Computer by Pargon",
+    "cover": "https://api.openverse.org/v1/images/50439fae-a270-4de1-bcab-b69522aac437/thumb/",
+    "coverAlt": "Vertical AI 워크플로 리서치 해설: 메커니즘, 한계, 시장 신호 - Mainframe Computer by Pargon",
     "coverPrompt": "industrial control room",
     "coverSource": "curated",
     "coverGeneration": {
@@ -22815,11 +22815,11 @@ export const marketBlogPosts = [
       "provider": "openverse",
       "prompt": "industrial control room",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:05:10.129Z",
+      "generatedAt": "2026-05-28T19:26:16.643Z",
       "status": "generated"
     },
-    "coverCredit": "Air Defense Computer by Pargon",
-    "coverCreditUrl": "https://www.flickr.com/photos/24539921@N08/2444940338",
+    "coverCredit": "Mainframe Computer by Pargon",
+    "coverCreditUrl": "https://www.flickr.com/photos/24539921@N08/2444943158",
     "coverLicense": "CC BY 2.0",
     "coverLicenseUrl": "https://creativecommons.org/licenses/by/2.0/",
     "readTimeMinutes": 2,
@@ -22855,11 +22855,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "morning",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:05:10.129Z",
+    "generatedAt": "2026-05-28T19:26:16.643Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:05:10.129Z",
-    "updatedAt": "2026-05-28T19:05:10.129Z",
-    "publishedAt": "2026-05-28T19:05:10.129Z"
+    "createdAt": "2026-05-28T19:26:16.643Z",
+    "updatedAt": "2026-05-28T19:26:16.643Z",
+    "publishedAt": "2026-05-28T19:26:16.643Z"
   },
   {
     "id": "post_market_meeting_to_action_system_zh_hant",
@@ -22942,7 +22942,7 @@ export const marketBlogPosts = [
       "provider": "local",
       "prompt": "meeting notes action automation fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:05:11.117Z",
+      "generatedAt": "2026-05-28T19:26:18.397Z",
       "status": "skipped"
     },
     "coverCredit": "ALTOS LAB",
@@ -22982,11 +22982,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "afternoon",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:05:11.117Z",
+    "generatedAt": "2026-05-28T19:26:18.397Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:05:11.117Z",
-    "updatedAt": "2026-05-28T19:05:11.117Z",
-    "publishedAt": "2026-05-28T19:05:11.117Z"
+    "createdAt": "2026-05-28T19:26:18.397Z",
+    "updatedAt": "2026-05-28T19:26:18.397Z",
+    "publishedAt": "2026-05-28T19:26:18.397Z"
   },
   {
     "id": "post_market_meeting_to_action_system_en",
@@ -23069,7 +23069,7 @@ export const marketBlogPosts = [
       "provider": "local",
       "prompt": "meeting notes action automation fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:05:12.103Z",
+      "generatedAt": "2026-05-28T19:26:19.859Z",
       "status": "skipped"
     },
     "coverCredit": "ALTOS LAB",
@@ -23109,11 +23109,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "afternoon",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:05:12.103Z",
+    "generatedAt": "2026-05-28T19:26:19.859Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:05:12.103Z",
-    "updatedAt": "2026-05-28T19:05:12.103Z",
-    "publishedAt": "2026-05-28T19:05:12.103Z"
+    "createdAt": "2026-05-28T19:26:19.859Z",
+    "updatedAt": "2026-05-28T19:26:19.859Z",
+    "publishedAt": "2026-05-28T19:26:19.859Z"
   },
   {
     "id": "post_market_meeting_to_action_system_ja",
@@ -23187,22 +23187,22 @@ export const marketBlogPosts = [
       "運用プレイブック"
     ],
     "author": "ALTOS LAB Editorial Lab",
-    "cover": "https://api.openverse.org/v1/images/7ddafa0c-1638-41ae-af53-dc9e74c17e9f/thumb/",
-    "coverAlt": "会議からアクションへプレイブック：議事録・タスク・追跡をAI運用に変える - USAMRUK Malaria Diagnostics and Control Center of Excellence microscopy training - Nigeria, Africa, September 2009 by US Army Africa",
-    "coverPrompt": "industrial control room",
-    "coverSource": "curated",
+    "cover": "/blog-cover-ja.png",
+    "coverAlt": "会議からアクションへプレイブック：議事録・タスク・追跡をAI運用に変える - ALTOS LAB",
+    "coverPrompt": "meeting notes action automation fallback",
+    "coverSource": "manual",
     "coverGeneration": {
-      "source": "curated",
-      "provider": "openverse",
-      "prompt": "industrial control room",
+      "source": "manual",
+      "provider": "local",
+      "prompt": "meeting notes action automation fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:05:12.366Z",
-      "status": "generated"
+      "generatedAt": "2026-05-28T19:26:21.307Z",
+      "status": "skipped"
     },
-    "coverCredit": "USAMRUK Malaria Diagnostics and Control Center of Excellence microscopy training - Nigeria, Africa, September 2009 by US Army Africa",
-    "coverCreditUrl": "https://www.flickr.com/photos/36281822@N08/4077018383",
-    "coverLicense": "CC BY 2.0",
-    "coverLicenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "coverCredit": "ALTOS LAB",
+    "coverCreditUrl": "https://altoslab-ai.cc",
+    "coverLicense": "Internal asset",
+    "coverLicenseUrl": "https://altoslab-ai.cc",
     "readTimeMinutes": 2,
     "featured": false,
     "reviewStatus": "approved",
@@ -23236,11 +23236,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "afternoon",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:05:12.366Z",
+    "generatedAt": "2026-05-28T19:26:21.307Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:05:12.366Z",
-    "updatedAt": "2026-05-28T19:05:12.366Z",
-    "publishedAt": "2026-05-28T19:05:12.366Z"
+    "createdAt": "2026-05-28T19:26:21.307Z",
+    "updatedAt": "2026-05-28T19:26:21.307Z",
+    "publishedAt": "2026-05-28T19:26:21.307Z"
   },
   {
     "id": "post_market_meeting_to_action_system_ko",
@@ -23323,7 +23323,7 @@ export const marketBlogPosts = [
       "provider": "local",
       "prompt": "meeting notes action automation fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:05:13.644Z",
+      "generatedAt": "2026-05-28T19:26:22.965Z",
       "status": "skipped"
     },
     "coverCredit": "ALTOS LAB",
@@ -23363,11 +23363,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "afternoon",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:05:13.644Z",
+    "generatedAt": "2026-05-28T19:26:22.965Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:05:13.644Z",
-    "updatedAt": "2026-05-28T19:05:13.644Z",
-    "publishedAt": "2026-05-28T19:05:13.644Z"
+    "createdAt": "2026-05-28T19:26:22.965Z",
+    "updatedAt": "2026-05-28T19:26:22.965Z",
+    "publishedAt": "2026-05-28T19:26:22.965Z"
   },
   {
     "id": "post_market_sales_proposal_review_zh_hant",
@@ -23450,7 +23450,7 @@ export const marketBlogPosts = [
       "provider": "local",
       "prompt": "sales proposal AI review fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:05:14.718Z",
+      "generatedAt": "2026-05-28T19:26:24.517Z",
       "status": "skipped"
     },
     "coverCredit": "ALTOS LAB",
@@ -23490,11 +23490,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "morning",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:05:14.718Z",
+    "generatedAt": "2026-05-28T19:26:24.517Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:05:14.718Z",
-    "updatedAt": "2026-05-28T19:05:14.718Z",
-    "publishedAt": "2026-05-28T19:05:14.718Z"
+    "createdAt": "2026-05-28T19:26:24.517Z",
+    "updatedAt": "2026-05-28T19:26:24.517Z",
+    "publishedAt": "2026-05-28T19:26:24.517Z"
   },
   {
     "id": "post_market_sales_proposal_review_en",
@@ -23568,22 +23568,22 @@ export const marketBlogPosts = [
       "Column"
     ],
     "author": "ALTOS LAB Editorial Lab",
-    "cover": "https://api.openverse.org/v1/images/50439fae-a270-4de1-bcab-b69522aac437/thumb/",
-    "coverAlt": "The overlooked risk inside AI sales proposal review - Mainframe Computer by Pargon",
-    "coverPrompt": "industrial control room",
-    "coverSource": "curated",
+    "cover": "/blog-cover-en.png",
+    "coverAlt": "The overlooked risk inside AI sales proposal review - ALTOS LAB",
+    "coverPrompt": "sales proposal AI review fallback",
+    "coverSource": "manual",
     "coverGeneration": {
-      "source": "curated",
-      "provider": "openverse",
-      "prompt": "industrial control room",
+      "source": "manual",
+      "provider": "local",
+      "prompt": "sales proposal AI review fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:05:15.041Z",
-      "status": "generated"
+      "generatedAt": "2026-05-28T19:26:26.240Z",
+      "status": "skipped"
     },
-    "coverCredit": "Mainframe Computer by Pargon",
-    "coverCreditUrl": "https://www.flickr.com/photos/24539921@N08/2444943158",
-    "coverLicense": "CC BY 2.0",
-    "coverLicenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "coverCredit": "ALTOS LAB",
+    "coverCreditUrl": "https://altoslab-ai.cc",
+    "coverLicense": "Internal asset",
+    "coverLicenseUrl": "https://altoslab-ai.cc",
     "readTimeMinutes": 2,
     "featured": true,
     "reviewStatus": "approved",
@@ -23617,11 +23617,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "morning",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:05:15.041Z",
+    "generatedAt": "2026-05-28T19:26:26.240Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:05:15.041Z",
-    "updatedAt": "2026-05-28T19:05:15.041Z",
-    "publishedAt": "2026-05-28T19:05:15.041Z"
+    "createdAt": "2026-05-28T19:26:26.240Z",
+    "updatedAt": "2026-05-28T19:26:26.240Z",
+    "publishedAt": "2026-05-28T19:26:26.240Z"
   },
   {
     "id": "post_market_sales_proposal_review_ja",
@@ -23704,7 +23704,7 @@ export const marketBlogPosts = [
       "provider": "local",
       "prompt": "sales proposal AI review fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:05:16.096Z",
+      "generatedAt": "2026-05-28T19:26:27.836Z",
       "status": "skipped"
     },
     "coverCredit": "ALTOS LAB",
@@ -23744,11 +23744,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "morning",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:05:16.096Z",
+    "generatedAt": "2026-05-28T19:26:27.836Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:05:16.096Z",
-    "updatedAt": "2026-05-28T19:05:16.096Z",
-    "publishedAt": "2026-05-28T19:05:16.096Z"
+    "createdAt": "2026-05-28T19:26:27.836Z",
+    "updatedAt": "2026-05-28T19:26:27.836Z",
+    "publishedAt": "2026-05-28T19:26:27.836Z"
   },
   {
     "id": "post_market_sales_proposal_review_ko",
@@ -23831,7 +23831,7 @@ export const marketBlogPosts = [
       "provider": "local",
       "prompt": "sales proposal AI review fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:05:17.095Z",
+      "generatedAt": "2026-05-28T19:26:29.225Z",
       "status": "skipped"
     },
     "coverCredit": "ALTOS LAB",
@@ -23871,11 +23871,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "morning",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:05:17.095Z",
+    "generatedAt": "2026-05-28T19:26:29.225Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:05:17.095Z",
-    "updatedAt": "2026-05-28T19:05:17.095Z",
-    "publishedAt": "2026-05-28T19:05:17.095Z"
+    "createdAt": "2026-05-28T19:26:29.225Z",
+    "updatedAt": "2026-05-28T19:26:29.225Z",
+    "publishedAt": "2026-05-28T19:26:29.225Z"
   },
   {
     "id": "post_market_research_agent_source_cards_zh_hant",
@@ -23958,7 +23958,7 @@ export const marketBlogPosts = [
       "provider": "local",
       "prompt": "research agent source cards fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:05:18.235Z",
+      "generatedAt": "2026-05-28T19:26:30.624Z",
       "status": "skipped"
     },
     "coverCredit": "ALTOS LAB",
@@ -23998,11 +23998,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "afternoon",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:05:18.235Z",
+    "generatedAt": "2026-05-28T19:26:30.624Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:05:18.235Z",
-    "updatedAt": "2026-05-28T19:05:18.235Z",
-    "publishedAt": "2026-05-28T19:05:18.235Z"
+    "createdAt": "2026-05-28T19:26:30.624Z",
+    "updatedAt": "2026-05-28T19:26:30.624Z",
+    "publishedAt": "2026-05-28T19:26:30.624Z"
   },
   {
     "id": "post_market_research_agent_source_cards_en",
@@ -24085,7 +24085,7 @@ export const marketBlogPosts = [
       "provider": "local",
       "prompt": "research agent source cards fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:05:19.173Z",
+      "generatedAt": "2026-05-28T19:26:32.129Z",
       "status": "skipped"
     },
     "coverCredit": "ALTOS LAB",
@@ -24125,11 +24125,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "afternoon",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:05:19.173Z",
+    "generatedAt": "2026-05-28T19:26:32.129Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:05:19.173Z",
-    "updatedAt": "2026-05-28T19:05:19.173Z",
-    "publishedAt": "2026-05-28T19:05:19.173Z"
+    "createdAt": "2026-05-28T19:26:32.129Z",
+    "updatedAt": "2026-05-28T19:26:32.129Z",
+    "publishedAt": "2026-05-28T19:26:32.129Z"
   },
   {
     "id": "post_market_research_agent_source_cards_ja",
@@ -24212,7 +24212,7 @@ export const marketBlogPosts = [
       "provider": "local",
       "prompt": "research agent source cards fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:05:20.209Z",
+      "generatedAt": "2026-05-28T19:26:33.538Z",
       "status": "skipped"
     },
     "coverCredit": "ALTOS LAB",
@@ -24252,11 +24252,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "afternoon",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:05:20.209Z",
+    "generatedAt": "2026-05-28T19:26:33.538Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:05:20.209Z",
-    "updatedAt": "2026-05-28T19:05:20.209Z",
-    "publishedAt": "2026-05-28T19:05:20.209Z"
+    "createdAt": "2026-05-28T19:26:33.538Z",
+    "updatedAt": "2026-05-28T19:26:33.538Z",
+    "publishedAt": "2026-05-28T19:26:33.538Z"
   },
   {
     "id": "post_market_research_agent_source_cards_ko",
@@ -24339,7 +24339,7 @@ export const marketBlogPosts = [
       "provider": "local",
       "prompt": "research agent source cards fallback",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-28T19:05:21.274Z",
+      "generatedAt": "2026-05-28T19:26:35.067Z",
       "status": "skipped"
     },
     "coverCredit": "ALTOS LAB",
@@ -24379,10 +24379,10 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-28",
     "generationSlot": "afternoon",
     "scheduledFor": "2026-05-28",
-    "generatedAt": "2026-05-28T19:05:21.274Z",
+    "generatedAt": "2026-05-28T19:26:35.067Z",
     "generatedBy": "",
-    "createdAt": "2026-05-28T19:05:21.274Z",
-    "updatedAt": "2026-05-28T19:05:21.274Z",
-    "publishedAt": "2026-05-28T19:05:21.274Z"
+    "createdAt": "2026-05-28T19:26:35.067Z",
+    "updatedAt": "2026-05-28T19:26:35.067Z",
+    "publishedAt": "2026-05-28T19:26:35.067Z"
   }
 ] satisfies BlogPost[];
