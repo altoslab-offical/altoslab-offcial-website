@@ -383,6 +383,12 @@ export function publishValidationForBlogPost(post: BlogPost) {
   if (!post.readTimeMinutes) errors.push("readTimeMinutes is required");
   if (!post.faqs.length) errors.push("at least one visible FAQ is required for GEO");
   if (post.generatedBy && !post.sourceLinks.length) errors.push("AI-generated posts require at least one source link");
+  if (post.generatedBy && post.coverSource !== "curated") {
+    errors.push("AI-generated posts require a topic-matched legally sourced cover before publishing");
+  }
+  if (post.generatedBy && post.coverSource === "curated" && !post.coverCredit) {
+    errors.push("AI-generated posts require cover attribution before publishing");
+  }
   if (
     post.generatedBy &&
     !post.qualityChecks.hasHumanReview &&

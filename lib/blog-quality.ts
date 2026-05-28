@@ -393,7 +393,7 @@ export function reviewImageFit(post: BlogPost): ReviewResult {
   if (!post.cover || !post.coverAlt) {
     issues.push("cover image and alt text are required");
   } else {
-    if (!isApprovedCoverUrl(post.cover)) issues.push("cover image must use an approved ALTOS LAB asset or Vercel Blob URL");
+    if (!isApprovedCoverUrl(post.cover)) issues.push("cover image must use an approved ALTOS LAB asset, Vercel Blob URL or open-licensed image URL");
     if (post.coverAlt.trim().length < 18) issues.push("cover alt text is too thin");
     if (post.generatedBy && post.coverSource !== "curated") {
       issues.push("AI generated articles require a topic-matched legally sourced cover before auto-publish");
