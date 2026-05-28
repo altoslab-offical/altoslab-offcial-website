@@ -3,6 +3,15 @@ import type { BlogPost, Project, SitePage } from "./types";
 
 export const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || "https://altoslab.com").replace(/\/$/, "");
 export const siteName = "ALTOS LAB";
+export const canonicalHost = new URL(siteUrl).host;
+
+const defaultAlternateHosts = [
+  `www.${canonicalHost.replace(/^www\./, "")}`,
+  "altoslab.com",
+  "www.altoslab.com",
+  "altoslab-offcial-website.vercel.app",
+  "altoslab-offcial-website-altoslaboffical-3015s-projects.vercel.app"
+];
 
 const verificationEnv = {
   google: "GOOGLE_SITE_VERIFICATION",
@@ -28,6 +37,21 @@ function escapeHtmlAttribute(value: string) {
 export function absoluteUrl(path = "/") {
   if (path.startsWith("http")) return path;
   return `${siteUrl}${path.startsWith("/") ? path : `/${path}`}`;
+}
+
+export function canonicalRedirectHosts() {
+  const configured = process.env.CANONICAL_REDIRECT_HOSTS?.split(",") || defaultAlternateHosts;
+  return Array.from(
+    new Set(
+      configured
+        .map((host) => host.trim().toLowerCase())
+        .filter((host) => host && host !== canonicalHost.toLowerCase())
+    )
+  );
+}
+
+export function shouldRedirectToCanonicalHost(host: string) {
+  return canonicalRedirectHosts().includes(host.split(":")[0].toLowerCase());
 }
 
 export function searchVerificationValues() {
@@ -83,12 +107,21 @@ export function organizationJsonLd() {
   return {
     "@context": "https://schema.org",
     "@type": "Organization",
+    "@id": `${siteUrl}/#organization`,
     name: siteName,
     url: siteUrl,
     email: "hello@altoslab.com",
+    logo: absoluteUrl("/geo-cover.png"),
+    image: absoluteUrl("/geo-cover.png"),
     description: "AI implementation lab and product studio for agents, automation, AI products, CMS, SEO/GEO content systems and applied AI research.",
     areaServed: ["Taiwan", "APAC"],
     knowsAbout: ["AI Agent", "AI product studio", "workflow automation", "AI operations", "SEO", "GEO", "generative AI"],
+    contactPoint: {
+      "@type": "ContactPoint",
+      email: "hello@altoslab.com",
+      contactType: "business inquiries",
+      availableLanguage: ["zh-Hant", "en", "ja", "ko"]
+    },
     sameAs: ["https://github.com/altoslab-offical"]
   };
 }
@@ -97,14 +130,94 @@ export function websiteJsonLd() {
   return {
     "@context": "https://schema.org",
     "@type": "WebSite",
+    "@id": `${siteUrl}/#website`,
     name: siteName,
     url: siteUrl,
+    publisher: { "@id": `${siteUrl}/#organization` },
     inLanguage: "zh-Hant-TW",
     potentialAction: {
       "@type": "SearchAction",
       target: `${siteUrl}/blog?query={search_term_string}`,
       "query-input": "required name=search_term_string"
     }
+  };
+}
+
+export function homepageWebPageJsonLd() {
+  return {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "@id": `${siteUrl}/#webpage`,
+    url: siteUrl,
+    name: "ALTOS LAB AI Studio 人工智慧工作室",
+    description:
+      "ALTOS LAB 深耕互聯網產品開發與 AI 系統整合，協助企業導入 AI Skill、AI Agent、系統串接、後台 CMS、SEO/GEO 內容系統與智能行銷。",
+    inLanguage: "zh-Hant-TW",
+    isPartOf: { "@id": `${siteUrl}/#website` },
+    about: { "@id": `${siteUrl}/#organization` },
+    primaryImageOfPage: absoluteUrl("/geo-cover.png")
+  };
+}
+
+export function professionalServiceJsonLd() {
+  const services = [
+    "AI product studio",
+    "AI agent implementation",
+    "Workflow automation",
+    "AI customer service systems",
+    "CMS and backoffice development",
+    "SEO/GEO content operations"
+  ];
+
+  return {
+    "@context": "https://schema.org",
+    "@type": "ProfessionalService",
+    "@id": `${siteUrl}/#professional-service`,
+    name: siteName,
+    url: siteUrl,
+    image: absoluteUrl("/geo-cover.png"),
+    areaServed: ["Taiwan", "APAC"],
+    priceRange: "$$",
+    provider: { "@id": `${siteUrl}/#organization` },
+    serviceType: services,
+    hasOfferCatalog: {
+      "@type": "OfferCatalog",
+      name: "ALTOS LAB AI implementation services",
+      itemListElement: services.map((service) => ({
+        "@type": "Offer",
+        itemOffered: {
+          "@type": "Service",
+          name: service,
+          provider: { "@id": `${siteUrl}/#organization` }
+        }
+      }))
+    }
+  };
+}
+
+export function blogIndexItemListJsonLd(posts: BlogPost[], url: string, name: string) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name,
+    url: absoluteUrl(url),
+    numberOfItems: posts.length,
+    itemListElement: posts.slice(0, 20).map((post, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      url: absoluteUrl(blogPostPath(post)),
+      item: {
+        "@type": "BlogPosting",
+        headline: post.title,
+        description: post.seoDescription || post.excerpt,
+        image: absoluteUrl(post.cover || blogCoverForLanguage(post.language)),
+        datePublished: post.publishedAt || post.createdAt,
+        dateModified: post.updatedAt,
+        author: { "@type": "Organization", name: post.author || siteName },
+        publisher: { "@id": `${siteUrl}/#organization` },
+        inLanguage: htmlLanguage(post.language)
+      }
+    }))
   };
 }
 

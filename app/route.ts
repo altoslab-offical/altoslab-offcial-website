@@ -1,7 +1,13 @@
 import { readFile } from "fs/promises";
 import path from "path";
 import { gtmHeadSnippet, gtmNoScriptSnippet, homepageAnalyticsSnippet } from "@/lib/analytics";
-import { organizationJsonLd, searchVerificationMetaTags, websiteJsonLd } from "@/lib/seo";
+import {
+  homepageWebPageJsonLd,
+  organizationJsonLd,
+  professionalServiceJsonLd,
+  searchVerificationMetaTags,
+  websiteJsonLd
+} from "@/lib/seo";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -12,7 +18,7 @@ function withLaunchMetadata(html: string) {
   const description =
     "ALTOS LAB 深耕互聯網產品開發與 AI 系統整合，協助企業導入 AI Skill、AI Agent、系統串接與智能行銷。";
   const image = `${siteUrl}/geo-cover.png`;
-  const jsonLd = [organizationJsonLd(), websiteJsonLd()]
+  const jsonLd = [organizationJsonLd(), websiteJsonLd(), homepageWebPageJsonLd(), professionalServiceJsonLd()]
     .map(
       (data) =>
         `<script type="application/ld+json">${JSON.stringify(data).replace(/</g, "\\u003c")}</script>`

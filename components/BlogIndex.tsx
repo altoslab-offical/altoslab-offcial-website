@@ -6,7 +6,7 @@ import { SiteFooter } from "@/components/site/SiteFooter";
 import { SiteHeader } from "@/components/site/SiteHeader";
 import { BLOG_LANGUAGES, blogIndexPath, blogPostPath, languageShortLabel } from "@/lib/blog-utils";
 import { getPublishedBlogPostsByLanguage } from "@/lib/cms";
-import { breadcrumbJsonLd } from "@/lib/seo";
+import { blogIndexItemListJsonLd, breadcrumbJsonLd } from "@/lib/seo";
 import type { BlogLanguage } from "@/lib/types";
 
 type BlogIndexProps = {
@@ -39,6 +39,9 @@ const copy = {
     startHere: "先從這篇開始",
     postsLabel: "篇文章",
     topicsLabel: "個主題",
+    searchLabel: "搜尋文章",
+    searchPlaceholder: "搜尋 AI、Agent、GEO...",
+    searchSubmit: "搜尋",
     all: "全部",
     read: "閱讀文章",
     updated: "更新",
@@ -75,6 +78,9 @@ const copy = {
     startHere: "Start here",
     postsLabel: "posts",
     topicsLabel: "topics",
+    searchLabel: "Search articles",
+    searchPlaceholder: "Search AI, agents, GEO...",
+    searchSubmit: "Search",
     all: "All",
     read: "Read article",
     updated: "Updated",
@@ -112,6 +118,9 @@ const copy = {
     startHere: "まずはこちら",
     postsLabel: "記事",
     topicsLabel: "テーマ",
+    searchLabel: "記事を検索",
+    searchPlaceholder: "AI、Agent、GEO を検索...",
+    searchSubmit: "検索",
     all: "すべて",
     read: "読む",
     updated: "更新",
@@ -149,6 +158,9 @@ const copy = {
     startHere: "여기서 시작",
     postsLabel: "글",
     topicsLabel: "주제",
+    searchLabel: "글 검색",
+    searchPlaceholder: "AI, Agent, GEO 검색...",
+    searchSubmit: "검색",
     all: "전체",
     read: "읽기",
     updated: "업데이트",
@@ -211,6 +223,7 @@ export async function BlogIndex({ language, tag, query }: BlogIndexProps) {
             { name: "Blog", url: blogIndexPath(language) }
           ])}
         />
+        <JsonLd data={blogIndexItemListJsonLd(filtered, blogIndexPath(language), dictionary.title)} />
         <div className="blog-craft-layout">
           <aside className="blog-craft-sidebar" aria-label="Blog navigation">
             <div className="blog-craft-brand">
@@ -232,6 +245,22 @@ export async function BlogIndex({ language, tag, query }: BlogIndexProps) {
                 </Link>
               ))}
             </nav>
+
+            <form className="blog-craft-search blog-craft-search-sidebar" action={blogIndexPath(language)} role="search">
+              {normalizedTag ? <input type="hidden" name="tag" value={tag} /> : null}
+              <label className="sr-only" htmlFor={`blog-search-sidebar-${language}`}>
+                {dictionary.searchLabel}
+              </label>
+              <input
+                id={`blog-search-sidebar-${language}`}
+                name="query"
+                type="search"
+                defaultValue={query || ""}
+                placeholder={dictionary.searchPlaceholder}
+                autoComplete="off"
+              />
+              <button type="submit">{dictionary.searchSubmit}</button>
+            </form>
 
             <div className="blog-craft-sidebar-footer">
               <span>
@@ -256,6 +285,21 @@ export async function BlogIndex({ language, tag, query }: BlogIndexProps) {
                   <em>— {dictionary.mobileTopicDescription}</em>
                 </h2>
               </div>
+              <form className="blog-craft-search" action={blogIndexPath(language)} role="search">
+                {normalizedTag ? <input type="hidden" name="tag" value={tag} /> : null}
+                <label className="sr-only" htmlFor={`blog-search-${language}`}>
+                  {dictionary.searchLabel}
+                </label>
+                <input
+                  id={`blog-search-${language}`}
+                  name="query"
+                  type="search"
+                  defaultValue={query || ""}
+                  placeholder={dictionary.searchPlaceholder}
+                  autoComplete="off"
+                />
+                <button type="submit">{dictionary.searchSubmit}</button>
+              </form>
             </div>
 
             <div className="blog-craft-grid">

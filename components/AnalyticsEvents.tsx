@@ -55,7 +55,14 @@ export function AnalyticsEvent({ payload }: { payload: AnalyticsPayload }) {
 
 export function CtaAnalytics() {
   useEffect(() => {
-    document.documentElement.lang = window.location.pathname.startsWith("/en/") ? "en" : "zh-Hant-TW";
+    const path = window.location.pathname;
+    document.documentElement.lang = path.startsWith("/en/")
+      ? "en"
+      : path.startsWith("/ja/")
+        ? "ja"
+        : path.startsWith("/ko/")
+          ? "ko"
+          : "zh-Hant-TW";
 
     function onClick(event: MouseEvent) {
       const target = event.target instanceof Element ? event.target.closest("a[href], button") : null;

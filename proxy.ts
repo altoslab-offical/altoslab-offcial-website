@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { adminCookieName, getAdminSessionToken } from "./lib/auth";
+import { shouldRedirectToCanonicalHost, siteUrl } from "./lib/seo";
 
 function nextWithPathname(request: NextRequest) {
   const requestHeaders = new Headers(request.headers);
@@ -13,6 +14,17 @@ function nextWithPathname(request: NextRequest) {
 
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
+  const host = request.headers.get("host") || "";
+
+  if (
+    (request.method === "GET" || request.method === "HEAD") &&
+    !pathname.startsWith("/api/") &&
+    shouldRedirectToCanonicalHost(host)
+  ) {
+    const canonicalUrl = new URL(request.nextUrl.pathname + request.nextUrl.search, siteUrl);
+    return NextResponse.redirect(canonicalUrl, 308);
+  }
+
   const isAdminPage = pathname.startsWith("/admin");
   const isAdminApi = pathname.startsWith("/api/admin");
   const isPublicAuthRoute =
