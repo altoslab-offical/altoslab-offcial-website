@@ -2,6 +2,7 @@
 
 import type { FormEvent } from "react";
 import { useState } from "react";
+import { BrandText } from "@/components/BrandText";
 
 export default function AdminLoginPage() {
   const [password, setPassword] = useState("");
@@ -32,7 +33,9 @@ export default function AdminLoginPage() {
       <form className="login-card admin-form" onSubmit={login}>
         <div className="brand">
           <span className="brand-mark">A</span>
-          <span>ALTOS LAB Admin</span>
+          <span>
+            <BrandText /> Admin
+          </span>
         </div>
         <h1>管理後台登入</h1>
         <p className="muted">本機開發預設密碼為 altoslab-admin；正式環境請設定 ADMIN_PASSWORD。</p>

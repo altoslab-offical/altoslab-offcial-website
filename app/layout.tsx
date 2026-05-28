@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { GoogleTagManager } from "@next/third-parties/google";
 import { headers } from "next/headers";
-import { Inter, Noto_Sans_TC } from "next/font/google";
+import { Inter, Noto_Sans_TC, Space_Grotesk } from "next/font/google";
 import "./globals.css";
 import { CtaAnalytics } from "@/components/AnalyticsEvents";
 import { gtmId, isGtmConfigured } from "@/lib/analytics";
@@ -16,6 +16,12 @@ const inter = Inter({
 const notoSansTc = Noto_Sans_TC({
   subsets: ["latin"],
   variable: "--font-noto-tc",
+  display: "swap"
+});
+
+const spaceGrotesk = Space_Grotesk({
+  subsets: ["latin"],
+  variable: "--font-space-grotesk",
   display: "swap"
 });
 
@@ -79,7 +85,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const language = pathname.startsWith("/en") ? "en" : "zh-Hant-TW";
 
   return (
-    <html lang={language} className={`${inter.variable} ${notoSansTc.variable}`}>
+    <html lang={language} className={`${inter.variable} ${notoSansTc.variable} ${spaceGrotesk.variable}`}>
       <body>
         {children}
         <CtaAnalytics />

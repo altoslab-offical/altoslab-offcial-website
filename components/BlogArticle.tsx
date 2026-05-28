@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { AnalyticsEvent } from "@/components/AnalyticsEvents";
+import { renderBrandText } from "@/components/BrandText";
 import { JsonLd } from "@/components/JsonLd";
 import { RichText } from "@/components/RichText";
 import { SiteFooter } from "@/components/site/SiteFooter";
@@ -44,7 +45,7 @@ export async function BlogArticle({ post }: { post: BlogPost }) {
   return (
     <div className="site-home blog-site-shell">
       <SiteHeader />
-      <main className="blog-page">
+      <main className="blog-page blog-article-page">
         <AnalyticsEvent
           payload={{
             event: "blog_post_viewed",
@@ -77,22 +78,22 @@ export async function BlogArticle({ post }: { post: BlogPost }) {
             <p className="eyebrow">
               {post.tags.slice(0, 3).join(" / ")} · {dictionary.readTime(post.readTimeMinutes)}
             </p>
-            <h1>{post.title}</h1>
+            <h1>{renderBrandText(post.title)}</h1>
             <div className="article-meta">
-              <span>{post.author}</span>
+              <span>{renderBrandText(post.author)}</span>
               <span>
                 {dictionary.updated} {new Date(post.updatedAt).toLocaleDateString(locale)}
               </span>
               <span>{languageLabel(post.language)}</span>
             </div>
-            <p className="hero-copy">{post.excerpt}</p>
+            <p className="hero-copy">{renderBrandText(post.excerpt)}</p>
             {post.cover ? (
               <img className="article-cover" src={post.cover} alt={post.coverAlt || `${post.title} cover`} />
             ) : null}
           </header>
 
           <aside className="geo-summary">
-            <strong>{dictionary.geoSummary}:</strong> {post.geoSummary}
+            <strong>{dictionary.geoSummary}:</strong> {renderBrandText(post.geoSummary)}
           </aside>
 
           {post.keyTakeaways.length ? (
@@ -100,7 +101,7 @@ export async function BlogArticle({ post }: { post: BlogPost }) {
               <p className="eyebrow">{dictionary.takeaways}</p>
               <ul>
                 {post.keyTakeaways.map((item) => (
-                  <li key={item}>{item}</li>
+                  <li key={item}>{renderBrandText(item)}</li>
                 ))}
               </ul>
             </section>
@@ -115,9 +116,9 @@ export async function BlogArticle({ post }: { post: BlogPost }) {
                 {post.sourceLinks.map((source) => (
                   <li key={source.url}>
                     <a href={source.url} target="_blank" rel="noreferrer">
-                      {source.title}
+                      {renderBrandText(source.title)}
                     </a>
-                    {source.publisher ? <span> · {source.publisher}</span> : null}
+                    {source.publisher ? <span> · {renderBrandText(source.publisher)}</span> : null}
                   </li>
                 ))}
               </ul>
@@ -132,7 +133,7 @@ export async function BlogArticle({ post }: { post: BlogPost }) {
                 {post.faqs.map((faq) => (
                   <article className="faq-item" key={faq.question}>
                     <h3>{faq.question}</h3>
-                    <p>{faq.answer}</p>
+                    <p>{renderBrandText(faq.answer)}</p>
                   </article>
                 ))}
               </div>
@@ -141,14 +142,14 @@ export async function BlogArticle({ post }: { post: BlogPost }) {
 
           {post.aiDisclosure ? (
             <aside className="ai-disclosure">
-              <strong>{dictionary.disclosure}:</strong> {post.aiDisclosure}
+              <strong>{dictionary.disclosure}:</strong> {renderBrandText(post.aiDisclosure)}
             </aside>
           ) : null}
 
           <section className="blog-cta-panel">
             <h2>{dictionary.ctaTitle}</h2>
             <Link className="button primary" href="/#contact">
-              {dictionary.cta}
+              {renderBrandText(dictionary.cta)}
             </Link>
           </section>
         </article>

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ArrowUpRight } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import { BrandText } from "@/components/BrandText";
 import { homeNavigation } from "@/lib/site-content";
 import type { BlogLanguage } from "@/lib/types";
 
@@ -66,7 +67,7 @@ export function SiteHeader() {
   return (
     <header className="site-nav">
       <Link className="site-logo" href="/" aria-label="ALTOS LAB home">
-        <span>ALTOS LAB</span>
+        <BrandText />
       </Link>
       <nav aria-label="Main navigation">
         {navigation.map((item) => (

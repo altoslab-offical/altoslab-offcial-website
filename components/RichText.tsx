@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { renderBrandText } from "@/components/BrandText";
 
 export function RichText({ text }: { text: string }) {
   const lines = text.split("\n").map((line) => line.trim());
@@ -10,7 +11,7 @@ export function RichText({ text }: { text: string }) {
     const parts = value.split(/(\*\*[^*]+\*\*)/g).filter(Boolean);
     return parts.map((part, index) => {
       const strong = part.match(/^\*\*([^*]+)\*\*$/);
-      return strong ? <strong key={`${part}-${index}`}>{strong[1]}</strong> : part;
+      return strong ? <strong key={`${part}-${index}`}>{renderBrandText(strong[1])}</strong> : renderBrandText(part);
     });
   }
 

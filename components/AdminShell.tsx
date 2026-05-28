@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { sendAnalyticsEvent } from "@/components/AnalyticsEvents";
+import { BrandText, renderBrandText } from "@/components/BrandText";
 import {
   CalendarClock,
   CheckCircle2,
@@ -481,7 +482,9 @@ export function AdminShell({ initialTab = "dashboard" }: AdminShellProps) {
         <div className="admin-header-inner">
           <Link className="brand" href="/">
             <span className="brand-mark">A</span>
-            <span>ALTOS LAB 後台</span>
+            <span>
+              <BrandText /> 後台
+            </span>
           </Link>
           <button className="button" onClick={logout} type="button">
             <LogOut size={16} />
@@ -749,7 +752,7 @@ export function AdminShell({ initialTab = "dashboard" }: AdminShellProps) {
                 <ImageIcon size={17} />
                 <div>
                   <strong>圖文完整</strong>
-                  <span>自動草稿會套用 ALTOS LAB 自有封面素材與 alt text</span>
+                  <span>{renderBrandText("自動草稿會套用 ALTOS LAB 自有封面素材與 alt text")}</span>
                 </div>
               </article>
             </div>
