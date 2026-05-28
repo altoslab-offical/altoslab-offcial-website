@@ -783,22 +783,24 @@ Quality rules:
 - The article must be an original ALTOS LAB synthesis: summarize facts in your own words, cite the source URLs, and add implementation judgment.
 - Make readers feel ALTOS LAB is a serious lab: source-grounded, practical, original, careful with uncertainty and useful for decision makers.
 - Every article needs one fresh angle: a counterintuitive point, implementation framework, case breakdown, risk warning or decision matrix.
+- Use a sharp title pattern: specific source/event/question + operator implication + ALTOS LAB framework. Never use generic titles like "AI platform trends", "search visibility and executive decisions", "what business leaders need to know", "不可忽視", "必須關注" or "關鍵轉變".
 - Anti-slop style gate: cut throat-clearing openers, do not announce "this article will", avoid "not X but Y" structures, avoid generic hype words, use concrete actors and actions, vary sentence rhythm, and remove empty transitions.
 - Sound like a sharp lab editor. Specific claims beat polished slogans.
 - Do not invent client names, statistics, dates or source claims.
 - Any claim tied to a trend must be supported by sourceLinks.
-- The first 50 words must directly answer the search intent.
+- The first 50 words must directly answer the search intent with concrete entities and an operator decision. Do not begin with "本文", "這篇文章", "In this article", "This article", "we will", "この記事では", or "이 글에서는".
 - seoDescription must be 80-150 characters.
 - excerpt must be 80-160 characters.
 - geoSummary must be 120-220 characters.
 - keyTakeaways must contain 4 concrete, non-generic bullets.
 - faqs must contain 3-5 visible questions and answers covered by the article.
 - sourceLinks must reuse only the URLs listed in Sources.
-- Body must use 4-6 Markdown H2 headings and practical paragraphs.
+- Body must use 4-6 Markdown H2 headings and practical paragraphs. At least one H2 must be an "ALTOS LAB" lab judgment or point-of-view section.
 - ${bodyLengthRule}
 - If contentType is "feature", include one Markdown comparison table and one step-by-step framework.
-- If contentType is "column", answer one concrete operator question and include tradeoffs plus next steps.
+- If contentType is "column", answer one concrete operator question and include tradeoffs, a decision table or numbered operator framework, plus next steps.
 - If contentType is "breaking", keep it timely and factual: what happened, why it matters, what remains uncertain, sources.
+- Cover image metadata must be topic-specific: write coverAlt/visual language around the article's concrete subject, not generic dashboards, team meetings, server rooms or workspaces.
 - Keep status/review fields out of the JSON; the CMS will set them.`;
   }
 
@@ -837,6 +839,7 @@ Preserve the same source URLs, same contentType, same newsCategory, same transla
 Do not invent clients, private data, statistics or dates.
 Make ALTOS LAB sound like a serious AI implementation lab and product studio, not only an SEO/GEO tool.
 Remove AI-slop patterns: throat-clearing, generic hype, passive voice, "not X but Y" contrasts, meta transitions, repeated sentence rhythm and vague claims. Keep the article specific and source-grounded.
+Reject generic trend framing. The repaired title must contain a concrete question, framework, source-backed event or operator decision. The opening must answer the query immediately and one section must state ALTOS LAB's lab judgment.
 
 Language: ${post.language}
 Content type: ${post.contentType || contentTypeFromInput(input)}

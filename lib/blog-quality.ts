@@ -94,6 +94,10 @@ const defaultTrustedHostFragments = [
   "notion.com",
   "stripe.com",
   "microsoft.com",
+  "ibm.com",
+  "newsroom.ibm.com",
+  "artificialanalysis.ai",
+  "cisco.com",
   "github.blog",
   "nvidia.com",
   "semianalysis.com",
@@ -128,10 +132,29 @@ const blockedPhrases = [
   "as an ai language model",
   "i cannot browse",
   "quickly understand the latest",
+  "cuts through the hype",
+  "what business leaders need to know",
+  "business leaders can no longer ignore",
+  "in today's fast-paced",
+  "in the rapidly evolving",
   "我無法瀏覽",
   "作為一個 ai",
   "作為一個 AI",
-  "人工智慧語言模型"
+  "人工智慧語言模型",
+  "本文將",
+  "本文會",
+  "本文整理",
+  "這篇文章將",
+  "這篇文章會",
+  "高階主管必須關注",
+  "企業不可忽視"
+];
+
+const genericTitlePatterns = [
+  /AI 平台趨勢.*搜尋能見度.*高階主管/i,
+  /AI Platform Trends.*Search Visibility.*Executive Implementation Decisions/i,
+  /What Business Leaders Need to Know Now/i,
+  /不可忽視|必須關注|關鍵轉變|latest AI trends|business leaders need to know/i
 ];
 
 const labsSignals = [
@@ -162,20 +185,42 @@ const creativeSignals = [
   "風險",
   "矩陣",
   "案例",
+  "清單",
+  "評估",
+  "試點",
+  "實驗室判斷",
+  "ALTOS LAB 判斷",
+  "ALTOS LAB 觀點",
   "method",
   "framework",
+  "playbook",
+  "scorecard",
+  "checklist",
+  "pilot",
   "tradeoff",
   "risk",
   "matrix",
   "case",
+  "Lab note",
+  "Lab POV",
   "counterintuitive",
   "フレームワーク",
   "リスク",
   "判断",
+  "チェックリスト",
+  "試験導入",
   "프레임워크",
   "리스크",
-  "판단"
+  "판단",
+  "체크리스트",
+  "파일럿"
 ];
+
+const labsPointOfViewPattern =
+  /(ALTOS LAB (判斷|觀點|實驗室筆記|implementation note|lab note|Lab note|Lab POV)|實驗室判斷|Lab POV|Lab note|ALTOS LAB の判断|ALTOS LAB 관점)/i;
+
+const genericCoverWords =
+  /(dashboard|analytics dashboard|team meeting|server room|workspace|generic|seo analytics|儀表板|會議|伺服器機房|ワークスペース|회의|서버룸)/i;
 
 const antiSlopRules: Array<{
   dimension: AntiSlopDimension;
@@ -428,8 +473,13 @@ export function reviewContentTypeFit(post: BlogPost): ReviewResult {
   if (contentType === "breaking") {
     if (body.length > 3600) warnings.push("breaking article may be too long for a fast news format");
   } else if (contentType === "column") {
+    const hasTable = /\|.+\|/.test(post.body);
+    const hasNumberedFramework = /(^|\n)\d+\.\s+\S+/.test(post.body);
     if (!creativeSignals.some((signal) => body.includes(signal))) {
       issues.push("column needs a clear angle, framework, tradeoff or decision lens");
+    }
+    if (!hasTable && !hasNumberedFramework) {
+      issues.push("column needs a visible decision table or numbered operator framework");
     }
   } else if (contentType === "feature") {
     const hasTable = /\|.+\|/.test(post.body);
@@ -483,6 +533,9 @@ export function reviewLabsPointOfView(post: BlogPost): ReviewResult {
 
   if (hitCount < 4) issues.push("article does not carry enough ALTOS LAB lab/product studio perspective");
   if (!/ALTOS LAB/i.test(text)) issues.push("article should name ALTOS LAB as the publishing lab");
+  if (!labsPointOfViewPattern.test(text)) {
+    issues.push("article needs a visible ALTOS LAB point-of-view section or lab judgment");
+  }
   if (lower.includes("seo") && lower.includes("geo") && hitCount < 6) {
     warnings.push("article risks sounding like an SEO/GEO tool page instead of a broader AI lab note");
   }
@@ -501,7 +554,10 @@ export function reviewCreativity(post: BlogPost): ReviewResult {
 
   if (hits.length < 2) issues.push("article needs a fresher angle: framework, risk lens, case breakdown or decision matrix");
   if (/最新|latest|trend|趨勢|トレンド|트렌드/i.test(post.title) && hits.length < 3) {
-    warnings.push("trend headline should be anchored by a more specific creative POV");
+    issues.push("trend headline should be anchored by a specific framework, source-backed claim or creative POV");
+  }
+  if (genericTitlePatterns.some((pattern) => pattern.test(post.title))) {
+    issues.push("title is too generic; anchor it to a specific question, framework or source-backed claim");
   }
 
   return reviewWeighted(10, issues, warnings);
@@ -520,7 +576,14 @@ function reviewSeoGeoStructure(post: BlogPost): ReviewResult {
   if (!post.excerpt || post.excerpt.length < 50) issues.push("excerpt is too thin");
   if (!post.geoSummary || post.geoSummary.length < 80) issues.push("geoSummary is too thin");
   if (!post.tags.length) issues.push("tags are required");
-  if (!firstAnswerBlock(post.body)) issues.push("body needs a direct answer opening");
+  const firstBlock = firstAnswerBlock(post.body);
+  if (!firstBlock) issues.push("body needs a direct answer opening");
+  if (/(本文|這篇文章|in this article|this article|we will|we'll|cuts through|この記事では|本稿では|이 글에서는|이번 글에서는)/i.test(firstBlock)) {
+    issues.push("opening must answer the query directly instead of introducing the article");
+  }
+  if (!/(ALTOS LAB|GEO|SEO|AI|Agent|agent|automation|workflow|導入|產品|流程|自動化|実装|運用|도입|자동화)/i.test(firstBlock)) {
+    issues.push("opening answer needs concrete entities, not a generic setup paragraph");
+  }
   if (post.geoSummary.includes("...")) issues.push("geoSummary should not contain truncation ellipsis");
   if (post.faqs.some((faq) => !faq.question || !faq.answer)) issues.push("FAQ entries must include question and answer");
   if (!post.author?.trim()) issues.push("author is required");
@@ -537,11 +600,15 @@ function reviewReadability(post: BlogPost): ReviewResult {
   const warnings: string[] = [];
   const body = plainText(post.body);
   const paragraphs = post.body.split(/\n{2,}/).map((item) => item.trim()).filter(Boolean);
+  const h2Titles = [...post.body.matchAll(/^##\s+(.+)$/gm)].map((match) => match[1]?.trim() || "");
 
   if (paragraphs.length < 4) issues.push("body needs more scannable paragraphs");
-  if (paragraphs.some((paragraph) => paragraph.length > 900)) warnings.push("some paragraphs are too long for mobile reading");
+  if (paragraphs.some((paragraph) => paragraph.length > 700)) warnings.push("some paragraphs are too long for mobile reading");
   if (body.length && post.excerpt && body.includes(post.excerpt) && post.excerpt.length > 180) {
     warnings.push("excerpt may be copied too directly into the article body");
+  }
+  if (h2Titles.length >= 3 && h2Titles.filter((title) => /^(趨勢|Trend|トレンド|트렌드)\s*[一二三四五\d]/i.test(title)).length >= 2) {
+    warnings.push("headings read like a generic trend list; use question, framework or decision headings");
   }
 
   return reviewWeighted(15, issues, warnings);
@@ -566,6 +633,9 @@ export function reviewImageFit(post: BlogPost): ReviewResult {
     const imageContext = `${post.coverAlt} ${post.coverPrompt || ""}`.toLowerCase();
     if (!topicWords.split(/\s+|、|\/|,|，/).some((word) => word.length > 2 && imageContext.includes(word))) {
       warnings.push("cover prompt or alt text should describe the article topic more clearly");
+    }
+    if (genericCoverWords.test(imageContext) && !/(agent|ai|geo|search|network|引用|搜尋|知識網路|エージェント|検索|에이전트|검색)/i.test(imageContext)) {
+      issues.push("cover image context is too generic for a quality SEO/GEO article");
     }
   }
 
