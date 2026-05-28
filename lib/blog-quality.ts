@@ -191,9 +191,16 @@ const creativeSignals = [
   "清單",
   "評估",
   "試點",
+  "市場訊號",
+  "來源脈絡",
+  "訊號圖",
+  "圖表",
+  "編輯台觀點",
+  "編輯筆記",
+  "現場筆記",
   "實驗室判斷",
-  "ALTOS LAB 判斷",
   "ALTOS LAB 觀點",
+  "ALTOS LAB 編輯",
   "method",
   "framework",
   "playbook",
@@ -204,23 +211,34 @@ const creativeSignals = [
   "risk",
   "matrix",
   "case",
+  "market signal",
+  "source trail",
+  "signal map",
+  "editorial read",
+  "field note",
   "Lab note",
   "Lab POV",
   "counterintuitive",
   "フレームワーク",
   "リスク",
   "判断",
+  "市場シグナル",
+  "編集メモ",
+  "シグナルマップ",
   "チェックリスト",
   "試験導入",
   "프레임워크",
   "리스크",
   "판단",
+  "시장 신호",
+  "편집 노트",
+  "시그널 맵",
   "체크리스트",
   "파일럿"
 ];
 
 const labsPointOfViewPattern =
-  /(ALTOS LAB (判斷|觀點|實驗室筆記|implementation note|lab note|Lab note|Lab POV)|實驗室判斷|Lab POV|Lab note|ALTOS LAB の判断|ALTOS LAB 관점)/i;
+  /(ALTOS LAB (判斷|觀點|編輯|現場筆記|實驗室筆記|implementation note|lab note|Lab note|Lab POV|editorial|field note)|實驗室判斷|編輯台觀點|編輯筆記|現場筆記|Lab POV|Lab note|editorial read|field note|ALTOS LAB編集|ALTOS LAB の判断|ALTOS LAB 편집|ALTOS LAB 관점)/i;
 
 const genericCoverWords =
   /(dashboard|analytics dashboard|team meeting|server room|workspace|generic|seo analytics|儀表板|會議|伺服器機房|ワークスペース|회의|서버룸)/i;
@@ -536,9 +554,7 @@ export function reviewLabsPointOfView(post: BlogPost): ReviewResult {
 
   if (hitCount < 4) issues.push("article does not carry enough ALTOS LAB lab/product studio perspective");
   if (!/ALTOS LAB/i.test(text)) issues.push("article should name ALTOS LAB as the publishing lab");
-  if (!labsPointOfViewPattern.test(text)) {
-    issues.push("article needs a visible ALTOS LAB point-of-view section or lab judgment");
-  }
+  if (!labsPointOfViewPattern.test(text)) warnings.push("article should make the publishing lab's editorial read visible without repeating a fixed heading");
   if (lower.includes("seo") && lower.includes("geo") && hitCount < 6) {
     warnings.push("article risks sounding like an SEO/GEO tool page instead of a broader AI lab note");
   }

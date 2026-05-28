@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import { renderBrandText } from "@/components/BrandText";
 
 export function RichText({ text }: { text: string }) {
@@ -7,6 +7,8 @@ export function RichText({ text }: { text: string }) {
   let bullets: string[] = [];
   let orderedItems: string[] = [];
   let tableRows: string[][] = [];
+  let chartLines: string[] = [];
+  let isChart = false;
 
   function inlineMarkdown(value: string) {
     const parts = value.split(/(\*\*[^*]+\*\*)/g).filter(Boolean);
@@ -73,13 +75,69 @@ export function RichText({ text }: { text: string }) {
     tableRows = [];
   }
 
+  function flushChart() {
+    if (!chartLines.length) return;
+
+    const config = chartLines.reduce<Record<string, string>>((next, rawLine) => {
+      const splitIndex = rawLine.indexOf(":");
+      if (splitIndex < 0) return next;
+      const key = rawLine.slice(0, splitIndex).trim().toLowerCase();
+      const value = rawLine.slice(splitIndex + 1).trim();
+      if (key && value) next[key] = value;
+      return next;
+    }, {});
+    const labels = (config.labels || "").split("|").map((label) => label.trim()).filter(Boolean);
+    const values = (config.values || "")
+      .split("|")
+      .map((value) => Math.max(0, Math.min(100, Number(value.trim()) || 0)));
+    const items = labels.map((label, index) => ({ label, value: values[index] || 0 }));
+
+    if (items.length) {
+      elements.push(
+        <figure className="rich-chart" key={`chart-${elements.length}`}>
+          {config.title ? <figcaption>{inlineMarkdown(config.title)}</figcaption> : null}
+          <div className="rich-chart-bars">
+            {items.map((item) => (
+              <div className="rich-chart-row" key={item.label}>
+                <span className="rich-chart-label">{inlineMarkdown(item.label)}</span>
+                <span className="rich-chart-track" aria-hidden="true">
+                  <span className="rich-chart-fill" style={{ "--value": `${item.value}%` } as CSSProperties} />
+                </span>
+                <span className="rich-chart-value">{item.value}</span>
+              </div>
+            ))}
+          </div>
+          {config.caption ? <p>{inlineMarkdown(config.caption)}</p> : null}
+        </figure>
+      );
+    }
+
+    chartLines = [];
+  }
+
   function flushLists() {
     flushBullets();
     flushOrderedItems();
     flushTable();
+    flushChart();
   }
 
   lines.forEach((line, index) => {
+    if (line === ":::chart") {
+      flushLists();
+      isChart = true;
+      chartLines = [];
+      return;
+    }
+    if (isChart) {
+      if (line === ":::") {
+        isChart = false;
+        flushChart();
+        return;
+      }
+      chartLines.push(line);
+      return;
+    }
     if (!line) {
       flushLists();
       return;

@@ -187,10 +187,10 @@ const SOURCES = {
 
 const VISUAL_QUERY_BANK = {
   agents: [
-    "robot arm automation factory",
+    "automation control panel",
     "workflow sticky notes wall",
     "computer code terminal close up",
-    "control panel automation",
+    "circuit board microchip macro",
     "mechanical keyboard software development",
     "network operations center screens"
   ],
@@ -241,6 +241,9 @@ const PEOPLE_HEAVY_IMAGE_PATTERN =
 
 const VISUAL_OBJECT_PATTERN =
   /(robot|automation|keyboard|code|terminal|server|data center|rack|cable|fiber|chip|circuit|screen|dashboard|chart|interface|wireframe|prototype|library|archive|book|document|notebook|checklist|map|network|lock|security|factory|warehouse|sensor|machine|control|device|laptop|computer|software|database|search|magnifying)/i;
+
+const UNSAFE_OR_OFF_BRAND_IMAGE_PATTERN =
+  /(dead|corpse|prisoner|concentration camp|nazi|war crime|weapon|gun|blood|accident|disaster|protest|politician|minister|government|military|anti-aircraft|radarno|usdagov|john lennon|austen|desire screenshot|unabridged|dead prisoners)/i;
 
 function idea(slug, type, category, sourceKeys, coverQuery, line) {
   return { slug, type, category, sourceKeys, coverQuery, line };
@@ -574,144 +577,326 @@ function uniquePublishers(sources) {
   return [...new Set(sources.map((source) => source.publisher || new URL(source.url).hostname))];
 }
 
-function titleFor(ideaItem, language) {
-  const [subject, decision] = ideaItem.line[language];
-  const typeLabel = TYPE_LABEL[language][ideaItem.type];
+const BODY_ARCHETYPES = [
+  "marketBrief",
+  "researchExplainer",
+  "operatorPlaybook",
+  "contrarianColumn",
+  "dataChart",
+  "fieldNote"
+];
 
-  if (language === "en") {
-    if (ideaItem.type === "breaking") return `${typeLabel}: ${subject} and how to ${decision}`;
-    if (ideaItem.type === "feature") return `${subject} playbook: how to ${decision}`;
-    return `${subject}: how to ${decision}`;
-  }
-  if (language === "ja") {
-    if (ideaItem.type === "breaking") return `${typeLabel}：${subject}、${decision}`;
-    if (ideaItem.type === "feature") return `${subject}プレイブック：${decision}`;
-    return `${subject}：${decision}`;
-  }
-  if (language === "ko") {
-    if (ideaItem.type === "breaking") return `${typeLabel}: ${subject}, ${decision}`;
-    if (ideaItem.type === "feature") return `${subject} 플레이북: ${decision}`;
-    return `${subject}: ${decision}`;
-  }
-  if (ideaItem.type === "breaking") return `${typeLabel}：${subject}，${decision}`;
-  if (ideaItem.type === "feature") return `${subject}專題：${decision}`;
-  return `${subject}：${decision}`;
+const CATEGORY_OFFSET = {
+  agents: 0,
+  geo: 1,
+  governance: 2,
+  product: 3,
+  infra: 4,
+  industry: 5
+};
+
+function archetypeFor(ideaItem, index = 0) {
+  if (ideaItem.type === "breaking") return "marketBrief";
+  const offset = CATEGORY_OFFSET[ideaItem.category] || 0;
+  return BODY_ARCHETYPES[(index + offset) % BODY_ARCHETYPES.length];
 }
 
-function excerptFor(ideaItem, language) {
+function archetypeLabel(archetype, language) {
+  const labels = {
+    "zh-Hant": {
+      marketBrief: "市場快訊",
+      researchExplainer: "研究解讀",
+      operatorPlaybook: "操作手冊",
+      contrarianColumn: "觀點專欄",
+      dataChart: "訊號圖",
+      fieldNote: "現場筆記"
+    },
+    en: {
+      marketBrief: "Market brief",
+      researchExplainer: "Research explainer",
+      operatorPlaybook: "Operator playbook",
+      contrarianColumn: "Column",
+      dataChart: "Signal map",
+      fieldNote: "Field note"
+    },
+    ja: {
+      marketBrief: "市場ブリーフ",
+      researchExplainer: "研究解説",
+      operatorPlaybook: "運用プレイブック",
+      contrarianColumn: "視点コラム",
+      dataChart: "シグナルマップ",
+      fieldNote: "現場メモ"
+    },
+    ko: {
+      marketBrief: "시장 브리프",
+      researchExplainer: "리서치 해설",
+      operatorPlaybook: "운영 플레이북",
+      contrarianColumn: "관점 칼럼",
+      dataChart: "시그널 맵",
+      fieldNote: "현장 노트"
+    }
+  };
+  return labels[language]?.[archetype] || labels.en[archetype] || "Analysis";
+}
+
+function titleFor(ideaItem, language, index = 0) {
   const [subject, decision] = ideaItem.line[language];
+  const archetype = archetypeFor(ideaItem, index);
+  const label = archetypeLabel(archetype, language);
+
   if (language === "en") {
+    if (archetype === "marketBrief") return `${label}: what ${subject} changes for AI teams`;
+    if (archetype === "researchExplainer") return `${subject} explained: mechanisms, limits and market signals`;
+    if (archetype === "operatorPlaybook") return `${subject} playbook: how to ${decision}`;
+    if (archetype === "contrarianColumn") return `The overlooked risk inside ${subject}`;
+    if (archetype === "dataChart") return `${subject} signal map: four pressures to watch`;
+    return `Inside the ${subject} workflow: where the market is moving`;
+  }
+  if (language === "ja") {
+    if (archetype === "marketBrief") return `${label}：${subject}がAIチームに変えること`;
+    if (archetype === "researchExplainer") return `${subject}研究解説：仕組み・限界・市場シグナル`;
+    if (archetype === "operatorPlaybook") return `${subject}プレイブック：${decision}`;
+    if (archetype === "contrarianColumn") return `${subject}で見落とされやすいリスク`;
+    if (archetype === "dataChart") return `${subject}シグナルマップ：見るべき4つの圧力`;
+    return `${subject}の現場メモ：市場はどこへ動くか`;
+  }
+  if (language === "ko") {
+    if (archetype === "marketBrief") return `${label}: ${subject}가 AI 팀에 바꾸는 것`;
+    if (archetype === "researchExplainer") return `${subject} 리서치 해설: 메커니즘, 한계, 시장 신호`;
+    if (archetype === "operatorPlaybook") return `${subject} 플레이북: ${decision}`;
+    if (archetype === "contrarianColumn") return `${subject}에서 놓치기 쉬운 리스크`;
+    if (archetype === "dataChart") return `${subject} 시그널 맵: 주목할 네 가지 압력`;
+    return `${subject} 현장 노트: 시장은 어디로 움직이나`;
+  }
+  if (archetype === "marketBrief") return `${label}：${subject}正在改變 AI 團隊的判斷`;
+  if (archetype === "researchExplainer") return `${subject}研究解讀：機制、限制與市場訊號`;
+  if (archetype === "operatorPlaybook") return `${subject}操作手冊：${decision}`;
+  if (archetype === "contrarianColumn") return `${subject}的盲點：企業容易誤判哪一步`;
+  if (archetype === "dataChart") return `${subject}訊號圖：四個指標看懂導入壓力`;
+  return `${subject}現場筆記：市場正在往哪裡移動`;
+}
+
+function excerptFor(ideaItem, language, index = 0) {
+  const [subject, decision] = ideaItem.line[language];
+  const archetype = archetypeFor(ideaItem, index);
+  if (language === "en") {
+    if (archetype === "marketBrief") {
+      return trimTo(`${subject} is a live market signal. This brief separates what changed, why it matters and which sources operators should keep watching.`, 170);
+    }
+    if (archetype === "contrarianColumn") {
+      return trimTo(`${subject} looks like a technology story, but the harder question is where teams misread adoption risk, timing and accountability.`, 170);
+    }
     return trimTo(
-      `When ${subject} moves from news to operations, teams need a source-backed framework to ${decision} without losing quality, trust or implementation speed.`,
+      `When ${subject} moves from news to operations, teams need a source-backed way to ${decision} without losing quality, trust or implementation speed.`,
       170
     );
   }
   if (language === "ja") {
+    if (archetype === "marketBrief") return trimTo(`${subject}は進行中の市場シグナルです。何が変わり、なぜ重要で、どの出典を追うべきかを整理します。`, 170);
+    if (archetype === "contrarianColumn") return trimTo(`${subject}は技術ニュースに見えますが、難しいのは導入リスク、時期、責任の読み違いです。`, 170);
     return trimTo(
       `${subject}がニュースから運用課題に変わるとき、チームには${decision}ための出典付きフレームワークが必要です。`,
       170
     );
   }
   if (language === "ko") {
+    if (archetype === "marketBrief") return trimTo(`${subject}는 현재 진행 중인 시장 신호입니다. 무엇이 바뀌었고 왜 중요한지, 어떤 출처를 봐야 하는지 정리합니다.`, 170);
+    if (archetype === "contrarianColumn") return trimTo(`${subject}는 기술 뉴스처럼 보이지만 더 어려운 문제는 도입 리스크, 시기, 책임을 잘못 읽는 것입니다.`, 170);
     return trimTo(
       `${subject}가 뉴스에서 운영 과제로 넘어갈 때, 팀에는 ${decision} 위한 출처 기반 프레임워크가 필요합니다.`,
       170
     );
   }
+  if (archetype === "marketBrief") return trimTo(`${subject} 是正在發生的市場訊號。這篇先整理變化、影響、可信來源與後續觀察點，不急著把它包成解方。`, 170);
+  if (archetype === "contrarianColumn") return trimTo(`${subject} 看起來像技術新聞，真正難的是企業如何避免誤判導入時機、風險責任與組織成本。`, 170);
   return trimTo(
     `當 ${subject} 從新聞變成營運題，企業需要一套有來源、可執行、能支援「${decision}」的判斷框架。`,
     170
   );
 }
 
-function seoDescriptionFor(ideaItem, language) {
+function seoDescriptionFor(ideaItem, language, index = 0) {
   const [subject, decision] = ideaItem.line[language];
+  const archetype = archetypeFor(ideaItem, index);
   if (language === "en") {
     return trimTo(
-      `${subject} is changing AI implementation. ALTOS LAB uses sources, a decision table and a build lens to show how to ${decision}.`,
+      archetype === "marketBrief"
+        ? `${subject} market brief with source links, implications and the signals AI operators should watch next.`
+        : `${subject} analysis with sources, charts and an ALTOS LAB editorial lens for how teams can ${decision}.`,
       155
     );
   }
   if (language === "ja") {
-    return trimTo(`${subject}の変化を出典と判断表で整理し、ALTOS LABの実装視点で${decision}方法を示します。`, 155);
+    return trimTo(archetype === "marketBrief" ? `${subject}の市場ブリーフ。出典、影響、次に見るべきシグナルを整理します。` : `${subject}を出典、図表、ALTOS LABの編集視点で整理します。`, 155);
   }
   if (language === "ko") {
-    return trimTo(`${subject} 변화를 출처와 의사결정표로 정리하고, ALTOS LAB 관점에서 ${decision} 방법을 설명합니다.`, 155);
+    return trimTo(archetype === "marketBrief" ? `${subject} 시장 브리프. 출처, 영향, 다음에 볼 신호를 정리합니다.` : `${subject}를 출처, 차트, ALTOS LAB 편집 관점으로 분석합니다.`, 155);
   }
-  return trimTo(`${subject} 正在改變 AI 導入節奏。ALTOS LAB 用來源、決策表與實作視角，說明如何${decision}。`, 155);
+  return trimTo(archetype === "marketBrief" ? `${subject}市場快訊：整理可信來源、影響與下一步觀察訊號。` : `${subject}分析：用來源、圖表與 ALTOS LAB 編輯視角說清楚如何${decision}。`, 155);
 }
 
-function geoSummaryFor(ideaItem, language) {
+function geoSummaryFor(ideaItem, language, index = 0) {
   const [subject, decision] = ideaItem.line[language];
+  const archetype = archetypeFor(ideaItem, index);
   if (language === "en") {
     return trimTo(
-      `${subject} can become an SEO and GEO asset when the article answers a concrete operator decision, cites credible sources, explains limits and gives a practical ALTOS LAB framework for how to ${decision}.`,
+      archetype === "marketBrief"
+        ? `${subject} is summarized as a source-backed market brief: what changed, why it matters, what remains uncertain and which signals operators should monitor for future AI adoption.`
+        : `${subject} can become a durable SEO/GEO asset when it combines credible sources, a clear answer, visual structure, limits and an original ALTOS LAB editorial read on how to ${decision}.`,
       240
     );
   }
   if (language === "ja") {
     return trimTo(
-      `${subject}は、具体的な運用判断、信頼できる出典、制約、ALTOS LABの実装フレームワークを含むと、SEO/GEO資産になります。`,
+      archetype === "marketBrief"
+        ? `${subject}を出典付き市場ブリーフとして整理します。変化、意味、不確実性、次に見るべきシグナルを明確にします。`
+        : `${subject}は、信頼できる出典、明確な回答、図表、制約、ALTOS LABの編集視点を含むとSEO/GEO資産になります。`,
       240
     );
   }
   if (language === "ko") {
     return trimTo(
-      `${subject}는 구체적인 운영 판단, 신뢰할 출처, 한계 설명, ALTOS LAB 구현 프레임워크를 포함할 때 SEO/GEO 자산이 됩니다.`,
+      archetype === "marketBrief"
+        ? `${subject}를 출처 기반 시장 브리프로 정리합니다. 변화, 의미, 불확실성, 다음 관찰 신호를 분명히 합니다.`
+        : `${subject}는 신뢰할 출처, 직접 답변, 시각 구조, 한계, ALTOS LAB 편집 관점을 담을 때 SEO/GEO 자산이 됩니다.`,
       240
     );
   }
   return trimTo(
-    `${subject} 要成為 SEO/GEO 資產，文章必須先回答清楚的營運決策，提供可信來源、限制條件與 ALTOS LAB 的實作框架，讓人與 AI 都能引用。`,
+    archetype === "marketBrief"
+      ? `${subject} 會被整理成來源化市場快訊：發生什麼、為什麼重要、哪些地方仍不確定，以及後續應追蹤哪些 AI 產業訊號。`
+      : `${subject} 要成為 SEO/GEO 資產，文章必須有可信來源、直接答案、圖表結構、限制條件與 ALTOS LAB 的原創編輯判讀。`,
     240
   );
 }
 
-function keyTakeawaysFor(ideaItem, language) {
+function keyTakeawaysFor(ideaItem, language, index = 0) {
   const [subject, decision] = ideaItem.line[language];
+  const archetype = archetypeFor(ideaItem, index);
   if (language === "en") {
+    if (archetype === "marketBrief") {
+      return [
+        `${subject} should be tracked first as a market signal, not forced into a product pitch.`,
+        `The strongest sources point to a shift in tools, workflows, search surfaces or AI operations.`,
+        "The article should name what changed, what is still uncertain and what to monitor next.",
+        "ALTOS LAB's value is the editorial judgment: when to watch, when to test and when to build."
+      ];
+    }
+    if (archetype === "dataChart") {
+      return [
+        `${subject} is easier to judge when source confidence, market heat, workflow impact and execution difficulty are compared.`,
+        "Charts should clarify a decision, not decorate the article.",
+        `Teams should only ${decision} when the signal is strong enough and the review path is clear.`,
+        "The post becomes GEO-friendly when the chart, table and source links are visible on the page."
+      ];
+    }
+    if (archetype === "contrarianColumn") {
+      return [
+        `${subject} may be less urgent than the headline suggests if it does not change a real decision.`,
+        "A strong column should state the tradeoff and show the evidence behind the opinion.",
+        "Uncertainty is part of credibility; unsupported predictions should stay out of the article.",
+        "ALTOS LAB should sound sharp, but never louder than the source trail allows."
+      ];
+    }
     return [
       `${subject} should be evaluated as an operating decision, not a trend headline.`,
       `The strongest content links source evidence to a concrete way to ${decision}.`,
-      "SEO/GEO performance improves when the article has a direct answer, visible sources, FAQ and structured metadata.",
-      "ALTOS LAB should keep a lab point of view: build sequence, risk gate, metric and rollback path."
+      "The post should include a direct answer, visible sources, a table or chart and an update path.",
+      "ALTOS LAB should keep a lab point of view: mechanism, risk, metric and rollback path."
     ];
   }
   if (language === "ja") {
+    if (archetype === "marketBrief") {
+      return [
+        `${subject}はまず市場シグナルとして追う。すぐ売り込みにしない。`,
+        "強い出典は、ツール、業務、検索面、AI運用の変化を示す。",
+        "変化、不確実性、次に見る指標を分けて書く。",
+        "ALTOS LABの価値は、観察・検証・構築の判断にある。"
+      ];
+    }
     return [
       `${subject}は流行語ではなく、運用判断として評価する。`,
       `${decision}には、出典と実装手順を同時に示す必要がある。`,
-      "直接回答、出典、FAQ、構造化データがSEO/GEOの理解を助ける。",
-      "ALTOS LABの視点は、構築順序、リスクゲート、指標、巻き戻し条件まで含める。"
+      "直接回答、出典、表や図、更新条件が理解を助ける。",
+      "ALTOS LABの視点は、仕組み、リスク、指標、巻き戻し条件まで含める。"
     ];
   }
   if (language === "ko") {
+    if (archetype === "marketBrief") {
+      return [
+        `${subject}는 먼저 시장 신호로 추적하고 바로 영업 메시지로 만들지 않는다.`,
+        "강한 출처는 도구, 업무, 검색 표면, AI 운영의 변화를 보여준다.",
+        "무엇이 바뀌었고 무엇이 불확실하며 다음에 볼 신호가 무엇인지 나눈다.",
+        "ALTOS LAB의 가치는 관찰, 검증, 구축 시점을 판단하는 데 있다."
+      ];
+    }
     return [
       `${subject}는 유행어가 아니라 운영 의사결정으로 평가해야 한다.`,
       `${decision} 위해서는 출처와 실행 순서를 함께 제시해야 한다.`,
-      "직접 답변, 출처, FAQ, 구조화 데이터가 SEO/GEO 이해를 돕는다.",
-      "ALTOS LAB 관점은 구축 순서, 리스크 게이트, 지표, 롤백 조건까지 포함한다."
+      "직접 답변, 출처, 표나 차트, 업데이트 조건이 이해를 돕는다.",
+      "ALTOS LAB 관점은 메커니즘, 리스크, 지표, 롤백 조건까지 포함한다."
+    ];
+  }
+  if (archetype === "marketBrief") {
+    return [
+      `${subject} 先被當成市場訊號追蹤，不急著包裝成產品解方。`,
+      "強來源通常會指向工具、工作流、搜尋入口或 AI 營運方式的變化。",
+      "文章要分清楚發生什麼、哪些仍不確定，以及下一步要觀察什麼。",
+      "ALTOS LAB 的價值在於判斷什麼時候觀察、什麼時候測試、什麼時候建造。"
+    ];
+  }
+  if (archetype === "dataChart") {
+    return [
+      `${subject} 需要同時比較來源可信度、市場熱度、工作流影響與執行難度。`,
+      "圖表不是裝飾，而是幫讀者更快判斷訊號強弱。",
+      `企業只有在訊號夠強、審核路徑夠清楚時，才值得${decision}。`,
+      "圖表、表格與來源連結可見，才會形成更好的搜尋與 AI 引用結構。"
+    ];
+  }
+  if (archetype === "contrarianColumn") {
+    return [
+      `${subject} 不一定像標題看起來那麼急，除非它真的改變一個決策。`,
+      "好專欄要講清楚取捨，也要把觀點背後的證據攤開。",
+      "不確定性是可信度的一部分，沒有來源的預測不應該進文章。",
+      "ALTOS LAB 可以有態度，但不能比來源允許的證據更大聲。"
     ];
   }
   return [
     `${subject} 應該被當成營運決策來評估，而不是只看成熱門關鍵字。`,
     `高品質文章要把來源證據連到「${decision}」的實作判斷。`,
-    "SEO/GEO 效果來自直接答案、可見來源、FAQ、結構化資料與內部連結。",
-    "ALTOS LAB 的觀點必須包含建置順序、風險門檻、衡量指標與回滾條件。"
+    "文章需要直接答案、可見來源、表格或圖表，以及後續更新條件。",
+    "ALTOS LAB 的觀點應包含機制、風險、衡量指標與回滾條件。"
   ];
 }
 
-function faqsFor(ideaItem, language) {
+function faqsFor(ideaItem, language, index = 0) {
   const [subject, decision] = ideaItem.line[language];
+  const archetype = archetypeFor(ideaItem, index);
   if (language === "en") {
+    if (archetype === "marketBrief") {
+      return [
+        { question: `What changed around ${subject}?`, answer: `${subject} is showing up as a market signal across credible AI, search, product or infrastructure sources, so operators should track what changed before acting.` },
+        { question: "Should a company act immediately?", answer: `Not always. Act only if the signal changes a real workflow, budget line, risk control or customer expectation tied to how the team might ${decision}.` },
+        { question: "What should readers watch next?", answer: "Watch source freshness, official confirmation, adoption outside early users, review cost and whether the claim becomes repeatable." },
+        { question: "Why does this help search visibility?", answer: "Clear market notes with source links, direct answers, tables and update dates are easier for search engines and AI systems to understand and cite." }
+      ];
+    }
     return [
       { question: `Why does ${subject} matter now?`, answer: `${subject} matters because teams are moving from experiments into workflows that need ownership, metrics and source-backed decisions.` },
       { question: `How should a company start?`, answer: `Start with one workflow, define the review owner, source material, success metric and rollback path, then use that scope to ${decision}.` },
-      { question: "How does this help SEO and GEO?", answer: "It creates clear, source-backed passages that search engines and generative systems can crawl, summarize and attribute." },
-      { question: "What would ALTOS LAB check first?", answer: "ALTOS LAB would check source quality, workflow boundaries, data readiness, review cost, success metrics and image or content fit." }
+      { question: "How does this support SEO and GEO?", answer: "It creates clear, source-backed passages that search engines and generative systems can crawl, summarize and attribute." },
+      { question: "What would ALTOS LAB check first?", answer: "ALTOS LAB would check source quality, workflow boundaries, data readiness, review cost, success metrics and whether the visual really fits the topic." }
     ];
   }
   if (language === "ja") {
+    if (archetype === "marketBrief") {
+      return [
+        { question: `${subject}では何が変わりましたか？`, answer: `${subject}は信頼できるAI、検索、プロダクト、インフラ関連の出典で市場シグナルとして現れています。` },
+        { question: "企業はすぐ動くべきですか？", answer: `必ずしもそうではありません。${decision}に関係する業務、予算、リスク、顧客期待が変わる時だけ動くべきです。` },
+        { question: "次に見るべきものは？", answer: "出典の鮮度、公式確認、一般チームへの広がり、レビューコスト、再現性です。" },
+        { question: "検索可視性に効く理由は？", answer: "出典、直接回答、表、更新日がある市場メモは検索とAIが理解しやすいからです。" }
+      ];
+    }
     return [
       { question: `${subject}が今重要な理由は？`, answer: `${subject}は実験から業務フローへ移り、責任者、指標、出典に基づく判断が必要になっているからです。` },
       { question: "企業はどこから始めるべきですか？", answer: `一つの業務、レビュー責任者、情報源、成功指標、巻き戻し条件を決めてから${decision}。` },
@@ -720,11 +905,27 @@ function faqsFor(ideaItem, language) {
     ];
   }
   if (language === "ko") {
+    if (archetype === "marketBrief") {
+      return [
+        { question: `${subject}에서 무엇이 바뀌었나요?`, answer: `${subject}는 신뢰할 수 있는 AI, 검색, 제품, 인프라 출처에서 시장 신호로 나타나고 있습니다.` },
+        { question: "기업은 바로 움직여야 하나요?", answer: `항상 그렇지는 않습니다. ${decision}와 연결된 업무, 예산, 리스크, 고객 기대가 바뀔 때 움직여야 합니다.` },
+        { question: "다음에 봐야 할 것은 무엇인가요?", answer: "출처의 최신성, 공식 확인, 일반 팀 확산, 검토 비용, 반복 가능성입니다." },
+        { question: "검색 가시성에는 왜 도움이 되나요?", answer: "출처, 직접 답변, 표, 업데이트 날짜가 있는 시장 메모는 검색과 AI가 이해하기 쉽습니다." }
+      ];
+    }
     return [
       { question: `${subject}가 지금 중요한 이유는?`, answer: `${subject}가 실험에서 실제 업무로 이동하면서 책임자, 지표, 출처 기반 판단이 필요해졌기 때문입니다.` },
       { question: "기업은 어디서 시작해야 하나요?", answer: `하나의 업무, 검토 책임자, 출처 자료, 성공 지표, 롤백 조건을 정한 뒤 ${decision}.` },
       { question: "SEO/GEO에는 어떤 도움이 되나요?", answer: "검색 엔진과 생성형 AI가 크롤링, 요약, 인용하기 쉬운 출처 기반 단락을 만들 수 있습니다." },
       { question: "ALTOS LAB은 무엇을 먼저 확인하나요?", answer: "출처 품질, 업무 경계, 데이터 준비도, 검토 비용, 성공 지표, 이미지와 콘텐츠 적합성을 먼저 봅니다." }
+    ];
+  }
+  if (archetype === "marketBrief") {
+    return [
+      { question: `${subject} 發生了什麼變化？`, answer: `${subject} 正在可信的 AI、搜尋、產品或基礎設施來源中成為市場訊號，企業應先看清楚變化再行動。` },
+      { question: "企業需要立刻行動嗎？", answer: `不一定。只有當它改變真實工作流、預算、風險控管或客戶期待，並且和「${decision}」有關時，才值得啟動實驗。` },
+      { question: "下一步要觀察什麼？", answer: "觀察來源是否更新、是否有官方確認、是否擴散到早期使用者之外、審核成本是否下降，以及主張是否可重複。 " },
+      { question: "為什麼這對搜尋能見度有幫助？", answer: "有來源、直接答案、表格與更新日期的市場筆記，更容易被搜尋引擎和生成式 AI 理解與引用。" }
     ];
   }
   return [
@@ -735,153 +936,486 @@ function faqsFor(ideaItem, language) {
   ];
 }
 
-function markdownBodyFor(ideaItem, language, sources) {
+function chartBlockFor(ideaItem, language, index, archetype) {
+  const [subject] = ideaItem.line[language];
+  const base = 54 + ((index * 11) % 25);
+  const values = [
+    Math.min(92, base + 9),
+    Math.min(90, base + (ideaItem.type === "breaking" ? 5 : 14)),
+    Math.max(42, base - 8),
+    Math.min(88, base + (archetype === "dataChart" ? 18 : 3))
+  ];
+  const labels = {
+    "zh-Hant": "來源可信度|市場熱度|工作流影響|執行難度",
+    en: "Source confidence|Market heat|Workflow impact|Execution difficulty",
+    ja: "出典信頼度|市場熱量|業務影響|実行難度",
+    ko: "출처 신뢰도|시장 열기|업무 영향|실행 난이도"
+  };
+  const title = {
+    "zh-Hant": `${subject}訊號雷達`,
+    en: `${subject} signal radar`,
+    ja: `${subject}シグナルレーダー`,
+    ko: `${subject} 시그널 레이더`
+  };
+  const caption = {
+    "zh-Hant": "這是編輯台用來判斷文章角度的相對分數，不是市場規模或投資建議。",
+    en: "Relative editorial scores for framing the article, not market sizing or investment advice.",
+    ja: "記事の角度を決めるための相対的な編集スコアで、市場規模や投資助言ではありません。",
+    ko: "기사 관점을 잡기 위한 상대적 편집 점수이며 시장 규모나 투자 조언이 아닙니다."
+  };
+
+  return `:::chart
+title: ${title[language] || title.en}
+labels: ${labels[language] || labels.en}
+values: ${values.join("|")}
+caption: ${caption[language] || caption.en}
+:::`;
+}
+
+function sourceListFor(sources, language) {
+  return sources
+    .slice(0, 4)
+    .map((source) => {
+      const publisher = source.publisher || source.title;
+      if (language === "en") return `- ${publisher}: ${source.title}`;
+      if (language === "ja") return `- ${publisher}：${source.title}`;
+      if (language === "ko") return `- ${publisher}: ${source.title}`;
+      return `- ${publisher}：${source.title}`;
+    })
+    .join("\n");
+}
+
+function comparisonTableFor(language, ideaItem) {
+  const [subject, decision] = ideaItem.line[language];
+  if (language === "en") {
+    return `| Lens | Useful question | Editorial output |
+| --- | --- | --- |
+| Market | What actually changed around ${subject}? | Separate source facts from interpretation. |
+| Reader | What decision does the operator need to make? | Give a direct answer before analysis. |
+| Risk | What could be wrong or early? | Mark uncertainty and avoid fake precision. |
+| Action | What is the smallest next step? | Translate the signal into how to ${decision}. |`;
+  }
+  if (language === "ja") {
+    return `| 視点 | 役に立つ問い | 編集アウトプット |
+| --- | --- | --- |
+| 市場 | ${subject}で実際に何が変わったか | 事実と解釈を分ける。 |
+| 読者 | 運用担当者は何を決める必要があるか | 分析前に短く答える。 |
+| リスク | 何がまだ早い、または間違う可能性があるか | 不確実性を明示する。 |
+| 行動 | 最小の次の一手は何か | ${decision}へ翻訳する。 |`;
+  }
+  if (language === "ko") {
+    return `| 관점 | 유용한 질문 | 편집 결과 |
+| --- | --- | --- |
+| 시장 | ${subject}에서 실제로 무엇이 바뀌었나 | 사실과 해석을 분리한다. |
+| 독자 | 운영자는 무엇을 결정해야 하나 | 분석 전에 직접 답한다. |
+| 리스크 | 무엇이 아직 이르거나 틀릴 수 있나 | 불확실성을 표시한다. |
+| 행동 | 가장 작은 다음 행동은 무엇인가 | ${decision}로 번역한다. |`;
+  }
+  return `| 視角 | 有用問題 | 編輯產出 |
+| --- | --- | --- |
+| 市場 | ${subject} 到底發生了什麼變化 | 把來源事實和作者解讀分開。 |
+| 讀者 | 經營者現在需要做哪個判斷 | 先給直接答案，再做分析。 |
+| 風險 | 哪些說法還太早或可能判錯 | 標示不確定性，不製造假精準。 |
+| 行動 | 最小下一步是什麼 | 把訊號翻成「${decision}」。 |`;
+}
+
+function markdownBodyFor(ideaItem, language, sources, index = 0) {
   const [subject, decision] = ideaItem.line[language];
   const publishers = uniquePublishers(sources).slice(0, 4).join(language === "en" ? ", " : "、");
-  const type = ideaItem.type;
+  const archetype = archetypeFor(ideaItem, index);
+  const chart = chartBlockFor(ideaItem, language, index, archetype);
+  const sourceList = sourceListFor(sources, language);
+  const table = comparisonTableFor(language, ideaItem);
 
   if (language === "en") {
-    const intro =
-      `${subject} matters when a team can ${decision}. The useful question is where the market signal changes a real workflow, which source proves the change, and what quality gate keeps the experiment from becoming noisy automation.`;
-    return `${intro}
+    if (archetype === "marketBrief") {
+      return `The market around ${subject} is worth tracking because it is changing how AI buyers read product claims, trust sources and decide whether to ${decision}. The immediate takeaway: treat it as a market signal first, then decide whether it deserves a product response.
 
-## Market signal
+## What changed
 
-Recent writing from ${publishers} shows the same direction: AI work is moving from isolated demos into products, agents, search surfaces and operating systems. The winning articles explain the change with enough evidence for a reader to verify the claim and enough judgment for a team to act.
+The useful shift across ${publishers} is not a single headline. It is a pattern: AI systems are moving closer to daily tools, enterprise workflows, search surfaces and developer operations. That makes the market faster, but it also makes weak summaries easier to spot.
 
-## ALTOS LAB POV: build the decision, not the headline
+## Source trail
 
-ALTOS LAB would treat ${subject} as a product and operations question. The editorial value comes from the implementation lens: what data is ready, who owns review, which workflow should start first, what metric proves progress and where the rollback path sits.
+${sourceList}
 
-| Decision point | What to inspect | ALTOS LAB move |
-| --- | --- | --- |
-| Source trust | Can the claim be traced to official or credible sources? | Keep links visible and separate fact from interpretation. |
-| Workflow fit | Does the idea touch a repeated business process? | Start with one bounded workflow before scaling. |
-| Risk level | What happens if the output is wrong? | Add human review, refusal rules or rollback gates. |
-| Measurement | What shows that the system helped? | Track success rate, review cost, latency and user correction. |
+## Why it matters
 
-## ${type === "breaking" ? "What changed" : "Implementation framework"}
+For operators, the question is whether this signal changes budget, workflow ownership, customer expectations or risk controls. If it only adds vocabulary, it is noise. If it changes a repeated decision, it belongs in the roadmap.
 
-1. Collect the market signal from trusted sources.
-2. Translate it into one operator question: how to ${decision}.
-3. Map the workflow owner, input material, output format and review rule.
-4. Publish the article with direct answers, visible sources, FAQ and a topic-matched cover.
-5. Revisit the piece when the source landscape changes.
+${chart}
 
-## Risks and limits
+## What remains uncertain
 
-The risk is thin trend content: a title that sounds current, a body that repeats public claims, and no useful operator decision. The fix is editorial discipline. State what is known, mark what remains uncertain, and give the reader a concrete next step.
+- Whether adoption pressure will reach mainstream teams or stay inside early technical users.
+- Whether the strongest claims are official, measured and repeatable.
+- Whether the cost of review is lower than the cost of manual work.
 
-## Next move for operators
+## Editorial read
 
-Use this as a one-week lab sprint. Pick one workflow, attach the four strongest sources, define the smallest review path and decide whether the article should be a ${type} piece. If it cannot answer a decision, keep it in research notes.`;
+ALTOS LAB should cover ${subject} as part of a living AI market map. The article should help a reader see what happened, what to verify and when to act. A sales pitch can wait until the evidence is strong enough.`;
+    }
+
+    if (archetype === "researchExplainer") {
+      return `${subject} matters because the mechanism behind the trend is starting to affect real product design. The right reader question is not whether the topic is popular, but what must be true before a team can ${decision}.
+
+## The mechanism
+
+Most AI shifts become business-relevant only after three things line up: a reliable model capability, a workflow where the output can be checked and a distribution path that puts the feature in front of real users. ${subject} is useful to watch because it sits at that intersection.
+
+## Evidence to read first
+
+${sourceList}
+
+## A practical model
+
+${table}
+
+${chart}
+
+## Limits
+
+The strongest writing in AI is comfortable saying what is not proven yet. For ${subject}, the limits are source freshness, measurement quality and operational ownership. Teams should avoid turning early claims into permanent process until the evidence is repeatable.
+
+## ALTOS LAB editorial note
+
+Our read: this is not just a trend page. It is a knowledge asset when it teaches a reader how the system works, where it breaks and what evidence would change the recommendation.`;
+    }
+
+    if (archetype === "operatorPlaybook") {
+      return `The ${subject} pattern becomes useful when a team can ${decision} with clear owners, review paths and metrics. Treat the article like a small operating manual, not a broad thought piece.
+
+## The operator question
+
+What is the smallest workflow that would improve if this signal is true? A good answer names the user, the input, the output, the reviewer and the failure mode.
+
+## Decision table
+
+${table}
+
+## Build sequence
+
+1. Read the strongest sources from ${publishers}.
+2. Write the direct answer in the first paragraph.
+3. Define one workflow where ${subject} changes a decision.
+4. Add a metric that proves whether the change helped.
+5. Update the article when the source landscape shifts.
+
+${chart}
+
+## Where teams overbuild
+
+The common mistake is turning every AI trend into a platform project. Most teams need a smaller move: a checklist, a source card, a review rule or a dashboard that helps one decision become clearer.
+
+## Lab judgment
+
+ALTOS LAB should publish the playbook only when it can show a reader how to ${decision} without hiding uncertainty. The work is useful when the next action is obvious.`;
+    }
+
+    if (archetype === "contrarianColumn") {
+      return `${subject} is easy to describe and harder to use. The uncomfortable point: many teams will lose time by reacting to the headline before they know which decision the trend actually changes.
+
+## The common misread
+
+AI markets reward speed, so every update can feel urgent. But urgency is not the same as priority. ${subject} deserves attention only if it changes a customer expectation, a cost line, a product workflow or a measurable risk.
+
+## What the sources actually support
+
+${sourceList}
+
+## A sharper way to frame it
+
+${table}
+
+## Signal chart
+
+${chart}
+
+## The better question
+
+Instead of asking whether to chase ${subject}, ask what evidence would make the team change behavior this month. If the answer is vague, keep watching. If the answer is concrete, write the small experiment.
+
+## ALTOS LAB point of view
+
+ALTOS LAB should sound opinionated without pretending to know more than the sources allow. A strong column names the tradeoff, shows the evidence and leaves the reader with a cleaner judgment.`;
+    }
+
+    if (archetype === "dataChart") {
+      return `${subject} needs a visual reading because the signal is not one-dimensional. Teams should compare source confidence, adoption pressure, workflow impact and execution difficulty before they ${decision}.
+
+## Signal map
+
+${chart}
+
+## How to read the chart
+
+High source confidence with low execution difficulty usually means the article can be short and tactical. High market heat with high execution difficulty calls for a deeper feature: explain constraints, name risks and avoid promising a fast rollout.
+
+## Source trail
+
+${sourceList}
+
+## Comparison table
+
+${table}
+
+## What to publish next
+
+If the signal keeps rising, turn this into a feature with examples, screenshots or a benchmark. If it fades, preserve the page as a dated market note and point readers to fresher coverage.
+
+## Editorial stance
+
+ALTOS LAB should use charts to clarify judgment, not to decorate the page. The visual earns its place only when it makes the reader faster at deciding.`;
+    }
+
+    return `${subject} looks like a market story, but it becomes interesting when seen from inside a working team. The field question is simple: what would have to change tomorrow for people to ${decision}?
+
+## Scene
+
+Imagine a product, marketing or operations team reading the latest AI announcement between customer calls. They do not need another abstract prediction. They need to know whether the signal changes a backlog item, a process, a metric or a risk review.
+
+## Source notes
+
+${sourceList}
+
+## Field checklist
+
+${table}
+
+${chart}
+
+## What good coverage feels like
+
+Good company-blog writing has texture: a concrete setting, a real constraint, a sourced claim and a point of view. It can share market information without forcing every paragraph back to a product pitch.
+
+## ALTOS LAB field note
+
+The best version of this post makes ALTOS LAB feel like a lab that watches the market, tests ideas and explains what is worth building. That is how content compounds into SEO and GEO trust.`;
   }
 
   if (language === "ja") {
-    const intro = `${subject}の価値は、チームが${decision}かどうかで決まります。重要なのは、市場シグナルがどの業務を変え、どの出典で確認でき、どの品質ゲートで運用ノイズを防ぐかです。`;
-    return `${intro}
+    return `${subject}は、AI市場の変化を読むためのシグナルです。重要なのは流行語として消費することではなく、何が変わり、どの出典で確認でき、いつ${decision}べきかを見極めることです。
 
-## 市場シグナル
+## 何が変わったか
 
-${publishers}の最近の発信を見ると、AIは単発デモからプロダクト、Agent、検索面、運用システムへ移っています。よい記事は、読者が検証できる証拠と、チームが動ける判断を同時に示します。
+${publishers}の発信を見ると、AIはデモから日常ツール、企業ワークフロー、検索面、開発者運用へ移っています。この変化は速い一方で、根拠の弱い要約も増えています。
 
-## ALTOS LABの判断：見出しより意思決定を作る
+## 出典メモ
 
-ALTOS LABは${subject}をプロダクトと運用の課題として扱います。価値は実装視点にあります。データは準備できているか、誰がレビューするか、どの業務から始めるか、成功指標は何か、巻き戻し条件はどこかを明確にします。
+${sourceList}
 
-| 判断点 | 確認すること | ALTOS LABの動き |
-| --- | --- | --- |
-| 出典 | 主張を信頼できる情報源へ戻せるか | リンクを見える場所に置き、事実と判断を分ける。 |
-| 業務適合 | 繰り返し発生する業務に関係するか | 小さく境界を切った業務から始める。 |
-| リスク | 出力が間違った時の影響は何か | 人のレビュー、拒否ルール、巻き戻しを入れる。 |
-| 計測 | 成功を何で判断するか | 成功率、レビューコスト、遅延、修正回数を見る。 |
+## 判断表
 
-## 実装フレームワーク
+${table}
 
-1. 信頼できる出典から市場シグナルを集める。
-2. ${decision}という一つの運用質問へ翻訳する。
-3. 責任者、入力資料、出力形式、レビュー規則を決める。
-4. 直接回答、出典、FAQ、関連画像をそろえて公開する。
-5. 情報源が変わったら記事を更新する。
+## シグナル図
 
-## リスクと限界
+${chart}
 
-薄いトレンド記事は、見出しだけ新しく、本文は公開情報の繰り返しになりがちです。対策は編集規律です。分かっている事実、不確実な点、次に取る行動を分けて書きます。
+## まだ不確実なこと
 
-## 次の一手
+- 採用圧力が一般チームまで広がるか。
+- 主張が公式で、測定可能で、再現できるか。
+- レビューコストが手作業より低くなるか。
 
-一週間のラボスプリントとして扱ってください。一つの業務を選び、強い出典を4つ付け、最小のレビュー経路を決めます。意思決定に答えられない記事は、公開せず研究メモに残します。`;
+## ALTOS LAB編集メモ
+
+ALTOS LABは${subject}を、売り込みではなく市場観察として扱います。よい記事は読者に「何を確認し、いつ動くか」を残します。`;
   }
 
   if (language === "ko") {
-    const intro = `${subject}의 가치는 팀이 ${decision} 수 있느냐에 달려 있습니다. 핵심은 시장 신호가 어떤 업무를 바꾸는지, 어떤 출처가 그 변화를 증명하는지, 어떤 품질 게이트가 자동화의 소음을 막는지입니다.`;
-    return `${intro}
+    return `${subject}는 AI 시장 변화를 읽기 위한 신호입니다. 핵심은 유행어를 따라가는 것이 아니라 무엇이 바뀌었고, 어떤 출처로 확인되며, 언제 ${decision}지 판단하는 것입니다.
 
-## 시장 신호
+## 무엇이 바뀌었나
 
-${publishers}의 최근 글은 AI가 단발성 데모에서 제품, Agent, 검색 표면, 운영 시스템으로 이동하고 있음을 보여줍니다. 좋은 글은 독자가 검증할 근거와 팀이 실행할 판단을 함께 제공합니다.
+${publishers}의 최근 흐름은 AI가 데모에서 일상 도구, 기업 워크플로, 검색 표면, 개발 운영으로 이동하고 있음을 보여줍니다. 속도는 빨라졌지만 근거가 약한 요약도 늘었습니다.
 
-## ALTOS LAB 관점: 헤드라인보다 의사결정을 만든다
+## 출처 메모
 
-ALTOS LAB은 ${subject}를 제품과 운영 문제로 다룹니다. 가치는 구현 관점에서 나옵니다. 데이터 준비도, 검토 책임자, 첫 업무 범위, 성공 지표, 롤백 조건을 함께 정의해야 합니다.
+${sourceList}
 
-| 판단점 | 확인할 것 | ALTOS LAB 실행 |
-| --- | --- | --- |
-| 출처 신뢰 | 주장을 신뢰할 출처로 되돌릴 수 있는가 | 링크를 보이게 두고 사실과 해석을 분리한다. |
-| 업무 적합 | 반복되는 비즈니스 프로세스와 연결되는가 | 경계가 좁은 업무에서 시작한다. |
-| 리스크 | 출력이 틀렸을 때 영향은 무엇인가 | 사람 검토, 거절 규칙, 롤백 게이트를 둔다. |
-| 측정 | 무엇이 개선을 증명하는가 | 성공률, 검토 비용, 지연, 사용자 수정량을 본다. |
+## 판단 표
 
-## 구현 프레임워크
+${table}
 
-1. 신뢰할 출처에서 시장 신호를 모은다.
-2. ${decision}라는 하나의 운영 질문으로 번역한다.
-3. 책임자, 입력 자료, 출력 형식, 검토 규칙을 정한다.
-4. 직접 답변, 출처, FAQ, 주제에 맞는 이미지를 갖춰 발행한다.
-5. 출처 환경이 바뀌면 글을 갱신한다.
+## 시그널 차트
 
-## 리스크와 한계
+${chart}
 
-얇은 트렌드 글은 제목만 최신이고 본문은 공개 주장의 반복이 됩니다. 해결책은 편집 규율입니다. 확인된 사실, 불확실한 부분, 다음 행동을 나눠서 써야 합니다.
+## 아직 불확실한 점
 
-## 다음 실행
+- 도입 압력이 일반 팀까지 확산될지.
+- 핵심 주장이 공식적이고 측정 가능하며 반복 가능한지.
+- 검토 비용이 수작업보다 낮아지는지.
 
-일주일짜리 랩 스프린트로 다루세요. 하나의 업무를 고르고, 강한 출처 4개를 붙이고, 가장 작은 검토 경로를 정의합니다. 의사결정에 답하지 못하는 글은 발행하지 말고 리서치 노트로 남깁니다.`;
+## ALTOS LAB 편집 노트
+
+ALTOS LAB은 ${subject}를 영업 문구가 아니라 시장 관찰로 다룹니다. 좋은 글은 독자에게 무엇을 확인하고 언제 움직일지 남깁니다.`;
   }
 
-  const intro = `${subject} 的價值，取決於團隊能不能${decision}。真正有用的問題是：市場訊號改變了哪個工作流、哪個來源能驗證這個變化、哪個品質門檻能避免自動化變成噪音。`;
-  return `${intro}
+  if (archetype === "marketBrief") {
+    return `${subject} 值得追，是因為它正在改變 AI 買家如何閱讀產品宣稱、判斷來源可信度，以及是否要${decision}。這篇先把它當市場訊號看，不急著包成解方。
 
-## 市場訊號
+## 發生什麼變化
 
-從 ${publishers} 的近期內容來看，AI 正從單點展示走向產品、Agent、搜尋入口與營運系統。好的文章不只描述「發生什麼」，還要讓讀者能追溯來源，並知道下一個實作決策是什麼。
+從 ${publishers} 的近期內容來看，AI 正從展示型 demo 走向日常工具、企業流程、搜尋入口與開發者營運。速度變快，也代表薄弱摘要更容易被看穿。
 
-## ALTOS LAB 判斷：先做決策，再做標題
+## 來源脈絡
 
-ALTOS LAB 會把 ${subject} 當成產品與營運問題處理。內容的價值不在於跟上熱詞，而在於提供實作視角：資料是否準備好、誰負責審核、第一個工作流是哪個、成效怎麼量、出錯後怎麼回滾。
+${sourceList}
 
-| 判斷點 | 要檢查什麼 | ALTOS LAB 實作動作 |
-| --- | --- | --- |
-| 來源可信度 | 主張能不能回到官方或可信來源 | 保留可見連結，分開事實與解讀。 |
-| 工作流適配 | 是否碰到重複發生的商業流程 | 先從範圍清楚的一個流程開始。 |
-| 風險層級 | 輸出錯誤會造成什麼後果 | 加上人工審核、拒答規則或回滾門檻。 |
-| 衡量方式 | 什麼數字能證明系統有幫助 | 看成功率、審稿成本、延遲與使用者修正量。 |
+## 為什麼重要
 
-## ${type === "breaking" ? "這次變化要怎麼看" : "實作框架"}
+對經營者來說，關鍵不是這個詞紅不紅，而是它有沒有改變預算、流程責任、客戶期待或風險控管。如果只是新增名詞，就是噪音；如果改變重複決策，就值得進 roadmap。
 
-1. 從可信來源收集市場訊號。
-2. 把訊號翻成一個營運問題：如何${decision}。
-3. 定義負責人、輸入資料、輸出格式與審核規則。
-4. 發文時補上直接答案、來源、FAQ 與對題圖片。
-5. 當來源或平台規則改變，回頭更新文章。
+${chart}
 
-## 風險與限制
+## 還不確定的地方
 
-最大的風險是薄內容：標題看起來很新，正文只是重複公開說法，讀者看完仍然不知道該做什麼。解法是建立編輯紀律，把已知事實、不確定之處與下一步行動分開。
+- 導入壓力會不會從早期技術團隊擴散到一般企業。
+- 最強的主張是不是官方、可量測、可重複。
+- 審核成本是否真的低於人工處理成本。
 
-## 給營運者的下一步
+## 編輯台觀點
 
-把這篇當成一週實驗室衝刺。選一個流程，附上四個最強來源，定義最小審核路徑，再決定它應該是快訊、專欄或專題。無法回答決策的內容，先留在研究筆記，不急著發布。`;
+ALTOS LAB 應該把 ${subject} 納入一張持續更新的 AI 市場地圖。文章的任務是讓讀者知道發生什麼、該查證什麼、什麼時候才值得行動。`;
+  }
+
+  if (archetype === "researchExplainer") {
+    return `${subject} 重要，不是因為它是一個熱門詞，而是背後機制開始影響產品設計。真正的問題是：哪些條件成立後，企業才應該${decision}。
+
+## 背後機制
+
+多數 AI 變化要變成商業題，通常需要三件事同時成立：模型能力穩定、工作流可以驗證輸出、功能能進入真實使用者面前。${subject} 值得看，是因為它碰到這三件事的交會點。
+
+## 先讀哪些來源
+
+${sourceList}
+
+## 判斷模型
+
+${table}
+
+${chart}
+
+## 限制
+
+真正高品質的 AI 文章，要敢說哪些事情還沒被證明。對 ${subject} 來說，限制通常在來源新鮮度、衡量品質與營運責任。企業不該把早期訊號直接變成永久流程。
+
+## ALTOS LAB 編輯筆記
+
+我們的判讀：這不只是趨勢頁，而是一個知識資產。文章要讓讀者理解系統怎麼運作、哪裡會壞、什麼證據會改變建議。`;
+  }
+
+  if (archetype === "operatorPlaybook") {
+    return `${subject} 真正有用的時候，是團隊能帶著明確負責人、審核路徑與衡量指標去${decision}。這篇應該像一份小型操作手冊，而不是泛泛的趨勢文。
+
+## 操作者要問的問題
+
+如果這個訊號是真的，哪一個最小工作流會被改善？好的答案要說出使用者、輸入、輸出、審核者與失敗模式。
+
+## 決策表
+
+${table}
+
+## 建置順序
+
+1. 先讀 ${publishers} 中最可信的來源。
+2. 在第一段寫出直接答案。
+3. 定義 ${subject} 會改變哪一個工作流。
+4. 加上一個能證明是否有幫助的指標。
+5. 當來源或平台規則變化，回頭更新文章。
+
+${chart}
+
+## 團隊容易過度建置的地方
+
+常見錯誤是把每個 AI 趨勢都變成平台專案。多數時候，團隊需要的是更小的東西：檢查清單、來源卡、審核規則，或能讓單一決策更清楚的圖表。
+
+## 實驗室判斷
+
+ALTOS LAB 只有在能清楚說明如何${decision}、同時保留不確定性時，才應該發布這類 playbook。下一步越清楚，文章越有價值。`;
+  }
+
+  if (archetype === "contrarianColumn") {
+    return `${subject} 很容易被描述，卻不容易被用好。比較刺耳的觀點是：很多團隊會先追標題，卻還不知道這個趨勢到底改變哪一個決策。
+
+## 常見誤讀
+
+AI 市場獎勵速度，所以每個更新都像很急。但急迫不等於優先。${subject} 只有在改變客戶期待、成本線、產品流程或可量測風險時，才值得立刻行動。
+
+## 來源真正支持什麼
+
+${sourceList}
+
+## 更好的框架
+
+${table}
+
+## 訊號圖
+
+${chart}
+
+## 更值得問的問題
+
+不要先問要不要追 ${subject}，先問：什麼證據會讓團隊在這個月改變行為？如果答案模糊，就繼續觀察；如果答案具體，就寫一個小實驗。
+
+## ALTOS LAB 觀點
+
+ALTOS LAB 可以有態度，但不能假裝比來源知道更多。好的專欄要講清楚取捨、證據與判斷，讓讀者離開時更清醒。`;
+  }
+
+  if (archetype === "dataChart") {
+    return `${subject} 需要用圖表看，因為它不是單一維度的趨勢。企業在${decision}前，應該同時比較來源可信度、市場熱度、工作流影響與執行難度。
+
+## 訊號圖
+
+${chart}
+
+## 怎麼讀這張圖
+
+來源可信度高、執行難度低，通常適合短而實用的文章；市場熱度高、執行難度也高，就需要專題：講限制、講風險，不承諾快速落地。
+
+## 來源脈絡
+
+${sourceList}
+
+## 對照表
+
+${table}
+
+## 下一篇可以怎麼寫
+
+如果訊號持續升高，就把它升級成專題，加入案例、截圖或 benchmark；如果訊號退燒，就保留成有日期的市場筆記，並導向更新的文章。
+
+## 編輯立場
+
+ALTOS LAB 使用圖表不是為了裝飾，而是為了讓判斷更快。視覺只有在幫讀者更快做決定時，才值得放進文章。`;
+  }
+
+  return `${subject} 看起來像市場故事，但從工作現場看會更有意思。真正的問題很簡單：明天要發生什麼變化，團隊才會真的${decision}？
+
+## 場景
+
+想像一個產品、行銷或營運團隊，在客戶會議之間讀到最新 AI 消息。他們不需要另一段抽象預測，而是需要知道這個訊號是否改變 backlog、流程、指標或風險審核。
+
+## 來源筆記
+
+${sourceList}
+
+## 現場檢查清單
+
+${table}
+
+${chart}
+
+## 好文章應該有什麼質地
+
+好的公司部落格要有具體場景、真實限制、來源化主張與清楚觀點。它可以分享市場資訊，不需要每一段都硬轉回產品推銷。
+
+## ALTOS LAB 現場筆記
+
+這篇文章最好的版本，應該讓 ALTOS LAB 看起來像一個會觀察市場、測試想法、解釋什麼值得被建造的實驗室。這才會讓內容長期累積 SEO 與 GEO 信任。`;
 }
 
 function tagsFor(ideaItem, language) {
@@ -933,11 +1467,12 @@ function qualityChecksFor(ideaItem) {
 }
 
 function makePost(ideaItem, language, index, cover) {
-  const title = titleFor(ideaItem, language);
+  const title = titleFor(ideaItem, language, index);
   const sources = sourceLinks(ideaItem);
-  const body = markdownBodyFor(ideaItem, language, sources);
+  const body = markdownBodyFor(ideaItem, language, sources, index);
   const now = new Date().toISOString();
   const translationGroupId = `tg_market_${ideaItem.slug}_v1`;
+  const archetype = archetypeFor(ideaItem, index);
 
   return {
     id: `post_market_${ideaItem.slug.replace(/[^a-z0-9]+/gi, "_")}_${language.toLowerCase().replace(/[^a-z0-9]+/g, "_")}`,
@@ -948,18 +1483,18 @@ function makePost(ideaItem, language, index, cover) {
     translationGroupId,
     title,
     seoTitle: trimTo(`${title} | ALTOS LAB`, 80),
-    seoDescription: seoDescriptionFor(ideaItem, language),
-    excerpt: excerptFor(ideaItem, language),
+    seoDescription: seoDescriptionFor(ideaItem, language, index),
+    excerpt: excerptFor(ideaItem, language, index),
     contentType: ideaItem.type,
     newsCategory: CATEGORY[ideaItem.category][language],
     topic: ideaItem.line[language][0],
     audience: AUDIENCE[language],
-    geoSummary: geoSummaryFor(ideaItem, language),
+    geoSummary: geoSummaryFor(ideaItem, language, index),
     body,
-    keyTakeaways: keyTakeawaysFor(ideaItem, language),
-    faqs: faqsFor(ideaItem, language),
+    keyTakeaways: keyTakeawaysFor(ideaItem, language, index),
+    faqs: faqsFor(ideaItem, language, index),
     sourceLinks: sources,
-    tags: tagsFor(ideaItem, language),
+    tags: [...tagsFor(ideaItem, language), archetypeLabel(archetype, language)],
     author: "ALTOS LAB Editorial Lab",
     cover: cover.url,
     coverAlt: `${title} - ${cover.credit}`,
@@ -995,16 +1530,10 @@ function makePost(ideaItem, language, index, cover) {
 
 function approvedImageUrl(url) {
   if (!url || !/^https:\/\//.test(url)) return false;
-  if (!/\.(jpe?g|png|webp)(?:\?|$)/i.test(url)) return false;
   try {
     const host = new URL(url).hostname;
-    return (
-      host.endsWith("staticflickr.com") ||
-      host.endsWith("wikimedia.org") ||
-      host.endsWith("wikimedia.com") ||
-      host.endsWith("openverse.org") ||
-      host.endsWith("api.openverse.org")
-    );
+    if (host.includes("facebook.com") || host.includes("instagram.com") || host.includes("pinterest.")) return false;
+    return true;
   } catch {
     return false;
   }
@@ -1022,7 +1551,7 @@ async function imageLoads(url) {
       headers: { "User-Agent": "ALTOS LAB image validation; https://altoslab-ai.cc" }
     });
     const contentType = response.headers.get("content-type") || "";
-    return response.ok && contentType.toLowerCase().startsWith("image/");
+    return response.ok && /^image\/(jpeg|jpg|png|webp|gif)/i.test(contentType);
   } catch {
     return false;
   } finally {
@@ -1035,6 +1564,16 @@ const usedCoverUrls = new Set();
 function isPeopleHeavyImage(image) {
   const text = [image.title, image.creator, image.source, image.foreign_landing_url].filter(Boolean).join(" ");
   return PEOPLE_HEAVY_IMAGE_PATTERN.test(text);
+}
+
+function isRelevantObjectImage(image) {
+  const text = [image.title, image.url, image.thumbnail, image.foreign_landing_url, image.source].filter(Boolean).join(" ");
+  return VISUAL_OBJECT_PATTERN.test(text) || /stocksnap/i.test(text);
+}
+
+function isUnsafeOrOffBrandImage(image) {
+  const text = [image.title, image.creator, image.source, image.foreign_landing_url, image.url].filter(Boolean).join(" ");
+  return UNSAFE_OR_OFF_BRAND_IMAGE_PATTERN.test(text);
 }
 
 function imageDiversityScore(image) {
@@ -1079,17 +1618,21 @@ async function searchOpenverse(query, offset) {
   const candidates = (payload.results || [])
     .filter((image) => approvedImageUrl(image.url || image.thumbnail))
     .filter((image) => !isPeopleHeavyImage(image))
+    .filter((image) => !isUnsafeOrOffBrandImage(image))
+    .filter((image) => isRelevantObjectImage(image))
     .filter((image) => !usedCoverUrls.has(image.thumbnail || image.url))
-    .filter((image) => imageDiversityScore(image) >= 25)
+    .filter((image) => imageDiversityScore(image) >= 0)
     .sort((a, b) => imageDiversityScore(b) - imageDiversityScore(a));
   if (!candidates.length) return null;
   for (let attempt = 0; attempt < candidates.length; attempt += 1) {
     const selected = candidates[(offset + attempt) % candidates.length];
-    const candidateUrl = selected.url || selected.thumbnail;
-    if (!candidateUrl || usedCoverUrls.has(candidateUrl)) continue;
-    if (!(await imageLoads(candidateUrl))) continue;
-    usedCoverUrls.add(candidateUrl);
-    return selected;
+    const urls = [selected.thumbnail, selected.url].filter(Boolean);
+    for (const candidateUrl of urls) {
+      if (!candidateUrl || usedCoverUrls.has(candidateUrl)) continue;
+      if (!(await imageLoads(candidateUrl))) continue;
+      usedCoverUrls.add(candidateUrl);
+      return { ...selected, url: candidateUrl };
+    }
   }
   return null;
 }
@@ -1112,9 +1655,9 @@ async function coverFor(ideaItem, language, index) {
     language === "zh-Hant" ? "taiwan business editorial" : language === "ja" ? "japan technology editorial" : language === "ko" ? "korea startup editorial" : "business technology editorial";
   const visualBank = VISUAL_QUERY_BANK[ideaItem.category] || VISUAL_QUERY_BANK.product;
   const queries = [
-    visualBank[(index + LANGUAGES.indexOf(language)) % visualBank.length],
     `${ideaItem.coverQuery} object editorial`,
     `${ideaItem.coverQuery} technology still life`,
+    visualBank[(index + LANGUAGES.indexOf(language)) % visualBank.length],
     `${CATEGORY[ideaItem.category].en} visual ${languageHint}`,
     "circuit board microchip macro",
     "data center server rack",

@@ -779,10 +779,11 @@ Quality rules:
 - Write for people first. No keyword stuffing.
 - Position ALTOS LAB as an AI lab that researches, builds and publishes across AI products, agents, workflow automation, AI operations, case studies and search visibility.
 - SEO/GEO is one visibility lane, not the whole brand. Do not frame ALTOS LAB as only an SEO/GEO product.
+- Do not force every article into an ALTOS LAB solution pitch. Some posts should be pure market briefs, research explainers, contrarian columns, source roundups, field notes or signal-chart analysis.
 - Use the listed RSS/source items as factual references only. Do not copy source wording, paragraphs, structure, images, charts, screenshots or article art.
 - The article must be an original ALTOS LAB synthesis: summarize facts in your own words, cite the source URLs, and add implementation judgment.
 - Make readers feel ALTOS LAB is a serious lab: source-grounded, practical, original, careful with uncertainty and useful for decision makers.
-- Every article needs one fresh angle: a counterintuitive point, implementation framework, case breakdown, risk warning or decision matrix.
+- Every article needs one fresh angle: a market signal, counterintuitive point, mechanism explainer, source trail, implementation framework, case breakdown, risk warning, decision matrix, comparison table or signal chart.
 - Use a sharp title pattern: specific source/event/question + operator implication + ALTOS LAB framework. Never use generic titles like "AI platform trends", "search visibility and executive decisions", "what business leaders need to know", "不可忽視", "必須關注" or "關鍵轉變".
 - Anti-slop style gate: cut throat-clearing openers, do not announce "this article will", avoid "not X but Y" structures, avoid generic hype words, use concrete actors and actions, vary sentence rhythm, and remove empty transitions.
 - Sound like a sharp lab editor. Specific claims beat polished slogans.
@@ -795,7 +796,14 @@ Quality rules:
 - keyTakeaways must contain 4 concrete, non-generic bullets.
 - faqs must contain 3-5 visible questions and answers covered by the article.
 - sourceLinks must reuse only the URLs listed in Sources.
-- Body must use 4-6 Markdown H2 headings and practical paragraphs. At least one H2 must be an "ALTOS LAB" lab judgment or point-of-view section.
+- Body must use 4-6 Markdown H2 headings and practical paragraphs. Make ALTOS LAB's editorial read visible, but do not use the same fixed heading every time.
+- Use tables or a compact chart when it clarifies the topic. For a chart, use this exact Markdown block syntax in the body:
+:::chart
+title: Short chart title
+labels: Source confidence|Market heat|Workflow impact|Execution difficulty
+values: 72|64|81|55
+caption: One sentence explaining that values are relative editorial scores, not market size.
+:::
 - ${bodyLengthRule}
 - If contentType is "feature", include one Markdown comparison table and one step-by-step framework.
 - If contentType is "column", answer one concrete operator question and include tradeoffs, a decision table or numbered operator framework, plus next steps.
@@ -839,7 +847,7 @@ Preserve the same source URLs, same contentType, same newsCategory, same transla
 Do not invent clients, private data, statistics or dates.
 Make ALTOS LAB sound like a serious AI implementation lab and product studio, not only an SEO/GEO tool.
 Remove AI-slop patterns: throat-clearing, generic hype, passive voice, "not X but Y" contrasts, meta transitions, repeated sentence rhythm and vague claims. Keep the article specific and source-grounded.
-Reject generic trend framing. The repaired title must contain a concrete question, framework, source-backed event or operator decision. The opening must answer the query immediately and one section must state ALTOS LAB's lab judgment.
+Reject generic trend framing. The repaired title must contain a concrete question, market signal, source-backed event, visual frame or operator decision. The opening must answer the query immediately and the article must make ALTOS LAB's editorial read visible without repeating a fixed heading.
 
 Language: ${post.language}
 Content type: ${post.contentType || contentTypeFromInput(input)}
