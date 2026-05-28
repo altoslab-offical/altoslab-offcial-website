@@ -101,6 +101,7 @@ export function defaultQualityChecks(patch?: Partial<BlogQualityChecks>): BlogQu
     hasNoFabricatedClaims: false,
     hasSearchIntentAnswer: false,
     hasBilingualParity: false,
+    hasAntiSlopReview: false,
     ...patch
   };
 }

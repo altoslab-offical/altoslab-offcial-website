@@ -146,6 +146,7 @@ export type BlogQualityChecks = {
   hasLabsPointOfView?: boolean;
   hasCreativeAngle?: boolean;
   hasImageFit?: boolean;
+  hasAntiSlopReview?: boolean;
   qualityScoreBreakdown?: {
     sourceTrust: number;
     labsPointOfView: number;
@@ -156,6 +157,8 @@ export type BlogQualityChecks = {
   };
   qualityScore?: number;
   qualityIssues?: string[];
+  antiSlopScore?: number;
+  antiSlopIssues?: string[];
   notes?: string;
 };
 

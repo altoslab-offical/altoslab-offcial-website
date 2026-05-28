@@ -26,4 +26,12 @@ Auto-publishing requires:
 - Trusted visible source links.
 - Topic-matched legally sourced cover image with attribution.
 - Quality score at or above the content-type threshold.
+- Anti-slop writing score at or above the content-type threshold.
 - No unsupported claims or copied source content.
+
+## Anti-Slop Writing Gate
+
+- The reviewer scores directness, rhythm, trust, authenticity and density on a 50-point scale.
+- The gate blocks AI drafts that use throat-clearing openers, "this article will" framing, generic hype, passive/actorless phrasing, repeated sentence rhythm, empty transitions or formulaic "not X but Y" contrasts.
+- Thresholds: `breaking` >= 35, `column` >= 38, `feature` >= 40.
+- The admin blog editor stores `antiSlopScore`, `antiSlopIssues` and `hasAntiSlopReview` with the normal quality review record.

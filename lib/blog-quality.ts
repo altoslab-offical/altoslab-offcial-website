@@ -9,6 +9,8 @@ type ReviewArea =
   | "imageFit"
   | "multilingualParity";
 
+type AntiSlopDimension = "directness" | "rhythm" | "trust" | "authenticity" | "density";
+
 type ReviewResult = {
   score: number;
   issues: string[];
@@ -22,6 +24,9 @@ type PostReview = {
   issues: string[];
   warnings: string[];
   breakdown: Record<ReviewArea, number>;
+  antiSlopScore: number;
+  antiSlopIssues: string[];
+  antiSlopDimensions: Record<AntiSlopDimension, number>;
 };
 
 export type BlogPairQualityReview = {
@@ -39,6 +44,12 @@ const CONTENT_TYPE_THRESHOLDS: Record<BlogContentType, number> = {
   breaking: 82,
   column: 88,
   feature: 92
+};
+
+const ANTI_SLOP_THRESHOLDS: Record<BlogContentType, number> = {
+  breaking: 35,
+  column: 38,
+  feature: 40
 };
 
 const CONTENT_TYPE_MINIMUMS: Record<
@@ -166,6 +177,63 @@ const creativeSignals = [
   "판단"
 ];
 
+const antiSlopRules: Array<{
+  dimension: AntiSlopDimension;
+  label: string;
+  pattern: RegExp;
+  penalty: number;
+}> = [
+  {
+    dimension: "directness",
+    label: "throat-clearing or meta opener",
+    pattern:
+      /\b(in this article|this article (explores|examines|will)|we will explore|let'?s dive|here'?s what|it is important to note|it'?s worth noting)\b|(?:本文(?:將|会|會)|這篇文章(?:將|會)|接下來(?:我們)?(?:將|會)|以下(?:是|將)|值得注意的是|要知道的是|この記事では|本稿では|これから|이 글에서는|이번 글에서는)/gi,
+    penalty: 2
+  },
+  {
+    dimension: "authenticity",
+    label: "formulaic not-X-but-Y contrast",
+    pattern:
+      /\bnot (just|only)\b[\s\S]{0,90}\bbut\b|(?:不只是|不僅是|不只是單純|不是單純)[\s\S]{0,60}(?:而是|更是)|(?:単なる|ただの)[\s\S]{0,60}(?:ではなく|ではない)|(?:단순히|그저)[\s\S]{0,60}(?:아니라|넘어)/gi,
+    penalty: 3
+  },
+  {
+    dimension: "authenticity",
+    label: "generic hype or business jargon",
+    pattern:
+      /\b(game-changing|cutting-edge|revolutionary|seamless|robust|leverage|unlock|transformative|ever-evolving|landscape|delve|showcase)\b|(?:賦能|顛覆|革新|不可忽視|至關重要|重大意義|深遠影響|快速變化|全面解析|深入探討|關鍵轉折|生态位|生態系)|(?:革新的|変革的|見逃せない|重要な意味|深掘り|包括的に解説)|(?:혁신적|변혁적|중요한 의미|간과할 수 없는|심층 분석)/gi,
+    penalty: 2
+  },
+  {
+    dimension: "directness",
+    label: "passive or actorless construction",
+    pattern:
+      /\b(?:is|are|was|were|be|been|being)\s+\w{3,}(?:ed|en)\b|(?:被認為|被視為|被稱為|被用來|被設計|被建立|被引用)|(?:とされる|と考えられる)|(?:간주된다|여겨진다)/gi,
+    penalty: 1
+  },
+  {
+    dimension: "trust",
+    label: "soft hedging",
+    pattern:
+      /\b(may|might|could|possibly|potentially|perhaps|arguably|seems to|appears to)\b|(?:可能|或許|也許|有機會|某種程度|初步看來)|(?:かもしれない|可能性がある|一部では)|(?:가능성이 있다|어쩌면|일부에서는)/gi,
+    penalty: 1
+  },
+  {
+    dimension: "density",
+    label: "cuttable vague declarative",
+    pattern:
+      /\b(significant implications|important consideration|rapidly changing|increasingly important|key takeaway|important to understand)\b|(?:意義重大|值得關注|值得留意|越來越重要|帶來新的可能|產生重大影響)|(?:重要な示唆|注目すべき|大きな影響)|(?:중요한 시사점|주목할 필요|큰 영향을 미친다)/gi,
+    penalty: 2
+  },
+  {
+    dimension: "density",
+    label: "meta transition filler",
+    pattern:
+      /\b(the rest of this essay|the rest of this article|before we begin|to understand this)\b|(?:換句話說|總而言之|簡單來說|從這個角度來看|回到問題本身)|(?:言い換えると|要するに)|(?:다시 말해|요약하면)/gi,
+    penalty: 1
+  }
+];
+
 function trustedHostFragments() {
   const configured = (process.env.BLOG_SOURCE_WHITELIST || "")
     .split(",")
@@ -237,6 +305,99 @@ function reviewWeighted(max: number, issues: string[], warnings: string[], base 
     score: clampScore(base - issues.length * 6 - warnings.length * 2, max),
     issues,
     warnings
+  };
+}
+
+function countMatches(text: string, pattern: RegExp) {
+  const flags = pattern.flags.includes("g") ? pattern.flags : `${pattern.flags}g`;
+  return text.match(new RegExp(pattern.source, flags))?.length || 0;
+}
+
+function sentenceLengths(text: string) {
+  return text
+    .split(/[.!?。！？]\s*/)
+    .map((sentence) => sentence.trim())
+    .filter((sentence) => sentence.length > 20)
+    .map((sentence) => plainText(sentence).length);
+}
+
+function repeatedRhythmWindows(lengths: number[]) {
+  let repeated = 0;
+  for (let index = 0; index <= lengths.length - 3; index += 1) {
+    const group = lengths.slice(index, index + 3);
+    if (Math.max(...group) - Math.min(...group) <= 12) repeated += 1;
+  }
+  return repeated;
+}
+
+function englishLyAdverbs(text: string, language: BlogLanguage) {
+  if (language !== "en") return 0;
+  return countMatches(text, /\b[a-z]{4,}ly\b/gi);
+}
+
+export function reviewAntiSlop(post: BlogPost): ReviewResult & {
+  threshold: number;
+  dimensions: Record<AntiSlopDimension, number>;
+} {
+  const contentType = post.contentType || "column";
+  const threshold = ANTI_SLOP_THRESHOLDS[contentType];
+  const text = `${post.title}\n${post.excerpt}\n${post.geoSummary}\n${post.body}`;
+  const dimensions: Record<AntiSlopDimension, number> = {
+    directness: 10,
+    rhythm: 10,
+    trust: 10,
+    authenticity: 10,
+    density: 10
+  };
+  const issues: string[] = [];
+  const warnings: string[] = [];
+
+  for (const rule of antiSlopRules) {
+    const hits = countMatches(text, rule.pattern);
+    if (!hits) continue;
+    dimensions[rule.dimension] = Math.max(0, dimensions[rule.dimension] - Math.min(6, hits * rule.penalty));
+    warnings.push(`anti-slop pattern: ${rule.label} (${hits})`);
+  }
+
+  const emDashCount = countMatches(text, /[—–]/g);
+  if (emDashCount) {
+    dimensions.rhythm = Math.max(0, dimensions.rhythm - Math.min(5, emDashCount * 2));
+    warnings.push(`anti-slop pattern: em dash rhythm (${emDashCount})`);
+  }
+
+  const adverbs = englishLyAdverbs(text, post.language);
+  if (adverbs > 5) {
+    dimensions.density = Math.max(0, dimensions.density - Math.min(4, adverbs - 5));
+    warnings.push(`anti-slop pattern: too many -ly adverbs (${adverbs})`);
+  }
+
+  const rhythms = repeatedRhythmWindows(sentenceLengths(post.body));
+  if (rhythms > 1) {
+    dimensions.rhythm = Math.max(0, dimensions.rhythm - Math.min(5, rhythms * 2));
+    warnings.push("anti-slop pattern: repeated sentence rhythm");
+  }
+
+  const firstBlock = firstAnswerBlock(post.body);
+  if (countMatches(firstBlock, antiSlopRules[0].pattern)) {
+    dimensions.directness = Math.max(0, dimensions.directness - 2);
+    issues.push("anti-slop opening must answer directly instead of announcing the article");
+  }
+
+  for (const [dimension, value] of Object.entries(dimensions) as Array<[AntiSlopDimension, number]>) {
+    if (value < 6) issues.push(`anti-slop ${dimension} score ${value}/10 is below 6`);
+  }
+
+  const score = Object.values(dimensions).reduce((sum, value) => sum + value, 0);
+  if (score < threshold) {
+    issues.push(`anti-slop score ${score}/50 is below ${threshold}; revise filler, formulaic structure and vague claims`);
+  }
+
+  return {
+    score,
+    threshold,
+    dimensions,
+    issues,
+    warnings: warnings.slice(0, 8)
   };
 }
 
@@ -457,6 +618,7 @@ function reviewPost(post: BlogPost, multilingual: ReviewResult): PostReview {
   const seoGeoStructure = reviewSeoGeoStructure(post);
   const readability = reviewReadability(post);
   const imageFit = reviewImageFit(post);
+  const antiSlop = reviewAntiSlop(post);
   const breakdown: Record<ReviewArea, number> = {
     sourceTrust: sourceTrust.score,
     labsPointOfView: Math.max(0, labsPointOfView.score - Math.max(0, 10 - creativity.score)),
@@ -472,7 +634,8 @@ function reviewPost(post: BlogPost, multilingual: ReviewResult): PostReview {
     ...creativity.issues,
     ...seoGeoStructure.issues,
     ...readability.issues,
-    ...imageFit.issues
+    ...imageFit.issues,
+    ...antiSlop.issues
   ];
   const warnings = [
     ...contentType.warnings,
@@ -481,7 +644,8 @@ function reviewPost(post: BlogPost, multilingual: ReviewResult): PostReview {
     ...creativity.warnings,
     ...seoGeoStructure.warnings,
     ...readability.warnings,
-    ...imageFit.warnings
+    ...imageFit.warnings,
+    ...antiSlop.warnings
   ];
 
   if (post.generatedBy?.includes("local-bilingual-geo-template") || post.generatedBy?.includes("local-bilingual-lab-template")) {
@@ -492,7 +656,17 @@ function reviewPost(post: BlogPost, multilingual: ReviewResult): PostReview {
   }
 
   const score = Object.values(breakdown).reduce((sum, value) => sum + value, 0);
-  return { language: post.language, slug: post.slug, score, issues, warnings, breakdown };
+  return {
+    language: post.language,
+    slug: post.slug,
+    score,
+    issues,
+    warnings,
+    breakdown,
+    antiSlopScore: antiSlop.score,
+    antiSlopIssues: [...antiSlop.issues, ...antiSlop.warnings],
+    antiSlopDimensions: antiSlop.dimensions
+  };
 }
 
 async function sourceUrlStatus(url: string) {
@@ -558,11 +732,12 @@ export async function reviewBlogPairForAutoPublish(posts: BlogPost[]): Promise<B
   warnings.push(...sourceValidation.warnings);
 
   const baseScore = Math.min(...postReviews.map((review) => review.score), 100);
+  const antiSlopScore = Math.min(...postReviews.map((review) => review.antiSlopScore), 50);
   const score = Math.max(0, Math.min(100, baseScore - sourceValidation.issues.length * 10 - sourceValidation.warnings.length * 1));
   const approved = issues.length === 0 && score >= threshold;
   const notes = approved
-    ? `ALTOS LAB quality reviewer approved ${contentType} auto-publish. Score ${score}/${threshold}.`
-    : `ALTOS LAB quality reviewer held publish. Score ${score}/${threshold}. Issues: ${issues.join("; ")}`;
+    ? `ALTOS LAB quality reviewer approved ${contentType} auto-publish. Score ${score}/${threshold}. Anti-slop ${antiSlopScore}/50.`
+    : `ALTOS LAB quality reviewer held publish. Score ${score}/${threshold}. Anti-slop ${antiSlopScore}/50. Issues: ${issues.join("; ")}`;
 
   return { approved, score, threshold, contentType, issues, warnings, postReviews, notes };
 }
@@ -590,9 +765,12 @@ export function applyQualityReview(post: BlogPost, review: BlogPairQualityReview
       hasLabsPointOfView: postReview ? postReview.breakdown.labsPointOfView >= 15 : publish,
       hasCreativeAngle: postReview ? reviewCreativity(post).score >= 7 : publish,
       hasImageFit: postReview ? postReview.breakdown.imageFit >= 8 : publish,
+      hasAntiSlopReview: postReview ? postReview.antiSlopScore >= ANTI_SLOP_THRESHOLDS[review.contentType] : publish,
       qualityScoreBreakdown: postReview?.breakdown,
       qualityScore: review.score,
       qualityIssues,
+      antiSlopScore: postReview?.antiSlopScore,
+      antiSlopIssues: postReview?.antiSlopIssues,
       notes: review.notes
     }),
     aiDisclosure: publish

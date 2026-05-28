@@ -108,9 +108,12 @@ function hydrateBlogPost(post: BlogPost): BlogPost {
       hasLabsPointOfView: Boolean(post.qualityChecks?.hasLabsPointOfView ?? false),
       hasCreativeAngle: Boolean(post.qualityChecks?.hasCreativeAngle ?? false),
       hasImageFit: Boolean(post.qualityChecks?.hasImageFit ?? Boolean(post.cover && post.coverAlt)),
+      hasAntiSlopReview: Boolean(post.qualityChecks?.hasAntiSlopReview ?? (!post.generatedBy || post.status === "published")),
       qualityScoreBreakdown: post.qualityChecks?.qualityScoreBreakdown,
       qualityScore: post.qualityChecks?.qualityScore,
       qualityIssues: post.qualityChecks?.qualityIssues,
+      antiSlopScore: post.qualityChecks?.antiSlopScore,
+      antiSlopIssues: post.qualityChecks?.antiSlopIssues,
       notes: post.qualityChecks?.notes
     }),
     aiDisclosure: post.aiDisclosure,
@@ -395,6 +398,16 @@ export function publishValidationForBlogPost(post: BlogPost) {
     !post.qualityChecks.hasQualityReviewerApproval
   ) {
     errors.push("AI-generated posts require human review or quality reviewer approval before publishing");
+  }
+  if (post.generatedBy && !post.qualityChecks.hasAntiSlopReview) {
+    errors.push("AI-generated posts require anti-slop writing review before publishing");
+  }
+  if (
+    post.generatedBy &&
+    typeof post.qualityChecks.antiSlopScore === "number" &&
+    post.qualityChecks.antiSlopScore < 35
+  ) {
+    errors.push("AI-generated posts require anti-slop score 35/50 or higher before publishing");
   }
   return errors;
 }

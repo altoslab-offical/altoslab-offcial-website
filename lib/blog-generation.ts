@@ -783,6 +783,8 @@ Quality rules:
 - The article must be an original ALTOS LAB synthesis: summarize facts in your own words, cite the source URLs, and add implementation judgment.
 - Make readers feel ALTOS LAB is a serious lab: source-grounded, practical, original, careful with uncertainty and useful for decision makers.
 - Every article needs one fresh angle: a counterintuitive point, implementation framework, case breakdown, risk warning or decision matrix.
+- Anti-slop style gate: cut throat-clearing openers, do not announce "this article will", avoid "not X but Y" structures, avoid generic hype words, use concrete actors and actions, vary sentence rhythm, and remove empty transitions.
+- Sound like a sharp lab editor. Specific claims beat polished slogans.
 - Do not invent client names, statistics, dates or source claims.
 - Any claim tied to a trend must be supported by sourceLinks.
 - The first 50 words must directly answer the search intent.
@@ -834,6 +836,7 @@ Repair only the quality issues listed below. Do not rewrite the whole article if
 Preserve the same source URLs, same contentType, same newsCategory, same translationGroupId semantics and the same main angle.
 Do not invent clients, private data, statistics or dates.
 Make ALTOS LAB sound like a serious AI implementation lab and product studio, not only an SEO/GEO tool.
+Remove AI-slop patterns: throat-clearing, generic hype, passive voice, "not X but Y" contrasts, meta transitions, repeated sentence rhythm and vague claims. Keep the article specific and source-grounded.
 
 Language: ${post.language}
 Content type: ${post.contentType || contentTypeFromInput(input)}

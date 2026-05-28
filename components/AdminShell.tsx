@@ -458,6 +458,7 @@ export function AdminShell({ initialTab = "dashboard" }: AdminShellProps) {
       { label: "有可見 FAQ", ok: post.faqs.length > 0 },
       { label: "AI 草稿有來源連結", ok: !post.generatedBy || post.sourceLinks.length > 0 },
       { label: "來源可信與圖文符合", ok: Boolean(post.qualityChecks.hasSourceTrust && post.qualityChecks.hasImageFit) },
+      { label: "Anti-slop 寫作品質通過", ok: !post.generatedBy || Boolean(post.qualityChecks.hasAntiSlopReview) },
       { label: "人工或品質審核已通過", ok: !post.generatedBy || hasReviewApproval }
     ];
   }
@@ -1304,6 +1305,7 @@ export function AdminShell({ initialTab = "dashboard" }: AdminShellProps) {
                             ["hasLabsPointOfView", "Labs 觀點"],
                             ["hasCreativeAngle", "創意角度"],
                             ["hasImageFit", "圖文符合"],
+                            ["hasAntiSlopReview", "Anti-slop 通過"],
                             ["hasBilingualParity", "多語對齊"]
                           ].map(([field, label]) => (
                             <label className="checkbox-label" key={field}>
@@ -1351,6 +1353,20 @@ export function AdminShell({ initialTab = "dashboard" }: AdminShellProps) {
                             ) : (
                               <span>沒有阻擋發布的品質問題。</span>
                             )}
+                            {typeof selectedPost.qualityChecks.antiSlopScore === "number" ? (
+                              <>
+                                <strong>Anti-slop 分數 {selectedPost.qualityChecks.antiSlopScore}/50</strong>
+                                {selectedPost.qualityChecks.antiSlopIssues?.length ? (
+                                  <ul>
+                                    {selectedPost.qualityChecks.antiSlopIssues.map((issue) => (
+                                      <li key={issue}>{issue}</li>
+                                    ))}
+                                  </ul>
+                                ) : (
+                                  <span>沒有偵測到明顯 AI 味寫作問題。</span>
+                                )}
+                              </>
+                            ) : null}
                           </div>
                         ) : null}
                         <div className="publish-readiness">
