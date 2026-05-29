@@ -104,6 +104,7 @@ const defaultTrustedHostFragments = [
   "nvidia.com",
   "technologyreview.com",
   "semianalysis.com",
+  "aimagazine.com",
   "theverge.com",
   "techcrunch.com"
 ];

@@ -217,6 +217,18 @@ export const BLOG_SOURCE_REGISTRY: BlogSourceRegistryEntry[] = [
     notes: "Fast product/startup news signal; validate major claims with official sources."
   },
   {
+    id: "ai-magazine",
+    name: "AI Magazine",
+    url: "https://aimagazine.com/",
+    tier: "trusted-media",
+    market: "global",
+    language: "en",
+    category: "AI Products",
+    authority: 74,
+    freshness: 90,
+    notes: "International enterprise AI news; use as translated/adapted market signal with official or technical sources for verification."
+  },
+  {
     id: "the-verge-ai",
     name: "The Verge AI",
     url: "https://www.theverge.com/ai-artificial-intelligence",

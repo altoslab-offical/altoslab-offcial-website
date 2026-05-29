@@ -3778,6 +3778,15 @@ img {
   .blog-site-shell .blog-page {
     width: calc(100vw - 32px);
     max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  .blog-site-shell .blog-page article,
+  .blog-site-shell .article-hero {
+    width: 100%;
+    max-width: calc(100vw - 32px);
+    min-width: 0;
+    overflow-x: hidden;
   }
 
   .blog-site-shell .site-nav {
@@ -3830,11 +3839,12 @@ img {
 
   .blog-site-shell .article-hero h1 {
     width: 100%;
-    max-width: calc(100vw - 32px);
-    font-size: clamp(30px, 8.4vw, 36px);
-    line-height: 1.1;
+    max-width: calc(100vw - 44px);
+    font-size: clamp(24px, 6.4vw, 28px);
+    line-height: 1.14;
     overflow-wrap: anywhere;
-    word-break: break-word;
+    word-break: break-all;
+    text-wrap: wrap;
   }
 
   .blog-site-shell .article-hero .hero-copy,
@@ -3843,7 +3853,7 @@ img {
   }
 
   .blog-site-shell .article-hero .hero-copy {
-    font-size: 17px;
+    font-size: 16px;
     line-height: 1.55;
   }
 
@@ -3852,11 +3862,37 @@ img {
   .blog-site-shell .source-list,
   .blog-site-shell .ai-disclosure,
   .blog-site-shell .blog-cta-panel,
+  .blog-site-shell .faq-list,
+  .blog-site-shell .rich-text,
+  .blog-site-shell .rich-text p,
+  .blog-site-shell .rich-text li,
+  .blog-site-shell .project-detail-card li {
+    word-break: break-word;
+    overflow-wrap: anywhere;
+  }
+
+  .blog-site-shell .geo-summary,
+  .blog-site-shell .project-detail-card,
+  .blog-site-shell .source-list,
+  .blog-site-shell .ai-disclosure,
+  .blog-site-shell .blog-cta-panel,
   .blog-site-shell .faq-list {
+    width: 100%;
     max-width: calc(100vw - 32px);
+    overflow-wrap: anywhere;
+  }
+
+  .blog-site-shell .article-cover,
+  .blog-site-shell .article-cover-credit {
+    box-sizing: border-box;
+    display: block;
+    width: 100% !important;
+    max-width: calc(100vw - 32px) !important;
   }
 
   .blog-site-shell .rich-text {
+    width: 100%;
+    max-width: calc(100vw - 32px);
     font-size: 18px;
     line-height: 1.68;
   }

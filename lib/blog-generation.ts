@@ -881,6 +881,8 @@ Quality rules:
 - Never put the content type label in the title or seoTitle. Do not prefix titles with "市場快訊", "Market brief", "Column", "Feature", "專欄", "專題", "市場ブリーフ", "コラム", "特集", "시장 브리프", "칼럼" or "기획". The website renders contentType as a separate badge.
 - Do not make the title a taxonomy bucket. The title must name the source/event/mechanism/operator question and the implication for the reader.
 - Use the listed RSS/source items as factual references only. Do not copy source wording, paragraphs, structure, images, charts, screenshots or article art.
+- If using foreign news, write it as a translated and adapted market signal. Add a visible "Source and translation note" / "來源與轉譯備註" / equivalent local-language H2 that says which sources were translated or summarized, how ALTOS LAB used them, and that the article is not a full reprint.
+- At least one body section must connect a concrete outside news event to the reader's business decision. Do not leave foreign sources only in sourceLinks.
 - The article must be an original ALTOS LAB synthesis: summarize facts in your own words, cite the source URLs, and add implementation judgment.
 - Make readers feel ALTOS LAB is a serious lab: source-grounded, practical, original, careful with uncertainty and useful for decision makers.
 - Every article needs one fresh angle: a market signal, counterintuitive point, mechanism explainer, source trail, implementation framework, case breakdown, risk warning, decision matrix, comparison table or signal chart.

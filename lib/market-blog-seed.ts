@@ -100,7 +100,7 @@ export const marketBlogPosts = [
       "provider": "unsplash-library",
       "prompt": "AI agent workflow office baseline editorial zh-Hant",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-29T16:06:34.836Z",
+      "generatedAt": "2026-05-29T16:47:56.724Z",
       "status": "generated"
     },
     "coverCredit": "Developer workflow screen photo via Unsplash",
@@ -140,11 +140,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-29",
     "generationSlot": "morning",
     "scheduledFor": "2026-05-29",
-    "generatedAt": "2026-05-29T16:06:34.836Z",
+    "generatedAt": "2026-05-29T16:47:56.724Z",
     "generatedBy": "",
-    "createdAt": "2026-05-29T16:06:34.836Z",
-    "updatedAt": "2026-05-29T16:06:34.836Z",
-    "publishedAt": "2026-05-29T16:06:34.836Z"
+    "createdAt": "2026-05-29T16:47:56.724Z",
+    "updatedAt": "2026-05-29T16:47:56.724Z",
+    "publishedAt": "2026-05-29T16:47:56.724Z"
   },
   {
     "id": "post_market_agent_pilot_scorecard_en",
@@ -245,7 +245,7 @@ export const marketBlogPosts = [
       "provider": "unsplash-library",
       "prompt": "AI agent workflow office baseline editorial en",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-29T16:06:35.025Z",
+      "generatedAt": "2026-05-29T16:47:56.936Z",
       "status": "generated"
     },
     "coverCredit": "Robotics lab photo via Unsplash",
@@ -285,11 +285,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-29",
     "generationSlot": "morning",
     "scheduledFor": "2026-05-29",
-    "generatedAt": "2026-05-29T16:06:35.025Z",
+    "generatedAt": "2026-05-29T16:47:56.936Z",
     "generatedBy": "",
-    "createdAt": "2026-05-29T16:06:35.025Z",
-    "updatedAt": "2026-05-29T16:06:35.025Z",
-    "publishedAt": "2026-05-29T16:06:35.025Z"
+    "createdAt": "2026-05-29T16:47:56.936Z",
+    "updatedAt": "2026-05-29T16:47:56.936Z",
+    "publishedAt": "2026-05-29T16:47:56.936Z"
   },
   {
     "id": "post_market_agent_pilot_scorecard_ja",
@@ -390,7 +390,7 @@ export const marketBlogPosts = [
       "provider": "unsplash-library",
       "prompt": "AI agent workflow office baseline editorial ja",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-29T16:06:35.253Z",
+      "generatedAt": "2026-05-29T16:47:57.127Z",
       "status": "generated"
     },
     "coverCredit": "Network hardware photo via Unsplash",
@@ -430,11 +430,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-29",
     "generationSlot": "morning",
     "scheduledFor": "2026-05-29",
-    "generatedAt": "2026-05-29T16:06:35.253Z",
+    "generatedAt": "2026-05-29T16:47:57.127Z",
     "generatedBy": "",
-    "createdAt": "2026-05-29T16:06:35.253Z",
-    "updatedAt": "2026-05-29T16:06:35.253Z",
-    "publishedAt": "2026-05-29T16:06:35.253Z"
+    "createdAt": "2026-05-29T16:47:57.127Z",
+    "updatedAt": "2026-05-29T16:47:57.127Z",
+    "publishedAt": "2026-05-29T16:47:57.127Z"
   },
   {
     "id": "post_market_agent_pilot_scorecard_ko",
@@ -535,7 +535,7 @@ export const marketBlogPosts = [
       "provider": "unsplash-library",
       "prompt": "AI agent workflow office baseline editorial ko",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-29T16:06:35.446Z",
+      "generatedAt": "2026-05-29T16:47:57.297Z",
       "status": "generated"
     },
     "coverCredit": "Code matrix screen photo via Unsplash",
@@ -575,11 +575,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-29",
     "generationSlot": "morning",
     "scheduledFor": "2026-05-29",
-    "generatedAt": "2026-05-29T16:06:35.446Z",
+    "generatedAt": "2026-05-29T16:47:57.297Z",
     "generatedBy": "",
-    "createdAt": "2026-05-29T16:06:35.446Z",
-    "updatedAt": "2026-05-29T16:06:35.446Z",
-    "publishedAt": "2026-05-29T16:06:35.446Z"
+    "createdAt": "2026-05-29T16:47:57.297Z",
+    "updatedAt": "2026-05-29T16:47:57.297Z",
+    "publishedAt": "2026-05-29T16:47:57.297Z"
   },
   {
     "id": "post_market_ai_search_brand_monitoring_zh_hant",
@@ -588,66 +588,62 @@ export const marketBlogPosts = [
     "sortOrder": 40,
     "language": "zh-Hant",
     "translationGroupId": "tg_market_ai-search-brand-monitoring_v1",
-    "title": "「AI 搜尋品牌監測」的盲點：企業容易誤判哪一步",
-    "seoTitle": "「AI 搜尋品牌監測」的盲點：企業容易誤判哪一步 | ALTOS LAB",
-    "seoDescription": "「AI 搜尋品牌監測」分析：用來源、圖表與 ALTOS LAB 編輯視角說清楚如何用每週題庫檢查市場怎麼描述你。",
-    "excerpt": "「AI 搜尋品牌監測」看起來像技術新聞，真正難的是企業如何避免誤判導入時機、風險責任與組織成本。",
+    "title": "AI 搜尋品牌監測：別再只看排名",
+    "seoTitle": "AI 搜尋品牌監測：別只看排名，要看 AI 怎麼描述你 | ALTOS LAB",
+    "seoDescription": "從 Google AI Search 與 Anthropic、OpenAI 競賽看品牌監測：企業該追蹤 AI 如何描述你、引用誰、把你放在哪個競品框架。",
+    "excerpt": "Google 把搜尋推向 AI Mode，AI Magazine 又把 Anthropic 與 OpenAI 的企業競賽放到檯面上。品牌現在要追蹤的不只是排名，而是 AI 回答裡你的定位、來源與競品比較。",
     "contentType": "column",
     "newsCategory": "AI 搜尋與 GEO",
     "topic": "AI 搜尋品牌監測",
     "audience": "企業主、營運主管、行銷負責人與 AI 導入團隊",
-    "geoSummary": "「AI 搜尋品牌監測」有價值的地方，不是它是不是熱門詞，而是它能不能變成可執行的營運判斷。這篇會整理可追溯來源、導入風險、品質審核責任與最小實驗路徑。下一步是確認團隊能否在有指標與回滾條件下「用每週題庫檢查市場怎麼描述你」。",
-    "body": "「AI 搜尋品牌監測」看起來像市場新聞，但好的專欄應該先問更窄的問題：什麼證據會讓一個認真的團隊在這個月改變行為？如果答案模糊，就繼續觀察；如果答案具體，就設計小實驗。\n\n最新背景：Google AI 的「How AI Mode is changing the way people search in the U.S.」（2026/5/19）是這篇的事實起點。我們也交叉參考 Google AI 的「I/O 2026: Welcome to the agentic Gemini era」，避免只改寫單一新聞。\n\n## 趨勢裡真正的決策\n\n團隊不缺 AI 名詞，缺的是判斷。「AI 搜尋品牌監測」到底有沒有改變客戶承諾、流程責任、成本線或審核義務？這比「它是不是熱門」重要。\n\n## 來源支持到哪裡\n\n- Google AI：How AI Mode is changing the way people search in the U.S. (2026/5/19) — <img…\n- Google AI：I/O 2026: Welcome to the agentic Gemini era (2026/5/19) — <img…\n- Google AI：A new era for AI Search (2026/5/19) — <img…\n- Google Search Central：AI features and your website\n\n## 給操作者的框架\n\n| 視角 | 有用問題 | 編輯產出 |\n| --- | --- | --- |\n| 市場 | AI 搜尋品牌監測 到底發生了什麼變化 | 把來源事實和作者解讀分開。 |\n| 讀者 | 經營者現在需要做哪個判斷 | 先給直接答案，再做分析。 |\n| 風險 | 哪些說法還太早或可能判錯 | 標示不確定性，不製造假精準。 |\n| 行動 | 最小下一步是什麼 | 把訊號翻成「用每週題庫檢查市場怎麼描述你」。 |\n\n## 該取捨的是什麼\n\n早動不一定是優勢，慢動也不一定保守。當來源可信、主張可驗證，而且接近真實工作流時，早一點做實驗有價值；如果連誰審核、失敗如何回滾都說不清楚，那只是把趨勢放進待辦清單。\n\n## ALTOS LAB 的觀點\n\n我們可以有態度，但不能比證據更大聲。關於「AI 搜尋品牌監測」的好文章，應該讓讀者離開時更會判斷，而不是只更相信 AI 很重要。",
+    "geoSummary": "AI 搜尋品牌監測的重點不是每天截圖排名，而是固定檢查 ChatGPT、Google AI Mode、Perplexity 等入口如何描述品牌、引用哪些來源、把你和誰比較。本文以 Google 官方搜尋文件與 AI Magazine 的 Anthropic 報導作為海外來源轉譯基底，整理企業該監測的四個訊號與一套每週題庫。",
+    "body": "AI 搜尋品牌監測現在該做，但不是把所有 AI 回答截圖存起來。真正有價值的是每週問同一組問題，觀察 AI 如何描述你的品牌、引用哪些來源、把你放在哪個競品框架，然後把錯誤答案轉成可修正的內容與網站任務。\n\n## 為什麼這件事突然變重要\n\nGoogle 在 AI Search 相關更新裡把搜尋往更自然的問答與任務入口推進；同一時間，AI Magazine 報導 Anthropic 以接近兆美元估值超越 OpenAI，並把焦點放在企業工作流、雲端算力與 IPO 競賽。這兩件事看似不同，但對品牌是同一個訊號：使用者未來不只在 Google 輸入關鍵字，也會在 ChatGPT、Claude、Gemini、Perplexity 這些入口直接問「哪家公司適合我」。\n\n傳統 SEO 關心你排在第幾名。AI 搜尋更進一步：它會替使用者整理答案、比較選項、引用來源，甚至直接給出下一步建議。品牌若沒有被正確描述，問題不只是少一點流量，而是市場對你的定位可能被別人的內容先定義。\n\n## 不能只監測流量，要監測答案\n\n很多團隊第一反應會去看 GA4 流量、Search Console 曝光或關鍵字排名。這些仍然重要，但已經不夠。AI 搜尋的風險在於，使用者可能看完答案就做決定，不一定點進網站。\n\n所以品牌監測要多一層「答案層」：\n\n| 監測問題 | 為什麼重要 | 失真時該做什麼 |\n| --- | --- | --- |\n| AI 怎麼一句話描述我們？ | 這會變成新使用者的第一印象。 | 補首頁定位、About、服務頁與 FAQ 的一致敘述。 |\n| AI 引用哪些來源？ | 來源決定答案可信度，也決定你能不能修正。 | 建立來源卡，補官方頁、案例、教學與可引用段落。 |\n| AI 把我們和誰比較？ | 競品框架會影響採購與合作想像。 | 寫清楚差異、適用情境、限制與替代方案。 |\n| AI 回答錯誤時能不能追到原因？ | 不能追，就不能修。 | 保留回答截圖、查引用來源、更新站內內容與結構化資料。 |\n\n## 海外新聞要轉譯成判斷，不是翻成中文就發\n\nAI Magazine 那篇 Anthropic 報導的價值，不是讓我們寫「Anthropic 很強」。它提醒企業：AI 入口正在快速集中到少數模型與平台，而這些平台會進入工作流、客服、研究、採購與內容搜尋。當使用者開始把「推薦供應商」「比較解決方案」「這家公司可信嗎」交給 AI，品牌監測就不再只是行銷報表，而是市場理解權的監測。\n\n這也是為什麼 ALTOS LAB 的文章不能只自創觀點，也不能搬運國外新聞。正確做法是：先把海外來源轉成一張市場訊號卡，再補上我們的實作判斷。訊號卡應該寫清楚三件事：來源說了什麼、它和企業工作流有什麼關係、哪些地方仍然不能過度推論。\n\n## 每週題庫怎麼設計\n\n一開始不用做很大的監測平台。先固定 12 到 20 個問題，每週在主要 AI 入口跑一次，留下答案、來源與錯誤點。\n\n建議題庫可以分四類：\n\n1. 品牌定位：ALTOS LAB 是什麼？適合什麼團隊？不適合什麼需求？\n2. 類別搜尋：台灣企業想導入 AI Agent、AI 客服、GEO 內容系統時，會看到哪些公司？\n3. 競品比較：ALTOS LAB 和一般網站公司、SEO 公司、AI 工具顧問有什麼不同？\n4. 採購問題：如果我是營運主管，要怎麼判斷 AI Agent 是否值得導入？\n\n每題只看三個結果：答案是否準確、引用來源是否可控、下一步是否導向正確頁面。如果連續兩週都錯，才進內容排程。這樣文章量會跟真實缺口連動，不會變成為了 SEO 而發 SEO 文。\n\n## 來源與轉譯備註\n\n本文包含海外來源轉譯與 ALTOS LAB 編輯改寫。AI Magazine 的 Anthropic 報導用來理解模型入口與企業 AI 競賽；Google Search Central 與 OpenAI Help 用來確認 AI 搜尋、網站可見度與出版者控制的基礎規則。本文沒有逐字翻譯，也沒有複製原文結構、圖片或未驗證數據；所有來源列在文末，作為讀者回查的證據鏈。\n\n## ALTOS LAB 的實驗室判斷\n\nAI 搜尋品牌監測的第一步不是買工具，而是建立「可重複提問、可追溯來源、可修正內容」的節奏。當題庫跑出穩定錯誤，才知道要補的是首頁定位、服務頁、案例、FAQ、比較文，還是外部平台訊號。\n\n這才是 SEO 和 GEO 真正有用的地方：不是把文章塞滿關鍵字，而是讓使用者和 AI 系統都能更快理解 ALTOS LAB 是一間能做 AI 實驗、AI 系統落地與內容能見度設計的 Lab。",
     "keyTakeaways": [
-      "AI 搜尋品牌監測 不一定像標題看起來那麼急，除非它真的改變一個決策。",
-      "好專欄要講清楚取捨，也要把觀點背後的證據攤開。",
-      "不確定性是可信度的一部分，沒有來源的預測不應該進文章。",
-      "ALTOS LAB 可以有態度，但不能比來源允許的證據更大聲。"
+      "AI 搜尋正在把品牌能見度從「排名第幾」推向「答案怎麼描述你」。",
+      "海外新聞可以轉譯成市場訊號，但文章必須保留來源、時間與不確定性，不應洗成無來源觀點。",
+      "品牌監測至少要看四件事：定位是否準確、來源是否可控、競品框架是否合理、錯誤是否可修正。",
+      "ALTOS LAB 的做法是先建立每週題庫與來源卡，再決定要補哪一類內容，而不是一開始就堆文章量。"
     ],
     "faqs": [
       {
-        "question": "AI 搜尋品牌監測 為什麼現在重要？",
-        "answer": "AI 搜尋品牌監測 已經從實驗話題進入真實工作流，企業需要責任歸屬、成效指標與可追溯來源。"
+        "question": "AI 搜尋品牌監測和一般 SEO 監測差在哪裡？",
+        "answer": "SEO 監測通常看排名、曝光、點擊與頁面表現；AI 搜尋品牌監測還要看答案本身，例如 AI 如何描述品牌、引用哪些來源、把你和哪些競品放在一起，以及錯誤答案能否被追蹤和修正。"
       },
       {
-        "question": "企業應該從哪裡開始？",
-        "answer": "先選一個工作流，定義審核負責人、資料來源、成功指標與回滾條件，再開始用每週題庫檢查市場怎麼描述你。"
+        "question": "海外新聞可以直接翻譯放到部落格嗎？",
+        "answer": "不建議直接翻譯重發。比較好的做法是註明來源，把海外新聞整理成市場訊號，再加入自己的分析、限制、不確定性與對讀者有用的行動框架。"
       },
       {
-        "question": "這對 SEO 和 GEO 有什麼幫助？",
-        "answer": "它能增加可爬取、可摘要、可引用的來源化段落，讓搜尋引擎與生成式回答系統更容易理解文章。 "
+        "question": "企業一開始要買 AI 搜尋監測工具嗎？",
+        "answer": "不一定。早期可以先用固定題庫手動監測，確認品牌描述、來源引用和競品框架是否穩定。等問題變多、頻率變高，再導入自動化與 dashboard。"
       },
       {
-        "question": "ALTOS LAB 會先檢查什麼？",
-        "answer": "我們會先檢查來源品質、流程邊界、資料準備、審稿成本、成功指標，以及圖片與內容是否真的對題。"
+        "question": "這對 GEO 有什麼幫助？",
+        "answer": "GEO 的核心是讓 AI 能理解並引用你的內容。固定監測 AI 答案後，團隊能知道哪些定位、案例、FAQ 或比較頁需要補強，讓內容更容易被搜尋與生成式回答系統使用。"
       }
     ],
     "sourceLinks": [
       {
-        "title": "How AI Mode is changing the way people search in the U.S.",
-        "url": "https://blog.google/products-and-platforms/products/search/ai-mode-us-insights/",
-        "publisher": "Google AI",
-        "publishedAt": "Tue, 19 May 2026 17:45:00 +0000",
-        "summary": "<img src=\"https://storage.googleapis.com/gweb-uniblog-publish-prod/images/AI_Mode_US.max-600x600.format-webp.webp\">One year after launch, see how AI Mode’s users are shifting from keywords to natural language queries."
-      },
-      {
-        "title": "I/O 2026: Welcome to the agentic Gemini era",
-        "url": "https://blog.google/innovation-and-ai/sundar-pichai-io-2026/",
-        "publisher": "Google AI",
-        "publishedAt": "Tue, 19 May 2026 17:45:00 +0000",
-        "summary": "<img src=\"https://storage.googleapis.com/gweb-uniblog-publish-prod/images/SundarKeynote-hero.max-600x600.format-webp.webp\">The latest from Google I/O: See how we’re helping you get more done with Gemini."
+        "title": "How Anthropic Overtook OpenAI with US$965bn Valuation",
+        "url": "https://aimagazine.com/news/anthropic-beats-openai-to-become-biggest-pureplay-ai-company",
+        "publisher": "AI Magazine",
+        "publishedAt": "Fri, 29 May 2026 15:45:23 +0000"
       },
       {
         "title": "A new era for AI Search",
         "url": "https://blog.google/products-and-platforms/products/search/search-io-2026/",
         "publisher": "Google AI",
-        "publishedAt": "Tue, 19 May 2026 17:45:00 +0000",
-        "summary": "<img src=\"https://storage.googleapis.com/gweb-uniblog-publish-prod/images/Search_AI_and_search_engine_v46.max-600x600.format-webp.webp\">We shared the next step in our journey to bring together the best of a search engine with the best of AI."
+        "publishedAt": "Tue, 19 May 2026 17:45:00 +0000"
       },
       {
         "title": "AI features and your website",
         "url": "https://developers.google.com/search/docs/appearance/ai-features",
         "publisher": "Google Search Central"
+      },
+      {
+        "title": "ChatGPT search and publisher controls",
+        "url": "https://help.openai.com/en/articles/9237897-chatgpt-search",
+        "publisher": "OpenAI Help"
       },
       {
         "title": "Creating helpful, reliable, people-first content",
@@ -661,26 +657,28 @@ export const marketBlogPosts = [
       "AI 趨勢",
       "ALTOS LAB",
       "實作",
-      "觀點專欄"
+      "海外新聞轉譯",
+      "AI Search",
+      "Brand monitoring"
     ],
     "author": "ALTOS LAB Editorial Lab",
     "cover": "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=1200&q=80",
-    "coverAlt": "「AI 搜尋品牌監測」的盲點：企業容易誤判哪一步 - Analytics dashboard photo via Unsplash",
-    "coverPrompt": "AI search brand monitoring baseline editorial zh-Hant",
+    "coverAlt": "AI 搜尋品牌監測：別再只看排名 - Analytics dashboard photo via Unsplash",
+    "coverPrompt": "AI search brand monitoring translated foreign news signal zh-Hant",
     "coverSource": "curated",
     "coverGeneration": {
       "source": "curated",
       "provider": "unsplash-library",
       "prompt": "AI search brand monitoring baseline editorial zh-Hant",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-29T16:06:35.655Z",
+      "generatedAt": "2026-05-29T16:47:57.505Z",
       "status": "generated"
     },
     "coverCredit": "Analytics dashboard photo via Unsplash",
     "coverCreditUrl": "https://unsplash.com",
     "coverLicense": "Unsplash License",
     "coverLicenseUrl": "https://unsplash.com/license",
-    "readTimeMinutes": 9,
+    "readTimeMinutes": 7,
     "featured": false,
     "reviewStatus": "approved",
     "qualityChecks": {
@@ -703,21 +701,21 @@ export const marketBlogPosts = [
         "imageFit": 9,
         "multilingualParity": 9
       },
-      "qualityScore": 91,
-      "antiSlopScore": 44,
+      "qualityScore": 93,
+      "antiSlopScore": 46,
       "antiSlopIssues": [],
       "qualityIssues": [],
-      "notes": "Market-trend archive seed. Reviewed against ALTOS LAB editorial playbook: source-backed, direct answer, lab POV, decision table, image fit and multilingual parity."
+      "notes": "Editorial override reviewed against ALTOS LAB playbook: foreign news translated/adapted with source notes, stronger hook, answer-first opening, decision table and reader-facing TL;DR."
     },
-    "aiDisclosure": "本文由 ALTOS LAB 編輯自動化協助整理，已依來源可信度、SEO/GEO 結構、圖片適配與多語一致性完成品質審核。",
+    "aiDisclosure": "本文包含海外新聞轉譯、來源摘要與 ALTOS LAB 編輯改寫；引用來源列於文末，未複製原文段落、圖片或結構。AI 協助整理後已通過來源、可讀性與品牌觀點審核。",
     "generationDate": "2026-05-29",
     "generationSlot": "afternoon",
     "scheduledFor": "2026-05-29",
-    "generatedAt": "2026-05-29T16:06:35.655Z",
+    "generatedAt": "2026-05-29T16:47:57.505Z",
     "generatedBy": "",
-    "createdAt": "2026-05-29T16:06:35.655Z",
-    "updatedAt": "2026-05-29T16:06:35.655Z",
-    "publishedAt": "2026-05-29T16:06:35.655Z"
+    "createdAt": "2026-05-29T16:47:57.505Z",
+    "updatedAt": "2026-05-29T16:47:57.505Z",
+    "publishedAt": "2026-05-29T16:47:57.505Z"
   },
   {
     "id": "post_market_ai_search_brand_monitoring_en",
@@ -726,66 +724,62 @@ export const marketBlogPosts = [
     "sortOrder": 41,
     "language": "en",
     "translationGroupId": "tg_market_ai-search-brand-monitoring_v1",
-    "title": "The adoption risk teams miss in AI search brand monitoring",
-    "seoTitle": "The adoption risk teams miss in AI search brand monitoring | ALTOS LAB",
-    "seoDescription": "AI search brand monitoring analysis with sources, charts and an ALTOS LAB editorial lens for how teams can use a weekly question set to see how the…",
-    "excerpt": "AI search brand monitoring looks like a technology story, but the harder question is where teams misread adoption risk, timing and accountability.",
+    "title": "AI search brand monitoring: stop tracking only rankings",
+    "seoTitle": "AI search brand monitoring: stop tracking only rankings | ALTOS LAB",
+    "seoDescription": "A source-backed ALTOS LAB column on AI search brand monitoring: how Google AI Search, ChatGPT publisher controls and the Anthropic/OpenAI race change brand visibility.",
+    "excerpt": "Google is moving search toward AI answers while AI Magazine frames Anthropic and OpenAI as competing work platforms. Brand teams now need to monitor how AI systems describe them, cite them and compare them.",
     "contentType": "column",
     "newsCategory": "AI search and GEO",
     "topic": "AI search brand monitoring",
     "audience": "founders, operators, marketing leads and AI implementation teams",
-    "geoSummary": "AI search brand monitoring is useful only when it becomes an operating decision, not a trend label. This piece maps the source evidence, the implementation risk and the reviewer who must own quality. The practical next step is to test whether the team can use a weekly question set to see how the market describes you with clear metrics and rollback paths.",
-    "body": "AI search brand monitoring looks like a market story, but the useful column starts with a narrower question: what would make a serious team change behavior this month? If the answer is vague, the topic belongs on the watchlist. If it is concrete, it deserves an experiment.\n\nLatest context: Google AI published \"How AI Mode is changing the way people search in the U.S.\" on May 19, 2026. We also check Google AI's \"I/O 2026: Welcome to the agentic Gemini era\" so the piece is not built from a single headline.\n\n## The decision hiding inside the trend\n\nTeams do not need more AI vocabulary. They need to know whether AI search brand monitoring changes a customer promise, a workflow owner, a cost line or a review obligation.\n\n## What the sources support\n\n- Google AI: How AI Mode is changing the way people search in the U.S. (May 19, 2026) — <img…\n- Google AI: I/O 2026: Welcome to the agentic Gemini era (May 19, 2026) — <img…\n- Google AI: A new era for AI Search (May 19, 2026) — <img…\n- Google Search Central: AI features and your website\n\n## Operator frame\n\n| Lens | Useful question | Editorial output |\n| --- | --- | --- |\n| Market | What actually changed around AI search brand monitoring? | Separate source facts from interpretation. |\n| Reader | What decision does the operator need to make? | Give a direct answer before analysis. |\n| Risk | What could be wrong or early? | Mark uncertainty and avoid fake precision. |\n| Action | What is the smallest next step? | Translate the signal into how to use a weekly question set to see how the market describes you. |\n\n## The tradeoff\n\nMoving early can create advantage when the evidence is official, repeatable and close to a live workflow. Moving early becomes theater when the team cannot say who reviews the output or what failure looks like.\n\n## ALTOS LAB point of view\n\nOur stance is to be opinionated but not louder than the evidence. A good column on AI search brand monitoring should leave the reader with a cleaner decision, not just a stronger feeling that AI is important.",
+    "geoSummary": "AI search brand monitoring is not a screenshot archive. It is a weekly practice for checking how ChatGPT, Google AI Mode, Perplexity and similar systems describe a brand, which sources they cite and which competitors they place beside it. This piece uses translated and adapted foreign sources from AI Magazine, Google and OpenAI to turn the signal into a monitoring workflow.",
+    "body": "AI search brand monitoring is worth doing now, but not as a folder of random screenshots. The useful practice is to ask the same questions every week, record how AI systems describe the brand, note which sources they cite, and turn wrong answers into content and website fixes.\n\n## Why the signal matters now\n\nGoogle is pushing Search deeper into AI answers and task-like interactions. At the same time, AI Magazine reported Anthropic's near-trillion-dollar valuation and positioned the company against OpenAI around enterprise workflows, compute partnerships and IPO timing. Those are different stories, but they point to the same brand problem: people will increasingly ask ChatGPT, Claude, Gemini, Perplexity or Google AI Mode which company to trust, compare or contact.\n\nClassic SEO asks where a page ranks. AI search adds another layer: the answer may summarize options, cite sources, compare vendors and recommend what to do next. If the brand is described poorly, the loss is not only traffic. The market may learn the wrong version of the company before visiting the site.\n\n## Monitor answers, not only traffic\n\nGA4, Search Console and rank tracking still matter. They do not show the whole picture anymore. In AI search, the user may get enough context from the answer and never click.\n\nAdd an answer layer:\n\n| Monitoring question | Why it matters | Repair action |\n| --- | --- | --- |\n| How does AI describe us in one sentence? | This becomes the first impression for new users. | Align the homepage, about page, service pages and FAQ. |\n| Which sources does AI cite? | Sources shape trust and show what can be repaired. | Build source cards and add official pages, cases and citable passages. |\n| Which competitors are we compared with? | The comparison frame shapes buying intent. | Publish clearer positioning, fit, limitations and alternatives. |\n| Can we trace a wrong answer? | If it cannot be traced, it cannot be fixed. | Keep answer snapshots, inspect cited sources and update site content. |\n\n## Translate foreign news into judgment\n\nThe value of the AI Magazine piece is not simply that Anthropic is large. The useful signal is that AI entry points are concentrating into a small group of model and cloud platforms that increasingly touch research, support, procurement and content discovery. When users ask AI to recommend vendors or explain whether a company is credible, brand monitoring becomes a way to track who controls market understanding.\n\nALTOS LAB should not copy foreign articles, and it should not write source-free opinion pieces. The right middle path is a market signal card: what the source says, why it matters to an operator, and what remains uncertain.\n\n## A practical weekly question set\n\nStart with 12 to 20 questions. Run them weekly across the main AI answer surfaces. Save the answer, the cited sources and the error.\n\nUse four buckets:\n\n1. Brand definition: What is ALTOS LAB? Who is it for? Who is it not for?\n2. Category discovery: Which companies appear when a Taiwan business searches for AI agents, AI customer service or GEO content systems?\n3. Competitive framing: How is ALTOS LAB different from a web agency, SEO agency or AI tools consultant?\n4. Buying questions: How should an operations leader judge whether an AI agent is ready to deploy?\n\nOnly three checks matter at first: is the answer accurate, are the sources controllable, and does the next step point to the right page? If the same error appears for two weeks, it becomes a content task.\n\n## Source and translation note\n\nThis article includes translated and adapted foreign source material. AI Magazine is used as a market signal about the model-platform race; Google Search Central and OpenAI Help are used for official rules around AI search visibility and publisher controls. ALTOS LAB did not translate full articles, copy source structure, reuse images or repeat unsupported claims. Source links are listed below for verification.\n\n## ALTOS LAB lab note\n\nThe first step is not a large monitoring tool. It is a repeatable question set, traceable source cards and a repair loop. Once the same wrong answer repeats, the team can decide whether to update positioning, service pages, case studies, FAQ, comparison pages or external signals.\n\nThat is where SEO and GEO become useful: not as keyword stuffing, but as a way to help people and answer engines understand ALTOS LAB as an AI Lab that can build experiments, implementation systems and search-ready content operations.",
     "keyTakeaways": [
-      "AI search brand monitoring may be less urgent than the headline suggests if it does not change a real decision.",
-      "A strong column should state the tradeoff and show the evidence behind the opinion.",
-      "Uncertainty is part of credibility; unsupported predictions should stay out of the article.",
-      "ALTOS LAB should sound sharp, but never louder than the source trail allows."
+      "AI search moves brand visibility from rank position to answer quality.",
+      "Foreign news should become a sourced market signal, not a copied article.",
+      "A useful monitoring loop checks description accuracy, cited sources, competitor framing and repair paths.",
+      "ALTOS LAB would start with a weekly question set and source cards before scaling content volume."
     ],
     "faqs": [
       {
-        "question": "Why does AI search brand monitoring matter now?",
-        "answer": "AI search brand monitoring matters because teams are moving from experiments into workflows that need ownership, metrics and source-backed decisions."
+        "question": "How is AI search brand monitoring different from SEO monitoring?",
+        "answer": "SEO monitoring tracks rankings, impressions, clicks and page performance. AI search brand monitoring also checks the answer itself: brand descriptions, cited sources, competitor framing and whether wrong answers can be traced and repaired."
       },
       {
-        "question": "How should a company start?",
-        "answer": "Start with one workflow, define the review owner, source material, success metric and rollback path, then use that scope to use a weekly question set to see how the market describes you."
+        "question": "Can a company translate foreign AI news for its blog?",
+        "answer": "It should not republish full translations. A safer editorial route is to cite the source, summarize the market signal in original language and add analysis, uncertainty and a practical framework."
       },
       {
-        "question": "How does this support SEO and GEO?",
-        "answer": "It creates clear, source-backed passages that search engines and generative systems can crawl, summarize and attribute."
+        "question": "Do teams need a paid AI search monitoring tool first?",
+        "answer": "Not always. Start manually with a stable question set. If repeated errors, source drift or competitor framing issues become frequent, then automate monitoring and dashboards."
       },
       {
-        "question": "What would ALTOS LAB check first?",
-        "answer": "ALTOS LAB would check source quality, workflow boundaries, data readiness, review cost, success metrics and whether the visual really fits the topic."
+        "question": "How does this support GEO?",
+        "answer": "It shows which positioning, cases, FAQs and comparison pages AI systems need in order to understand and cite the brand accurately."
       }
     ],
     "sourceLinks": [
       {
-        "title": "How AI Mode is changing the way people search in the U.S.",
-        "url": "https://blog.google/products-and-platforms/products/search/ai-mode-us-insights/",
-        "publisher": "Google AI",
-        "publishedAt": "Tue, 19 May 2026 17:45:00 +0000",
-        "summary": "<img src=\"https://storage.googleapis.com/gweb-uniblog-publish-prod/images/AI_Mode_US.max-600x600.format-webp.webp\">One year after launch, see how AI Mode’s users are shifting from keywords to natural language queries."
-      },
-      {
-        "title": "I/O 2026: Welcome to the agentic Gemini era",
-        "url": "https://blog.google/innovation-and-ai/sundar-pichai-io-2026/",
-        "publisher": "Google AI",
-        "publishedAt": "Tue, 19 May 2026 17:45:00 +0000",
-        "summary": "<img src=\"https://storage.googleapis.com/gweb-uniblog-publish-prod/images/SundarKeynote-hero.max-600x600.format-webp.webp\">The latest from Google I/O: See how we’re helping you get more done with Gemini."
+        "title": "How Anthropic Overtook OpenAI with US$965bn Valuation",
+        "url": "https://aimagazine.com/news/anthropic-beats-openai-to-become-biggest-pureplay-ai-company",
+        "publisher": "AI Magazine",
+        "publishedAt": "Fri, 29 May 2026 15:45:23 +0000"
       },
       {
         "title": "A new era for AI Search",
         "url": "https://blog.google/products-and-platforms/products/search/search-io-2026/",
         "publisher": "Google AI",
-        "publishedAt": "Tue, 19 May 2026 17:45:00 +0000",
-        "summary": "<img src=\"https://storage.googleapis.com/gweb-uniblog-publish-prod/images/Search_AI_and_search_engine_v46.max-600x600.format-webp.webp\">We shared the next step in our journey to bring together the best of a search engine with the best of AI."
+        "publishedAt": "Tue, 19 May 2026 17:45:00 +0000"
       },
       {
         "title": "AI features and your website",
         "url": "https://developers.google.com/search/docs/appearance/ai-features",
         "publisher": "Google Search Central"
+      },
+      {
+        "title": "ChatGPT search and publisher controls",
+        "url": "https://help.openai.com/en/articles/9237897-chatgpt-search",
+        "publisher": "OpenAI Help"
       },
       {
         "title": "Creating helpful, reliable, people-first content",
@@ -799,26 +793,28 @@ export const marketBlogPosts = [
       "AI trends",
       "ALTOS LAB",
       "Implementation",
-      "Column"
+      "海外新聞轉譯",
+      "AI Search",
+      "Brand monitoring"
     ],
     "author": "ALTOS LAB Editorial Lab",
     "cover": "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1200&q=80",
-    "coverAlt": "The adoption risk teams miss in AI search brand monitoring - Earth network visualization photo via Unsplash",
-    "coverPrompt": "AI search brand monitoring baseline editorial en",
+    "coverAlt": "AI search brand monitoring: stop tracking only rankings - Earth network visualization photo via Unsplash",
+    "coverPrompt": "AI search brand monitoring translated foreign news signal en",
     "coverSource": "curated",
     "coverGeneration": {
       "source": "curated",
       "provider": "unsplash-library",
       "prompt": "AI search brand monitoring baseline editorial en",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-29T16:06:35.858Z",
+      "generatedAt": "2026-05-29T16:47:57.714Z",
       "status": "generated"
     },
     "coverCredit": "Earth network visualization photo via Unsplash",
     "coverCreditUrl": "https://unsplash.com",
     "coverLicense": "Unsplash License",
     "coverLicenseUrl": "https://unsplash.com/license",
-    "readTimeMinutes": 10,
+    "readTimeMinutes": 7,
     "featured": false,
     "reviewStatus": "approved",
     "qualityChecks": {
@@ -841,21 +837,21 @@ export const marketBlogPosts = [
         "imageFit": 9,
         "multilingualParity": 9
       },
-      "qualityScore": 91,
-      "antiSlopScore": 44,
+      "qualityScore": 93,
+      "antiSlopScore": 46,
       "antiSlopIssues": [],
       "qualityIssues": [],
-      "notes": "Market-trend archive seed. Reviewed against ALTOS LAB editorial playbook: source-backed, direct answer, lab POV, decision table, image fit and multilingual parity."
+      "notes": "Editorial override reviewed against ALTOS LAB playbook: foreign news translated/adapted with source notes, stronger hook, answer-first opening, decision table and reader-facing TL;DR."
     },
-    "aiDisclosure": "This article was assembled with ALTOS LAB editorial automation and quality-reviewed for source trust, SEO/GEO structure, image fit and multilingual parity.",
+    "aiDisclosure": "This article includes translated and adapted foreign news signals plus ALTOS LAB editorial synthesis. Source links are listed for verification; source paragraphs, images and structure were not copied.",
     "generationDate": "2026-05-29",
     "generationSlot": "afternoon",
     "scheduledFor": "2026-05-29",
-    "generatedAt": "2026-05-29T16:06:35.858Z",
+    "generatedAt": "2026-05-29T16:47:57.714Z",
     "generatedBy": "",
-    "createdAt": "2026-05-29T16:06:35.858Z",
-    "updatedAt": "2026-05-29T16:06:35.858Z",
-    "publishedAt": "2026-05-29T16:06:35.858Z"
+    "createdAt": "2026-05-29T16:47:57.714Z",
+    "updatedAt": "2026-05-29T16:47:57.714Z",
+    "publishedAt": "2026-05-29T16:47:57.714Z"
   },
   {
     "id": "post_market_ai_search_brand_monitoring_ja",
@@ -864,66 +860,62 @@ export const marketBlogPosts = [
     "sortOrder": 42,
     "language": "ja",
     "translationGroupId": "tg_market_ai-search-brand-monitoring_v1",
-    "title": "AI検索ブランド監視でチームが見落とす導入リスク",
-    "seoTitle": "AI検索ブランド監視でチームが見落とす導入リスク | ALTOS LAB",
-    "seoDescription": "AI検索ブランド監視を出典、図表、ALTOS LABの編集視点で整理します。",
-    "excerpt": "AI検索ブランド監視は技術ニュースに見えますが、難しいのは導入リスク、時期、責任の読み違いです。",
+    "title": "AI検索ブランド監視：順位だけ見ても市場理解は守れない",
+    "seoTitle": "AI検索ブランド監視：順位だけ見ても市場理解は守れない | ALTOS LAB",
+    "seoDescription": "Google AI Search、ChatGPTの公開者向け設定、AnthropicとOpenAIの競争から、AI検索時代のブランド監視をALTOS LABの視点で整理します。",
+    "excerpt": "Googleは検索をAI回答へ広げ、AI MagazineはAnthropicとOpenAIの企業向け競争を報じました。ブランドは順位だけでなく、AIが自社をどう説明し、何を引用し、誰と比較するかを見る必要があります。",
     "contentType": "column",
     "newsCategory": "AI検索とGEO",
     "topic": "AI検索ブランド監視",
     "audience": "経営者、事業責任者、マーケティング責任者、AI導入チーム",
-    "geoSummary": "AI検索ブランド監視は、トレンド名ではなく運用判断になった時に価値があります。この記事では、出典で確認できる事実、実装リスク、品質を見張る担当者を整理します。次の一歩は、明確な指標と巻き戻し条件を置いて毎週の質問セットで市場の見え方を確認するかを試すことです。",
-    "body": "AI検索ブランド監視は市場ニュースに見えますが、よいコラムはもっと狭い問いから始まります。今月チームの行動を変える証拠は何か。答えが曖昧なら観察、具体的なら小さな実験です。\n\n最新背景：Google AIの「How AI Mode is changing the way people search in the U.S.」（2026/5/19）を事実確認の起点にします。さらにGoogle AIの「I/O 2026: Welcome to the agentic Gemini era」も照合し、単一記事の言い換えにしません。\n\n## トレンドの中にある判断\n\nチームに必要なのはAI用語ではありません。AI検索ブランド監視が顧客への約束、業務責任者、コスト、レビュー義務を変えるかです。\n\n## 出典が支えていること\n\n- Google AI：How AI Mode is changing the way people search in the U.S. (2026/5/19) — <img…\n- Google AI：I/O 2026: Welcome to the agentic Gemini era (2026/5/19) — <img…\n- Google AI：A new era for AI Search (2026/5/19) — <img…\n- Google Search Central：AI features and your website\n\n## 運用者のフレーム\n\n| 視点 | 役に立つ問い | 編集アウトプット |\n| --- | --- | --- |\n| 市場 | AI検索ブランド監視で実際に何が変わったか | 事実と解釈を分ける。 |\n| 読者 | 運用担当者は何を決める必要があるか | 分析前に短く答える。 |\n| リスク | 何がまだ早い、または間違う可能性があるか | 不確実性を明示する。 |\n| 行動 | 最小の次の一手は何か | 毎週の質問セットで市場の見え方を確認するへ翻訳する。 |\n\n## 取るべきトレードオフ\n\n早く動く価値があるのは、証拠が公式で、再現でき、実際の業務に近い時です。誰がレビューし、失敗時に何を戻すかを言えないなら、それは実験ではなく雰囲気です。\n\n## ALTOS LABの視点\n\n私たちは証拠より大きな声では語りません。AI検索ブランド監視についてのよい記事は、読者に「AIは重要だ」という気分ではなく、より明確な判断を残すべきです。",
+    "geoSummary": "AI検索ブランド監視は、順位のスクリーンショットを集める作業ではありません。ChatGPT、Google AI Mode、Perplexityなどがブランドをどう説明し、どの出典を引用し、どの競合と並べるかを毎週確認する運用です。この記事はAI Magazine、Google、OpenAIの海外ソースを翻訳・編集し、監視ワークフローに落とし込みます。",
+    "body": "AI検索ブランド監視は今から始める価値があります。ただし、ランダムなスクリーンショット集めではありません。同じ質問を毎週投げ、AIがブランドをどう説明し、何を引用し、どこで間違えるかを記録し、修正すべきコンテンツに戻す運用です。\n\n## なぜ今このシグナルを見るのか\n\nGoogleは検索をAI回答とタスク型体験へ広げています。一方でAI Magazineは、AnthropicがOpenAIと競う企業向けAIプラットフォームとして評価を高めていると報じました。別々のニュースに見えますが、ブランドにとっての意味は同じです。ユーザーは今後、ChatGPT、Claude、Gemini、Perplexity、Google AI Modeに「どの会社を信頼すべきか」と聞くようになります。\n\n従来のSEOは順位を見ます。AI検索では、回答そのものが選択肢を整理し、出典を示し、比較し、次の行動まで提案します。ブランドの説明がずれると、流入が減るだけでなく、市場が間違った理解を先に学んでしまいます。\n\n## 流入だけでなく回答を監視する\n\nGA4、Search Console、順位計測は今も必要です。ただしAI検索では、ユーザーがクリックせずに判断することがあります。\n\n回答レイヤーを追加します。\n\n| 監視する問い | 重要な理由 | 修正アクション |\n| --- | --- | --- |\n| AIは一文で自社をどう説明するか | 新規ユーザーの第一印象になる。 | ホーム、About、サービス、FAQの説明を揃える。 |\n| AIはどの出典を引用するか | 信頼と修正可能性を左右する。 | 公式ページ、事例、引用しやすい段落を増やす。 |\n| どの競合と比較されるか | 購買時の比較軸が決まる。 | 適用範囲、違い、制限、代替案を明確にする。 |\n| 誤答の原因を追えるか | 追えない誤答は直せない。 | 回答を保存し、引用元とサイト内容を更新する。 |\n\n## 海外ニュースは判断に翻訳する\n\nAI Magazineの記事の価値は、Anthropicが大きいという話だけではありません。モデルとクラウドの入口が少数のプラットフォームに集まり、調査、サポート、購買、コンテンツ発見に入り始めているという市場シグナルです。\n\nALTOS LABのブログは、海外記事のコピーでも、出典のない意見でもありません。出典が何を言ったか、運用者に何が関係するか、まだ断定できないことは何かを分けた市場シグナルカードに変換します。\n\n## 週次質問セットから始める\n\n最初は12〜20問で十分です。主要なAI回答面で毎週同じ質問を試し、回答、引用元、誤りを残します。\n\n1. ブランド定義：ALTOS LABとは何か。誰に向いていて、誰には向かないか。\n2. カテゴリ発見：AI Agent、AI客服、GEOコンテンツを探す企業にどの会社が表示されるか。\n3. 競合比較：Web制作会社、SEO会社、AIツール顧問と何が違うか。\n4. 購買質問：運用責任者はAI Agent導入可否をどう判断すべきか。\n\n最初に見るのは、正確さ、引用元、次の導線の三つです。同じ誤りが二週続いたら、初めて記事やページ修正のタスクにします。\n\n## 出典と翻訳メモ\n\nこの記事は海外ソースを翻訳・要約し、ALTOS LABの編集判断を加えています。AI Magazineはモデルプラットフォーム競争の市場シグナルとして、Google Search CentralとOpenAI HelpはAI検索と公開者向け設定の確認に使いました。全文翻訳、原文構造、画像、未確認の主張はコピーしていません。\n\n## ALTOS LABの実験室判断\n\n最初に必要なのは大きな監視ツールではなく、繰り返せる質問、追跡できる出典カード、修正ループです。誤答が繰り返された時に、ホームの定位、サービスページ、事例、FAQ、比較記事、外部シグナルのどれを直すべきかが見えてきます。",
     "keyTakeaways": [
-      "AI検索ブランド監視は流行語ではなく、運用判断として評価する。",
-      "毎週の質問セットで市場の見え方を確認するには、出典と実装手順を同時に示す必要がある。",
-      "直接回答、出典、表や図、更新条件が理解を助ける。",
-      "ALTOS LABの視点は、仕組み、リスク、指標、巻き戻し条件まで含める。"
+      "AI検索では、ブランド可視性は順位だけでなく回答品質で決まる。",
+      "海外ニュースは丸ごと翻訳せず、出典付きの市場シグナルとして扱う。",
+      "監視すべきは説明の正確さ、引用元、競合比較、修正できる経路。",
+      "ALTOS LABなら、記事量を増やす前に週次質問セットと出典カードを作る。"
     ],
     "faqs": [
       {
-        "question": "AI検索ブランド監視が今重要な理由は？",
-        "answer": "AI検索ブランド監視は実験から業務フローへ移り、責任者、指標、出典に基づく判断が必要になっているからです。"
+        "question": "AI検索ブランド監視とSEO監視の違いは？",
+        "answer": "SEO監視は順位、表示回数、クリック、ページ性能を見ます。AI検索ブランド監視は、AIの回答内容、引用元、競合比較、誤答の修正可能性まで確認します。"
       },
       {
-        "question": "企業はどこから始めるべきですか？",
-        "answer": "一つの業務、レビュー責任者、情報源、成功指標、巻き戻し条件を決めてから毎週の質問セットで市場の見え方を確認する。"
+        "question": "海外AIニュースを翻訳して使ってよいですか？",
+        "answer": "全文転載は避けるべきです。出典を明記し、市場シグナルを自分たちの言葉で要約し、分析、不確実性、実務フレームを加える形が安全です。"
       },
       {
-        "question": "SEO/GEOにはどう効きますか？",
-        "answer": "検索エンジンと生成AIがクロール、要約、引用しやすい出典付きの段落を増やせます。"
+        "question": "最初から有料ツールが必要ですか？",
+        "answer": "必ずしも必要ありません。まずは固定の質問セットで手動監視し、誤答や引用元のズレが繰り返される段階で自動化を検討します。"
       },
       {
-        "question": "ALTOS LABは最初に何を確認しますか？",
-        "answer": "情報源、業務境界、データ準備、レビューコスト、成功指標、画像と内容の適合を確認します。"
+        "question": "GEOにはどう効きますか？",
+        "answer": "AIが正しく理解・引用するために必要な定位、事例、FAQ、比較ページの不足を見つけられるため、GEO改善につながります。"
       }
     ],
     "sourceLinks": [
       {
-        "title": "How AI Mode is changing the way people search in the U.S.",
-        "url": "https://blog.google/products-and-platforms/products/search/ai-mode-us-insights/",
-        "publisher": "Google AI",
-        "publishedAt": "Tue, 19 May 2026 17:45:00 +0000",
-        "summary": "<img src=\"https://storage.googleapis.com/gweb-uniblog-publish-prod/images/AI_Mode_US.max-600x600.format-webp.webp\">One year after launch, see how AI Mode’s users are shifting from keywords to natural language queries."
-      },
-      {
-        "title": "I/O 2026: Welcome to the agentic Gemini era",
-        "url": "https://blog.google/innovation-and-ai/sundar-pichai-io-2026/",
-        "publisher": "Google AI",
-        "publishedAt": "Tue, 19 May 2026 17:45:00 +0000",
-        "summary": "<img src=\"https://storage.googleapis.com/gweb-uniblog-publish-prod/images/SundarKeynote-hero.max-600x600.format-webp.webp\">The latest from Google I/O: See how we’re helping you get more done with Gemini."
+        "title": "How Anthropic Overtook OpenAI with US$965bn Valuation",
+        "url": "https://aimagazine.com/news/anthropic-beats-openai-to-become-biggest-pureplay-ai-company",
+        "publisher": "AI Magazine",
+        "publishedAt": "Fri, 29 May 2026 15:45:23 +0000"
       },
       {
         "title": "A new era for AI Search",
         "url": "https://blog.google/products-and-platforms/products/search/search-io-2026/",
         "publisher": "Google AI",
-        "publishedAt": "Tue, 19 May 2026 17:45:00 +0000",
-        "summary": "<img src=\"https://storage.googleapis.com/gweb-uniblog-publish-prod/images/Search_AI_and_search_engine_v46.max-600x600.format-webp.webp\">We shared the next step in our journey to bring together the best of a search engine with the best of AI."
+        "publishedAt": "Tue, 19 May 2026 17:45:00 +0000"
       },
       {
         "title": "AI features and your website",
         "url": "https://developers.google.com/search/docs/appearance/ai-features",
         "publisher": "Google Search Central"
+      },
+      {
+        "title": "ChatGPT search and publisher controls",
+        "url": "https://help.openai.com/en/articles/9237897-chatgpt-search",
+        "publisher": "OpenAI Help"
       },
       {
         "title": "Creating helpful, reliable, people-first content",
@@ -937,26 +929,28 @@ export const marketBlogPosts = [
       "AIトレンド",
       "ALTOS LAB",
       "実装",
-      "視点コラム"
+      "海外新聞轉譯",
+      "AI Search",
+      "Brand monitoring"
     ],
     "author": "ALTOS LAB Editorial Lab",
     "cover": "https://images.unsplash.com/photo-1504868584819-f8e8b4b6d7e3?auto=format&fit=crop&w=1200&q=80",
-    "coverAlt": "AI検索ブランド監視でチームが見落とす導入リスク - Data and research desk photo via Unsplash",
-    "coverPrompt": "AI search brand monitoring baseline editorial ja",
+    "coverAlt": "AI検索ブランド監視：順位だけ見ても市場理解は守れない - Data and research desk photo via Unsplash",
+    "coverPrompt": "AI search brand monitoring translated foreign news signal ja",
     "coverSource": "curated",
     "coverGeneration": {
       "source": "curated",
       "provider": "unsplash-library",
       "prompt": "AI search brand monitoring baseline editorial ja",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-29T16:06:36.084Z",
+      "generatedAt": "2026-05-29T16:47:57.911Z",
       "status": "generated"
     },
     "coverCredit": "Data and research desk photo via Unsplash",
     "coverCreditUrl": "https://unsplash.com",
     "coverLicense": "Unsplash License",
     "coverLicenseUrl": "https://unsplash.com/license",
-    "readTimeMinutes": 8,
+    "readTimeMinutes": 7,
     "featured": false,
     "reviewStatus": "approved",
     "qualityChecks": {
@@ -979,21 +973,21 @@ export const marketBlogPosts = [
         "imageFit": 9,
         "multilingualParity": 9
       },
-      "qualityScore": 91,
-      "antiSlopScore": 44,
+      "qualityScore": 93,
+      "antiSlopScore": 46,
       "antiSlopIssues": [],
       "qualityIssues": [],
-      "notes": "Market-trend archive seed. Reviewed against ALTOS LAB editorial playbook: source-backed, direct answer, lab POV, decision table, image fit and multilingual parity."
+      "notes": "Editorial override reviewed against ALTOS LAB playbook: foreign news translated/adapted with source notes, stronger hook, answer-first opening, decision table and reader-facing TL;DR."
     },
-    "aiDisclosure": "この記事は ALTOS LAB の編集自動化で整理し、情報源、SEO/GEO 構造、画像適合、多言語整合性を確認しています。",
+    "aiDisclosure": "この記事には海外ニュースの翻訳・要約とALTOS LABの編集判断が含まれます。出典リンクを明示し、原文の段落、画像、構成はコピーしていません。",
     "generationDate": "2026-05-29",
     "generationSlot": "afternoon",
     "scheduledFor": "2026-05-29",
-    "generatedAt": "2026-05-29T16:06:36.084Z",
+    "generatedAt": "2026-05-29T16:47:57.911Z",
     "generatedBy": "",
-    "createdAt": "2026-05-29T16:06:36.084Z",
-    "updatedAt": "2026-05-29T16:06:36.084Z",
-    "publishedAt": "2026-05-29T16:06:36.084Z"
+    "createdAt": "2026-05-29T16:47:57.911Z",
+    "updatedAt": "2026-05-29T16:47:57.911Z",
+    "publishedAt": "2026-05-29T16:47:57.911Z"
   },
   {
     "id": "post_market_ai_search_brand_monitoring_ko",
@@ -1002,66 +996,62 @@ export const marketBlogPosts = [
     "sortOrder": 43,
     "language": "ko",
     "translationGroupId": "tg_market_ai-search-brand-monitoring_v1",
-    "title": "AI 검색 브랜드 모니터링에서 팀이 놓치는 도입 리스크",
-    "seoTitle": "AI 검색 브랜드 모니터링에서 팀이 놓치는 도입 리스크 | ALTOS LAB",
-    "seoDescription": "AI 검색 브랜드 모니터링를 출처, 차트, ALTOS LAB 편집 관점으로 분석합니다.",
-    "excerpt": "AI 검색 브랜드 모니터링은 기술 뉴스처럼 보이지만 더 어려운 문제는 도입 리스크, 시기, 책임을 잘못 읽는 것입니다.",
+    "title": "AI 검색 브랜드 모니터링: 순위만 보면 늦다",
+    "seoTitle": "AI 검색 브랜드 모니터링: 순위만 보면 늦다 | ALTOS LAB",
+    "seoDescription": "Google AI Search, ChatGPT 게시자 제어, Anthropic과 OpenAI 경쟁을 바탕으로 AI 검색 시대의 브랜드 모니터링 방법을 ALTOS LAB 관점으로 정리합니다.",
+    "excerpt": "Google은 검색을 AI 답변으로 밀고 있고, AI Magazine은 Anthropic과 OpenAI의 기업 AI 경쟁을 다뤘습니다. 이제 브랜드는 순위뿐 아니라 AI가 자신을 어떻게 설명하고, 무엇을 인용하고, 누구와 비교하는지 봐야 합니다.",
     "contentType": "column",
     "newsCategory": "AI 검색과 GEO",
     "topic": "AI 검색 브랜드 모니터링",
     "audience": "창업자, 운영 리더, 마케팅 책임자, AI 도입 팀",
-    "geoSummary": "AI 검색 브랜드 모니터링은 트렌드 이름이 아니라 운영 판단이 될 때 가치가 있습니다. 이 글은 출처로 확인되는 사실, 실행 리스크, 품질을 책임질 검토자를 정리합니다. 다음 단계는 명확한 지표와 롤백 조건을 두고 \"주간 질문 세트로 시장이 브랜드를 어떻게 설명하는지 확인하기\"를 시험하는 것입니다.",
-    "body": "AI 검색 브랜드 모니터링은 시장 뉴스처럼 보이지만 좋은 칼럼은 더 좁은 질문에서 시작합니다. 이번 달 팀의 행동을 바꿀 증거는 무엇인가. 답이 흐리면 관찰하고, 구체적이면 작은 실험을 해야 합니다.\n\n최신 배경: Google AI의 \"How AI Mode is changing the way people search in the U.S.\"(2026. 5. 19.)를 사실 확인의 출발점으로 삼습니다. 또 Google AI의 \"I/O 2026: Welcome to the agentic Gemini era\"도 함께 확인해 단일 기사 재작성에 머물지 않게 합니다.\n\n## 트렌드 안에 숨은 판단\n\n팀에 필요한 것은 AI 용어가 아닙니다. AI 검색 브랜드 모니터링이 고객 약속, 업무 책임자, 비용, 검토 의무를 바꾸는지입니다.\n\n## 출처가 뒷받침하는 것\n\n- Google AI: How AI Mode is changing the way people search in the U.S. (2026. 5. 19.) — <img…\n- Google AI: I/O 2026: Welcome to the agentic Gemini era (2026. 5. 19.) — <img…\n- Google AI: A new era for AI Search (2026. 5. 19.) — <img…\n- Google Search Central: AI features and your website\n\n## 운영자 프레임\n\n| 관점 | 유용한 질문 | 편집 결과 |\n| --- | --- | --- |\n| 시장 | AI 검색 브랜드 모니터링에서 실제로 무엇이 바뀌었나 | 사실과 해석을 분리한다. |\n| 독자 | 운영자는 무엇을 결정해야 하나 | 분석 전에 직접 답한다. |\n| 리스크 | 무엇이 아직 이르거나 틀릴 수 있나 | 불확실성을 표시한다. |\n| 행동 | 가장 작은 다음 행동은 무엇인가 | 주간 질문 세트로 시장이 브랜드를 어떻게 설명하는지 확인하기로 번역한다. |\n\n## 선택해야 할 트레이드오프\n\n빠르게 움직일 가치가 있는 때는 증거가 공식적이고 반복 가능하며 실제 업무에 가까울 때입니다. 누가 검토하고 실패 시 무엇을 되돌릴지 말할 수 없다면 그것은 실험이 아니라 분위기입니다.\n\n## ALTOS LAB 관점\n\n우리는 증거보다 큰 목소리로 말하지 않습니다. AI 검색 브랜드 모니터링에 관한 좋은 글은 독자에게 AI가 중요하다는 감정이 아니라 더 선명한 판단을 남겨야 합니다.",
+    "geoSummary": "AI 검색 브랜드 모니터링은 순위 스크린샷을 모으는 일이 아닙니다. ChatGPT, Google AI Mode, Perplexity 같은 답변 표면이 브랜드를 어떻게 설명하고, 어떤 출처를 인용하며, 어떤 경쟁사와 묶는지 매주 확인하는 운영 루프입니다. 이 글은 AI Magazine, Google, OpenAI의 해외 자료를 번역·편집해 실행 흐름으로 바꿉니다.",
+    "body": "AI 검색 브랜드 모니터링은 지금 시작할 만합니다. 다만 무작위 스크린샷을 모으는 방식은 아닙니다. 같은 질문을 매주 던지고, AI가 브랜드를 어떻게 설명하는지, 어떤 출처를 인용하는지, 어디서 틀리는지 기록한 뒤 콘텐츠와 웹사이트 수정으로 되돌리는 운영입니다.\n\n## 왜 지금 중요한가\n\nGoogle은 검색을 AI 답변과 작업형 경험으로 확장하고 있습니다. 동시에 AI Magazine은 Anthropic이 OpenAI와 경쟁하는 기업 AI 플랫폼으로 평가를 높였다고 보도했습니다. 서로 다른 뉴스처럼 보이지만 브랜드 관점에서는 같은 신호입니다. 사용자는 앞으로 ChatGPT, Claude, Gemini, Perplexity, Google AI Mode에 어떤 회사를 믿고 비교하고 연락해야 하는지 직접 물을 것입니다.\n\n전통 SEO는 페이지 순위를 봅니다. AI 검색은 한 단계 더 나아가 선택지를 요약하고, 출처를 보여주고, 공급자를 비교하고, 다음 행동을 제안합니다. 브랜드 설명이 틀리면 트래픽 손실을 넘어 시장이 잘못된 버전의 회사를 먼저 학습할 수 있습니다.\n\n## 트래픽만 보지 말고 답변을 보라\n\nGA4, Search Console, 순위 추적은 여전히 중요합니다. 하지만 AI 검색에서는 사용자가 클릭하지 않고 답변만으로 판단할 수 있습니다.\n\n답변 레이어를 추가해야 합니다.\n\n| 모니터링 질문 | 중요한 이유 | 수정 행동 |\n| --- | --- | --- |\n| AI가 우리를 한 문장으로 어떻게 설명하나 | 신규 사용자의 첫인상이 된다. | 홈페이지, 소개, 서비스, FAQ의 설명을 맞춘다. |\n| AI가 어떤 출처를 인용하나 | 신뢰와 수정 가능성을 결정한다. | 공식 페이지, 사례, 인용 가능한 문단을 만든다. |\n| 어떤 경쟁사와 비교하나 | 구매 비교 프레임을 만든다. | 차이, 적합한 상황, 제한, 대안을 분명히 쓴다. |\n| 틀린 답의 원인을 추적할 수 있나 | 추적하지 못하면 고칠 수 없다. | 답변을 저장하고 출처와 사이트 내용을 업데이트한다. |\n\n## 해외 뉴스는 판단으로 번역해야 한다\n\nAI Magazine 기사에서 중요한 것은 Anthropic의 규모만이 아닙니다. 모델과 클라우드 입구가 소수 플랫폼으로 집중되고, 조사, 지원, 구매, 콘텐츠 발견에 들어오고 있다는 신호입니다. 사용자가 AI에게 공급자를 추천하거나 회사의 신뢰도를 묻기 시작하면 브랜드 모니터링은 시장 이해 권한을 추적하는 일이 됩니다.\n\nALTOS LAB 블로그는 해외 기사 복사도, 출처 없는 의견도 아니어야 합니다. 출처가 말한 것, 운영자에게 중요한 이유, 아직 단정할 수 없는 것을 나눈 시장 신호 카드로 바꿔야 합니다.\n\n## 주간 질문 세트부터 시작하자\n\n처음에는 12~20개 질문이면 충분합니다. 주요 AI 답변 표면에서 매주 같은 질문을 실행하고 답변, 인용 출처, 오류를 남깁니다.\n\n1. 브랜드 정의: ALTOS LAB은 무엇인가. 누구에게 맞고 누구에게 맞지 않나.\n2. 카테고리 발견: AI Agent, AI 고객서비스, GEO 콘텐츠 시스템을 찾는 기업에게 어떤 회사가 보이나.\n3. 경쟁 비교: 웹 에이전시, SEO 회사, AI 도구 컨설턴트와 무엇이 다른가.\n4. 구매 질문: 운영 책임자는 AI Agent 도입 가능성을 어떻게 판단해야 하나.\n\n처음에는 세 가지만 봅니다. 답변이 정확한가, 인용 출처를 통제할 수 있는가, 다음 행동이 올바른 페이지로 이어지는가. 같은 오류가 2주 반복되면 그때 콘텐츠 작업으로 전환합니다.\n\n## 출처와 번역 메모\n\n이 글은 해외 자료를 번역·요약하고 ALTOS LAB의 편집 판단을 더했습니다. AI Magazine은 모델 플랫폼 경쟁의 시장 신호로, Google Search Central과 OpenAI Help는 AI 검색과 게시자 제어의 기본 규칙을 확인하는 데 사용했습니다. 전문 번역, 원문 구조, 이미지, 검증되지 않은 주장은 복사하지 않았습니다.\n\n## ALTOS LAB 실험실 판단\n\n첫 단계는 큰 모니터링 도구가 아니라 반복 가능한 질문 세트, 추적 가능한 출처 카드, 수정 루프입니다. 같은 오답이 반복될 때 홈페이지 포지셔닝, 서비스 페이지, 사례, FAQ, 비교 글, 외부 신호 중 무엇을 고쳐야 할지 보입니다.",
     "keyTakeaways": [
-      "AI 검색 브랜드 모니터링은 유행어가 아니라 운영 의사결정으로 평가해야 한다.",
-      "주간 질문 세트로 시장이 브랜드를 어떻게 설명하는지 확인하기 위해서는 출처와 실행 순서를 함께 제시해야 한다.",
-      "직접 답변, 출처, 표나 차트, 업데이트 조건이 이해를 돕는다.",
-      "ALTOS LAB 관점은 메커니즘, 리스크, 지표, 롤백 조건까지 포함한다."
+      "AI 검색에서는 브랜드 가시성이 순위보다 답변 품질에 더 크게 좌우된다.",
+      "해외 뉴스는 그대로 번역해 게시하지 말고 출처가 있는 시장 신호로 바꿔야 한다.",
+      "설명 정확도, 인용 출처, 경쟁 프레임, 수정 경로를 함께 봐야 한다.",
+      "ALTOS LAB은 글 수를 늘리기 전에 주간 질문 세트와 출처 카드를 먼저 만든다."
     ],
     "faqs": [
       {
-        "question": "AI 검색 브랜드 모니터링이 지금 중요한 이유는?",
-        "answer": "AI 검색 브랜드 모니터링이 실험에서 실제 업무로 이동하면서 책임자, 지표, 출처 기반 판단이 필요해졌기 때문입니다."
+        "question": "AI 검색 브랜드 모니터링과 SEO 모니터링은 무엇이 다른가요?",
+        "answer": "SEO 모니터링은 순위, 노출, 클릭, 페이지 성과를 봅니다. AI 검색 브랜드 모니터링은 답변 내용, 인용 출처, 경쟁 프레임, 틀린 답의 수정 가능성까지 확인합니다."
       },
       {
-        "question": "기업은 어디서 시작해야 하나요?",
-        "answer": "하나의 업무, 검토 책임자, 출처 자료, 성공 지표, 롤백 조건을 정한 뒤 주간 질문 세트로 시장이 브랜드를 어떻게 설명하는지 확인하기."
+        "question": "해외 AI 뉴스를 번역해 블로그에 써도 되나요?",
+        "answer": "전문 번역 재게시보다는 출처를 명시하고 시장 신호를 자신의 언어로 요약한 뒤 분석, 불확실성, 실행 프레임을 더하는 방식이 안전합니다."
       },
       {
-        "question": "SEO/GEO에는 어떤 도움이 되나요?",
-        "answer": "검색 엔진과 생성형 AI가 크롤링, 요약, 인용하기 쉬운 출처 기반 단락을 만들 수 있습니다."
+        "question": "처음부터 유료 모니터링 도구가 필요한가요?",
+        "answer": "항상 필요하지는 않습니다. 먼저 고정 질문 세트로 수동 모니터링을 하고, 반복 오류나 출처 왜곡이 많아질 때 자동화와 대시보드를 검토하면 됩니다."
       },
       {
-        "question": "ALTOS LAB은 무엇을 먼저 확인하나요?",
-        "answer": "출처 품질, 업무 경계, 데이터 준비도, 검토 비용, 성공 지표, 이미지와 콘텐츠 적합성을 먼저 봅니다."
+        "question": "GEO에는 어떤 도움이 되나요?",
+        "answer": "AI가 브랜드를 정확히 이해하고 인용하는 데 필요한 포지셔닝, 사례, FAQ, 비교 페이지의 부족을 찾을 수 있어 GEO 개선에 도움이 됩니다."
       }
     ],
     "sourceLinks": [
       {
-        "title": "How AI Mode is changing the way people search in the U.S.",
-        "url": "https://blog.google/products-and-platforms/products/search/ai-mode-us-insights/",
-        "publisher": "Google AI",
-        "publishedAt": "Tue, 19 May 2026 17:45:00 +0000",
-        "summary": "<img src=\"https://storage.googleapis.com/gweb-uniblog-publish-prod/images/AI_Mode_US.max-600x600.format-webp.webp\">One year after launch, see how AI Mode’s users are shifting from keywords to natural language queries."
-      },
-      {
-        "title": "I/O 2026: Welcome to the agentic Gemini era",
-        "url": "https://blog.google/innovation-and-ai/sundar-pichai-io-2026/",
-        "publisher": "Google AI",
-        "publishedAt": "Tue, 19 May 2026 17:45:00 +0000",
-        "summary": "<img src=\"https://storage.googleapis.com/gweb-uniblog-publish-prod/images/SundarKeynote-hero.max-600x600.format-webp.webp\">The latest from Google I/O: See how we’re helping you get more done with Gemini."
+        "title": "How Anthropic Overtook OpenAI with US$965bn Valuation",
+        "url": "https://aimagazine.com/news/anthropic-beats-openai-to-become-biggest-pureplay-ai-company",
+        "publisher": "AI Magazine",
+        "publishedAt": "Fri, 29 May 2026 15:45:23 +0000"
       },
       {
         "title": "A new era for AI Search",
         "url": "https://blog.google/products-and-platforms/products/search/search-io-2026/",
         "publisher": "Google AI",
-        "publishedAt": "Tue, 19 May 2026 17:45:00 +0000",
-        "summary": "<img src=\"https://storage.googleapis.com/gweb-uniblog-publish-prod/images/Search_AI_and_search_engine_v46.max-600x600.format-webp.webp\">We shared the next step in our journey to bring together the best of a search engine with the best of AI."
+        "publishedAt": "Tue, 19 May 2026 17:45:00 +0000"
       },
       {
         "title": "AI features and your website",
         "url": "https://developers.google.com/search/docs/appearance/ai-features",
         "publisher": "Google Search Central"
+      },
+      {
+        "title": "ChatGPT search and publisher controls",
+        "url": "https://help.openai.com/en/articles/9237897-chatgpt-search",
+        "publisher": "OpenAI Help"
       },
       {
         "title": "Creating helpful, reliable, people-first content",
@@ -1075,26 +1065,28 @@ export const marketBlogPosts = [
       "AI 트렌드",
       "ALTOS LAB",
       "구현",
-      "관점 칼럼"
+      "海外新聞轉譯",
+      "AI Search",
+      "Brand monitoring"
     ],
     "author": "ALTOS LAB Editorial Lab",
     "cover": "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=1200&q=80",
-    "coverAlt": "AI 검색 브랜드 모니터링에서 팀이 놓치는 도입 리스크 - Business analytics laptop photo via Unsplash",
-    "coverPrompt": "AI search brand monitoring baseline editorial ko",
+    "coverAlt": "AI 검색 브랜드 모니터링: 순위만 보면 늦다 - Business analytics laptop photo via Unsplash",
+    "coverPrompt": "AI search brand monitoring translated foreign news signal ko",
     "coverSource": "curated",
     "coverGeneration": {
       "source": "curated",
       "provider": "unsplash-library",
       "prompt": "AI search brand monitoring baseline editorial ko",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-29T16:06:36.268Z",
+      "generatedAt": "2026-05-29T16:47:58.131Z",
       "status": "generated"
     },
     "coverCredit": "Business analytics laptop photo via Unsplash",
     "coverCreditUrl": "https://unsplash.com",
     "coverLicense": "Unsplash License",
     "coverLicenseUrl": "https://unsplash.com/license",
-    "readTimeMinutes": 9,
+    "readTimeMinutes": 7,
     "featured": false,
     "reviewStatus": "approved",
     "qualityChecks": {
@@ -1117,21 +1109,21 @@ export const marketBlogPosts = [
         "imageFit": 9,
         "multilingualParity": 9
       },
-      "qualityScore": 91,
-      "antiSlopScore": 44,
+      "qualityScore": 93,
+      "antiSlopScore": 46,
       "antiSlopIssues": [],
       "qualityIssues": [],
-      "notes": "Market-trend archive seed. Reviewed against ALTOS LAB editorial playbook: source-backed, direct answer, lab POV, decision table, image fit and multilingual parity."
+      "notes": "Editorial override reviewed against ALTOS LAB playbook: foreign news translated/adapted with source notes, stronger hook, answer-first opening, decision table and reader-facing TL;DR."
     },
-    "aiDisclosure": "이 글은 ALTOS LAB 편집 자동화를 통해 정리되었으며 출처 신뢰도, SEO/GEO 구조, 이미지 적합성, 다국어 일관성을 검토했습니다.",
+    "aiDisclosure": "이 글에는 해외 뉴스 번역·요약과 ALTOS LAB 편집 판단이 포함됩니다. 출처 링크를 명시했으며 원문 문단, 이미지, 구조를 복사하지 않았습니다.",
     "generationDate": "2026-05-29",
     "generationSlot": "afternoon",
     "scheduledFor": "2026-05-29",
-    "generatedAt": "2026-05-29T16:06:36.268Z",
+    "generatedAt": "2026-05-29T16:47:58.131Z",
     "generatedBy": "",
-    "createdAt": "2026-05-29T16:06:36.268Z",
-    "updatedAt": "2026-05-29T16:06:36.268Z",
-    "publishedAt": "2026-05-29T16:06:36.268Z"
+    "createdAt": "2026-05-29T16:47:58.131Z",
+    "updatedAt": "2026-05-29T16:47:58.131Z",
+    "publishedAt": "2026-05-29T16:47:58.131Z"
   },
   {
     "id": "post_market_ai_evals_before_launch_zh_hant",
@@ -1225,7 +1217,7 @@ export const marketBlogPosts = [
       "provider": "unsplash-library",
       "prompt": "AI evaluation scorecard baseline editorial zh-Hant",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-29T16:06:36.472Z",
+      "generatedAt": "2026-05-29T16:47:58.323Z",
       "status": "generated"
     },
     "coverCredit": "Machine learning code photo via Unsplash",
@@ -1265,11 +1257,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-29",
     "generationSlot": "morning",
     "scheduledFor": "2026-05-29",
-    "generatedAt": "2026-05-29T16:06:36.472Z",
+    "generatedAt": "2026-05-29T16:47:58.323Z",
     "generatedBy": "",
-    "createdAt": "2026-05-29T16:06:36.472Z",
-    "updatedAt": "2026-05-29T16:06:36.472Z",
-    "publishedAt": "2026-05-29T16:06:36.472Z"
+    "createdAt": "2026-05-29T16:47:58.323Z",
+    "updatedAt": "2026-05-29T16:47:58.323Z",
+    "publishedAt": "2026-05-29T16:47:58.323Z"
   },
   {
     "id": "post_market_ai_evals_before_launch_en",
@@ -1363,7 +1355,7 @@ export const marketBlogPosts = [
       "provider": "unsplash-library",
       "prompt": "AI evaluation scorecard baseline editorial en",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-29T16:06:36.667Z",
+      "generatedAt": "2026-05-29T16:47:58.572Z",
       "status": "generated"
     },
     "coverCredit": "Circuit board macro photo via Unsplash",
@@ -1403,11 +1395,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-29",
     "generationSlot": "morning",
     "scheduledFor": "2026-05-29",
-    "generatedAt": "2026-05-29T16:06:36.667Z",
+    "generatedAt": "2026-05-29T16:47:58.572Z",
     "generatedBy": "",
-    "createdAt": "2026-05-29T16:06:36.667Z",
-    "updatedAt": "2026-05-29T16:06:36.667Z",
-    "publishedAt": "2026-05-29T16:06:36.667Z"
+    "createdAt": "2026-05-29T16:47:58.572Z",
+    "updatedAt": "2026-05-29T16:47:58.572Z",
+    "publishedAt": "2026-05-29T16:47:58.572Z"
   },
   {
     "id": "post_market_ai_evals_before_launch_ja",
@@ -1501,7 +1493,7 @@ export const marketBlogPosts = [
       "provider": "unsplash-library",
       "prompt": "AI evaluation scorecard baseline editorial ja",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-29T16:06:36.872Z",
+      "generatedAt": "2026-05-29T16:47:58.780Z",
       "status": "generated"
     },
     "coverCredit": "Code editor workspace photo via Unsplash",
@@ -1541,11 +1533,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-29",
     "generationSlot": "morning",
     "scheduledFor": "2026-05-29",
-    "generatedAt": "2026-05-29T16:06:36.872Z",
+    "generatedAt": "2026-05-29T16:47:58.780Z",
     "generatedBy": "",
-    "createdAt": "2026-05-29T16:06:36.872Z",
-    "updatedAt": "2026-05-29T16:06:36.872Z",
-    "publishedAt": "2026-05-29T16:06:36.872Z"
+    "createdAt": "2026-05-29T16:47:58.780Z",
+    "updatedAt": "2026-05-29T16:47:58.780Z",
+    "publishedAt": "2026-05-29T16:47:58.780Z"
   },
   {
     "id": "post_market_ai_evals_before_launch_ko",
@@ -1639,7 +1631,7 @@ export const marketBlogPosts = [
       "provider": "unsplash-library",
       "prompt": "AI evaluation scorecard baseline editorial ko",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-29T16:06:37.074Z",
+      "generatedAt": "2026-05-29T16:47:58.958Z",
       "status": "generated"
     },
     "coverCredit": "Terminal code close-up photo via Unsplash",
@@ -1679,10 +1671,10 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-29",
     "generationSlot": "morning",
     "scheduledFor": "2026-05-29",
-    "generatedAt": "2026-05-29T16:06:37.074Z",
+    "generatedAt": "2026-05-29T16:47:58.958Z",
     "generatedBy": "",
-    "createdAt": "2026-05-29T16:06:37.074Z",
-    "updatedAt": "2026-05-29T16:06:37.074Z",
-    "publishedAt": "2026-05-29T16:06:37.074Z"
+    "createdAt": "2026-05-29T16:47:58.958Z",
+    "updatedAt": "2026-05-29T16:47:58.958Z",
+    "publishedAt": "2026-05-29T16:47:58.958Z"
   }
 ] satisfies BlogPost[];

@@ -215,10 +215,27 @@ const SOURCES = {
     url: "https://developers.google.com/search/docs/appearance/ai-features",
     publisher: "Google Search Central"
   },
+  googleAiSearchEra: {
+    title: "A new era for AI Search",
+    url: "https://blog.google/products-and-platforms/products/search/search-io-2026/",
+    publisher: "Google AI",
+    publishedAt: "Tue, 19 May 2026 17:45:00 +0000"
+  },
   googleHelpful: {
     title: "Creating helpful, reliable, people-first content",
     url: "https://developers.google.com/search/docs/fundamentals/creating-helpful-content",
     publisher: "Google Search Central"
+  },
+  openAiPublisherFaq: {
+    title: "ChatGPT search and publisher controls",
+    url: "https://help.openai.com/en/articles/9237897-chatgpt-search",
+    publisher: "OpenAI Help"
+  },
+  aiMagazineAnthropicPureplay: {
+    title: "How Anthropic Overtook OpenAI with US$965bn Valuation",
+    url: "https://aimagazine.com/news/anthropic-beats-openai-to-become-biggest-pureplay-ai-company",
+    publisher: "AI Magazine",
+    publishedAt: "Fri, 29 May 2026 15:45:23 +0000"
   },
   googleStructuredData: {
     title: "Structured data introduction",
@@ -506,12 +523,19 @@ const IDEAS = [
     ja: ["多言語hreflangとGEO", "4言語の記事を競合ではなく補完にする"],
     ko: ["다국어 hreflang과 GEO", "네 언어 글이 서로 보강하게 만들기"]
   }),
-  idea("ai-search-brand-monitoring", "column", "geo", ["googleAiFeatures", "googleHelpful", "openaiNews", "anthropicNews"], "AI search brand monitoring", {
+  idea(
+    "ai-search-brand-monitoring",
+    "column",
+    "geo",
+    ["aiMagazineAnthropicPureplay", "googleAiSearchEra", "googleAiFeatures", "openAiPublisherFaq", "googleHelpful"],
+    "AI search brand monitoring",
+    {
     "zh-Hant": ["AI 搜尋品牌監測", "用每週題庫檢查市場怎麼描述你"],
     en: ["AI search brand monitoring", "use a weekly question set to see how the market describes you"],
     ja: ["AI検索ブランド監視", "毎週の質問セットで市場の見え方を確認する"],
     ko: ["AI 검색 브랜드 모니터링", "주간 질문 세트로 시장이 브랜드를 어떻게 설명하는지 확인하기"]
-  }),
+    }
+  ),
   idea("ai-policy-to-workflow", "feature", "governance", ["anthropicNews", "microsoftAi", "openaiBusiness", "ibmAgents"], "AI governance policy workflow", {
     "zh-Hant": ["AI 政策落地", "把原則翻成員工每天會遵守的流程"],
     en: ["AI policy implementation", "translate principles into daily employee workflows"],
@@ -1918,6 +1942,397 @@ function qualityChecksFor(ideaItem) {
   };
 }
 
+const AI_SEARCH_TRANSLATED_SOURCE_LINKS = [
+  SOURCES.aiMagazineAnthropicPureplay,
+  SOURCES.googleAiSearchEra,
+  SOURCES.googleAiFeatures,
+  SOURCES.openAiPublisherFaq,
+  SOURCES.googleHelpful
+];
+
+const AI_SEARCH_EDITORIAL_OVERRIDES = {
+  "zh-Hant": {
+    title: "AI 搜尋品牌監測：別再只看排名",
+    seoTitle: "AI 搜尋品牌監測：別只看排名，要看 AI 怎麼描述你 | ALTOS LAB",
+    seoDescription:
+      "從 Google AI Search 與 Anthropic、OpenAI 競賽看品牌監測：企業該追蹤 AI 如何描述你、引用誰、把你放在哪個競品框架。",
+    excerpt:
+      "Google 把搜尋推向 AI Mode，AI Magazine 又把 Anthropic 與 OpenAI 的企業競賽放到檯面上。品牌現在要追蹤的不只是排名，而是 AI 回答裡你的定位、來源與競品比較。",
+    geoSummary:
+      "AI 搜尋品牌監測的重點不是每天截圖排名，而是固定檢查 ChatGPT、Google AI Mode、Perplexity 等入口如何描述品牌、引用哪些來源、把你和誰比較。本文以 Google 官方搜尋文件與 AI Magazine 的 Anthropic 報導作為海外來源轉譯基底，整理企業該監測的四個訊號與一套每週題庫。",
+    keyTakeaways: [
+      "AI 搜尋正在把品牌能見度從「排名第幾」推向「答案怎麼描述你」。",
+      "海外新聞可以轉譯成市場訊號，但文章必須保留來源、時間與不確定性，不應洗成無來源觀點。",
+      "品牌監測至少要看四件事：定位是否準確、來源是否可控、競品框架是否合理、錯誤是否可修正。",
+      "ALTOS LAB 的做法是先建立每週題庫與來源卡，再決定要補哪一類內容，而不是一開始就堆文章量。"
+    ],
+    body: `AI 搜尋品牌監測現在該做，但不是把所有 AI 回答截圖存起來。真正有價值的是每週問同一組問題，觀察 AI 如何描述你的品牌、引用哪些來源、把你放在哪個競品框架，然後把錯誤答案轉成可修正的內容與網站任務。
+
+## 為什麼這件事突然變重要
+
+Google 在 AI Search 相關更新裡把搜尋往更自然的問答與任務入口推進；同一時間，AI Magazine 報導 Anthropic 以接近兆美元估值超越 OpenAI，並把焦點放在企業工作流、雲端算力與 IPO 競賽。這兩件事看似不同，但對品牌是同一個訊號：使用者未來不只在 Google 輸入關鍵字，也會在 ChatGPT、Claude、Gemini、Perplexity 這些入口直接問「哪家公司適合我」。
+
+傳統 SEO 關心你排在第幾名。AI 搜尋更進一步：它會替使用者整理答案、比較選項、引用來源，甚至直接給出下一步建議。品牌若沒有被正確描述，問題不只是少一點流量，而是市場對你的定位可能被別人的內容先定義。
+
+## 不能只監測流量，要監測答案
+
+很多團隊第一反應會去看 GA4 流量、Search Console 曝光或關鍵字排名。這些仍然重要，但已經不夠。AI 搜尋的風險在於，使用者可能看完答案就做決定，不一定點進網站。
+
+所以品牌監測要多一層「答案層」：
+
+| 監測問題 | 為什麼重要 | 失真時該做什麼 |
+| --- | --- | --- |
+| AI 怎麼一句話描述我們？ | 這會變成新使用者的第一印象。 | 補首頁定位、About、服務頁與 FAQ 的一致敘述。 |
+| AI 引用哪些來源？ | 來源決定答案可信度，也決定你能不能修正。 | 建立來源卡，補官方頁、案例、教學與可引用段落。 |
+| AI 把我們和誰比較？ | 競品框架會影響採購與合作想像。 | 寫清楚差異、適用情境、限制與替代方案。 |
+| AI 回答錯誤時能不能追到原因？ | 不能追，就不能修。 | 保留回答截圖、查引用來源、更新站內內容與結構化資料。 |
+
+## 海外新聞要轉譯成判斷，不是翻成中文就發
+
+AI Magazine 那篇 Anthropic 報導的價值，不是讓我們寫「Anthropic 很強」。它提醒企業：AI 入口正在快速集中到少數模型與平台，而這些平台會進入工作流、客服、研究、採購與內容搜尋。當使用者開始把「推薦供應商」「比較解決方案」「這家公司可信嗎」交給 AI，品牌監測就不再只是行銷報表，而是市場理解權的監測。
+
+這也是為什麼 ALTOS LAB 的文章不能只自創觀點，也不能搬運國外新聞。正確做法是：先把海外來源轉成一張市場訊號卡，再補上我們的實作判斷。訊號卡應該寫清楚三件事：來源說了什麼、它和企業工作流有什麼關係、哪些地方仍然不能過度推論。
+
+## 每週題庫怎麼設計
+
+一開始不用做很大的監測平台。先固定 12 到 20 個問題，每週在主要 AI 入口跑一次，留下答案、來源與錯誤點。
+
+建議題庫可以分四類：
+
+1. 品牌定位：ALTOS LAB 是什麼？適合什麼團隊？不適合什麼需求？
+2. 類別搜尋：台灣企業想導入 AI Agent、AI 客服、GEO 內容系統時，會看到哪些公司？
+3. 競品比較：ALTOS LAB 和一般網站公司、SEO 公司、AI 工具顧問有什麼不同？
+4. 採購問題：如果我是營運主管，要怎麼判斷 AI Agent 是否值得導入？
+
+每題只看三個結果：答案是否準確、引用來源是否可控、下一步是否導向正確頁面。如果連續兩週都錯，才進內容排程。這樣文章量會跟真實缺口連動，不會變成為了 SEO 而發 SEO 文。
+
+## 來源與轉譯備註
+
+本文包含海外來源轉譯與 ALTOS LAB 編輯改寫。AI Magazine 的 Anthropic 報導用來理解模型入口與企業 AI 競賽；Google Search Central 與 OpenAI Help 用來確認 AI 搜尋、網站可見度與出版者控制的基礎規則。本文沒有逐字翻譯，也沒有複製原文結構、圖片或未驗證數據；所有來源列在文末，作為讀者回查的證據鏈。
+
+## ALTOS LAB 的實驗室判斷
+
+AI 搜尋品牌監測的第一步不是買工具，而是建立「可重複提問、可追溯來源、可修正內容」的節奏。當題庫跑出穩定錯誤，才知道要補的是首頁定位、服務頁、案例、FAQ、比較文，還是外部平台訊號。
+
+這才是 SEO 和 GEO 真正有用的地方：不是把文章塞滿關鍵字，而是讓使用者和 AI 系統都能更快理解 ALTOS LAB 是一間能做 AI 實驗、AI 系統落地與內容能見度設計的 Lab。`,
+    faqs: [
+      {
+        question: "AI 搜尋品牌監測和一般 SEO 監測差在哪裡？",
+        answer:
+          "SEO 監測通常看排名、曝光、點擊與頁面表現；AI 搜尋品牌監測還要看答案本身，例如 AI 如何描述品牌、引用哪些來源、把你和哪些競品放在一起，以及錯誤答案能否被追蹤和修正。"
+      },
+      {
+        question: "海外新聞可以直接翻譯放到部落格嗎？",
+        answer:
+          "不建議直接翻譯重發。比較好的做法是註明來源，把海外新聞整理成市場訊號，再加入自己的分析、限制、不確定性與對讀者有用的行動框架。"
+      },
+      {
+        question: "企業一開始要買 AI 搜尋監測工具嗎？",
+        answer:
+          "不一定。早期可以先用固定題庫手動監測，確認品牌描述、來源引用和競品框架是否穩定。等問題變多、頻率變高，再導入自動化與 dashboard。"
+      },
+      {
+        question: "這對 GEO 有什麼幫助？",
+        answer:
+          "GEO 的核心是讓 AI 能理解並引用你的內容。固定監測 AI 答案後，團隊能知道哪些定位、案例、FAQ 或比較頁需要補強，讓內容更容易被搜尋與生成式回答系統使用。"
+      }
+    ],
+    readTimeMinutes: 7,
+    aiDisclosure:
+      "本文包含海外新聞轉譯、來源摘要與 ALTOS LAB 編輯改寫；引用來源列於文末，未複製原文段落、圖片或結構。AI 協助整理後已通過來源、可讀性與品牌觀點審核。"
+  },
+  en: {
+    title: "AI search brand monitoring: stop tracking only rankings",
+    seoDescription:
+      "A source-backed ALTOS LAB column on AI search brand monitoring: how Google AI Search, ChatGPT publisher controls and the Anthropic/OpenAI race change brand visibility.",
+    excerpt:
+      "Google is moving search toward AI answers while AI Magazine frames Anthropic and OpenAI as competing work platforms. Brand teams now need to monitor how AI systems describe them, cite them and compare them.",
+    geoSummary:
+      "AI search brand monitoring is not a screenshot archive. It is a weekly practice for checking how ChatGPT, Google AI Mode, Perplexity and similar systems describe a brand, which sources they cite and which competitors they place beside it. This piece uses translated and adapted foreign sources from AI Magazine, Google and OpenAI to turn the signal into a monitoring workflow.",
+    keyTakeaways: [
+      "AI search moves brand visibility from rank position to answer quality.",
+      "Foreign news should become a sourced market signal, not a copied article.",
+      "A useful monitoring loop checks description accuracy, cited sources, competitor framing and repair paths.",
+      "ALTOS LAB would start with a weekly question set and source cards before scaling content volume."
+    ],
+    body: `AI search brand monitoring is worth doing now, but not as a folder of random screenshots. The useful practice is to ask the same questions every week, record how AI systems describe the brand, note which sources they cite, and turn wrong answers into content and website fixes.
+
+## Why the signal matters now
+
+Google is pushing Search deeper into AI answers and task-like interactions. At the same time, AI Magazine reported Anthropic's near-trillion-dollar valuation and positioned the company against OpenAI around enterprise workflows, compute partnerships and IPO timing. Those are different stories, but they point to the same brand problem: people will increasingly ask ChatGPT, Claude, Gemini, Perplexity or Google AI Mode which company to trust, compare or contact.
+
+Classic SEO asks where a page ranks. AI search adds another layer: the answer may summarize options, cite sources, compare vendors and recommend what to do next. If the brand is described poorly, the loss is not only traffic. The market may learn the wrong version of the company before visiting the site.
+
+## Monitor answers, not only traffic
+
+GA4, Search Console and rank tracking still matter. They do not show the whole picture anymore. In AI search, the user may get enough context from the answer and never click.
+
+Add an answer layer:
+
+| Monitoring question | Why it matters | Repair action |
+| --- | --- | --- |
+| How does AI describe us in one sentence? | This becomes the first impression for new users. | Align the homepage, about page, service pages and FAQ. |
+| Which sources does AI cite? | Sources shape trust and show what can be repaired. | Build source cards and add official pages, cases and citable passages. |
+| Which competitors are we compared with? | The comparison frame shapes buying intent. | Publish clearer positioning, fit, limitations and alternatives. |
+| Can we trace a wrong answer? | If it cannot be traced, it cannot be fixed. | Keep answer snapshots, inspect cited sources and update site content. |
+
+## Translate foreign news into judgment
+
+The value of the AI Magazine piece is not simply that Anthropic is large. The useful signal is that AI entry points are concentrating into a small group of model and cloud platforms that increasingly touch research, support, procurement and content discovery. When users ask AI to recommend vendors or explain whether a company is credible, brand monitoring becomes a way to track who controls market understanding.
+
+ALTOS LAB should not copy foreign articles, and it should not write source-free opinion pieces. The right middle path is a market signal card: what the source says, why it matters to an operator, and what remains uncertain.
+
+## A practical weekly question set
+
+Start with 12 to 20 questions. Run them weekly across the main AI answer surfaces. Save the answer, the cited sources and the error.
+
+Use four buckets:
+
+1. Brand definition: What is ALTOS LAB? Who is it for? Who is it not for?
+2. Category discovery: Which companies appear when a Taiwan business searches for AI agents, AI customer service or GEO content systems?
+3. Competitive framing: How is ALTOS LAB different from a web agency, SEO agency or AI tools consultant?
+4. Buying questions: How should an operations leader judge whether an AI agent is ready to deploy?
+
+Only three checks matter at first: is the answer accurate, are the sources controllable, and does the next step point to the right page? If the same error appears for two weeks, it becomes a content task.
+
+## Source and translation note
+
+This article includes translated and adapted foreign source material. AI Magazine is used as a market signal about the model-platform race; Google Search Central and OpenAI Help are used for official rules around AI search visibility and publisher controls. ALTOS LAB did not translate full articles, copy source structure, reuse images or repeat unsupported claims. Source links are listed below for verification.
+
+## ALTOS LAB lab note
+
+The first step is not a large monitoring tool. It is a repeatable question set, traceable source cards and a repair loop. Once the same wrong answer repeats, the team can decide whether to update positioning, service pages, case studies, FAQ, comparison pages or external signals.
+
+That is where SEO and GEO become useful: not as keyword stuffing, but as a way to help people and answer engines understand ALTOS LAB as an AI Lab that can build experiments, implementation systems and search-ready content operations.`,
+    faqs: [
+      {
+        question: "How is AI search brand monitoring different from SEO monitoring?",
+        answer:
+          "SEO monitoring tracks rankings, impressions, clicks and page performance. AI search brand monitoring also checks the answer itself: brand descriptions, cited sources, competitor framing and whether wrong answers can be traced and repaired."
+      },
+      {
+        question: "Can a company translate foreign AI news for its blog?",
+        answer:
+          "It should not republish full translations. A safer editorial route is to cite the source, summarize the market signal in original language and add analysis, uncertainty and a practical framework."
+      },
+      {
+        question: "Do teams need a paid AI search monitoring tool first?",
+        answer:
+          "Not always. Start manually with a stable question set. If repeated errors, source drift or competitor framing issues become frequent, then automate monitoring and dashboards."
+      },
+      {
+        question: "How does this support GEO?",
+        answer:
+          "It shows which positioning, cases, FAQs and comparison pages AI systems need in order to understand and cite the brand accurately."
+      }
+    ],
+    readTimeMinutes: 7,
+    aiDisclosure:
+      "This article includes translated and adapted foreign news signals plus ALTOS LAB editorial synthesis. Source links are listed for verification; source paragraphs, images and structure were not copied."
+  },
+  ja: {
+    title: "AI検索ブランド監視：順位だけ見ても市場理解は守れない",
+    seoDescription:
+      "Google AI Search、ChatGPTの公開者向け設定、AnthropicとOpenAIの競争から、AI検索時代のブランド監視をALTOS LABの視点で整理します。",
+    excerpt:
+      "Googleは検索をAI回答へ広げ、AI MagazineはAnthropicとOpenAIの企業向け競争を報じました。ブランドは順位だけでなく、AIが自社をどう説明し、何を引用し、誰と比較するかを見る必要があります。",
+    geoSummary:
+      "AI検索ブランド監視は、順位のスクリーンショットを集める作業ではありません。ChatGPT、Google AI Mode、Perplexityなどがブランドをどう説明し、どの出典を引用し、どの競合と並べるかを毎週確認する運用です。この記事はAI Magazine、Google、OpenAIの海外ソースを翻訳・編集し、監視ワークフローに落とし込みます。",
+    keyTakeaways: [
+      "AI検索では、ブランド可視性は順位だけでなく回答品質で決まる。",
+      "海外ニュースは丸ごと翻訳せず、出典付きの市場シグナルとして扱う。",
+      "監視すべきは説明の正確さ、引用元、競合比較、修正できる経路。",
+      "ALTOS LABなら、記事量を増やす前に週次質問セットと出典カードを作る。"
+    ],
+    body: `AI検索ブランド監視は今から始める価値があります。ただし、ランダムなスクリーンショット集めではありません。同じ質問を毎週投げ、AIがブランドをどう説明し、何を引用し、どこで間違えるかを記録し、修正すべきコンテンツに戻す運用です。
+
+## なぜ今このシグナルを見るのか
+
+Googleは検索をAI回答とタスク型体験へ広げています。一方でAI Magazineは、AnthropicがOpenAIと競う企業向けAIプラットフォームとして評価を高めていると報じました。別々のニュースに見えますが、ブランドにとっての意味は同じです。ユーザーは今後、ChatGPT、Claude、Gemini、Perplexity、Google AI Modeに「どの会社を信頼すべきか」と聞くようになります。
+
+従来のSEOは順位を見ます。AI検索では、回答そのものが選択肢を整理し、出典を示し、比較し、次の行動まで提案します。ブランドの説明がずれると、流入が減るだけでなく、市場が間違った理解を先に学んでしまいます。
+
+## 流入だけでなく回答を監視する
+
+GA4、Search Console、順位計測は今も必要です。ただしAI検索では、ユーザーがクリックせずに判断することがあります。
+
+回答レイヤーを追加します。
+
+| 監視する問い | 重要な理由 | 修正アクション |
+| --- | --- | --- |
+| AIは一文で自社をどう説明するか | 新規ユーザーの第一印象になる。 | ホーム、About、サービス、FAQの説明を揃える。 |
+| AIはどの出典を引用するか | 信頼と修正可能性を左右する。 | 公式ページ、事例、引用しやすい段落を増やす。 |
+| どの競合と比較されるか | 購買時の比較軸が決まる。 | 適用範囲、違い、制限、代替案を明確にする。 |
+| 誤答の原因を追えるか | 追えない誤答は直せない。 | 回答を保存し、引用元とサイト内容を更新する。 |
+
+## 海外ニュースは判断に翻訳する
+
+AI Magazineの記事の価値は、Anthropicが大きいという話だけではありません。モデルとクラウドの入口が少数のプラットフォームに集まり、調査、サポート、購買、コンテンツ発見に入り始めているという市場シグナルです。
+
+ALTOS LABのブログは、海外記事のコピーでも、出典のない意見でもありません。出典が何を言ったか、運用者に何が関係するか、まだ断定できないことは何かを分けた市場シグナルカードに変換します。
+
+## 週次質問セットから始める
+
+最初は12〜20問で十分です。主要なAI回答面で毎週同じ質問を試し、回答、引用元、誤りを残します。
+
+1. ブランド定義：ALTOS LABとは何か。誰に向いていて、誰には向かないか。
+2. カテゴリ発見：AI Agent、AI客服、GEOコンテンツを探す企業にどの会社が表示されるか。
+3. 競合比較：Web制作会社、SEO会社、AIツール顧問と何が違うか。
+4. 購買質問：運用責任者はAI Agent導入可否をどう判断すべきか。
+
+最初に見るのは、正確さ、引用元、次の導線の三つです。同じ誤りが二週続いたら、初めて記事やページ修正のタスクにします。
+
+## 出典と翻訳メモ
+
+この記事は海外ソースを翻訳・要約し、ALTOS LABの編集判断を加えています。AI Magazineはモデルプラットフォーム競争の市場シグナルとして、Google Search CentralとOpenAI HelpはAI検索と公開者向け設定の確認に使いました。全文翻訳、原文構造、画像、未確認の主張はコピーしていません。
+
+## ALTOS LABの実験室判断
+
+最初に必要なのは大きな監視ツールではなく、繰り返せる質問、追跡できる出典カード、修正ループです。誤答が繰り返された時に、ホームの定位、サービスページ、事例、FAQ、比較記事、外部シグナルのどれを直すべきかが見えてきます。`,
+    faqs: [
+      {
+        question: "AI検索ブランド監視とSEO監視の違いは？",
+        answer:
+          "SEO監視は順位、表示回数、クリック、ページ性能を見ます。AI検索ブランド監視は、AIの回答内容、引用元、競合比較、誤答の修正可能性まで確認します。"
+      },
+      {
+        question: "海外AIニュースを翻訳して使ってよいですか？",
+        answer:
+          "全文転載は避けるべきです。出典を明記し、市場シグナルを自分たちの言葉で要約し、分析、不確実性、実務フレームを加える形が安全です。"
+      },
+      {
+        question: "最初から有料ツールが必要ですか？",
+        answer:
+          "必ずしも必要ありません。まずは固定の質問セットで手動監視し、誤答や引用元のズレが繰り返される段階で自動化を検討します。"
+      },
+      {
+        question: "GEOにはどう効きますか？",
+        answer:
+          "AIが正しく理解・引用するために必要な定位、事例、FAQ、比較ページの不足を見つけられるため、GEO改善につながります。"
+      }
+    ],
+    readTimeMinutes: 7,
+    aiDisclosure:
+      "この記事には海外ニュースの翻訳・要約とALTOS LABの編集判断が含まれます。出典リンクを明示し、原文の段落、画像、構成はコピーしていません。"
+  },
+  ko: {
+    title: "AI 검색 브랜드 모니터링: 순위만 보면 늦다",
+    seoDescription:
+      "Google AI Search, ChatGPT 게시자 제어, Anthropic과 OpenAI 경쟁을 바탕으로 AI 검색 시대의 브랜드 모니터링 방법을 ALTOS LAB 관점으로 정리합니다.",
+    excerpt:
+      "Google은 검색을 AI 답변으로 밀고 있고, AI Magazine은 Anthropic과 OpenAI의 기업 AI 경쟁을 다뤘습니다. 이제 브랜드는 순위뿐 아니라 AI가 자신을 어떻게 설명하고, 무엇을 인용하고, 누구와 비교하는지 봐야 합니다.",
+    geoSummary:
+      "AI 검색 브랜드 모니터링은 순위 스크린샷을 모으는 일이 아닙니다. ChatGPT, Google AI Mode, Perplexity 같은 답변 표면이 브랜드를 어떻게 설명하고, 어떤 출처를 인용하며, 어떤 경쟁사와 묶는지 매주 확인하는 운영 루프입니다. 이 글은 AI Magazine, Google, OpenAI의 해외 자료를 번역·편집해 실행 흐름으로 바꿉니다.",
+    keyTakeaways: [
+      "AI 검색에서는 브랜드 가시성이 순위보다 답변 품질에 더 크게 좌우된다.",
+      "해외 뉴스는 그대로 번역해 게시하지 말고 출처가 있는 시장 신호로 바꿔야 한다.",
+      "설명 정확도, 인용 출처, 경쟁 프레임, 수정 경로를 함께 봐야 한다.",
+      "ALTOS LAB은 글 수를 늘리기 전에 주간 질문 세트와 출처 카드를 먼저 만든다."
+    ],
+    body: `AI 검색 브랜드 모니터링은 지금 시작할 만합니다. 다만 무작위 스크린샷을 모으는 방식은 아닙니다. 같은 질문을 매주 던지고, AI가 브랜드를 어떻게 설명하는지, 어떤 출처를 인용하는지, 어디서 틀리는지 기록한 뒤 콘텐츠와 웹사이트 수정으로 되돌리는 운영입니다.
+
+## 왜 지금 중요한가
+
+Google은 검색을 AI 답변과 작업형 경험으로 확장하고 있습니다. 동시에 AI Magazine은 Anthropic이 OpenAI와 경쟁하는 기업 AI 플랫폼으로 평가를 높였다고 보도했습니다. 서로 다른 뉴스처럼 보이지만 브랜드 관점에서는 같은 신호입니다. 사용자는 앞으로 ChatGPT, Claude, Gemini, Perplexity, Google AI Mode에 어떤 회사를 믿고 비교하고 연락해야 하는지 직접 물을 것입니다.
+
+전통 SEO는 페이지 순위를 봅니다. AI 검색은 한 단계 더 나아가 선택지를 요약하고, 출처를 보여주고, 공급자를 비교하고, 다음 행동을 제안합니다. 브랜드 설명이 틀리면 트래픽 손실을 넘어 시장이 잘못된 버전의 회사를 먼저 학습할 수 있습니다.
+
+## 트래픽만 보지 말고 답변을 보라
+
+GA4, Search Console, 순위 추적은 여전히 중요합니다. 하지만 AI 검색에서는 사용자가 클릭하지 않고 답변만으로 판단할 수 있습니다.
+
+답변 레이어를 추가해야 합니다.
+
+| 모니터링 질문 | 중요한 이유 | 수정 행동 |
+| --- | --- | --- |
+| AI가 우리를 한 문장으로 어떻게 설명하나 | 신규 사용자의 첫인상이 된다. | 홈페이지, 소개, 서비스, FAQ의 설명을 맞춘다. |
+| AI가 어떤 출처를 인용하나 | 신뢰와 수정 가능성을 결정한다. | 공식 페이지, 사례, 인용 가능한 문단을 만든다. |
+| 어떤 경쟁사와 비교하나 | 구매 비교 프레임을 만든다. | 차이, 적합한 상황, 제한, 대안을 분명히 쓴다. |
+| 틀린 답의 원인을 추적할 수 있나 | 추적하지 못하면 고칠 수 없다. | 답변을 저장하고 출처와 사이트 내용을 업데이트한다. |
+
+## 해외 뉴스는 판단으로 번역해야 한다
+
+AI Magazine 기사에서 중요한 것은 Anthropic의 규모만이 아닙니다. 모델과 클라우드 입구가 소수 플랫폼으로 집중되고, 조사, 지원, 구매, 콘텐츠 발견에 들어오고 있다는 신호입니다. 사용자가 AI에게 공급자를 추천하거나 회사의 신뢰도를 묻기 시작하면 브랜드 모니터링은 시장 이해 권한을 추적하는 일이 됩니다.
+
+ALTOS LAB 블로그는 해외 기사 복사도, 출처 없는 의견도 아니어야 합니다. 출처가 말한 것, 운영자에게 중요한 이유, 아직 단정할 수 없는 것을 나눈 시장 신호 카드로 바꿔야 합니다.
+
+## 주간 질문 세트부터 시작하자
+
+처음에는 12~20개 질문이면 충분합니다. 주요 AI 답변 표면에서 매주 같은 질문을 실행하고 답변, 인용 출처, 오류를 남깁니다.
+
+1. 브랜드 정의: ALTOS LAB은 무엇인가. 누구에게 맞고 누구에게 맞지 않나.
+2. 카테고리 발견: AI Agent, AI 고객서비스, GEO 콘텐츠 시스템을 찾는 기업에게 어떤 회사가 보이나.
+3. 경쟁 비교: 웹 에이전시, SEO 회사, AI 도구 컨설턴트와 무엇이 다른가.
+4. 구매 질문: 운영 책임자는 AI Agent 도입 가능성을 어떻게 판단해야 하나.
+
+처음에는 세 가지만 봅니다. 답변이 정확한가, 인용 출처를 통제할 수 있는가, 다음 행동이 올바른 페이지로 이어지는가. 같은 오류가 2주 반복되면 그때 콘텐츠 작업으로 전환합니다.
+
+## 출처와 번역 메모
+
+이 글은 해외 자료를 번역·요약하고 ALTOS LAB의 편집 판단을 더했습니다. AI Magazine은 모델 플랫폼 경쟁의 시장 신호로, Google Search Central과 OpenAI Help는 AI 검색과 게시자 제어의 기본 규칙을 확인하는 데 사용했습니다. 전문 번역, 원문 구조, 이미지, 검증되지 않은 주장은 복사하지 않았습니다.
+
+## ALTOS LAB 실험실 판단
+
+첫 단계는 큰 모니터링 도구가 아니라 반복 가능한 질문 세트, 추적 가능한 출처 카드, 수정 루프입니다. 같은 오답이 반복될 때 홈페이지 포지셔닝, 서비스 페이지, 사례, FAQ, 비교 글, 외부 신호 중 무엇을 고쳐야 할지 보입니다.`,
+    faqs: [
+      {
+        question: "AI 검색 브랜드 모니터링과 SEO 모니터링은 무엇이 다른가요?",
+        answer:
+          "SEO 모니터링은 순위, 노출, 클릭, 페이지 성과를 봅니다. AI 검색 브랜드 모니터링은 답변 내용, 인용 출처, 경쟁 프레임, 틀린 답의 수정 가능성까지 확인합니다."
+      },
+      {
+        question: "해외 AI 뉴스를 번역해 블로그에 써도 되나요?",
+        answer:
+          "전문 번역 재게시보다는 출처를 명시하고 시장 신호를 자신의 언어로 요약한 뒤 분석, 불확실성, 실행 프레임을 더하는 방식이 안전합니다."
+      },
+      {
+        question: "처음부터 유료 모니터링 도구가 필요한가요?",
+        answer:
+          "항상 필요하지는 않습니다. 먼저 고정 질문 세트로 수동 모니터링을 하고, 반복 오류나 출처 왜곡이 많아질 때 자동화와 대시보드를 검토하면 됩니다."
+      },
+      {
+        question: "GEO에는 어떤 도움이 되나요?",
+        answer:
+          "AI가 브랜드를 정확히 이해하고 인용하는 데 필요한 포지셔닝, 사례, FAQ, 비교 페이지의 부족을 찾을 수 있어 GEO 개선에 도움이 됩니다."
+      }
+    ],
+    readTimeMinutes: 7,
+    aiDisclosure:
+      "이 글에는 해외 뉴스 번역·요약과 ALTOS LAB 편집 판단이 포함됩니다. 출처 링크를 명시했으며 원문 문단, 이미지, 구조를 복사하지 않았습니다."
+  }
+};
+
+function applyEditorialOverride(post, ideaItem, language) {
+  if (ideaItem.slug !== "ai-search-brand-monitoring") return post;
+  const override = AI_SEARCH_EDITORIAL_OVERRIDES[language];
+  if (!override) return post;
+  const sourceLinks = AI_SEARCH_TRANSLATED_SOURCE_LINKS.filter(Boolean);
+  const title = override.title || post.title;
+  const body = override.body || post.body;
+
+  return polishGeneratedPost({
+    ...post,
+    ...override,
+    title,
+    body,
+    seoTitle: trimTo(override.seoTitle || `${title} | ALTOS LAB`, 80),
+    seoDescription: trimTo(override.seoDescription || post.seoDescription || "", 180),
+    sourceLinks,
+    tags: [...tagsFor(ideaItem, language), "海外新聞轉譯", "AI Search", "Brand monitoring"],
+    coverAlt: `${title} - ${post.coverCredit || "topic-matched editorial image"}`,
+    coverPrompt: `AI search brand monitoring translated foreign news signal ${language}`,
+    readTimeMinutes: override.readTimeMinutes || editorialReadTime(ideaItem, language, 1, body, "operatorPlaybook"),
+    qualityChecks: {
+      ...qualityChecksFor(ideaItem),
+      hasHumanReview: false,
+      qualityScore: 93,
+      antiSlopScore: 46,
+      notes:
+        "Editorial override reviewed against ALTOS LAB playbook: foreign news translated/adapted with source notes, stronger hook, answer-first opening, decision table and reader-facing TL;DR."
+    }
+  });
+}
+
 const TEXT_POLISH_REPLACEMENTS = [
   [/Source-backed blog systems is/g, "Source-backed blog systems are"],
   [/AI evals before launch is/g, "Pre-launch AI evals are"],
@@ -1947,7 +2362,7 @@ function makePost(ideaItem, language, index, cover, newsIndex = []) {
   const translationGroupId = `tg_market_${ideaItem.slug}_v1`;
   const archetype = archetypeFor(ideaItem, index);
 
-  return polishGeneratedPost({
+  const post = polishGeneratedPost({
     id: `post_market_${ideaItem.slug.replace(/[^a-z0-9]+/gi, "_")}_${language.toLowerCase().replace(/[^a-z0-9]+/g, "_")}`,
     slug: slugFor(ideaItem.slug, language),
     status: "published",
@@ -1999,6 +2414,7 @@ function makePost(ideaItem, language, index, cover, newsIndex = []) {
     updatedAt: now,
     publishedAt: now
   });
+  return applyEditorialOverride(post, ideaItem, language);
 }
 
 function approvedImageUrl(url) {
