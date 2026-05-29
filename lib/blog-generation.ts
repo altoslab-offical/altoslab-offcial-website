@@ -156,7 +156,7 @@ function parseFeed(xml: string, sourceUrl: string): TrendCandidate[] {
   })();
   const itemMatches = xml.match(/<item[\s\S]*?<\/item>|<entry[\s\S]*?<\/entry>/gi) || [];
 
-  return itemMatches.slice(0, 4).map((item) => {
+  return itemMatches.slice(0, 8).map((item) => {
     const title = firstXmlValue(item, ["title"]);
     const summary = firstXmlValue(item, ["description", "summary", "content"]);
     const publishedAt = firstXmlValue(item, ["pubDate", "updated", "published"]);
@@ -212,14 +212,14 @@ export async function fetchTrendCandidates(input: BlogGenerateInput = {}): Promi
       if (candidate && !candidates.some((item) => item.url === candidate.url)) {
         candidates.push(candidate);
       }
-      if (candidates.length >= 8) break;
+      if (candidates.length >= 12) break;
     }
-    if (candidates.length >= 8) break;
+    if (candidates.length >= 12) break;
   }
 
   const contentType = contentTypeFromInput(input);
   const ranked = rankTrendCandidates(candidates, contentType);
-  return ranked.length ? ranked.slice(0, 8) : FALLBACK_SOURCES;
+  return ranked.length ? ranked.slice(0, 12) : FALLBACK_SOURCES;
 }
 
 function recencyScore(publishedAt?: string) {

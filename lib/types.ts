@@ -134,6 +134,7 @@ export type BlogSourceLink = {
   url: string;
   publisher?: string;
   publishedAt?: string;
+  summary?: string;
 };
 
 export type BlogLlmQualityEvaluation = {

@@ -93,14 +93,13 @@ export const BLOG_SOURCE_REGISTRY: BlogSourceRegistryEntry[] = [
     id: "anthropic-news",
     name: "Anthropic News",
     url: "https://www.anthropic.com/news",
-    feedUrl: "https://www.anthropic.com/news/rss.xml",
-    tier: "official-rss",
+    tier: "official-docs",
     market: "global",
     language: "en",
     category: "AI Ops & Governance",
     authority: 95,
     freshness: 88,
-    notes: "Official model, safety and enterprise AI updates."
+    notes: "Official model, safety and enterprise AI updates. No stable official RSS feed is exposed, so use as a trusted source URL rather than a scheduled feed."
   },
   {
     id: "deepseek-docs",

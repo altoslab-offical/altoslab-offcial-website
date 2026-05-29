@@ -21,6 +21,8 @@ const covers = read("lib/blog-cover-generation.ts");
 const cron = read("lib/blog-cron.ts");
 const vercel = JSON.parse(read("vercel.json"));
 const marketSeed = read("lib/market-blog-seed.ts");
+const seedMatch = marketSeed.match(/export const marketBlogPosts = ([\s\S]*?) satisfies BlogPost\[];/);
+const seedPosts = seedMatch ? JSON.parse(seedMatch[1]) : [];
 
 assert(sourceRegistry.includes("BLOG_NEWS_MIX"), "source registry exposes content/news mix");
 assert((sourceRegistry.match(/tier: "official-rss"/g) || []).length >= 8, "source registry has at least 8 official RSS sources");
@@ -44,9 +46,34 @@ assert(vercel.crons?.some((item) => item.path.includes("/morning")), "Vercel cro
 assert(vercel.crons?.some((item) => item.path.includes("/afternoon")), "Vercel cron has afternoon slot");
 
 for (const language of ["zh-Hant", "en", "ja", "ko"]) {
-  const count = (marketSeed.match(new RegExp(`"language": "${language}"`, "g")) || []).length;
+  const count = seedPosts.filter((post) => post.language === language).length;
   assert(count >= 48, `${language} has at least 48 seed articles`);
 }
+
+const typeCounts = seedPosts.reduce((counts, post) => {
+  counts[post.contentType] = (counts[post.contentType] || 0) + 1;
+  return counts;
+}, {});
+assert(typeCounts.breaking >= 72, "seed archive has a real latest-news/breaking lane");
+assert(typeCounts.column >= 60, "seed archive keeps a substantial column lane");
+assert(typeCounts.feature >= 44, "seed archive keeps a substantial feature lane");
+
+const misleadingTitles = seedPosts.filter(
+  (post) => /快訊|Market brief|市場ブリーフ|시장 브리프/i.test(post.title) && post.contentType !== "breaking"
+);
+assert(misleadingTitles.length === 0, "seed article titles match breaking/column/feature classification");
+
+const postsWithoutDatedSource = seedPosts.filter(
+  (post) => !post.sourceLinks?.some((source) => source.publishedAt)
+);
+assert(postsWithoutDatedSource.length === 0, "seed articles include at least one dated real news/source link");
+
+const breakingWithoutNewsAnchor = seedPosts.filter(
+  (post) =>
+    post.contentType === "breaking" &&
+    !/最新新聞錨點|Latest news anchor|最新ニュース|최신 뉴스/.test(post.body || "")
+);
+assert(breakingWithoutNewsAnchor.length === 0, "breaking articles visibly cite a latest-news anchor");
 
 if (process.exitCode) {
   process.exit(process.exitCode);

@@ -112,7 +112,8 @@ export function normalizeSourceLinks(sourceLinks?: BlogSourceLink[]) {
       title: String(source.title || source.url || "").trim(),
       url: String(source.url || "").trim(),
       publisher: source.publisher ? String(source.publisher).trim() : undefined,
-      publishedAt: source.publishedAt ? String(source.publishedAt).trim() : undefined
+      publishedAt: source.publishedAt ? String(source.publishedAt).trim() : undefined,
+      summary: source.summary ? String(source.summary).trim() : undefined
     }))
     .filter((source) => source.title && /^https?:\/\//.test(source.url))
     .slice(0, 8);

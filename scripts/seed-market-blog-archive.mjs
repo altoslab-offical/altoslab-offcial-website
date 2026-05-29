@@ -96,6 +96,29 @@ const TYPE_LABEL = {
   ko: { breaking: "시장 브리프", column: "칼럼", feature: "기획" }
 };
 
+const CONTENT_TYPE_CYCLE = [
+  "breaking",
+  "column",
+  "feature",
+  "breaking",
+  "column",
+  "breaking",
+  "feature",
+  "column",
+  "breaking",
+  "column",
+  "feature",
+  "breaking",
+  "column",
+  "breaking",
+  "feature",
+  "column",
+  "breaking",
+  "column",
+  "feature",
+  "breaking"
+];
+
 const CATEGORY = {
   agents: {
     "zh-Hant": "AI Agent 與工作流",
@@ -245,6 +268,63 @@ const SOURCES = {
     publisher: "MIT Technology Review"
   }
 };
+
+const NEWS_FEEDS = [
+  {
+    publisher: "OpenAI",
+    url: "https://openai.com/news/rss.xml",
+    category: "AI Products",
+    priority: 98
+  },
+  {
+    publisher: "Google DeepMind",
+    url: "https://deepmind.google/blog/rss.xml",
+    category: "Build Notes",
+    priority: 96
+  },
+  {
+    publisher: "Google AI",
+    url: "https://blog.google/innovation-and-ai/technology/ai/rss/",
+    category: "AI Products",
+    priority: 94
+  },
+  {
+    publisher: "GitHub Blog",
+    url: "https://github.blog/ai-and-ml/feed/",
+    category: "Agents & Automation",
+    priority: 88
+  },
+  {
+    publisher: "Hugging Face",
+    url: "https://huggingface.co/blog/feed.xml",
+    category: "Infrastructure",
+    priority: 88
+  },
+  {
+    publisher: "Microsoft AI",
+    url: "https://blogs.microsoft.com/ai/feed/",
+    category: "Industry Workflow",
+    priority: 84
+  },
+  {
+    publisher: "NVIDIA AI",
+    url: "https://blogs.nvidia.com/blog/category/deep-learning/feed/",
+    category: "Infrastructure",
+    priority: 82
+  },
+  {
+    publisher: "TechCrunch AI",
+    url: "https://techcrunch.com/category/artificial-intelligence/feed/",
+    category: "AI Products",
+    priority: 78
+  },
+  {
+    publisher: "The Verge AI",
+    url: "https://www.theverge.com/rss/ai-artificial-intelligence/index.xml",
+    category: "AI Products",
+    priority: 76
+  }
+];
 
 const VISUAL_QUERY_BANK = {
   agents: [
@@ -535,10 +615,10 @@ const IDEAS = [
     ko: ["Edge AI 배포", "지연, 프라이버시, 비용으로 클라우드와 로컬 결정하기"]
   }),
   idea("gpu-capacity-planning", "breaking", "infra", ["nvidiaGenAi", "azureAi", "microsoftAi", "mitAi"], "GPU server data center", {
-    "zh-Hant": ["GPU 容量快訊", "把算力採購連到產品路線圖"],
-    en: ["GPU capacity brief", "connect compute buying to the product roadmap"],
-    ja: ["GPU容量ブリーフ", "計算資源調達をプロダクト計画へつなぐ"],
-    ko: ["GPU 용량 브리프", "컴퓨트 구매를 제품 로드맵과 연결하기"]
+    "zh-Hant": ["GPU 容量規劃", "把算力採購連到產品路線圖"],
+    en: ["GPU capacity planning", "connect compute buying to the product roadmap"],
+    ja: ["GPU容量計画", "計算資源調達をプロダクト計画へつなぐ"],
+    ko: ["GPU 용량 계획", "컴퓨트 구매를 제품 로드맵과 연결하기"]
   }),
   idea("model-routing-strategy", "feature", "infra", ["openaiNews", "anthropicNews", "deepmindBlog", "huggingFaceBlog"], "AI model routing architecture", {
     "zh-Hant": ["模型路由策略", "用任務難度與風險分配模型成本"],
@@ -605,6 +685,148 @@ const IDEAS = [
   sourceKeys: entry.sourceKeys.map((key) => (key === "notionFallback" ? "vercelBlog" : key))
 }));
 
+function contentTypeForIndex(index) {
+  return CONTENT_TYPE_CYCLE[index % CONTENT_TYPE_CYCLE.length];
+}
+
+function withResolvedContentType(ideaItem, index) {
+  return {
+    ...ideaItem,
+    type: contentTypeForIndex(index)
+  };
+}
+
+function decodeEntities(value = "") {
+  return value
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;|&apos;/g, "'");
+}
+
+function stripXml(value = "") {
+  return decodeEntities(
+    value
+      .replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, "$1")
+      .replace(/<[^>]*>/g, " ")
+      .replace(/\s+/g, " ")
+      .trim()
+  );
+}
+
+function firstXmlValue(item, tags) {
+  for (const tag of tags) {
+    const match = item.match(new RegExp(`<${tag}[^>]*>([\\s\\S]*?)<\\/${tag}>`, "i"));
+    if (match?.[1]) return stripXml(match[1]);
+  }
+  return "";
+}
+
+function parseFeedItems(xml, feed) {
+  const itemMatches = xml.match(/<item[\s\S]*?<\/item>|<entry[\s\S]*?<\/entry>/gi) || [];
+  return itemMatches
+    .slice(0, 12)
+    .map((item) => {
+      const hrefMatch = item.match(/<link[^>]+href=["']([^"']+)["'][^>]*>/i);
+      const link = hrefMatch?.[1] || firstXmlValue(item, ["link"]);
+      return {
+        title: firstXmlValue(item, ["title"]),
+        url: link,
+        publisher: feed.publisher,
+        publishedAt: firstXmlValue(item, ["pubDate", "updated", "published"]),
+        summary: firstXmlValue(item, ["description", "summary", "content"]),
+        sourceCategory: feed.category,
+        priority: feed.priority
+      };
+    })
+    .filter((item) => item.title && /^https?:\/\//.test(item.url));
+}
+
+async function fetchFeedItems(feed) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 5500);
+  try {
+    const response = await fetch(feed.url, {
+      headers: { "User-Agent": "ALTOS LAB editorial research bot; https://altoslab-ai.cc" },
+      signal: controller.signal
+    });
+    if (!response.ok) return [];
+    return parseFeedItems(await response.text(), feed);
+  } catch {
+    return [];
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+async function fetchNewsIndex() {
+  if (DRY_RUN && process.env.BLOG_SEED_FETCH_NEWS !== "1") return [];
+  const feeds = await Promise.all(NEWS_FEEDS.map(fetchFeedItems));
+  const seen = new Set();
+  return feeds
+    .flat()
+    .filter((item) => {
+      if (seen.has(item.url)) return false;
+      seen.add(item.url);
+      return true;
+    })
+    .sort((a, b) => {
+      const aTime = Date.parse(a.publishedAt || "") || 0;
+      const bTime = Date.parse(b.publishedAt || "") || 0;
+      return b.priority - a.priority || bTime - aTime;
+    });
+}
+
+function sourceKeyPublisher(key) {
+  return SOURCES[key]?.publisher || "";
+}
+
+function cleanSearchText(input = "") {
+  return input
+    .toLowerCase()
+    .replace(/[^a-z0-9\u4e00-\u9fff\u3040-\u30ff\uac00-\ud7af\s-]+/g, " ")
+    .split(/\s+/)
+    .filter((word) => word.length >= 3);
+}
+
+function scoreNewsItemForIdea(item, ideaItem) {
+  const sourcePublishers = ideaItem.sourceKeys.map(sourceKeyPublisher).filter(Boolean);
+  const haystack = cleanSearchText([item.title, item.summary, item.publisher, item.sourceCategory].filter(Boolean).join(" "));
+  const ideaWords = cleanSearchText([
+    ideaItem.category,
+    ideaItem.coverQuery,
+    ideaItem.line?.en?.join(" "),
+    ideaItem.line?.["zh-Hant"]?.join(" ")
+  ].filter(Boolean).join(" "));
+  const publisherScore = sourcePublishers.some((publisher) => item.publisher.toLowerCase().includes(publisher.toLowerCase().split(" ")[0])) ? 36 : 0;
+  const categoryScore =
+    (ideaItem.category === "agents" && /agent|codex|github|workflow|developer|coding/i.test(`${item.title} ${item.summary}`)) ||
+    (ideaItem.category === "geo" && /search|content|publisher|web|google|chatgpt|answer/i.test(`${item.title} ${item.summary}`)) ||
+    (ideaItem.category === "governance" && /safety|governance|policy|risk|security|frontier|responsible/i.test(`${item.title} ${item.summary}`)) ||
+    (ideaItem.category === "product" && /product|app|chatgpt|claude|gemini|model|feature/i.test(`${item.title} ${item.summary}`)) ||
+    (ideaItem.category === "infra" && /inference|gpu|model|infrastructure|developer|api|server|edge/i.test(`${item.title} ${item.summary}`)) ||
+    (ideaItem.category === "industry" && /enterprise|customer|business|workflow|industry|organization|copilot/i.test(`${item.title} ${item.summary}`))
+      ? 28
+      : 0;
+  const keywordScore = ideaWords.reduce((score, word) => score + (haystack.includes(word) ? 5 : 0), 0);
+  const recency = Date.parse(item.publishedAt || "");
+  const recencyScore = Number.isFinite(recency)
+    ? Math.max(0, 24 - Math.floor((Date.now() - recency) / 86_400_000))
+    : 0;
+  return publisherScore + categoryScore + keywordScore + recencyScore + item.priority / 10;
+}
+
+function newsItemsFor(ideaItem, newsIndex) {
+  if (!newsIndex.length) return [];
+  return [...newsIndex]
+    .map((item) => ({ item, score: scoreNewsItemForIdea(item, ideaItem) }))
+    .filter(({ score }) => score > 18)
+    .sort((a, b) => b.score - a.score)
+    .slice(0, ideaItem.type === "breaking" ? 4 : 3)
+    .map(({ item }) => item);
+}
+
 function parseCredentialFile() {
   if (!fs.existsSync(credentialsPath)) return {};
   const result = {};
@@ -631,8 +853,24 @@ function slugFor(baseSlug, language) {
   return `${baseSlug}-${language}`;
 }
 
-function sourceLinks(ideaItem) {
-  return ideaItem.sourceKeys.map((key) => SOURCES[key]).filter(Boolean).slice(0, 6);
+function sourceLinks(ideaItem, newsIndex = []) {
+  const liveNews = newsItemsFor(ideaItem, newsIndex).map((item) => ({
+    title: item.title,
+    url: item.url,
+    publisher: item.publisher,
+    publishedAt: item.publishedAt,
+    summary: item.summary
+  }));
+  const evergreen = ideaItem.sourceKeys.map((key) => SOURCES[key]).filter(Boolean);
+  const combined = [...liveNews, ...evergreen];
+  const seen = new Set();
+  return combined
+    .filter((source) => {
+      if (!source?.url || seen.has(source.url)) return false;
+      seen.add(source.url);
+      return true;
+    })
+    .slice(0, ideaItem.type === "breaking" ? 6 : 5);
 }
 
 function uniquePublishers(sources) {
@@ -640,7 +878,6 @@ function uniquePublishers(sources) {
 }
 
 const BODY_ARCHETYPES = [
-  "marketBrief",
   "researchExplainer",
   "operatorPlaybook",
   "contrarianColumn",
@@ -707,31 +944,35 @@ function titleFor(ideaItem, language, index = 0) {
   const label = archetypeLabel(archetype, language);
 
   if (language === "en") {
-    if (archetype === "marketBrief") return `${label}: what ${subject} changes for AI teams`;
-    if (archetype === "researchExplainer") return `${subject} explained: mechanisms, limits and market signals`;
-    if (archetype === "operatorPlaybook") return `${subject} playbook: how to ${decision}`;
+    if (ideaItem.type === "breaking") return `${label}: new source signal for ${subject} and what operators should watch`;
+    if (ideaItem.type === "feature") return `${subject} feature: from source signal to implementation framework`;
+    if (archetype === "researchExplainer") return `${subject} explained: mechanisms, limits and source signals`;
+    if (archetype === "operatorPlaybook") return `${subject} playbook: ${decision}`;
     if (archetype === "contrarianColumn") return `The overlooked risk inside ${subject}`;
     if (archetype === "dataChart") return `${subject} signal map: four pressures to watch`;
     return `Inside the ${subject} workflow: where the market is moving`;
   }
   if (language === "ja") {
-    if (archetype === "marketBrief") return `${label}：${subject}がAIチームに変えること`;
-    if (archetype === "researchExplainer") return `${subject}研究解説：仕組み・限界・市場シグナル`;
+    if (ideaItem.type === "breaking") return `${label}：${subject}の新しい出典シグナルを読む`;
+    if (ideaItem.type === "feature") return `${subject}特集：出典シグナルから実装フレームへ`;
+    if (archetype === "researchExplainer") return `${subject}研究解説：仕組み・限界・出典シグナル`;
     if (archetype === "operatorPlaybook") return `${subject}プレイブック：${decision}`;
     if (archetype === "contrarianColumn") return `${subject}で見落とされやすいリスク`;
     if (archetype === "dataChart") return `${subject}シグナルマップ：見るべき4つの圧力`;
     return `${subject}の現場メモ：市場はどこへ動くか`;
   }
   if (language === "ko") {
-    if (archetype === "marketBrief") return `${label}: ${subject}가 AI 팀에 바꾸는 것`;
-    if (archetype === "researchExplainer") return `${subject} 리서치 해설: 메커니즘, 한계, 시장 신호`;
+    if (ideaItem.type === "breaking") return `${label}: ${subject}의 새 출처 신호로 보는 다음 판단`;
+    if (ideaItem.type === "feature") return `${subject} 기획: 출처 신호에서 실행 프레임워크까지`;
+    if (archetype === "researchExplainer") return `${subject} 리서치 해설: 메커니즘, 한계, 출처 신호`;
     if (archetype === "operatorPlaybook") return `${subject} 플레이북: ${decision}`;
     if (archetype === "contrarianColumn") return `${subject}에서 놓치기 쉬운 리스크`;
     if (archetype === "dataChart") return `${subject} 시그널 맵: 주목할 네 가지 압력`;
     return `${subject} 현장 노트: 시장은 어디로 움직이나`;
   }
-  if (archetype === "marketBrief") return `${label}：${subject}正在改變 AI 團隊的判斷`;
-  if (archetype === "researchExplainer") return `${subject}研究解讀：機制、限制與市場訊號`;
+  if (ideaItem.type === "breaking") return `${label}：${subject}出現新來源訊號，企業該看什麼`;
+  if (ideaItem.type === "feature") return `${subject}專題：從來源訊號到企業導入框架`;
+  if (archetype === "researchExplainer") return `${subject}研究解讀：機制、限制與來源訊號`;
   if (archetype === "operatorPlaybook") return `${subject}操作手冊：${decision}`;
   if (archetype === "contrarianColumn") return `${subject}的盲點：企業容易誤判哪一步`;
   if (archetype === "dataChart") return `${subject}訊號圖：四個指標看懂導入壓力`;
@@ -1039,12 +1280,56 @@ function sourceListFor(sources, language) {
     .slice(0, 4)
     .map((source) => {
       const publisher = source.publisher || source.title;
-      if (language === "en") return `- ${publisher}: ${source.title}`;
-      if (language === "ja") return `- ${publisher}：${source.title}`;
-      if (language === "ko") return `- ${publisher}: ${source.title}`;
-      return `- ${publisher}：${source.title}`;
+      const date = source.publishedAt ? ` (${dateLabel(source.publishedAt, language)})` : "";
+      const summary = source.summary ? ` — ${trimTo(source.summary, language === "en" ? 110 : 80)}` : "";
+      if (language === "en") return `- ${publisher}: ${source.title}${date}${summary}`;
+      if (language === "ja") return `- ${publisher}：${source.title}${date}${summary}`;
+      if (language === "ko") return `- ${publisher}: ${source.title}${date}${summary}`;
+      return `- ${publisher}：${source.title}${date}${summary}`;
     })
     .join("\n");
+}
+
+function dateLabel(value, language) {
+  const parsed = Date.parse(value || "");
+  if (!Number.isFinite(parsed)) return "";
+  const date = new Date(parsed);
+  if (language === "en") {
+    return date.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric", timeZone: "UTC" });
+  }
+  if (language === "ja") {
+    return date.toLocaleDateString("ja-JP", { year: "numeric", month: "numeric", day: "numeric", timeZone: "UTC" });
+  }
+  if (language === "ko") {
+    return date.toLocaleDateString("ko-KR", { year: "numeric", month: "numeric", day: "numeric", timeZone: "UTC" });
+  }
+  return date.toLocaleDateString("zh-TW", { year: "numeric", month: "numeric", day: "numeric", timeZone: "UTC" });
+}
+
+function newsContextParagraph(sources, language) {
+  const live = sources.filter((source) => source.publishedAt && source.summary);
+  if (!live.length) return "";
+  const first = live[0];
+  const second = live[1];
+  const firstDate = dateLabel(first.publishedAt, language);
+  if (language === "en") {
+    return `Latest news anchor: ${first.publisher || "Source"} published "${first.title}"${firstDate ? ` on ${firstDate}` : ""}. ${second ? `This draft also checks ${second.publisher || "another source"}'s "${second.title}" so the piece is not built from a single headline.` : "The article uses that item as a source anchor, then adds ALTOS LAB's implementation judgment instead of rewriting the original report."}`;
+  }
+  if (language === "ja") {
+    return `最新ニュースの軸：${first.publisher || "Source"}の「${first.title}」${firstDate ? `（${firstDate}）` : ""}を出発点にします。${second ? `さらに${second.publisher || "別の出典"}の「${second.title}」も照合し、単一記事の言い換えにしません。` : "そこから ALTOS LAB の実装判断を加え、元記事の言い換えにしません。"}`;
+  }
+  if (language === "ko") {
+    return `최신 뉴스 앵커: ${first.publisher || "Source"}의 "${first.title}"${firstDate ? `(${firstDate})` : ""}를 출발점으로 삼습니다. ${second ? `또 ${second.publisher || "다른 출처"}의 "${second.title}"도 함께 확인해 단일 기사 재작성에 머물지 않게 합니다.` : "그 위에 ALTOS LAB의 실행 판단을 더해 원문 재작성에 머물지 않게 합니다."}`;
+  }
+  return `最新新聞錨點：${first.publisher || "Source"} 的「${first.title}」${firstDate ? `（${firstDate}）` : ""}。${second ? `這篇也交叉參考 ${second.publisher || "另一個來源"} 的「${second.title}」，避免只改寫單一新聞。` : "文章會把它當作來源錨點，再加入 ALTOS LAB 的實作判斷，而不是改寫原文。"}`;
+}
+
+function injectNewsContext(body, language, sources) {
+  const context = newsContextParagraph(sources, language);
+  if (!context || body.includes("最新新聞錨點") || body.includes("Latest news anchor")) return body;
+  const parts = body.split(/\n{2,}/);
+  if (parts.length < 2) return body;
+  return [parts[0], context, ...parts.slice(1)].join("\n\n");
 }
 
 function comparisonTableFor(language, ideaItem) {
@@ -1556,10 +1841,10 @@ function qualityChecksFor(ideaItem) {
   };
 }
 
-function makePost(ideaItem, language, index, cover) {
+function makePost(ideaItem, language, index, cover, newsIndex = []) {
+  const sources = sourceLinks(ideaItem, newsIndex);
   const title = titleFor(ideaItem, language, index);
-  const sources = sourceLinks(ideaItem);
-  const body = markdownBodyFor(ideaItem, language, sources, index);
+  const body = injectNewsContext(markdownBodyFor(ideaItem, language, sources, index), language, sources);
   const now = new Date().toISOString();
   const translationGroupId = `tg_market_${ideaItem.slug}_v1`;
   const archetype = archetypeFor(ideaItem, index);
@@ -1961,13 +2246,20 @@ function summarize(posts) {
 }
 
 async function main() {
+  const newsIndex = await fetchNewsIndex();
+  if (newsIndex.length) {
+    console.log(`[seed] fetched ${newsIndex.length} live news/source items`);
+  } else {
+    console.log("[seed] live news fetch unavailable; using evergreen source links only");
+  }
+
   if (EXPORT_SEED_PATH) {
     const posts = [];
     for (let index = 0; index < IDEAS.length; index += 1) {
-      const ideaItem = IDEAS[index];
+      const ideaItem = withResolvedContentType(IDEAS[index], index);
       for (const language of LANGUAGES) {
         const cover = await coverFor(ideaItem, language, index);
-        posts.push(makePost(ideaItem, language, index, cover));
+        posts.push(makePost(ideaItem, language, index, cover, newsIndex));
       }
       console.log(`[export] ${index + 1}/${IDEAS.length} ${ideaItem.slug}`);
     }
@@ -1990,10 +2282,10 @@ async function main() {
   let wouldUpdate = 0;
 
   for (let index = 0; index < IDEAS.length; index += 1) {
-    const ideaItem = IDEAS[index];
+    const ideaItem = withResolvedContentType(IDEAS[index], index);
     for (const language of LANGUAGES) {
       const cover = await coverFor(ideaItem, language, index);
-      const post = makePost(ideaItem, language, index, cover);
+      const post = makePost(ideaItem, language, index, cover, newsIndex);
       const action = await upsertPost(post, existingPosts, cookie);
       if (action === "created") {
         created += 1;
