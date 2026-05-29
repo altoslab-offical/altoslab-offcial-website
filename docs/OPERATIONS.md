@@ -42,10 +42,20 @@ CMS_ENCRYPTION_KEY=<64-hex-random-secret>
 CMS_STORAGE_KEY=altoslab:cms:v1
 DEEPSEEK_API_KEY=<required-for-ai-blog-generation>
 DEEPSEEK_BASE_URL=https://api.deepseek.com
+DEEPSEEK_ROUTER_MODEL=deepseek-v4-flash
 DEEPSEEK_CONTENT_MODEL=deepseek-v4-pro
+DEEPSEEK_REVIEW_MODEL=deepseek-v4-pro
+DEEPSEEK_REPAIR_MODEL=deepseek-v4-pro
 DEEPSEEK_MAX_TOKENS=7600
 DEEPSEEK_TIMEOUT_MS=90000
-BLOG_TREND_SOURCES=https://openai.com/news/rss.xml,https://blog.google/innovation-and-ai/technology/ai/rss/,https://deepmind.google/blog/rss.xml,https://huggingface.co/blog/feed.xml,https://feeds.feedburner.com/blogspot/amDG,https://vercel.com/blog/rss.xml
+BLOG_LLM_REVIEW=true
+BLOG_TREND_SOURCES=<optional-comma-separated-rss-override>
+AUTO_GENERATE_BLOG_COVERS=true
+BLOG_IMAGE_PROVIDER=openverse
+OPENVERSE_API_BASE_URL=https://api.openverse.engineering/v1
+PEXELS_API_KEY=<optional-pexels-key>
+PIXABAY_API_KEY=<optional-pixabay-key>
+BLOG_IMAGE_STORE_BLOB=true
 CRON_SECRET=<long-random-cron-secret>
 AUTO_PUBLISH_BLOG=true
 ```
@@ -57,13 +67,15 @@ Notes:
 - The current Vercel Blob store is public-access, so `BLOB_ACCESS=public` and `CMS_ENCRYPTION_KEY` are required in production. CMS JSON is encrypted server-side before it is written to Blob.
 - Upstash Redis is also supported and takes priority when `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` are configured. The token must be the standard write token, not the read-only token.
 - Without Vercel Blob or Upstash env vars, production can still render seed content, but admin edits and contact leads will not persist.
-- `AUTO_PUBLISH_BLOG=true` allows cron-generated posts to publish automatically only after the deterministic quality reviewer approves the bilingual pair. Fallback template output, malformed model output, thin content, missing sources, missing images, invalid HTTPS links or failed bilingual pairing stay draft/needs-revision.
+- `AUTO_PUBLISH_BLOG=true` allows cron-generated posts to publish automatically only after deterministic review and the optional DeepSeek LLM-as-judge review approve the multilingual set. Fallback template output, malformed model output, thin content, missing sources, missing images, invalid HTTPS links or failed multilingual pairing stay draft/needs-revision.
 - `CRON_SECRET` protects `/api/cron/blog-drafts`, `/api/cron/blog-drafts/morning` and `/api/cron/blog-drafts/afternoon`.
-- Vercel Cron runs once daily: `0 1 * * *` UTC = 09:00 Asia/Taipei. The scheduled job creates one bilingual zh/en article pair, publishes only if the quality gate passes, and is idempotent by `generationDate + generationSlot`. The afternoon endpoint remains available for authenticated manual QA, but it is not scheduled.
-- `DEEPSEEK_CONTENT_MODEL=deepseek-v4-pro` is the recommended default when article quality is the priority. `deepseek-v4-flash` can be used for faster lower-cost drafting, but production auto-publishing should keep the quality gate enabled either way.
+- Vercel Cron runs twice daily: `0 1 * * *` UTC = 09:00 Asia/Taipei and `0 7 * * *` UTC = 15:00 Asia/Taipei. Each run creates one zh-Hant/en/ja/ko article set, publishes only if all quality gates pass, and is idempotent by `generationDate + generationSlot`.
+- The source registry controls the default mix: 40% `breaking`, 35% `column`, 25% `feature`. Breaking posts prioritize latest official/trusted news; columns turn fresh signals into operator decisions; features turn recent sources into durable frameworks.
+- `DEEPSEEK_ROUTER_MODEL=deepseek-v4-flash` is the low-cost routing/planning model. `DEEPSEEK_CONTENT_MODEL=deepseek-v4-pro` and `DEEPSEEK_REVIEW_MODEL=deepseek-v4-pro` are recommended when article quality is the priority.
 - `DEEPSEEK_MAX_TOKENS=7600` gives the model enough room to return valid JSON and complete 4-6 section bilingual-quality drafts. The generator retries once with a stricter format-repair prompt if JSON validation fails.
 - `DEEPSEEK_TIMEOUT_MS=90000` gives `deepseek-v4-pro` enough time to return complete article JSON. If cron reliability becomes more important than model depth, switch the model back to `deepseek-v4-flash` and keep the same quality gate.
-- `BLOG_TREND_SOURCES` should contain only live RSS/Atom feeds. The generator samples across feeds in round-robin order so a daily draft can reference multiple AI/search sources instead of overfitting to the first feed.
+- `BLOG_TREND_SOURCES` is optional. If unset, the app uses `lib/blog-source-registry.ts`, which includes official AI/product/search sources and trusted media. If set, it should contain only live RSS/Atom feeds.
+- `BLOG_IMAGE_STORE_BLOB=true` copies selected legal cover images into Vercel Blob when `BLOB_READ_WRITE_TOKEN` is available. If Blob copy fails, the original licensed image URL stays in place and the issue is recorded in cover generation metadata.
 - Search verification env vars are optional until the matching Search Console/Webmaster account provides the token. Once set and redeployed, the homepage and App Router pages emit the required verification meta tags.
 
 ## Vercel Project Settings
@@ -83,6 +95,7 @@ Run locally before pushing:
 
 ```bash
 npm run typecheck
+npm run test:blog
 npm run build
 ```
 
@@ -110,7 +123,7 @@ Expected results:
 - `/llms.txt` returns a concise LLM-readable site map.
 - `/llms-full.txt` returns expanded answer-engine context for services, projects and published articles.
 - `/api/*` and `/admin/*` return `X-Robots-Tag: noindex, nofollow, noarchive`.
-- `/api/cron/blog-drafts` returns 401 without `CRON_SECRET`; `/api/cron/blog-drafts/morning` creates the scheduled zh/en pair, publishes only when `qualityReview.approved=true`, and reruns for the same Taiwan date + slot skip. `/api/cron/blog-drafts/afternoon` is available for authenticated manual QA.
+- `/api/cron/blog-drafts` returns 401 without `CRON_SECRET`; `/api/cron/blog-drafts/morning` and `/api/cron/blog-drafts/afternoon` create scheduled four-language article sets, publish only when `qualityReview.approved=true`, and reruns for the same Taiwan date + slot skip.
 - Authenticated dry-run checks are available with `?dryRun=1`. Dry-run runs source collection, DeepSeek generation and quality review, but does not write to CMS or publish.
 
 ## SEO / GEO Release Checks
@@ -125,7 +138,9 @@ Before promoting a deployment, verify:
 - Blog post `hreflang` clusters include the current language, the paired translation and `x-default` pointing to the zh-Hant article.
 - FAQ JSON-LD appears only when the FAQ content is visible on the page.
 - Published AI-assisted posts have visible source links, an approved quality review or human review, no fabricated claims, a direct GEO summary, bilingual parity, approved internal cover image and meaningful alt text.
-- GTM dataLayer events are present for `cta_clicked`, `contact_form_submitted`, `lead_created`, `blog_post_viewed`, `blog_post_published` and `ai_blog_draft_generated`.
+- Blog pages include related-article internal links so topic clusters are crawlable.
+- GTM dataLayer events are present for `cta_clicked`, `contact_form_submitted`, `lead_created`, `blog_post_viewed`, `blog_post_published`, `ai_blog_draft_generated` and `ai_referral_landing`.
+- Vercel logs show `[altos-ai-crawler]` entries for recognized AI crawler user agents.
 
 ## Content Operations
 

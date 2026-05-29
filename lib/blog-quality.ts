@@ -1,5 +1,6 @@
 import { BLOG_LANGUAGES, defaultQualityChecks } from "./blog-utils";
-import type { BlogContentType, BlogLanguage, BlogPost } from "./types";
+import { registryTrustedHostFragments } from "./blog-source-registry";
+import type { BlogContentType, BlogLanguage, BlogLlmQualityEvaluation, BlogPost } from "./types";
 
 type ReviewArea =
   | "sourceTrust"
@@ -37,6 +38,7 @@ export type BlogPairQualityReview = {
   issues: string[];
   warnings: string[];
   postReviews: PostReview[];
+  llmEvaluation?: BlogLlmQualityEvaluation;
   notes: string;
 };
 
@@ -119,6 +121,14 @@ function isApprovedCoverUrl(url: string) {
       host.endsWith("api.openverse.engineering") ||
       host.endsWith("openverse.org") ||
       host.endsWith("openverse.engineering") ||
+      host.endsWith("unsplash.com") ||
+      host.endsWith("images.unsplash.com") ||
+      host.endsWith("pexels.com") ||
+      host.endsWith("images.pexels.com") ||
+      host.endsWith("pixabay.com") ||
+      host.endsWith("cdn.pixabay.com") ||
+      host.endsWith("images.nasa.gov") ||
+      host.endsWith("metmuseum.org") ||
       host.endsWith("staticflickr.com") ||
       host.endsWith("wikimedia.org") ||
       host.endsWith("wikimedia.com")
@@ -308,7 +318,7 @@ function trustedHostFragments() {
     .split(",")
     .map((item) => item.trim())
     .filter(Boolean);
-  return [...new Set([...defaultTrustedHostFragments, ...configured])];
+  return [...new Set([...defaultTrustedHostFragments, ...registryTrustedHostFragments(), ...configured])];
 }
 
 function plainText(markdown: string) {
@@ -837,6 +847,29 @@ export async function reviewBlogPairForAutoPublish(posts: BlogPost[]): Promise<B
   return { approved, score, threshold, contentType, issues, warnings, postReviews, notes };
 }
 
+export function withLlmQualityEvaluation(
+  review: BlogPairQualityReview,
+  llmEvaluation: BlogLlmQualityEvaluation
+): BlogPairQualityReview {
+  const issues = [...review.issues, ...llmEvaluation.issues.map((issue) => `LLM judge: ${issue}`)];
+  const warnings = [...review.warnings, ...llmEvaluation.warnings.map((warning) => `LLM judge: ${warning}`)];
+  const score = Math.min(review.score, llmEvaluation.score);
+  const approved = review.approved && llmEvaluation.approved && score >= review.threshold;
+  const notes = approved
+    ? `${review.notes} LLM judge approved with ${llmEvaluation.score}/${llmEvaluation.threshold}.`
+    : `${review.notes} LLM judge held or lowered publish with ${llmEvaluation.score}/${llmEvaluation.threshold}.`;
+
+  return {
+    ...review,
+    approved,
+    score,
+    issues,
+    warnings,
+    llmEvaluation,
+    notes
+  };
+}
+
 export function applyQualityReview(post: BlogPost, review: BlogPairQualityReview, publish: boolean): BlogPost {
   const now = new Date().toISOString();
   const qualityIssues = [...review.issues, ...review.warnings];
@@ -866,6 +899,7 @@ export function applyQualityReview(post: BlogPost, review: BlogPairQualityReview
       qualityIssues,
       antiSlopScore: postReview?.antiSlopScore,
       antiSlopIssues: postReview?.antiSlopIssues,
+      llmEvaluation: review.llmEvaluation,
       notes: review.notes
     }),
     aiDisclosure: publish

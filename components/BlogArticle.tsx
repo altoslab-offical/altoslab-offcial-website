@@ -8,7 +8,7 @@ import { SafeBlogImage } from "@/components/SafeBlogImage";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { SiteHeader } from "@/components/site/SiteHeader";
 import { blogIndexPath, blogPostPath, languageLabel } from "@/lib/blog-utils";
-import { getPublishedBlogAlternates } from "@/lib/cms";
+import { getPublishedBlogAlternates, getRelatedPublishedBlogPosts } from "@/lib/cms";
 import { articleJsonLd, breadcrumbJsonLd, faqJsonLd } from "@/lib/seo";
 import type { BlogPost } from "@/lib/types";
 
@@ -21,6 +21,7 @@ const copy = {
     takeaways: "Key Takeaways",
     faq: "常見問題",
     sources: "來源與參考",
+    related: "延伸閱讀",
     disclosure: "AI 內容揭露",
     ctaTitle: "需要把這套內容系統接到你的官網？",
     cta: "和 ALTOS LAB 討論"
@@ -33,6 +34,7 @@ const copy = {
     takeaways: "Key Takeaways",
     faq: "FAQ",
     sources: "Sources",
+    related: "Related reading",
     disclosure: "AI disclosure",
     ctaTitle: "Need this content system wired into your company website?",
     cta: "Talk to ALTOS LAB"
@@ -45,6 +47,7 @@ const copy = {
     takeaways: "Key Takeaways",
     faq: "FAQ",
     sources: "Sources",
+    related: "関連記事",
     disclosure: "AI disclosure",
     ctaTitle: "このコンテンツ運用を自社サイトに接続しますか？",
     cta: "ALTOS LAB に相談"
@@ -57,6 +60,7 @@ const copy = {
     takeaways: "Key Takeaways",
     faq: "FAQ",
     sources: "Sources",
+    related: "관련 글",
     disclosure: "AI disclosure",
     ctaTitle: "이 콘텐츠 운영 시스템을 회사 웹사이트에 연결할까요?",
     cta: "ALTOS LAB에 상담"
@@ -65,7 +69,10 @@ const copy = {
 
 export async function BlogArticle({ post }: { post: BlogPost }) {
   const dictionary = copy[post.language];
-  const alternates = await getPublishedBlogAlternates(post);
+  const [alternates, relatedPosts] = await Promise.all([
+    getPublishedBlogAlternates(post),
+    getRelatedPublishedBlogPosts(post, 4)
+  ]);
   const locale = post.language === "en" ? "en" : "zh-TW";
 
   return (
@@ -199,6 +206,21 @@ export async function BlogArticle({ post }: { post: BlogPost }) {
             <aside className="ai-disclosure">
               <strong>{dictionary.disclosure}:</strong> {renderBrandText(post.aiDisclosure)}
             </aside>
+          ) : null}
+
+          {relatedPosts.length ? (
+            <section className="related-articles">
+              <p className="eyebrow">{dictionary.related}</p>
+              <div className="related-article-grid">
+                {relatedPosts.map((related) => (
+                  <Link className="related-article-card" href={blogPostPath(related)} key={related.id}>
+                    <span>{[related.contentType, related.newsCategory || related.tags[0]].filter(Boolean).join(" / ")}</span>
+                    <strong>{renderBrandText(related.title)}</strong>
+                    <small>{dictionary.readTime(related.readTimeMinutes)}</small>
+                  </Link>
+                ))}
+              </div>
+            </section>
           ) : null}
 
           <section className="blog-cta-panel">

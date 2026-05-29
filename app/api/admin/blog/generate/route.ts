@@ -12,6 +12,9 @@ export async function POST(request: Request) {
     post: result.posts[0],
     provider: result.provider,
     sources: result.sources,
+    promptVersion: result.promptVersion,
+    traces: result.traces,
+    coverGeneration: result.coverGeneration,
     warning: result.warning
   });
 }

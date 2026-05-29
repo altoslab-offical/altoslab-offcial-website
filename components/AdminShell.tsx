@@ -5,9 +5,12 @@ import Link from "next/link";
 import { sendAnalyticsEvent } from "@/components/AnalyticsEvents";
 import { BrandText, renderBrandText } from "@/components/BrandText";
 import {
+  Activity,
   CalendarClock,
   CheckCircle2,
   Clock3,
+  Cpu,
+  Database,
   Eye,
   FileText,
   Gauge,
@@ -20,13 +23,14 @@ import {
   Newspaper,
   PenLine,
   Plus,
+  Radio,
   Save,
   Search,
   ShieldCheck,
   Sparkles,
   Users
 } from "lucide-react";
-import { BLOG_LANGUAGES, blogCoverForLanguage, blogPostPath, languageLabel } from "@/lib/blog-utils";
+import { BLOG_LANGUAGES, blogCoverForLanguage, blogPostPath, languageLabel, languageShortLabel } from "@/lib/blog-utils";
 import type {
   BlogGenerationSlot,
   BlogLanguage,
@@ -101,6 +105,20 @@ function trackAdminBlogEvent(event: "blog_post_published" | "ai_blog_draft_gener
     admin_surface: "blog",
     ...payload
   });
+}
+
+function hostnameFromUrl(url: string) {
+  try {
+    return new URL(url).hostname.replace(/^www\./, "");
+  } catch {
+    return "unknown";
+  }
+}
+
+function compactNumber(value: number) {
+  if (value >= 1_000_000) return `${(value / 1_000_000).toFixed(1)}M`;
+  if (value >= 1_000) return `${(value / 1_000).toFixed(1)}K`;
+  return String(Math.round(value));
 }
 
 async function api<T>(url: string, init?: RequestInit): Promise<T> {
@@ -245,6 +263,49 @@ export function AdminShell({ initialTab = "dashboard" }: AdminShellProps) {
     }),
     [data.blogPosts]
   );
+
+  const contentFactoryStats = useMemo(() => {
+    const contentMix = {
+      breaking: data.blogPosts.filter((post) => post.contentType === "breaking").length,
+      column: data.blogPosts.filter((post) => post.contentType === "column").length,
+      feature: data.blogPosts.filter((post) => post.contentType === "feature").length
+    };
+    const sourceCounts = new Map<string, number>();
+    for (const post of data.blogPosts) {
+      for (const source of post.sourceLinks) {
+        const host = hostnameFromUrl(source.url);
+        sourceCounts.set(host, (sourceCounts.get(host) || 0) + 1);
+      }
+    }
+    const traces = data.blogPosts.flatMap((post) => post.generationTrace || []);
+    const deepSeekTraces = traces.filter((trace) => trace.provider === "deepseek");
+    const latencyValues = deepSeekTraces.map((trace) => trace.latencyMs || 0).filter(Boolean);
+    const usage = deepSeekTraces.reduce(
+      (sum, trace) => ({
+        totalTokens: sum.totalTokens + (trace.usage?.totalTokens || 0),
+        cacheHitTokens: sum.cacheHitTokens + (trace.usage?.promptCacheHitTokens || 0),
+        cacheMissTokens: sum.cacheMissTokens + (trace.usage?.promptCacheMissTokens || 0)
+      }),
+      { totalTokens: 0, cacheHitTokens: 0, cacheMissTokens: 0 }
+    );
+    const recentGenerated = data.blogPosts
+      .filter((post) => post.generatedBy)
+      .slice()
+      .sort((a, b) => new Date(b.updatedAt || b.createdAt).getTime() - new Date(a.updatedAt || a.createdAt).getTime())
+      .slice(0, 5);
+
+    return {
+      contentMix,
+      topSources: [...sourceCounts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 6),
+      traceCount: deepSeekTraces.length,
+      averageLatencyMs: latencyValues.length
+        ? Math.round(latencyValues.reduce((sum, value) => sum + value, 0) / latencyValues.length)
+        : 0,
+      usage,
+      llmReviewed: data.blogPosts.filter((post) => post.qualityChecks.llmEvaluation?.enabled).length,
+      recentGenerated
+    };
+  }, [data.blogPosts]);
 
   const filteredBlogPosts = useMemo(() => {
     const query = blogFilters.query.trim().toLowerCase();
@@ -764,7 +825,7 @@ export function AdminShell({ initialTab = "dashboard" }: AdminShellProps) {
                 <CalendarClock size={17} />
                 <div>
                   <strong>每日兩批四語自動發文</strong>
-                  <span>09:00 專欄、15:00 專題；zh/en/ja/ko 同主題，達標才發布</span>
+                  <span>09:00 / 15:00 依週期混合快訊、專欄、專題；zh/en/ja/ko 同主題，達標才發布</span>
                 </div>
               </article>
               <article>
@@ -782,6 +843,53 @@ export function AdminShell({ initialTab = "dashboard" }: AdminShellProps) {
                 </div>
               </article>
             </div>
+
+            <section className="admin-card content-factory-panel">
+              <header>
+                <div>
+                  <p className="eyebrow">Content Factory v2</p>
+                  <h2>新聞訊號 × Labs 觀點 × 可觀測自動發文</h2>
+                </div>
+                <span className="factory-ratio">快訊 40% · 專欄 35% · 專題 25%</span>
+              </header>
+              <div className="content-factory-grid">
+                <article>
+                  <Radio size={17} />
+                  <strong>內容比例</strong>
+                  <span>
+                    快訊 {contentFactoryStats.contentMix.breaking} / 專欄 {contentFactoryStats.contentMix.column} / 專題{" "}
+                    {contentFactoryStats.contentMix.feature}
+                  </span>
+                </article>
+                <article>
+                  <Database size={17} />
+                  <strong>來源雷達</strong>
+                  <span>
+                    {contentFactoryStats.topSources.length
+                      ? contentFactoryStats.topSources.map(([host, count]) => `${host} ${count}`).join(" · ")
+                      : "等待第一批來源化文章"}
+                  </span>
+                </article>
+                <article>
+                  <Cpu size={17} />
+                  <strong>DeepSeek 遙測</strong>
+                  <span>
+                    {contentFactoryStats.traceCount} traces · 平均 {contentFactoryStats.averageLatencyMs || 0}ms ·{" "}
+                    {compactNumber(contentFactoryStats.usage.totalTokens)} tokens
+                  </span>
+                </article>
+                <article>
+                  <Activity size={17} />
+                  <strong>審核與發布帳本</strong>
+                  <span>
+                    LLM judge {contentFactoryStats.llmReviewed} 篇 · 最近{" "}
+                    {contentFactoryStats.recentGenerated
+                      .map((post) => `${languageShortLabel(post.language)}:${post.status}`)
+                      .join(" / ") || "尚無自動草稿"}
+                  </span>
+                </article>
+              </div>
+            </section>
 
             <section className="blog-workbench-grid">
               <aside className="blog-sidebar">

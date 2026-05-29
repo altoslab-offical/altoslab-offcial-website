@@ -55,6 +55,16 @@ export default function robots(): MetadataRoute.Robots {
         userAgent: "Google-Extended",
         allow: "/",
         disallow: disallowPrivateSurfaces
+      },
+      {
+        userAgent: "Meta-ExternalAgent",
+        allow: "/",
+        disallow: disallowPrivateSurfaces
+      },
+      {
+        userAgent: "Bytespider",
+        allow: "/",
+        disallow: disallowPrivateSurfaces
       }
     ],
     sitemap: `${siteUrl}/sitemap.xml`,

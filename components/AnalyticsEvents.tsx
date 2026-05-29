@@ -9,6 +9,7 @@ type AnalyticsEventName =
   | "blog_post_viewed"
   | "blog_post_published"
   | "ai_blog_draft_generated"
+  | "ai_referral_landing"
   | "lead_created";
 
 type AnalyticsPayload = {
@@ -56,13 +57,31 @@ export function AnalyticsEvent({ payload }: { payload: AnalyticsPayload }) {
 export function CtaAnalytics() {
   useEffect(() => {
     const path = window.location.pathname;
+    const params = new URLSearchParams(window.location.search);
+    const aiReferralPattern = /(chatgpt\.com|openai\.com|perplexity\.ai|claude\.ai|gemini\.google\.com|copilot\.microsoft\.com|you\.com|phind\.com)/i;
     document.documentElement.lang = path.startsWith("/en/")
       ? "en"
       : path.startsWith("/ja/")
         ? "ja"
         : path.startsWith("/ko/")
           ? "ko"
-          : "zh-Hant-TW";
+        : "zh-Hant-TW";
+
+    const referrer = document.referrer || "";
+    const utmSource = params.get("utm_source") || "";
+    if (aiReferralPattern.test(referrer) || aiReferralPattern.test(utmSource)) {
+      let sourceHost = utmSource;
+      try {
+        sourceHost = referrer ? new URL(referrer).hostname : utmSource;
+      } catch {
+        sourceHost = utmSource;
+      }
+      sendAnalyticsEvent({
+        event: "ai_referral_landing",
+        source_host: sourceHost,
+        page_path: window.location.pathname
+      });
+    }
 
     function onClick(event: MouseEvent) {
       const target = event.target instanceof Element ? event.target.closest("a[href], button") : null;

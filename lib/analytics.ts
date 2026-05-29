@@ -52,6 +52,20 @@ export function homepageAnalyticsSnippet() {
         page_path: location.pathname
       });
     }, true);
+    (function(){
+      var referrer = document.referrer || "";
+      var params = new URLSearchParams(location.search || "");
+      var source = params.get("utm_source") || "";
+      var aiPattern = /(chatgpt\\.com|openai\\.com|perplexity\\.ai|claude\\.ai|gemini\\.google\\.com|copilot\\.microsoft\\.com|you\\.com|phind\\.com)/i;
+      if (aiPattern.test(referrer) || aiPattern.test(source)) {
+        var sourceHost = source;
+        try { sourceHost = referrer ? new URL(referrer).hostname : source; } catch (error) {}
+        window.altosTrack("ai_referral_landing", {
+          source_host: sourceHost,
+          page_path: location.pathname
+        });
+      }
+    })();
     if (window.fetch) {
       var originalFetch = window.fetch;
       window.fetch = function(input, init) {

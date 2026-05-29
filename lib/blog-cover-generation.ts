@@ -1,6 +1,7 @@
 import { BLOG_LANGUAGES, blogCoverForLanguage } from "@/lib/blog-utils";
 import { nowIso } from "@/lib/cms";
 import { FREE_STOCK_COVER_LIBRARY } from "@/lib/blog-stock-cover-library";
+import { put } from "@vercel/blob";
 import type { BlogLanguage, BlogPost } from "@/lib/types";
 
 type ImageSourcingResult = {
@@ -13,6 +14,7 @@ type ImageSourcingResult = {
 type OpenverseImage = {
   id?: string;
   title?: string;
+  alt?: string;
   creator?: string;
   creator_url?: string;
   license?: string;
@@ -30,7 +32,38 @@ type OpenverseResponse = {
   results?: OpenverseImage[];
 };
 
-const legalLicenses = ["cc0", "pdm", "by", "by-sa"];
+type PexelsResponse = {
+  photos?: Array<{
+    id?: number;
+    alt?: string;
+    photographer?: string;
+    photographer_url?: string;
+    url?: string;
+    width?: number;
+    height?: number;
+    src?: {
+      large2x?: string;
+      large?: string;
+      landscape?: string;
+    };
+  }>;
+};
+
+type PixabayResponse = {
+  hits?: Array<{
+    id?: number;
+    tags?: string;
+    user?: string;
+    pageURL?: string;
+    largeImageURL?: string;
+    webformatURL?: string;
+    imageWidth?: number;
+    imageHeight?: number;
+  }>;
+};
+
+const legalLicenses = ["cc0", "pdm", "by", "by-sa", "pexels", "pixabay"];
+const openverseLicenses = ["cc0", "pdm", "by", "by-sa"];
 
 const peopleHeavyImagePattern =
   /(meeting|conference|congress|committee|summit|panel|speaker|speaking|audience|portrait|headshot|interview|workshop|seminar|forum|startup live|people|person|woman|women|man|men|group|team photo|boardroom|minister|deputy|chief|official|press|discussion|roundtable|talking|session|lecture|會議|演講|人物|肖像|討論|委員會|講座|人像|会議|講演|人物|토론|회의|강연|인물)/i;
@@ -58,6 +91,10 @@ export function isBlogImageGenerationConfigured() {
 
 function shouldSourceImages() {
   return process.env.AUTO_GENERATE_BLOG_COVERS !== "false" && process.env.BLOG_IMAGE_PROVIDER !== "none";
+}
+
+function shouldStoreImagesInBlob() {
+  return process.env.BLOG_IMAGE_STORE_BLOB === "true";
 }
 
 function openverseBaseUrl() {
@@ -96,7 +133,7 @@ function imageSearchQueries(post: BlogPost) {
   ].filter((query, index, all) => query && all.indexOf(query) === index);
 }
 
-async function fetchWithTimeout(url: string) {
+async function fetchWithTimeout(url: string, headers?: HeadersInit) {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), sourceTimeoutMs());
   try {
@@ -104,7 +141,8 @@ async function fetchWithTimeout(url: string) {
       cache: "no-store",
       signal: controller.signal,
       headers: {
-        "User-Agent": "ALTOS LAB legal image sourcing bot; https://altoslab.com"
+        "User-Agent": "ALTOS LAB legal image sourcing bot; https://altoslab.com",
+        ...(headers || {})
       }
     });
   } finally {
@@ -115,7 +153,7 @@ async function fetchWithTimeout(url: string) {
 async function searchOpenverse(query: string) {
   const url = new URL(`${openverseBaseUrl()}/images/`);
   url.searchParams.set("q", query);
-  url.searchParams.set("license", legalLicenses.join(","));
+  url.searchParams.set("license", openverseLicenses.join(","));
   url.searchParams.set("page_size", "8");
   url.searchParams.set("mature", "false");
 
@@ -125,8 +163,78 @@ async function searchOpenverse(query: string) {
   return payload.results || [];
 }
 
+async function searchPexels(query: string): Promise<OpenverseImage[]> {
+  const apiKey = process.env.PEXELS_API_KEY;
+  if (!apiKey) return [];
+  const url = new URL("https://api.pexels.com/v1/search");
+  url.searchParams.set("query", query);
+  url.searchParams.set("orientation", "landscape");
+  url.searchParams.set("per_page", "8");
+
+  const response = await fetchWithTimeout(url.toString(), {
+    Authorization: apiKey
+  });
+  if (!response.ok) return [];
+  const payload = (await response.json()) as PexelsResponse;
+  return (payload.photos || []).map((photo) => ({
+    id: photo.id ? String(photo.id) : undefined,
+    title: photo.alt || "Pexels photo",
+    alt: photo.alt,
+    creator: photo.photographer,
+    creator_url: photo.photographer_url,
+    license: "pexels",
+    license_url: "https://www.pexels.com/license/",
+    url: photo.src?.large2x || photo.src?.large || photo.src?.landscape,
+    thumbnail: photo.src?.landscape || photo.src?.large,
+    foreign_landing_url: photo.url,
+    source: "pexels",
+    width: photo.width,
+    height: photo.height
+  }));
+}
+
+async function searchPixabay(query: string): Promise<OpenverseImage[]> {
+  const apiKey = process.env.PIXABAY_API_KEY;
+  if (!apiKey) return [];
+  const url = new URL("https://pixabay.com/api/");
+  url.searchParams.set("key", apiKey);
+  url.searchParams.set("q", query);
+  url.searchParams.set("image_type", "photo");
+  url.searchParams.set("orientation", "horizontal");
+  url.searchParams.set("safesearch", "true");
+  url.searchParams.set("per_page", "8");
+
+  const response = await fetchWithTimeout(url.toString());
+  if (!response.ok) return [];
+  const payload = (await response.json()) as PixabayResponse;
+  return (payload.hits || []).map((hit) => ({
+    id: hit.id ? String(hit.id) : undefined,
+    title: hit.tags || "Pixabay photo",
+    creator: hit.user,
+    license: "pixabay",
+    license_url: "https://pixabay.com/service/license-summary/",
+    url: hit.largeImageURL || hit.webformatURL,
+    thumbnail: hit.webformatURL || hit.largeImageURL,
+    foreign_landing_url: hit.pageURL,
+    source: "pixabay",
+    width: hit.imageWidth,
+    height: hit.imageHeight
+  }));
+}
+
+async function searchLicensedImages(query: string) {
+  const [openverse, pexels, pixabay] = await Promise.all([
+    searchOpenverse(query).catch(() => []),
+    searchPexels(query).catch(() => []),
+    searchPixabay(query).catch(() => [])
+  ]);
+  return [...pexels, ...pixabay, ...openverse];
+}
+
 function imageText(image: OpenverseImage) {
-  return [image.title, image.creator, image.source, image.foreign_landing_url, image.url, image.thumbnail].filter(Boolean).join(" ");
+  return [image.title, image.alt, image.creator, image.source, image.foreign_landing_url, image.url, image.thumbnail]
+    .filter(Boolean)
+    .join(" ");
 }
 
 function approvedImageUrl(url?: string) {
@@ -216,6 +324,49 @@ async function imageLoads(url: string) {
   return /^image\/(jpeg|jpg|png|webp|gif)/i.test(contentType);
 }
 
+function extensionFromContentType(contentType: string) {
+  if (/webp/i.test(contentType)) return "webp";
+  if (/png/i.test(contentType)) return "png";
+  if (/gif/i.test(contentType)) return "gif";
+  return "jpg";
+}
+
+function shortHash(input: string) {
+  let hash = 0;
+  for (let index = 0; index < input.length; index += 1) {
+    hash = (hash * 31 + input.charCodeAt(index)) >>> 0;
+  }
+  return hash.toString(36);
+}
+
+async function storeCoverInBlob(post: BlogPost, url: string) {
+  if (!shouldStoreImagesInBlob()) return { url };
+
+  try {
+    const response = await fetchWithTimeout(url);
+    if (!response.ok) throw new Error(`image fetch failed: HTTP ${response.status}`);
+    const contentType = response.headers.get("content-type") || "";
+    if (!/^image\/(jpeg|jpg|png|webp|gif)/i.test(contentType)) {
+      throw new Error(`image content-type is not supported: ${contentType || "unknown"}`);
+    }
+
+    const bytes = await response.arrayBuffer();
+    const extension = extensionFromContentType(contentType);
+    const pathname = `blog-covers/${post.language}/${post.slug || "post"}-${shortHash(url)}.${extension}`;
+    const blob = await put(pathname, Buffer.from(bytes), {
+      access: "public",
+      contentType,
+      addRandomSuffix: false
+    });
+    return { url: blob.url, storedUrl: blob.url };
+  } catch (error) {
+    return {
+      url,
+      error: error instanceof Error ? `Vercel Blob image store skipped: ${error.message}` : "Vercel Blob image store skipped"
+    };
+  }
+}
+
 function imageScore(image: OpenverseImage) {
   let score = 0;
   if (image.url) score += 20;
@@ -224,7 +375,9 @@ function imageScore(image: OpenverseImage) {
   if (image.license && legalLicenses.includes(image.license)) score += image.license === "cc0" || image.license === "pdm" ? 20 : 12;
   if ((image.width || 0) >= 1000) score += 8;
   if ((image.height || 0) >= 650) score += 8;
-  if (image.source === "flickr" || image.source === "wikimedia_commons") score += 4;
+  if (image.source === "flickr" || image.source === "wikimedia_commons" || image.source === "pexels" || image.source === "pixabay") {
+    score += 4;
+  }
   return score;
 }
 
@@ -238,7 +391,7 @@ function selectionOffset(post: BlogPost, total: number) {
 async function findImage(post: BlogPost) {
   const seen = new Set<string>();
   for (const query of imageSearchQueries(post)) {
-    const images = await searchOpenverse(query).catch(() => []);
+    const images = await searchLicensedImages(query).catch(() => []);
     const ranked = images
       .filter((image) => image.license && legalLicenses.includes(image.license))
       .filter((image) => approvedImageUrl(image.url || image.thumbnail))
@@ -267,6 +420,8 @@ function licenseName(image: OpenverseImage) {
   if (!image.license) return undefined;
   if (image.license === "cc0") return "CC0";
   if (image.license === "pdm") return "Public Domain Mark";
+  if (image.license === "pexels") return "Pexels License";
+  if (image.license === "pixabay") return "Pixabay Content License";
   return `CC ${image.license.toUpperCase()}${image.license_version ? ` ${image.license_version}` : ""}`;
 }
 
@@ -304,9 +459,10 @@ export async function generateBlogCoverForPost(post: BlogPost): Promise<BlogPost
   try {
     const preferredStockCover = await findStockCover(post, { allowReuse: false });
     if (preferredStockCover) {
+      const stored = await storeCoverInBlob(post, preferredStockCover.url);
       return {
         ...post,
-        cover: preferredStockCover.url,
+        cover: stored.url,
         coverAlt: `${post.title} - ${preferredStockCover.credit}`,
         coverPrompt: `${imageSearchQueries(post)[0] || post.title} curated free stock`,
         coverSource: "curated",
@@ -320,7 +476,9 @@ export async function generateBlogCoverForPost(post: BlogPost): Promise<BlogPost
           prompt: `${imageSearchQueries(post)[0] || post.title} curated free stock`,
           style: "Pinterest-inspired editorial image selection using legal free stock photography.",
           generatedAt: nowIso(),
-          status: "generated"
+          status: "generated",
+          storedUrl: stored.storedUrl,
+          error: stored.error
         }
       };
     }
@@ -329,10 +487,11 @@ export async function generateBlogCoverForPost(post: BlogPost): Promise<BlogPost
     if (!match) {
       const stockCover = await findStockCover(post);
       if (!stockCover) throw new Error("No suitable open-licensed image was found.");
+      const stored = await storeCoverInBlob(post, stockCover.url);
 
       return {
         ...post,
-        cover: stockCover.url,
+        cover: stored.url,
         coverAlt: `${post.title} - ${stockCover.credit}`,
         coverPrompt: `${imageSearchQueries(post)[0] || post.title} curated free stock`,
         coverSource: "curated",
@@ -346,7 +505,9 @@ export async function generateBlogCoverForPost(post: BlogPost): Promise<BlogPost
           prompt: `${imageSearchQueries(post)[0] || post.title} curated free stock`,
           style: "Pinterest-inspired editorial image selection using legal free stock photography.",
           generatedAt: nowIso(),
-          status: "generated"
+          status: "generated",
+          storedUrl: stored.storedUrl,
+          error: stored.error
         }
       };
     }
@@ -354,10 +515,11 @@ export async function generateBlogCoverForPost(post: BlogPost): Promise<BlogPost
     const url = match.image.thumbnail || match.image.url;
     const credit = attribution(match.image);
     const license = licenseName(match.image);
+    const stored = await storeCoverInBlob(post, url);
 
     return {
       ...post,
-      cover: url,
+      cover: stored.url,
       coverAlt: `${post.title} - ${credit}`,
       coverPrompt: match.query,
       coverSource: "curated",
@@ -371,7 +533,9 @@ export async function generateBlogCoverForPost(post: BlogPost): Promise<BlogPost
         prompt: match.query,
         style: "Pinterest-style editorial search using open-licensed photography only.",
         generatedAt: nowIso(),
-        status: "generated"
+        status: "generated",
+        storedUrl: stored.storedUrl,
+        error: stored.error
       }
     };
   } catch (error) {

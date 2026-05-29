@@ -5,6 +5,7 @@ export type BlogLanguage = "zh-Hant" | "en" | "ja" | "ko";
 export type BlogReviewStatus = "ai-draft" | "human-review" | "approved" | "needs-revision";
 export type BlogGenerationSlot = "manual" | "morning" | "afternoon";
 export type BlogContentType = "breaking" | "column" | "feature";
+export type BlogGenerationTask = "source-planning" | "content-draft" | "quality-review" | "quality-repair";
 
 export type PageSectionType =
   | "hero"
@@ -135,6 +136,39 @@ export type BlogSourceLink = {
   publishedAt?: string;
 };
 
+export type BlogLlmQualityEvaluation = {
+  enabled: boolean;
+  approved: boolean;
+  score: number;
+  threshold: number;
+  model?: string;
+  promptVersion?: string;
+  latencyMs?: number;
+  issues: string[];
+  warnings: string[];
+  notes?: string;
+};
+
+export type BlogGenerationTrace = {
+  provider: "deepseek" | "fallback" | "local";
+  task: BlogGenerationTask;
+  model?: string;
+  promptVersion?: string;
+  latencyMs?: number;
+  finishReason?: string;
+  usage?: {
+    promptTokens?: number;
+    completionTokens?: number;
+    totalTokens?: number;
+    promptCacheHitTokens?: number;
+    promptCacheMissTokens?: number;
+    reasoningTokens?: number;
+  };
+  sourceCount?: number;
+  error?: string;
+  attemptedAt: string;
+};
+
 export type BlogQualityChecks = {
   hasHumanReview: boolean;
   hasQualityReviewerApproval: boolean;
@@ -159,6 +193,7 @@ export type BlogQualityChecks = {
   qualityIssues?: string[];
   antiSlopScore?: number;
   antiSlopIssues?: string[];
+  llmEvaluation?: BlogLlmQualityEvaluation;
   notes?: string;
 };
 
@@ -173,6 +208,7 @@ export type BlogCoverGeneration = {
   generatedAt?: string;
   status?: "generated" | "skipped" | "failed";
   error?: string;
+  storedUrl?: string;
 };
 
 export type BlogPost = {
@@ -219,6 +255,7 @@ export type BlogPost = {
   publishedAt?: string;
   generatedAt?: string;
   generatedBy?: string;
+  generationTrace?: BlogGenerationTrace[];
 };
 
 export type ContactLead = {

@@ -88,13 +88,14 @@ function hydrateBlogPost(post: BlogPost): BlogPost {
   const language = normalizeBlogLanguage(post.language);
   const body = post.body || "";
   const sourceLinks = normalizeSourceLinks(post.sourceLinks);
+  const estimatedReadTime = estimateReadTimeMinutes(body, language);
 
   return {
     ...post,
     language,
     translationGroupId: post.translationGroupId || `seed-${post.slug}`,
     sourceLinks,
-    readTimeMinutes: Number(post.readTimeMinutes || estimateReadTimeMinutes(body, language)),
+    readTimeMinutes: Math.max(estimatedReadTime, Number(post.readTimeMinutes || 0) || 0),
     featured: Boolean(post.featured),
     reviewStatus: post.reviewStatus || (post.generatedBy ? "ai-draft" : "approved"),
     qualityChecks: defaultQualityChecks({
@@ -114,6 +115,7 @@ function hydrateBlogPost(post: BlogPost): BlogPost {
       qualityIssues: post.qualityChecks?.qualityIssues,
       antiSlopScore: post.qualityChecks?.antiSlopScore,
       antiSlopIssues: post.qualityChecks?.antiSlopIssues,
+      llmEvaluation: post.qualityChecks?.llmEvaluation,
       notes: post.qualityChecks?.notes
     }),
     aiDisclosure: post.aiDisclosure,
@@ -127,7 +129,8 @@ function hydrateBlogPost(post: BlogPost): BlogPost {
     coverCredit: post.coverCredit,
     coverCreditUrl: post.coverCreditUrl,
     coverLicense: post.coverLicense,
-    coverLicenseUrl: post.coverLicenseUrl
+    coverLicenseUrl: post.coverLicenseUrl,
+    generationTrace: post.generationTrace
   };
 }
 
@@ -226,6 +229,41 @@ export async function getPublishedBlogAlternates(post: BlogPost) {
   );
 }
 
+function blogSourceHosts(post: BlogPost) {
+  return post.sourceLinks
+    .map((source) => {
+      try {
+        return new URL(source.url).hostname.replace(/^www\./, "");
+      } catch {
+        return "";
+      }
+    })
+    .filter(Boolean);
+}
+
+export async function getRelatedPublishedBlogPosts(post: BlogPost, limit = 4) {
+  const data = await readPublicCmsData();
+  const tagSet = new Set(post.tags.map((tag) => tag.toLowerCase()));
+  const sourceHosts = new Set(blogSourceHosts(post));
+  return data.blogPosts
+    .filter((item) => item.status === "published" && item.id !== post.id && normalizeBlogLanguage(item.language) === post.language)
+    .map((item) => {
+      const sharedTags = item.tags.filter((tag) => tagSet.has(tag.toLowerCase())).length;
+      const sharedSources = blogSourceHosts(item).filter((host) => sourceHosts.has(host)).length;
+      const categoryMatch = item.newsCategory && item.newsCategory === post.newsCategory ? 2 : 0;
+      const typeMatch = item.contentType === post.contentType ? 1 : 0;
+      const recency = Math.max(0, 1_000_000_000_000 - Math.abs(new Date(item.updatedAt).getTime() - new Date(post.updatedAt).getTime())) / 1_000_000_000_000;
+      return {
+        item,
+        score: sharedTags * 3 + sharedSources * 2 + categoryMatch + typeMatch + recency
+      };
+    })
+    .filter(({ score }) => score > 0)
+    .sort((a, b) => b.score - a.score || new Date(b.item.updatedAt).getTime() - new Date(a.item.updatedAt).getTime())
+    .slice(0, limit)
+    .map(({ item }) => item);
+}
+
 export function normalizePageInput(input: Partial<SitePage>): Partial<SitePage> {
   return {
     ...input,
@@ -272,6 +310,7 @@ export function normalizeBlogPostInput(input: Partial<BlogPost>, existing?: Blog
   const status = input.status ?? existing?.status ?? "draft";
   const language = normalizeBlogLanguage(input.language ?? existing?.language);
   const body = input.body ?? existing?.body ?? "";
+  const estimatedReadTime = estimateReadTimeMinutes(body, language);
   const sourceLinks = normalizeSourceLinks(input.sourceLinks ?? existing?.sourceLinks);
   const qualityChecks = defaultQualityChecks({
     ...existing?.qualityChecks,
@@ -314,9 +353,7 @@ export function normalizeBlogPostInput(input: Partial<BlogPost>, existing?: Blog
     coverCreditUrl: input.coverCreditUrl ?? existing?.coverCreditUrl,
     coverLicense: input.coverLicense ?? existing?.coverLicense,
     coverLicenseUrl: input.coverLicenseUrl ?? existing?.coverLicenseUrl,
-    readTimeMinutes: Number(
-      input.readTimeMinutes ?? existing?.readTimeMinutes ?? estimateReadTimeMinutes(body, language)
-    ),
+    readTimeMinutes: Math.max(estimatedReadTime, Number(input.readTimeMinutes ?? existing?.readTimeMinutes ?? 0) || 0),
     featured: Boolean(input.featured ?? existing?.featured ?? false),
     reviewStatus: input.reviewStatus ?? existing?.reviewStatus ?? "ai-draft",
     qualityChecks,
@@ -331,7 +368,8 @@ export function normalizeBlogPostInput(input: Partial<BlogPost>, existing?: Blog
     updatedAt: time,
     publishedAt: status === "published" ? existing?.publishedAt ?? time : existing?.publishedAt,
     generatedAt: input.generatedAt ?? existing?.generatedAt,
-    generatedBy: input.generatedBy ?? existing?.generatedBy
+    generatedBy: input.generatedBy ?? existing?.generatedBy,
+    generationTrace: input.generationTrace ?? existing?.generationTrace
   };
 }
 

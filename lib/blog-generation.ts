@@ -1,8 +1,25 @@
 import { BLOG_LANGUAGES, blogCoverForLanguage, estimateReadTimeMinutes, normalizeSourceLinks, taiwanDate } from "./blog-utils";
 import { normalizeBlogPostInput, nowIso, slugify } from "./cms";
 import { generateBlogCovers } from "./blog-cover-generation";
+import {
+  enrichSourceLink,
+  pickEditorialBrief,
+  registryFeedsFromEnv,
+  sourceAuthorityScore,
+  sourceFreshnessScore,
+  sourceRegistryEntryForUrl
+} from "./blog-source-registry";
+import {
+  BLOG_PROMPT_VERSION,
+  createDeepSeekTrace,
+  deepSeekBaseUrl,
+  deepSeekMaxTokens,
+  deepSeekModelForTask,
+  deepSeekTimeoutMs,
+  stableDeepSeekSystemPrompt
+} from "./deepseek-orchestration";
 import type { BlogPairQualityReview } from "./blog-quality";
-import type { BlogContentType, BlogGenerationSlot, BlogLanguage, BlogPost, BlogSourceLink } from "./types";
+import type { BlogContentType, BlogGenerationSlot, BlogGenerationTrace, BlogLanguage, BlogPost, BlogSourceLink } from "./types";
 
 export type BlogGenerateInput = {
   topic?: string;
@@ -22,6 +39,9 @@ type TrendCandidate = {
   publisher?: string;
   publishedAt?: string;
   summary?: string;
+  authority?: number;
+  freshness?: number;
+  category?: string;
 };
 
 type DeepSeekPost = Partial<BlogPost> & {
@@ -42,6 +62,17 @@ type DeepSeekChatChoice = {
 
 type DeepSeekChatResponse = {
   choices?: DeepSeekChatChoice[];
+  usage?: {
+    prompt_tokens?: number;
+    completion_tokens?: number;
+    total_tokens?: number;
+    prompt_cache_hit_tokens?: number;
+    prompt_cache_miss_tokens?: number;
+    reasoning_tokens?: number;
+    completion_tokens_details?: {
+      reasoning_tokens?: number;
+    };
+  };
 };
 
 const FALLBACK_SOURCES: TrendCandidate[] = [
@@ -65,15 +96,6 @@ const FALLBACK_SOURCES: TrendCandidate[] = [
     url: "https://vercel.com/docs/cron-jobs",
     publisher: "Vercel"
   }
-];
-
-const DEFAULT_RSS_SOURCES = [
-  "https://openai.com/news/rss.xml",
-  "https://blog.google/innovation-and-ai/technology/ai/rss/",
-  "https://deepmind.google/blog/rss.xml",
-  "https://huggingface.co/blog/feed.xml",
-  "https://feeds.feedburner.com/blogspot/amDG",
-  "https://vercel.com/blog/rss.xml",
 ];
 
 const BLOG_COVER_POOL = [
@@ -104,11 +126,7 @@ const BLOG_COVER_POOL = [
 ];
 
 function sourceListFromEnv() {
-  return (process.env.BLOG_TREND_SOURCES || DEFAULT_RSS_SOURCES.join(","))
-    .split(",")
-    .map((source) => source.trim())
-    .filter(Boolean)
-    .slice(0, 8);
+  return registryFeedsFromEnv();
 }
 
 function stripTags(value: string) {
@@ -128,9 +146,10 @@ function firstXmlValue(item: string, tags: string[]) {
 }
 
 function parseFeed(xml: string, sourceUrl: string): TrendCandidate[] {
+  const registry = sourceRegistryEntryForUrl(sourceUrl);
   const publisher = (() => {
     try {
-      return new URL(sourceUrl).hostname.replace(/^www\./, "");
+      return registry?.name || new URL(sourceUrl).hostname.replace(/^www\./, "");
     } catch {
       return undefined;
     }
@@ -148,7 +167,10 @@ function parseFeed(xml: string, sourceUrl: string): TrendCandidate[] {
       summary,
       publisher,
       publishedAt,
-      url: hrefMatch?.[1] || linkText
+      url: hrefMatch?.[1] || linkText,
+      authority: registry?.authority,
+      freshness: registry?.freshness,
+      category: registry?.category
     };
   }).filter((candidate) => candidate.title && /^https?:\/\//.test(candidate.url));
 }
@@ -195,7 +217,43 @@ export async function fetchTrendCandidates(input: BlogGenerateInput = {}): Promi
     if (candidates.length >= 8) break;
   }
 
-  return candidates.length ? candidates.slice(0, 8) : FALLBACK_SOURCES;
+  const contentType = contentTypeFromInput(input);
+  const ranked = rankTrendCandidates(candidates, contentType);
+  return ranked.length ? ranked.slice(0, 8) : FALLBACK_SOURCES;
+}
+
+function recencyScore(publishedAt?: string) {
+  if (!publishedAt) return 35;
+  const published = Date.parse(publishedAt);
+  if (!Number.isFinite(published)) return 35;
+  const ageHours = Math.max(0, (Date.now() - published) / 3_600_000);
+  if (ageHours <= 24) return 100;
+  if (ageHours <= 72) return 85;
+  if (ageHours <= 168) return 65;
+  if (ageHours <= 720) return 45;
+  return 25;
+}
+
+function rankTrendCandidates(candidates: TrendCandidate[], contentType: BlogContentType) {
+  return [...candidates].sort((a, b) => {
+    const aRegistry = sourceRegistryEntryForUrl(a.url);
+    const bRegistry = sourceRegistryEntryForUrl(b.url);
+    const aFreshness = a.freshness ?? aRegistry?.freshness ?? sourceFreshnessScore(a.url);
+    const bFreshness = b.freshness ?? bRegistry?.freshness ?? sourceFreshnessScore(b.url);
+    const aAuthority = a.authority ?? aRegistry?.authority ?? sourceAuthorityScore(a.url);
+    const bAuthority = b.authority ?? bRegistry?.authority ?? sourceAuthorityScore(b.url);
+    const aScore =
+      aAuthority * 0.45 +
+      aFreshness * (contentType === "breaking" ? 0.25 : 0.15) +
+      recencyScore(a.publishedAt) * (contentType === "breaking" ? 0.3 : 0.15) +
+      (aRegistry?.tier === "official-rss" || aRegistry?.tier === "official-docs" ? 12 : 0);
+    const bScore =
+      bAuthority * 0.45 +
+      bFreshness * (contentType === "breaking" ? 0.25 : 0.15) +
+      recencyScore(b.publishedAt) * (contentType === "breaking" ? 0.3 : 0.15) +
+      (bRegistry?.tier === "official-rss" || bRegistry?.tier === "official-docs" ? 12 : 0);
+    return bScore - aScore;
+  });
 }
 
 function extractJson(text: string) {
@@ -243,7 +301,7 @@ function assertDeepSeekPost(value: DeepSeekPost, language: DeepSeekLanguage) {
 }
 
 function canonicalSources(candidates: TrendCandidate[]) {
-  return normalizeSourceLinks(candidates.map(({ title, url, publisher, publishedAt }) => ({ title, url, publisher, publishedAt })));
+  return normalizeSourceLinks(candidates.map(({ title, url, publisher, publishedAt }) => ({ title, url, publisher, publishedAt }))).map(enrichSourceLink);
 }
 
 function chooseBlogCover(input: BlogGenerateInput, language: BlogLanguage) {
@@ -271,6 +329,8 @@ function singleLine(input = "") {
 }
 
 function contentTypeFromInput(input: BlogGenerateInput): BlogContentType {
+  const editorialBrief = input.slot && !input.contentType ? pickEditorialBrief(input.slot).contentType : undefined;
+  if (editorialBrief) return editorialBrief;
   if (input.contentType === "breaking" || input.contentType === "feature") return input.contentType;
   if (input.slot === "afternoon") return "feature";
   return "column";
@@ -300,6 +360,7 @@ function localizedDisclosure(language: BlogLanguage) {
 
 function localizedNewsCategory(input: BlogGenerateInput, language: BlogLanguage) {
   if (input.newsCategory?.trim()) return input.newsCategory.trim();
+  if (input.slot) return pickEditorialBrief(input.slot).newsCategory;
   if (language === "en") return "AI trends";
   if (language === "ja") return "AIトレンド";
   if (language === "ko") return "AI 트렌드";
@@ -328,12 +389,6 @@ function fitSummaryField(value = "", fallback = "", minLength: number, maxLength
     .replace(/\s+\S*$/, "")
     .trim();
   return clipped || source.slice(0, maxLength).trim();
-}
-
-function deepSeekMaxTokens() {
-  const configured = Number(process.env.DEEPSEEK_MAX_TOKENS || 7600);
-  if (!Number.isFinite(configured)) return 7600;
-  return Math.min(8000, Math.max(4200, Math.floor(configured)));
 }
 
 function buildFallbackPost({
@@ -515,7 +570,17 @@ Source links 提供證據鏈，但文章仍然要加入 ALTOS LAB 的實作觀�
     generationDate,
     generationSlot: input.slot,
     generatedAt: nowIso(),
-    generatedBy: "local-bilingual-lab-template"
+    generatedBy: "local-bilingual-lab-template",
+    generationTrace: [
+      {
+        provider: "local",
+        task: "content-draft",
+        model: "local-template",
+        promptVersion: BLOG_PROMPT_VERSION,
+        sourceCount: sources.length,
+        attemptedAt: nowIso()
+      }
+    ]
   });
 }
 
@@ -526,7 +591,8 @@ function normalizeGeneratedPost({
   translationGroupId,
   sources,
   generationDate,
-  model
+  model,
+  traces = []
 }: {
   generated: DeepSeekPost | undefined;
   input: BlogGenerateInput;
@@ -535,6 +601,7 @@ function normalizeGeneratedPost({
   sources: BlogSourceLink[];
   generationDate: string;
   model: string;
+  traces?: BlogGenerationTrace[];
 }) {
   if (!generated?.title || !generated.body) {
     return buildFallbackPost({ input, language, translationGroupId, sources, generationDate });
@@ -611,7 +678,8 @@ function normalizeGeneratedPost({
     generationDate,
     generationSlot: input.slot,
     generatedAt: nowIso(),
-    generatedBy: model
+    generatedBy: `${model}:${BLOG_PROMPT_VERSION}`,
+    generationTrace: traces
   });
 }
 
@@ -619,14 +687,16 @@ async function generateWithDeepSeek(input: BlogGenerateInput, sources: BlogSourc
   const apiKey = process.env.DEEPSEEK_API_KEY;
   if (!apiKey) return null;
 
-  const baseUrl = (process.env.DEEPSEEK_BASE_URL || "https://api.deepseek.com").replace(/\/$/, "");
-  const model = process.env.DEEPSEEK_CONTENT_MODEL || "deepseek-v4-flash";
-  const timeoutMs = Number(process.env.DEEPSEEK_TIMEOUT_MS || 45_000);
+  const baseUrl = deepSeekBaseUrl();
+  const model = deepSeekModelForTask("content-draft");
+  const timeoutMs = deepSeekTimeoutMs();
   const maxTokens = deepSeekMaxTokens();
+  const traces: BlogGenerationTrace[] = [];
   const sourceBrief = sources
     .map((source, index) => `${index + 1}. ${source.title} (${source.publisher || "source"}) - ${source.url}`)
     .join("\n");
-  const topic = input.topic || sources[0]?.title || "AI trends and search visibility";
+  const editorialBrief = input.slot ? pickEditorialBrief(input.slot) : undefined;
+  const topic = input.topic || editorialBrief?.topic || sources[0]?.title || "AI trends and search visibility";
 
   async function requestJsonOnce({
     prompt,
@@ -639,6 +709,7 @@ async function generateWithDeepSeek(input: BlogGenerateInput, sources: BlogSourc
   }) {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), timeoutMs);
+    const startedAt = Date.now();
 
     try {
       const response = await fetch(`${baseUrl}/chat/completions`, {
@@ -653,8 +724,7 @@ async function generateWithDeepSeek(input: BlogGenerateInput, sources: BlogSourc
           messages: [
             {
               role: "system",
-              content:
-                "You are a JSON API. Return only one valid JSON object matching the user's schema. Never include reasoning text outside JSON."
+              content: stableDeepSeekSystemPrompt("content-draft")
             },
             { role: "user", content: prompt }
           ],
@@ -684,8 +754,32 @@ async function generateWithDeepSeek(input: BlogGenerateInput, sources: BlogSourc
 
       const message = choice.message || {};
       const content = message.content || message.reasoning_content || "";
+      traces.push(
+        createDeepSeekTrace({
+          task: "content-draft",
+          model,
+          startedAt,
+          finishReason: choice.finish_reason,
+          usage: data.usage,
+          sourceCount: sources.length
+        })
+      );
       return assertDeepSeekPost(extractJson(content) as DeepSeekPost, language);
     } catch (error) {
+      traces.push(
+        createDeepSeekTrace({
+          task: "content-draft",
+          model,
+          startedAt,
+          error:
+            error instanceof Error && error.name === "AbortError"
+              ? `DeepSeek ${language} generation timed out after ${timeoutMs}ms`
+              : error instanceof Error
+                ? error.message
+                : "DeepSeek generation failed",
+          sourceCount: sources.length
+        })
+      );
       if (error instanceof Error && error.name === "AbortError") {
         throw new Error(`DeepSeek ${language} generation timed out after ${timeoutMs}ms`);
       }
@@ -734,6 +828,7 @@ Format repair instruction:
     const languageLabel = language;
     const contentType = contentTypeFromInput(input);
     const newsCategory = localizedNewsCategory(input, language);
+    const brief = input.slot ? pickEditorialBrief(input.slot) : undefined;
     const bodyLengthRule =
       contentType === "breaking"
         ? "Body should be short and fast: 260-420 English words or equivalent local-language length."
@@ -751,6 +846,7 @@ Audience: ${input.audience || "business owners, operators, marketing teams and A
 Search intent: ${input.intent || "understand the trend and evaluate practical AI product, agent, automation and implementation steps"}
 Content type: ${contentType}
 News category: ${newsCategory}
+Editorial mix: ALTOS LAB uses roughly ${Math.round((brief?.newsRatio ?? 0.35) * 100)}% latest source/news signal and ${Math.round((1 - (brief?.newsRatio ?? 0.35)) * 100)}% original lab synthesis for this lane.
 Sources:
 ${sourceBrief}
 
@@ -780,6 +876,8 @@ Quality rules:
 - Position ALTOS LAB as an AI lab that researches, builds and publishes across AI products, agents, workflow automation, AI operations, case studies and search visibility.
 - SEO/GEO is one visibility lane, not the whole brand. Do not frame ALTOS LAB as only an SEO/GEO product.
 - Do not force every article into an ALTOS LAB solution pitch. Some posts should be pure market briefs, research explainers, contrarian columns, source roundups, field notes or signal-chart analysis.
+- Adjust the mix by article type: breaking = latest news first with minimal interpretation; column = recent news signal plus one sharp operator question; feature = durable framework anchored in recent sources.
+- If sources contain fresh official announcements or credible recent news, name the event/source in the angle and explain what changed. If the sources are evergreen docs, label the piece as a framework or field note instead of pretending it is breaking news.
 - Use the listed RSS/source items as factual references only. Do not copy source wording, paragraphs, structure, images, charts, screenshots or article art.
 - The article must be an original ALTOS LAB synthesis: summarize facts in your own words, cite the source URLs, and add implementation judgment.
 - Make readers feel ALTOS LAB is a serious lab: source-grounded, practical, original, careful with uncertainty and useful for decision makers.
@@ -816,7 +914,7 @@ caption: One sentence explaining that values are relative editorial scores, not 
     BLOG_LANGUAGES.map(async (language) => [language, await requestJson(languagePrompt(language), language)] as const)
   );
 
-  return { pair: assertDeepSeekPair(Object.fromEntries(entries) as DeepSeekPair), model };
+  return { pair: assertDeepSeekPair(Object.fromEntries(entries) as DeepSeekPair), model, traces };
 }
 
 export async function repairBlogPostsWithDeepSeek(
@@ -827,14 +925,15 @@ export async function repairBlogPostsWithDeepSeek(
   const apiKey = process.env.DEEPSEEK_API_KEY;
   if (!apiKey) return { posts, repaired: false, warning: "DEEPSEEK_API_KEY is not configured" };
 
-  const baseUrl = (process.env.DEEPSEEK_BASE_URL || "https://api.deepseek.com").replace(/\/$/, "");
-  const model = process.env.DEEPSEEK_CONTENT_MODEL || "deepseek-v4-flash";
-  const timeoutMs = Number(process.env.DEEPSEEK_TIMEOUT_MS || 45_000);
+  const baseUrl = deepSeekBaseUrl();
+  const model = deepSeekModelForTask("quality-repair");
+  const timeoutMs = deepSeekTimeoutMs();
   const maxTokens = deepSeekMaxTokens();
 
   async function repairOne(post: BlogPost) {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), timeoutMs);
+    const startedAt = Date.now();
     const languageIssues = review.issues
       .filter((issue) => issue.startsWith(`${post.language}/${post.slug}:`) || !issue.includes("/"))
       .concat(review.warnings.filter((warning) => warning.startsWith(`${post.language}/${post.slug}:`)))
@@ -909,8 +1008,7 @@ ${JSON.stringify(
           messages: [
             {
               role: "system",
-              content:
-                "You are a JSON API and senior editor. Return only one valid JSON object. Never include reasoning text outside JSON."
+              content: stableDeepSeekSystemPrompt("quality-repair")
             },
             { role: "user", content: prompt }
           ],
@@ -923,7 +1021,16 @@ ${JSON.stringify(
 
       if (!response.ok) throw new Error(`DeepSeek repair failed: ${response.status}`);
       const data = (await response.json()) as DeepSeekChatResponse;
-      const content = data.choices?.[0]?.message?.content || data.choices?.[0]?.message?.reasoning_content || "";
+      const choice = data.choices?.[0];
+      const content = choice?.message?.content || choice?.message?.reasoning_content || "";
+      const trace = createDeepSeekTrace({
+        task: "quality-repair",
+        model,
+        startedAt,
+        finishReason: choice?.finish_reason,
+        usage: data.usage,
+        sourceCount: post.sourceLinks.length
+      });
       const generated = assertDeepSeekPost(extractJson(content) as DeepSeekPost, post.language);
       return normalizeGeneratedPost({
         generated: {
@@ -942,7 +1049,8 @@ ${JSON.stringify(
         translationGroupId: post.translationGroupId,
         sources: post.sourceLinks,
         generationDate: post.generationDate || input.generationDate || taiwanDate(),
-        model: `${model}:quality-repair`
+        model: `${model}:quality-repair`,
+        traces: [...(post.generationTrace || []), trace]
       });
     } finally {
       clearTimeout(timeout);
@@ -979,7 +1087,8 @@ export async function generateBlogDraftPair(input: BlogGenerateInput = {}) {
         posts: fallbackCovers.posts,
         sources,
         provider: "fallback" as const,
-        coverGeneration: fallbackCovers
+        coverGeneration: fallbackCovers,
+        promptVersion: BLOG_PROMPT_VERSION
       };
     }
 
@@ -991,7 +1100,8 @@ export async function generateBlogDraftPair(input: BlogGenerateInput = {}) {
         translationGroupId,
         sources,
         generationDate,
-        model: generated.model
+        model: generated.model,
+        traces: generated.traces
       })
     );
     const generatedCovers = await generateBlogCovers(normalizedPosts);
@@ -1000,7 +1110,9 @@ export async function generateBlogDraftPair(input: BlogGenerateInput = {}) {
       posts: generatedCovers.posts,
       sources,
       provider: "deepseek" as const,
-      coverGeneration: generatedCovers
+      coverGeneration: generatedCovers,
+      promptVersion: BLOG_PROMPT_VERSION,
+      traces: generated.traces
     };
   } catch (error) {
     const fallbackPosts = BLOG_LANGUAGES.map((language) =>
@@ -1012,6 +1124,7 @@ export async function generateBlogDraftPair(input: BlogGenerateInput = {}) {
       sources,
       provider: "fallback" as const,
       coverGeneration: fallbackCovers,
+      promptVersion: BLOG_PROMPT_VERSION,
       warning: error instanceof Error ? error.message : "DeepSeek provider failed; used local fallback"
     };
   }

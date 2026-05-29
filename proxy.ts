@@ -2,14 +2,30 @@ import { NextResponse, type NextRequest } from "next/server";
 import { adminCookieName, getAdminSessionToken } from "./lib/auth";
 import { shouldRedirectToCanonicalHost, siteUrl } from "./lib/seo";
 
+const AI_CRAWLER_PATTERN =
+  /(GPTBot|OAI-SearchBot|ChatGPT-User|ClaudeBot|Claude-SearchBot|PerplexityBot|Google-Extended|Meta-ExternalAgent|Bytespider)/i;
+
 function nextWithPathname(request: NextRequest) {
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set("x-altos-pathname", request.nextUrl.pathname);
-  return NextResponse.next({
+  const response = NextResponse.next({
     request: {
       headers: requestHeaders
     }
   });
+  const userAgent = request.headers.get("user-agent") || "";
+  if (AI_CRAWLER_PATTERN.test(userAgent)) {
+    response.headers.set("x-altos-ai-crawler", "detected");
+    console.info(
+      "[altos-ai-crawler]",
+      JSON.stringify({
+        path: request.nextUrl.pathname,
+        userAgent: userAgent.slice(0, 160),
+        at: new Date().toISOString()
+      })
+    );
+  }
+  return response;
 }
 
 export function proxy(request: NextRequest) {
