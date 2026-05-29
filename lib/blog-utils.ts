@@ -85,12 +85,12 @@ export function estimateReadTimeMinutes(text: string, language: BlogLanguage = "
 
   if (language === "en") {
     const words = trimmed.split(/\s+/).filter(Boolean).length;
-    return Math.max(1, Math.ceil(words / 220));
+    return Math.max(3, Math.ceil(words / 220));
   }
 
   const cjkChars = (trimmed.match(/[\u3040-\u30ff\u3400-\u9fff\uf900-\ufaff\uac00-\ud7af]/g) || []).length;
   const latinWords = (trimmed.replace(/[\u3040-\u30ff\u3400-\u9fff\uf900-\ufaff\uac00-\ud7af]/g, " ").match(/[a-z0-9]+/gi) || []).length;
-  return Math.max(1, Math.ceil((cjkChars + latinWords * 1.4) / 500));
+  return Math.max(3, Math.ceil((cjkChars + latinWords * 1.4) / 500));
 }
 
 export function defaultQualityChecks(patch?: Partial<BlogQualityChecks>): BlogQualityChecks {

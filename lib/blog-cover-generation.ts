@@ -1,5 +1,6 @@
 import { BLOG_LANGUAGES, blogCoverForLanguage } from "@/lib/blog-utils";
 import { nowIso } from "@/lib/cms";
+import { FREE_STOCK_COVER_LIBRARY } from "@/lib/blog-stock-cover-library";
 import type { BlogLanguage, BlogPost } from "@/lib/types";
 
 type ImageSourcingResult = {
@@ -172,6 +173,42 @@ function rememberRuntimeImage(image: OpenverseImage, url: string) {
   if (theme) recentlyUsedCoverThemes.set(theme, (recentlyUsedCoverThemes.get(theme) || 0) + 1);
 }
 
+function stockCoverScore(post: BlogPost, cover: (typeof FREE_STOCK_COVER_LIBRARY)[number]) {
+  const haystack = [post.contentType, post.newsCategory, post.topic, post.title, post.tags.join(" ")]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+  const tagScore = cover.tags.reduce((score, tag) => score + (haystack.includes(tag) ? 4 : 0), 0);
+  const peopleHeavyPenalty = /(team|workshop|boardroom|collaborative|planning workspace|operations desk|operational planning|startup product team|creative business)/i.test(
+    cover.credit
+  )
+    ? 8
+    : 0;
+
+  return tagScore - peopleHeavyPenalty;
+}
+
+async function findStockCover(post: BlogPost, { allowReuse = true } = {}) {
+  const ranked = FREE_STOCK_COVER_LIBRARY.map((cover, index) => ({
+    cover,
+    index,
+    score: stockCoverScore(post, cover)
+  })).sort((a, b) => b.score - a.score || a.index - b.index);
+  const fresh = ranked.filter((item) => !recentlyUsedCoverUrls.has(item.cover.url));
+  if (!fresh.length && !allowReuse) return null;
+  const pool = fresh.length ? fresh : ranked;
+  const start = selectionOffset(post, pool.length);
+
+  for (let attempt = 0; attempt < pool.length; attempt += 1) {
+    const selected = pool[(start + attempt) % pool.length].cover;
+    if (!(await imageLoads(selected.url))) continue;
+    recentlyUsedCoverUrls.add(selected.url);
+    return selected;
+  }
+
+  return null;
+}
+
 async function imageLoads(url: string) {
   const response = await fetchWithTimeout(url).catch(() => null);
   if (!response?.ok) return false;
@@ -265,8 +302,54 @@ export async function generateBlogCoverForPost(post: BlogPost): Promise<BlogPost
   }
 
   try {
+    const preferredStockCover = await findStockCover(post, { allowReuse: false });
+    if (preferredStockCover) {
+      return {
+        ...post,
+        cover: preferredStockCover.url,
+        coverAlt: `${post.title} - ${preferredStockCover.credit}`,
+        coverPrompt: `${imageSearchQueries(post)[0] || post.title} curated free stock`,
+        coverSource: "curated",
+        coverCredit: preferredStockCover.credit,
+        coverCreditUrl: preferredStockCover.creditUrl,
+        coverLicense: preferredStockCover.license,
+        coverLicenseUrl: preferredStockCover.licenseUrl,
+        coverGeneration: {
+          source: "curated",
+          provider: preferredStockCover.provider,
+          prompt: `${imageSearchQueries(post)[0] || post.title} curated free stock`,
+          style: "Pinterest-inspired editorial image selection using legal free stock photography.",
+          generatedAt: nowIso(),
+          status: "generated"
+        }
+      };
+    }
+
     const match = await findImage(post);
-    if (!match) throw new Error("No suitable open-licensed image was found.");
+    if (!match) {
+      const stockCover = await findStockCover(post);
+      if (!stockCover) throw new Error("No suitable open-licensed image was found.");
+
+      return {
+        ...post,
+        cover: stockCover.url,
+        coverAlt: `${post.title} - ${stockCover.credit}`,
+        coverPrompt: `${imageSearchQueries(post)[0] || post.title} curated free stock`,
+        coverSource: "curated",
+        coverCredit: stockCover.credit,
+        coverCreditUrl: stockCover.creditUrl,
+        coverLicense: stockCover.license,
+        coverLicenseUrl: stockCover.licenseUrl,
+        coverGeneration: {
+          source: "curated",
+          provider: stockCover.provider,
+          prompt: `${imageSearchQueries(post)[0] || post.title} curated free stock`,
+          style: "Pinterest-inspired editorial image selection using legal free stock photography.",
+          generatedAt: nowIso(),
+          status: "generated"
+        }
+      };
+    }
 
     const url = match.image.thumbnail || match.image.url;
     const credit = attribution(match.image);

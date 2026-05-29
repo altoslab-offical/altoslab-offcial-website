@@ -107,7 +107,6 @@ export async function BlogArticle({ post }: { post: BlogPost }) {
             </p>
             <h1>{renderBrandText(post.title)}</h1>
             <div className="article-meta">
-              <span>{renderBrandText(post.author)}</span>
               <span>
                 {dictionary.updated} {new Date(post.updatedAt).toLocaleDateString(locale)}
               </span>

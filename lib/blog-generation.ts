@@ -499,7 +499,7 @@ Source links 提供證據鏈，但文章仍然要加入 ALTOS LAB 的實作觀�
     cover: chooseBlogCover(input, language),
     coverAlt: chooseBlogCoverAlt(input, language),
     coverSource: "fallback",
-    readTimeMinutes: estimateReadTimeMinutes(body, language),
+    readTimeMinutes: Math.max(3, estimateReadTimeMinutes(body, language)),
     featured: false,
     reviewStatus: "ai-draft",
     qualityChecks: {
@@ -595,7 +595,7 @@ function normalizeGeneratedPost({
     coverPrompt: generated.coverPrompt,
     coverSource: generated.coverSource || "fallback",
     coverGeneration: generated.coverGeneration,
-    readTimeMinutes: generated.readTimeMinutes || estimateReadTimeMinutes(body, language),
+    readTimeMinutes: Math.max(3, generated.readTimeMinutes || estimateReadTimeMinutes(body, language)),
     featured: false,
     reviewStatus: "ai-draft",
     qualityChecks: {

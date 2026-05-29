@@ -319,14 +319,8 @@ export async function BlogIndex({ language, tag, query }: BlogIndexProps) {
                     </h3>
                     <p>{renderBrandText(post.excerpt)}</p>
                     <div className="blog-craft-card-meta">
-                      <span aria-hidden="true">AL</span>
-                      <div>
-                        <strong>{renderBrandText(post.author)}</strong>
-                        <small>
-                          {[post.contentType, post.newsCategory || post.tags[0]].filter(Boolean).join(" / ")} ·{" "}
-                          {dictionary.readTime(post.readTimeMinutes)}
-                        </small>
-                      </div>
+                      <span>{[post.contentType, post.newsCategory || post.tags[0]].filter(Boolean).join(" / ")}</span>
+                      <small>{dictionary.readTime(post.readTimeMinutes)}</small>
                     </div>
                   </div>
                 </article>

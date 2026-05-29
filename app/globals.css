@@ -3191,41 +3191,36 @@ img {
 .blog-craft-card-meta {
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin-top: 0;
-}
-
-.blog-craft-card-meta > span {
-  width: 38px;
-  height: 38px;
-  border: 1px solid var(--al-blog-border);
-  border-radius: 10px;
-  background: var(--al-blog-panel);
-  color: var(--al-blog-ink);
-  display: grid;
-  place-items: center;
-  font-family: var(--al-font-mono);
-  font-size: 11px;
-  font-weight: 900;
-}
-
-.blog-craft-card-meta strong,
-.blog-craft-card-meta small {
-  display: block;
-}
-
-.blog-craft-card-meta strong {
-  color: var(--al-blog-ink);
-  font-size: 15px;
-  line-height: 20px;
-  font-weight: 400;
-}
-
-.blog-craft-card-meta small {
-  margin-top: 0;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 10px;
   color: #a39e98;
   font-size: 12px;
   line-height: 16px;
+}
+
+.blog-craft-card-meta > span,
+.blog-craft-card-meta small {
+  display: inline-flex;
+  align-items: center;
+  color: #a39e98;
+  font-size: inherit;
+  line-height: inherit;
+}
+
+.blog-craft-card-meta > span::after {
+  content: "";
+  width: 3px;
+  height: 3px;
+  margin-left: 7px;
+  border-radius: 999px;
+  background: currentColor;
+  opacity: 0.72;
+}
+
+.blog-craft-card-meta small {
+  margin-top: 0;
+  font-size: 12px;
 }
 
 @media (max-width: 980px) {
