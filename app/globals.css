@@ -2408,6 +2408,7 @@ img {
 .blog-site-shell .related-articles,
 .blog-site-shell .faq-list,
 .blog-site-shell .blog-cta-panel {
+  box-sizing: border-box;
   width: min(700px, 100%);
   margin-inline: auto;
 }
@@ -2439,6 +2440,7 @@ img {
 }
 
 .blog-site-shell .article-hero h1 {
+  box-sizing: border-box;
   width: min(840px, 100%);
   margin: 0 auto;
   color: var(--al-blog-strong);
@@ -2446,6 +2448,8 @@ img {
   line-height: 1.06;
   letter-spacing: 0;
   font-weight: 700;
+  text-wrap: balance;
+  overflow-wrap: anywhere;
 }
 
 .blog-site-shell .article-meta {
@@ -2474,11 +2478,13 @@ img {
 }
 
 .article-cover-credit {
+  box-sizing: border-box;
   width: min(700px, 100%);
   margin: 10px auto 0;
   color: var(--al-blog-muted);
   font-size: 12px;
   line-height: 1.4;
+  overflow-wrap: anywhere;
 }
 
 .article-cover-credit a {
@@ -2494,6 +2500,7 @@ img {
 }
 
 .blog-site-shell .rich-text {
+  box-sizing: border-box;
   width: min(700px, 100%);
   margin: 0 auto;
   color: var(--al-blog-ink);
@@ -3824,8 +3831,8 @@ img {
   .blog-site-shell .article-hero h1 {
     width: 100%;
     max-width: calc(100vw - 32px);
-    font-size: clamp(34px, 10.5vw, 44px);
-    line-height: 1.04;
+    font-size: clamp(30px, 8.4vw, 36px);
+    line-height: 1.1;
     overflow-wrap: anywhere;
     word-break: break-word;
   }
@@ -3833,6 +3840,25 @@ img {
   .blog-site-shell .article-hero .hero-copy,
   .blog-site-shell .rich-text {
     overflow-wrap: anywhere;
+  }
+
+  .blog-site-shell .article-hero .hero-copy {
+    font-size: 17px;
+    line-height: 1.55;
+  }
+
+  .blog-site-shell .geo-summary,
+  .blog-site-shell .project-detail-card,
+  .blog-site-shell .source-list,
+  .blog-site-shell .ai-disclosure,
+  .blog-site-shell .blog-cta-panel,
+  .blog-site-shell .faq-list {
+    max-width: calc(100vw - 32px);
+  }
+
+  .blog-site-shell .rich-text {
+    font-size: 18px;
+    line-height: 1.68;
   }
 
   .site-logo {

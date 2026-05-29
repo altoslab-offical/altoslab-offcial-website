@@ -885,6 +885,7 @@ Quality rules:
 - Make readers feel ALTOS LAB is a serious lab: source-grounded, practical, original, careful with uncertainty and useful for decision makers.
 - Every article needs one fresh angle: a market signal, counterintuitive point, mechanism explainer, source trail, implementation framework, case breakdown, risk warning, decision matrix, comparison table or signal chart.
 - Use a sharp title pattern: specific source/event/question + operator implication + ALTOS LAB framework. Never use generic titles like "AI platform trends", "search visibility and executive decisions", "what business leaders need to know", "不可忽視", "必須關注" or "關鍵轉變".
+- The excerpt is the visible article subtitle and must be SEO-useful: include a concrete source/event or market signal, the reader's search intent, and the operator decision in 1-2 compelling sentences. Do not write vague subtitles like "not about heat, but whether it changes workflow".
 - Anti-slop style gate: cut throat-clearing openers, do not announce "this article will", avoid "not X but Y" structures, avoid generic hype words, use concrete actors and actions, vary sentence rhythm, and remove empty transitions.
 - Sound like a sharp lab editor. Specific claims beat polished slogans.
 - Do not invent client names, statistics, dates or source claims.

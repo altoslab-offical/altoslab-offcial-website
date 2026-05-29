@@ -15,9 +15,12 @@ const BASE_URL = (process.env.ALTOS_ADMIN_BASE_URL || process.env.NEXT_PUBLIC_SI
 );
 const DRY_RUN = process.argv.includes("--dry-run");
 const SKIP_IMAGES = process.argv.includes("--skip-images");
+const PRUNE_EXISTING = process.argv.includes("--prune");
 const EXPORT_SEED_INDEX = process.argv.indexOf("--export-seed");
 const EXPORT_SEED_PATH = EXPORT_SEED_INDEX >= 0 ? process.argv[EXPORT_SEED_INDEX + 1] : "";
-const TARGET_PER_LANGUAGE = Number(process.env.BLOG_TARGET_PER_LANGUAGE || 48);
+const SEED_MODE = process.env.BLOG_SEED_MODE === "archive" ? "archive" : "baseline";
+const BASELINE_IDEAS = ["agent-pilot-scorecard", "ai-search-brand-monitoring", "ai-evals-before-launch"];
+const TARGET_PER_LANGUAGE = Number(process.env.BLOG_TARGET_PER_LANGUAGE || (SEED_MODE === "baseline" ? BASELINE_IDEAS.length : 48));
 const RUN_ID = "altos-market-editorial-seed-v1";
 const FALLBACK_COVER = {
   "zh-Hant": "/blog-cover-zh-hant.png",
@@ -86,6 +89,21 @@ const FREE_STOCK_COVER_LIBRARY = [
   stockCover("https://images.pexels.com/photos/8386434/pexels-photo-8386434.jpeg?auto=compress&cs=tinysrgb&w=1200", "AI interface photo via Pexels", ["agent", "product", "automation", "model"]),
   stockCover("https://images.pexels.com/photos/8386440/pexels-photo-8386440.jpeg?auto=compress&cs=tinysrgb&w=1200", "Machine intelligence visual photo via Pexels", ["model", "agent", "trend", "product"])
 ];
+
+const BASELINE_COVER_OVERRIDES = {
+  "agent-pilot-scorecard:zh-Hant": stockCover("https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1200&q=80", "Developer workflow screen photo via Unsplash", ["product", "automation", "software", "agent"]),
+  "agent-pilot-scorecard:en": stockCover("https://images.unsplash.com/photo-1485827404703-89b55fcc595e?auto=format&fit=crop&w=1200&q=80", "Robotics lab photo via Unsplash", ["agents", "automation", "robotics", "industry"]),
+  "agent-pilot-scorecard:ja": stockCover("https://images.unsplash.com/photo-1518432031352-d6fc5c10da5a?auto=format&fit=crop&w=1200&q=80", "Network hardware photo via Unsplash", ["infra", "network", "model", "data"]),
+  "agent-pilot-scorecard:ko": stockCover("https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1200&q=80", "Code matrix screen photo via Unsplash", ["infra", "software", "agent", "automation"]),
+  "ai-search-brand-monitoring:zh-Hant": stockCover("https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=1200&q=80", "Analytics dashboard photo via Unsplash", ["geo", "search", "data", "governance"]),
+  "ai-search-brand-monitoring:en": stockCover("https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1200&q=80", "Earth network visualization photo via Unsplash", ["geo", "search", "platform", "trend"]),
+  "ai-search-brand-monitoring:ja": stockCover("https://images.unsplash.com/photo-1504868584819-f8e8b4b6d7e3?auto=format&fit=crop&w=1200&q=80", "Data and research desk photo via Unsplash", ["geo", "data", "research", "governance"]),
+  "ai-search-brand-monitoring:ko": stockCover("https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=1200&q=80", "Business analytics laptop photo via Unsplash", ["geo", "growth", "data", "business"]),
+  "ai-evals-before-launch:zh-Hant": stockCover("https://images.unsplash.com/photo-1555949963-aa79dcee981c?auto=format&fit=crop&w=1200&q=80", "Machine learning code photo via Unsplash", ["agent", "software", "model", "automation"]),
+  "ai-evals-before-launch:en": stockCover("https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1200&q=80", "Circuit board macro photo via Unsplash", ["infra", "model", "technology", "product"]),
+  "ai-evals-before-launch:ja": stockCover("https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=1200&q=80", "Code editor workspace photo via Unsplash", ["software", "product", "agent", "build"]),
+  "ai-evals-before-launch:ko": stockCover("https://images.unsplash.com/photo-1515879218367-8466d910aaa4?auto=format&fit=crop&w=1200&q=80", "Terminal code close-up photo via Unsplash", ["software", "infra", "agent", "automation"])
+};
 
 const LANGUAGES = ["zh-Hant", "en", "ja", "ko"];
 
@@ -689,6 +707,15 @@ function contentTypeForIndex(index) {
   return CONTENT_TYPE_CYCLE[index % CONTENT_TYPE_CYCLE.length];
 }
 
+function selectedIdeas() {
+  if (SEED_MODE === "archive") return IDEAS;
+  const selected = BASELINE_IDEAS.map((slug) => IDEAS.find((entry) => entry.slug === slug));
+  if (selected.some((entry) => !entry)) {
+    throw new Error(`Missing baseline idea in IDEAS: ${BASELINE_IDEAS.join(", ")}`);
+  }
+  return selected;
+}
+
 function withResolvedContentType(ideaItem, index) {
   return {
     ...ideaItem,
@@ -946,7 +973,7 @@ function titleFor(ideaItem, language, index = 0) {
   if (language === "en") {
     if (ideaItem.type === "breaking") {
       return [
-        `${subject} now belongs in workflow, budget and risk review`,
+        `How to evaluate ${subject} before launch`,
         `What recent sources around ${subject} mean for operators`,
         `${subject} is heating up; the real test is review cost`,
         `The new ${subject} signal and the first workflow experiment to run`
@@ -1014,7 +1041,7 @@ function titleFor(ideaItem, language, index = 0) {
   }
   if (ideaItem.type === "breaking") {
     return [
-      `「${subject}」進入最新來源視野，企業先看流程與責任`,
+      `「${subject}」怎麼選？先看來源、流程與回滾成本`,
       `企業該如何判讀「${subject}」的新訊號`,
       `「${subject}」熱度升高，但先別急著導入`,
       `「${subject}」從新聞變成工作流實驗，該怎麼看`
@@ -1035,18 +1062,32 @@ function titleFor(ideaItem, language, index = 0) {
   return `從工作現場看「${subject}」：市場訊號如何變成決策`;
 }
 
-function excerptFor(ideaItem, language, index = 0) {
+function sourcePhrase(sources, language) {
+  const publishers = uniquePublishers(sources).slice(0, 3);
+  if (!publishers.length) {
+    if (language === "en") return "recent AI sources";
+    if (language === "ja") return "最近のAI関連出典";
+    if (language === "ko") return "최근 AI 출처";
+    return "近期 AI 來源";
+  }
+  if (language === "en") return publishers.join(", ");
+  if (language === "ko") return publishers.join(", ");
+  return publishers.join("、");
+}
+
+function excerptFor(ideaItem, language, index = 0, sources = []) {
   const [subject, decision] = ideaItem.line[language];
   const archetype = archetypeFor(ideaItem, index);
   const variant = index % 4;
+  const publishers = sourcePhrase(sources, language);
   if (language === "en") {
     if (ideaItem.type === "breaking") {
       return trimTo(
         [
-          `${subject} is appearing across recent sources; the useful question is whether it changes workflow ownership, budget or risk review.`,
-          `Recent coverage around ${subject} matters only if it changes a repeated operator decision, not because it adds another AI label.`,
-          `${subject} is gaining heat, but teams should test source quality and review cost before turning it into a roadmap item.`,
-          `The first move around ${subject} is not a platform build; it is a source card, a review rule and one workflow experiment.`
+          `${publishers} are making ${subject} a real workflow question. Operators should test review cost, ownership and rollback before choosing the first pilot.`,
+          `Recent coverage around ${subject} matters if it changes a repeated operator decision. This brief turns the signal into a practical adoption check.`,
+          `${subject} is gaining heat, but teams should test source quality, review cost and workflow risk before turning it into a roadmap item.`,
+          `The first move around ${subject} is not a platform build. It is a source card, a review rule and one workflow experiment.`
         ][variant],
         170
       );
@@ -1066,7 +1107,7 @@ function excerptFor(ideaItem, language, index = 0) {
     if (ideaItem.type === "breaking") {
       return trimTo(
         [
-          `${subject}は複数の新しい出典に現れ始めています。見るべきなのは、業務・予算・リスク判断が変わるかです。`,
+          `${publishers}の動きで、${subject}は実務上の判断テーマになっています。最初に見るべきはレビューコスト、責任者、巻き戻し条件です。`,
           `${subject}の最近の報道は、新しいAI用語ではなく、繰り返し発生する業務判断を変えるかで読むべきです。`,
           `${subject}の熱量が上がる今、チームは導入前に出典の質とレビューコストを確認すべきです。`,
           `${subject}で最初に作るべきものは大きな基盤ではなく、出典カード、レビュー規則、小さな業務実験です。`
@@ -1085,7 +1126,7 @@ function excerptFor(ideaItem, language, index = 0) {
     if (ideaItem.type === "breaking") {
       return trimTo(
         [
-          `${subject}는 최근 여러 출처에서 나타나고 있습니다. 핵심은 업무, 예산, 리스크 판단을 바꾸는지입니다.`,
+          `${publishers}의 흐름은 ${subject}를 실제 업무 판단으로 만들고 있습니다. 먼저 볼 것은 검토 비용, 책임자, 롤백 조건입니다.`,
           `${subject}의 최근 보도는 새 AI 용어가 아니라 반복되는 운영 판단을 바꾸는지로 읽어야 합니다.`,
           `${subject}의 열기가 높아질 때 팀은 도입 전에 출처 품질과 검토 비용을 먼저 확인해야 합니다.`,
           `${subject}의 첫 움직임은 큰 플랫폼 구축이 아니라 출처 카드, 검토 규칙, 작은 업무 실험입니다.`
@@ -1103,9 +1144,9 @@ function excerptFor(ideaItem, language, index = 0) {
   if (ideaItem.type === "breaking") {
     return trimTo(
       [
-        `「${subject}」開始出現在多個近期來源裡；真正該看的不是熱度，而是它有沒有改變流程、預算或風險判斷。`,
-        `「${subject}」不是多一個 AI 名詞，而是企業該問它會不會改變某個重複決策。`,
-        `「${subject}」熱度升高時，團隊先檢查來源品質與審核成本，再決定是否放進 roadmap。`,
+        `${publishers} 的近期訊號正在把「${subject}」推向真實工作流問題。企業先看審核成本、權限責任與回滾條件，再決定第一個試點。`,
+        `「${subject}」不是多一個 AI 名詞，而是企業該問它會不會改變某個重複決策。這篇把新聞訊號翻成導入檢查表。`,
+        `「${subject}」熱度升高時，團隊先檢查來源品質、審核成本與工作流風險，再決定是否放進 roadmap。`,
         `「${subject}」的第一步不是建平台，而是來源卡、審核規則，以及一個能驗證價值的小實驗。`
       ][variant],
       170
@@ -1119,33 +1160,35 @@ function excerptFor(ideaItem, language, index = 0) {
   );
 }
 
-function seoDescriptionFor(ideaItem, language, index = 0) {
+function seoDescriptionFor(ideaItem, language, index = 0, sources = []) {
   const [subject, decision] = ideaItem.line[language];
   const archetype = archetypeFor(ideaItem, index);
+  const publishers = sourcePhrase(sources, language);
   if (language === "en") {
     return trimTo(
       archetype === "marketBrief"
-        ? `${subject} source-backed update with implications, uncertainty and operator signals to watch next.`
+        ? `${subject} analysis based on ${publishers}: source signal, operator impact, uncertainty and first workflow test.`
         : `${subject} analysis with sources, charts and an ALTOS LAB editorial lens for how teams can ${decision}.`,
       155
     );
   }
   if (language === "ja") {
-    return trimTo(archetype === "marketBrief" ? `${subject}の最新動向を出典、影響、不確実性、次の観測点で整理します。` : `${subject}を出典、図表、ALTOS LABの編集視点で整理します。`, 155);
+    return trimTo(archetype === "marketBrief" ? `${publishers}を起点に、${subject}の影響、不確実性、最初の業務実験を整理します。` : `${subject}を出典、図表、ALTOS LABの編集視点で整理します。`, 155);
   }
   if (language === "ko") {
-    return trimTo(archetype === "marketBrief" ? `${subject} 최신 흐름을 출처, 영향, 불확실성, 다음 관찰 신호로 정리합니다.` : `${subject}를 출처, 차트, ALTOS LAB 편집 관점으로 분석합니다.`, 155);
+    return trimTo(archetype === "marketBrief" ? `${publishers}를 바탕으로 ${subject}의 영향, 불확실성, 첫 업무 실험을 정리합니다.` : `${subject}를 출처, 차트, ALTOS LAB 편집 관점으로 분석합니다.`, 155);
   }
-  return trimTo(archetype === "marketBrief" ? `「${subject}」最新動向：用可信來源、影響、不確定性與下一步觀察訊號整理。` : `「${subject}」分析：用來源、圖表與 ALTOS LAB 編輯視角說清楚如何${decision}。`, 155);
+  return trimTo(archetype === "marketBrief" ? `從 ${publishers} 看「${subject}」：整理來源訊號、企業影響、不確定性與第一個工作流試點。` : `「${subject}」分析：用來源、圖表與 ALTOS LAB 編輯視角說清楚如何${decision}。`, 155);
 }
 
-function geoSummaryFor(ideaItem, language, index = 0) {
+function geoSummaryFor(ideaItem, language, index = 0, sources = []) {
   const [subject, decision] = ideaItem.line[language];
   const archetype = archetypeFor(ideaItem, index);
+  const publishers = sourcePhrase(sources, language);
   if (language === "en") {
     return trimTo(
       archetype === "marketBrief"
-        ? `${subject} is not a reason to buy or rebuild yet; it is a source-backed signal to watch. The useful read is whether recent coverage changes workflow ownership, budget pressure or risk review. ALTOS LAB would start with a source card, a review rule and one small experiment before moving it into the roadmap.`
+        ? `${publishers} make ${subject} worth tracking, but not worth overbuilding yet. The useful question is whether the signal changes workflow ownership, budget pressure or risk review. ALTOS LAB would start with a source card, a review rule and one small experiment before moving it into the roadmap.`
         : `${subject} is useful only when it becomes an operating decision, not a trend label. This piece maps the source evidence, the implementation risk and the reviewer who must own quality. The practical next step is to test whether the team can ${decision} with clear metrics and rollback paths.`,
       420
     );
@@ -1162,13 +1205,13 @@ function geoSummaryFor(ideaItem, language, index = 0) {
     return trimTo(
       archetype === "marketBrief"
         ? `${subject}는 지금 바로 도입할 답이 아니라 출처 기반으로 지켜볼 신호입니다. 중요한 것은 최근 보도가 업무 책임, 예산 압박, 리스크 검토를 바꾸는지입니다. ALTOS LAB이라면 먼저 출처 카드, 검토 규칙, 작은 업무 실험부터 설계합니다.`
-        : `${subject}는 트렌드 이름이 아니라 운영 판단이 될 때 가치가 있습니다. 이 글은 출처로 확인되는 사실, 실행 리스크, 품질을 책임질 검토자를 정리합니다. 다음 단계는 명확한 지표와 롤백 조건을 두고 ${decision}지 시험하는 것입니다.`,
+        : `${subject}는 트렌드 이름이 아니라 운영 판단이 될 때 가치가 있습니다. 이 글은 출처로 확인되는 사실, 실행 리스크, 품질을 책임질 검토자를 정리합니다. 다음 단계는 명확한 지표와 롤백 조건을 두고 "${decision}"를 시험하는 것입니다.`,
       420
     );
   }
   return trimTo(
     archetype === "marketBrief"
-      ? `「${subject}」現在不是立刻導入的答案，而是值得用來源追蹤的市場訊號。真正要看的是近期消息是否改變流程責任、預算壓力或風險審核。ALTOS LAB 會先做來源卡、審核規則與一個小型工作流實驗，再決定要不要放進 roadmap。`
+      ? `${publishers} 讓「${subject}」值得追蹤，但還不等於該立刻大規模導入。真正要看的是它是否改變流程責任、預算壓力或風險審核。ALTOS LAB 會先做來源卡、審核規則與一個小型工作流實驗，再決定要不要放進 roadmap。`
       : `「${subject}」有價值的地方，不是它是不是熱門詞，而是它能不能變成可執行的營運判斷。這篇會整理可追溯來源、導入風險、品質審核責任與最小實驗路徑。下一步是確認團隊能否在有指標與回滾條件下「${decision}」。`,
     420
   );
@@ -1722,7 +1765,7 @@ ${table}
   }
 
   if (isBrief) {
-    return `${subject} 現在值得看，不是因為它又多了一個 AI 名詞，而是 ${publishers} 的近期來源開始指向同一個營運問題：企業要不要把這個訊號放進流程、預算或風險審核。我的判斷是先觀察，但要用工作流標準觀察。
+    return `「${subject}」現在值得看，不是因為它又多了一個 AI 名詞，而是 ${publishers} 的近期來源開始指向同一個營運問題：企業能不能在審核成本、權限責任與回滾條件可控時，啟動第一個工作流試點。我的判斷是先觀察來源，再用流程標準做小測。
 
 ## 先把新聞變成可判斷的訊號
 
@@ -1740,7 +1783,7 @@ ${sourceList}
 
 ## 還不能過度推論
 
-目前不能把 ${subject} 直接等同於大規模採用。還要看官方確認、跨來源一致性、非技術團隊是否真的有需求，以及審核成本是否低到值得更換流程。
+目前不能把「${subject}」直接等同於大規模採用。還要看官方確認、跨來源一致性、非技術團隊是否真的有需求，以及審核成本是否低到值得更換流程。
 
 ## ALTOS LAB 的讀法
 
@@ -1875,6 +1918,27 @@ function qualityChecksFor(ideaItem) {
   };
 }
 
+const TEXT_POLISH_REPLACEMENTS = [
+  [/Source-backed blog systems is/g, "Source-backed blog systems are"],
+  [/AI evals before launch is/g, "Pre-launch AI evals are"],
+  [/AI Agent 파일럿는/g, "AI Agent 파일럿은"],
+  [/AI Agent 파일럿가/g, "AI Agent 파일럿이"],
+  [/AI Agent 파일럿를/g, "AI Agent 파일럿을"],
+  [/AI 검색 브랜드 모니터링는/g, "AI 검색 브랜드 모니터링은"],
+  [/AI 검색 브랜드 모니터링가/g, "AI 검색 브랜드 모니터링이"],
+  [/출처 기반 블로그 시스템를/g, "출처 기반 블로그 시스템을"],
+  [/출처 기반 블로그 시스템는/g, "출처 기반 블로그 시스템은"]
+];
+
+function polishText(value) {
+  if (typeof value !== "string") return value;
+  return TEXT_POLISH_REPLACEMENTS.reduce((text, [pattern, replacement]) => text.replace(pattern, replacement), value);
+}
+
+function polishGeneratedPost(post) {
+  return JSON.parse(JSON.stringify(post), (_, value) => polishText(value));
+}
+
 function makePost(ideaItem, language, index, cover, newsIndex = []) {
   const sources = sourceLinks(ideaItem, newsIndex);
   const title = titleFor(ideaItem, language, index);
@@ -1883,7 +1947,7 @@ function makePost(ideaItem, language, index, cover, newsIndex = []) {
   const translationGroupId = `tg_market_${ideaItem.slug}_v1`;
   const archetype = archetypeFor(ideaItem, index);
 
-  return {
+  return polishGeneratedPost({
     id: `post_market_${ideaItem.slug.replace(/[^a-z0-9]+/gi, "_")}_${language.toLowerCase().replace(/[^a-z0-9]+/g, "_")}`,
     slug: slugFor(ideaItem.slug, language),
     status: "published",
@@ -1892,13 +1956,13 @@ function makePost(ideaItem, language, index, cover, newsIndex = []) {
     translationGroupId,
     title,
     seoTitle: trimTo(`${title} | ALTOS LAB`, 80),
-    seoDescription: seoDescriptionFor(ideaItem, language, index),
-    excerpt: excerptFor(ideaItem, language, index),
+    seoDescription: seoDescriptionFor(ideaItem, language, index, sources),
+    excerpt: excerptFor(ideaItem, language, index, sources),
     contentType: ideaItem.type,
     newsCategory: CATEGORY[ideaItem.category][language],
     topic: ideaItem.line[language][0],
     audience: AUDIENCE[language],
-    geoSummary: geoSummaryFor(ideaItem, language, index),
+    geoSummary: geoSummaryFor(ideaItem, language, index, sources),
     body,
     keyTakeaways: keyTakeawaysFor(ideaItem, language, index),
     faqs: faqsFor(ideaItem, language, index),
@@ -1934,7 +1998,7 @@ function makePost(ideaItem, language, index, cover, newsIndex = []) {
     createdAt: now,
     updatedAt: now,
     publishedAt: now
-  };
+  });
 }
 
 function approvedImageUrl(url) {
@@ -2142,6 +2206,21 @@ async function coverFor(ideaItem, language, index) {
     };
   }
 
+  const baselineCover = BASELINE_COVER_OVERRIDES[`${ideaItem.slug}:${language}`];
+  if (SEED_MODE === "baseline" && baselineCover && (await imageLoads(baselineCover.url))) {
+    usedCoverUrls.add(baselineCover.url);
+    return {
+      url: baselineCover.url,
+      query: `${ideaItem.coverQuery} baseline editorial ${language}`,
+      source: "curated",
+      provider: baselineCover.provider,
+      credit: baselineCover.credit,
+      creditUrl: baselineCover.creditUrl,
+      license: baselineCover.license,
+      licenseUrl: baselineCover.licenseUrl
+    };
+  }
+
   const languageHint =
     language === "zh-Hant" ? "taiwan business editorial" : language === "ja" ? "japan technology editorial" : language === "ko" ? "korea startup editorial" : "business technology editorial";
   const visualBank = VISUAL_QUERY_BANK[ideaItem.category] || VISUAL_QUERY_BANK.product;
@@ -2249,6 +2328,20 @@ async function upsertPost(post, existingPosts, cookie) {
   return "created";
 }
 
+async function prunePosts(allowedPosts, existingPosts, cookie) {
+  const allowed = new Set(allowedPosts.map(postKey));
+  const stale = existingPosts.filter((post) => post.status !== "archived" && !allowed.has(postKey(post)));
+  if (DRY_RUN) return { stale, archived: 0 };
+
+  let archived = 0;
+  for (const post of stale) {
+    await adminJson(`/api/admin/blog/${post.id}`, cookie, { method: "DELETE" });
+    archived += 1;
+    await new Promise((resolve) => setTimeout(resolve, 120));
+  }
+  return { stale, archived };
+}
+
 function summarize(posts) {
   const counts = Object.fromEntries(LANGUAGES.map((language) => [language, 0]));
   const types = {};
@@ -2280,6 +2373,7 @@ function summarize(posts) {
 }
 
 async function main() {
+  const ideas = selectedIdeas();
   const newsIndex = await fetchNewsIndex();
   if (newsIndex.length) {
     console.log(`[seed] fetched ${newsIndex.length} live news/source items`);
@@ -2289,13 +2383,13 @@ async function main() {
 
   if (EXPORT_SEED_PATH) {
     const posts = [];
-    for (let index = 0; index < IDEAS.length; index += 1) {
-      const ideaItem = withResolvedContentType(IDEAS[index], index);
+    for (let index = 0; index < ideas.length; index += 1) {
+      const ideaItem = withResolvedContentType(ideas[index], index);
       for (const language of LANGUAGES) {
         const cover = await coverFor(ideaItem, language, index);
         posts.push(makePost(ideaItem, language, index, cover, newsIndex));
       }
-      console.log(`[export] ${index + 1}/${IDEAS.length} ${ideaItem.slug}`);
+      console.log(`[export] ${index + 1}/${ideas.length} ${ideaItem.slug}`);
     }
 
     const output = `import type { BlogPost } from "./types";\n\nexport const marketBlogPosts = ${JSON.stringify(posts, null, 2)} satisfies BlogPost[];\n`;
@@ -2305,21 +2399,23 @@ async function main() {
     return;
   }
 
-  console.log(`[seed] base=${BASE_URL} dryRun=${DRY_RUN} ideas=${IDEAS.length}`);
+  console.log(`[seed] base=${BASE_URL} dryRun=${DRY_RUN} prune=${PRUNE_EXISTING} mode=${SEED_MODE} ideas=${ideas.length}`);
   const cookie = DRY_RUN ? "" : await login();
   const current = DRY_RUN ? { posts: [] } : await adminJson("/api/admin/blog", cookie);
   const existingPosts = current.posts || [];
+  const allowedPosts = [];
 
   let created = 0;
   let updated = 0;
   let wouldCreate = 0;
   let wouldUpdate = 0;
 
-  for (let index = 0; index < IDEAS.length; index += 1) {
-    const ideaItem = withResolvedContentType(IDEAS[index], index);
+  for (let index = 0; index < ideas.length; index += 1) {
+    const ideaItem = withResolvedContentType(ideas[index], index);
     for (const language of LANGUAGES) {
       const cover = await coverFor(ideaItem, language, index);
       const post = makePost(ideaItem, language, index, cover, newsIndex);
+      allowedPosts.push(post);
       const action = await upsertPost(post, existingPosts, cookie);
       if (action === "created") {
         created += 1;
@@ -2330,7 +2426,12 @@ async function main() {
       if (action === "would-update") wouldUpdate += 1;
       await new Promise((resolve) => setTimeout(resolve, DRY_RUN ? 5 : 250));
     }
-    console.log(`[seed] ${index + 1}/${IDEAS.length} ${ideaItem.slug}`);
+    console.log(`[seed] ${index + 1}/${ideas.length} ${ideaItem.slug}`);
+  }
+
+  if (PRUNE_EXISTING) {
+    const { stale, archived } = await prunePosts(allowedPosts, existingPosts, cookie);
+    console.log(`[seed] prune stale=${stale.length} archived=${archived}`);
   }
 
   if (DRY_RUN) {

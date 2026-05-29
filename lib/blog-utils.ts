@@ -106,6 +106,11 @@ export function blogCoverForLanguage(language: BlogLanguage) {
   return BLOG_LANGUAGE_CONFIG[language].cover;
 }
 
+export function cleanBlogSeoTitle(title: string) {
+  const cleaned = title.replace(/\s*[|｜]\s*ALTOS LAB\s*$/i, "").trim();
+  return cleaned || title.trim();
+}
+
 export function estimateReadTimeMinutes(text: string, language: BlogLanguage = "zh-Hant") {
   const trimmed = text.replace(/\s+/g, " ").trim();
   if (!trimmed) return 1;

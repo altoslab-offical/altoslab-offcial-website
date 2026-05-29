@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { BlogArticle } from "@/components/BlogArticle";
-import { blogCoverForLanguage, blogPostPath, metadataLanguageKey } from "@/lib/blog-utils";
+import { blogCoverForLanguage, blogPostPath, cleanBlogSeoTitle, metadataLanguageKey } from "@/lib/blog-utils";
 import { getPublishedBlogAlternates, getPublishedBlogPost } from "@/lib/cms";
 import { absoluteUrl } from "@/lib/seo";
 
@@ -19,7 +19,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const image = absoluteUrl(post.cover || blogCoverForLanguage(post.language));
 
   return {
-    title: post.seoTitle || post.title,
+    title: cleanBlogSeoTitle(post.seoTitle || post.title),
     description: post.seoDescription || post.excerpt,
     alternates: {
       canonical: absoluteUrl(blogPostPath(post)),

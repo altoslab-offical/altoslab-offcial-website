@@ -18,7 +18,7 @@ const copy = {
     updated: "更新",
     readTime: (minutes: number) => `${minutes} 分鐘閱讀`,
     geoSummary: "重點摘要",
-    takeaways: "Key Takeaways",
+    takeaways: "本文重點",
     faq: "常見問題",
     sources: "來源與參考",
     related: "延伸閱讀",
@@ -44,11 +44,11 @@ const copy = {
     updated: "更新",
     readTime: (minutes: number) => `${minutes} 分で読めます`,
     geoSummary: "要約",
-    takeaways: "Key Takeaways",
+    takeaways: "要点",
     faq: "FAQ",
-    sources: "Sources",
+    sources: "出典",
     related: "関連記事",
-    disclosure: "AI disclosure",
+    disclosure: "AI 開示",
     ctaTitle: "このコンテンツ運用を自社サイトに接続しますか？",
     cta: "ALTOS LAB に相談"
   },
@@ -57,18 +57,33 @@ const copy = {
     updated: "업데이트",
     readTime: (minutes: number) => `${minutes}분 읽기`,
     geoSummary: "핵심 요약",
-    takeaways: "Key Takeaways",
+    takeaways: "핵심 포인트",
     faq: "FAQ",
-    sources: "Sources",
+    sources: "출처",
     related: "관련 글",
-    disclosure: "AI disclosure",
+    disclosure: "AI 공개",
     ctaTitle: "이 콘텐츠 운영 시스템을 회사 웹사이트에 연결할까요?",
     cta: "ALTOS LAB에 상담"
   }
 };
 
+function articleTaxonomy(post: BlogPost) {
+  const seen = new Set<string>();
+  const typeLabel = blogContentTypeLabel(post.contentType, post.language).toLowerCase();
+  return [post.newsCategory, ...post.tags.slice(0, 3)]
+    .filter(Boolean)
+    .filter((item) => {
+      const key = item.toLowerCase();
+      if (key === typeLabel) return false;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+}
+
 export async function BlogArticle({ post }: { post: BlogPost }) {
   const dictionary = copy[post.language];
+  const taxonomy = articleTaxonomy(post);
   const [alternates, relatedPosts] = await Promise.all([
     getPublishedBlogAlternates(post),
     getRelatedPublishedBlogPosts(post, 4)
@@ -112,7 +127,7 @@ export async function BlogArticle({ post }: { post: BlogPost }) {
               <span className={`blog-craft-type-badge is-${post.contentType}`}>
                 {blogContentTypeLabel(post.contentType, post.language)}
               </span>
-              <span>{[post.newsCategory, ...post.tags.slice(0, 2)].filter(Boolean).join(" / ")}</span>
+              <span>{taxonomy.join(" / ")}</span>
               <span>{dictionary.readTime(post.readTimeMinutes)}</span>
             </p>
             <h1>{renderBrandText(post.title)}</h1>

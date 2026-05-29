@@ -46,17 +46,32 @@ assert(vercel.crons?.some((item) => item.path.includes("/morning")), "Vercel cro
 assert(vercel.crons?.some((item) => item.path.includes("/afternoon")), "Vercel cron has afternoon slot");
 
 for (const language of ["zh-Hant", "en", "ja", "ko"]) {
-  const count = seedPosts.filter((post) => post.language === language).length;
-  assert(count >= 48, `${language} has at least 48 seed articles`);
+  const languagePosts = seedPosts.filter((post) => post.language === language);
+  const languageTypes = new Set(languagePosts.map((post) => post.contentType));
+  const languageCategories = new Set(languagePosts.map((post) => post.newsCategory));
+  assert(languagePosts.length === 3, `${language} has exactly 3 baseline seed articles`);
+  assert(languageTypes.size === 3, `${language} baseline covers breaking, column and feature`);
+  assert(languageCategories.size === 3, `${language} baseline covers three editorial categories`);
 }
 
 const typeCounts = seedPosts.reduce((counts, post) => {
   counts[post.contentType] = (counts[post.contentType] || 0) + 1;
   return counts;
 }, {});
-assert(typeCounts.breaking >= 72, "seed archive has a real latest-news/breaking lane");
-assert(typeCounts.column >= 60, "seed archive keeps a substantial column lane");
-assert(typeCounts.feature >= 44, "seed archive keeps a substantial feature lane");
+assert(seedPosts.length === 12, "seed archive is currently pruned to 12 baseline articles");
+assert(typeCounts.breaking === 4, "baseline has one breaking article per language");
+assert(typeCounts.column === 4, "baseline has one column article per language");
+assert(typeCounts.feature === 4, "baseline has one feature article per language");
+
+const languageSet = ["zh-Hant", "en", "ja", "ko"].sort().join("|");
+const incompleteGroups = Object.values(
+  seedPosts.reduce((groups, post) => {
+    groups[post.translationGroupId] ||= new Set();
+    groups[post.translationGroupId].add(post.language);
+    return groups;
+  }, {})
+).filter((languages) => [...languages].sort().join("|") !== languageSet);
+assert(incompleteGroups.length === 0, "baseline translation groups have all four languages");
 
 const titlesWithTypeLabels = seedPosts.filter((post) =>
   /市場快訊|Market brief|市場ブリーフ|시장 브리프|專欄[:：]|Column[:：]|Feature[:：]|專題[:：]|特集[:：]|기획[:：]/i.test(
