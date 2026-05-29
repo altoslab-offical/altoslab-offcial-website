@@ -210,6 +210,17 @@ const SOURCES = {
     url: "https://openai.com/index/building-self-improving-tax-agents-with-codex/",
     publisher: "OpenAI"
   },
+  huggingFaceSmolagents: {
+    title: "Introducing smolagents: simple agents that write actions in code",
+    url: "https://huggingface.co/blog/smolagents",
+    publisher: "Hugging Face"
+  },
+  techCrunchAnthropicEnterpriseAgents: {
+    title: "Anthropic launches new push for enterprise agents with plug-ins for finance, engineering, and design",
+    url: "https://techcrunch.com/2026/02/24/anthropic-launches-new-push-for-enterprise-agents-with-plugins-for-finance-engineering-and-design/",
+    publisher: "TechCrunch",
+    publishedAt: "Tue, 24 Feb 2026 14:45:00 +0000"
+  },
   googleAiFeatures: {
     title: "AI features and your website",
     url: "https://developers.google.com/search/docs/appearance/ai-features",
@@ -1950,6 +1961,181 @@ const AI_SEARCH_TRANSLATED_SOURCE_LINKS = [
   SOURCES.googleHelpful
 ];
 
+const AGENT_PILOT_TRANSLATED_SOURCE_LINKS = [
+  SOURCES.openaiCodexTax,
+  SOURCES.huggingFaceSmolagents,
+  SOURCES.huggingFaceItBench,
+  SOURCES.ibmAgents,
+  SOURCES.techCrunchAnthropicEnterpriseAgents
+];
+
+const AGENT_PILOT_EDITORIAL_OVERRIDES = {
+  "zh-Hant": {
+    title: "AI Agent 試點別急著上線：先選能回滾的流程",
+    seoTitle: "AI Agent 試點怎麼選：可審核、可回滾的企業導入框架 | ALTOS LAB",
+    seoDescription:
+      "AI Agent 試點不是挑最炫任務，而是挑每週重複、資料可追溯、能人工審核且失敗可回滾的流程。本文整理 OpenAI、Hugging Face、IBM 與 Anthropic 企業 agent 訊號。",
+    excerpt:
+      "第一個 AI Agent 試點不要從跨部門黑盒流程開始。先找每週重複、輸入固定、結果可審核、失敗能回滾的工作，才有機會從 demo 走到營運系統。",
+    geoSummary:
+      "AI Agent 試點的最佳起點，是高頻、邊界清楚、資料可追溯、權限可控、失敗可回滾的流程。本文把 OpenAI Codex tax agent 案例、Hugging Face smolagents 對 agent 工作流的定義、IBM 對 AI agents 的基礎說明，以及 Anthropic 企業 agent 插件訊號整理成一套選題分數卡，協助企業判斷第一個 agent 該放在哪裡。",
+    keyTakeaways: [
+      "第一個 AI Agent 試點不該選最炫的任務，而要選最容易留下證據、審核結果、回滾流程的任務。",
+      "OpenAI 的 tax agent 案例重點不是「AI 會報稅」，而是專家回饋、生產 traces、eval loop 如何讓 agent 持續改進。",
+      "Hugging Face 的 smolagents 提醒我們：agent 不是魔法，而是 LLM 輸出開始控制工作流，控制越多，治理要求越高。",
+      "ALTOS LAB 的建議是先做一張試點分數卡，再決定流程、權限、人工審核與 rollback，不要先買工具再找場景。"
+    ],
+    body: `如果你現在只想問「企業第一個 AI Agent 試點該做哪裡」，答案很直接：選一個每週重複、輸入資料固定、結果可以人工審核、失敗能回滾的流程。不要從跨部門、跨系統、權限複雜的黑盒任務開始。
+
+## 為什麼現在值得重看 AI Agent
+
+最新背景：OpenAI 在 2026/5/27 發布 Codex tax agent 案例，Hugging Face 與 IBM 持續把 agent 定義拉回 workflow、trace、eval 與可觀測性，Anthropic 企業 agent 插件則顯示平台商正在把 agent 推進高價值工作流。
+
+OpenAI 在 2026/5/27 發布的 Codex tax agent 案例，不只是展示 AI 能處理稅務文件。真正值得企業注意的是它背後的三個條件：專家回饋、生產 traces，以及用 eval 驅動的迭代循環。換句話說，agent 不是一次寫好就放出去，而是被放進一套能觀察、能評分、能修正的工程系統。
+
+Hugging Face 在 smolagents 的介紹裡，把 agent 說得很清楚：agent 是讓 LLM 的輸出開始控制 workflow 的程式。這句話很重要，因為它把討論從「AI 聰不聰明」拉回「我們到底讓 AI 控制哪一段流程」。IBM 對 AI agents 的說明也把 observe、plan、act 這類循環拆開來看。再加上 Anthropic 推企業 agent 插件的市場訊號，方向已經很明確：agent 正在從 demo 走向工作流，但不是每個流程都適合先做。
+
+## 第一個試點要避開「看起來很厲害」的任務
+
+很多團隊會想從最吸睛的題目開始，例如「全自動處理客訴」「自動產完整提案」「幫主管做策略決策」。這些題目聽起來像成果，但通常不是好的第一個試點，因為它們牽涉太多隱性判斷、跨部門責任與不可逆操作。
+
+更好的起點通常比較無聊，但更能成功：
+
+| 候選流程 | 為什麼適合先試 | 隱藏風險 | 驗收證據 |
+| --- | --- | --- | --- |
+| 客服知識庫回覆草稿 | 問題高頻、資料來源明確、可由客服審核。 | 來源過舊會讓 agent 重複錯誤。 | 回答引用來源、人工改稿率、轉人工比例。 |
+| 銷售線索研究卡 | 輸入固定，可輸出摘要、風險、下一步。 | 可能抓到錯公司或過期資訊。 | 來源連結、CRM 欄位完成率、業務採用率。 |
+| 合約或文件初審清單 | 規則可明文化，結果能由專人覆核。 | 不能讓 agent 直接做法律結論。 | 缺漏項命中率、人工覆核時間、錯誤類型。 |
+| 內容研究來源卡 | 適合建立來源、摘要、引用與不確定性。 | 容易變成低品質搬運。 | 來源白名單、轉譯備註、編輯採用率。 |
+
+## 用 5 個分數選試點
+
+ALTOS LAB 會先用 1 到 5 分評估候選流程，而不是一開始就做 automation map。
+
+1. 頻率：這件事是否每週都會重複發生？
+2. 邊界：輸入、輸出、成功標準是否能說清楚？
+3. 證據：agent 的答案能不能留下來源、trace、版本與審核紀錄？
+4. 權限：它需要讀取或寫入哪些系統？會不會碰到敏感資料？
+5. 回滾：如果 agent 做錯，人能不能快速停下、修正、回到舊流程？
+
+總分不到 18 分，不建議當第一個試點。不是不能做，而是它比較像後期專案。第一個 agent 應該讓團隊學會怎麼設計權限、審核、eval、rollback，而不是一次把風險推到最大。
+
+## 海外新聞要轉譯成行動，不是只翻譯標題
+
+OpenAI 的 tax agent 案例可以被翻成一句新聞：「Codex 可以打造自我改進的稅務 agent」。但這樣寫對企業沒有用。比較有用的轉譯是：如果 agent 要進入真實營運，它需要專家回饋、production traces、eval loop，以及能被審核的輸出。
+
+Anthropic 的企業 agent 插件訊號也不能只解讀成「大廠都在做 agent」。它真正提醒的是，finance、engineering、design 這類高價值流程會被平台商包進更完整的 agent 工具鏈。企業如果完全沒有自己的流程標準，未來會很難判斷哪些 agent 值得導入，哪些只是換皮的工作流自動化。
+
+## 來源與轉譯備註
+
+本文包含海外來源轉譯與 ALTOS LAB 編輯改寫。OpenAI Codex tax agent 案例用來理解 production agent 的迭代條件；Hugging Face smolagents 與 ITBench 用來補足 agent 定義、可觀測性與任務評測；IBM Think 用來補基礎概念；TechCrunch 的 Anthropic 企業 agent 報導作為市場訊號。本文沒有逐字翻譯或複製原文結構，所有來源列在文末供讀者回查。
+
+## ALTOS LAB 的實驗室判斷
+
+AI Agent 的價值不在「它能自己做很多事」，而在它能不能被放進一套人類願意負責的流程裡。第一個試點的目標不是取代團隊，而是建立一個可觀察、可審核、可修正的操作單元。
+
+如果一個流程不能說清楚來源、權限、評分、人工覆核與回滾方式，那它現在還不是 agent 試點，而只是 demo。真正值得做的第一個 agent，應該讓企業更敢把 AI 放進工作，而不是更難知道出了問題該找誰。`,
+    faqs: [
+      {
+        question: "企業第一個 AI Agent 試點應該選哪種流程？",
+        answer:
+          "優先選每週重複、資料來源明確、輸出可由人審核、錯誤能回滾的流程，例如客服回覆草稿、銷售研究卡、文件初審清單或內容來源卡。"
+      },
+      {
+        question: "為什麼不要一開始就做全自動跨部門 Agent？",
+        answer:
+          "因為跨部門流程通常牽涉權限、責任、例外處理與不可逆操作。第一個試點應該先讓團隊學會審核、trace、eval 和 rollback，再逐步擴大權限。"
+      },
+      {
+        question: "AI Agent 試點和一般流程自動化有什麼差別？",
+        answer:
+          "一般自動化多半照固定規則執行；AI Agent 會根據目標、上下文與工具結果做多步判斷。因此它更需要來源、權限、審核紀錄與錯誤回復設計。"
+      }
+    ],
+    readTimeMinutes: 8,
+    aiDisclosure:
+      "本文包含海外來源轉譯、摘要與 ALTOS LAB 編輯判斷；已標註來源，並以可讀性、事實可追溯、SEO/GEO 結構與企業導入實用性完成審核。"
+  },
+  en: {
+    title: "Do not rush an AI agent pilot. Choose a workflow you can roll back",
+    seoTitle: "How to choose an AI agent pilot: an auditable rollback-first framework | ALTOS LAB",
+    seoDescription:
+      "The right first AI agent pilot is not the flashiest workflow. It is repeatable, source-grounded, reviewable and reversible.",
+    excerpt:
+      "OpenAI, Hugging Face, IBM and Anthropic all point to the same lesson: production agents need traces, evals, permissions and rollback paths before they need bigger promises.",
+    geoSummary:
+      "A strong first AI agent pilot is frequent, bounded, traceable, permission-light and reversible. This article translates recent OpenAI, Hugging Face, IBM and Anthropic signals into a practical scorecard for choosing the first enterprise agent workflow.",
+    keyTakeaways: [
+      "Start with a workflow that leaves evidence and can be reviewed by a human.",
+      "The OpenAI tax-agent example matters because of expert feedback, production traces and eval loops.",
+      "Hugging Face frames agents as LLM outputs controlling workflow; more control means more governance.",
+      "ALTOS LAB recommends a pilot scorecard before tool selection."
+    ],
+    body: `If you need to choose the first enterprise AI agent pilot, start with a workflow that repeats every week, has stable inputs, can be reviewed by a human and can be rolled back. Do not begin with a cross-department black-box task.
+
+## Why this is worth revisiting now
+
+Latest context: OpenAI published its Codex tax-agent case on May 27, 2026; Hugging Face and IBM keep grounding agents in workflow, traces, evals and observability; Anthropic's enterprise-agent coverage shows vendors moving agents into high-value work.
+
+OpenAI's Codex tax-agent case is not only a story about tax automation. Its useful lesson is the operating system around the agent: practitioner feedback, production traces and an eval-driven improvement loop. That is what turns an agent from a demo into something a business can improve safely.
+
+Hugging Face describes agents as programs where LLM outputs control the workflow. IBM's AI-agent overview breaks the loop into observing, planning and acting. Anthropic's enterprise-agent push adds a market signal: vendors are moving agents into finance, engineering, design and other high-value workflows. The question is no longer whether agents are coming; it is which workflows deserve the first controlled test.
+
+## Avoid the impressive-looking first pilot
+
+The wrong first pilot is usually the loudest one: fully automated customer escalations, full proposal generation, or strategic decisions for executives. These sound valuable, but they hide too many ownership, permission and review problems.
+
+Better first pilots are narrower:
+
+| Candidate workflow | Why it works first | Hidden risk | Evidence to track |
+| --- | --- | --- | --- |
+| Support reply drafts | Frequent, source-grounded and easy to review. | Stale knowledge makes the agent repeat old errors. | Cited sources, edit rate, handoff rate. |
+| Sales research cards | Stable input and useful structured output. | Wrong company or outdated source. | Source links, CRM completion rate, sales adoption. |
+| Document pre-review checklist | Rules can be written down and reviewed. | The agent must not make final legal decisions. | Missed-item rate, review time, error types. |
+| Content research source cards | Great for source, summary and uncertainty habits. | Can become low-quality rewriting. | Source whitelist, translation note, editor adoption. |
+
+## Use a five-part scorecard
+
+Score each candidate from 1 to 5:
+
+1. Frequency: does this happen every week?
+2. Boundary: are input, output and success criteria clear?
+3. Evidence: can the agent leave sources, traces, versions and review history?
+4. Permission: what systems and data does it need to access?
+5. Rollback: can a human stop, repair and return to the old process quickly?
+
+If the total is below 18, it is probably not the first pilot. It may still be important, but it belongs later.
+
+## Source and translation note
+
+This article translates and adapts foreign sources into an ALTOS LAB operating framework. OpenAI is used for the production-agent improvement loop, Hugging Face for the agent/workflow definition and evaluation context, IBM for the conceptual baseline, and TechCrunch's Anthropic coverage as an enterprise market signal. It is not a full translation or reprint; source links are listed below.
+
+## ALTOS LAB lab note
+
+An AI agent pilot should make the organization more willing to trust AI work, not less able to understand failure. If a workflow cannot define sources, permissions, scoring, human review and rollback, it is still a demo. The first serious agent should be a small operating unit that teaches the team how to observe, evaluate and repair AI-assisted work.`,
+    faqs: [
+      {
+        question: "What workflow should be the first AI agent pilot?",
+        answer:
+          "Choose a repeatable workflow with clear sources, reviewable output and a rollback path, such as support drafts, sales research cards, document pre-review or content source cards."
+      },
+      {
+        question: "Why not start with a fully autonomous cross-team agent?",
+        answer:
+          "Cross-team agents usually hide ownership, permission and exception-handling risks. A first pilot should teach the team how to audit and recover before expanding autonomy."
+      },
+      {
+        question: "How is an AI agent different from automation?",
+        answer:
+          "Automation follows fixed rules. An AI agent makes multi-step decisions based on goals, context and tool results, so it needs stronger tracing, review and rollback design."
+      }
+    ],
+    readTimeMinutes: 7,
+    aiDisclosure:
+      "This article includes translated source summaries and ALTOS LAB editorial synthesis. It was reviewed for source traceability, readability, SEO/GEO structure and implementation usefulness."
+  }
+};
+
 const AI_SEARCH_EDITORIAL_OVERRIDES = {
   "zh-Hant": {
     title: "AI 搜尋品牌監測：別再只看排名",
@@ -2303,10 +2489,30 @@ ALTOS LAB 블로그는 해외 기사 복사도, 출처 없는 의견도 아니�
 };
 
 function applyEditorialOverride(post, ideaItem, language) {
-  if (ideaItem.slug !== "ai-search-brand-monitoring") return post;
-  const override = AI_SEARCH_EDITORIAL_OVERRIDES[language];
+  const config =
+    ideaItem.slug === "ai-search-brand-monitoring"
+      ? {
+          overrides: AI_SEARCH_EDITORIAL_OVERRIDES,
+          sourceLinks: AI_SEARCH_TRANSLATED_SOURCE_LINKS,
+          tags: ["海外新聞轉譯", "AI Search", "Brand monitoring"],
+          coverPrompt: `AI search brand monitoring translated foreign news signal ${language}`,
+          qualityScore: 93,
+          antiSlopScore: 46
+        }
+      : ideaItem.slug === "agent-pilot-scorecard"
+        ? {
+            overrides: AGENT_PILOT_EDITORIAL_OVERRIDES,
+            sourceLinks: AGENT_PILOT_TRANSLATED_SOURCE_LINKS,
+            tags: ["海外新聞轉譯", "AI Agent", "Workflow design", "Rollback"],
+            coverPrompt: `AI agent pilot rollback workflow source card ${language}`,
+            qualityScore: 94,
+            antiSlopScore: 48
+          }
+        : null;
+  if (!config) return post;
+  const override = config.overrides[language];
   if (!override) return post;
-  const sourceLinks = AI_SEARCH_TRANSLATED_SOURCE_LINKS.filter(Boolean);
+  const sourceLinks = config.sourceLinks.filter(Boolean);
   const title = override.title || post.title;
   const body = override.body || post.body;
 
@@ -2318,15 +2524,15 @@ function applyEditorialOverride(post, ideaItem, language) {
     seoTitle: trimTo(override.seoTitle || `${title} | ALTOS LAB`, 80),
     seoDescription: trimTo(override.seoDescription || post.seoDescription || "", 180),
     sourceLinks,
-    tags: [...tagsFor(ideaItem, language), "海外新聞轉譯", "AI Search", "Brand monitoring"],
+    tags: [...tagsFor(ideaItem, language), ...config.tags],
     coverAlt: `${title} - ${post.coverCredit || "topic-matched editorial image"}`,
-    coverPrompt: `AI search brand monitoring translated foreign news signal ${language}`,
+    coverPrompt: config.coverPrompt,
     readTimeMinutes: override.readTimeMinutes || editorialReadTime(ideaItem, language, 1, body, "operatorPlaybook"),
     qualityChecks: {
       ...qualityChecksFor(ideaItem),
       hasHumanReview: false,
-      qualityScore: 93,
-      antiSlopScore: 46,
+      qualityScore: config.qualityScore,
+      antiSlopScore: config.antiSlopScore,
       notes:
         "Editorial override reviewed against ALTOS LAB playbook: foreign news translated/adapted with source notes, stronger hook, answer-first opening, decision table and reader-facing TL;DR."
     }
