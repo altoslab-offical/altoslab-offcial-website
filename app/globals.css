@@ -3728,6 +3728,10 @@ img {
   .blog-site-shell .site-nav-actions {
     min-width: 0;
     justify-content: flex-end;
+    position: absolute;
+    top: 50%;
+    right: 16px;
+    transform: translateY(-50%);
   }
 
   .blog-site-shell .site-nav-cta {
