@@ -3444,13 +3444,23 @@ img {
   .blog-site-shell .site-language-toggle {
     min-height: 42px;
     padding: 3px;
-    max-width: min(100%, 180px);
+    max-width: min(100%, 148px);
     flex-shrink: 1;
   }
 
   .blog-site-shell .site-language-toggle button {
     min-height: 34px;
-    padding-inline: 10px;
+    min-width: 32px;
+    padding-inline: 7px;
+    font-size: 0.78rem;
+  }
+
+  .blog-site-shell .site-language-toggle button:first-child {
+    font-size: 0;
+  }
+
+  .blog-site-shell .site-language-toggle button:first-child::after {
+    content: "中";
     font-size: 0.78rem;
   }
 
