@@ -3734,6 +3734,14 @@ img {
     transform: translateY(-50%);
   }
 
+  .blog-site-shell .site-language-toggle {
+    max-width: none;
+  }
+
+  .blog-site-shell .site-language-toggle button:nth-child(n + 3) {
+    display: none;
+  }
+
   .blog-site-shell .site-nav-cta {
     width: 2.6rem;
     padding: 0;
