@@ -2404,6 +2404,7 @@ img {
 .blog-site-shell .geo-summary,
 .blog-site-shell .project-detail-card,
 .blog-site-shell .source-list,
+.blog-site-shell .source-translation-note,
 .blog-site-shell .ai-disclosure,
 .blog-site-shell .related-articles,
 .blog-site-shell .faq-list,
@@ -2528,15 +2529,49 @@ img {
 .blog-site-shell .rich-text strong,
 .blog-site-shell .project-detail-card strong,
 .blog-site-shell .source-list strong,
+.blog-site-shell .source-translation-note strong,
 .blog-site-shell .ai-disclosure strong {
   color: var(--al-blog-ink);
 }
 
 .blog-site-shell .project-detail-card li,
 .blog-site-shell .source-list li,
+.blog-site-shell .source-translation-note,
 .blog-site-shell .faq-item p,
 .blog-site-shell .ai-disclosure {
   color: var(--al-blog-body);
+}
+
+.blog-site-shell .source-translation-note {
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid var(--al-blog-border);
+  font-family: var(--font-inter, "Inter"), ui-sans-serif, system-ui, sans-serif;
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.blog-site-shell .source-translation-note > strong {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--al-blog-muted);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.blog-site-shell .source-translation-note .rich-text {
+  width: 100%;
+  margin: 0;
+  color: inherit;
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+}
+
+.blog-site-shell .source-translation-note .rich-text p {
+  margin: 0;
 }
 
 .related-articles {
@@ -3860,6 +3895,7 @@ img {
   .blog-site-shell .geo-summary,
   .blog-site-shell .project-detail-card,
   .blog-site-shell .source-list,
+  .blog-site-shell .source-translation-note,
   .blog-site-shell .ai-disclosure,
   .blog-site-shell .blog-cta-panel,
   .blog-site-shell .faq-list,
@@ -3874,6 +3910,7 @@ img {
   .blog-site-shell .geo-summary,
   .blog-site-shell .project-detail-card,
   .blog-site-shell .source-list,
+  .blog-site-shell .source-translation-note,
   .blog-site-shell .ai-disclosure,
   .blog-site-shell .blog-cta-panel,
   .blog-site-shell .faq-list {

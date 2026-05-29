@@ -81,9 +81,44 @@ function articleTaxonomy(post: BlogPost) {
     });
 }
 
+const sourceTranslationHeadings = new Set([
+  "來源與轉譯備註",
+  "Source and translation note",
+  "Source and Translation Note",
+  "出典と翻訳メモ",
+  "出典・翻訳メモ",
+  "출처 및 번역 메모",
+  "출처와 번역 메모"
+]);
+
+function extractSourceTranslationNote(body: string) {
+  const lines = body.split("\n");
+  const headingIndex = lines.findIndex((line) => {
+    const match = line.trim().match(/^##\s+(.+)$/);
+    return Boolean(match?.[1] && sourceTranslationHeadings.has(match[1].trim()));
+  });
+
+  if (headingIndex < 0) return { body, noteTitle: "", noteBody: "" };
+
+  const nextHeadingIndex = lines.findIndex((line, index) => index > headingIndex && /^##\s+/.test(line.trim()));
+  const endIndex = nextHeadingIndex < 0 ? lines.length : nextHeadingIndex;
+  const noteTitle = lines[headingIndex].trim().replace(/^##\s+/, "");
+  const noteBody = lines
+    .slice(headingIndex + 1, endIndex)
+    .join("\n")
+    .trim();
+  const nextBody = [...lines.slice(0, headingIndex), ...lines.slice(endIndex)]
+    .join("\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+
+  return { body: nextBody, noteTitle, noteBody };
+}
+
 export async function BlogArticle({ post }: { post: BlogPost }) {
   const dictionary = copy[post.language];
   const taxonomy = articleTaxonomy(post);
+  const sourceTranslationNote = extractSourceTranslationNote(post.body);
   const [alternates, relatedPosts] = await Promise.all([
     getPublishedBlogAlternates(post),
     getRelatedPublishedBlogPosts(post, 4)
@@ -187,7 +222,7 @@ export async function BlogArticle({ post }: { post: BlogPost }) {
             </section>
           ) : null}
 
-          <RichText text={post.body} />
+          <RichText text={sourceTranslationNote.body} />
 
           {post.sourceLinks.length ? (
             <section className="source-list">
@@ -218,6 +253,13 @@ export async function BlogArticle({ post }: { post: BlogPost }) {
                 ))}
               </div>
             </section>
+          ) : null}
+
+          {sourceTranslationNote.noteBody ? (
+            <aside className="source-translation-note">
+              <strong>{sourceTranslationNote.noteTitle}</strong>
+              <RichText text={sourceTranslationNote.noteBody} />
+            </aside>
           ) : null}
 
           {post.aiDisclosure ? (

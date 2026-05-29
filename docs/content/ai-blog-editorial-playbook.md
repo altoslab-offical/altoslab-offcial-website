@@ -155,6 +155,10 @@ Each published article needs:
 Foreign news should never be imported as a pile of impressive terms. Translate
 the source into a decision the reader can use.
 
+On the website, the source-translation note is rendered as a compact footnote
+near the source list. It should never compete with the main article as a large
+H2 section. Keep it to one small paragraph.
+
 Every source-translation section must answer four questions:
 
 1. What did the source actually say?

@@ -19,6 +19,7 @@ const generation = read("lib/blog-generation.ts");
 const quality = read("lib/blog-quality.ts");
 const covers = read("lib/blog-cover-generation.ts");
 const cron = read("lib/blog-cron.ts");
+const blogArticle = read("components/BlogArticle.tsx");
 const vercel = JSON.parse(read("vercel.json"));
 const marketSeed = read("lib/market-blog-seed.ts");
 const seedMatch = marketSeed.match(/export const marketBlogPosts = ([\s\S]*?) satisfies BlogPost\[];/);
@@ -39,6 +40,10 @@ assert(
   generation.includes("Foreign-source sections must be plain-language source translation"),
   "generation requires foreign news to become plain-language source translation"
 );
+assert(
+  generation.includes("compact footnote"),
+  "generation tells DeepSeek source-translation notes render as compact footnotes"
+);
 
 assert(quality.includes("withLlmQualityEvaluation"), "quality gate can merge LLM-as-judge evaluation");
 assert(quality.includes("registryTrustedHostFragments"), "quality source trust uses the source registry");
@@ -49,6 +54,8 @@ assert(quality.includes("technicalJargonPattern"), "quality gate requires jargon
 assert(covers.includes("BLOG_IMAGE_STORE_BLOB"), "image pipeline supports optional Vercel Blob persistence");
 assert(covers.includes("searchPexels") && covers.includes("searchPixabay"), "image pipeline supports expanded free image APIs");
 assert(covers.includes("pinterest") && covers.includes("approvedImageUrl"), "image pipeline rejects Pinterest URLs while allowing style inspiration");
+assert(blogArticle.includes("extractSourceTranslationNote"), "article renderer extracts source translation note from main body");
+assert(blogArticle.includes("source-translation-note"), "article renderer displays source translation note as a compact support block");
 
 assert(cron.includes("pickEditorialBrief"), "cron uses editorial brief and content mix");
 assert(cron.includes("reviewBlogPairWithDeepSeek"), "cron runs LLM-as-judge before publish when configured");
