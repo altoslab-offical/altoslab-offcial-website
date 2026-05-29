@@ -3430,30 +3430,27 @@ img {
 
   .blog-site-shell .site-nav-actions {
     gap: 8px;
+    min-width: 0;
   }
 
   .blog-site-shell .site-nav-cta {
-    width: auto;
-    min-height: 42px;
-    display: inline-flex;
-    padding: 0 16px;
-    border-radius: var(--al-radius-full);
-    font-size: 0.9rem;
-    white-space: nowrap;
+    display: none;
   }
 
   .blog-site-shell .site-nav-cta-label {
-    display: inline;
+    display: none;
   }
 
   .blog-site-shell .site-language-toggle {
     min-height: 42px;
     padding: 3px;
+    max-width: min(100%, 180px);
+    flex-shrink: 1;
   }
 
   .blog-site-shell .site-language-toggle button {
     min-height: 34px;
-    padding-inline: 12px;
+    padding-inline: 10px;
     font-size: 0.78rem;
   }
 
