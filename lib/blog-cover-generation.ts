@@ -94,7 +94,7 @@ function shouldSourceImages() {
 }
 
 function shouldStoreImagesInBlob() {
-  return process.env.BLOG_IMAGE_STORE_BLOB === "true";
+  return process.env.BLOG_IMAGE_STORE_BLOB !== "false" && Boolean(process.env.BLOB_READ_WRITE_TOKEN?.trim());
 }
 
 function openverseBaseUrl() {

@@ -22,7 +22,7 @@ export async function GET() {
       deepSeekReviewModel: process.env.DEEPSEEK_REVIEW_MODEL || process.env.DEEPSEEK_CONTENT_MODEL || "deepseek-v4-pro",
       llmQualityReview: process.env.BLOG_LLM_REVIEW !== "false",
       legalImageSourcingConfigured: isBlogImageGenerationConfigured(),
-      imageBlobStorageConfigured: process.env.BLOG_IMAGE_STORE_BLOB === "true" && Boolean(process.env.BLOB_READ_WRITE_TOKEN?.trim()),
+      imageBlobStorageConfigured: process.env.BLOG_IMAGE_STORE_BLOB !== "false" && Boolean(process.env.BLOB_READ_WRITE_TOKEN?.trim()),
       cronConfigured: Boolean(process.env.CRON_SECRET?.trim()),
       autoPublishBlog: process.env.AUTO_PUBLISH_BLOG !== "false",
       blogLanguages: ["zh-Hant", "en", "ja", "ko"],
