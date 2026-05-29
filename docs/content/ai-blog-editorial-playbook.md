@@ -18,6 +18,10 @@ piece has evidence, judgment and a reason to exist.
 
 ## Market Writing Patterns To Learn From
 
+- Medium / independent technical writers: start from a concrete scene or
+  failure, then earn the framework. Strong posts often use a TL;DR, an
+  "honest take", evaluation questions, and a specific example before the
+  abstract lesson.
 - OpenAI: clear product/research/company separation, direct launch framing,
   concrete capability implications and credible examples.
 - Google DeepMind: lab tone, mechanism-first explanation, research context,
@@ -53,6 +57,31 @@ Subtitle formula:
 
 `market signal + operator consequence + what the reader can decide after reading`
 
+Subtitle / standfirst gate:
+
+- It is visible front-of-page copy, not a CMS summary field.
+- It must add a second angle that the title does not already say.
+- It should contain one of: a named source/event, a concrete operator scene, a
+  tradeoff, a risk, or a practical promise.
+- It should make the next paragraph feel necessary.
+- It must not start with "本文整理", "這篇文章", "This article", "learn how",
+  "explore", or equivalent template language.
+
+Weak:
+
+- This article explains AI agent pilots and why they matter for companies.
+- AI agent pilots are changing workflows, and businesses should pay attention.
+- Learn how enterprises can use AI agents to improve operations.
+
+Better:
+
+- Do not hand the first AI-agent pilot to the messiest workflow. OpenAI's
+  tax-agent case and Hugging Face's agent framing both point to the same rule:
+  start where traces, review and rollback are possible.
+- Google is pushing search toward AI Mode while AI Magazine frames Anthropic
+  as an enterprise platform signal. Brand teams now need to monitor how answer
+  engines describe them, not only where they rank.
+
 SEO description formulas:
 
 - Market brief: `source-backed signal + why it matters + what to watch next`
@@ -83,6 +112,19 @@ Archetypes:
   workflow impact and execution difficulty.
 - `field note`: a scene from product, marketing or operations work that makes a
   trend concrete without inventing fake clients.
+
+Narrative modes the generator may choose:
+
+- Scene hook: begin with a founder/operator situation and use it to reveal the
+  mechanism.
+- Market route comparison: map two or three possible paths and show the tradeoff
+  behind each path.
+- Company signal: use one company move, valuation, product launch or platform
+  decision as a lens for the broader market.
+- Lab notebook: explain what changed, what we would test, what would falsify the
+  idea, and what remains unknown.
+- Contrarian operator column: name the tempting mistake, steelman it briefly,
+  then give the better rule.
 
 Use six recurring content pillars:
 

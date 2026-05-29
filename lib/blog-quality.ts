@@ -65,6 +65,8 @@ const CONTENT_TYPE_MINIMUMS: Record<
 
 const MAX_SEO_DESCRIPTION = 180;
 const MIN_SEO_DESCRIPTION = 70;
+const MIN_EXCERPT_LENGTH = 70;
+const MAX_EXCERPT_LENGTH = 260;
 const SOURCE_LINK_TIMEOUT_MS = 4500;
 
 const allowedCoverPaths = new Set([
@@ -108,6 +110,16 @@ const defaultTrustedHostFragments = [
   "theverge.com",
   "techcrunch.com"
 ];
+
+const weakSubtitlePatterns = [
+  /^(本文|這篇文章|本篇|這篇|本文整理|本文探討|本文介紹|本文將|本稿|この記事|この記事では|本記事|本稿では|이 글|이번 글|이 글에서는|이번 글에서는)/i,
+  /^(this article|in this article|this post|learn how|we explore|we look at|we explain|discover how|a guide to)/i,
+  /(值得關注|不可忽視|關鍵趨勢|重要趨勢|完整解析|深入解析|懶人包|必須知道|what you need to know|ultimate guide|deep dive|comprehensive guide)/i,
+  /(is important for|matters for|helps companies|can help businesses|對企業很重要|對企業來說很重要|企業需要關注)/i
+];
+
+const subtitleEvidencePattern =
+  /(OpenAI|Anthropic|Google|DeepMind|Hugging Face|IBM|Microsoft|NVIDIA|Vercel|TechCrunch|AI Magazine|Search Console|ChatGPT|Claude|Gemini|Perplexity|Codex|AI Mode|Gartner|官方|報導|來源|案例|發布|launch|released|published|case|report|source|workflow|rollback|trace|eval|審核|回滾|來源|試點|採購|導入|ワークフロー|出典|検証|롤백|출처|검토)/i;
 
 function isApprovedCoverUrl(url: string) {
   if (allowedCoverPaths.has(url)) return true;
@@ -600,13 +612,26 @@ function reviewSeoGeoStructure(post: BlogPost): ReviewResult {
   const issues: string[] = [];
   const warnings: string[] = [];
   const seoDescriptionLength = post.seoDescription?.trim().length || 0;
+  const excerpt = post.excerpt?.trim() || "";
 
   if (!post.title || post.title.length < 12) issues.push("title is too short");
   if (!post.slug) issues.push("slug is missing");
   if (seoDescriptionLength < MIN_SEO_DESCRIPTION || seoDescriptionLength > MAX_SEO_DESCRIPTION) {
     issues.push("seoDescription must be 70-180 characters");
   }
-  if (!post.excerpt || post.excerpt.length < 50) issues.push("excerpt is too thin");
+  if (!excerpt || excerpt.length < MIN_EXCERPT_LENGTH) issues.push("subtitle/excerpt is too thin");
+  if (excerpt.length > MAX_EXCERPT_LENGTH) warnings.push("subtitle/excerpt is too long for card and hero reading");
+  if (weakSubtitlePatterns.some((pattern) => pattern.test(excerpt))) {
+    issues.push("subtitle/excerpt is too generic; write a newsroom-style standfirst with tension, source/event and reader decision");
+  }
+  if (excerpt && !subtitleEvidencePattern.test(excerpt)) {
+    issues.push("subtitle/excerpt needs a concrete source, event, operator situation or decision hook");
+  }
+  const normalizedTitle = post.title.toLowerCase().replace(/\s+/g, "");
+  const normalizedExcerpt = excerpt.toLowerCase().replace(/\s+/g, "");
+  if (normalizedTitle && normalizedExcerpt.includes(normalizedTitle.slice(0, Math.min(normalizedTitle.length, 18)))) {
+    warnings.push("subtitle/excerpt appears to repeat the title instead of adding a second angle");
+  }
   if (!post.geoSummary || post.geoSummary.length < 80) issues.push("geoSummary is too thin");
   if (!post.tags.length) issues.push("tags are required");
   const firstBlock = firstAnswerBlock(post.body);

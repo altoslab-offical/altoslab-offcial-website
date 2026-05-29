@@ -1119,23 +1119,23 @@ function excerptFor(ideaItem, language, index = 0, sources = []) {
     if (ideaItem.type === "breaking") {
       return trimTo(
         [
-          `${publishers} are making ${subject} a real workflow question. Operators should test review cost, ownership and rollback before choosing the first pilot.`,
-          `Recent coverage around ${subject} matters if it changes a repeated operator decision. This brief turns the signal into a practical adoption check.`,
-          `${subject} is gaining heat, but teams should test source quality, review cost and workflow risk before turning it into a roadmap item.`,
-          `The first move around ${subject} is not a platform build. It is a source card, a review rule and one workflow experiment.`
+          `${publishers} put ${subject} in front of operators who need a safer first move: choose the workflow where sources, review and rollback are already visible.`,
+          `The useful question around ${subject} is not whether the category is hot. It is which repeated decision now needs a source card, owner and rollback path.`,
+          `${subject} is gaining heat, but the first pilot should feel almost boring: clear inputs, reviewable output and a failure path the team can actually use.`,
+          `Before ${subject} becomes a roadmap item, teams need one concrete test: can a human trace the source, judge the output and return to the old workflow?`
         ][variant],
-        170
+        230
       );
     }
     if (ideaItem.type === "feature") {
-      return trimTo(`${subject} is treated as a system-design problem: sources, ownership, review paths, rollback and the smallest useful implementation step.`, 170);
+      return trimTo(`${subject} becomes useful when it is treated as a system-design problem: sources, ownership, review paths, rollback and the smallest implementation step.`, 230);
     }
     if (archetype === "contrarianColumn") {
-      return trimTo(`${subject} looks like a technology story, but the harder question is where teams misread adoption risk, timing and accountability.`, 170);
+      return trimTo(`${subject} looks like a technology story, but the real operator risk is easier to miss: bad timing, vague ownership and a rollout no one can reverse.`, 230);
     }
     return trimTo(
-      `When ${subject} moves from news to operations, teams need a source-backed way to ${decision} without losing quality, trust or implementation speed.`,
-      170
+      `When ${subject} moves from news to operations, the subtitle question is practical: how can a team ${decision} without losing quality, trust or implementation speed?`,
+      230
     );
   }
   if (language === "ja") {
@@ -1179,19 +1179,19 @@ function excerptFor(ideaItem, language, index = 0, sources = []) {
   if (ideaItem.type === "breaking") {
     return trimTo(
       [
-        `${publishers} 的近期訊號正在把「${subject}」推向真實工作流問題。企業先看審核成本、權限責任與回滾條件，再決定第一個試點。`,
-        `「${subject}」不是多一個 AI 名詞，而是企業該問它會不會改變某個重複決策。這篇把新聞訊號翻成導入檢查表。`,
-        `「${subject}」熱度升高時，團隊先檢查來源品質、審核成本與工作流風險，再決定是否放進 roadmap。`,
-        `「${subject}」的第一步不是建平台，而是來源卡、審核規則，以及一個能驗證價值的小實驗。`
+        `${publishers} 把「${subject}」推到營運團隊面前，但第一步不是追熱度。先選來源看得到、結果能審核、做錯能回滾的流程。`,
+        `「${subject}」真正值得看的不是新名詞，而是哪個重複決策開始需要來源卡、負責人與回滾路徑。`,
+        `「${subject}」熱度升高時，最好的第一個試點反而要夠無聊：輸入清楚、輸出可審、失敗能退回舊流程。`,
+        `在「${subject}」變成 roadmap 前，先問一個具體問題：人能不能追來源、判斷結果，並在出錯時停回原流程？`
       ][variant],
-      170
+      230
     );
   }
-  if (ideaItem.type === "feature") return trimTo(`把「${subject}」當成系統設計題：來源、責任、審核路徑、回滾條件與最小可行實驗要一起看。`, 170);
-  if (archetype === "contrarianColumn") return trimTo(`「${subject}」看起來像技術新聞，真正難的是企業如何避免誤判導入時機、風險責任與組織成本。`, 170);
+  if (ideaItem.type === "feature") return trimTo(`把「${subject}」當成系統設計題，而不是工具採購題：來源、責任、審核路徑、回滾條件與最小可行實驗要一起看。`, 230);
+  if (archetype === "contrarianColumn") return trimTo(`「${subject}」看起來像技術新聞，真正難的是企業如何避免誤判導入時機、風險責任與組織成本。`, 230);
   return trimTo(
-    `當「${subject}」從新聞變成營運題，企業需要一套有來源、可執行、能支援「${decision}」的判斷框架。`,
-    170
+    `當「${subject}」從新聞變成營運題，企業需要一套能看來源、能落地、能支援「${decision}」的判斷框架。`,
+    230
   );
 }
 
@@ -1976,7 +1976,7 @@ const AGENT_PILOT_EDITORIAL_OVERRIDES = {
     seoDescription:
       "AI Agent 試點不是挑最炫任務，而是挑每週重複、資料可追溯、能人工審核且失敗可回滾的流程。本文整理 OpenAI、Hugging Face、IBM 與 Anthropic 企業 agent 訊號。",
     excerpt:
-      "第一個 AI Agent 試點不要從跨部門黑盒流程開始。先找每週重複、輸入固定、結果可審核、失敗能回滾的工作，才有機會從 demo 走到營運系統。",
+      "不要把第一個 AI Agent 試點丟給最混亂的流程。OpenAI 的 tax-agent 案例和 Hugging Face 的 agent 定義都指向同一條線：先從 trace、審核、回滾都看得見的任務開始。",
     geoSummary:
       "AI Agent 試點的最佳起點，是高頻、邊界清楚、資料可追溯、權限可控、失敗可回滾的流程。本文把 OpenAI Codex tax agent 案例、Hugging Face smolagents 對 agent 工作流的定義、IBM 對 AI agents 的基礎說明，以及 Anthropic 企業 agent 插件訊號整理成一套選題分數卡，協助企業判斷第一個 agent 該放在哪裡。",
     keyTakeaways: [
@@ -2062,7 +2062,7 @@ AI Agent 的價值不在「它能自己做很多事」，而在它能不能被�
     seoDescription:
       "The right first AI agent pilot is not the flashiest workflow. It is repeatable, source-grounded, reviewable and reversible.",
     excerpt:
-      "OpenAI, Hugging Face, IBM and Anthropic all point to the same lesson: production agents need traces, evals, permissions and rollback paths before they need bigger promises.",
+      "Do not hand the first AI-agent pilot to the messiest workflow. OpenAI's tax-agent case and Hugging Face's agent framing point to the same rule: start where traces, review and rollback are possible.",
     geoSummary:
       "A strong first AI agent pilot is frequent, bounded, traceable, permission-light and reversible. This article translates recent OpenAI, Hugging Face, IBM and Anthropic signals into a practical scorecard for choosing the first enterprise agent workflow.",
     keyTakeaways: [
@@ -2143,7 +2143,7 @@ const AI_SEARCH_EDITORIAL_OVERRIDES = {
     seoDescription:
       "從 Google AI Search 與 Anthropic、OpenAI 競賽看品牌監測：企業該追蹤 AI 如何描述你、引用誰、把你放在哪個競品框架。",
     excerpt:
-      "Google 把搜尋推向 AI Mode，AI Magazine 又把 Anthropic 與 OpenAI 的企業競賽放到檯面上。品牌現在要追蹤的不只是排名，而是 AI 回答裡你的定位、來源與競品比較。",
+      "Google 把搜尋推向 AI Mode，AI Magazine 又把 Anthropic 與 OpenAI 的企業競賽放到檯面上。品牌真正該追的不是第幾名，而是 AI 回答裡你被誰定義、被誰引用、被拿來跟誰比較。",
     geoSummary:
       "AI 搜尋品牌監測的重點不是每天截圖排名，而是固定檢查 ChatGPT、Google AI Mode、Perplexity 等入口如何描述品牌、引用哪些來源、把你和誰比較。本文以 Google 官方搜尋文件與 AI Magazine 的 Anthropic 報導作為海外來源轉譯基底，整理企業該監測的四個訊號與一套每週題庫。",
     keyTakeaways: [

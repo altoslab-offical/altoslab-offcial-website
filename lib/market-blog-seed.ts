@@ -11,7 +11,7 @@ export const marketBlogPosts = [
     "title": "AI Agent 試點別急著上線：先選能回滾的流程",
     "seoTitle": "AI Agent 試點怎麼選：可審核、可回滾的企業導入框架 | ALTOS LAB",
     "seoDescription": "AI Agent 試點不是挑最炫任務，而是挑每週重複、資料可追溯、能人工審核且失敗可回滾的流程。本文整理 OpenAI、Hugging Face、IBM 與 Anthropic 企業 agent 訊號。",
-    "excerpt": "第一個 AI Agent 試點不要從跨部門黑盒流程開始。先找每週重複、輸入固定、結果可審核、失敗能回滾的工作，才有機會從 demo 走到營運系統。",
+    "excerpt": "不要把第一個 AI Agent 試點丟給最混亂的流程。OpenAI 的 tax-agent 案例和 Hugging Face 的 agent 定義都指向同一條線：先從 trace、審核、回滾都看得見的任務開始。",
     "contentType": "breaking",
     "newsCategory": "AI Agent 與工作流",
     "topic": "AI Agent 試點",
@@ -87,7 +87,7 @@ export const marketBlogPosts = [
       "provider": "unsplash-library",
       "prompt": "AI agent workflow office baseline editorial zh-Hant",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-29T17:10:29.500Z",
+      "generatedAt": "2026-05-29T17:18:39.349Z",
       "status": "generated"
     },
     "coverCredit": "Developer workflow screen photo via Unsplash",
@@ -127,11 +127,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-29",
     "generationSlot": "morning",
     "scheduledFor": "2026-05-29",
-    "generatedAt": "2026-05-29T17:10:29.500Z",
+    "generatedAt": "2026-05-29T17:18:39.349Z",
     "generatedBy": "",
-    "createdAt": "2026-05-29T17:10:29.500Z",
-    "updatedAt": "2026-05-29T17:10:29.500Z",
-    "publishedAt": "2026-05-29T17:10:29.500Z"
+    "createdAt": "2026-05-29T17:18:39.349Z",
+    "updatedAt": "2026-05-29T17:18:39.349Z",
+    "publishedAt": "2026-05-29T17:18:39.349Z"
   },
   {
     "id": "post_market_agent_pilot_scorecard_en",
@@ -143,7 +143,7 @@ export const marketBlogPosts = [
     "title": "Do not rush an AI agent pilot. Choose a workflow you can roll back",
     "seoTitle": "How to choose an AI agent pilot: an auditable rollback-first framework | ALTOS…",
     "seoDescription": "The right first AI agent pilot is not the flashiest workflow. It is repeatable, source-grounded, reviewable and reversible.",
-    "excerpt": "OpenAI, Hugging Face, IBM and Anthropic all point to the same lesson: production agents need traces, evals, permissions and rollback paths before they need bigger promises.",
+    "excerpt": "Do not hand the first AI-agent pilot to the messiest workflow. OpenAI's tax-agent case and Hugging Face's agent framing point to the same rule: start where traces, review and rollback are possible.",
     "contentType": "breaking",
     "newsCategory": "AI agents and workflows",
     "topic": "AI agent pilots",
@@ -219,7 +219,7 @@ export const marketBlogPosts = [
       "provider": "unsplash-library",
       "prompt": "AI agent workflow office baseline editorial en",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-29T17:10:29.728Z",
+      "generatedAt": "2026-05-29T17:18:39.523Z",
       "status": "generated"
     },
     "coverCredit": "Robotics lab photo via Unsplash",
@@ -259,11 +259,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-29",
     "generationSlot": "morning",
     "scheduledFor": "2026-05-29",
-    "generatedAt": "2026-05-29T17:10:29.728Z",
+    "generatedAt": "2026-05-29T17:18:39.523Z",
     "generatedBy": "",
-    "createdAt": "2026-05-29T17:10:29.728Z",
-    "updatedAt": "2026-05-29T17:10:29.728Z",
-    "publishedAt": "2026-05-29T17:10:29.728Z"
+    "createdAt": "2026-05-29T17:18:39.523Z",
+    "updatedAt": "2026-05-29T17:18:39.523Z",
+    "publishedAt": "2026-05-29T17:18:39.523Z"
   },
   {
     "id": "post_market_agent_pilot_scorecard_ja",
@@ -364,7 +364,7 @@ export const marketBlogPosts = [
       "provider": "unsplash-library",
       "prompt": "AI agent workflow office baseline editorial ja",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-29T17:10:29.964Z",
+      "generatedAt": "2026-05-29T17:18:39.724Z",
       "status": "generated"
     },
     "coverCredit": "Network hardware photo via Unsplash",
@@ -404,11 +404,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-29",
     "generationSlot": "morning",
     "scheduledFor": "2026-05-29",
-    "generatedAt": "2026-05-29T17:10:29.964Z",
+    "generatedAt": "2026-05-29T17:18:39.724Z",
     "generatedBy": "",
-    "createdAt": "2026-05-29T17:10:29.964Z",
-    "updatedAt": "2026-05-29T17:10:29.964Z",
-    "publishedAt": "2026-05-29T17:10:29.964Z"
+    "createdAt": "2026-05-29T17:18:39.724Z",
+    "updatedAt": "2026-05-29T17:18:39.724Z",
+    "publishedAt": "2026-05-29T17:18:39.724Z"
   },
   {
     "id": "post_market_agent_pilot_scorecard_ko",
@@ -509,7 +509,7 @@ export const marketBlogPosts = [
       "provider": "unsplash-library",
       "prompt": "AI agent workflow office baseline editorial ko",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-29T17:10:30.181Z",
+      "generatedAt": "2026-05-29T17:18:39.943Z",
       "status": "generated"
     },
     "coverCredit": "Code matrix screen photo via Unsplash",
@@ -549,11 +549,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-29",
     "generationSlot": "morning",
     "scheduledFor": "2026-05-29",
-    "generatedAt": "2026-05-29T17:10:30.181Z",
+    "generatedAt": "2026-05-29T17:18:39.943Z",
     "generatedBy": "",
-    "createdAt": "2026-05-29T17:10:30.181Z",
-    "updatedAt": "2026-05-29T17:10:30.181Z",
-    "publishedAt": "2026-05-29T17:10:30.181Z"
+    "createdAt": "2026-05-29T17:18:39.943Z",
+    "updatedAt": "2026-05-29T17:18:39.943Z",
+    "publishedAt": "2026-05-29T17:18:39.943Z"
   },
   {
     "id": "post_market_ai_search_brand_monitoring_zh_hant",
@@ -565,7 +565,7 @@ export const marketBlogPosts = [
     "title": "AI 搜尋品牌監測：別再只看排名",
     "seoTitle": "AI 搜尋品牌監測：別只看排名，要看 AI 怎麼描述你 | ALTOS LAB",
     "seoDescription": "從 Google AI Search 與 Anthropic、OpenAI 競賽看品牌監測：企業該追蹤 AI 如何描述你、引用誰、把你放在哪個競品框架。",
-    "excerpt": "Google 把搜尋推向 AI Mode，AI Magazine 又把 Anthropic 與 OpenAI 的企業競賽放到檯面上。品牌現在要追蹤的不只是排名，而是 AI 回答裡你的定位、來源與競品比較。",
+    "excerpt": "Google 把搜尋推向 AI Mode，AI Magazine 又把 Anthropic 與 OpenAI 的企業競賽放到檯面上。品牌真正該追的不是第幾名，而是 AI 回答裡你被誰定義、被誰引用、被拿來跟誰比較。",
     "contentType": "column",
     "newsCategory": "AI 搜尋與 GEO",
     "topic": "AI 搜尋品牌監測",
@@ -645,7 +645,7 @@ export const marketBlogPosts = [
       "provider": "unsplash-library",
       "prompt": "AI search brand monitoring baseline editorial zh-Hant",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-29T17:10:30.376Z",
+      "generatedAt": "2026-05-29T17:18:40.152Z",
       "status": "generated"
     },
     "coverCredit": "Analytics dashboard photo via Unsplash",
@@ -685,11 +685,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-29",
     "generationSlot": "afternoon",
     "scheduledFor": "2026-05-29",
-    "generatedAt": "2026-05-29T17:10:30.376Z",
+    "generatedAt": "2026-05-29T17:18:40.152Z",
     "generatedBy": "",
-    "createdAt": "2026-05-29T17:10:30.376Z",
-    "updatedAt": "2026-05-29T17:10:30.376Z",
-    "publishedAt": "2026-05-29T17:10:30.376Z"
+    "createdAt": "2026-05-29T17:18:40.152Z",
+    "updatedAt": "2026-05-29T17:18:40.152Z",
+    "publishedAt": "2026-05-29T17:18:40.152Z"
   },
   {
     "id": "post_market_ai_search_brand_monitoring_en",
@@ -781,7 +781,7 @@ export const marketBlogPosts = [
       "provider": "unsplash-library",
       "prompt": "AI search brand monitoring baseline editorial en",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-29T17:10:30.570Z",
+      "generatedAt": "2026-05-29T17:18:40.351Z",
       "status": "generated"
     },
     "coverCredit": "Earth network visualization photo via Unsplash",
@@ -821,11 +821,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-29",
     "generationSlot": "afternoon",
     "scheduledFor": "2026-05-29",
-    "generatedAt": "2026-05-29T17:10:30.570Z",
+    "generatedAt": "2026-05-29T17:18:40.351Z",
     "generatedBy": "",
-    "createdAt": "2026-05-29T17:10:30.570Z",
-    "updatedAt": "2026-05-29T17:10:30.570Z",
-    "publishedAt": "2026-05-29T17:10:30.570Z"
+    "createdAt": "2026-05-29T17:18:40.351Z",
+    "updatedAt": "2026-05-29T17:18:40.351Z",
+    "publishedAt": "2026-05-29T17:18:40.351Z"
   },
   {
     "id": "post_market_ai_search_brand_monitoring_ja",
@@ -917,7 +917,7 @@ export const marketBlogPosts = [
       "provider": "unsplash-library",
       "prompt": "AI search brand monitoring baseline editorial ja",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-29T17:10:30.786Z",
+      "generatedAt": "2026-05-29T17:18:40.426Z",
       "status": "generated"
     },
     "coverCredit": "Data and research desk photo via Unsplash",
@@ -957,11 +957,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-29",
     "generationSlot": "afternoon",
     "scheduledFor": "2026-05-29",
-    "generatedAt": "2026-05-29T17:10:30.786Z",
+    "generatedAt": "2026-05-29T17:18:40.426Z",
     "generatedBy": "",
-    "createdAt": "2026-05-29T17:10:30.786Z",
-    "updatedAt": "2026-05-29T17:10:30.786Z",
-    "publishedAt": "2026-05-29T17:10:30.786Z"
+    "createdAt": "2026-05-29T17:18:40.426Z",
+    "updatedAt": "2026-05-29T17:18:40.426Z",
+    "publishedAt": "2026-05-29T17:18:40.426Z"
   },
   {
     "id": "post_market_ai_search_brand_monitoring_ko",
@@ -1053,7 +1053,7 @@ export const marketBlogPosts = [
       "provider": "unsplash-library",
       "prompt": "AI search brand monitoring baseline editorial ko",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-29T17:10:30.975Z",
+      "generatedAt": "2026-05-29T17:18:40.495Z",
       "status": "generated"
     },
     "coverCredit": "Business analytics laptop photo via Unsplash",
@@ -1093,11 +1093,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-29",
     "generationSlot": "afternoon",
     "scheduledFor": "2026-05-29",
-    "generatedAt": "2026-05-29T17:10:30.975Z",
+    "generatedAt": "2026-05-29T17:18:40.495Z",
     "generatedBy": "",
-    "createdAt": "2026-05-29T17:10:30.975Z",
-    "updatedAt": "2026-05-29T17:10:30.975Z",
-    "publishedAt": "2026-05-29T17:10:30.975Z"
+    "createdAt": "2026-05-29T17:18:40.495Z",
+    "updatedAt": "2026-05-29T17:18:40.495Z",
+    "publishedAt": "2026-05-29T17:18:40.495Z"
   },
   {
     "id": "post_market_ai_evals_before_launch_zh_hant",
@@ -1109,7 +1109,7 @@ export const marketBlogPosts = [
     "title": "「AI 產品上線前評測」的系統設計框架：來源、責任與回滾",
     "seoTitle": "「AI 產品上線前評測」的系統設計框架：來源、責任與回滾 | ALTOS LAB",
     "seoDescription": "「AI 產品上線前評測」分析：用來源、圖表與 ALTOS LAB 編輯視角說清楚如何先定義失敗樣本再談發布。",
-    "excerpt": "把「AI 產品上線前評測」當成系統設計題：來源、責任、審核路徑、回滾條件與最小可行實驗要一起看。",
+    "excerpt": "把「AI 產品上線前評測」當成系統設計題，而不是工具採購題：來源、責任、審核路徑、回滾條件與最小可行實驗要一起看。",
     "contentType": "feature",
     "newsCategory": "AI 產品與評測",
     "topic": "AI 產品上線前評測",
@@ -1191,7 +1191,7 @@ export const marketBlogPosts = [
       "provider": "unsplash-library",
       "prompt": "AI evaluation scorecard baseline editorial zh-Hant",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-29T17:10:31.167Z",
+      "generatedAt": "2026-05-29T17:18:40.558Z",
       "status": "generated"
     },
     "coverCredit": "Machine learning code photo via Unsplash",
@@ -1231,11 +1231,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-29",
     "generationSlot": "morning",
     "scheduledFor": "2026-05-29",
-    "generatedAt": "2026-05-29T17:10:31.167Z",
+    "generatedAt": "2026-05-29T17:18:40.558Z",
     "generatedBy": "",
-    "createdAt": "2026-05-29T17:10:31.167Z",
-    "updatedAt": "2026-05-29T17:10:31.167Z",
-    "publishedAt": "2026-05-29T17:10:31.167Z"
+    "createdAt": "2026-05-29T17:18:40.558Z",
+    "updatedAt": "2026-05-29T17:18:40.558Z",
+    "publishedAt": "2026-05-29T17:18:40.558Z"
   },
   {
     "id": "post_market_ai_evals_before_launch_en",
@@ -1247,7 +1247,7 @@ export const marketBlogPosts = [
     "title": "AI evals before launch as system design: sources, review paths and execution risk",
     "seoTitle": "AI evals before launch as system design: sources, review paths and execution…",
     "seoDescription": "AI evals before launch analysis with sources, charts and an ALTOS LAB editorial lens for how teams can define failure cases before shipping.",
-    "excerpt": "Pre-launch AI evals are treated as a system-design problem: sources, ownership, review paths, rollback and the smallest useful implementation step.",
+    "excerpt": "AI evals before launch becomes useful when it is treated as a system-design problem: sources, ownership, review paths, rollback and the smallest implementation step.",
     "contentType": "feature",
     "newsCategory": "AI product and evals",
     "topic": "AI evals before launch",
@@ -1329,7 +1329,7 @@ export const marketBlogPosts = [
       "provider": "unsplash-library",
       "prompt": "AI evaluation scorecard baseline editorial en",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-29T17:10:31.447Z",
+      "generatedAt": "2026-05-29T17:18:40.622Z",
       "status": "generated"
     },
     "coverCredit": "Circuit board macro photo via Unsplash",
@@ -1369,11 +1369,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-29",
     "generationSlot": "morning",
     "scheduledFor": "2026-05-29",
-    "generatedAt": "2026-05-29T17:10:31.447Z",
+    "generatedAt": "2026-05-29T17:18:40.622Z",
     "generatedBy": "",
-    "createdAt": "2026-05-29T17:10:31.447Z",
-    "updatedAt": "2026-05-29T17:10:31.447Z",
-    "publishedAt": "2026-05-29T17:10:31.447Z"
+    "createdAt": "2026-05-29T17:18:40.622Z",
+    "updatedAt": "2026-05-29T17:18:40.622Z",
+    "publishedAt": "2026-05-29T17:18:40.622Z"
   },
   {
     "id": "post_market_ai_evals_before_launch_ja",
@@ -1467,7 +1467,7 @@ export const marketBlogPosts = [
       "provider": "unsplash-library",
       "prompt": "AI evaluation scorecard baseline editorial ja",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-29T17:10:31.623Z",
+      "generatedAt": "2026-05-29T17:18:40.836Z",
       "status": "generated"
     },
     "coverCredit": "Code editor workspace photo via Unsplash",
@@ -1507,11 +1507,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-29",
     "generationSlot": "morning",
     "scheduledFor": "2026-05-29",
-    "generatedAt": "2026-05-29T17:10:31.623Z",
+    "generatedAt": "2026-05-29T17:18:40.836Z",
     "generatedBy": "",
-    "createdAt": "2026-05-29T17:10:31.623Z",
-    "updatedAt": "2026-05-29T17:10:31.623Z",
-    "publishedAt": "2026-05-29T17:10:31.623Z"
+    "createdAt": "2026-05-29T17:18:40.836Z",
+    "updatedAt": "2026-05-29T17:18:40.836Z",
+    "publishedAt": "2026-05-29T17:18:40.836Z"
   },
   {
     "id": "post_market_ai_evals_before_launch_ko",
@@ -1605,7 +1605,7 @@ export const marketBlogPosts = [
       "provider": "unsplash-library",
       "prompt": "AI evaluation scorecard baseline editorial ko",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-29T17:10:31.881Z",
+      "generatedAt": "2026-05-29T17:18:41.023Z",
       "status": "generated"
     },
     "coverCredit": "Terminal code close-up photo via Unsplash",
@@ -1645,10 +1645,10 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-29",
     "generationSlot": "morning",
     "scheduledFor": "2026-05-29",
-    "generatedAt": "2026-05-29T17:10:31.881Z",
+    "generatedAt": "2026-05-29T17:18:41.023Z",
     "generatedBy": "",
-    "createdAt": "2026-05-29T17:10:31.881Z",
-    "updatedAt": "2026-05-29T17:10:31.881Z",
-    "publishedAt": "2026-05-29T17:10:31.881Z"
+    "createdAt": "2026-05-29T17:18:41.023Z",
+    "updatedAt": "2026-05-29T17:18:41.023Z",
+    "publishedAt": "2026-05-29T17:18:41.023Z"
   }
 ] satisfies BlogPost[];

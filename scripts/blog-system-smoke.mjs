@@ -33,9 +33,13 @@ assert(generation.includes("deepSeekModelForTask(\"content-draft\")"), "content 
 assert(generation.includes("BLOG_PROMPT_VERSION"), "generation records prompt version");
 assert(generation.includes("sourceRegistryEntryForUrl"), "generation ranks sources with registry metadata");
 assert(!generation.includes("deepseek-chat"), "generation does not use deprecated deepseek-chat alias");
+assert(generation.includes("Subtitle/standfirst craft rules"), "generation trains DeepSeek on compelling subtitle/standfirst rules");
+assert(generation.includes("Medium-style scene hook"), "generation includes creative narrative modes learned from market writing");
 
 assert(quality.includes("withLlmQualityEvaluation"), "quality gate can merge LLM-as-judge evaluation");
 assert(quality.includes("registryTrustedHostFragments"), "quality source trust uses the source registry");
+assert(quality.includes("weakSubtitlePatterns"), "quality gate rejects weak generic subtitles");
+assert(quality.includes("subtitleEvidencePattern"), "quality gate requires subtitle evidence or operator tension");
 assert(covers.includes("BLOG_IMAGE_STORE_BLOB"), "image pipeline supports optional Vercel Blob persistence");
 assert(covers.includes("searchPexels") && covers.includes("searchPixabay"), "image pipeline supports expanded free image APIs");
 assert(covers.includes("pinterest") && covers.includes("approvedImageUrl"), "image pipeline rejects Pinterest URLs while allowing style inspiration");

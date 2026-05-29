@@ -850,6 +850,16 @@ Editorial mix: ALTOS LAB uses roughly ${Math.round((brief?.newsRatio ?? 0.35) * 
 Sources:
 ${sourceBrief}
 
+Editorial writing system:
+- Do not let older ALTOS LAB templates control the article. Choose one fresh narrative mode before drafting and make the structure fit the story.
+- Mode A, Medium-style scene hook: open with a concrete operator scene, failure, or decision moment, then widen into the framework.
+- Mode B, Foresight-style market brief: start from a news event, map competing routes or stakeholders, then explain what changes for readers.
+- Mode C, AI Magazine-style company signal: use one company move as a lens for market structure, valuation, enterprise demand or platform power.
+- Mode D, lab notebook: explain the mechanism, limits, uncertainty and what ALTOS LAB would test next.
+- Mode E, contrarian operator column: name the popular mistake, show why it fails, then give a sharper decision rule.
+- Strong articles usually include a memorable line, an honest take, one table/checklist, and a final judgment that a reader can repeat to a teammate.
+- Avoid same-shape articles. Do not always use the same H2 sequence, same "what changed/why it matters" frame, or same SEO/GEO ending.
+
 Return exactly one valid JSON object. Do not include Markdown, prose, comments, analysis, XML, YAML or code fences.
 ${languageInstruction}
 
@@ -887,7 +897,18 @@ Quality rules:
 - Make readers feel ALTOS LAB is a serious lab: source-grounded, practical, original, careful with uncertainty and useful for decision makers.
 - Every article needs one fresh angle: a market signal, counterintuitive point, mechanism explainer, source trail, implementation framework, case breakdown, risk warning, decision matrix, comparison table or signal chart.
 - Use a sharp title pattern: specific source/event/question + operator implication + ALTOS LAB framework. Never use generic titles like "AI platform trends", "search visibility and executive decisions", "what business leaders need to know", "不可忽視", "必須關注" or "關鍵轉變".
-- The excerpt is the visible article subtitle and must be SEO-useful: include a concrete source/event or market signal, the reader's search intent, and the operator decision in 1-2 compelling sentences. Do not write vague subtitles like "not about heat, but whether it changes workflow".
+- The excerpt is the visible article subtitle. Treat it like a newsroom standfirst, not a summary field.
+- Subtitle/standfirst craft rules:
+  1. Start with a concrete tension, source/event or reader problem. Avoid "本文整理", "這篇文章", "This article", "learn how", "explore", "matters because" and template summary language.
+  2. Include at least one named actor/source/event OR one vivid operator situation, plus the decision the reader must make.
+  3. Make a busy reader want the next paragraph: show the stakes, tradeoff, surprise or useful promise in 1-2 sentences.
+  4. Use specific nouns and verbs. Weak: "This trend is important for companies." Strong: "OpenAI's tax-agent case turns the question from 'can an agent act?' into 'can we trace, score and roll it back when it acts wrong?'"
+  5. Never repeat the title with extra words. The subtitle must add a second angle: source evidence, risk, operator benefit or decision frame.
+- Subtitle examples by language:
+  zh-Hant: "不要把第一個 AI Agent 試點交給最複雜的流程。OpenAI 的 tax-agent 案例和 Hugging Face 的 agent 定義都指向同一件事：先選能留下 trace、能人工審核、能退回舊流程的任務。"
+  en: "Do not hand the first AI-agent pilot to the messiest workflow. OpenAI's tax-agent case and Hugging Face's agent framing both point to the same rule: start where traces, review and rollback are possible."
+  ja: "最初のAIエージェント実験を、いきなり最も複雑な業務に置かない。OpenAIの事例とHugging Faceの定義から見える基準は、trace、レビュー、巻き戻しができる業務から始めることです。"
+  ko: "첫 AI Agent 파일럿을 가장 복잡한 업무에 맡기지 마세요. OpenAI 사례와 Hugging Face의 agent 정의가 가리키는 기준은 trace, 검토, 롤백이 가능한 흐름부터 시작하는 것입니다."
 - Anti-slop style gate: cut throat-clearing openers, do not announce "this article will", avoid "not X but Y" structures, avoid generic hype words, use concrete actors and actions, vary sentence rhythm, and remove empty transitions.
 - Sound like a sharp lab editor. Specific claims beat polished slogans.
 - Do not invent client names, statistics, dates or source claims.
@@ -896,7 +917,7 @@ Quality rules:
 - Do not use the same fixed H2 structure across drafts. Avoid stale template headings like "發生什麼變化", "為什麼重要", "訊號圖", "What changed", "Why it matters" unless that is truly the best human-readable heading for the specific story.
 - Write like an editor who expects a busy founder to finish the piece: concrete first sentence, human rhythm, source-backed detail, one useful judgment per section.
 - seoDescription must be 80-150 characters.
-- excerpt must be 80-160 characters.
+- excerpt must be 90-220 characters or equivalent local-language length; if the subject requires two short sentences, use two.
 - geoSummary is reader-facing TL;DR, not an internal field label. It must be 2-4 useful sentences, 180-420 characters or equivalent local-language length, and explain the article's main judgment, evidence base, uncertainty and next operator action.
 - Do not write "GEO answer summary" inside geoSummary. Do not describe the post as an "SEO/GEO asset" unless the topic is specifically search visibility.
 - keyTakeaways must contain 4 concrete, non-generic bullets.
@@ -955,6 +976,8 @@ Do not invent clients, private data, statistics or dates.
 Make ALTOS LAB sound like a serious AI implementation lab and product studio, not only an SEO/GEO tool.
 Remove AI-slop patterns: throat-clearing, generic hype, passive voice, "not X but Y" contrasts, meta transitions, repeated sentence rhythm and vague claims. Keep the article specific and source-grounded.
 Reject generic trend framing. The repaired title must contain a concrete question, market signal, source-backed event, visual frame or operator decision. The opening must answer the query immediately and the article must make ALTOS LAB's editorial read visible without repeating a fixed heading.
+Rewrite the excerpt as a strong visible subtitle/standfirst: concrete source/event or operator tension first, then the reader decision or tradeoff. It must not be a bland summary, must not repeat the title, and must not start with "本文", "這篇文章", "This article", "learn how", "explore", "この記事", or "이 글".
+If the article feels templated, pick a stronger narrative mode: scene hook, market route comparison, company-signal analysis, lab notebook, or contrarian operator column. Keep the sources, but make the human reading experience less predictable.
 
 Language: ${post.language}
 Content type: ${post.contentType || contentTypeFromInput(input)}
