@@ -91,7 +91,7 @@ const FREE_STOCK_COVER_LIBRARY = [
 ];
 
 const BASELINE_COVER_OVERRIDES = {
-  "agent-pilot-scorecard:zh-Hant": stockCover("https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1200&q=80", "Developer workflow screen photo via Unsplash", ["product", "automation", "software", "agent"]),
+  "agent-pilot-scorecard:zh-Hant": stockCover("https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1200&q=80", "開發者工作流程照片 via Unsplash", ["product", "automation", "software", "agent"]),
   "agent-pilot-scorecard:en": stockCover("https://images.unsplash.com/photo-1485827404703-89b55fcc595e?auto=format&fit=crop&w=1200&q=80", "Robotics lab photo via Unsplash", ["agents", "automation", "robotics", "industry"]),
   "agent-pilot-scorecard:ja": stockCover("https://images.unsplash.com/photo-1518432031352-d6fc5c10da5a?auto=format&fit=crop&w=1200&q=80", "Network hardware photo via Unsplash", ["infra", "network", "model", "data"]),
   "agent-pilot-scorecard:ko": stockCover("https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1200&q=80", "Code matrix screen photo via Unsplash", ["infra", "software", "agent", "automation"]),
@@ -1976,24 +1976,24 @@ const AGENT_PILOT_EDITORIAL_OVERRIDES = {
     seoDescription:
       "AI Agent 試點不是挑最炫任務，而是挑每週重複、資料可追溯、能人工審核且失敗可回滾的流程。本文整理 OpenAI、Hugging Face、IBM 與 Anthropic 企業 agent 訊號。",
     excerpt:
-      "不要把第一個 AI Agent 試點丟給最混亂的流程。OpenAI 的 tax-agent 案例和 Hugging Face 的 agent 定義都指向同一條線：先從 trace、審核、回滾都看得見的任務開始。",
+      "不要把第一個 AI Agent 試點丟給最混亂的流程。OpenAI 的 tax-agent 案例和 Hugging Face 的 agent 定義都指向同一條線：先選能留下操作紀錄、能人工審核、能退回舊流程的任務。",
     geoSummary:
       "AI Agent 試點的最佳起點，是高頻、邊界清楚、資料可追溯、權限可控、失敗可回滾的流程。本文把 OpenAI Codex tax agent 案例、Hugging Face smolagents 對 agent 工作流的定義、IBM 對 AI agents 的基礎說明，以及 Anthropic 企業 agent 插件訊號整理成一套選題分數卡，協助企業判斷第一個 agent 該放在哪裡。",
     keyTakeaways: [
       "第一個 AI Agent 試點不該選最炫的任務，而要選最容易留下證據、審核結果、回滾流程的任務。",
-      "OpenAI 的 tax agent 案例重點不是「AI 會報稅」，而是專家回饋、生產 traces、eval loop 如何讓 agent 持續改進。",
+      "OpenAI 的 tax agent 案例重點不是「AI 會報稅」，而是它如何用專家審核、操作紀錄與測試題，讓 agent 的表現能被追蹤和改進。",
       "Hugging Face 的 smolagents 提醒我們：agent 不是魔法，而是 LLM 輸出開始控制工作流，控制越多，治理要求越高。",
-      "ALTOS LAB 的建議是先做一張試點分數卡，再決定流程、權限、人工審核與 rollback，不要先買工具再找場景。"
+      "ALTOS LAB 的建議是先做一張試點分數卡，再決定流程、權限、人工審核與回滾機制，不要先買工具再找場景。"
     ],
     body: `如果你現在只想問「企業第一個 AI Agent 試點該做哪裡」，答案很直接：選一個每週重複、輸入資料固定、結果可以人工審核、失敗能回滾的流程。不要從跨部門、跨系統、權限複雜的黑盒任務開始。
 
 ## 為什麼現在值得重看 AI Agent
 
-最新背景：OpenAI 在 2026/5/27 發布 Codex tax agent 案例，Hugging Face 與 IBM 持續把 agent 定義拉回 workflow、trace、eval 與可觀測性，Anthropic 企業 agent 插件則顯示平台商正在把 agent 推進高價值工作流。
+最新背景：OpenAI 在 2026/5/27 發布 Codex tax agent 案例，Hugging Face 與 IBM 持續把 agent 定義拉回工作流、操作紀錄、評測與可觀測性，Anthropic 企業 agent 插件則顯示平台商正在把 agent 推進高價值工作流。
 
-OpenAI 在 2026/5/27 發布的 Codex tax agent 案例，不只是展示 AI 能處理稅務文件。真正值得企業注意的是它背後的三個條件：專家回饋、生產 traces，以及用 eval 驅動的迭代循環。換句話說，agent 不是一次寫好就放出去，而是被放進一套能觀察、能評分、能修正的工程系統。
+OpenAI 在 2026/5/27 發布的 Codex tax agent 案例，不只是展示 AI 能處理稅務文件。真正值得企業注意的是它背後的三個條件：**專家審核、完整操作紀錄、固定測試題**。換成企業語言，就是 agent 不能一次寫好就放出去；它要被放進一套能看見錯誤、能評分、能修正的工作流程。
 
-Hugging Face 在 smolagents 的介紹裡，把 agent 說得很清楚：agent 是讓 LLM 的輸出開始控制 workflow 的程式。這句話很重要，因為它把討論從「AI 聰不聰明」拉回「我們到底讓 AI 控制哪一段流程」。IBM 對 AI agents 的說明也把 observe、plan、act 這類循環拆開來看。再加上 Anthropic 推企業 agent 插件的市場訊號，方向已經很明確：agent 正在從 demo 走向工作流，但不是每個流程都適合先做。
+Hugging Face 在 smolagents 的介紹裡，把 agent 說得很清楚：agent 是讓 LLM 的輸出開始控制工作流程的程式。這句話很重要，因為它把討論從「AI 聰不聰明」拉回「我們到底讓 AI 控制哪一段流程」。IBM 對 AI agents 的說明也把「觀察、規劃、行動」這類循環拆開來看。再加上 Anthropic 推企業 agent 插件的市場訊號，方向已經很明確：agent 正在從展示範例走向真實工作流，但不是每個流程都適合先做。
 
 ## 第一個試點要避開「看起來很厲害」的任務
 
@@ -2010,31 +2010,35 @@ Hugging Face 在 smolagents 的介紹裡，把 agent 說得很清楚：agent 是
 
 ## 用 5 個分數選試點
 
-ALTOS LAB 會先用 1 到 5 分評估候選流程，而不是一開始就做 automation map。
+ALTOS LAB 會先用 1 到 5 分評估候選流程，而不是一開始就畫自動化地圖。
 
 1. 頻率：這件事是否每週都會重複發生？
 2. 邊界：輸入、輸出、成功標準是否能說清楚？
-3. 證據：agent 的答案能不能留下來源、trace、版本與審核紀錄？
+3. 證據：agent 的答案能不能留下來源、操作紀錄、版本與審核紀錄？
 4. 權限：它需要讀取或寫入哪些系統？會不會碰到敏感資料？
 5. 回滾：如果 agent 做錯，人能不能快速停下、修正、回到舊流程？
 
-總分不到 18 分，不建議當第一個試點。不是不能做，而是它比較像後期專案。第一個 agent 應該讓團隊學會怎麼設計權限、審核、eval、rollback，而不是一次把風險推到最大。
+總分不到 18 分，不建議當第一個試點。不是不能做，而是它比較像後期專案。第一個 agent 應該讓團隊學會怎麼設計權限、審核、測試題與回滾，而不是一次把風險推到最大。
 
-## 海外新聞要轉譯成行動，不是只翻譯標題
+## 把海外新聞翻成企業能用的判斷
 
-OpenAI 的 tax agent 案例可以被翻成一句新聞：「Codex 可以打造自我改進的稅務 agent」。但這樣寫對企業沒有用。比較有用的轉譯是：如果 agent 要進入真實營運，它需要專家回饋、production traces、eval loop，以及能被審核的輸出。
+這段想說的其實很簡單：**我們不只是把國外新聞翻成中文，而是要把新聞翻成企業能用的判斷。**一則 AI 新聞放進文章前，至少要回答三個問題：它改變哪一段工作流程？企業導入前要補哪些資料或規則？如果 AI 做錯，人要怎麼停下來、查原因、退回舊流程？
 
-Anthropic 的企業 agent 插件訊號也不能只解讀成「大廠都在做 agent」。它真正提醒的是，finance、engineering、design 這類高價值流程會被平台商包進更完整的 agent 工具鏈。企業如果完全沒有自己的流程標準，未來會很難判斷哪些 agent 值得導入，哪些只是換皮的工作流自動化。
+以 OpenAI 的 tax agent 案例來看，重點不是「AI 會報稅」。真正可學的是背後的工作方式：**專家先檢查結果、系統保留每次操作紀錄，再用固定測試題持續確認 agent 有沒有變好。**翻成企業語言，就是不要讓 agent 直接接手高風險工作；先讓它在可檢查、可評分、可修正的流程裡練習。
+
+Anthropic 的企業 agent 插件訊號也是同樣邏輯。它不是在告訴我們「大廠都在做 agent，所以你也要做」。它提醒的是：未來財務、工程、設計、客服這些流程，會越來越常被平台商包成 agent 工具。企業如果沒有自己的流程標準，就很難判斷哪些值得導入，哪些只是把舊自動化換成 AI 名稱。
+
+所以 ALTOS LAB 會先問三件事：**這個 agent 要看哪些來源？誰負責審核？出錯時能不能回滾？**三題答不出來，就先不要上線。
 
 ## 來源與轉譯備註
 
-本文包含海外來源轉譯與 ALTOS LAB 編輯改寫。OpenAI Codex tax agent 案例用來理解 production agent 的迭代條件；Hugging Face smolagents 與 ITBench 用來補足 agent 定義、可觀測性與任務評測；IBM Think 用來補基礎概念；TechCrunch 的 Anthropic 企業 agent 報導作為市場訊號。本文沒有逐字翻譯或複製原文結構，所有來源列在文末供讀者回查。
+本文包含海外來源轉譯與 ALTOS LAB 編輯改寫。OpenAI Codex tax agent 案例用來理解「真實工作裡的 agent 要怎麼被審核和改進」；Hugging Face smolagents 與 ITBench 用來補 agent 定義、可觀測性與任務評測；IBM Think 用來補基礎概念；TechCrunch 的 Anthropic 企業 agent 報導作為市場訊號，不作為產品採購建議。本文沒有逐字翻譯或複製原文結構，所有來源列在文末供讀者回查。
 
 ## ALTOS LAB 的實驗室判斷
 
 AI Agent 的價值不在「它能自己做很多事」，而在它能不能被放進一套人類願意負責的流程裡。第一個試點的目標不是取代團隊，而是建立一個可觀察、可審核、可修正的操作單元。
 
-如果一個流程不能說清楚來源、權限、評分、人工覆核與回滾方式，那它現在還不是 agent 試點，而只是 demo。真正值得做的第一個 agent，應該讓企業更敢把 AI 放進工作，而不是更難知道出了問題該找誰。`,
+如果一個流程不能說清楚來源、權限、評分、人工覆核與回滾方式，那它現在還不是 agent 試點，只是一個展示範例。真正值得做的第一個 agent，應該讓企業更敢把 AI 放進工作，而不是更難知道出了問題該找誰。`,
     faqs: [
       {
         question: "企業第一個 AI Agent 試點應該選哪種流程？",
@@ -2044,7 +2048,7 @@ AI Agent 的價值不在「它能自己做很多事」，而在它能不能被�
       {
         question: "為什麼不要一開始就做全自動跨部門 Agent？",
         answer:
-          "因為跨部門流程通常牽涉權限、責任、例外處理與不可逆操作。第一個試點應該先讓團隊學會審核、trace、eval 和 rollback，再逐步擴大權限。"
+          "因為跨部門流程通常牽涉權限、責任、例外處理與不可逆操作。第一個試點應該先讓團隊學會人工審核、操作紀錄、測試題和回滾，再逐步擴大權限。"
       },
       {
         question: "AI Agent 試點和一般流程自動化有什麼差別？",
@@ -2062,12 +2066,12 @@ AI Agent 的價值不在「它能自己做很多事」，而在它能不能被�
     seoDescription:
       "The right first AI agent pilot is not the flashiest workflow. It is repeatable, source-grounded, reviewable and reversible.",
     excerpt:
-      "Do not hand the first AI-agent pilot to the messiest workflow. OpenAI's tax-agent case and Hugging Face's agent framing point to the same rule: start where traces, review and rollback are possible.",
+      "Do not hand the first AI-agent pilot to the messiest workflow. OpenAI's tax-agent case and Hugging Face's agent framing point to the same rule: start where operation logs, review and rollback are possible.",
     geoSummary:
       "A strong first AI agent pilot is frequent, bounded, traceable, permission-light and reversible. This article translates recent OpenAI, Hugging Face, IBM and Anthropic signals into a practical scorecard for choosing the first enterprise agent workflow.",
     keyTakeaways: [
       "Start with a workflow that leaves evidence and can be reviewed by a human.",
-      "The OpenAI tax-agent example matters because of expert feedback, production traces and eval loops.",
+      "The OpenAI tax-agent example matters because expert review, operation logs and test questions make agent behavior traceable.",
       "Hugging Face frames agents as LLM outputs controlling workflow; more control means more governance.",
       "ALTOS LAB recommends a pilot scorecard before tool selection."
     ],
@@ -2075,9 +2079,9 @@ AI Agent 的價值不在「它能自己做很多事」，而在它能不能被�
 
 ## Why this is worth revisiting now
 
-Latest context: OpenAI published its Codex tax-agent case on May 27, 2026; Hugging Face and IBM keep grounding agents in workflow, traces, evals and observability; Anthropic's enterprise-agent coverage shows vendors moving agents into high-value work.
+Latest context: OpenAI published its Codex tax-agent case on May 27, 2026; Hugging Face and IBM keep grounding agents in workflows, operation logs, evaluation and observability; Anthropic's enterprise-agent coverage shows vendors moving agents into high-value work.
 
-OpenAI's Codex tax-agent case is not only a story about tax automation. Its useful lesson is the operating system around the agent: practitioner feedback, production traces and an eval-driven improvement loop. That is what turns an agent from a demo into something a business can improve safely.
+OpenAI's Codex tax-agent case is not only a story about tax automation. Its useful lesson is the operating system around the agent: practitioner review, operation logs and repeated test questions. In plain terms, the agent becomes safer when the team can see what happened, score the output and fix the workflow before expanding autonomy.
 
 Hugging Face describes agents as programs where LLM outputs control the workflow. IBM's AI-agent overview breaks the loop into observing, planning and acting. Anthropic's enterprise-agent push adds a market signal: vendors are moving agents into finance, engineering, design and other high-value workflows. The question is no longer whether agents are coming; it is which workflows deserve the first controlled test.
 
@@ -2108,7 +2112,7 @@ If the total is below 18, it is probably not the first pilot. It may still be im
 
 ## Source and translation note
 
-This article translates and adapts foreign sources into an ALTOS LAB operating framework. OpenAI is used for the production-agent improvement loop, Hugging Face for the agent/workflow definition and evaluation context, IBM for the conceptual baseline, and TechCrunch's Anthropic coverage as an enterprise market signal. It is not a full translation or reprint; source links are listed below.
+This article translates and adapts foreign sources into an ALTOS LAB operating framework. OpenAI is used to understand how a real-work agent can be reviewed and improved, Hugging Face for the agent/workflow definition and evaluation context, IBM for the conceptual baseline, and TechCrunch's Anthropic coverage as an enterprise market signal. It is not a full translation or reprint; source links are listed below.
 
 ## ALTOS LAB lab note
 

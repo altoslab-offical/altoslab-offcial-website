@@ -121,6 +121,14 @@ const weakSubtitlePatterns = [
 const subtitleEvidencePattern =
   /(OpenAI|Anthropic|Google|DeepMind|Hugging Face|IBM|Microsoft|NVIDIA|Vercel|TechCrunch|AI Magazine|Search Console|ChatGPT|Claude|Gemini|Perplexity|Codex|AI Mode|Gartner|官方|報導|來源|案例|發布|launch|released|published|case|report|source|workflow|rollback|trace|eval|審核|回滾|來源|試點|採購|導入|ワークフロー|出典|検証|롤백|출처|검토)/i;
 
+const rawZhEnglishJargonPattern = /\b(?:production traces?|eval(?:uation)? loops?|eval-driven|trace|evals?|rollback)\b/i;
+
+const technicalJargonPattern =
+  /\b(?:production traces?|eval(?:uation)? loops?|eval-driven|agentic workflow|workflow orchestration|orchestration|retrieval|routing|observability|vector database|context window|tool calls?|RAG)\b/i;
+
+const plainLanguageCuePattern =
+  /(意思是|也就是|換成(?:企業)?語言|白話|可以理解成|翻成|先問|要回答|操作紀錄|固定測試題|測試題|人工審核|退回舊流程|回滾|what this means|in plain terms|put simply|for an operator|operation logs|test questions|human review|rollback path|つまり|言い換えると|쉽게 말해|운영 언어로)/i;
+
 function isApprovedCoverUrl(url: string) {
   if (allowedCoverPaths.has(url)) return true;
   if (!/^https:\/\//.test(url)) return false;
@@ -659,11 +667,23 @@ function reviewReadability(post: BlogPost): ReviewResult {
   const body = plainText(post.body);
   const paragraphs = post.body.split(/\n{2,}/).map((item) => item.trim()).filter(Boolean);
   const h2Titles = [...post.body.matchAll(/^##\s+(.+)$/gm)].map((match) => match[1]?.trim() || "");
+  const jargonParagraphs = paragraphs.filter(
+    (paragraph) => technicalJargonPattern.test(paragraph) && !plainLanguageCuePattern.test(paragraph)
+  );
 
   if (paragraphs.length < 4) issues.push("body needs more scannable paragraphs");
   if (paragraphs.some((paragraph) => paragraph.length > 700)) warnings.push("some paragraphs are too long for mobile reading");
   if (body.length && post.excerpt && body.includes(post.excerpt) && post.excerpt.length > 180) {
     warnings.push("excerpt may be copied too directly into the article body");
+  }
+  if (post.language === "zh-Hant" && rawZhEnglishJargonPattern.test(post.body)) {
+    issues.push("zh-Hant article must translate AI-ops jargon like trace/eval/rollback into plain Chinese on first use");
+  }
+  if (jargonParagraphs.length) {
+    issues.push("technical jargon needs plain-language translation in the same paragraph");
+  }
+  if (post.body.includes("**") && !/\*\*[^*\n]{4,80}\*\*/.test(post.body)) {
+    warnings.push("bold emphasis should highlight a short judgment or checklist phrase, not decorative formatting");
   }
   if (h2Titles.length >= 3 && h2Titles.filter((title) => /^(趨勢|Trend|トレンド|트렌드)\s*[一二三四五\d]/i.test(title)).length >= 2) {
     warnings.push("headings read like a generic trend list; use question, framework or decision headings");

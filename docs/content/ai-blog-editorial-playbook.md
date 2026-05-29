@@ -77,7 +77,7 @@ Better:
 
 - Do not hand the first AI-agent pilot to the messiest workflow. OpenAI's
   tax-agent case and Hugging Face's agent framing both point to the same rule:
-  start where traces, review and rollback are possible.
+  start where operation logs, human review and rollback are possible.
 - Google is pushing search toward AI Mode while AI Magazine frames Anthropic
   as an enterprise platform signal. Brand teams now need to monitor how answer
   engines describe them, not only where they rank.
@@ -149,6 +149,28 @@ Each published article needs:
 - table or chart when it makes the reader faster at judging the signal
 - canonical and hreflang handled by the site routing
 - structured data aligned with visible content
+
+## Plain-Language Source Translation
+
+Foreign news should never be imported as a pile of impressive terms. Translate
+the source into a decision the reader can use.
+
+Every source-translation section must answer four questions:
+
+1. What did the source actually say?
+2. What does it change in a workflow, product decision or operating risk?
+3. What should we avoid overclaiming?
+4. What should the reader check or do next?
+
+If the article uses terms like `trace`, `eval`, `rollback`, `orchestration`,
+`retrieval`, `routing`, `plugin` or `observability`, explain them in the
+article language the first time they appear. In Traditional Chinese, prefer
+plain terms such as `操作紀錄`, `固定測試題/評測`, `回滾/退回舊流程`,
+`工作流編排`, `檢索`, `路由` and `可觀測性`.
+
+Use bold only when it helps scanning: the core judgment, the three operator
+questions, or a checklist phrase. Do not bold entire paragraphs and do not use
+bold as visual decoration.
 
 ## Quality Gate
 

@@ -11,18 +11,18 @@ export const marketBlogPosts = [
     "title": "AI Agent 試點別急著上線：先選能回滾的流程",
     "seoTitle": "AI Agent 試點怎麼選：可審核、可回滾的企業導入框架 | ALTOS LAB",
     "seoDescription": "AI Agent 試點不是挑最炫任務，而是挑每週重複、資料可追溯、能人工審核且失敗可回滾的流程。本文整理 OpenAI、Hugging Face、IBM 與 Anthropic 企業 agent 訊號。",
-    "excerpt": "不要把第一個 AI Agent 試點丟給最混亂的流程。OpenAI 的 tax-agent 案例和 Hugging Face 的 agent 定義都指向同一條線：先從 trace、審核、回滾都看得見的任務開始。",
+    "excerpt": "不要把第一個 AI Agent 試點丟給最混亂的流程。OpenAI 的 tax-agent 案例和 Hugging Face 的 agent 定義都指向同一條線：先選能留下操作紀錄、能人工審核、能退回舊流程的任務。",
     "contentType": "breaking",
     "newsCategory": "AI Agent 與工作流",
     "topic": "AI Agent 試點",
     "audience": "企業主、營運主管、行銷負責人與 AI 導入團隊",
     "geoSummary": "AI Agent 試點的最佳起點，是高頻、邊界清楚、資料可追溯、權限可控、失敗可回滾的流程。本文把 OpenAI Codex tax agent 案例、Hugging Face smolagents 對 agent 工作流的定義、IBM 對 AI agents 的基礎說明，以及 Anthropic 企業 agent 插件訊號整理成一套選題分數卡，協助企業判斷第一個 agent 該放在哪裡。",
-    "body": "如果你現在只想問「企業第一個 AI Agent 試點該做哪裡」，答案很直接：選一個每週重複、輸入資料固定、結果可以人工審核、失敗能回滾的流程。不要從跨部門、跨系統、權限複雜的黑盒任務開始。\n\n## 為什麼現在值得重看 AI Agent\n\n最新背景：OpenAI 在 2026/5/27 發布 Codex tax agent 案例，Hugging Face 與 IBM 持續把 agent 定義拉回 workflow、trace、eval 與可觀測性，Anthropic 企業 agent 插件則顯示平台商正在把 agent 推進高價值工作流。\n\nOpenAI 在 2026/5/27 發布的 Codex tax agent 案例，不只是展示 AI 能處理稅務文件。真正值得企業注意的是它背後的三個條件：專家回饋、生產 traces，以及用 eval 驅動的迭代循環。換句話說，agent 不是一次寫好就放出去，而是被放進一套能觀察、能評分、能修正的工程系統。\n\nHugging Face 在 smolagents 的介紹裡，把 agent 說得很清楚：agent 是讓 LLM 的輸出開始控制 workflow 的程式。這句話很重要，因為它把討論從「AI 聰不聰明」拉回「我們到底讓 AI 控制哪一段流程」。IBM 對 AI agents 的說明也把 observe、plan、act 這類循環拆開來看。再加上 Anthropic 推企業 agent 插件的市場訊號，方向已經很明確：agent 正在從 demo 走向工作流，但不是每個流程都適合先做。\n\n## 第一個試點要避開「看起來很厲害」的任務\n\n很多團隊會想從最吸睛的題目開始，例如「全自動處理客訴」「自動產完整提案」「幫主管做策略決策」。這些題目聽起來像成果，但通常不是好的第一個試點，因為它們牽涉太多隱性判斷、跨部門責任與不可逆操作。\n\n更好的起點通常比較無聊，但更能成功：\n\n| 候選流程 | 為什麼適合先試 | 隱藏風險 | 驗收證據 |\n| --- | --- | --- | --- |\n| 客服知識庫回覆草稿 | 問題高頻、資料來源明確、可由客服審核。 | 來源過舊會讓 agent 重複錯誤。 | 回答引用來源、人工改稿率、轉人工比例。 |\n| 銷售線索研究卡 | 輸入固定，可輸出摘要、風險、下一步。 | 可能抓到錯公司或過期資訊。 | 來源連結、CRM 欄位完成率、業務採用率。 |\n| 合約或文件初審清單 | 規則可明文化，結果能由專人覆核。 | 不能讓 agent 直接做法律結論。 | 缺漏項命中率、人工覆核時間、錯誤類型。 |\n| 內容研究來源卡 | 適合建立來源、摘要、引用與不確定性。 | 容易變成低品質搬運。 | 來源白名單、轉譯備註、編輯採用率。 |\n\n## 用 5 個分數選試點\n\nALTOS LAB 會先用 1 到 5 分評估候選流程，而不是一開始就做 automation map。\n\n1. 頻率：這件事是否每週都會重複發生？\n2. 邊界：輸入、輸出、成功標準是否能說清楚？\n3. 證據：agent 的答案能不能留下來源、trace、版本與審核紀錄？\n4. 權限：它需要讀取或寫入哪些系統？會不會碰到敏感資料？\n5. 回滾：如果 agent 做錯，人能不能快速停下、修正、回到舊流程？\n\n總分不到 18 分，不建議當第一個試點。不是不能做，而是它比較像後期專案。第一個 agent 應該讓團隊學會怎麼設計權限、審核、eval、rollback，而不是一次把風險推到最大。\n\n## 海外新聞要轉譯成行動，不是只翻譯標題\n\nOpenAI 的 tax agent 案例可以被翻成一句新聞：「Codex 可以打造自我改進的稅務 agent」。但這樣寫對企業沒有用。比較有用的轉譯是：如果 agent 要進入真實營運，它需要專家回饋、production traces、eval loop，以及能被審核的輸出。\n\nAnthropic 的企業 agent 插件訊號也不能只解讀成「大廠都在做 agent」。它真正提醒的是，finance、engineering、design 這類高價值流程會被平台商包進更完整的 agent 工具鏈。企業如果完全沒有自己的流程標準，未來會很難判斷哪些 agent 值得導入，哪些只是換皮的工作流自動化。\n\n## 來源與轉譯備註\n\n本文包含海外來源轉譯與 ALTOS LAB 編輯改寫。OpenAI Codex tax agent 案例用來理解 production agent 的迭代條件；Hugging Face smolagents 與 ITBench 用來補足 agent 定義、可觀測性與任務評測；IBM Think 用來補基礎概念；TechCrunch 的 Anthropic 企業 agent 報導作為市場訊號。本文沒有逐字翻譯或複製原文結構，所有來源列在文末供讀者回查。\n\n## ALTOS LAB 的實驗室判斷\n\nAI Agent 的價值不在「它能自己做很多事」，而在它能不能被放進一套人類願意負責的流程裡。第一個試點的目標不是取代團隊，而是建立一個可觀察、可審核、可修正的操作單元。\n\n如果一個流程不能說清楚來源、權限、評分、人工覆核與回滾方式，那它現在還不是 agent 試點，而只是 demo。真正值得做的第一個 agent，應該讓企業更敢把 AI 放進工作，而不是更難知道出了問題該找誰。",
+    "body": "如果你現在只想問「企業第一個 AI Agent 試點該做哪裡」，答案很直接：選一個每週重複、輸入資料固定、結果可以人工審核、失敗能回滾的流程。不要從跨部門、跨系統、權限複雜的黑盒任務開始。\n\n## 為什麼現在值得重看 AI Agent\n\n最新背景：OpenAI 在 2026/5/27 發布 Codex tax agent 案例，Hugging Face 與 IBM 持續把 agent 定義拉回工作流、操作紀錄、評測與可觀測性，Anthropic 企業 agent 插件則顯示平台商正在把 agent 推進高價值工作流。\n\nOpenAI 在 2026/5/27 發布的 Codex tax agent 案例，不只是展示 AI 能處理稅務文件。真正值得企業注意的是它背後的三個條件：**專家審核、完整操作紀錄、固定測試題**。換成企業語言，就是 agent 不能一次寫好就放出去；它要被放進一套能看見錯誤、能評分、能修正的工作流程。\n\nHugging Face 在 smolagents 的介紹裡，把 agent 說得很清楚：agent 是讓 LLM 的輸出開始控制工作流程的程式。這句話很重要，因為它把討論從「AI 聰不聰明」拉回「我們到底讓 AI 控制哪一段流程」。IBM 對 AI agents 的說明也把「觀察、規劃、行動」這類循環拆開來看。再加上 Anthropic 推企業 agent 插件的市場訊號，方向已經很明確：agent 正在從展示範例走向真實工作流，但不是每個流程都適合先做。\n\n## 第一個試點要避開「看起來很厲害」的任務\n\n很多團隊會想從最吸睛的題目開始，例如「全自動處理客訴」「自動產完整提案」「幫主管做策略決策」。這些題目聽起來像成果，但通常不是好的第一個試點，因為它們牽涉太多隱性判斷、跨部門責任與不可逆操作。\n\n更好的起點通常比較無聊，但更能成功：\n\n| 候選流程 | 為什麼適合先試 | 隱藏風險 | 驗收證據 |\n| --- | --- | --- | --- |\n| 客服知識庫回覆草稿 | 問題高頻、資料來源明確、可由客服審核。 | 來源過舊會讓 agent 重複錯誤。 | 回答引用來源、人工改稿率、轉人工比例。 |\n| 銷售線索研究卡 | 輸入固定，可輸出摘要、風險、下一步。 | 可能抓到錯公司或過期資訊。 | 來源連結、CRM 欄位完成率、業務採用率。 |\n| 合約或文件初審清單 | 規則可明文化，結果能由專人覆核。 | 不能讓 agent 直接做法律結論。 | 缺漏項命中率、人工覆核時間、錯誤類型。 |\n| 內容研究來源卡 | 適合建立來源、摘要、引用與不確定性。 | 容易變成低品質搬運。 | 來源白名單、轉譯備註、編輯採用率。 |\n\n## 用 5 個分數選試點\n\nALTOS LAB 會先用 1 到 5 分評估候選流程，而不是一開始就畫自動化地圖。\n\n1. 頻率：這件事是否每週都會重複發生？\n2. 邊界：輸入、輸出、成功標準是否能說清楚？\n3. 證據：agent 的答案能不能留下來源、操作紀錄、版本與審核紀錄？\n4. 權限：它需要讀取或寫入哪些系統？會不會碰到敏感資料？\n5. 回滾：如果 agent 做錯，人能不能快速停下、修正、回到舊流程？\n\n總分不到 18 分，不建議當第一個試點。不是不能做，而是它比較像後期專案。第一個 agent 應該讓團隊學會怎麼設計權限、審核、測試題與回滾，而不是一次把風險推到最大。\n\n## 把海外新聞翻成企業能用的判斷\n\n這段想說的其實很簡單：**我們不只是把國外新聞翻成中文，而是要把新聞翻成企業能用的判斷。**一則 AI 新聞放進文章前，至少要回答三個問題：它改變哪一段工作流程？企業導入前要補哪些資料或規則？如果 AI 做錯，人要怎麼停下來、查原因、退回舊流程？\n\n以 OpenAI 的 tax agent 案例來看，重點不是「AI 會報稅」。真正可學的是背後的工作方式：**專家先檢查結果、系統保留每次操作紀錄，再用固定測試題持續確認 agent 有沒有變好。**翻成企業語言，就是不要讓 agent 直接接手高風險工作；先讓它在可檢查、可評分、可修正的流程裡練習。\n\nAnthropic 的企業 agent 插件訊號也是同樣邏輯。它不是在告訴我們「大廠都在做 agent，所以你也要做」。它提醒的是：未來財務、工程、設計、客服這些流程，會越來越常被平台商包成 agent 工具。企業如果沒有自己的流程標準，就很難判斷哪些值得導入，哪些只是把舊自動化換成 AI 名稱。\n\n所以 ALTOS LAB 會先問三件事：**這個 agent 要看哪些來源？誰負責審核？出錯時能不能回滾？**三題答不出來，就先不要上線。\n\n## 來源與轉譯備註\n\n本文包含海外來源轉譯與 ALTOS LAB 編輯改寫。OpenAI Codex tax agent 案例用來理解「真實工作裡的 agent 要怎麼被審核和改進」；Hugging Face smolagents 與 ITBench 用來補 agent 定義、可觀測性與任務評測；IBM Think 用來補基礎概念；TechCrunch 的 Anthropic 企業 agent 報導作為市場訊號，不作為產品採購建議。本文沒有逐字翻譯或複製原文結構，所有來源列在文末供讀者回查。\n\n## ALTOS LAB 的實驗室判斷\n\nAI Agent 的價值不在「它能自己做很多事」，而在它能不能被放進一套人類願意負責的流程裡。第一個試點的目標不是取代團隊，而是建立一個可觀察、可審核、可修正的操作單元。\n\n如果一個流程不能說清楚來源、權限、評分、人工覆核與回滾方式，那它現在還不是 agent 試點，只是一個展示範例。真正值得做的第一個 agent，應該讓企業更敢把 AI 放進工作，而不是更難知道出了問題該找誰。",
     "keyTakeaways": [
       "第一個 AI Agent 試點不該選最炫的任務，而要選最容易留下證據、審核結果、回滾流程的任務。",
-      "OpenAI 的 tax agent 案例重點不是「AI 會報稅」，而是專家回饋、生產 traces、eval loop 如何讓 agent 持續改進。",
+      "OpenAI 的 tax agent 案例重點不是「AI 會報稅」，而是它如何用專家審核、操作紀錄與測試題，讓 agent 的表現能被追蹤和改進。",
       "Hugging Face 的 smolagents 提醒我們：agent 不是魔法，而是 LLM 輸出開始控制工作流，控制越多，治理要求越高。",
-      "ALTOS LAB 的建議是先做一張試點分數卡，再決定流程、權限、人工審核與 rollback，不要先買工具再找場景。"
+      "ALTOS LAB 的建議是先做一張試點分數卡，再決定流程、權限、人工審核與回滾機制，不要先買工具再找場景。"
     ],
     "faqs": [
       {
@@ -31,7 +31,7 @@ export const marketBlogPosts = [
       },
       {
         "question": "為什麼不要一開始就做全自動跨部門 Agent？",
-        "answer": "因為跨部門流程通常牽涉權限、責任、例外處理與不可逆操作。第一個試點應該先讓團隊學會審核、trace、eval 和 rollback，再逐步擴大權限。"
+        "answer": "因為跨部門流程通常牽涉權限、責任、例外處理與不可逆操作。第一個試點應該先讓團隊學會人工審核、操作紀錄、測試題和回滾，再逐步擴大權限。"
       },
       {
         "question": "AI Agent 試點和一般流程自動化有什麼差別？",
@@ -79,7 +79,7 @@ export const marketBlogPosts = [
     ],
     "author": "ALTOS LAB Editorial Lab",
     "cover": "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1200&q=80",
-    "coverAlt": "AI Agent 試點別急著上線：先選能回滾的流程 - Developer workflow screen photo via Unsplash",
+    "coverAlt": "AI Agent 試點別急著上線：先選能回滾的流程 - 開發者工作流程照片 via Unsplash",
     "coverPrompt": "AI agent pilot rollback workflow source card zh-Hant",
     "coverSource": "curated",
     "coverGeneration": {
@@ -87,10 +87,10 @@ export const marketBlogPosts = [
       "provider": "unsplash-library",
       "prompt": "AI agent workflow office baseline editorial zh-Hant",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-29T17:18:39.349Z",
+      "generatedAt": "2026-05-29T17:51:31.387Z",
       "status": "generated"
     },
-    "coverCredit": "Developer workflow screen photo via Unsplash",
+    "coverCredit": "開發者工作流程照片 via Unsplash",
     "coverCreditUrl": "https://unsplash.com",
     "coverLicense": "Unsplash License",
     "coverLicenseUrl": "https://unsplash.com/license",
@@ -127,11 +127,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-29",
     "generationSlot": "morning",
     "scheduledFor": "2026-05-29",
-    "generatedAt": "2026-05-29T17:18:39.349Z",
+    "generatedAt": "2026-05-29T17:51:31.387Z",
     "generatedBy": "",
-    "createdAt": "2026-05-29T17:18:39.349Z",
-    "updatedAt": "2026-05-29T17:18:39.349Z",
-    "publishedAt": "2026-05-29T17:18:39.349Z"
+    "createdAt": "2026-05-29T17:51:31.387Z",
+    "updatedAt": "2026-05-29T17:51:31.387Z",
+    "publishedAt": "2026-05-29T17:51:31.387Z"
   },
   {
     "id": "post_market_agent_pilot_scorecard_en",
@@ -143,16 +143,16 @@ export const marketBlogPosts = [
     "title": "Do not rush an AI agent pilot. Choose a workflow you can roll back",
     "seoTitle": "How to choose an AI agent pilot: an auditable rollback-first framework | ALTOS…",
     "seoDescription": "The right first AI agent pilot is not the flashiest workflow. It is repeatable, source-grounded, reviewable and reversible.",
-    "excerpt": "Do not hand the first AI-agent pilot to the messiest workflow. OpenAI's tax-agent case and Hugging Face's agent framing point to the same rule: start where traces, review and rollback are possible.",
+    "excerpt": "Do not hand the first AI-agent pilot to the messiest workflow. OpenAI's tax-agent case and Hugging Face's agent framing point to the same rule: start where operation logs, review and rollback are possible.",
     "contentType": "breaking",
     "newsCategory": "AI agents and workflows",
     "topic": "AI agent pilots",
     "audience": "founders, operators, marketing leads and AI implementation teams",
     "geoSummary": "A strong first AI agent pilot is frequent, bounded, traceable, permission-light and reversible. This article translates recent OpenAI, Hugging Face, IBM and Anthropic signals into a practical scorecard for choosing the first enterprise agent workflow.",
-    "body": "If you need to choose the first enterprise AI agent pilot, start with a workflow that repeats every week, has stable inputs, can be reviewed by a human and can be rolled back. Do not begin with a cross-department black-box task.\n\n## Why this is worth revisiting now\n\nLatest context: OpenAI published its Codex tax-agent case on May 27, 2026; Hugging Face and IBM keep grounding agents in workflow, traces, evals and observability; Anthropic's enterprise-agent coverage shows vendors moving agents into high-value work.\n\nOpenAI's Codex tax-agent case is not only a story about tax automation. Its useful lesson is the operating system around the agent: practitioner feedback, production traces and an eval-driven improvement loop. That is what turns an agent from a demo into something a business can improve safely.\n\nHugging Face describes agents as programs where LLM outputs control the workflow. IBM's AI-agent overview breaks the loop into observing, planning and acting. Anthropic's enterprise-agent push adds a market signal: vendors are moving agents into finance, engineering, design and other high-value workflows. The question is no longer whether agents are coming; it is which workflows deserve the first controlled test.\n\n## Avoid the impressive-looking first pilot\n\nThe wrong first pilot is usually the loudest one: fully automated customer escalations, full proposal generation, or strategic decisions for executives. These sound valuable, but they hide too many ownership, permission and review problems.\n\nBetter first pilots are narrower:\n\n| Candidate workflow | Why it works first | Hidden risk | Evidence to track |\n| --- | --- | --- | --- |\n| Support reply drafts | Frequent, source-grounded and easy to review. | Stale knowledge makes the agent repeat old errors. | Cited sources, edit rate, handoff rate. |\n| Sales research cards | Stable input and useful structured output. | Wrong company or outdated source. | Source links, CRM completion rate, sales adoption. |\n| Document pre-review checklist | Rules can be written down and reviewed. | The agent must not make final legal decisions. | Missed-item rate, review time, error types. |\n| Content research source cards | Great for source, summary and uncertainty habits. | Can become low-quality rewriting. | Source whitelist, translation note, editor adoption. |\n\n## Use a five-part scorecard\n\nScore each candidate from 1 to 5:\n\n1. Frequency: does this happen every week?\n2. Boundary: are input, output and success criteria clear?\n3. Evidence: can the agent leave sources, traces, versions and review history?\n4. Permission: what systems and data does it need to access?\n5. Rollback: can a human stop, repair and return to the old process quickly?\n\nIf the total is below 18, it is probably not the first pilot. It may still be important, but it belongs later.\n\n## Source and translation note\n\nThis article translates and adapts foreign sources into an ALTOS LAB operating framework. OpenAI is used for the production-agent improvement loop, Hugging Face for the agent/workflow definition and evaluation context, IBM for the conceptual baseline, and TechCrunch's Anthropic coverage as an enterprise market signal. It is not a full translation or reprint; source links are listed below.\n\n## ALTOS LAB lab note\n\nAn AI agent pilot should make the organization more willing to trust AI work, not less able to understand failure. If a workflow cannot define sources, permissions, scoring, human review and rollback, it is still a demo. The first serious agent should be a small operating unit that teaches the team how to observe, evaluate and repair AI-assisted work.",
+    "body": "If you need to choose the first enterprise AI agent pilot, start with a workflow that repeats every week, has stable inputs, can be reviewed by a human and can be rolled back. Do not begin with a cross-department black-box task.\n\n## Why this is worth revisiting now\n\nLatest context: OpenAI published its Codex tax-agent case on May 27, 2026; Hugging Face and IBM keep grounding agents in workflows, operation logs, evaluation and observability; Anthropic's enterprise-agent coverage shows vendors moving agents into high-value work.\n\nOpenAI's Codex tax-agent case is not only a story about tax automation. Its useful lesson is the operating system around the agent: practitioner review, operation logs and repeated test questions. In plain terms, the agent becomes safer when the team can see what happened, score the output and fix the workflow before expanding autonomy.\n\nHugging Face describes agents as programs where LLM outputs control the workflow. IBM's AI-agent overview breaks the loop into observing, planning and acting. Anthropic's enterprise-agent push adds a market signal: vendors are moving agents into finance, engineering, design and other high-value workflows. The question is no longer whether agents are coming; it is which workflows deserve the first controlled test.\n\n## Avoid the impressive-looking first pilot\n\nThe wrong first pilot is usually the loudest one: fully automated customer escalations, full proposal generation, or strategic decisions for executives. These sound valuable, but they hide too many ownership, permission and review problems.\n\nBetter first pilots are narrower:\n\n| Candidate workflow | Why it works first | Hidden risk | Evidence to track |\n| --- | --- | --- | --- |\n| Support reply drafts | Frequent, source-grounded and easy to review. | Stale knowledge makes the agent repeat old errors. | Cited sources, edit rate, handoff rate. |\n| Sales research cards | Stable input and useful structured output. | Wrong company or outdated source. | Source links, CRM completion rate, sales adoption. |\n| Document pre-review checklist | Rules can be written down and reviewed. | The agent must not make final legal decisions. | Missed-item rate, review time, error types. |\n| Content research source cards | Great for source, summary and uncertainty habits. | Can become low-quality rewriting. | Source whitelist, translation note, editor adoption. |\n\n## Use a five-part scorecard\n\nScore each candidate from 1 to 5:\n\n1. Frequency: does this happen every week?\n2. Boundary: are input, output and success criteria clear?\n3. Evidence: can the agent leave sources, traces, versions and review history?\n4. Permission: what systems and data does it need to access?\n5. Rollback: can a human stop, repair and return to the old process quickly?\n\nIf the total is below 18, it is probably not the first pilot. It may still be important, but it belongs later.\n\n## Source and translation note\n\nThis article translates and adapts foreign sources into an ALTOS LAB operating framework. OpenAI is used to understand how a real-work agent can be reviewed and improved, Hugging Face for the agent/workflow definition and evaluation context, IBM for the conceptual baseline, and TechCrunch's Anthropic coverage as an enterprise market signal. It is not a full translation or reprint; source links are listed below.\n\n## ALTOS LAB lab note\n\nAn AI agent pilot should make the organization more willing to trust AI work, not less able to understand failure. If a workflow cannot define sources, permissions, scoring, human review and rollback, it is still a demo. The first serious agent should be a small operating unit that teaches the team how to observe, evaluate and repair AI-assisted work.",
     "keyTakeaways": [
       "Start with a workflow that leaves evidence and can be reviewed by a human.",
-      "The OpenAI tax-agent example matters because of expert feedback, production traces and eval loops.",
+      "The OpenAI tax-agent example matters because expert review, operation logs and test questions make agent behavior traceable.",
       "Hugging Face frames agents as LLM outputs controlling workflow; more control means more governance.",
       "ALTOS LAB recommends a pilot scorecard before tool selection."
     ],
@@ -219,7 +219,7 @@ export const marketBlogPosts = [
       "provider": "unsplash-library",
       "prompt": "AI agent workflow office baseline editorial en",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-29T17:18:39.523Z",
+      "generatedAt": "2026-05-29T17:51:31.569Z",
       "status": "generated"
     },
     "coverCredit": "Robotics lab photo via Unsplash",
@@ -259,11 +259,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-29",
     "generationSlot": "morning",
     "scheduledFor": "2026-05-29",
-    "generatedAt": "2026-05-29T17:18:39.523Z",
+    "generatedAt": "2026-05-29T17:51:31.569Z",
     "generatedBy": "",
-    "createdAt": "2026-05-29T17:18:39.523Z",
-    "updatedAt": "2026-05-29T17:18:39.523Z",
-    "publishedAt": "2026-05-29T17:18:39.523Z"
+    "createdAt": "2026-05-29T17:51:31.569Z",
+    "updatedAt": "2026-05-29T17:51:31.569Z",
+    "publishedAt": "2026-05-29T17:51:31.569Z"
   },
   {
     "id": "post_market_agent_pilot_scorecard_ja",
@@ -364,7 +364,7 @@ export const marketBlogPosts = [
       "provider": "unsplash-library",
       "prompt": "AI agent workflow office baseline editorial ja",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-29T17:18:39.724Z",
+      "generatedAt": "2026-05-29T17:51:31.753Z",
       "status": "generated"
     },
     "coverCredit": "Network hardware photo via Unsplash",
@@ -404,11 +404,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-29",
     "generationSlot": "morning",
     "scheduledFor": "2026-05-29",
-    "generatedAt": "2026-05-29T17:18:39.724Z",
+    "generatedAt": "2026-05-29T17:51:31.753Z",
     "generatedBy": "",
-    "createdAt": "2026-05-29T17:18:39.724Z",
-    "updatedAt": "2026-05-29T17:18:39.724Z",
-    "publishedAt": "2026-05-29T17:18:39.724Z"
+    "createdAt": "2026-05-29T17:51:31.753Z",
+    "updatedAt": "2026-05-29T17:51:31.753Z",
+    "publishedAt": "2026-05-29T17:51:31.753Z"
   },
   {
     "id": "post_market_agent_pilot_scorecard_ko",
@@ -509,7 +509,7 @@ export const marketBlogPosts = [
       "provider": "unsplash-library",
       "prompt": "AI agent workflow office baseline editorial ko",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-29T17:18:39.943Z",
+      "generatedAt": "2026-05-29T17:51:31.988Z",
       "status": "generated"
     },
     "coverCredit": "Code matrix screen photo via Unsplash",
@@ -549,11 +549,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-29",
     "generationSlot": "morning",
     "scheduledFor": "2026-05-29",
-    "generatedAt": "2026-05-29T17:18:39.943Z",
+    "generatedAt": "2026-05-29T17:51:31.988Z",
     "generatedBy": "",
-    "createdAt": "2026-05-29T17:18:39.943Z",
-    "updatedAt": "2026-05-29T17:18:39.943Z",
-    "publishedAt": "2026-05-29T17:18:39.943Z"
+    "createdAt": "2026-05-29T17:51:31.988Z",
+    "updatedAt": "2026-05-29T17:51:31.988Z",
+    "publishedAt": "2026-05-29T17:51:31.988Z"
   },
   {
     "id": "post_market_ai_search_brand_monitoring_zh_hant",
@@ -645,7 +645,7 @@ export const marketBlogPosts = [
       "provider": "unsplash-library",
       "prompt": "AI search brand monitoring baseline editorial zh-Hant",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-29T17:18:40.152Z",
+      "generatedAt": "2026-05-29T17:51:32.173Z",
       "status": "generated"
     },
     "coverCredit": "Analytics dashboard photo via Unsplash",
@@ -685,11 +685,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-29",
     "generationSlot": "afternoon",
     "scheduledFor": "2026-05-29",
-    "generatedAt": "2026-05-29T17:18:40.152Z",
+    "generatedAt": "2026-05-29T17:51:32.173Z",
     "generatedBy": "",
-    "createdAt": "2026-05-29T17:18:40.152Z",
-    "updatedAt": "2026-05-29T17:18:40.152Z",
-    "publishedAt": "2026-05-29T17:18:40.152Z"
+    "createdAt": "2026-05-29T17:51:32.173Z",
+    "updatedAt": "2026-05-29T17:51:32.173Z",
+    "publishedAt": "2026-05-29T17:51:32.173Z"
   },
   {
     "id": "post_market_ai_search_brand_monitoring_en",
@@ -781,7 +781,7 @@ export const marketBlogPosts = [
       "provider": "unsplash-library",
       "prompt": "AI search brand monitoring baseline editorial en",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-29T17:18:40.351Z",
+      "generatedAt": "2026-05-29T17:51:32.363Z",
       "status": "generated"
     },
     "coverCredit": "Earth network visualization photo via Unsplash",
@@ -821,11 +821,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-29",
     "generationSlot": "afternoon",
     "scheduledFor": "2026-05-29",
-    "generatedAt": "2026-05-29T17:18:40.351Z",
+    "generatedAt": "2026-05-29T17:51:32.363Z",
     "generatedBy": "",
-    "createdAt": "2026-05-29T17:18:40.351Z",
-    "updatedAt": "2026-05-29T17:18:40.351Z",
-    "publishedAt": "2026-05-29T17:18:40.351Z"
+    "createdAt": "2026-05-29T17:51:32.363Z",
+    "updatedAt": "2026-05-29T17:51:32.363Z",
+    "publishedAt": "2026-05-29T17:51:32.363Z"
   },
   {
     "id": "post_market_ai_search_brand_monitoring_ja",
@@ -917,7 +917,7 @@ export const marketBlogPosts = [
       "provider": "unsplash-library",
       "prompt": "AI search brand monitoring baseline editorial ja",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-29T17:18:40.426Z",
+      "generatedAt": "2026-05-29T17:51:32.568Z",
       "status": "generated"
     },
     "coverCredit": "Data and research desk photo via Unsplash",
@@ -957,11 +957,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-29",
     "generationSlot": "afternoon",
     "scheduledFor": "2026-05-29",
-    "generatedAt": "2026-05-29T17:18:40.426Z",
+    "generatedAt": "2026-05-29T17:51:32.568Z",
     "generatedBy": "",
-    "createdAt": "2026-05-29T17:18:40.426Z",
-    "updatedAt": "2026-05-29T17:18:40.426Z",
-    "publishedAt": "2026-05-29T17:18:40.426Z"
+    "createdAt": "2026-05-29T17:51:32.568Z",
+    "updatedAt": "2026-05-29T17:51:32.568Z",
+    "publishedAt": "2026-05-29T17:51:32.568Z"
   },
   {
     "id": "post_market_ai_search_brand_monitoring_ko",
@@ -1053,7 +1053,7 @@ export const marketBlogPosts = [
       "provider": "unsplash-library",
       "prompt": "AI search brand monitoring baseline editorial ko",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-29T17:18:40.495Z",
+      "generatedAt": "2026-05-29T17:51:32.776Z",
       "status": "generated"
     },
     "coverCredit": "Business analytics laptop photo via Unsplash",
@@ -1093,11 +1093,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-29",
     "generationSlot": "afternoon",
     "scheduledFor": "2026-05-29",
-    "generatedAt": "2026-05-29T17:18:40.495Z",
+    "generatedAt": "2026-05-29T17:51:32.776Z",
     "generatedBy": "",
-    "createdAt": "2026-05-29T17:18:40.495Z",
-    "updatedAt": "2026-05-29T17:18:40.495Z",
-    "publishedAt": "2026-05-29T17:18:40.495Z"
+    "createdAt": "2026-05-29T17:51:32.776Z",
+    "updatedAt": "2026-05-29T17:51:32.776Z",
+    "publishedAt": "2026-05-29T17:51:32.776Z"
   },
   {
     "id": "post_market_ai_evals_before_launch_zh_hant",
@@ -1115,7 +1115,7 @@ export const marketBlogPosts = [
     "topic": "AI 產品上線前評測",
     "audience": "企業主、營運主管、行銷負責人與 AI 導入團隊",
     "geoSummary": "「AI 產品上線前評測」有價值的地方，不是它是不是熱門詞，而是它能不能變成可執行的營運判斷。這篇會整理可追溯來源、導入風險、品質審核責任與最小實驗路徑。下一步是確認團隊能否在有指標與回滾條件下「先定義失敗樣本再談發布」。",
-    "body": "AI 產品上線前評測 真正重要的時候，不是它登上新聞，而是它開始變成系統設計題。企業想做到「先定義失敗樣本再談發布」前，應該先確認能力是否穩定、輸出是否能被審核，以及導入後的責任會落在哪裡。\n\n最新背景：OpenAI 的「A shared playbook for trustworthy third party evaluations」（2026/5/29）是這篇的事實起點。我們也交叉參考 OpenAI 的「MUFG aims to become AI-native with OpenAI」，避免只改寫單一新聞。\n\n## 為什麼它會變成系統問題\n\n多數 AI 趨勢要變成商業價值，必須同時有三件事：模型能力夠穩、工作流能驗證輸出、結果能進入真實使用者面前。AI 產品上線前評測 值得被做成專題，是因為它碰到這三件事的交界。\n\n## 先讀這些來源\n\n- OpenAI：A shared playbook for trustworthy third party evaluations (2026/5/29) — OpenAI shares guidance on third-party AI evaluations, covering how to assess…\n- OpenAI：MUFG aims to become AI-native with OpenAI (2026/5/28) — MUFG uses ChatGPT Enterprise to build an AI-native organization, improve…\n- Google AI：Catch up on 12 major I/O 2026 moments (2026/5/28) — <img…\n- Anthropic：Anthropic Research\n\n## 導入判斷表\n\n| 視角 | 有用問題 | 編輯產出 |\n| --- | --- | --- |\n| 市場 | AI 產品上線前評測 到底發生了什麼變化 | 把來源事實和作者解讀分開。 |\n| 讀者 | 經營者現在需要做哪個判斷 | 先給直接答案，再做分析。 |\n| 風險 | 哪些說法還太早或可能判錯 | 標示不確定性，不製造假精準。 |\n| 行動 | 最小下一步是什麼 | 把訊號翻成「先定義失敗樣本再談發布」。 |\n\n## 從小實驗開始\n\n1. 先選一個被 AI 產品上線前評測 影響的重複決策。\n2. 寫出來源卡，分清楚已確認、推論與未知。\n3. 先定義審核者，再定義自動化。\n4. 用品質、審核時間與回滾成本判斷是否擴大。\n\n:::chart\ntitle: AI 產品上線前評測導入判斷卡\nlabels: 來源可信度|市場熱度|工作流影響|執行難度\nvalues: 85|90|68|79\ncaption: 這是編輯台用來判斷文章角度的相對分數，不是市場規模或投資建議。\n:::\n\n## 實驗室觀點\n\nALTOS LAB 不應該只做趨勢整理，而是把「AI 產品上線前評測」變成可被引用的知識資產。讀者離開時要知道系統怎麼運作、哪裡可能壞掉、什麼證據會讓建議改變。",
+    "body": "AI 產品上線前評測 真正重要的時候，不是它登上新聞，而是它開始變成系統設計題。企業想做到「先定義失敗樣本再談發布」前，應該先確認能力是否穩定、輸出是否能被審核，以及導入後的責任會落在哪裡。\n\n最新背景：OpenAI 的「A shared playbook for trustworthy third party evaluations」（2026/5/29）是這篇的事實起點。我們也交叉參考 Google AI 的「11 demos of Gemini Omni and Gemini 3.5 in action」，避免只改寫單一新聞。\n\n## 為什麼它會變成系統問題\n\n多數 AI 趨勢要變成商業價值，必須同時有三件事：模型能力夠穩、工作流能驗證輸出、結果能進入真實使用者面前。AI 產品上線前評測 值得被做成專題，是因為它碰到這三件事的交界。\n\n## 先讀這些來源\n\n- OpenAI：A shared playbook for trustworthy third party evaluations (2026/5/29) — OpenAI shares guidance on third-party AI evaluations, covering how to assess…\n- Google AI：11 demos of Gemini Omni and Gemini 3.5 in action (2026/5/29) — <img…\n- OpenAI：MUFG aims to become AI-native with OpenAI (2026/5/28) — MUFG uses ChatGPT Enterprise to build an AI-native organization, improve…\n- Anthropic：Anthropic Research\n\n## 導入判斷表\n\n| 視角 | 有用問題 | 編輯產出 |\n| --- | --- | --- |\n| 市場 | AI 產品上線前評測 到底發生了什麼變化 | 把來源事實和作者解讀分開。 |\n| 讀者 | 經營者現在需要做哪個判斷 | 先給直接答案，再做分析。 |\n| 風險 | 哪些說法還太早或可能判錯 | 標示不確定性，不製造假精準。 |\n| 行動 | 最小下一步是什麼 | 把訊號翻成「先定義失敗樣本再談發布」。 |\n\n## 從小實驗開始\n\n1. 先選一個被 AI 產品上線前評測 影響的重複決策。\n2. 寫出來源卡，分清楚已確認、推論與未知。\n3. 先定義審核者，再定義自動化。\n4. 用品質、審核時間與回滾成本判斷是否擴大。\n\n:::chart\ntitle: AI 產品上線前評測導入判斷卡\nlabels: 來源可信度|市場熱度|工作流影響|執行難度\nvalues: 85|90|68|79\ncaption: 這是編輯台用來判斷文章角度的相對分數，不是市場規模或投資建議。\n:::\n\n## 實驗室觀點\n\nALTOS LAB 不應該只做趨勢整理，而是把「AI 產品上線前評測」變成可被引用的知識資產。讀者離開時要知道系統怎麼運作、哪裡可能壞掉、什麼證據會讓建議改變。",
     "keyTakeaways": [
       "AI 產品上線前評測 應該被當成營運決策來評估，而不是只看成熱門關鍵字。",
       "高品質文章要把來源證據連到「先定義失敗樣本再談發布」的實作判斷。",
@@ -1149,18 +1149,18 @@ export const marketBlogPosts = [
         "summary": "OpenAI shares guidance on third-party AI evaluations, covering how to assess model capabilities, safeguards, and validity for frontier systems."
       },
       {
+        "title": "11 demos of Gemini Omni and Gemini 3.5 in action",
+        "url": "https://blog.google/innovation-and-ai/models-and-research/gemini-models/gemini-omni-3-5-videos/",
+        "publisher": "Google AI",
+        "publishedAt": "Fri, 29 May 2026 17:30:00 +0000",
+        "summary": "<img src=\"https://storage.googleapis.com/gweb-uniblog-publish-prod/images/Gemini_Omni_and_Gemini_3.5_hero.max-600x600.format-webp.webp\">Watch 11 videos showing the capabilities of Gemini Omni and Gemini 3.5, announced at Google I/O 2026."
+      },
+      {
         "title": "MUFG aims to become AI-native with OpenAI",
         "url": "https://openai.com/index/mufg",
         "publisher": "OpenAI",
         "publishedAt": "Thu, 28 May 2026 00:00:00 GMT",
         "summary": "MUFG uses ChatGPT Enterprise to build an AI-native organization, improve workflows, and deliver new AI-powered financial services at scale."
-      },
-      {
-        "title": "Catch up on 12 major I/O 2026 moments",
-        "url": "https://blog.google/innovation-and-ai/technology/ai/io-2026-keynote-moment-videos/",
-        "publisher": "Google AI",
-        "publishedAt": "Thu, 28 May 2026 15:00:00 +0000",
-        "summary": "<img src=\"https://storage.googleapis.com/gweb-uniblog-publish-prod/images/KW_KNH.max-600x600.format-webp.webp\">Here are 12 of the biggest Google I/O 2026 keynote moments, including news about Gemini Omni, Gemini 3.5 Flash and more."
       },
       {
         "title": "Anthropic Research",
@@ -1191,7 +1191,7 @@ export const marketBlogPosts = [
       "provider": "unsplash-library",
       "prompt": "AI evaluation scorecard baseline editorial zh-Hant",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-29T17:18:40.558Z",
+      "generatedAt": "2026-05-29T17:51:32.965Z",
       "status": "generated"
     },
     "coverCredit": "Machine learning code photo via Unsplash",
@@ -1231,11 +1231,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-29",
     "generationSlot": "morning",
     "scheduledFor": "2026-05-29",
-    "generatedAt": "2026-05-29T17:18:40.558Z",
+    "generatedAt": "2026-05-29T17:51:32.965Z",
     "generatedBy": "",
-    "createdAt": "2026-05-29T17:18:40.558Z",
-    "updatedAt": "2026-05-29T17:18:40.558Z",
-    "publishedAt": "2026-05-29T17:18:40.558Z"
+    "createdAt": "2026-05-29T17:51:32.965Z",
+    "updatedAt": "2026-05-29T17:51:32.965Z",
+    "publishedAt": "2026-05-29T17:51:32.965Z"
   },
   {
     "id": "post_market_ai_evals_before_launch_en",
@@ -1253,7 +1253,7 @@ export const marketBlogPosts = [
     "topic": "AI evals before launch",
     "audience": "founders, operators, marketing leads and AI implementation teams",
     "geoSummary": "Pre-launch AI evals are useful only when it becomes an operating decision, not a trend label. This piece maps the source evidence, the implementation risk and the reviewer who must own quality. The practical next step is to test whether the team can define failure cases before shipping with clear metrics and rollback paths.",
-    "body": "AI evals before launch becomes interesting when it stops being a headline and starts behaving like an operating-system problem. The practical question is what has to be true before a company can define failure cases before shipping without creating hidden review debt.\n\nLatest context: OpenAI published \"A shared playbook for trustworthy third party evaluations\" on May 29, 2026. We also check OpenAI's \"MUFG aims to become AI-native with OpenAI\" so the piece is not built from a single headline.\n\n## Why this turns into a system question\n\nMost AI trends become business-relevant only when three things line up: a reliable capability, a workflow where the output can be checked, and a distribution path that puts the result in front of real users. AI evals before launch sits close to that intersection.\n\n## Evidence to read first\n\n- OpenAI: A shared playbook for trustworthy third party evaluations (May 29, 2026) — OpenAI shares guidance on third-party AI evaluations, covering how to assess model capabilities, safeguards…\n- OpenAI: MUFG aims to become AI-native with OpenAI (May 28, 2026) — MUFG uses ChatGPT Enterprise to build an AI-native organization, improve workflows, and deliver new…\n- Google AI: Catch up on 12 major I/O 2026 moments (May 28, 2026) — <img…\n- Anthropic: Anthropic Research\n\n## Adoption decision table\n\n| Lens | Useful question | Editorial output |\n| --- | --- | --- |\n| Market | What actually changed around AI evals before launch? | Separate source facts from interpretation. |\n| Reader | What decision does the operator need to make? | Give a direct answer before analysis. |\n| Risk | What could be wrong or early? | Mark uncertainty and avoid fake precision. |\n| Action | What is the smallest next step? | Translate the signal into how to define failure cases before shipping. |\n\n## A small implementation path\n\n1. Pick one repeated decision affected by AI evals before launch.\n2. Write the source card: what is confirmed, what is inferred and what is unknown.\n3. Define the reviewer before defining the automation.\n4. Measure quality, review time and rollback cost before expanding scope.\n\n:::chart\ntitle: AI evals before launch adoption scorecard\nlabels: Source confidence|Market heat|Workflow impact|Execution difficulty\nvalues: 85|90|68|79\ncaption: Relative editorial scores for framing the article, not market sizing or investment advice.\n:::\n\n## Lab judgment\n\nALTOS LAB should publish this as a durable knowledge asset, not a trend recap. The piece is useful if a reader can leave with a sharper model of how the system works, where it breaks and what evidence would change the recommendation.",
+    "body": "AI evals before launch becomes interesting when it stops being a headline and starts behaving like an operating-system problem. The practical question is what has to be true before a company can define failure cases before shipping without creating hidden review debt.\n\nLatest context: OpenAI published \"A shared playbook for trustworthy third party evaluations\" on May 29, 2026. We also check Google AI's \"11 demos of Gemini Omni and Gemini 3.5 in action\" so the piece is not built from a single headline.\n\n## Why this turns into a system question\n\nMost AI trends become business-relevant only when three things line up: a reliable capability, a workflow where the output can be checked, and a distribution path that puts the result in front of real users. AI evals before launch sits close to that intersection.\n\n## Evidence to read first\n\n- OpenAI: A shared playbook for trustworthy third party evaluations (May 29, 2026) — OpenAI shares guidance on third-party AI evaluations, covering how to assess model capabilities, safeguards…\n- Google AI: 11 demos of Gemini Omni and Gemini 3.5 in action (May 29, 2026) — <img…\n- OpenAI: MUFG aims to become AI-native with OpenAI (May 28, 2026) — MUFG uses ChatGPT Enterprise to build an AI-native organization, improve workflows, and deliver new…\n- Anthropic: Anthropic Research\n\n## Adoption decision table\n\n| Lens | Useful question | Editorial output |\n| --- | --- | --- |\n| Market | What actually changed around AI evals before launch? | Separate source facts from interpretation. |\n| Reader | What decision does the operator need to make? | Give a direct answer before analysis. |\n| Risk | What could be wrong or early? | Mark uncertainty and avoid fake precision. |\n| Action | What is the smallest next step? | Translate the signal into how to define failure cases before shipping. |\n\n## A small implementation path\n\n1. Pick one repeated decision affected by AI evals before launch.\n2. Write the source card: what is confirmed, what is inferred and what is unknown.\n3. Define the reviewer before defining the automation.\n4. Measure quality, review time and rollback cost before expanding scope.\n\n:::chart\ntitle: AI evals before launch adoption scorecard\nlabels: Source confidence|Market heat|Workflow impact|Execution difficulty\nvalues: 85|90|68|79\ncaption: Relative editorial scores for framing the article, not market sizing or investment advice.\n:::\n\n## Lab judgment\n\nALTOS LAB should publish this as a durable knowledge asset, not a trend recap. The piece is useful if a reader can leave with a sharper model of how the system works, where it breaks and what evidence would change the recommendation.",
     "keyTakeaways": [
       "AI evals before launch should be evaluated as an operating decision, not a trend headline.",
       "The strongest content links source evidence to a concrete way to define failure cases before shipping.",
@@ -1287,18 +1287,18 @@ export const marketBlogPosts = [
         "summary": "OpenAI shares guidance on third-party AI evaluations, covering how to assess model capabilities, safeguards, and validity for frontier systems."
       },
       {
+        "title": "11 demos of Gemini Omni and Gemini 3.5 in action",
+        "url": "https://blog.google/innovation-and-ai/models-and-research/gemini-models/gemini-omni-3-5-videos/",
+        "publisher": "Google AI",
+        "publishedAt": "Fri, 29 May 2026 17:30:00 +0000",
+        "summary": "<img src=\"https://storage.googleapis.com/gweb-uniblog-publish-prod/images/Gemini_Omni_and_Gemini_3.5_hero.max-600x600.format-webp.webp\">Watch 11 videos showing the capabilities of Gemini Omni and Gemini 3.5, announced at Google I/O 2026."
+      },
+      {
         "title": "MUFG aims to become AI-native with OpenAI",
         "url": "https://openai.com/index/mufg",
         "publisher": "OpenAI",
         "publishedAt": "Thu, 28 May 2026 00:00:00 GMT",
         "summary": "MUFG uses ChatGPT Enterprise to build an AI-native organization, improve workflows, and deliver new AI-powered financial services at scale."
-      },
-      {
-        "title": "Catch up on 12 major I/O 2026 moments",
-        "url": "https://blog.google/innovation-and-ai/technology/ai/io-2026-keynote-moment-videos/",
-        "publisher": "Google AI",
-        "publishedAt": "Thu, 28 May 2026 15:00:00 +0000",
-        "summary": "<img src=\"https://storage.googleapis.com/gweb-uniblog-publish-prod/images/KW_KNH.max-600x600.format-webp.webp\">Here are 12 of the biggest Google I/O 2026 keynote moments, including news about Gemini Omni, Gemini 3.5 Flash and more."
       },
       {
         "title": "Anthropic Research",
@@ -1329,7 +1329,7 @@ export const marketBlogPosts = [
       "provider": "unsplash-library",
       "prompt": "AI evaluation scorecard baseline editorial en",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-29T17:18:40.622Z",
+      "generatedAt": "2026-05-29T17:51:33.158Z",
       "status": "generated"
     },
     "coverCredit": "Circuit board macro photo via Unsplash",
@@ -1369,11 +1369,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-29",
     "generationSlot": "morning",
     "scheduledFor": "2026-05-29",
-    "generatedAt": "2026-05-29T17:18:40.622Z",
+    "generatedAt": "2026-05-29T17:51:33.158Z",
     "generatedBy": "",
-    "createdAt": "2026-05-29T17:18:40.622Z",
-    "updatedAt": "2026-05-29T17:18:40.622Z",
-    "publishedAt": "2026-05-29T17:18:40.622Z"
+    "createdAt": "2026-05-29T17:51:33.158Z",
+    "updatedAt": "2026-05-29T17:51:33.158Z",
+    "publishedAt": "2026-05-29T17:51:33.158Z"
   },
   {
     "id": "post_market_ai_evals_before_launch_ja",
@@ -1391,7 +1391,7 @@ export const marketBlogPosts = [
     "topic": "AIプロダクト公開前評価",
     "audience": "経営者、事業責任者、マーケティング責任者、AI導入チーム",
     "geoSummary": "AIプロダクト公開前評価は、トレンド名ではなく運用判断になった時に価値があります。この記事では、出典で確認できる事実、実装リスク、品質を見張る担当者を整理します。次の一歩は、明確な指標と巻き戻し条件を置いて出荷前に失敗ケースを定義するかを試すことです。",
-    "body": "AIプロダクト公開前評価は、見出しではなく運用システムの問題として見ると重要になります。企業が「出荷前に失敗ケースを定義する」を始める前に確認すべきなのは、隠れたレビュー負債を増やさずに使えるかです。\n\n最新背景：OpenAIの「A shared playbook for trustworthy third party evaluations」（2026/5/29）を事実確認の起点にします。さらにOpenAIの「MUFG aims to become AI-native with OpenAI」も照合し、単一記事の言い換えにしません。\n\n## なぜシステム問題になるのか\n\nAIトレンドが事業に効くのは、能力が安定し、出力を検証できる業務があり、実際の利用者に届く経路がある時です。AIプロダクト公開前評価はその交差点に近づいています。\n\n## 先に読むべき出典\n\n- OpenAI：A shared playbook for trustworthy third party evaluations (2026/5/29) — OpenAI shares guidance on third-party AI evaluations, covering how to assess…\n- OpenAI：MUFG aims to become AI-native with OpenAI (2026/5/28) — MUFG uses ChatGPT Enterprise to build an AI-native organization, improve…\n- Google AI：Catch up on 12 major I/O 2026 moments (2026/5/28) — <img…\n- Anthropic：Anthropic Research\n\n## 導入判断表\n\n| 視点 | 役に立つ問い | 編集アウトプット |\n| --- | --- | --- |\n| 市場 | AIプロダクト公開前評価で実際に何が変わったか | 事実と解釈を分ける。 |\n| 読者 | 運用担当者は何を決める必要があるか | 分析前に短く答える。 |\n| リスク | 何がまだ早い、または間違う可能性があるか | 不確実性を明示する。 |\n| 行動 | 最小の次の一手は何か | 出荷前に失敗ケースを定義するへ翻訳する。 |\n\n## 小さく試す手順\n\n1. AIプロダクト公開前評価が影響する繰り返し判断を一つ選ぶ。\n2. 確認済み、推定、不明点を分けた出典カードを作る。\n3. 自動化より先にレビュー責任者を決める。\n4. 品質、レビュー時間、巻き戻しコストを測る。\n\n:::chart\ntitle: AIプロダクト公開前評価導入スコアカード\nlabels: 出典信頼度|市場熱量|業務影響|実行難度\nvalues: 85|90|68|79\ncaption: 記事の角度を決めるための相対的な編集スコアで、市場規模や投資助言ではありません。\n:::\n\n## 実験室の判断\n\nALTOS LABはこれを流行まとめではなく、長く使える知識資産として扱います。読者が仕組み、壊れ方、判断を変える証拠を持ち帰れるなら価値があります。",
+    "body": "AIプロダクト公開前評価は、見出しではなく運用システムの問題として見ると重要になります。企業が「出荷前に失敗ケースを定義する」を始める前に確認すべきなのは、隠れたレビュー負債を増やさずに使えるかです。\n\n最新背景：OpenAIの「A shared playbook for trustworthy third party evaluations」（2026/5/29）を事実確認の起点にします。さらにGoogle AIの「11 demos of Gemini Omni and Gemini 3.5 in action」も照合し、単一記事の言い換えにしません。\n\n## なぜシステム問題になるのか\n\nAIトレンドが事業に効くのは、能力が安定し、出力を検証できる業務があり、実際の利用者に届く経路がある時です。AIプロダクト公開前評価はその交差点に近づいています。\n\n## 先に読むべき出典\n\n- OpenAI：A shared playbook for trustworthy third party evaluations (2026/5/29) — OpenAI shares guidance on third-party AI evaluations, covering how to assess…\n- Google AI：11 demos of Gemini Omni and Gemini 3.5 in action (2026/5/29) — <img…\n- OpenAI：MUFG aims to become AI-native with OpenAI (2026/5/28) — MUFG uses ChatGPT Enterprise to build an AI-native organization, improve…\n- Anthropic：Anthropic Research\n\n## 導入判断表\n\n| 視点 | 役に立つ問い | 編集アウトプット |\n| --- | --- | --- |\n| 市場 | AIプロダクト公開前評価で実際に何が変わったか | 事実と解釈を分ける。 |\n| 読者 | 運用担当者は何を決める必要があるか | 分析前に短く答える。 |\n| リスク | 何がまだ早い、または間違う可能性があるか | 不確実性を明示する。 |\n| 行動 | 最小の次の一手は何か | 出荷前に失敗ケースを定義するへ翻訳する。 |\n\n## 小さく試す手順\n\n1. AIプロダクト公開前評価が影響する繰り返し判断を一つ選ぶ。\n2. 確認済み、推定、不明点を分けた出典カードを作る。\n3. 自動化より先にレビュー責任者を決める。\n4. 品質、レビュー時間、巻き戻しコストを測る。\n\n:::chart\ntitle: AIプロダクト公開前評価導入スコアカード\nlabels: 出典信頼度|市場熱量|業務影響|実行難度\nvalues: 85|90|68|79\ncaption: 記事の角度を決めるための相対的な編集スコアで、市場規模や投資助言ではありません。\n:::\n\n## 実験室の判断\n\nALTOS LABはこれを流行まとめではなく、長く使える知識資産として扱います。読者が仕組み、壊れ方、判断を変える証拠を持ち帰れるなら価値があります。",
     "keyTakeaways": [
       "AIプロダクト公開前評価は流行語ではなく、運用判断として評価する。",
       "出荷前に失敗ケースを定義するには、出典と実装手順を同時に示す必要がある。",
@@ -1425,18 +1425,18 @@ export const marketBlogPosts = [
         "summary": "OpenAI shares guidance on third-party AI evaluations, covering how to assess model capabilities, safeguards, and validity for frontier systems."
       },
       {
+        "title": "11 demos of Gemini Omni and Gemini 3.5 in action",
+        "url": "https://blog.google/innovation-and-ai/models-and-research/gemini-models/gemini-omni-3-5-videos/",
+        "publisher": "Google AI",
+        "publishedAt": "Fri, 29 May 2026 17:30:00 +0000",
+        "summary": "<img src=\"https://storage.googleapis.com/gweb-uniblog-publish-prod/images/Gemini_Omni_and_Gemini_3.5_hero.max-600x600.format-webp.webp\">Watch 11 videos showing the capabilities of Gemini Omni and Gemini 3.5, announced at Google I/O 2026."
+      },
+      {
         "title": "MUFG aims to become AI-native with OpenAI",
         "url": "https://openai.com/index/mufg",
         "publisher": "OpenAI",
         "publishedAt": "Thu, 28 May 2026 00:00:00 GMT",
         "summary": "MUFG uses ChatGPT Enterprise to build an AI-native organization, improve workflows, and deliver new AI-powered financial services at scale."
-      },
-      {
-        "title": "Catch up on 12 major I/O 2026 moments",
-        "url": "https://blog.google/innovation-and-ai/technology/ai/io-2026-keynote-moment-videos/",
-        "publisher": "Google AI",
-        "publishedAt": "Thu, 28 May 2026 15:00:00 +0000",
-        "summary": "<img src=\"https://storage.googleapis.com/gweb-uniblog-publish-prod/images/KW_KNH.max-600x600.format-webp.webp\">Here are 12 of the biggest Google I/O 2026 keynote moments, including news about Gemini Omni, Gemini 3.5 Flash and more."
       },
       {
         "title": "Anthropic Research",
@@ -1467,7 +1467,7 @@ export const marketBlogPosts = [
       "provider": "unsplash-library",
       "prompt": "AI evaluation scorecard baseline editorial ja",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-29T17:18:40.836Z",
+      "generatedAt": "2026-05-29T17:51:33.369Z",
       "status": "generated"
     },
     "coverCredit": "Code editor workspace photo via Unsplash",
@@ -1507,11 +1507,11 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-29",
     "generationSlot": "morning",
     "scheduledFor": "2026-05-29",
-    "generatedAt": "2026-05-29T17:18:40.836Z",
+    "generatedAt": "2026-05-29T17:51:33.369Z",
     "generatedBy": "",
-    "createdAt": "2026-05-29T17:18:40.836Z",
-    "updatedAt": "2026-05-29T17:18:40.836Z",
-    "publishedAt": "2026-05-29T17:18:40.836Z"
+    "createdAt": "2026-05-29T17:51:33.369Z",
+    "updatedAt": "2026-05-29T17:51:33.369Z",
+    "publishedAt": "2026-05-29T17:51:33.369Z"
   },
   {
     "id": "post_market_ai_evals_before_launch_ko",
@@ -1529,7 +1529,7 @@ export const marketBlogPosts = [
     "topic": "AI 제품 출시 전 평가",
     "audience": "창업자, 운영 리더, 마케팅 책임자, AI 도입 팀",
     "geoSummary": "AI 제품 출시 전 평가는 트렌드 이름이 아니라 운영 판단이 될 때 가치가 있습니다. 이 글은 출처로 확인되는 사실, 실행 리스크, 품질을 책임질 검토자를 정리합니다. 다음 단계는 명확한 지표와 롤백 조건을 두고 \"배포 전에 실패 사례부터 정의하기\"를 시험하는 것입니다.",
-    "body": "AI 제품 출시 전 평가는 헤드라인이 아니라 운영 시스템 문제로 볼 때 중요해집니다. 기업이 \"배포 전에 실패 사례부터 정의하기\"를 시작하기 전에 확인해야 할 것은 숨은 검토 부채 없이 쓸 수 있는가입니다.\n\n최신 배경: OpenAI의 \"A shared playbook for trustworthy third party evaluations\"(2026. 5. 29.)를 사실 확인의 출발점으로 삼습니다. 또 OpenAI의 \"MUFG aims to become AI-native with OpenAI\"도 함께 확인해 단일 기사 재작성에 머물지 않게 합니다.\n\n## 왜 시스템 문제가 되는가\n\nAI 트렌드가 사업에 영향을 주려면 능력이 안정적이고, 출력을 검증할 업무가 있으며, 실제 사용자에게 닿는 경로가 있어야 합니다. AI 제품 출시 전 평가는 그 교차점에 가까워지고 있습니다.\n\n## 먼저 읽을 출처\n\n- OpenAI: A shared playbook for trustworthy third party evaluations (2026. 5. 29.) — OpenAI shares guidance on third-party AI evaluations, covering how to assess…\n- OpenAI: MUFG aims to become AI-native with OpenAI (2026. 5. 28.) — MUFG uses ChatGPT Enterprise to build an AI-native organization, improve…\n- Google AI: Catch up on 12 major I/O 2026 moments (2026. 5. 28.) — <img…\n- Anthropic: Anthropic Research\n\n## 도입 판단 표\n\n| 관점 | 유용한 질문 | 편집 결과 |\n| --- | --- | --- |\n| 시장 | AI 제품 출시 전 평가에서 실제로 무엇이 바뀌었나 | 사실과 해석을 분리한다. |\n| 독자 | 운영자는 무엇을 결정해야 하나 | 분석 전에 직접 답한다. |\n| 리스크 | 무엇이 아직 이르거나 틀릴 수 있나 | 불확실성을 표시한다. |\n| 행동 | 가장 작은 다음 행동은 무엇인가 | 배포 전에 실패 사례부터 정의하기로 번역한다. |\n\n## 작게 실험하는 순서\n\n1. AI 제품 출시 전 평가가 영향을 주는 반복 판단 하나를 고른다.\n2. 확인된 것, 추론한 것, 모르는 것을 나눈 출처 카드를 만든다.\n3. 자동화보다 먼저 검토 책임자를 정한다.\n4. 품질, 검토 시간, 롤백 비용을 측정한다.\n\n:::chart\ntitle: AI 제품 출시 전 평가 도입 스코어카드\nlabels: 출처 신뢰도|시장 열기|업무 영향|실행 난이도\nvalues: 85|90|68|79\ncaption: 기사 관점을 잡기 위한 상대적 편집 점수이며 시장 규모나 투자 조언이 아닙니다.\n:::\n\n## 실험실 판단\n\nALTOS LAB은 이를 유행 정리가 아니라 오래 쓰일 지식 자산으로 다룹니다. 독자가 작동 방식, 깨지는 지점, 판단을 바꿀 증거를 가져갈 수 있어야 합니다.",
+    "body": "AI 제품 출시 전 평가는 헤드라인이 아니라 운영 시스템 문제로 볼 때 중요해집니다. 기업이 \"배포 전에 실패 사례부터 정의하기\"를 시작하기 전에 확인해야 할 것은 숨은 검토 부채 없이 쓸 수 있는가입니다.\n\n최신 배경: OpenAI의 \"A shared playbook for trustworthy third party evaluations\"(2026. 5. 29.)를 사실 확인의 출발점으로 삼습니다. 또 Google AI의 \"11 demos of Gemini Omni and Gemini 3.5 in action\"도 함께 확인해 단일 기사 재작성에 머물지 않게 합니다.\n\n## 왜 시스템 문제가 되는가\n\nAI 트렌드가 사업에 영향을 주려면 능력이 안정적이고, 출력을 검증할 업무가 있으며, 실제 사용자에게 닿는 경로가 있어야 합니다. AI 제품 출시 전 평가는 그 교차점에 가까워지고 있습니다.\n\n## 먼저 읽을 출처\n\n- OpenAI: A shared playbook for trustworthy third party evaluations (2026. 5. 29.) — OpenAI shares guidance on third-party AI evaluations, covering how to assess…\n- Google AI: 11 demos of Gemini Omni and Gemini 3.5 in action (2026. 5. 29.) — <img…\n- OpenAI: MUFG aims to become AI-native with OpenAI (2026. 5. 28.) — MUFG uses ChatGPT Enterprise to build an AI-native organization, improve…\n- Anthropic: Anthropic Research\n\n## 도입 판단 표\n\n| 관점 | 유용한 질문 | 편집 결과 |\n| --- | --- | --- |\n| 시장 | AI 제품 출시 전 평가에서 실제로 무엇이 바뀌었나 | 사실과 해석을 분리한다. |\n| 독자 | 운영자는 무엇을 결정해야 하나 | 분석 전에 직접 답한다. |\n| 리스크 | 무엇이 아직 이르거나 틀릴 수 있나 | 불확실성을 표시한다. |\n| 행동 | 가장 작은 다음 행동은 무엇인가 | 배포 전에 실패 사례부터 정의하기로 번역한다. |\n\n## 작게 실험하는 순서\n\n1. AI 제품 출시 전 평가가 영향을 주는 반복 판단 하나를 고른다.\n2. 확인된 것, 추론한 것, 모르는 것을 나눈 출처 카드를 만든다.\n3. 자동화보다 먼저 검토 책임자를 정한다.\n4. 품질, 검토 시간, 롤백 비용을 측정한다.\n\n:::chart\ntitle: AI 제품 출시 전 평가 도입 스코어카드\nlabels: 출처 신뢰도|시장 열기|업무 영향|실행 난이도\nvalues: 85|90|68|79\ncaption: 기사 관점을 잡기 위한 상대적 편집 점수이며 시장 규모나 투자 조언이 아닙니다.\n:::\n\n## 실험실 판단\n\nALTOS LAB은 이를 유행 정리가 아니라 오래 쓰일 지식 자산으로 다룹니다. 독자가 작동 방식, 깨지는 지점, 판단을 바꿀 증거를 가져갈 수 있어야 합니다.",
     "keyTakeaways": [
       "AI 제품 출시 전 평가는 유행어가 아니라 운영 의사결정으로 평가해야 한다.",
       "배포 전에 실패 사례부터 정의하기 위해서는 출처와 실행 순서를 함께 제시해야 한다.",
@@ -1563,18 +1563,18 @@ export const marketBlogPosts = [
         "summary": "OpenAI shares guidance on third-party AI evaluations, covering how to assess model capabilities, safeguards, and validity for frontier systems."
       },
       {
+        "title": "11 demos of Gemini Omni and Gemini 3.5 in action",
+        "url": "https://blog.google/innovation-and-ai/models-and-research/gemini-models/gemini-omni-3-5-videos/",
+        "publisher": "Google AI",
+        "publishedAt": "Fri, 29 May 2026 17:30:00 +0000",
+        "summary": "<img src=\"https://storage.googleapis.com/gweb-uniblog-publish-prod/images/Gemini_Omni_and_Gemini_3.5_hero.max-600x600.format-webp.webp\">Watch 11 videos showing the capabilities of Gemini Omni and Gemini 3.5, announced at Google I/O 2026."
+      },
+      {
         "title": "MUFG aims to become AI-native with OpenAI",
         "url": "https://openai.com/index/mufg",
         "publisher": "OpenAI",
         "publishedAt": "Thu, 28 May 2026 00:00:00 GMT",
         "summary": "MUFG uses ChatGPT Enterprise to build an AI-native organization, improve workflows, and deliver new AI-powered financial services at scale."
-      },
-      {
-        "title": "Catch up on 12 major I/O 2026 moments",
-        "url": "https://blog.google/innovation-and-ai/technology/ai/io-2026-keynote-moment-videos/",
-        "publisher": "Google AI",
-        "publishedAt": "Thu, 28 May 2026 15:00:00 +0000",
-        "summary": "<img src=\"https://storage.googleapis.com/gweb-uniblog-publish-prod/images/KW_KNH.max-600x600.format-webp.webp\">Here are 12 of the biggest Google I/O 2026 keynote moments, including news about Gemini Omni, Gemini 3.5 Flash and more."
       },
       {
         "title": "Anthropic Research",
@@ -1605,7 +1605,7 @@ export const marketBlogPosts = [
       "provider": "unsplash-library",
       "prompt": "AI evaluation scorecard baseline editorial ko",
       "style": "Open-licensed editorial photography selected to match the article topic.",
-      "generatedAt": "2026-05-29T17:18:41.023Z",
+      "generatedAt": "2026-05-29T17:51:33.553Z",
       "status": "generated"
     },
     "coverCredit": "Terminal code close-up photo via Unsplash",
@@ -1645,10 +1645,10 @@ export const marketBlogPosts = [
     "generationDate": "2026-05-29",
     "generationSlot": "morning",
     "scheduledFor": "2026-05-29",
-    "generatedAt": "2026-05-29T17:18:41.023Z",
+    "generatedAt": "2026-05-29T17:51:33.553Z",
     "generatedBy": "",
-    "createdAt": "2026-05-29T17:18:41.023Z",
-    "updatedAt": "2026-05-29T17:18:41.023Z",
-    "publishedAt": "2026-05-29T17:18:41.023Z"
+    "createdAt": "2026-05-29T17:51:33.553Z",
+    "updatedAt": "2026-05-29T17:51:33.553Z",
+    "publishedAt": "2026-05-29T17:51:33.553Z"
   }
 ] satisfies BlogPost[];

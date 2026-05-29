@@ -35,11 +35,17 @@ assert(generation.includes("sourceRegistryEntryForUrl"), "generation ranks sourc
 assert(!generation.includes("deepseek-chat"), "generation does not use deprecated deepseek-chat alias");
 assert(generation.includes("Subtitle/standfirst craft rules"), "generation trains DeepSeek on compelling subtitle/standfirst rules");
 assert(generation.includes("Medium-style scene hook"), "generation includes creative narrative modes learned from market writing");
+assert(
+  generation.includes("Foreign-source sections must be plain-language source translation"),
+  "generation requires foreign news to become plain-language source translation"
+);
 
 assert(quality.includes("withLlmQualityEvaluation"), "quality gate can merge LLM-as-judge evaluation");
 assert(quality.includes("registryTrustedHostFragments"), "quality source trust uses the source registry");
 assert(quality.includes("weakSubtitlePatterns"), "quality gate rejects weak generic subtitles");
 assert(quality.includes("subtitleEvidencePattern"), "quality gate requires subtitle evidence or operator tension");
+assert(quality.includes("rawZhEnglishJargonPattern"), "quality gate rejects raw English AI-ops jargon in zh-Hant articles");
+assert(quality.includes("technicalJargonPattern"), "quality gate requires jargon-heavy paragraphs to explain terms plainly");
 assert(covers.includes("BLOG_IMAGE_STORE_BLOB"), "image pipeline supports optional Vercel Blob persistence");
 assert(covers.includes("searchPexels") && covers.includes("searchPixabay"), "image pipeline supports expanded free image APIs");
 assert(covers.includes("pinterest") && covers.includes("approvedImageUrl"), "image pipeline rejects Pinterest URLs while allowing style inspiration");
@@ -88,6 +94,28 @@ const postsWithoutDatedSource = seedPosts.filter(
   (post) => !post.sourceLinks?.some((source) => source.publishedAt)
 );
 assert(postsWithoutDatedSource.length === 0, "seed articles include at least one dated real news/source link");
+
+const zhAgentPilot = seedPosts.find((post) => post.slug === "agent-pilot-scorecard-zh-hant");
+const zhAgentPilotReadableText = zhAgentPilot
+  ? [
+      zhAgentPilot.title,
+      zhAgentPilot.excerpt,
+      zhAgentPilot.geoSummary,
+      zhAgentPilot.body,
+      ...(zhAgentPilot.keyTakeaways || []),
+      ...(zhAgentPilot.faqs || []).flatMap((faq) => [faq.question, faq.answer])
+    ].join("\n")
+  : "";
+assert(Boolean(zhAgentPilot), "zh-Hant agent pilot baseline exists");
+assert(
+  zhAgentPilotReadableText.includes("把海外新聞翻成企業能用的判斷"),
+  "agent pilot article has a clear source-translation section heading"
+);
+assert(
+  !/\b(?:production traces?|eval(?:uation)? loops?|eval-driven|trace|evals?|rollback)\b/i.test(zhAgentPilotReadableText),
+  "zh-Hant agent pilot article translates trace/eval/rollback jargon into plain Chinese"
+);
+assert(/\*\*[^*\n]{4,80}\*\*/.test(zhAgentPilot?.body || ""), "zh-Hant agent pilot article uses concise bold emphasis for scanability");
 
 const breakingWithoutNewsAnchor = seedPosts.filter(
   (post) =>

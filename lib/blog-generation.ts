@@ -892,6 +892,10 @@ Quality rules:
 - Do not make the title a taxonomy bucket. The title must name the source/event/mechanism/operator question and the implication for the reader.
 - Use the listed RSS/source items as factual references only. Do not copy source wording, paragraphs, structure, images, charts, screenshots or article art.
 - If using foreign news, write it as a translated and adapted market signal. Add a visible "Source and translation note" / "來源與轉譯備註" / equivalent local-language H2 that says which sources were translated or summarized, how ALTOS LAB used them, and that the article is not a full reprint.
+- Foreign-source sections must be plain-language source translation, not jargon display. They must answer: what did the source say, what does it mean for the reader's workflow, what should not be overclaimed, and what action or check follows.
+- Do not leave technical terms unexplained. If you use terms like trace, eval, rollback, orchestration, retrieval, routing, agent workflow, plugin or observability, define them in the article's language the first time they appear. For zh-Hant, prefer "操作紀錄", "固定測試題/評測", "回滾/退回舊流程", "工作流編排", "檢索", "路由", "可觀測性".
+- Use bold sparingly to help scanning: bold the one-sentence judgment, key operator questions, or concrete checklist phrase. Do not bold entire paragraphs.
+- If a smart non-engineer would ask "所以這跟我有什麼關係？", rewrite the paragraph with a workflow example and a next decision.
 - At least one body section must connect a concrete outside news event to the reader's business decision. Do not leave foreign sources only in sourceLinks.
 - The article must be an original ALTOS LAB synthesis: summarize facts in your own words, cite the source URLs, and add implementation judgment.
 - Make readers feel ALTOS LAB is a serious lab: source-grounded, practical, original, careful with uncertainty and useful for decision makers.
@@ -905,10 +909,10 @@ Quality rules:
   4. Use specific nouns and verbs. Weak: "This trend is important for companies." Strong: "OpenAI's tax-agent case turns the question from 'can an agent act?' into 'can we trace, score and roll it back when it acts wrong?'"
   5. Never repeat the title with extra words. The subtitle must add a second angle: source evidence, risk, operator benefit or decision frame.
 - Subtitle examples by language:
-  zh-Hant: "不要把第一個 AI Agent 試點交給最複雜的流程。OpenAI 的 tax-agent 案例和 Hugging Face 的 agent 定義都指向同一件事：先選能留下 trace、能人工審核、能退回舊流程的任務。"
-  en: "Do not hand the first AI-agent pilot to the messiest workflow. OpenAI's tax-agent case and Hugging Face's agent framing both point to the same rule: start where traces, review and rollback are possible."
-  ja: "最初のAIエージェント実験を、いきなり最も複雑な業務に置かない。OpenAIの事例とHugging Faceの定義から見える基準は、trace、レビュー、巻き戻しができる業務から始めることです。"
-  ko: "첫 AI Agent 파일럿을 가장 복잡한 업무에 맡기지 마세요. OpenAI 사례와 Hugging Face의 agent 정의가 가리키는 기준은 trace, 검토, 롤백이 가능한 흐름부터 시작하는 것입니다."
+  zh-Hant: "不要把第一個 AI Agent 試點交給最複雜的流程。OpenAI 的 tax-agent 案例和 Hugging Face 的 agent 定義都指向同一件事：先選能留下操作紀錄、能人工審核、能退回舊流程的任務。"
+  en: "Do not hand the first AI-agent pilot to the messiest workflow. OpenAI's tax-agent case and Hugging Face's agent framing both point to the same rule: start where operation logs, review and rollback are possible."
+  ja: "最初のAIエージェント実験を、いきなり最も複雑な業務に置かない。OpenAIの事例とHugging Faceの定義から見える基準は、操作記録、レビュー、巻き戻しができる業務から始めることです。"
+  ko: "첫 AI Agent 파일럿을 가장 복잡한 업무에 맡기지 마세요. OpenAI 사례와 Hugging Face의 agent 정의가 가리키는 기준은 작업 기록, 검토, 롤백이 가능한 흐름부터 시작하는 것입니다."
 - Anti-slop style gate: cut throat-clearing openers, do not announce "this article will", avoid "not X but Y" structures, avoid generic hype words, use concrete actors and actions, vary sentence rhythm, and remove empty transitions.
 - Sound like a sharp lab editor. Specific claims beat polished slogans.
 - Do not invent client names, statistics, dates or source claims.
@@ -977,6 +981,8 @@ Make ALTOS LAB sound like a serious AI implementation lab and product studio, no
 Remove AI-slop patterns: throat-clearing, generic hype, passive voice, "not X but Y" contrasts, meta transitions, repeated sentence rhythm and vague claims. Keep the article specific and source-grounded.
 Reject generic trend framing. The repaired title must contain a concrete question, market signal, source-backed event, visual frame or operator decision. The opening must answer the query immediately and the article must make ALTOS LAB's editorial read visible without repeating a fixed heading.
 Rewrite the excerpt as a strong visible subtitle/standfirst: concrete source/event or operator tension first, then the reader decision or tradeoff. It must not be a bland summary, must not repeat the title, and must not start with "本文", "這篇文章", "This article", "learn how", "explore", "この記事", or "이 글".
+Make every technical section easy for a busy non-specialist to understand. Translate jargon into plain language on first use. If the draft uses trace, eval, rollback, orchestration, retrieval, routing, plugin or observability, explain the human meaning immediately, such as operation logs, test questions, returning to the old workflow, source lookup, or seeing where the system failed.
+Use bold sparingly to mark the core judgment, the three operator questions, or a checklist phrase that helps scanning. Never use bold as decoration.
 If the article feels templated, pick a stronger narrative mode: scene hook, market route comparison, company-signal analysis, lab notebook, or contrarian operator column. Keep the sources, but make the human reading experience less predictable.
 
 Language: ${post.language}
