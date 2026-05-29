@@ -7,7 +7,7 @@ import { RichText } from "@/components/RichText";
 import { SafeBlogImage } from "@/components/SafeBlogImage";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { SiteHeader } from "@/components/site/SiteHeader";
-import { blogIndexPath, blogPostPath, languageLabel } from "@/lib/blog-utils";
+import { blogContentTypeLabel, blogIndexPath, blogPostPath, languageLabel } from "@/lib/blog-utils";
 import { getPublishedBlogAlternates, getRelatedPublishedBlogPosts } from "@/lib/cms";
 import { articleJsonLd, breadcrumbJsonLd, faqJsonLd } from "@/lib/seo";
 import type { BlogPost } from "@/lib/types";
@@ -17,7 +17,7 @@ const copy = {
     back: "← Blog",
     updated: "更新",
     readTime: (minutes: number) => `${minutes} 分鐘閱讀`,
-    geoSummary: "GEO answer summary",
+    geoSummary: "重點摘要",
     takeaways: "Key Takeaways",
     faq: "常見問題",
     sources: "來源與參考",
@@ -30,7 +30,7 @@ const copy = {
     back: "← Blog",
     updated: "Updated",
     readTime: (minutes: number) => `${minutes} min read`,
-    geoSummary: "GEO answer summary",
+    geoSummary: "TL;DR",
     takeaways: "Key Takeaways",
     faq: "FAQ",
     sources: "Sources",
@@ -43,7 +43,7 @@ const copy = {
     back: "← Blog",
     updated: "更新",
     readTime: (minutes: number) => `${minutes} 分で読めます`,
-    geoSummary: "GEO answer summary",
+    geoSummary: "要約",
     takeaways: "Key Takeaways",
     faq: "FAQ",
     sources: "Sources",
@@ -56,7 +56,7 @@ const copy = {
     back: "← Blog",
     updated: "업데이트",
     readTime: (minutes: number) => `${minutes}분 읽기`,
-    geoSummary: "GEO answer summary",
+    geoSummary: "핵심 요약",
     takeaways: "Key Takeaways",
     faq: "FAQ",
     sources: "Sources",
@@ -108,9 +108,12 @@ export async function BlogArticle({ post }: { post: BlogPost }) {
                 </Link>
               ))}
             </div>
-            <p className="eyebrow">
-              {[post.contentType, post.newsCategory, ...post.tags.slice(0, 2)].filter(Boolean).join(" / ")} ·{" "}
-              {dictionary.readTime(post.readTimeMinutes)}
+            <p className="eyebrow article-kicker">
+              <span className={`blog-craft-type-badge is-${post.contentType}`}>
+                {blogContentTypeLabel(post.contentType, post.language)}
+              </span>
+              <span>{[post.newsCategory, ...post.tags.slice(0, 2)].filter(Boolean).join(" / ")}</span>
+              <span>{dictionary.readTime(post.readTimeMinutes)}</span>
             </p>
             <h1>{renderBrandText(post.title)}</h1>
             <div className="article-meta">
@@ -214,7 +217,12 @@ export async function BlogArticle({ post }: { post: BlogPost }) {
               <div className="related-article-grid">
                 {relatedPosts.map((related) => (
                   <Link className="related-article-card" href={blogPostPath(related)} key={related.id}>
-                    <span>{[related.contentType, related.newsCategory || related.tags[0]].filter(Boolean).join(" / ")}</span>
+                    <span className="related-article-meta">
+                      <span className={`blog-craft-type-badge is-${related.contentType}`}>
+                        {blogContentTypeLabel(related.contentType, related.language)}
+                      </span>
+                      <span>{related.newsCategory || related.tags[0]}</span>
+                    </span>
                     <strong>{renderBrandText(related.title)}</strong>
                     <small>{dictionary.readTime(related.readTimeMinutes)}</small>
                   </Link>

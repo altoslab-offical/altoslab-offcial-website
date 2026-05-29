@@ -1,4 +1,4 @@
-import type { BlogLanguage, BlogPost, BlogQualityChecks, BlogSourceLink } from "./types";
+import type { BlogContentType, BlogLanguage, BlogPost, BlogQualityChecks, BlogSourceLink } from "./types";
 
 export const BLOG_LANGUAGES: BlogLanguage[] = ["zh-Hant", "en", "ja", "ko"];
 
@@ -40,6 +40,29 @@ const BLOG_LANGUAGE_CONFIG: Record<
   }
 };
 
+const BLOG_CONTENT_TYPE_LABELS: Record<BlogLanguage, Record<BlogContentType, string>> = {
+  "zh-Hant": {
+    breaking: "市場快訊",
+    column: "專欄",
+    feature: "專題"
+  },
+  en: {
+    breaking: "Brief",
+    column: "Column",
+    feature: "Feature"
+  },
+  ja: {
+    breaking: "市場ブリーフ",
+    column: "コラム",
+    feature: "特集"
+  },
+  ko: {
+    breaking: "시장 브리프",
+    column: "칼럼",
+    feature: "기획"
+  }
+};
+
 export function blogSlugPathSegment(slug: string) {
   return encodeURIComponent(slug);
 }
@@ -65,6 +88,10 @@ export function languageLabel(language: BlogLanguage) {
 
 export function languageShortLabel(language: BlogLanguage) {
   return BLOG_LANGUAGE_CONFIG[language].shortLabel;
+}
+
+export function blogContentTypeLabel(contentType: BlogContentType, language: BlogLanguage) {
+  return BLOG_CONTENT_TYPE_LABELS[language]?.[contentType] || BLOG_CONTENT_TYPE_LABELS.en[contentType];
 }
 
 export function htmlLanguage(language: BlogLanguage) {

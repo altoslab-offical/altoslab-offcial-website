@@ -941,50 +941,118 @@ function archetypeLabel(archetype, language) {
 function titleFor(ideaItem, language, index = 0) {
   const [subject, decision] = ideaItem.line[language];
   const archetype = archetypeFor(ideaItem, index);
-  const label = archetypeLabel(archetype, language);
+  const variant = index % 4;
 
   if (language === "en") {
-    if (ideaItem.type === "breaking") return `${label}: new source signal for ${subject} and what operators should watch`;
-    if (ideaItem.type === "feature") return `${subject} feature: from source signal to implementation framework`;
-    if (archetype === "researchExplainer") return `${subject} explained: mechanisms, limits and source signals`;
-    if (archetype === "operatorPlaybook") return `${subject} playbook: ${decision}`;
-    if (archetype === "contrarianColumn") return `The overlooked risk inside ${subject}`;
-    if (archetype === "dataChart") return `${subject} signal map: four pressures to watch`;
-    return `Inside the ${subject} workflow: where the market is moving`;
+    if (ideaItem.type === "breaking") {
+      return [
+        `${subject} now belongs in workflow, budget and risk review`,
+        `What recent sources around ${subject} mean for operators`,
+        `${subject} is heating up; the real test is review cost`,
+        `The new ${subject} signal and the first workflow experiment to run`
+      ][variant];
+    }
+    if (ideaItem.type === "feature") {
+      return [
+        `From ${subject} to operating system: a practical adoption framework`,
+        `Before adopting ${subject}, clarify ownership, evidence and rollback`,
+        `${subject} as system design: sources, review paths and execution risk`,
+        `From market signal to field experiment: how to approach ${subject}`
+      ][variant];
+    }
+    if (archetype === "researchExplainer") return `How ${subject} works when it reaches real teams`;
+    if (archetype === "operatorPlaybook") return `The operator checklist for ${decision}`;
+    if (archetype === "contrarianColumn") return `The adoption risk teams miss in ${subject}`;
+    if (archetype === "dataChart") return `Four signals that decide whether ${subject} is ready`;
+    return `What ${subject} looks like inside a working team`;
   }
   if (language === "ja") {
-    if (ideaItem.type === "breaking") return `${label}：${subject}の新しい出典シグナルを読む`;
-    if (ideaItem.type === "feature") return `${subject}特集：出典シグナルから実装フレームへ`;
-    if (archetype === "researchExplainer") return `${subject}研究解説：仕組み・限界・出典シグナル`;
-    if (archetype === "operatorPlaybook") return `${subject}プレイブック：${decision}`;
-    if (archetype === "contrarianColumn") return `${subject}で見落とされやすいリスク`;
-    if (archetype === "dataChart") return `${subject}シグナルマップ：見るべき4つの圧力`;
-    return `${subject}の現場メモ：市場はどこへ動くか`;
+    if (ideaItem.type === "breaking") {
+      return [
+        `${subject}は業務・予算・リスク判断のテーマになり始めた`,
+        `${subject}の新しい出典シグナルを運用者はどう読むか`,
+        `${subject}の熱量が上がる今、先に見るべきレビューコスト`,
+        `${subject}を最初の業務実験に変えるなら何から始めるか`
+      ][variant];
+    }
+    if (ideaItem.type === "feature") {
+      return [
+        `${subject}を運用システムに変えるための実装フレーム`,
+        `${subject}導入前に決めるべき責任・証拠・巻き戻し`,
+        `${subject}をシステム設計として読む：出典、レビュー、実行リスク`,
+        `市場シグナルから現場実験へ：${subject}の導入ルート`
+      ][variant];
+    }
+    if (archetype === "researchExplainer") return `${subject}は現場でどう機能するのか`;
+    if (archetype === "operatorPlaybook") return `${decision}ための運用チェックリスト`;
+    if (archetype === "contrarianColumn") return `${subject}でチームが見落とす導入リスク`;
+    if (archetype === "dataChart") return `${subject}が導入可能かを決める4つのシグナル`;
+    return `働くチームの中で見る${subject}`;
   }
   if (language === "ko") {
-    if (ideaItem.type === "breaking") return `${label}: ${subject}의 새 출처 신호로 보는 다음 판단`;
-    if (ideaItem.type === "feature") return `${subject} 기획: 출처 신호에서 실행 프레임워크까지`;
-    if (archetype === "researchExplainer") return `${subject} 리서치 해설: 메커니즘, 한계, 출처 신호`;
-    if (archetype === "operatorPlaybook") return `${subject} 플레이북: ${decision}`;
-    if (archetype === "contrarianColumn") return `${subject}에서 놓치기 쉬운 리스크`;
-    if (archetype === "dataChart") return `${subject} 시그널 맵: 주목할 네 가지 압력`;
-    return `${subject} 현장 노트: 시장은 어디로 움직이나`;
+    if (ideaItem.type === "breaking") {
+      return [
+        `${subject}는 이제 업무, 예산, 리스크 판단의 주제다`,
+        `${subject}의 새 출처 신호를 운영자는 어떻게 읽어야 하나`,
+        `${subject} 열기가 높아질 때 먼저 볼 것은 검토 비용이다`,
+        `${subject}를 첫 업무 실험으로 바꾸려면 어디서 시작할까`
+      ][variant];
+    }
+    if (ideaItem.type === "feature") {
+      return [
+        `${subject}를 운영 시스템으로 바꾸는 실행 프레임`,
+        `${subject} 도입 전에 정해야 할 책임, 증거, 롤백`,
+        `${subject}를 시스템 설계로 읽기: 출처, 검토, 실행 리스크`,
+        `시장 신호에서 현장 실험으로: ${subject} 도입 경로`
+      ][variant];
+    }
+    if (archetype === "researchExplainer") return `${subject}는 실제 팀에서 어떻게 작동하나`;
+    if (archetype === "operatorPlaybook") return `${decision} 위한 운영 체크리스트`;
+    if (archetype === "contrarianColumn") return `${subject}에서 팀이 놓치는 도입 리스크`;
+    if (archetype === "dataChart") return `${subject} 도입 가능성을 가르는 네 가지 신호`;
+    return `일하는 팀 안에서 본 ${subject}`;
   }
-  if (ideaItem.type === "breaking") return `${label}：${subject}出現新來源訊號，企業該看什麼`;
-  if (ideaItem.type === "feature") return `${subject}專題：從來源訊號到企業導入框架`;
-  if (archetype === "researchExplainer") return `${subject}研究解讀：機制、限制與來源訊號`;
-  if (archetype === "operatorPlaybook") return `${subject}操作手冊：${decision}`;
-  if (archetype === "contrarianColumn") return `${subject}的盲點：企業容易誤判哪一步`;
-  if (archetype === "dataChart") return `${subject}訊號圖：四個指標看懂導入壓力`;
-  return `${subject}現場筆記：市場正在往哪裡移動`;
+  if (ideaItem.type === "breaking") {
+    return [
+      `「${subject}」進入最新來源視野，企業先看流程與責任`,
+      `企業該如何判讀「${subject}」的新訊號`,
+      `「${subject}」熱度升高，但先別急著導入`,
+      `「${subject}」從新聞變成工作流實驗，該怎麼看`
+    ][variant];
+  }
+  if (ideaItem.type === "feature") {
+    return [
+      `「${subject}」如何從新聞走到企業可用的系統`,
+      `企業導入「${subject}」前，必須先釐清的四件事`,
+      `「${subject}」的系統設計框架：來源、責任與回滾`,
+      `從市場訊號到落地實驗：「${subject}」的導入路徑`
+    ][variant];
+  }
+  if (archetype === "researchExplainer") return `「${subject}」進入真實團隊後，機制與限制是什麼`;
+  if (archetype === "operatorPlaybook") return `企業導入「${subject}」前，需要哪張操作檢查表`;
+  if (archetype === "contrarianColumn") return `「${subject}」的盲點：企業容易誤判哪一步`;
+  if (archetype === "dataChart") return `「${subject}」是否值得導入，用四個訊號先判斷`;
+  return `從工作現場看「${subject}」：市場訊號如何變成決策`;
 }
 
 function excerptFor(ideaItem, language, index = 0) {
   const [subject, decision] = ideaItem.line[language];
   const archetype = archetypeFor(ideaItem, index);
+  const variant = index % 4;
   if (language === "en") {
-    if (archetype === "marketBrief") {
-      return trimTo(`${subject} is a live market signal. This brief separates what changed, why it matters and which sources operators should keep watching.`, 170);
+    if (ideaItem.type === "breaking") {
+      return trimTo(
+        [
+          `${subject} is appearing across recent sources; the useful question is whether it changes workflow ownership, budget or risk review.`,
+          `Recent coverage around ${subject} matters only if it changes a repeated operator decision, not because it adds another AI label.`,
+          `${subject} is gaining heat, but teams should test source quality and review cost before turning it into a roadmap item.`,
+          `The first move around ${subject} is not a platform build; it is a source card, a review rule and one workflow experiment.`
+        ][variant],
+        170
+      );
+    }
+    if (ideaItem.type === "feature") {
+      return trimTo(`${subject} is treated as a system-design problem: sources, ownership, review paths, rollback and the smallest useful implementation step.`, 170);
     }
     if (archetype === "contrarianColumn") {
       return trimTo(`${subject} looks like a technology story, but the harder question is where teams misread adoption risk, timing and accountability.`, 170);
@@ -995,7 +1063,18 @@ function excerptFor(ideaItem, language, index = 0) {
     );
   }
   if (language === "ja") {
-    if (archetype === "marketBrief") return trimTo(`${subject}は進行中の市場シグナルです。何が変わり、なぜ重要で、どの出典を追うべきかを整理します。`, 170);
+    if (ideaItem.type === "breaking") {
+      return trimTo(
+        [
+          `${subject}は複数の新しい出典に現れ始めています。見るべきなのは、業務・予算・リスク判断が変わるかです。`,
+          `${subject}の最近の報道は、新しいAI用語ではなく、繰り返し発生する業務判断を変えるかで読むべきです。`,
+          `${subject}の熱量が上がる今、チームは導入前に出典の質とレビューコストを確認すべきです。`,
+          `${subject}で最初に作るべきものは大きな基盤ではなく、出典カード、レビュー規則、小さな業務実験です。`
+        ][variant],
+        170
+      );
+    }
+    if (ideaItem.type === "feature") return trimTo(`${subject}をシステム設計として扱い、出典、責任、レビュー経路、巻き戻し、小さな導入手順を整理します。`, 170);
     if (archetype === "contrarianColumn") return trimTo(`${subject}は技術ニュースに見えますが、難しいのは導入リスク、時期、責任の読み違いです。`, 170);
     return trimTo(
       `${subject}がニュースから運用課題に変わるとき、チームには${decision}ための出典付きフレームワークが必要です。`,
@@ -1003,17 +1082,39 @@ function excerptFor(ideaItem, language, index = 0) {
     );
   }
   if (language === "ko") {
-    if (archetype === "marketBrief") return trimTo(`${subject}는 현재 진행 중인 시장 신호입니다. 무엇이 바뀌었고 왜 중요한지, 어떤 출처를 봐야 하는지 정리합니다.`, 170);
+    if (ideaItem.type === "breaking") {
+      return trimTo(
+        [
+          `${subject}는 최근 여러 출처에서 나타나고 있습니다. 핵심은 업무, 예산, 리스크 판단을 바꾸는지입니다.`,
+          `${subject}의 최근 보도는 새 AI 용어가 아니라 반복되는 운영 판단을 바꾸는지로 읽어야 합니다.`,
+          `${subject}의 열기가 높아질 때 팀은 도입 전에 출처 품질과 검토 비용을 먼저 확인해야 합니다.`,
+          `${subject}의 첫 움직임은 큰 플랫폼 구축이 아니라 출처 카드, 검토 규칙, 작은 업무 실험입니다.`
+        ][variant],
+        170
+      );
+    }
+    if (ideaItem.type === "feature") return trimTo(`${subject}를 시스템 설계 문제로 보고 출처, 책임, 검토 경로, 롤백, 작은 실행 단계를 정리합니다.`, 170);
     if (archetype === "contrarianColumn") return trimTo(`${subject}는 기술 뉴스처럼 보이지만 더 어려운 문제는 도입 리스크, 시기, 책임을 잘못 읽는 것입니다.`, 170);
     return trimTo(
       `${subject}가 뉴스에서 운영 과제로 넘어갈 때, 팀에는 ${decision} 위한 출처 기반 프레임워크가 필요합니다.`,
       170
     );
   }
-  if (archetype === "marketBrief") return trimTo(`${subject} 是正在發生的市場訊號。這篇先整理變化、影響、可信來源與後續觀察點，不急著把它包成解方。`, 170);
-  if (archetype === "contrarianColumn") return trimTo(`${subject} 看起來像技術新聞，真正難的是企業如何避免誤判導入時機、風險責任與組織成本。`, 170);
+  if (ideaItem.type === "breaking") {
+    return trimTo(
+      [
+        `「${subject}」開始出現在多個近期來源裡；真正該看的不是熱度，而是它有沒有改變流程、預算或風險判斷。`,
+        `「${subject}」不是多一個 AI 名詞，而是企業該問它會不會改變某個重複決策。`,
+        `「${subject}」熱度升高時，團隊先檢查來源品質與審核成本，再決定是否放進 roadmap。`,
+        `「${subject}」的第一步不是建平台，而是來源卡、審核規則，以及一個能驗證價值的小實驗。`
+      ][variant],
+      170
+    );
+  }
+  if (ideaItem.type === "feature") return trimTo(`把「${subject}」當成系統設計題：來源、責任、審核路徑、回滾條件與最小可行實驗要一起看。`, 170);
+  if (archetype === "contrarianColumn") return trimTo(`「${subject}」看起來像技術新聞，真正難的是企業如何避免誤判導入時機、風險責任與組織成本。`, 170);
   return trimTo(
-    `當 ${subject} 從新聞變成營運題，企業需要一套有來源、可執行、能支援「${decision}」的判斷框架。`,
+    `當「${subject}」從新聞變成營運題，企業需要一套有來源、可執行、能支援「${decision}」的判斷框架。`,
     170
   );
 }
@@ -1024,18 +1125,18 @@ function seoDescriptionFor(ideaItem, language, index = 0) {
   if (language === "en") {
     return trimTo(
       archetype === "marketBrief"
-        ? `${subject} market brief with source links, implications and the signals AI operators should watch next.`
+        ? `${subject} source-backed update with implications, uncertainty and operator signals to watch next.`
         : `${subject} analysis with sources, charts and an ALTOS LAB editorial lens for how teams can ${decision}.`,
       155
     );
   }
   if (language === "ja") {
-    return trimTo(archetype === "marketBrief" ? `${subject}の市場ブリーフ。出典、影響、次に見るべきシグナルを整理します。` : `${subject}を出典、図表、ALTOS LABの編集視点で整理します。`, 155);
+    return trimTo(archetype === "marketBrief" ? `${subject}の最新動向を出典、影響、不確実性、次の観測点で整理します。` : `${subject}を出典、図表、ALTOS LABの編集視点で整理します。`, 155);
   }
   if (language === "ko") {
-    return trimTo(archetype === "marketBrief" ? `${subject} 시장 브리프. 출처, 영향, 다음에 볼 신호를 정리합니다.` : `${subject}를 출처, 차트, ALTOS LAB 편집 관점으로 분석합니다.`, 155);
+    return trimTo(archetype === "marketBrief" ? `${subject} 최신 흐름을 출처, 영향, 불확실성, 다음 관찰 신호로 정리합니다.` : `${subject}를 출처, 차트, ALTOS LAB 편집 관점으로 분석합니다.`, 155);
   }
-  return trimTo(archetype === "marketBrief" ? `${subject}市場快訊：整理可信來源、影響與下一步觀察訊號。` : `${subject}分析：用來源、圖表與 ALTOS LAB 編輯視角說清楚如何${decision}。`, 155);
+  return trimTo(archetype === "marketBrief" ? `「${subject}」最新動向：用可信來源、影響、不確定性與下一步觀察訊號整理。` : `「${subject}」分析：用來源、圖表與 ALTOS LAB 編輯視角說清楚如何${decision}。`, 155);
 }
 
 function geoSummaryFor(ideaItem, language, index = 0) {
@@ -1044,32 +1145,32 @@ function geoSummaryFor(ideaItem, language, index = 0) {
   if (language === "en") {
     return trimTo(
       archetype === "marketBrief"
-        ? `${subject} is summarized as a source-backed market brief: what changed, why it matters, what remains uncertain and which signals operators should monitor for future AI adoption.`
-        : `${subject} can become a durable SEO/GEO asset when it combines credible sources, a clear answer, visual structure, limits and an original ALTOS LAB editorial read on how to ${decision}.`,
-      240
+        ? `${subject} is not a reason to buy or rebuild yet; it is a source-backed signal to watch. The useful read is whether recent coverage changes workflow ownership, budget pressure or risk review. ALTOS LAB would start with a source card, a review rule and one small experiment before moving it into the roadmap.`
+        : `${subject} is useful only when it becomes an operating decision, not a trend label. This piece maps the source evidence, the implementation risk and the reviewer who must own quality. The practical next step is to test whether the team can ${decision} with clear metrics and rollback paths.`,
+      420
     );
   }
   if (language === "ja") {
     return trimTo(
       archetype === "marketBrief"
-        ? `${subject}を出典付き市場ブリーフとして整理します。変化、意味、不確実性、次に見るべきシグナルを明確にします。`
-        : `${subject}は、信頼できる出典、明確な回答、図表、制約、ALTOS LABの編集視点を含むとSEO/GEO資産になります。`,
-      240
+        ? `${subject}は、今すぐ導入すべき答えではなく、出典付きで観察すべきシグナルです。見るべきなのは、最近の報道が業務責任、予算、リスクレビューを変えるかどうかです。ALTOS LABなら、まず出典カード、レビュー規則、小さな業務実験から始めます。`
+        : `${subject}は、トレンド名ではなく運用判断になった時に価値があります。この記事では、出典で確認できる事実、実装リスク、品質を見張る担当者を整理します。次の一歩は、明確な指標と巻き戻し条件を置いて${decision}かを試すことです。`,
+      420
     );
   }
   if (language === "ko") {
     return trimTo(
       archetype === "marketBrief"
-        ? `${subject}를 출처 기반 시장 브리프로 정리합니다. 변화, 의미, 불확실성, 다음 관찰 신호를 분명히 합니다.`
-        : `${subject}는 신뢰할 출처, 직접 답변, 시각 구조, 한계, ALTOS LAB 편집 관점을 담을 때 SEO/GEO 자산이 됩니다.`,
-      240
+        ? `${subject}는 지금 바로 도입할 답이 아니라 출처 기반으로 지켜볼 신호입니다. 중요한 것은 최근 보도가 업무 책임, 예산 압박, 리스크 검토를 바꾸는지입니다. ALTOS LAB이라면 먼저 출처 카드, 검토 규칙, 작은 업무 실험부터 설계합니다.`
+        : `${subject}는 트렌드 이름이 아니라 운영 판단이 될 때 가치가 있습니다. 이 글은 출처로 확인되는 사실, 실행 리스크, 품질을 책임질 검토자를 정리합니다. 다음 단계는 명확한 지표와 롤백 조건을 두고 ${decision}지 시험하는 것입니다.`,
+      420
     );
   }
   return trimTo(
     archetype === "marketBrief"
-      ? `${subject} 會被整理成來源化市場快訊：發生什麼、為什麼重要、哪些地方仍不確定，以及後續應追蹤哪些 AI 產業訊號。`
-      : `${subject} 要成為 SEO/GEO 資產，文章必須有可信來源、直接答案、圖表結構、限制條件與 ALTOS LAB 的原創編輯判讀。`,
-    240
+      ? `「${subject}」現在不是立刻導入的答案，而是值得用來源追蹤的市場訊號。真正要看的是近期消息是否改變流程責任、預算壓力或風險審核。ALTOS LAB 會先做來源卡、審核規則與一個小型工作流實驗，再決定要不要放進 roadmap。`
+      : `「${subject}」有價值的地方，不是它是不是熱門詞，而是它能不能變成可執行的營運判斷。這篇會整理可追溯來源、導入風險、品質審核責任與最小實驗路徑。下一步是確認團隊能否在有指標與回滾條件下「${decision}」。`,
+    420
   );
 }
 
@@ -1255,10 +1356,10 @@ function chartBlockFor(ideaItem, language, index, archetype) {
     ko: "출처 신뢰도|시장 열기|업무 영향|실행 난이도"
   };
   const title = {
-    "zh-Hant": `${subject}訊號雷達`,
-    en: `${subject} signal radar`,
-    ja: `${subject}シグナルレーダー`,
-    ko: `${subject} 시그널 레이더`
+    "zh-Hant": `${subject}導入判斷卡`,
+    en: `${subject} adoption scorecard`,
+    ja: `${subject}導入スコアカード`,
+    ko: `${subject} 도입 스코어카드`
   };
   const caption = {
     "zh-Hant": "這是編輯台用來判斷文章角度的相對分數，不是市場規模或投資建議。",
@@ -1313,20 +1414,27 @@ function newsContextParagraph(sources, language) {
   const second = live[1];
   const firstDate = dateLabel(first.publishedAt, language);
   if (language === "en") {
-    return `Latest news anchor: ${first.publisher || "Source"} published "${first.title}"${firstDate ? ` on ${firstDate}` : ""}. ${second ? `This draft also checks ${second.publisher || "another source"}'s "${second.title}" so the piece is not built from a single headline.` : "The article uses that item as a source anchor, then adds ALTOS LAB's implementation judgment instead of rewriting the original report."}`;
+    return `Latest context: ${first.publisher || "Source"} published "${first.title}"${firstDate ? ` on ${firstDate}` : ""}. ${second ? `We also check ${second.publisher || "another source"}'s "${second.title}" so the piece is not built from a single headline.` : "We use that source as the factual floor, then add ALTOS LAB's implementation judgment instead of rewriting the report."}`;
   }
   if (language === "ja") {
-    return `最新ニュースの軸：${first.publisher || "Source"}の「${first.title}」${firstDate ? `（${firstDate}）` : ""}を出発点にします。${second ? `さらに${second.publisher || "別の出典"}の「${second.title}」も照合し、単一記事の言い換えにしません。` : "そこから ALTOS LAB の実装判断を加え、元記事の言い換えにしません。"}`;
+    return `最新背景：${first.publisher || "Source"}の「${first.title}」${firstDate ? `（${firstDate}）` : ""}を事実確認の起点にします。${second ? `さらに${second.publisher || "別の出典"}の「${second.title}」も照合し、単一記事の言い換えにしません。` : "そこから ALTOS LAB の実装判断を加え、元記事の言い換えにしません。"}`;
   }
   if (language === "ko") {
-    return `최신 뉴스 앵커: ${first.publisher || "Source"}의 "${first.title}"${firstDate ? `(${firstDate})` : ""}를 출발점으로 삼습니다. ${second ? `또 ${second.publisher || "다른 출처"}의 "${second.title}"도 함께 확인해 단일 기사 재작성에 머물지 않게 합니다.` : "그 위에 ALTOS LAB의 실행 판단을 더해 원문 재작성에 머물지 않게 합니다."}`;
+    return `최신 배경: ${first.publisher || "Source"}의 "${first.title}"${firstDate ? `(${firstDate})` : ""}를 사실 확인의 출발점으로 삼습니다. ${second ? `또 ${second.publisher || "다른 출처"}의 "${second.title}"도 함께 확인해 단일 기사 재작성에 머물지 않게 합니다.` : "그 위에 ALTOS LAB의 실행 판단을 더해 원문 재작성에 머물지 않게 합니다."}`;
   }
-  return `最新新聞錨點：${first.publisher || "Source"} 的「${first.title}」${firstDate ? `（${firstDate}）` : ""}。${second ? `這篇也交叉參考 ${second.publisher || "另一個來源"} 的「${second.title}」，避免只改寫單一新聞。` : "文章會把它當作來源錨點，再加入 ALTOS LAB 的實作判斷，而不是改寫原文。"}`;
+  return `最新背景：${first.publisher || "Source"} 的「${first.title}」${firstDate ? `（${firstDate}）` : ""}是這篇的事實起點。${second ? `我們也交叉參考 ${second.publisher || "另一個來源"} 的「${second.title}」，避免只改寫單一新聞。` : "文章會把它當作事實底線，再加入 ALTOS LAB 的實作判斷，而不是改寫原文。"}`;
 }
 
 function injectNewsContext(body, language, sources) {
   const context = newsContextParagraph(sources, language);
-  if (!context || body.includes("最新新聞錨點") || body.includes("Latest news anchor")) return body;
+  if (
+    !context ||
+    body.includes("最新背景") ||
+    body.includes("Latest context") ||
+    body.includes("최신 배경")
+  ) {
+    return body;
+  }
   const parts = body.split(/\n{2,}/);
   if (parts.length < 2) return body;
   return [parts[0], context, ...parts.slice(1)].join("\n\n");
@@ -1373,396 +1481,322 @@ function markdownBodyFor(ideaItem, language, sources, index = 0) {
   const chart = chartBlockFor(ideaItem, language, index, archetype);
   const sourceList = sourceListFor(sources, language);
   const table = comparisonTableFor(language, ideaItem);
+  const isBrief = archetype === "marketBrief" || ideaItem.type === "breaking";
+  const isFeature = ideaItem.type === "feature";
 
   if (language === "en") {
-    if (archetype === "marketBrief") {
-      return `The market around ${subject} is worth tracking because it is changing how AI buyers read product claims, trust sources and decide whether to ${decision}. The immediate takeaway: treat it as a market signal first, then decide whether it deserves a product response.
+    if (isBrief) {
+      return `${subject} is worth attention only if it changes an operator's next decision. The current signal from ${publishers} is not "AI is moving fast"; it is that teams may soon need a clearer way to decide whether this belongs in workflow, budget or risk review.
 
-## What changed
+## Read the signal before reacting
 
-The useful shift across ${publishers} is not a single headline. It is a pattern: AI systems are moving closer to daily tools, enterprise workflows, search surfaces and developer operations. That makes the market faster, but it also makes weak summaries easier to spot.
+The right move is not to turn every headline into a roadmap item. First decide whether ${subject} changes who owns the work, how output is reviewed, what customer expectation shifts, or what cost line becomes visible.
 
-## Source trail
+## Sources on the table
 
 ${sourceList}
 
-## Why it matters
+## The three useful questions
 
-For operators, the question is whether this signal changes budget, workflow ownership, customer expectations or risk controls. If it only adds vocabulary, it is noise. If it changes a repeated decision, it belongs in the roadmap.
+1. Does this source change a decision the team repeats every week?
+2. Can the claim be checked by an official source, product evidence or independent reporting?
+3. Would acting on it make the workflow easier to review, not just faster?
 
-${chart}
+## What is still early
 
-## What remains uncertain
+The signal is not proof of broad adoption. The open questions are whether the strongest claims are measurable, whether non-technical teams will feel the pressure, and whether review cost drops enough to justify a change.
 
-- Whether adoption pressure will reach mainstream teams or stay inside early technical users.
-- Whether the strongest claims are official, measured and repeatable.
-- Whether the cost of review is lower than the cost of manual work.
+## ALTOS LAB read
 
-## Editorial read
-
-ALTOS LAB should cover ${subject} as part of a living AI market map. The article should help a reader see what happened, what to verify and when to act. A sales pitch can wait until the evidence is strong enough.`;
+Treat ${subject} as a watchlist item until it changes a repeated decision. When it does, the smallest useful response is a source card, a review rule and one workflow experiment tied to how the team can ${decision}.`;
     }
 
-    if (archetype === "researchExplainer") {
-      return `${subject} matters because the mechanism behind the trend is starting to affect real product design. The right reader question is not whether the topic is popular, but what must be true before a team can ${decision}.
+    if (isFeature) {
+      return `${subject} becomes interesting when it stops being a headline and starts behaving like an operating-system problem. The practical question is what has to be true before a company can ${decision} without creating hidden review debt.
 
-## The mechanism
+## Why this turns into a system question
 
-Most AI shifts become business-relevant only after three things line up: a reliable model capability, a workflow where the output can be checked and a distribution path that puts the feature in front of real users. ${subject} is useful to watch because it sits at that intersection.
+Most AI trends become business-relevant only when three things line up: a reliable capability, a workflow where the output can be checked, and a distribution path that puts the result in front of real users. ${subject} sits close to that intersection.
 
 ## Evidence to read first
 
 ${sourceList}
 
-## A practical model
+## Adoption decision table
 
 ${table}
 
-${chart}
+## A small implementation path
 
-## Limits
-
-The strongest writing in AI is comfortable saying what is not proven yet. For ${subject}, the limits are source freshness, measurement quality and operational ownership. Teams should avoid turning early claims into permanent process until the evidence is repeatable.
-
-## ALTOS LAB editorial note
-
-Our read: this is not just a trend page. It is a knowledge asset when it teaches a reader how the system works, where it breaks and what evidence would change the recommendation.`;
-    }
-
-    if (archetype === "operatorPlaybook") {
-      return `The ${subject} pattern becomes useful when a team can ${decision} with clear owners, review paths and metrics. Treat the article like a small operating manual, not a broad thought piece.
-
-## The operator question
-
-What is the smallest workflow that would improve if this signal is true? A good answer names the user, the input, the output, the reviewer and the failure mode.
-
-## Decision table
-
-${table}
-
-## Build sequence
-
-1. Read the strongest sources from ${publishers}.
-2. Write the direct answer in the first paragraph.
-3. Define one workflow where ${subject} changes a decision.
-4. Add a metric that proves whether the change helped.
-5. Update the article when the source landscape shifts.
+1. Pick one repeated decision affected by ${subject}.
+2. Write the source card: what is confirmed, what is inferred and what is unknown.
+3. Define the reviewer before defining the automation.
+4. Measure quality, review time and rollback cost before expanding scope.
 
 ${chart}
-
-## Where teams overbuild
-
-The common mistake is turning every AI trend into a platform project. Most teams need a smaller move: a checklist, a source card, a review rule or a dashboard that helps one decision become clearer.
 
 ## Lab judgment
 
-ALTOS LAB should publish the playbook only when it can show a reader how to ${decision} without hiding uncertainty. The work is useful when the next action is obvious.`;
+ALTOS LAB should publish this as a durable knowledge asset, not a trend recap. The piece is useful if a reader can leave with a sharper model of how the system works, where it breaks and what evidence would change the recommendation.`;
     }
 
-    if (archetype === "contrarianColumn") {
-      return `${subject} is easy to describe and harder to use. The uncomfortable point: many teams will lose time by reacting to the headline before they know which decision the trend actually changes.
+    return `${subject} looks like a market story, but the useful column starts with a narrower question: what would make a serious team change behavior this month? If the answer is vague, the topic belongs on the watchlist. If it is concrete, it deserves an experiment.
 
-## The common misread
+## The decision hiding inside the trend
 
-AI markets reward speed, so every update can feel urgent. But urgency is not the same as priority. ${subject} deserves attention only if it changes a customer expectation, a cost line, a product workflow or a measurable risk.
+Teams do not need more AI vocabulary. They need to know whether ${subject} changes a customer promise, a workflow owner, a cost line or a review obligation.
 
-## What the sources actually support
+## What the sources support
 
 ${sourceList}
 
-## A sharper way to frame it
+## Operator frame
 
 ${table}
 
-## Signal chart
+## The tradeoff
 
-${chart}
-
-## The better question
-
-Instead of asking whether to chase ${subject}, ask what evidence would make the team change behavior this month. If the answer is vague, keep watching. If the answer is concrete, write the small experiment.
+Moving early can create advantage when the evidence is official, repeatable and close to a live workflow. Moving early becomes theater when the team cannot say who reviews the output or what failure looks like.
 
 ## ALTOS LAB point of view
 
-ALTOS LAB should sound opinionated without pretending to know more than the sources allow. A strong column names the tradeoff, shows the evidence and leaves the reader with a cleaner judgment.`;
-    }
-
-    if (archetype === "dataChart") {
-      return `${subject} needs a visual reading because the signal is not one-dimensional. Teams should compare source confidence, adoption pressure, workflow impact and execution difficulty before they ${decision}.
-
-## Signal map
-
-${chart}
-
-## How to read the chart
-
-High source confidence with low execution difficulty usually means the article can be short and tactical. High market heat with high execution difficulty calls for a deeper feature: explain constraints, name risks and avoid promising a fast rollout.
-
-## Source trail
-
-${sourceList}
-
-## Comparison table
-
-${table}
-
-## What to publish next
-
-If the signal keeps rising, turn this into a feature with examples, screenshots or a benchmark. If it fades, preserve the page as a dated market note and point readers to fresher coverage.
-
-## Editorial stance
-
-ALTOS LAB should use charts to clarify judgment, not to decorate the page. The visual earns its place only when it makes the reader faster at deciding.`;
-    }
-
-    return `${subject} looks like a market story, but it becomes interesting when seen from inside a working team. The field question is simple: what would have to change tomorrow for people to ${decision}?
-
-## Scene
-
-Imagine a product, marketing or operations team reading the latest AI announcement between customer calls. They do not need another abstract prediction. They need to know whether the signal changes a backlog item, a process, a metric or a risk review.
-
-## Source notes
-
-${sourceList}
-
-## Field checklist
-
-${table}
-
-${chart}
-
-## What good coverage feels like
-
-Good company-blog writing has texture: a concrete setting, a real constraint, a sourced claim and a point of view. It can share market information without forcing every paragraph back to a product pitch.
-
-## ALTOS LAB field note
-
-The best version of this post makes ALTOS LAB feel like a lab that watches the market, tests ideas and explains what is worth building. That is how content compounds into SEO and GEO trust.`;
+Our stance is to be opinionated but not louder than the evidence. A good column on ${subject} should leave the reader with a cleaner decision, not just a stronger feeling that AI is important.`;
   }
 
   if (language === "ja") {
-    return `${subject}は、AI市場の変化を読むためのシグナルです。重要なのは流行語として消費することではなく、何が変わり、どの出典で確認でき、いつ${decision}べきかを見極めることです。
+    if (isBrief) {
+      return `${subject}で見るべきなのは、話題性ではなく次の業務判断が変わるかです。${publishers}の最近の発信は、チームがこのテーマを業務、予算、リスク確認のどこに置くべきかを考え始める段階に来たことを示しています。
 
-## 何が変わったか
+## 反応する前に確認すること
 
-${publishers}の発信を見ると、AIはデモから日常ツール、企業ワークフロー、検索面、開発者運用へ移っています。この変化は速い一方で、根拠の弱い要約も増えています。
+すぐにロードマップへ入れる必要はありません。まず、${subject}が責任者、レビュー方法、顧客期待、またはコスト構造を変えるかを見ます。
 
-## 出典メモ
+## 確認した出典
 
 ${sourceList}
 
-## 判断表
+## 先に聞く三つの問い
+
+1. 週次で繰り返す判断を変えるか。
+2. 公式情報、製品上の証拠、独立した報道で確認できるか。
+3. 速くなるだけでなく、レビューしやすくなるか。
+
+## まだ早い部分
+
+このシグナルは広範な採用の証明ではありません。主張が測定可能か、非技術チームにも圧力が広がるか、レビューコストが下がるかはまだ確認が必要です。
+
+## ALTOS LABの読み
+
+${subject}は、繰り返し発生する意思決定を変えるまでは観察対象です。変わるなら、最初の一手は出典カード、レビュー規則、小さな業務実験です。`;
+    }
+
+    if (isFeature) {
+      return `${subject}は、見出しではなく運用システムの問題として見ると重要になります。企業が「${decision}」を始める前に確認すべきなのは、隠れたレビュー負債を増やさずに使えるかです。
+
+## なぜシステム問題になるのか
+
+AIトレンドが事業に効くのは、能力が安定し、出力を検証できる業務があり、実際の利用者に届く経路がある時です。${subject}はその交差点に近づいています。
+
+## 先に読むべき出典
+
+${sourceList}
+
+## 導入判断表
 
 ${table}
 
-## シグナル図
+## 小さく試す手順
+
+1. ${subject}が影響する繰り返し判断を一つ選ぶ。
+2. 確認済み、推定、不明点を分けた出典カードを作る。
+3. 自動化より先にレビュー責任者を決める。
+4. 品質、レビュー時間、巻き戻しコストを測る。
 
 ${chart}
 
-## まだ不確実なこと
+## 実験室の判断
 
-- 採用圧力が一般チームまで広がるか。
-- 主張が公式で、測定可能で、再現できるか。
-- レビューコストが手作業より低くなるか。
+ALTOS LABはこれを流行まとめではなく、長く使える知識資産として扱います。読者が仕組み、壊れ方、判断を変える証拠を持ち帰れるなら価値があります。`;
+    }
 
-## ALTOS LAB編集メモ
+    return `${subject}は市場ニュースに見えますが、よいコラムはもっと狭い問いから始まります。今月チームの行動を変える証拠は何か。答えが曖昧なら観察、具体的なら小さな実験です。
 
-ALTOS LABは${subject}を、売り込みではなく市場観察として扱います。よい記事は読者に「何を確認し、いつ動くか」を残します。`;
+## トレンドの中にある判断
+
+チームに必要なのはAI用語ではありません。${subject}が顧客への約束、業務責任者、コスト、レビュー義務を変えるかです。
+
+## 出典が支えていること
+
+${sourceList}
+
+## 運用者のフレーム
+
+${table}
+
+## 取るべきトレードオフ
+
+早く動く価値があるのは、証拠が公式で、再現でき、実際の業務に近い時です。誰がレビューし、失敗時に何を戻すかを言えないなら、それは実験ではなく雰囲気です。
+
+## ALTOS LABの視点
+
+私たちは証拠より大きな声では語りません。${subject}についてのよい記事は、読者に「AIは重要だ」という気分ではなく、より明確な判断を残すべきです。`;
   }
 
   if (language === "ko") {
-    return `${subject}는 AI 시장 변화를 읽기 위한 신호입니다. 핵심은 유행어를 따라가는 것이 아니라 무엇이 바뀌었고, 어떤 출처로 확인되며, 언제 ${decision}지 판단하는 것입니다.
+    if (isBrief) {
+      return `${subject}에서 볼 것은 화제성이 아니라 다음 업무 판단이 바뀌는지입니다. ${publishers}의 최근 흐름은 이 주제를 업무, 예산, 리스크 검토 중 어디에 둘지 고민해야 하는 단계가 왔음을 보여줍니다.
 
-## 무엇이 바뀌었나
+## 반응하기 전에 볼 것
 
-${publishers}의 최근 흐름은 AI가 데모에서 일상 도구, 기업 워크플로, 검색 표면, 개발 운영으로 이동하고 있음을 보여줍니다. 속도는 빨라졌지만 근거가 약한 요약도 늘었습니다.
+모든 헤드라인을 로드맵에 넣을 필요는 없습니다. 먼저 ${subject}가 책임자, 검토 방식, 고객 기대, 비용 구조를 바꾸는지 확인해야 합니다.
 
-## 출처 메모
-
-${sourceList}
-
-## 판단 표
-
-${table}
-
-## 시그널 차트
-
-${chart}
-
-## 아직 불확실한 점
-
-- 도입 압력이 일반 팀까지 확산될지.
-- 핵심 주장이 공식적이고 측정 가능하며 반복 가능한지.
-- 검토 비용이 수작업보다 낮아지는지.
-
-## ALTOS LAB 편집 노트
-
-ALTOS LAB은 ${subject}를 영업 문구가 아니라 시장 관찰로 다룹니다. 좋은 글은 독자에게 무엇을 확인하고 언제 움직일지 남깁니다.`;
-  }
-
-  if (archetype === "marketBrief") {
-    return `${subject} 值得追，是因為它正在改變 AI 買家如何閱讀產品宣稱、判斷來源可信度，以及是否要${decision}。這篇先把它當市場訊號看，不急著包成解方。
-
-## 發生什麼變化
-
-從 ${publishers} 的近期內容來看，AI 正從展示型 demo 走向日常工具、企業流程、搜尋入口與開發者營運。速度變快，也代表薄弱摘要更容易被看穿。
-
-## 來源脈絡
+## 확인한 출처
 
 ${sourceList}
 
-## 為什麼重要
+## 먼저 던질 세 가지 질문
 
-對經營者來說，關鍵不是這個詞紅不紅，而是它有沒有改變預算、流程責任、客戶期待或風險控管。如果只是新增名詞，就是噪音；如果改變重複決策，就值得進 roadmap。
+1. 매주 반복되는 판단을 바꾸는가.
+2. 공식 정보, 제품 증거, 독립 보도로 확인할 수 있는가.
+3. 단순히 빨라지는 것을 넘어 검토하기 쉬워지는가.
 
-${chart}
+## 아직 이른 부분
 
-## 還不確定的地方
+이 신호는 광범위한 도입의 증거가 아닙니다. 핵심 주장이 측정 가능한지, 비기술 팀까지 압력이 퍼지는지, 검토 비용이 낮아지는지는 더 봐야 합니다.
 
-- 導入壓力會不會從早期技術團隊擴散到一般企業。
-- 最強的主張是不是官方、可量測、可重複。
-- 審核成本是否真的低於人工處理成本。
+## ALTOS LAB의 판단
 
-## 編輯台觀點
+${subject}는 반복 의사결정을 바꾸기 전까지는 관찰 항목입니다. 바뀐다면 첫 움직임은 출처 카드, 검토 규칙, 작은 업무 실험이어야 합니다.`;
+    }
 
-ALTOS LAB 應該把 ${subject} 納入一張持續更新的 AI 市場地圖。文章的任務是讓讀者知道發生什麼、該查證什麼、什麼時候才值得行動。`;
-  }
+    if (isFeature) {
+      return `${subject}는 헤드라인이 아니라 운영 시스템 문제로 볼 때 중요해집니다. 기업이 "${decision}"를 시작하기 전에 확인해야 할 것은 숨은 검토 부채 없이 쓸 수 있는가입니다.
 
-  if (archetype === "researchExplainer") {
-    return `${subject} 重要，不是因為它是一個熱門詞，而是背後機制開始影響產品設計。真正的問題是：哪些條件成立後，企業才應該${decision}。
+## 왜 시스템 문제가 되는가
 
-## 背後機制
+AI 트렌드가 사업에 영향을 주려면 능력이 안정적이고, 출력을 검증할 업무가 있으며, 실제 사용자에게 닿는 경로가 있어야 합니다. ${subject}는 그 교차점에 가까워지고 있습니다.
 
-多數 AI 變化要變成商業題，通常需要三件事同時成立：模型能力穩定、工作流可以驗證輸出、功能能進入真實使用者面前。${subject} 值得看，是因為它碰到這三件事的交會點。
-
-## 先讀哪些來源
+## 먼저 읽을 출처
 
 ${sourceList}
 
-## 判斷模型
+## 도입 판단 표
 
 ${table}
 
-${chart}
+## 작게 실험하는 순서
 
-## 限制
-
-真正高品質的 AI 文章，要敢說哪些事情還沒被證明。對 ${subject} 來說，限制通常在來源新鮮度、衡量品質與營運責任。企業不該把早期訊號直接變成永久流程。
-
-## ALTOS LAB 編輯筆記
-
-我們的判讀：這不只是趨勢頁，而是一個知識資產。文章要讓讀者理解系統怎麼運作、哪裡會壞、什麼證據會改變建議。`;
-  }
-
-  if (archetype === "operatorPlaybook") {
-    return `${subject} 真正有用的時候，是團隊能帶著明確負責人、審核路徑與衡量指標去${decision}。這篇應該像一份小型操作手冊，而不是泛泛的趨勢文。
-
-## 操作者要問的問題
-
-如果這個訊號是真的，哪一個最小工作流會被改善？好的答案要說出使用者、輸入、輸出、審核者與失敗模式。
-
-## 決策表
-
-${table}
-
-## 建置順序
-
-1. 先讀 ${publishers} 中最可信的來源。
-2. 在第一段寫出直接答案。
-3. 定義 ${subject} 會改變哪一個工作流。
-4. 加上一個能證明是否有幫助的指標。
-5. 當來源或平台規則變化，回頭更新文章。
+1. ${subject}가 영향을 주는 반복 판단 하나를 고른다.
+2. 확인된 것, 추론한 것, 모르는 것을 나눈 출처 카드를 만든다.
+3. 자동화보다 먼저 검토 책임자를 정한다.
+4. 품질, 검토 시간, 롤백 비용을 측정한다.
 
 ${chart}
 
-## 團隊容易過度建置的地方
+## 실험실 판단
 
-常見錯誤是把每個 AI 趨勢都變成平台專案。多數時候，團隊需要的是更小的東西：檢查清單、來源卡、審核規則，或能讓單一決策更清楚的圖表。
+ALTOS LAB은 이를 유행 정리가 아니라 오래 쓰일 지식 자산으로 다룹니다. 독자가 작동 방식, 깨지는 지점, 판단을 바꿀 증거를 가져갈 수 있어야 합니다.`;
+    }
 
-## 實驗室判斷
+    return `${subject}는 시장 뉴스처럼 보이지만 좋은 칼럼은 더 좁은 질문에서 시작합니다. 이번 달 팀의 행동을 바꿀 증거는 무엇인가. 답이 흐리면 관찰하고, 구체적이면 작은 실험을 해야 합니다.
 
-ALTOS LAB 只有在能清楚說明如何${decision}、同時保留不確定性時，才應該發布這類 playbook。下一步越清楚，文章越有價值。`;
-  }
+## 트렌드 안에 숨은 판단
 
-  if (archetype === "contrarianColumn") {
-    return `${subject} 很容易被描述，卻不容易被用好。比較刺耳的觀點是：很多團隊會先追標題，卻還不知道這個趨勢到底改變哪一個決策。
+팀에 필요한 것은 AI 용어가 아닙니다. ${subject}가 고객 약속, 업무 책임자, 비용, 검토 의무를 바꾸는지입니다.
 
-## 常見誤讀
-
-AI 市場獎勵速度，所以每個更新都像很急。但急迫不等於優先。${subject} 只有在改變客戶期待、成本線、產品流程或可量測風險時，才值得立刻行動。
-
-## 來源真正支持什麼
+## 출처가 뒷받침하는 것
 
 ${sourceList}
 
-## 更好的框架
+## 운영자 프레임
 
 ${table}
 
-## 訊號圖
+## 선택해야 할 트레이드오프
 
-${chart}
+빠르게 움직일 가치가 있는 때는 증거가 공식적이고 반복 가능하며 실제 업무에 가까울 때입니다. 누가 검토하고 실패 시 무엇을 되돌릴지 말할 수 없다면 그것은 실험이 아니라 분위기입니다.
 
-## 更值得問的問題
+## ALTOS LAB 관점
 
-不要先問要不要追 ${subject}，先問：什麼證據會讓團隊在這個月改變行為？如果答案模糊，就繼續觀察；如果答案具體，就寫一個小實驗。
-
-## ALTOS LAB 觀點
-
-ALTOS LAB 可以有態度，但不能假裝比來源知道更多。好的專欄要講清楚取捨、證據與判斷，讓讀者離開時更清醒。`;
+우리는 증거보다 큰 목소리로 말하지 않습니다. ${subject}에 관한 좋은 글은 독자에게 AI가 중요하다는 감정이 아니라 더 선명한 판단을 남겨야 합니다.`;
   }
 
-  if (archetype === "dataChart") {
-    return `${subject} 需要用圖表看，因為它不是單一維度的趨勢。企業在${decision}前，應該同時比較來源可信度、市場熱度、工作流影響與執行難度。
+  if (isBrief) {
+    return `${subject} 現在值得看，不是因為它又多了一個 AI 名詞，而是 ${publishers} 的近期來源開始指向同一個營運問題：企業要不要把這個訊號放進流程、預算或風險審核。我的判斷是先觀察，但要用工作流標準觀察。
 
-## 訊號圖
+## 先把新聞變成可判斷的訊號
 
-${chart}
+每個 AI 消息都能被包成趨勢，真正有價值的是它有沒有改變重複決策。如果「${subject}」只是讓簡報多一個詞，就是噪音；如果它改變負責人、審核方式、客戶期待或成本線，就值得放進下一輪產品與營運討論。
 
-## 怎麼讀這張圖
-
-來源可信度高、執行難度低，通常適合短而實用的文章；市場熱度高、執行難度也高，就需要專題：講限制、講風險，不承諾快速落地。
-
-## 來源脈絡
+## 目前可追溯的來源
 
 ${sourceList}
 
-## 對照表
+## 企業讀完後該問的三件事
 
-${table}
+1. 這個訊號會不會改變每週都會做的某個決策？
+2. 來源是否足夠可信，還是只有單一媒體或單一平台說法？
+3. 行動後是更容易被審核，還是只是看起來更快？
 
-## 下一篇可以怎麼寫
+## 還不能過度推論
 
-如果訊號持續升高，就把它升級成專題，加入案例、截圖或 benchmark；如果訊號退燒，就保留成有日期的市場筆記，並導向更新的文章。
+目前不能把 ${subject} 直接等同於大規模採用。還要看官方確認、跨來源一致性、非技術團隊是否真的有需求，以及審核成本是否低到值得更換流程。
 
-## 編輯立場
+## ALTOS LAB 的讀法
 
-ALTOS LAB 使用圖表不是為了裝飾，而是為了讓判斷更快。視覺只有在幫讀者更快做決定時，才值得放進文章。`;
+我們會先把它放進 AI 市場觀察清單，而不是急著包成解決方案。當它真的改變一個重複決策，最小可行動作是來源卡、審核規則，以及一個能支援「${decision}」的小實驗。`;
   }
 
-  return `${subject} 看起來像市場故事，但從工作現場看會更有意思。真正的問題很簡單：明天要發生什麼變化，團隊才會真的${decision}？
+  if (isFeature) {
+    return `${subject} 真正重要的時候，不是它登上新聞，而是它開始變成系統設計題。企業想做到「${decision}」前，應該先確認能力是否穩定、輸出是否能被審核，以及導入後的責任會落在哪裡。
 
-## 場景
+## 為什麼它會變成系統問題
 
-想像一個產品、行銷或營運團隊，在客戶會議之間讀到最新 AI 消息。他們不需要另一段抽象預測，而是需要知道這個訊號是否改變 backlog、流程、指標或風險審核。
+多數 AI 趨勢要變成商業價值，必須同時有三件事：模型能力夠穩、工作流能驗證輸出、結果能進入真實使用者面前。${subject} 值得被做成專題，是因為它碰到這三件事的交界。
 
-## 來源筆記
+## 先讀這些來源
 
 ${sourceList}
 
-## 現場檢查清單
+## 導入判斷表
 
 ${table}
 
+## 從小實驗開始
+
+1. 先選一個被 ${subject} 影響的重複決策。
+2. 寫出來源卡，分清楚已確認、推論與未知。
+3. 先定義審核者，再定義自動化。
+4. 用品質、審核時間與回滾成本判斷是否擴大。
+
 ${chart}
 
-## 好文章應該有什麼質地
+## 實驗室觀點
 
-好的公司部落格要有具體場景、真實限制、來源化主張與清楚觀點。它可以分享市場資訊，不需要每一段都硬轉回產品推銷。
+ALTOS LAB 不應該只做趨勢整理，而是把「${subject}」變成可被引用的知識資產。讀者離開時要知道系統怎麼運作、哪裡可能壞掉、什麼證據會讓建議改變。`;
+  }
 
-## ALTOS LAB 現場筆記
+  return `「${subject}」看起來像市場新聞，但好的專欄應該先問更窄的問題：什麼證據會讓一個認真的團隊在這個月改變行為？如果答案模糊，就繼續觀察；如果答案具體，就設計小實驗。
 
-這篇文章最好的版本，應該讓 ALTOS LAB 看起來像一個會觀察市場、測試想法、解釋什麼值得被建造的實驗室。這才會讓內容長期累積 SEO 與 GEO 信任。`;
+## 趨勢裡真正的決策
+
+團隊不缺 AI 名詞，缺的是判斷。「${subject}」到底有沒有改變客戶承諾、流程責任、成本線或審核義務？這比「它是不是熱門」重要。
+
+## 來源支持到哪裡
+
+${sourceList}
+
+## 給操作者的框架
+
+${table}
+
+## 該取捨的是什麼
+
+早動不一定是優勢，慢動也不一定保守。當來源可信、主張可驗證，而且接近真實工作流時，早一點做實驗有價值；如果連誰審核、失敗如何回滾都說不清楚，那只是把趨勢放進待辦清單。
+
+## ALTOS LAB 的觀點
+
+我們可以有態度，但不能比證據更大聲。關於「${subject}」的好文章，應該讓讀者離開時更會判斷，而不是只更相信 AI 很重要。`;
 }
 
 function tagsFor(ideaItem, language) {

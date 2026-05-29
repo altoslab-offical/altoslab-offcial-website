@@ -5,7 +5,7 @@ import { JsonLd } from "@/components/JsonLd";
 import { SafeBlogImage } from "@/components/SafeBlogImage";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { SiteHeader } from "@/components/site/SiteHeader";
-import { BLOG_LANGUAGES, blogIndexPath, blogPostPath, languageShortLabel } from "@/lib/blog-utils";
+import { BLOG_LANGUAGES, blogContentTypeLabel, blogIndexPath, blogPostPath, languageShortLabel } from "@/lib/blog-utils";
 import { getPublishedBlogPostsByLanguage } from "@/lib/cms";
 import { blogIndexItemListJsonLd, breadcrumbJsonLd } from "@/lib/seo";
 import type { BlogLanguage } from "@/lib/types";
@@ -319,7 +319,10 @@ export async function BlogIndex({ language, tag, query }: BlogIndexProps) {
                     </h3>
                     <p>{renderBrandText(post.excerpt)}</p>
                     <div className="blog-craft-card-meta">
-                      <span>{[post.contentType, post.newsCategory || post.tags[0]].filter(Boolean).join(" / ")}</span>
+                      <span className={`blog-craft-type-badge is-${post.contentType}`}>
+                        {blogContentTypeLabel(post.contentType, post.language)}
+                      </span>
+                      <span className="blog-craft-card-taxonomy">{post.newsCategory || post.tags[0]}</span>
                       <small>{dictionary.readTime(post.readTimeMinutes)}</small>
                     </div>
                   </div>

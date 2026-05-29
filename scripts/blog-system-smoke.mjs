@@ -58,10 +58,12 @@ assert(typeCounts.breaking >= 72, "seed archive has a real latest-news/breaking 
 assert(typeCounts.column >= 60, "seed archive keeps a substantial column lane");
 assert(typeCounts.feature >= 44, "seed archive keeps a substantial feature lane");
 
-const misleadingTitles = seedPosts.filter(
-  (post) => /快訊|Market brief|市場ブリーフ|시장 브리프/i.test(post.title) && post.contentType !== "breaking"
+const titlesWithTypeLabels = seedPosts.filter((post) =>
+  /市場快訊|Market brief|市場ブリーフ|시장 브리프|專欄[:：]|Column[:：]|Feature[:：]|專題[:：]|特集[:：]|기획[:：]/i.test(
+    post.title
+  )
 );
-assert(misleadingTitles.length === 0, "seed article titles match breaking/column/feature classification");
+assert(titlesWithTypeLabels.length === 0, "seed article titles do not contain UI taxonomy labels");
 
 const postsWithoutDatedSource = seedPosts.filter(
   (post) => !post.sourceLinks?.some((source) => source.publishedAt)
@@ -71,9 +73,9 @@ assert(postsWithoutDatedSource.length === 0, "seed articles include at least one
 const breakingWithoutNewsAnchor = seedPosts.filter(
   (post) =>
     post.contentType === "breaking" &&
-    !/最新新聞錨點|Latest news anchor|最新ニュース|최신 뉴스/.test(post.body || "")
+    !/最新背景|Latest context|最新背景：|최신 배경/.test(post.body || "")
 );
-assert(breakingWithoutNewsAnchor.length === 0, "breaking articles visibly cite a latest-news anchor");
+assert(breakingWithoutNewsAnchor.length === 0, "breaking articles visibly cite latest source context");
 
 if (process.exitCode) {
   process.exit(process.exitCode);

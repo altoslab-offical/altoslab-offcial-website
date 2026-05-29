@@ -47,7 +47,7 @@ export async function GET() {
         `Topic: ${post.topic}`,
         `Audience: ${post.audience}`,
         `SEO description: ${post.seoDescription || post.excerpt}`,
-        `GEO answer summary: ${post.geoSummary}`,
+        `TL;DR: ${post.geoSummary}`,
         `Key takeaways: ${post.keyTakeaways.join(" | ")}`,
         "Sources:",
         sources,

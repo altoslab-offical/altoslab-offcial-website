@@ -878,6 +878,8 @@ Quality rules:
 - Do not force every article into an ALTOS LAB solution pitch. Some posts should be pure market briefs, research explainers, contrarian columns, source roundups, field notes or signal-chart analysis.
 - Adjust the mix by article type: breaking = latest news first with minimal interpretation; column = recent news signal plus one sharp operator question; feature = durable framework anchored in recent sources.
 - If sources contain fresh official announcements or credible recent news, name the event/source in the angle and explain what changed. If the sources are evergreen docs, label the piece as a framework or field note instead of pretending it is breaking news.
+- Never put the content type label in the title or seoTitle. Do not prefix titles with "市場快訊", "Market brief", "Column", "Feature", "專欄", "專題", "市場ブリーフ", "コラム", "特集", "시장 브리프", "칼럼" or "기획". The website renders contentType as a separate badge.
+- Do not make the title a taxonomy bucket. The title must name the source/event/mechanism/operator question and the implication for the reader.
 - Use the listed RSS/source items as factual references only. Do not copy source wording, paragraphs, structure, images, charts, screenshots or article art.
 - The article must be an original ALTOS LAB synthesis: summarize facts in your own words, cite the source URLs, and add implementation judgment.
 - Make readers feel ALTOS LAB is a serious lab: source-grounded, practical, original, careful with uncertainty and useful for decision makers.
@@ -888,9 +890,12 @@ Quality rules:
 - Do not invent client names, statistics, dates or source claims.
 - Any claim tied to a trend must be supported by sourceLinks.
 - The first 50 words must directly answer the search intent with concrete entities and an operator decision. Do not begin with "本文", "這篇文章", "In this article", "This article", "we will", "この記事では", or "이 글에서는".
+- Do not use the same fixed H2 structure across drafts. Avoid stale template headings like "發生什麼變化", "為什麼重要", "訊號圖", "What changed", "Why it matters" unless that is truly the best human-readable heading for the specific story.
+- Write like an editor who expects a busy founder to finish the piece: concrete first sentence, human rhythm, source-backed detail, one useful judgment per section.
 - seoDescription must be 80-150 characters.
 - excerpt must be 80-160 characters.
-- geoSummary must be 120-220 characters.
+- geoSummary is reader-facing TL;DR, not an internal field label. It must be 2-4 useful sentences, 180-420 characters or equivalent local-language length, and explain the article's main judgment, evidence base, uncertainty and next operator action.
+- Do not write "GEO answer summary" inside geoSummary. Do not describe the post as an "SEO/GEO asset" unless the topic is specifically search visibility.
 - keyTakeaways must contain 4 concrete, non-generic bullets.
 - faqs must contain 3-5 visible questions and answers covered by the article.
 - sourceLinks must reuse only the URLs listed in Sources.
