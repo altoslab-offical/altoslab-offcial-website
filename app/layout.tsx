@@ -89,6 +89,10 @@ export const metadata: Metadata = {
   authors: [{ name: siteName }],
   creator: siteName,
   publisher: siteName,
+  icons: {
+    icon: [{ url: "/icon.svg", type: "image/svg+xml" }],
+    shortcut: [{ url: "/icon.svg", type: "image/svg+xml" }]
+  },
   alternates: {
     types: {
       "application/rss+xml": `${siteUrl}/feed.xml`,

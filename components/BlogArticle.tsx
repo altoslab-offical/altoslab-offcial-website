@@ -249,8 +249,7 @@ export async function BlogArticle({ post }: { post: BlogPost }) {
           ) : null}
 
           {post.faqs.length ? (
-            <section style={{ marginTop: 48 }}>
-              <p className="eyebrow">FAQ</p>
+            <section className="article-faq-section">
               <h2>{dictionary.faq}</h2>
               <div className="faq-list">
                 {post.faqs.map((faq) => (

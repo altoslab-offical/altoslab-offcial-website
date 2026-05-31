@@ -29,6 +29,16 @@
   --border-soft: var(--ink-100);
   --border-strong: var(--ink-300);
 
+  --type-breaking-bg: oklch(96% 0.035 72);
+  --type-breaking-border: oklch(82% 0.07 70);
+  --type-breaking-fg: oklch(31% 0.12 58);
+  --type-column-bg: oklch(96% 0.025 250);
+  --type-column-border: oklch(82% 0.05 250);
+  --type-column-fg: oklch(31% 0.1 250);
+  --type-feature-bg: oklch(96% 0.032 150);
+  --type-feature-border: oklch(81% 0.055 150);
+  --type-feature-fg: oklch(30% 0.095 150);
+
   --font-sans: var(--font-geist, "Geist"), var(--font-inter, "Inter"), -apple-system, BlinkMacSystemFont,
     "Helvetica Neue", Arial, sans-serif;
   --font-serif: var(--font-newsreader, "Newsreader"), "Source Serif 4", Georgia, "Times New Roman", serif;
@@ -36,7 +46,7 @@
   --cjk-sans: var(--font-noto-tc, "Noto Sans TC"), "Noto Sans JP", "Noto Sans KR", "PingFang TC",
     "Hiragino Sans", "Microsoft JhengHei", sans-serif;
   --cjk-serif: "Noto Serif TC", "Noto Serif JP", "Noto Serif KR", "Source Han Serif TC", "Songti TC", serif;
-  --font-space: var(--font-space-grotesk, "Space Grotesk"), var(--cjk-sans);
+  --font-space: "Space Grotesk", var(--font-space-grotesk, "Space Grotesk"), var(--cjk-sans);
   --font-body: var(--font-sans), var(--cjk-sans);
   --font-display: var(--font-serif), var(--cjk-serif);
 

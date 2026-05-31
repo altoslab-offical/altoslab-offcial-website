@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getPublishedPage } from "@/lib/cms";
 
-type Params = { params: Promise<{ slug: string }> | { slug: string } };
+type Params = { params: Promise<{ slug: string }> };
 
 export async function GET(_: Request, context: Params) {
   const { slug } = await context.params;

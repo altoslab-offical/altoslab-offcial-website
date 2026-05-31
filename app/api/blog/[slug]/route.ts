@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getPublishedBlogPost } from "@/lib/cms";
 import type { BlogLanguage } from "@/lib/types";
 
-type Params = { params: Promise<{ slug: string }> | { slug: string } };
+type Params = { params: Promise<{ slug: string }> };
 
 export async function GET(request: Request, context: Params) {
   const { slug } = await context.params;

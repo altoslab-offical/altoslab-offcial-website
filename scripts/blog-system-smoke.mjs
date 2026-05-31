@@ -103,11 +103,22 @@ assert(!blogIndex.includes("blog-language-links"), "blog index does not show ext
 assert(tokensCss.includes("--paper: oklch(99.5% 0 0);"), "runtime tokens include source-aligned Blog paper token");
 assert(tokensCss.includes("--ink-1000: oklch(8% 0 0);"), "runtime tokens reserve source-aligned Blog display ink");
 assert(tokensCss.includes("--font-display: var(--font-serif), var(--cjk-serif);"), "runtime tokens expose combined display font stack");
-assert(tokensCss.includes("--font-space: var(--font-space-grotesk"), "runtime tokens expose Space Grotesk for the AI wordmark");
+assert(
+  tokensCss.includes('--font-space: "Space Grotesk", var(--font-space-grotesk'),
+  "runtime tokens expose Space Grotesk first for the AI wordmark"
+);
 assert(tokensCss.includes("--tap-min: 44px;"), "runtime tokens preserve 44px touch target contract");
 assert(tokensCss.includes("--al-blog-accent: var(--fg-display);"), "Blog accent compatibility token stays greyscale");
 assert(tokensCss.includes("--al-blog-column-gap: var(--sp-8);"), "Blog layout compatibility gap points to spacing token");
+assert(tokensCss.includes("--type-breaking-bg: oklch(96% 0.035 72);"), "runtime tokens include breaking badge color");
+assert(tokensCss.includes("--type-breaking-fg: oklch(31% 0.12 58);"), "runtime tokens include deep breaking badge text color");
 assert(tokensJson.color.paper.$value === "oklch(99.5% 0 0)", "tokens.json mirrors Blog paper token");
+assert(tokensJson.color["type-breaking-bg"].$value === "oklch(96% 0.035 72)", "tokens.json mirrors breaking badge color");
+assert(tokensJson.color["type-column-bg"].$value === "oklch(96% 0.025 250)", "tokens.json mirrors column badge color");
+assert(tokensJson.color["type-feature-bg"].$value === "oklch(96% 0.032 150)", "tokens.json mirrors feature badge color");
+assert(tokensJson.color["type-breaking-fg"].$value === "oklch(31% 0.12 58)", "tokens.json mirrors deep breaking badge text color");
+assert(tokensJson.color["type-column-fg"].$value === "oklch(31% 0.1 250)", "tokens.json mirrors deep column badge text color");
+assert(tokensJson.color["type-feature-fg"].$value === "oklch(30% 0.095 150)", "tokens.json mirrors deep feature badge text color");
 assert(tokensJson.fontSize.prose.$value === "17px", "tokens.json includes prose size to match runtime token");
 assert(tokensJson.compatibility.blog.accent.$value === "{semantic.fg-display}", "tokens.json keeps Blog accent greyscale");
 assert(tokensJson.legacyWebsite.color["lime-500"].$value === "#C8FF00", "tokens.json preserves non-blog legacy website tokens");
@@ -118,6 +129,9 @@ assert(!globals.includes("rgba(162, 198, 38"), "Blog type badges do not use gree
 assert(!globals.includes("rgba(45, 95, 225"), "Blog type badges do not use blue UI accents");
 assert(globals.includes(".blog-craft-brand h1") && globals.includes("font-family: var(--font-space);"), "Blog AI wordmark uses the Space Grotesk token");
 assert(globals.includes(".blog-craft-brand h1 em") && globals.includes("font-family: var(--font-display);"), "Blog Craft wordmark stays Newsreader italic");
+assert(globals.includes("--type-badge-bg: var(--type-breaking-bg);"), "breaking badge uses its content-type color token");
+assert(globals.includes("--type-badge-bg: var(--type-column-bg);"), "column badge uses its content-type color token");
+assert(globals.includes("--type-badge-bg: var(--type-feature-bg);"), "feature badge uses its content-type color token");
 assert(siteHeader.includes("Globe"), "site header uses a globe icon for language switching");
 assert(!siteHeader.includes("Globe2"), "site header uses the simpler line globe icon");
 assert(siteHeader.includes("aria-expanded={isLanguageMenuOpen}"), "language menu trigger exposes expanded state");
