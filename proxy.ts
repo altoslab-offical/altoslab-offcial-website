@@ -47,8 +47,10 @@ export function proxy(request: NextRequest) {
     pathname === "/admin/login" ||
     pathname === "/api/admin/auth/login" ||
     pathname === "/api/admin/auth/logout";
+  const isPublicSignedIngestRoute =
+    pathname === "/api/admin/blog/ingest-set" || pathname === "/api/admin/blog/media";
 
-  if ((!isAdminPage && !isAdminApi) || isPublicAuthRoute) {
+  if ((!isAdminPage && !isAdminApi) || isPublicAuthRoute || isPublicSignedIngestRoute) {
     return nextWithPathname(request);
   }
 

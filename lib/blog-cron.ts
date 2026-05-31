@@ -15,7 +15,7 @@ const SLOT_CONFIG: Record<CronSlot, { hour: string }> = {
     hour: "09:00"
   },
   afternoon: {
-    hour: "15:00"
+    hour: "16:00"
   }
 };
 
@@ -50,6 +50,10 @@ function shouldAutoPublish() {
   return process.env.AUTO_PUBLISH_BLOG !== "false";
 }
 
+function shouldRunLegacyDeepSeekCron() {
+  return process.env.BLOG_DISABLE_DEEPSEEK_CRON === "false";
+}
+
 function isSlotCronPost(post: BlogPost, date: string, slot: CronSlot) {
   return post.generationDate === date && post.generationSlot === slot && post.generatedBy?.startsWith("cron:");
 }
@@ -80,6 +84,18 @@ export async function runBlogDraftCron(request: Request, forcedSlot?: CronSlot) 
   const url = new URL(request.url);
   const dryRun = url.searchParams.get("dryRun") === "1";
   const slot = forcedSlot || inferSlot(request);
+
+  if (!shouldRunLegacyDeepSeekCron()) {
+    return NextResponse.json(
+      {
+        ok: true,
+        skipped: true,
+        reason: "Legacy DeepSeek blog cron is disabled. Use the signed local Antigravity ingest pipeline.",
+        generationSlot: slot
+      },
+      { status: 200 }
+    );
+  }
 
   try {
     const result = await withCmsStorageLock(`blog-drafts-${slot}`, async () => {

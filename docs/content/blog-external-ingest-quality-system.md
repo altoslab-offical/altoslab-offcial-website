@@ -1,0 +1,61 @@
+# ALTOS LAB Blog External Ingest Quality System
+
+Production blog publishing is now fail-closed:
+
+1. Local worker creates a multilingual article set with Antigravity as the primary writer.
+2. Local worker runs preflight checks before contacting production.
+3. Local worker uploads generated covers through signed `POST /api/admin/blog/media`.
+4. Production accepts only signed `POST /api/admin/blog/ingest-set` requests.
+5. Production runs content quality, source, multilingual parity and generated-image QA again.
+6. Posts publish only when every gate passes; otherwise the whole article set is held as draft.
+
+## Required Payload
+
+- `slot`: `morning` or `afternoon`.
+- `publishMode`: `publish-if-valid`.
+- `generation.provider`: `local-antigravity`.
+- `posts`: exactly one `zh-Hant`, `en`, `ja` and `ko` post.
+- All posts share the same `translationGroupId` and `sourceLinks`.
+- Every post uses `coverSource: "generated"`.
+- Every generated cover includes `coverGeneration.provider`, `prompt`, `generatedAt`, `visualChecks`, `coverAlt` and `coverCredit`.
+
+## Auth
+
+The local worker signs the exact JSON body:
+
+```txt
+HMAC_SHA256(BLOG_INGEST_HMAC_SECRET, X-Altos-Timestamp + "." + X-Altos-Nonce + "." + body)
+```
+
+Production rejects missing, stale, replayed or invalid signatures.
+
+The media upload route uses the same signature contract. Production stores images in Vercel Blob. `BLOG_MEDIA_ALLOW_LOCAL_STORAGE=1` and `BLOG_IMAGE_ALLOW_LOCAL_HTTP=1` are for local end-to-end tests only.
+
+## Runbook
+
+```bash
+node scripts/blog-antigravity-orchestrator.mjs --dry-run --slot morning --topic "AI agents in customer operations"
+node scripts/blog-antigravity-orchestrator.mjs --publish --slot morning
+node scripts/blog-local-worker.mjs --make-prompt --slot morning --topic "AI agents in customer operations"
+node scripts/blog-local-worker.mjs --article-set ./article-set.json --slot morning --validate-only
+node scripts/blog-local-worker.mjs --article-set ./article-set.json --slot morning --publish
+```
+
+Use `validateOnly` before every publish attempt. If production returns `wouldPublish: false`, fix the article set or image and retry; do not bypass the gate.
+
+## Scheduler
+
+Install `scripts/com.altoslab.blog-local-worker.plist.example` as a LaunchAgent after copying
+`scripts/altoslab-blog-worker.env.example` to `~/.altoslab-blog-worker.env` and filling the real
+`BLOG_INGEST_HMAC_SECRET`. The LaunchAgent runs the orchestrator at `09:00` and `16:00` Asia/Taipei.
+
+Use `scripts/install-blog-launch-agent.sh` after the env file is filled. It refuses to install when
+the secret is missing, too short, or still a placeholder/test value.
+
+The orchestrator writes a run folder under `data/blog-worker-runs`, opens local Antigravity with a
+prompt that instructs it to write `article-set.json`, waits for valid JSON, generates missing safe
+bitmap covers, uploads them through the signed media route, runs `validateOnly`, and publishes only
+if production returns `wouldPublish: true`.
+
+If Antigravity does not write valid JSON before the timeout, if a cover is broken, or if any quality
+gate fails, the run exits without publishing.

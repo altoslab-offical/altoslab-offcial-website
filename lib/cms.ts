@@ -118,6 +118,11 @@ function hydrateBlogPost(post: BlogPost): BlogPost {
       llmEvaluation: post.qualityChecks?.llmEvaluation,
       notes: post.qualityChecks?.notes
     }),
+    qualityStatus: post.qualityStatus,
+    imageQualityStatus: post.imageQualityStatus,
+    releaseDecision: post.releaseDecision,
+    qualityIssues: post.qualityIssues,
+    ingestRunId: post.ingestRunId,
     aiDisclosure: post.aiDisclosure,
     generationDate: post.generationDate,
     generationSlot: post.generationSlot,
@@ -357,6 +362,11 @@ export function normalizeBlogPostInput(input: Partial<BlogPost>, existing?: Blog
     featured: Boolean(input.featured ?? existing?.featured ?? false),
     reviewStatus: input.reviewStatus ?? existing?.reviewStatus ?? "ai-draft",
     qualityChecks,
+    qualityStatus: input.qualityStatus ?? existing?.qualityStatus,
+    imageQualityStatus: input.imageQualityStatus ?? existing?.imageQualityStatus,
+    releaseDecision: input.releaseDecision ?? existing?.releaseDecision,
+    qualityIssues: input.qualityIssues ?? existing?.qualityIssues,
+    ingestRunId: input.ingestRunId ?? existing?.ingestRunId,
     aiDisclosure:
       input.aiDisclosure ??
       existing?.aiDisclosure ??
@@ -424,11 +434,23 @@ export function publishValidationForBlogPost(post: BlogPost) {
   if (!post.readTimeMinutes) errors.push("readTimeMinutes is required");
   if (!post.faqs.length) errors.push("at least one visible FAQ is required for GEO");
   if (post.generatedBy && !post.sourceLinks.length) errors.push("AI-generated posts require at least one source link");
-  if (post.generatedBy && post.coverSource !== "curated") {
-    errors.push("AI-generated posts require a topic-matched legally sourced cover before publishing");
+  if (post.generatedBy && post.coverSource !== "curated" && post.coverSource !== "generated") {
+    errors.push("AI-generated posts require a topic-matched curated or generated cover before publishing");
   }
-  if (post.generatedBy && post.coverSource === "curated" && !post.coverCredit) {
+  if (post.generatedBy && (post.coverSource === "curated" || post.coverSource === "generated") && !post.coverCredit) {
     errors.push("AI-generated posts require cover attribution before publishing");
+  }
+  if (post.generatedBy && post.coverSource === "generated" && !post.coverGeneration?.prompt) {
+    errors.push("AI-generated cover images require the stored generation prompt before publishing");
+  }
+  if (post.generatedBy && post.coverSource === "generated" && !post.coverGeneration?.provider) {
+    errors.push("AI-generated cover images require the image provider before publishing");
+  }
+  if (post.generatedBy && post.qualityStatus && post.qualityStatus !== "passed") {
+    errors.push("AI-generated posts require qualityStatus passed before publishing");
+  }
+  if (post.generatedBy && post.imageQualityStatus && post.imageQualityStatus !== "passed") {
+    errors.push("AI-generated posts require imageQualityStatus passed before publishing");
   }
   if (
     post.generatedBy &&

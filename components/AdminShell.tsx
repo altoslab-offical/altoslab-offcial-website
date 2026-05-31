@@ -80,7 +80,7 @@ const reviewLabels: Record<BlogReviewStatus, string> = {
 const slotLabels: Record<BlogGenerationSlot, string> = {
   manual: "手動",
   morning: "早上 09:00",
-  afternoon: "下午 15:00"
+  afternoon: "下午 16:00"
 };
 
 const contentTypeLabels: Record<BlogContentType, string> = {
@@ -119,6 +119,18 @@ function compactNumber(value: number) {
   if (value >= 1_000_000) return `${(value / 1_000_000).toFixed(1)}M`;
   if (value >= 1_000) return `${(value / 1_000).toFixed(1)}K`;
   return String(Math.round(value));
+}
+
+function gateLabel(value?: string) {
+  if (value === "passed") return "通過";
+  if (value === "failed") return "失敗";
+  return "留稿";
+}
+
+function decisionLabel(value?: string) {
+  if (value === "published") return "已發布";
+  if (value === "rejected") return "拒絕";
+  return "留待審核";
 }
 
 async function api<T>(url: string, init?: RequestInit): Promise<T> {
@@ -278,9 +290,9 @@ export function AdminShell({ initialTab = "dashboard" }: AdminShellProps) {
       }
     }
     const traces = data.blogPosts.flatMap((post) => post.generationTrace || []);
-    const deepSeekTraces = traces.filter((trace) => trace.provider === "deepseek");
-    const latencyValues = deepSeekTraces.map((trace) => trace.latencyMs || 0).filter(Boolean);
-    const usage = deepSeekTraces.reduce(
+    const localTraces = traces.filter((trace) => trace.provider === "local-antigravity");
+    const latencyValues = traces.map((trace) => trace.latencyMs || 0).filter(Boolean);
+    const usage = traces.reduce(
       (sum, trace) => ({
         totalTokens: sum.totalTokens + (trace.usage?.totalTokens || 0),
         cacheHitTokens: sum.cacheHitTokens + (trace.usage?.promptCacheHitTokens || 0),
@@ -297,12 +309,16 @@ export function AdminShell({ initialTab = "dashboard" }: AdminShellProps) {
     return {
       contentMix,
       topSources: [...sourceCounts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 6),
-      traceCount: deepSeekTraces.length,
+      traceCount: traces.length,
+      localTraceCount: localTraces.length,
       averageLatencyMs: latencyValues.length
         ? Math.round(latencyValues.reduce((sum, value) => sum + value, 0) / latencyValues.length)
         : 0,
       usage,
       llmReviewed: data.blogPosts.filter((post) => post.qualityChecks.llmEvaluation?.enabled).length,
+      qualityPassed: data.blogPosts.filter((post) => post.qualityStatus === "passed").length,
+      imagePassed: data.blogPosts.filter((post) => post.imageQualityStatus === "passed").length,
+      held: data.blogPosts.filter((post) => post.releaseDecision === "held_for_review").length,
       recentGenerated
     };
   }, [data.blogPosts]);
@@ -423,34 +439,8 @@ export function AdminShell({ initialTab = "dashboard" }: AdminShellProps) {
   }
 
   async function generatePost() {
-    setMessage("正在產生四語同主題部落格草稿...");
+    setMessage("正式部落格生成已改由本機 Antigravity/Codex worker 執行；後台不再直接呼叫 DeepSeek 產生正式草稿。");
     setError("");
-    try {
-      const payload = await api<{ posts: BlogPost[]; post?: BlogPost; provider?: string; warning?: string }>(
-        "/api/admin/blog/generate",
-        {
-          method: "POST",
-          body: JSON.stringify(generator)
-        }
-      );
-      const created: BlogPost[] = [];
-      for (const post of payload.posts || (payload.post ? [payload.post] : [])) {
-        created.push(await createPost(post));
-      }
-      setSelectedPostId(created[0]?.id || selectedPostId);
-      trackAdminBlogEvent("ai_blog_draft_generated", {
-        post_count: created.length,
-        provider: payload.provider || "unknown",
-        languages: created.map((post) => post.language).join(","),
-        translation_group_id: created[0]?.translationGroupId || ""
-      });
-      setMessage(
-        payload.warning ||
-          `已產生 ${created.length} 篇 ${payload.provider || "AI"} 部落格草稿，排程自動發文仍會以品質審核員分數決定是否發布。`
-      );
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "產生失敗");
-    }
   }
 
   async function duplicateTranslation(post: BlogPost) {
@@ -515,7 +505,9 @@ export function AdminShell({ initialTab = "dashboard" }: AdminShellProps) {
       { label: "有 SEO title / description", ok: Boolean(post.seoTitle && post.seoDescription) },
       { label: "有 GEO 回答摘要", ok: Boolean(post.geoSummary) },
       { label: "有封面圖與 alt", ok: Boolean(post.cover && post.coverAlt) },
-      { label: "AI 草稿有合法主題配圖", ok: !post.generatedBy || post.coverSource === "curated" },
+      { label: "AI 草稿有合法主題配圖", ok: !post.generatedBy || post.coverSource === "curated" || post.coverSource === "generated" },
+      { label: "文章品質 gate 通過", ok: !post.generatedBy || post.qualityStatus === "passed" },
+      { label: "圖片品質 gate 通過", ok: !post.generatedBy || post.imageQualityStatus === "passed" },
       { label: "有可見 FAQ", ok: post.faqs.length > 0 },
       { label: "AI 草稿有來源連結", ok: !post.generatedBy || post.sourceLinks.length > 0 },
       { label: "來源可信與圖文符合", ok: Boolean(post.qualityChecks.hasSourceTrust && post.qualityChecks.hasImageFit) },
@@ -811,7 +803,7 @@ export function AdminShell({ initialTab = "dashboard" }: AdminShellProps) {
               <div className="admin-actions-stack">
                 <button className="button primary" onClick={generatePost} type="button">
                   <Sparkles size={16} />
-                  AI 產生四語草稿
+                  本機 worker 產生
                 </button>
                 <button className="button" onClick={() => createPost()} type="button">
                   <Plus size={16} />
@@ -825,7 +817,7 @@ export function AdminShell({ initialTab = "dashboard" }: AdminShellProps) {
                 <CalendarClock size={17} />
                 <div>
                   <strong>每日兩批四語自動發文</strong>
-                  <span>09:00 / 15:00 依週期混合快訊、專欄、專題；zh/en/ja/ko 同主題，達標才發布</span>
+                  <span>09:00 / 16:00 由本機 Antigravity/Codex worker 送稿；zh/en/ja/ko 同主題，達標才發布</span>
                 </div>
               </article>
               <article>
@@ -838,8 +830,8 @@ export function AdminShell({ initialTab = "dashboard" }: AdminShellProps) {
               <article>
                 <ImageIcon size={17} />
                 <div>
-                  <strong>圖文完整</strong>
-                  <span>{renderBrandText("自動草稿會根據文章主題配合法授權圖片、寫入 alt text，並保留圖片來源與授權")}</span>
+                  <strong>生成圖先過 QA</strong>
+                  <span>{renderBrandText("每篇主圖需有生成 prompt、Blob URL、visual checks、alt text 與圖片品質通過狀態")}</span>
                 </div>
               </article>
             </div>
@@ -872,9 +864,9 @@ export function AdminShell({ initialTab = "dashboard" }: AdminShellProps) {
                 </article>
                 <article>
                   <Cpu size={17} />
-                  <strong>DeepSeek 遙測</strong>
+                  <strong>本機生成遙測</strong>
                   <span>
-                    {contentFactoryStats.traceCount} traces · 平均 {contentFactoryStats.averageLatencyMs || 0}ms ·{" "}
+                    local {contentFactoryStats.localTraceCount} / total {contentFactoryStats.traceCount} traces · 平均 {contentFactoryStats.averageLatencyMs || 0}ms ·{" "}
                     {compactNumber(contentFactoryStats.usage.totalTokens)} tokens
                   </span>
                 </article>
@@ -882,7 +874,7 @@ export function AdminShell({ initialTab = "dashboard" }: AdminShellProps) {
                   <Activity size={17} />
                   <strong>審核與發布帳本</strong>
                   <span>
-                    LLM judge {contentFactoryStats.llmReviewed} 篇 · 最近{" "}
+                    文章通過 {contentFactoryStats.qualityPassed} · 圖片通過 {contentFactoryStats.imagePassed} · 留稿 {contentFactoryStats.held} · 最近{" "}
                     {contentFactoryStats.recentGenerated
                       .map((post) => `${languageShortLabel(post.language)}:${post.status}`)
                       .join(" / ") || "尚無自動草稿"}
@@ -894,8 +886,8 @@ export function AdminShell({ initialTab = "dashboard" }: AdminShellProps) {
             <section className="blog-workbench-grid">
               <aside className="blog-sidebar">
                 <section className="admin-card blog-generator-panel">
-                  <h2>AI 草稿設定</h2>
-                  <p className="muted">手動產生時可指定主題；每日排程會自動從 AI / 搜尋 / 產品趨勢來源抓題材。</p>
+                  <h2>本機 worker 提醒</h2>
+                  <p className="muted">正式文章由本機 Antigravity/Codex worker 生成，再透過 signed ingest API 送進後台。這裡保留主題欄位作為編輯 brief。</p>
                   <div className="admin-form">
                     <label>
                       <span>主題</span>
@@ -950,7 +942,7 @@ export function AdminShell({ initialTab = "dashboard" }: AdminShellProps) {
                     </div>
                     <button className="button primary" onClick={generatePost} type="button">
                       <Sparkles size={16} />
-                      產生四語草稿
+                      顯示 worker 說明
                     </button>
                   </div>
                 </section>
@@ -1090,6 +1082,13 @@ export function AdminShell({ initialTab = "dashboard" }: AdminShellProps) {
                       </button>
                     </div>
                   </header>
+
+                  <div className="quality-decision-strip">
+                    <span>文章品質：{gateLabel(selectedPost.qualityStatus)}</span>
+                    <span>圖片品質：{gateLabel(selectedPost.imageQualityStatus)}</span>
+                    <span>發布決策：{decisionLabel(selectedPost.releaseDecision)}</span>
+                    {selectedPost.ingestRunId ? <span>Run：{selectedPost.ingestRunId}</span> : null}
+                  </div>
 
                   <nav className="editor-tabs" aria-label="Blog editor sections">
                     {[

@@ -1,15 +1,5 @@
 {
   "framework": "nextjs",
-  "crons": [
-    {
-      "path": "/api/cron/blog-drafts/morning",
-      "schedule": "0 1 * * *"
-    },
-    {
-      "path": "/api/cron/blog-drafts/afternoon",
-      "schedule": "0 7 * * *"
-    }
-  ],
   "headers": [
     {
       "source": "/(.*)",

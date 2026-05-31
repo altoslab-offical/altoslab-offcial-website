@@ -1687,6 +1687,22 @@ img {
   margin-bottom: 16px;
 }
 
+.quality-decision-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.quality-decision-strip span {
+  border: 1px solid rgba(200, 255, 0, 0.24);
+  border-radius: 999px;
+  background: rgba(200, 255, 0, 0.05);
+  color: var(--al-secondary);
+  font-size: 12px;
+  padding: 6px 9px;
+}
+
 .blog-editor-header h2 {
   margin: 0 0 8px;
   font-size: clamp(24px, 3vw, 40px);

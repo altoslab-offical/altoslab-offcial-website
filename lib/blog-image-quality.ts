@@ -1,0 +1,397 @@
+import { defaultQualityChecks } from "./blog-utils";
+import type { BlogPost, BlogQualityStatus } from "./types";
+
+type ImageDimensions = {
+  width: number;
+  height: number;
+};
+
+type ImageProbe = {
+  contentType?: string;
+  contentLength?: number;
+  dimensions?: ImageDimensions;
+  issues: string[];
+  warnings: string[];
+};
+
+export type BlogImagePostReview = {
+  language: BlogPost["language"];
+  slug: string;
+  approved: boolean;
+  status: BlogQualityStatus;
+  score: number;
+  issues: string[];
+  warnings: string[];
+  metadata?: {
+    contentType?: string;
+    contentLength?: number;
+    width?: number;
+    height?: number;
+  };
+};
+
+export type BlogImageQualityReview = {
+  approved: boolean;
+  score: number;
+  threshold: number;
+  issues: string[];
+  warnings: string[];
+  postReviews: BlogImagePostReview[];
+  notes: string;
+};
+
+export type BlogImageQualityOptions = {
+  requireGeneratedCover?: boolean;
+  requireBlobCover?: boolean;
+  verifyRemoteImage?: boolean;
+  allowLocalHttp?: boolean;
+};
+
+const IMAGE_TIMEOUT_MS = 5000;
+const IMAGE_THRESHOLD = 82;
+const MIN_IMAGE_WIDTH = 1200;
+const MIN_IMAGE_HEIGHT = 630;
+const MIN_IMAGE_BYTES = 40_000;
+const MAX_IMAGE_BYTES = 8_000_000;
+const SAFE_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
+
+const unsafeImageMetadataPattern =
+  /(dead|corpse|prisoner|concentration camp|nazi|war crime|weapon|gun|blood|accident|disaster|protest|politician|minister|government|military|army|logo|trademark|celebrity|real person|portrait of|screenshot|ui screenshot|fake dashboard|亂碼|錯字|商標|真人|肖像|政治人物|ロゴ|商標|実在人物|초상|상표|로고)/i;
+
+const genericGeneratedImagePattern =
+  /(generic|abstract background|glowing dashboard|futuristic dashboard|server room|business meeting|robot handshake|stock photo|科技感背景|抽象科技|會議室|儀表板|伺服器機房|汎用|抽象|会議|서버룸|회의실|추상 배경)/i;
+
+function isVercelBlobUrl(url: string) {
+  try {
+    const host = new URL(url).hostname;
+    return host.endsWith(".blob.vercel-storage.com") || host.endsWith(".public.blob.vercel-storage.com");
+  } catch {
+    return false;
+  }
+}
+
+function isAllowedLocalHttpUrl(url: string) {
+  try {
+    const parsed = new URL(url);
+    return parsed.protocol === "http:" && ["localhost", "127.0.0.1", "::1"].includes(parsed.hostname);
+  } catch {
+    return false;
+  }
+}
+
+function imageContext(post: BlogPost) {
+  return [
+    post.title,
+    post.topic,
+    post.newsCategory,
+    post.tags.join(" "),
+    post.coverAlt,
+    post.coverPrompt,
+    post.coverGeneration?.prompt,
+    post.coverGeneration?.visualChecks?.notes
+  ]
+    .filter(Boolean)
+    .join("\n");
+}
+
+function topicWords(post: BlogPost) {
+  return `${post.topic} ${post.newsCategory} ${post.tags.join(" ")} ${post.title}`
+    .toLowerCase()
+    .split(/\s+|、|\/|,|，|:|：|\||\(|\)|（|）/)
+    .map((word) => word.trim())
+    .filter((word) => word.length > 2 && !["the", "and", "with", "from", "this", "that", "for"].includes(word));
+}
+
+function readUInt24LE(buffer: Buffer, offset: number) {
+  return buffer[offset] + (buffer[offset + 1] << 8) + (buffer[offset + 2] << 16);
+}
+
+function parsePngDimensions(buffer: Buffer): ImageDimensions | null {
+  if (buffer.length < 24) return null;
+  if (buffer.toString("ascii", 1, 4) !== "PNG") return null;
+  return {
+    width: buffer.readUInt32BE(16),
+    height: buffer.readUInt32BE(20)
+  };
+}
+
+function parseJpegDimensions(buffer: Buffer): ImageDimensions | null {
+  if (buffer.length < 4 || buffer[0] !== 0xff || buffer[1] !== 0xd8) return null;
+  let offset = 2;
+  while (offset + 9 < buffer.length) {
+    if (buffer[offset] !== 0xff) {
+      offset += 1;
+      continue;
+    }
+    const marker = buffer[offset + 1];
+    const length = buffer.readUInt16BE(offset + 2);
+    if (length < 2) return null;
+    if (
+      marker === 0xc0 ||
+      marker === 0xc1 ||
+      marker === 0xc2 ||
+      marker === 0xc3 ||
+      marker === 0xc5 ||
+      marker === 0xc6 ||
+      marker === 0xc7 ||
+      marker === 0xc9 ||
+      marker === 0xca ||
+      marker === 0xcb ||
+      marker === 0xcd ||
+      marker === 0xce ||
+      marker === 0xcf
+    ) {
+      return {
+        height: buffer.readUInt16BE(offset + 5),
+        width: buffer.readUInt16BE(offset + 7)
+      };
+    }
+    offset += 2 + length;
+  }
+  return null;
+}
+
+function parseWebpDimensions(buffer: Buffer): ImageDimensions | null {
+  if (buffer.length < 30 || buffer.toString("ascii", 0, 4) !== "RIFF" || buffer.toString("ascii", 8, 12) !== "WEBP") {
+    return null;
+  }
+  const chunk = buffer.toString("ascii", 12, 16);
+  if (chunk === "VP8X" && buffer.length >= 30) {
+    return {
+      width: readUInt24LE(buffer, 24) + 1,
+      height: readUInt24LE(buffer, 27) + 1
+    };
+  }
+  if (chunk === "VP8 " && buffer.length >= 30) {
+    return {
+      width: buffer.readUInt16LE(26) & 0x3fff,
+      height: buffer.readUInt16LE(28) & 0x3fff
+    };
+  }
+  if (chunk === "VP8L" && buffer.length >= 25) {
+    const b0 = buffer[21];
+    const b1 = buffer[22];
+    const b2 = buffer[23];
+    const b3 = buffer[24];
+    return {
+      width: 1 + (((b1 & 0x3f) << 8) | b0),
+      height: 1 + (((b3 & 0x0f) << 10) | (b2 << 2) | ((b1 & 0xc0) >> 6))
+    };
+  }
+  return null;
+}
+
+function parseImageDimensions(buffer: Buffer, contentType?: string): ImageDimensions | null {
+  if (contentType?.includes("png")) return parsePngDimensions(buffer);
+  if (contentType?.includes("jpeg") || contentType?.includes("jpg")) return parseJpegDimensions(buffer);
+  if (contentType?.includes("webp")) return parseWebpDimensions(buffer);
+  return parsePngDimensions(buffer) || parseJpegDimensions(buffer) || parseWebpDimensions(buffer);
+}
+
+async function fetchWithTimeout(url: string, init: RequestInit) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), IMAGE_TIMEOUT_MS);
+  try {
+    return await fetch(url, {
+      ...init,
+      signal: controller.signal,
+      redirect: "follow",
+      cache: "no-store",
+      headers: {
+        "User-Agent": "ALTOS LAB image quality gate; https://altoslab-ai.cc",
+        ...(init.headers || {})
+      }
+    });
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+async function probeRemoteImage(url: string): Promise<ImageProbe> {
+  const issues: string[] = [];
+  const warnings: string[] = [];
+  let contentType = "";
+  let contentLength = 0;
+
+  try {
+    const head = await fetchWithTimeout(url, { method: "HEAD" });
+    if (!head.ok && head.status !== 405 && head.status !== 403) {
+      issues.push(`cover URL returned HTTP ${head.status}`);
+      return { issues, warnings };
+    }
+    contentType = head.headers.get("content-type")?.split(";")[0]?.trim().toLowerCase() || "";
+    contentLength = Number(head.headers.get("content-length") || 0);
+  } catch (error) {
+    warnings.push(`cover HEAD check failed: ${error instanceof Error ? error.message : "request failed"}`);
+  }
+
+  if (contentType && !SAFE_IMAGE_TYPES.includes(contentType)) {
+    issues.push(`cover content-type must be jpeg, png or webp; received ${contentType}`);
+  }
+  if (contentLength && contentLength < MIN_IMAGE_BYTES) issues.push("cover image file is too small for a generated hero image");
+  if (contentLength && contentLength > MAX_IMAGE_BYTES) issues.push("cover image file is too large for blog delivery");
+
+  try {
+    const get = await fetchWithTimeout(url, {
+      method: "GET",
+      headers: { Range: "bytes=0-131071" }
+    });
+    if (!get.ok && get.status !== 206) {
+      issues.push(`cover binary probe returned HTTP ${get.status}`);
+      return { contentType, contentLength, issues, warnings };
+    }
+    const binaryContentType = get.headers.get("content-type")?.split(";")[0]?.trim().toLowerCase();
+    if (!contentType && binaryContentType) contentType = binaryContentType;
+    const buffer = Buffer.from(await get.arrayBuffer());
+    const dimensions = parseImageDimensions(buffer, contentType);
+    if (!dimensions) {
+      issues.push("cover image dimensions could not be verified from the binary header");
+      return { contentType, contentLength, issues, warnings };
+    }
+    if (dimensions.width < MIN_IMAGE_WIDTH || dimensions.height < MIN_IMAGE_HEIGHT) {
+      issues.push(`cover image dimensions ${dimensions.width}x${dimensions.height} are below ${MIN_IMAGE_WIDTH}x${MIN_IMAGE_HEIGHT}`);
+    }
+    const ratio = dimensions.width / dimensions.height;
+    if (ratio < 1.45 || ratio > 2.15) {
+      warnings.push(`cover image ratio ${ratio.toFixed(2)} may crop poorly in blog cards`);
+    }
+    return { contentType, contentLength, dimensions, issues, warnings };
+  } catch (error) {
+    issues.push(`cover binary probe failed: ${error instanceof Error ? error.message : "request failed"}`);
+    return { contentType, contentLength, issues, warnings };
+  }
+}
+
+async function reviewPostImage(post: BlogPost, options: Required<BlogImageQualityOptions>): Promise<BlogImagePostReview> {
+  const issues: string[] = [];
+  const warnings: string[] = [];
+  let probe: ImageProbe | undefined;
+
+  if (!post.cover) issues.push("cover image URL is required");
+  if (!post.coverAlt?.trim()) issues.push("cover alt text is required");
+  if (post.coverAlt && post.coverAlt.trim().length < 18) issues.push("cover alt text is too thin");
+  if (post.coverAlt && post.coverAlt.length > 180) warnings.push("cover alt text is too long");
+
+  if (options.requireGeneratedCover && post.coverSource !== "generated") {
+    issues.push("external Antigravity pipeline requires coverSource generated");
+  }
+
+  if (post.coverSource === "generated") {
+    if (post.coverGeneration?.status !== "generated") issues.push("generated cover status must be generated");
+    if (!post.coverGeneration?.provider) issues.push("generated cover provider is required");
+    if (!post.coverGeneration?.prompt) issues.push("generated cover prompt is required");
+    if (!post.coverGeneration?.generatedAt) issues.push("generated cover timestamp is required");
+    if (!post.coverCredit?.trim()) issues.push("generated cover credit is required");
+
+    const checks = post.coverGeneration?.visualChecks;
+    if (!checks) {
+      issues.push("generated cover requires visualChecks from local image QA");
+    } else {
+      const failedChecks = [
+        ["topicFit", checks.topicFit],
+        ["noTextArtifacts", checks.noTextArtifacts],
+        ["noLogos", checks.noLogos],
+        ["noPeople", checks.noPeople],
+        ["noTrademarkRisk", checks.noTrademarkRisk],
+        ["noGenericStockLook", checks.noGenericStockLook]
+      ].filter(([, ok]) => ok !== true);
+      if (failedChecks.length) {
+        issues.push(`generated cover visual QA failed: ${failedChecks.map(([name]) => name).join(", ")}`);
+      }
+      if (!checks.checkedBy || !checks.checkedAt) warnings.push("generated cover visual QA should record checkedBy and checkedAt");
+    }
+  }
+
+  const context = imageContext(post);
+  if (unsafeImageMetadataPattern.test(context)) {
+    issues.push("cover metadata indicates text artifacts, logos, people, trademark or unsafe visual risk");
+  }
+  if (genericGeneratedImagePattern.test(context)) {
+    issues.push("cover metadata reads like generic stock or abstract AI art");
+  }
+  const lowerContext = context.toLowerCase();
+  if (!topicWords(post).some((word) => lowerContext.includes(word))) {
+    warnings.push("cover prompt or alt text should name the article topic more directly");
+  }
+
+  if (post.cover) {
+    const allowedLocalHttp = options.allowLocalHttp && isAllowedLocalHttpUrl(post.cover);
+    if (!/^https:\/\//.test(post.cover) && !allowedLocalHttp) {
+      issues.push("generated cover must use a public https URL");
+    } else if (options.requireBlobCover && !isVercelBlobUrl(post.cover)) {
+      issues.push("generated cover must be stored on Vercel Blob before ingest");
+    }
+    if (options.verifyRemoteImage && (/^https:\/\//.test(post.cover) || allowedLocalHttp)) {
+      probe = await probeRemoteImage(post.cover);
+      issues.push(...probe.issues);
+      warnings.push(...probe.warnings);
+    }
+  }
+
+  const score = Math.max(0, 100 - issues.length * 18 - warnings.length * 3);
+  const approved = issues.length === 0 && score >= IMAGE_THRESHOLD;
+  return {
+    language: post.language,
+    slug: post.slug,
+    approved,
+    status: approved ? "passed" : "held",
+    score,
+    issues,
+    warnings,
+    metadata: {
+      contentType: probe?.contentType,
+      contentLength: probe?.contentLength,
+      width: probe?.dimensions?.width,
+      height: probe?.dimensions?.height
+    }
+  };
+}
+
+export async function reviewBlogImagesForRelease(
+  posts: BlogPost[],
+  options: BlogImageQualityOptions = {}
+): Promise<BlogImageQualityReview> {
+  const resolvedOptions: Required<BlogImageQualityOptions> = {
+    requireGeneratedCover: options.requireGeneratedCover ?? false,
+    requireBlobCover: options.requireBlobCover ?? false,
+    verifyRemoteImage: options.verifyRemoteImage ?? true,
+    allowLocalHttp: options.allowLocalHttp ?? false
+  };
+  const postReviews = await Promise.all(posts.map((post) => reviewPostImage(post, resolvedOptions)));
+  const issues = postReviews.flatMap((review) => review.issues.map((issue) => `${review.language}/${review.slug}: ${issue}`));
+  const warnings = postReviews.flatMap((review) => review.warnings.map((warning) => `${review.language}/${review.slug}: ${warning}`));
+  const score = postReviews.length ? Math.min(...postReviews.map((review) => review.score)) : 0;
+  const approved = postReviews.length > 0 && postReviews.every((review) => review.approved);
+  const notes = approved
+    ? `ALTOS LAB image QA approved all covers. Score ${score}/${IMAGE_THRESHOLD}.`
+    : `ALTOS LAB image QA held publish. Score ${score}/${IMAGE_THRESHOLD}. Issues: ${issues.join("; ")}`;
+
+  return {
+    approved,
+    score,
+    threshold: IMAGE_THRESHOLD,
+    issues,
+    warnings,
+    postReviews,
+    notes
+  };
+}
+
+export function applyImageQualityReview(post: BlogPost, review: BlogImageQualityReview, publish: boolean): BlogPost {
+  const postReview = review.postReviews.find((item) => item.language === post.language && item.slug === post.slug);
+  const imageIssues = [...(postReview?.issues || []), ...(postReview?.warnings || [])];
+  const qualityIssues = [...(post.qualityIssues || []), ...imageIssues];
+
+  return {
+    ...post,
+    imageQualityStatus: postReview?.approved ? "passed" : "held",
+    releaseDecision: publish ? "published" : "held_for_review",
+    qualityIssues,
+    qualityChecks: defaultQualityChecks({
+      ...post.qualityChecks,
+      hasImageFit: Boolean(postReview?.approved),
+      qualityIssues: [...(post.qualityChecks.qualityIssues || []), ...imageIssues],
+      notes: [post.qualityChecks.notes, review.notes].filter(Boolean).join("\n")
+    })
+  };
+}
