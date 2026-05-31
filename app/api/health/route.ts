@@ -23,6 +23,8 @@ export async function GET() {
       llmQualityReview: process.env.BLOG_LLM_REVIEW !== "false",
       legalImageSourcingConfigured: isBlogImageGenerationConfigured(),
       imageBlobStorageConfigured: process.env.BLOG_IMAGE_STORE_BLOB !== "false" && Boolean(process.env.BLOB_READ_WRITE_TOKEN?.trim()),
+      externalBlogIngestConfigured: Boolean(process.env.BLOG_INGEST_HMAC_SECRET?.trim()),
+      legacyDeepSeekCronDisabled: process.env.BLOG_DISABLE_DEEPSEEK_CRON !== "false",
       cronConfigured: Boolean(process.env.CRON_SECRET?.trim()),
       autoPublishBlog: process.env.AUTO_PUBLISH_BLOG !== "false",
       blogLanguages: ["zh-Hant", "en", "ja", "ko"],

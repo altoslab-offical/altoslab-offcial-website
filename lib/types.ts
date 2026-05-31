@@ -6,6 +6,8 @@ export type BlogReviewStatus = "ai-draft" | "human-review" | "approved" | "needs
 export type BlogGenerationSlot = "manual" | "morning" | "afternoon";
 export type BlogContentType = "breaking" | "column" | "feature";
 export type BlogGenerationTask = "source-planning" | "content-draft" | "quality-review" | "quality-repair";
+export type BlogQualityStatus = "passed" | "held" | "failed";
+export type BlogReleaseDecision = "published" | "held_for_review" | "rejected";
 
 export type PageSectionType =
   | "hero"
@@ -151,7 +153,7 @@ export type BlogLlmQualityEvaluation = {
 };
 
 export type BlogGenerationTrace = {
-  provider: "deepseek" | "fallback" | "local";
+  provider: "deepseek" | "fallback" | "local" | "local-antigravity" | "codex-image" | "chatgpt-image";
   task: BlogGenerationTask;
   model?: string;
   promptVersion?: string;
@@ -198,7 +200,19 @@ export type BlogQualityChecks = {
   notes?: string;
 };
 
-export type BlogCoverSource = "curated" | "manual" | "fallback";
+export type BlogCoverSource = "curated" | "manual" | "fallback" | "generated";
+
+export type BlogCoverVisualChecks = {
+  topicFit: boolean;
+  noTextArtifacts: boolean;
+  noLogos: boolean;
+  noPeople: boolean;
+  noTrademarkRisk: boolean;
+  noGenericStockLook: boolean;
+  checkedBy?: string;
+  checkedAt?: string;
+  notes?: string;
+};
 
 export type BlogCoverGeneration = {
   source: BlogCoverSource;
@@ -210,6 +224,7 @@ export type BlogCoverGeneration = {
   status?: "generated" | "skipped" | "failed";
   error?: string;
   storedUrl?: string;
+  visualChecks?: BlogCoverVisualChecks;
 };
 
 export type BlogPost = {
@@ -247,6 +262,11 @@ export type BlogPost = {
   featured: boolean;
   reviewStatus: BlogReviewStatus;
   qualityChecks: BlogQualityChecks;
+  qualityStatus?: BlogQualityStatus;
+  imageQualityStatus?: BlogQualityStatus;
+  releaseDecision?: BlogReleaseDecision;
+  qualityIssues?: string[];
+  ingestRunId?: string;
   aiDisclosure?: string;
   generationDate?: string;
   generationSlot?: BlogGenerationSlot;

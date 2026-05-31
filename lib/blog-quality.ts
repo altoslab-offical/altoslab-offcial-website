@@ -131,6 +131,14 @@ const plainLanguageCuePattern =
 
 function isApprovedCoverUrl(url: string) {
   if (allowedCoverPaths.has(url)) return true;
+  if (process.env.BLOG_IMAGE_ALLOW_LOCAL_HTTP === "1") {
+    try {
+      const parsed = new URL(url);
+      if (parsed.protocol === "http:" && ["localhost", "127.0.0.1", "::1"].includes(parsed.hostname)) return true;
+    } catch {
+      return false;
+    }
+  }
   if (!/^https:\/\//.test(url)) return false;
 
   try {
@@ -701,11 +709,19 @@ export function reviewImageFit(post: BlogPost): ReviewResult {
   } else {
     if (!isApprovedCoverUrl(post.cover)) issues.push("cover image must use an approved ALTOS LAB asset, Vercel Blob URL or open-licensed image URL");
     if (post.coverAlt.trim().length < 18) issues.push("cover alt text is too thin");
-    if (post.generatedBy && post.coverSource !== "curated") {
-      issues.push("AI generated articles require a topic-matched legally sourced cover before auto-publish");
+    if (post.generatedBy && post.coverSource !== "curated" && post.coverSource !== "generated") {
+      issues.push("AI generated articles require a topic-matched curated or generated cover before auto-publish");
     }
     if (post.coverSource === "curated" && !post.coverCredit) {
       issues.push("curated cover images require visible attribution metadata");
+    }
+    if (post.coverSource === "generated") {
+      if (!post.coverCredit) issues.push("generated cover images require ALTOS LAB attribution metadata");
+      if (!post.coverGeneration?.prompt) issues.push("generated cover images require the stored prompt");
+      if (!post.coverGeneration?.provider) issues.push("generated cover images require the generation provider");
+      if (post.coverGeneration?.status && post.coverGeneration.status !== "generated") {
+        issues.push("generated cover image status must be generated before auto-publish");
+      }
     }
     const topicWords = `${post.topic} ${post.newsCategory} ${post.tags.join(" ")}`.toLowerCase();
     const imageContext = `${post.coverAlt} ${post.coverPrompt || ""}`.toLowerCase();
@@ -802,7 +818,7 @@ function reviewPost(post: BlogPost, multilingual: ReviewResult): PostReview {
   if (post.generatedBy?.includes("local-bilingual-geo-template") || post.generatedBy?.includes("local-bilingual-lab-template")) {
     issues.push("local fallback template cannot auto-publish");
   }
-  if (!post.generatedBy?.includes("deepseek")) {
+  if (post.generatedBy && !post.generatedBy.includes("deepseek") && !post.generatedBy.includes("local-antigravity")) {
     warnings.push("provider is not DeepSeek; auto-publish should be conservative");
   }
 
@@ -925,6 +941,9 @@ export function applyQualityReview(post: BlogPost, review: BlogPairQualityReview
     ...post,
     status: publish ? "published" : "draft",
     reviewStatus: publish ? "approved" : "needs-revision",
+    qualityStatus: review.approved ? "passed" : "held",
+    releaseDecision: publish ? "published" : "held_for_review",
+    qualityIssues,
     qualityChecks: defaultQualityChecks({
       ...post.qualityChecks,
       hasHumanReview: Boolean(post.qualityChecks.hasHumanReview),

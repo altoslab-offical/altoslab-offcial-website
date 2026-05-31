@@ -8,3 +8,7 @@ dist/
 .admin-credentials.local
 *.tsbuildinfo
 .vercel
+data/cms.json
+data/generated-blog-media/
+data/blog-worker-runs/
+public/blog-generated/

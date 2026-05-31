@@ -40,15 +40,6 @@ BLOB_READ_WRITE_TOKEN=<vercel-blob-token>
 BLOB_ACCESS=public
 CMS_ENCRYPTION_KEY=<64-hex-random-secret>
 CMS_STORAGE_KEY=altoslab:cms:v1
-DEEPSEEK_API_KEY=<required-for-ai-blog-generation>
-DEEPSEEK_BASE_URL=https://api.deepseek.com
-DEEPSEEK_ROUTER_MODEL=deepseek-v4-flash
-DEEPSEEK_CONTENT_MODEL=deepseek-v4-pro
-DEEPSEEK_REVIEW_MODEL=deepseek-v4-pro
-DEEPSEEK_REPAIR_MODEL=deepseek-v4-pro
-DEEPSEEK_MAX_TOKENS=7600
-DEEPSEEK_TIMEOUT_MS=90000
-BLOG_LLM_REVIEW=true
 BLOG_TREND_SOURCES=<optional-comma-separated-rss-override>
 AUTO_GENERATE_BLOG_COVERS=true
 BLOG_IMAGE_PROVIDER=openverse
@@ -57,6 +48,8 @@ PEXELS_API_KEY=<optional-pexels-key>
 PIXABAY_API_KEY=<optional-pixabay-key>
 BLOG_IMAGE_STORE_BLOB=true
 CRON_SECRET=<long-random-cron-secret>
+BLOG_DISABLE_DEEPSEEK_CRON=true
+BLOG_INGEST_HMAC_SECRET=<long-random-external-ingest-secret>
 AUTO_PUBLISH_BLOG=true
 ```
 
@@ -67,13 +60,13 @@ Notes:
 - The current Vercel Blob store is public-access, so `BLOB_ACCESS=public` and `CMS_ENCRYPTION_KEY` are required in production. CMS JSON is encrypted server-side before it is written to Blob.
 - Upstash Redis is also supported and takes priority when `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` are configured. The token must be the standard write token, not the read-only token.
 - Without Vercel Blob or Upstash env vars, production can still render seed content, but admin edits and contact leads will not persist.
-- `AUTO_PUBLISH_BLOG=true` allows cron-generated posts to publish automatically only after deterministic review and the optional DeepSeek LLM-as-judge review approve the multilingual set. Fallback template output, malformed model output, thin content, missing sources, missing images, invalid HTTPS links or failed multilingual pairing stay draft/needs-revision.
-- `CRON_SECRET` protects `/api/cron/blog-drafts`, `/api/cron/blog-drafts/morning` and `/api/cron/blog-drafts/afternoon`.
-- Vercel Cron runs twice daily: `0 1 * * *` UTC = 09:00 Asia/Taipei and `0 7 * * *` UTC = 15:00 Asia/Taipei. Each run creates one zh-Hant/en/ja/ko article set, publishes only if all quality gates pass, and is idempotent by `generationDate + generationSlot`.
+- `AUTO_PUBLISH_BLOG=true` allows external Antigravity/Codex article sets to publish automatically only after deterministic article quality, multilingual parity, source and image QA gates approve the full four-language set. Fallback template output, malformed model output, thin content, missing sources, missing images, invalid HTTPS links or failed multilingual pairing stay draft/held.
+- `BLOG_INGEST_HMAC_SECRET` protects `POST /api/admin/blog/ingest-set` and `POST /api/admin/blog/media`. The local worker must use the same secret in `~/.altoslab-blog-worker.env`.
+- `BLOG_DISABLE_DEEPSEEK_CRON=true` keeps the legacy DeepSeek cron path disabled. DeepSeek can remain configured for manual/admin fallback work, but it is not part of the formal daily publishing pipeline.
+- `CRON_SECRET` protects the legacy `/api/cron/blog-drafts` routes if they are manually invoked. Vercel production should not schedule those routes for the formal blog workflow.
+- Daily generation/publishing is now local-first: Tommy's Mac LaunchAgent runs `scripts/blog-antigravity-orchestrator.mjs --publish` at 09:00 and 16:00 Asia/Taipei. Antigravity writes the article set locally; the worker uploads generated covers, calls production `validateOnly`, and publishes only if production returns `wouldPublish: true`.
+- Install the local LaunchAgent with `scripts/install-blog-launch-agent.sh` after `~/.altoslab-blog-worker.env` contains the real production `BLOG_INGEST_HMAC_SECRET`. The installer refuses placeholder or test secrets.
 - The source registry controls the default mix: 40% `breaking`, 35% `column`, 25% `feature`. Breaking posts prioritize latest official/trusted news; columns turn fresh signals into operator decisions; features turn recent sources into durable frameworks.
-- `DEEPSEEK_ROUTER_MODEL=deepseek-v4-flash` is the low-cost routing/planning model. `DEEPSEEK_CONTENT_MODEL=deepseek-v4-pro` and `DEEPSEEK_REVIEW_MODEL=deepseek-v4-pro` are recommended when article quality is the priority.
-- `DEEPSEEK_MAX_TOKENS=7600` gives the model enough room to return valid JSON and complete 4-6 section bilingual-quality drafts. The generator retries once with a stricter format-repair prompt if JSON validation fails.
-- `DEEPSEEK_TIMEOUT_MS=90000` gives `deepseek-v4-pro` enough time to return complete article JSON. If cron reliability becomes more important than model depth, switch the model back to `deepseek-v4-flash` and keep the same quality gate.
 - `BLOG_TREND_SOURCES` is optional. If unset, the app uses `lib/blog-source-registry.ts`, which includes official AI/product/search sources and trusted media. If set, it should contain only live RSS/Atom feeds.
 - `BLOG_IMAGE_STORE_BLOB=true` copies selected legal cover images into Vercel Blob when `BLOB_READ_WRITE_TOKEN` is available. If Blob copy fails, the original licensed image URL stays in place and the issue is recorded in cover generation metadata.
 - Search verification env vars are optional until the matching Search Console/Webmaster account provides the token. Once set and redeployed, the homepage and App Router pages emit the required verification meta tags.
@@ -117,14 +110,15 @@ Expected results:
 
 - `/` returns 200 and preserves the original UI from `index.html`.
 - `/admin` redirects to `/admin/login` when not signed in.
-- `/api/health` reports `adminConfigured: true` and `cmsStorage.provider` as `vercel-blob` or `upstash-redis` in production.
+- `/api/health` reports `adminConfigured: true`, `integrations.externalBlogIngestConfigured: true`, `integrations.legacyDeepSeekCronDisabled: true`, and `cmsStorage.provider` as `vercel-blob` or `upstash-redis` in production.
 - `/blog` returns 200 and remains indexable.
 - `/feed.xml` returns RSS XML for published blog posts.
 - `/llms.txt` returns a concise LLM-readable site map.
 - `/llms-full.txt` returns expanded answer-engine context for services, projects and published articles.
 - `/api/*` and `/admin/*` return `X-Robots-Tag: noindex, nofollow, noarchive`.
-- `/api/cron/blog-drafts` returns 401 without `CRON_SECRET`; `/api/cron/blog-drafts/morning` and `/api/cron/blog-drafts/afternoon` create scheduled four-language article sets, publish only when `qualityReview.approved=true`, and reruns for the same Taiwan date + slot skip.
-- Authenticated dry-run checks are available with `?dryRun=1`. Dry-run runs source collection, DeepSeek generation and quality review, but does not write to CMS or publish.
+- `/api/admin/blog/ingest-set` returns 401 without signed ingest headers and supports `?validateOnly=true`.
+- Production smoke must cover five routes: unsigned 401, validate-only success, image QA failure held, content quality failure held, and complete four-language publish success.
+- `/api/cron/blog-drafts` returns 401 without `CRON_SECRET`; when `BLOG_DISABLE_DEEPSEEK_CRON=true`, authenticated calls return a skipped legacy response rather than generating official daily posts.
 
 ## SEO / GEO Release Checks
 
@@ -146,14 +140,14 @@ Before promoting a deployment, verify:
 
 1. Log in at `/admin`.
 2. Use the Blog CMS workbench to generate drafts, filter by language/status/review state, edit SEO/GEO fields, manage source links and run the publishing checklist.
-3. Cron-generated posts publish automatically only when the quality reviewer approves the bilingual pair. If a post is held as `needs-revision`, review the listed quality issues before manual publishing.
+3. Local Antigravity/Codex-generated posts publish automatically only when the production quality gate approves the full zh-Hant/en/ja/ko set and all generated covers pass image QA. If a post is held, review the listed quality issues before manual publishing.
 4. Before manually publishing or overriding a held post, confirm:
    - SEO title and description are specific.
    - GEO summary directly answers the search intent.
    - Article body contains visible answer paragraphs, not only keywords.
    - Source links support trend claims.
    - FAQ answers are present in the article and mirrored in structured data.
-   - Cover image is one of the approved ALTOS LAB assets and alt text describes the article context.
+   - Cover image is generated, stored in Vercel Blob, visually safe, topic-matched, and has accurate alt text plus `coverCredit: "AI-generated by ALTOS LAB"`.
    - `qualityChecks.hasHumanReview=true` or `qualityChecks.hasQualityReviewerApproval=true`, and `reviewStatus=approved`.
 5. Do not manually publish fallback template output without rewriting it into a real article.
 
