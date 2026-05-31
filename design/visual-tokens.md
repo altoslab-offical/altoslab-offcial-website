@@ -1,6 +1,6 @@
 # ALTOS LAB Visual Tokens
 
-These files define the design-token contract for the ALTOS LAB website without changing the current public homepage layout.
+These files define the design-token contract for the ALTOS LAB website and Blog without changing the current public homepage layout.
 
 ## Current Integration Status
 
@@ -14,15 +14,16 @@ Do not switch the homepage back to `app/page.tsx` or replace `index.html` with R
 
 ## Token Layers
 
-- Primitive tokens: raw values such as `--al-color-lime-500`.
-- Semantic tokens: UI roles such as `--al-color-text-secondary`.
-- Component tokens: stable component decisions such as `--al-button-height-md`.
-- Media tokens: product-gallery rules such as `--al-project-gallery-max-images`.
+- Blog canonical tokens: source-aligned runtime values such as `--paper`, `--ink-800`, `--font-display`, `--sp-5`, and `--tap-min`.
+- Blog compatibility aliases: bridge variables such as `--al-blog-bg` and `--al-blog-body`; these must point back to canonical Blog tokens.
+- Legacy website tokens: preserved official website/admin values such as `--al-color-lime-500`, `--al-button-height-md`, and `--al-project-gallery-ratio`.
 
 ## Usage Rules
 
-- Use semantic tokens in components.
+- Use Blog canonical tokens or their compatibility aliases in Blog components.
+- Use semantic tokens in official website/admin components.
 - Use primitive tokens only when defining or extending semantic tokens.
+- Keep Blog UI chrome pure greyscale; color may appear in actual article/project images, not in controls, badges, gradients, or accents.
 - Keep signal lime under roughly 8% of a viewport.
 - Use orange only for system/process accents, not as a second primary CTA.
 - Keep radius at `8px` or lower for most cards and controls; pills are allowed for CTA and status badges.
@@ -32,7 +33,17 @@ Do not switch the homepage back to `app/page.tsx` or replace `index.html` with R
 
 ## Core Token Sets
 
-Color:
+Blog core:
+
+- `--paper`, `--paper-tint`: Blog page and elevated surfaces.
+- `--ink-50` through `--ink-1000`: greyscale only; `--ink-1000` is reserved for display headings, logo, primary CTA, quote rules, and progress.
+- `--font-body`: Geist plus CJK fallback for UI, headings, and body copy.
+- `--font-display`: Newsreader plus CJK serif fallback for italic editorial display only.
+- `--font-mono`: JetBrains Mono stack for dates, numbers, tokens, and code.
+- `--fs-prose`, `--lh-relaxed`: article body reading rhythm.
+- `--sp-*`, `--r-*`, `--shadow-*`, `--grid-*`, `--dur-*`: Blog spacing, shape, elevation, layout, and motion.
+
+Legacy official website:
 
 - `--al-color-bg-base`: deep black page background.
 - `--al-color-bg-surface`: repeated object/card surface.

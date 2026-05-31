@@ -8,7 +8,7 @@ import { SafeBlogImage } from "@/components/SafeBlogImage";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { SiteHeader } from "@/components/site/SiteHeader";
 import { blogContentTypeLabel, blogIndexPath, blogPostPath, languageLabel } from "@/lib/blog-utils";
-import { getPublishedBlogAlternates, getRelatedPublishedBlogPosts } from "@/lib/cms";
+import { getRelatedPublishedBlogPosts } from "@/lib/cms";
 import { articleJsonLd, breadcrumbJsonLd, faqJsonLd } from "@/lib/seo";
 import type { BlogPost } from "@/lib/types";
 
@@ -22,9 +22,13 @@ const copy = {
     faq: "常見問題",
     sources: "來源與參考",
     related: "延伸閱讀",
+    relatedTitle: "Keep reading",
+    relatedMore: "查看全部",
     disclosure: "AI 內容揭露",
-    ctaTitle: "需要把這套內容系統接到你的官網？",
-    cta: "和 ALTOS LAB 討論"
+    tags: "文章標籤",
+    authorLabel: "ALTOS LAB editorial note",
+    authorName: "ALTOS LAB",
+    authorBio: "專注於 AI 導入、生成式搜尋與企業數位策略的研究團隊。我們把第一線的實作經驗，整理成可被引用的觀點。"
   },
   en: {
     back: "← Blog",
@@ -35,9 +39,13 @@ const copy = {
     faq: "FAQ",
     sources: "Sources",
     related: "Related reading",
+    relatedTitle: "Keep reading",
+    relatedMore: "View all",
     disclosure: "AI disclosure",
-    ctaTitle: "Need this content system wired into your company website?",
-    cta: "Talk to ALTOS LAB"
+    tags: "Article tags",
+    authorLabel: "ALTOS LAB editorial note",
+    authorName: "ALTOS LAB",
+    authorBio: "A research team focused on AI adoption, generative search, and enterprise digital strategy. We turn hands-on implementation work into viewpoints others can cite."
   },
   ja: {
     back: "← Blog",
@@ -48,9 +56,13 @@ const copy = {
     faq: "FAQ",
     sources: "出典",
     related: "関連記事",
+    relatedTitle: "Keep reading",
+    relatedMore: "すべて見る",
     disclosure: "AI 開示",
-    ctaTitle: "このコンテンツ運用を自社サイトに接続しますか？",
-    cta: "ALTOS LAB に相談"
+    tags: "記事タグ",
+    authorLabel: "ALTOS LAB editorial note",
+    authorName: "ALTOS LAB",
+    authorBio: "AI 導入、生成型検索、企業のデジタル戦略を研究するチームです。現場での実装経験を、引用可能な視点として整理しています。"
   },
   ko: {
     back: "← Blog",
@@ -61,9 +73,13 @@ const copy = {
     faq: "FAQ",
     sources: "출처",
     related: "관련 글",
+    relatedTitle: "Keep reading",
+    relatedMore: "전체 보기",
     disclosure: "AI 공개",
-    ctaTitle: "이 콘텐츠 운영 시스템을 회사 웹사이트에 연결할까요?",
-    cta: "ALTOS LAB에 상담"
+    tags: "글 태그",
+    authorLabel: "ALTOS LAB editorial note",
+    authorName: "ALTOS LAB",
+    authorBio: "AI 도입, 생성형 검색, 기업 디지털 전략을 연구하는 팀입니다. 현장의 실행 경험을 인용 가능한 관점으로 정리합니다."
   }
 };
 
@@ -119,10 +135,7 @@ export async function BlogArticle({ post }: { post: BlogPost }) {
   const dictionary = copy[post.language];
   const taxonomy = articleTaxonomy(post);
   const sourceTranslationNote = extractSourceTranslationNote(post.body);
-  const [alternates, relatedPosts] = await Promise.all([
-    getPublishedBlogAlternates(post),
-    getRelatedPublishedBlogPosts(post, 4)
-  ]);
+  const relatedPosts = await getRelatedPublishedBlogPosts(post, 3);
   const locale = post.language === "en" ? "en" : "zh-TW";
 
   return (
@@ -152,11 +165,6 @@ export async function BlogArticle({ post }: { post: BlogPost }) {
               <Link className="card-link" href={blogIndexPath(post.language)}>
                 {dictionary.back}
               </Link>
-              {alternates.map((alternate) => (
-                <Link className="button" href={blogPostPath(alternate)} key={alternate.id}>
-                  {languageLabel(alternate.language)}
-                </Link>
-              ))}
             </div>
             <p className="eyebrow article-kicker">
               <span className={`blog-craft-type-badge is-${post.contentType}`}>
@@ -268,17 +276,48 @@ export async function BlogArticle({ post }: { post: BlogPost }) {
             </aside>
           ) : null}
 
+          {post.tags.length ? (
+            <nav className="article-tag-strip" aria-label={dictionary.tags}>
+              {post.tags.slice(0, 5).map((tag) => (
+                <Link className="article-tag-chip" href={`${blogIndexPath(post.language)}?tag=${encodeURIComponent(tag)}`} key={tag}>
+                  {tag}
+                </Link>
+              ))}
+            </nav>
+          ) : null}
+
+          <section className="article-author-card" aria-label={dictionary.authorLabel}>
+            <span className="article-author-mark" aria-hidden="true">
+              AL
+            </span>
+            <div>
+              <h2>{dictionary.authorName}</h2>
+              <p>{dictionary.authorBio}</p>
+            </div>
+          </section>
+
           {relatedPosts.length ? (
             <section className="related-articles">
-              <p className="eyebrow">{dictionary.related}</p>
+              <div className="related-article-head">
+                <h2>{dictionary.relatedTitle}</h2>
+                <Link href={blogIndexPath(post.language)}>
+                  {dictionary.relatedMore} <span aria-hidden="true">↗</span>
+                </Link>
+              </div>
               <div className="related-article-grid">
                 {relatedPosts.map((related) => (
                   <Link className="related-article-card" href={blogPostPath(related)} key={related.id}>
-                    <span className="related-article-meta">
-                      <span className={`blog-craft-type-badge is-${related.contentType}`}>
-                        {blogContentTypeLabel(related.contentType, related.language)}
-                      </span>
-                      <span>{related.newsCategory || related.tags[0]}</span>
+                    <span className="related-article-image" aria-hidden="true">
+                      {related.cover ? (
+                        <SafeBlogImage compact post={related} />
+                      ) : (
+                        <BlogEditorialVisual compact post={related} />
+                      )}
+                    </span>
+                    <span className="related-article-eyebrow">
+                      {[blogContentTypeLabel(related.contentType, related.language), related.newsCategory || related.tags[0]]
+                        .filter(Boolean)
+                        .join(" · ")}
                     </span>
                     <strong>{renderBrandText(related.title)}</strong>
                     <small>{dictionary.readTime(related.readTimeMinutes)}</small>
@@ -287,13 +326,6 @@ export async function BlogArticle({ post }: { post: BlogPost }) {
               </div>
             </section>
           ) : null}
-
-          <section className="blog-cta-panel">
-            <h2>{dictionary.ctaTitle}</h2>
-            <Link className="button primary" href="/#contact">
-              {renderBrandText(dictionary.cta)}
-            </Link>
-          </section>
         </article>
       </main>
       <SiteFooter />

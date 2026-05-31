@@ -5,7 +5,7 @@ import { JsonLd } from "@/components/JsonLd";
 import { SafeBlogImage } from "@/components/SafeBlogImage";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { SiteHeader } from "@/components/site/SiteHeader";
-import { BLOG_LANGUAGES, blogContentTypeLabel, blogIndexPath, blogPostPath, languageShortLabel } from "@/lib/blog-utils";
+import { blogContentTypeLabel, blogIndexPath, blogPostPath } from "@/lib/blog-utils";
 import { getPublishedBlogPostsByLanguage } from "@/lib/cms";
 import { blogIndexItemListJsonLd, breadcrumbJsonLd } from "@/lib/seo";
 import type { BlogLanguage } from "@/lib/types";
@@ -266,13 +266,6 @@ export async function BlogIndex({ language, tag, query }: BlogIndexProps) {
             <div className="blog-craft-sidebar-footer">
               <span>
                 <strong>{posts.length}</strong> {dictionary.postsLabel}
-              </span>
-              <span className="blog-language-links">
-                {BLOG_LANGUAGES.filter((item) => item !== language).map((item) => (
-                  <Link href={blogIndexPath(item)} key={item}>
-                    {languageShortLabel(item)}
-                  </Link>
-                ))}
               </span>
             </div>
           </aside>

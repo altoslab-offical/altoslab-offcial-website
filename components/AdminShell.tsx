@@ -3,18 +3,13 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { sendAnalyticsEvent } from "@/components/AnalyticsEvents";
-import { BrandText, renderBrandText } from "@/components/BrandText";
+import { BrandText } from "@/components/BrandText";
 import {
-  Activity,
-  CalendarClock,
   CheckCircle2,
   Clock3,
-  Cpu,
-  Database,
   Eye,
   FileText,
   Gauge,
-  ImageIcon,
   Languages,
   LayoutDashboard,
   Link2,
@@ -23,16 +18,14 @@ import {
   Newspaper,
   PenLine,
   Plus,
-  Radio,
   Save,
   Search,
-  ShieldCheck,
   Sparkles,
+  Trash2,
   Users
 } from "lucide-react";
 import { BLOG_LANGUAGES, blogCoverForLanguage, blogPostPath, languageLabel, languageShortLabel } from "@/lib/blog-utils";
 import type {
-  BlogGenerationSlot,
   BlogLanguage,
   BlogContentType,
   BlogPost,
@@ -50,6 +43,7 @@ type BlogFilterLanguage = "all" | BlogLanguage;
 type BlogFilterStatus = "all" | PublishStatus;
 type BlogFilterReview = "all" | BlogReviewStatus;
 type BlogFilterContentType = "all" | BlogContentType;
+type BlogGroupBy = "group" | "type" | "category" | "none";
 
 type AdminShellProps = {
   initialTab?: Tab;
@@ -77,16 +71,18 @@ const reviewLabels: Record<BlogReviewStatus, string> = {
   "needs-revision": "需修改"
 };
 
-const slotLabels: Record<BlogGenerationSlot, string> = {
-  manual: "手動",
-  morning: "早上 09:00",
-  afternoon: "下午 16:00"
-};
-
 const contentTypeLabels: Record<BlogContentType, string> = {
   breaking: "快訊",
   column: "專欄",
   feature: "專題"
+};
+
+const leadStatusLabels: Record<ContactLeadStatus, string> = {
+  new: "新進",
+  contacted: "已聯繫",
+  qualified: "已確認",
+  closed: "已結案",
+  spam: "垃圾訊息"
 };
 
 function makeSlug(input: string) {
@@ -113,6 +109,18 @@ function hostnameFromUrl(url: string) {
   } catch {
     return "unknown";
   }
+}
+
+function formatAdminDate(value?: string) {
+  if (!value) return "未更新";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "未更新";
+  return new Intl.DateTimeFormat("zh-TW", {
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit"
+  }).format(date);
 }
 
 function compactNumber(value: number) {
@@ -187,6 +195,196 @@ function JsonField({
   );
 }
 
+function StringListField({
+  label,
+  value,
+  onChange,
+  placeholder,
+  addLabel = "新增",
+  emptyHint = "尚未新增項目。"
+}: {
+  label: string;
+  value: string[];
+  onChange: (value: string[]) => void;
+  placeholder?: string;
+  addLabel?: string;
+  emptyHint?: string;
+}) {
+  const items = value || [];
+  return (
+    <div className="list-field">
+      <span className="list-field-label">{label}</span>
+      <div className="list-field-rows">
+        {items.length === 0 ? <p className="muted">{emptyHint}</p> : null}
+        {items.map((item, index) => (
+          <div className="list-field-row" key={index}>
+            <input
+              value={item}
+              placeholder={placeholder}
+              onChange={(event) => {
+                const next = [...items];
+                next[index] = event.target.value;
+                onChange(next);
+              }}
+            />
+            <button
+              className="button icon-button"
+              type="button"
+              aria-label="移除"
+              onClick={() => onChange(items.filter((_, i) => i !== index))}
+            >
+              <Trash2 size={15} />
+            </button>
+          </div>
+        ))}
+      </div>
+      <button className="button" type="button" onClick={() => onChange([...items, ""])}>
+        <Plus size={15} />
+        {addLabel}
+      </button>
+    </div>
+  );
+}
+
+function MetricListField({
+  label,
+  value,
+  onChange
+}: {
+  label: string;
+  value: Project["metrics"];
+  onChange: (value: Project["metrics"]) => void;
+}) {
+  const items = value || [];
+  const update = (index: number, patch: Partial<Project["metrics"][number]>) =>
+    onChange(items.map((item, i) => (i === index ? { ...item, ...patch } : item)));
+  return (
+    <div className="list-field">
+      <span className="list-field-label">{label}</span>
+      <div className="list-field-rows">
+        {items.length === 0 ? <p className="muted">尚未新增指標。</p> : null}
+        {items.map((item, index) => (
+          <div className="list-field-row" key={item.id || index}>
+            <input value={item.label} placeholder="名稱" onChange={(event) => update(index, { label: event.target.value })} />
+            <input value={item.value} placeholder="數值" onChange={(event) => update(index, { value: event.target.value })} />
+            <button
+              className="button icon-button"
+              type="button"
+              aria-label="移除"
+              onClick={() => onChange(items.filter((_, i) => i !== index))}
+            >
+              <Trash2 size={15} />
+            </button>
+          </div>
+        ))}
+      </div>
+      <button className="button" type="button" onClick={() => onChange([...items, { label: "", value: "" }])}>
+        <Plus size={15} />
+        新增指標
+      </button>
+    </div>
+  );
+}
+
+function FaqListField({
+  label,
+  value,
+  onChange
+}: {
+  label: string;
+  value: BlogPost["faqs"];
+  onChange: (value: BlogPost["faqs"]) => void;
+}) {
+  const items = value || [];
+  const update = (index: number, patch: Partial<BlogPost["faqs"][number]>) =>
+    onChange(items.map((item, i) => (i === index ? { ...item, ...patch } : item)));
+  return (
+    <div className="list-field">
+      <span className="list-field-label">{label}</span>
+      <div className="list-field-rows">
+        {items.length === 0 ? <p className="muted">尚未新增 FAQ。</p> : null}
+        {items.map((item, index) => (
+          <div className="list-field-card" key={index}>
+            <div className="list-field-card-head">
+              <span className="eyebrow">FAQ {index + 1}</span>
+              <button
+                className="button icon-button"
+                type="button"
+                aria-label="移除"
+                onClick={() => onChange(items.filter((_, i) => i !== index))}
+              >
+                <Trash2 size={15} />
+              </button>
+            </div>
+            <input value={item.question} placeholder="問題" onChange={(event) => update(index, { question: event.target.value })} />
+            <textarea rows={3} value={item.answer} placeholder="回答" onChange={(event) => update(index, { answer: event.target.value })} />
+          </div>
+        ))}
+      </div>
+      <button className="button" type="button" onClick={() => onChange([...items, { question: "", answer: "" }])}>
+        <Plus size={15} />
+        新增 FAQ
+      </button>
+    </div>
+  );
+}
+
+function SourceLinkListField({
+  label,
+  value,
+  onChange
+}: {
+  label: string;
+  value: BlogPost["sourceLinks"];
+  onChange: (value: BlogPost["sourceLinks"]) => void;
+}) {
+  const items = value || [];
+  const update = (index: number, patch: Partial<BlogPost["sourceLinks"][number]>) =>
+    onChange(items.map((item, i) => (i === index ? { ...item, ...patch } : item)));
+  return (
+    <div className="list-field">
+      <span className="list-field-label">{label}</span>
+      <div className="list-field-rows">
+        {items.length === 0 ? <p className="muted">尚未新增來源連結。</p> : null}
+        {items.map((item, index) => (
+          <div className="list-field-card" key={index}>
+            <div className="list-field-card-head">
+              <span className="eyebrow">來源 {index + 1}</span>
+              <button
+                className="button icon-button"
+                type="button"
+                aria-label="移除"
+                onClick={() => onChange(items.filter((_, i) => i !== index))}
+              >
+                <Trash2 size={15} />
+              </button>
+            </div>
+            <div className="form-row">
+              <input value={item.title} placeholder="標題" onChange={(event) => update(index, { title: event.target.value })} />
+              <input
+                value={item.publisher || ""}
+                placeholder="出處（選填）"
+                onChange={(event) => update(index, { publisher: event.target.value })}
+              />
+            </div>
+            <input value={item.url} placeholder="https://..." onChange={(event) => update(index, { url: event.target.value })} />
+            <textarea
+              rows={2}
+              value={item.summary || ""}
+              placeholder="摘要（選填）"
+              onChange={(event) => update(index, { summary: event.target.value })}
+            />
+          </div>
+        ))}
+      </div>
+      <button className="button" type="button" onClick={() => onChange([...items, { title: "", url: "" }])}>
+        <Plus size={15} />
+        新增來源
+      </button>
+    </div>
+  );
+}
+
 export function AdminShell({ initialTab = "dashboard" }: AdminShellProps) {
   const [tab, setTab] = useState<Tab>(initialTab);
   const [data, setData] = useState<CmsData>(emptyData);
@@ -218,6 +416,7 @@ export function AdminShell({ initialTab = "dashboard" }: AdminShellProps) {
     query: ""
   });
   const [blogEditorTab, setBlogEditorTab] = useState<BlogEditorTab>("content");
+  const [blogGroupBy, setBlogGroupBy] = useState<BlogGroupBy>("group");
 
   async function refresh() {
     setLoading(true);
@@ -344,6 +543,49 @@ export function AdminShell({ initialTab = "dashboard" }: AdminShellProps) {
           new Date(b.updatedAt || b.createdAt).getTime() - new Date(a.updatedAt || a.createdAt).getTime()
       );
   }, [blogFilters, data.blogPosts]);
+
+  const groupedBlogPosts = useMemo(() => {
+    if (blogGroupBy === "none") {
+      return [{ key: "all", label: "", posts: filteredBlogPosts }];
+    }
+    const languageOrder = (post: BlogPost) => {
+      const index = BLOG_LANGUAGES.indexOf(post.language);
+      return index === -1 ? BLOG_LANGUAGES.length : index;
+    };
+    const buckets = new Map<string, BlogPost[]>();
+    for (const post of filteredBlogPosts) {
+      const key =
+        blogGroupBy === "type"
+          ? post.contentType || "column"
+          : blogGroupBy === "category"
+            ? post.newsCategory || "未分類"
+            : post.translationGroupId || post.id;
+      const list = buckets.get(key) || [];
+      list.push(post);
+      buckets.set(key, list);
+    }
+    const groups = [...buckets.entries()].map(([key, posts]) => {
+      const sorted =
+        blogGroupBy === "group" ? [...posts].sort((a, b) => languageOrder(a) - languageOrder(b)) : posts;
+      const label =
+        blogGroupBy === "type"
+          ? contentTypeLabels[key as BlogContentType] || key
+          : blogGroupBy === "category"
+            ? key
+            : (posts.find((post) => post.language === "zh-Hant") || posts[0]).title || "未命名群組";
+      const latest = Math.max(
+        ...posts.map((post) => new Date(post.updatedAt || post.createdAt).getTime())
+      );
+      return { key, label, posts: sorted, latest };
+    });
+    if (blogGroupBy === "type") {
+      const order: Record<string, number> = { breaking: 0, column: 1, feature: 2 };
+      groups.sort((a, b) => (order[a.key] ?? 9) - (order[b.key] ?? 9));
+    } else {
+      groups.sort((a, b) => b.latest - a.latest);
+    }
+    return groups;
+  }, [filteredBlogPosts, blogGroupBy]);
 
   function updatePage(id: string, patch: Partial<SitePage>) {
     setData((current) => ({
@@ -476,14 +718,6 @@ export function AdminShell({ initialTab = "dashboard" }: AdminShellProps) {
     return `${statusLabels[post.status]} · ${languageLabel(post.language)} · ${contentTypeLabels[post.contentType || "column"]} · ${reviewLabels[post.reviewStatus]}`;
   }
 
-  function updateSourceLinks(post: BlogPost, value: unknown) {
-    updatePost(post.id, { sourceLinks: value as BlogPost["sourceLinks"] });
-  }
-
-  function updateQualityChecks(post: BlogPost, value: unknown) {
-    updatePost(post.id, { qualityChecks: value as BlogPost["qualityChecks"] });
-  }
-
   function updateQualityCheckField<K extends keyof BlogPost["qualityChecks"]>(
     post: BlogPost,
     field: K,
@@ -514,6 +748,12 @@ export function AdminShell({ initialTab = "dashboard" }: AdminShellProps) {
       { label: "Anti-slop 寫作品質通過", ok: !post.generatedBy || Boolean(post.qualityChecks.hasAntiSlopReview) },
       { label: "人工或品質審核已通過", ok: !post.generatedBy || hasReviewApproval }
     ];
+  }
+
+  function publishReadinessSummary(post: BlogPost) {
+    const checks = publishReadiness(post);
+    const ready = checks.filter((item) => item.ok).length;
+    return `${ready}/${checks.length}`;
   }
 
   async function savePost(post: BlogPost) {
@@ -597,27 +837,34 @@ export function AdminShell({ initialTab = "dashboard" }: AdminShellProps) {
         {loading ? <p className="muted">正在載入 CMS 資料...</p> : null}
 
         {tab === "dashboard" ? (
-          <section className="stats-grid">
-            {[
-              ["頁面", counts.pages],
-              ["專案", counts.projects],
-              ["已發布專案", counts.publishedProjects],
-              ["草稿", counts.drafts],
-              ["部落格文章", counts.posts],
-              ["表單名單", counts.leads]
-            ].map(([label, value]) => (
-              <article className="stat-card" key={String(label)}>
-                <div className="stat-value">{value}</div>
-                <div className="stat-label">{label}</div>
-              </article>
-            ))}
+          <section className="admin-dashboard">
+            <header className="admin-page-head">
+              <p className="eyebrow">總覽</p>
+              <h1>內容總覽</h1>
+              <p className="muted">頁面、專案、部落格與表單名單的即時統計。</p>
+            </header>
+            <div className="stats-grid">
+              {[
+                ["頁面", counts.pages],
+                ["專案", counts.projects],
+                ["已發布專案", counts.publishedProjects],
+                ["草稿", counts.drafts],
+                ["部落格文章", counts.posts],
+                ["表單名單", counts.leads]
+              ].map(([label, value]) => (
+                <article className="stat-card" key={String(label)}>
+                  <div className="stat-value">{value}</div>
+                  <div className="stat-label">{label}</div>
+                </article>
+              ))}
+            </div>
           </section>
         ) : null}
 
         {tab === "pages" && selectedPage ? (
           <section className="admin-grid">
             <aside className="admin-card">
-              <h2>Pages</h2>
+              <h2>頁面</h2>
               <div className="admin-list">
                 {data.sitePages.map((page) => (
                   <button
@@ -628,33 +875,33 @@ export function AdminShell({ initialTab = "dashboard" }: AdminShellProps) {
                   >
                     <strong>{page.title}</strong>
                     <br />
-                    <span className={`status-pill ${page.status}`}>{page.status}</span>
+                    <span className={`status-pill ${page.status}`}>{statusLabels[page.status]}</span>
                   </button>
                 ))}
               </div>
             </aside>
             <section className="admin-card">
-              <h2>Home Page CMS</h2>
+              <h2>首頁內容</h2>
               <div className="admin-form">
                 <div className="form-row">
                   <label>
-                    <span>Title</span>
+                    <span>標題</span>
                     <input value={selectedPage.title} onChange={(event) => updatePage(selectedPage.id, { title: event.target.value })} />
                   </label>
                   <label>
-                    <span>Slug</span>
+                    <span>網址 slug</span>
                     <input value={selectedPage.slug} onChange={(event) => updatePage(selectedPage.id, { slug: event.target.value })} />
                   </label>
                 </div>
                 <label>
-                  <span>SEO Title</span>
+                  <span>SEO 標題</span>
                   <input
                     value={selectedPage.seoTitle || ""}
                     onChange={(event) => updatePage(selectedPage.id, { seoTitle: event.target.value })}
                   />
                 </label>
                 <label>
-                  <span>SEO Description</span>
+                  <span>SEO 描述</span>
                   <textarea
                     rows={3}
                     value={selectedPage.seoDescription || ""}
@@ -662,17 +909,17 @@ export function AdminShell({ initialTab = "dashboard" }: AdminShellProps) {
                   />
                 </label>
                 <JsonField
-                  label="Sections JSON（可調整前台所有區塊、排序、文案與重複項目）"
+                  label="區塊 JSON（可調整前台所有區塊、排序、文案與重複項目）"
                   value={selectedPage.sections}
                   onChange={(value) => updatePage(selectedPage.id, { sections: value as SitePage["sections"] })}
                 />
                 <div className="form-actions">
                   <button className="button primary" onClick={() => savePage(selectedPage)} type="button">
                     <Save size={16} />
-                    Save page
+                    儲存頁面
                   </button>
                   <Link className="button" href="/" target="_blank">
-                    Preview
+                    預覽
                   </Link>
                 </div>
               </div>
@@ -684,8 +931,8 @@ export function AdminShell({ initialTab = "dashboard" }: AdminShellProps) {
           <section className="admin-grid">
             <aside className="admin-card">
               <div className="form-actions" style={{ justifyContent: "space-between" }}>
-                <h2>Projects</h2>
-                <button className="button primary" onClick={createProject} type="button" aria-label="Create project">
+                <h2>專案</h2>
+                <button className="button primary" onClick={createProject} type="button" aria-label="新增專案">
                   <Plus size={16} />
                 </button>
               </div>
@@ -699,25 +946,25 @@ export function AdminShell({ initialTab = "dashboard" }: AdminShellProps) {
                   >
                     <strong>{project.title}</strong>
                     <br />
-                    <span className={`status-pill ${project.status}`}>{project.status}</span>
+                    <span className={`status-pill ${project.status}`}>{statusLabels[project.status]}</span>
                   </button>
                 ))}
               </div>
             </aside>
             {selectedProject ? (
               <section className="admin-card">
-                <h2>Project Editor</h2>
+                <h2>專案編輯</h2>
                 <div className="admin-form">
                   <div className="form-row">
                     <label>
-                      <span>Title</span>
+                      <span>標題</span>
                       <input
                         value={selectedProject.title}
                         onChange={(event) => updateProject(selectedProject.id, { title: event.target.value })}
                       />
                     </label>
                     <label>
-                      <span>Slug</span>
+                      <span>網址 slug</span>
                       <input
                         value={selectedProject.slug}
                         onChange={(event) => updateProject(selectedProject.id, { slug: event.target.value })}
@@ -726,18 +973,18 @@ export function AdminShell({ initialTab = "dashboard" }: AdminShellProps) {
                   </div>
                   <div className="form-row">
                     <label>
-                      <span>Status</span>
+                      <span>狀態</span>
                       <select
                         value={selectedProject.status}
                         onChange={(event) => updateProject(selectedProject.id, { status: event.target.value as Project["status"] })}
                       >
-                        <option value="draft">draft</option>
-                        <option value="published">published</option>
-                        <option value="archived">archived</option>
+                        <option value="draft">草稿</option>
+                        <option value="published">已發布</option>
+                        <option value="archived">封存</option>
                       </select>
                     </label>
                     <label>
-                      <span>Tag</span>
+                      <span>標籤</span>
                       <input
                         value={selectedProject.tag}
                         onChange={(event) => updateProject(selectedProject.id, { tag: event.target.value })}
@@ -745,14 +992,14 @@ export function AdminShell({ initialTab = "dashboard" }: AdminShellProps) {
                     </label>
                   </div>
                   <label>
-                    <span>Cover URL</span>
+                    <span>封面 URL</span>
                     <input
                       value={selectedProject.cover}
                       onChange={(event) => updateProject(selectedProject.id, { cover: event.target.value })}
                     />
                   </label>
                   <label>
-                    <span>Description</span>
+                    <span>簡述</span>
                     <textarea
                       rows={3}
                       value={selectedProject.desc}
@@ -760,28 +1007,46 @@ export function AdminShell({ initialTab = "dashboard" }: AdminShellProps) {
                     />
                   </label>
                   <label>
-                    <span>Detail</span>
+                    <span>詳細內容</span>
                     <textarea
                       rows={5}
                       value={selectedProject.detail}
                       onChange={(event) => updateProject(selectedProject.id, { detail: event.target.value })}
                     />
                   </label>
-                  <JsonField label="Gallery JSON" value={selectedProject.gallery} onChange={(value) => updateProject(selectedProject.id, { gallery: value as string[] })} />
-                  <JsonField label="Metrics JSON" value={selectedProject.metrics} onChange={(value) => updateProject(selectedProject.id, { metrics: value as Project["metrics"] })} />
-                  <JsonField label="Tech JSON" value={selectedProject.tech} onChange={(value) => updateProject(selectedProject.id, { tech: value as string[] })} />
+                  <StringListField
+                    label="相簿圖片"
+                    value={selectedProject.gallery}
+                    onChange={(value) => updateProject(selectedProject.id, { gallery: value })}
+                    placeholder="/images/cover.png"
+                    addLabel="新增圖片"
+                    emptyHint="尚未新增圖片。"
+                  />
+                  <MetricListField
+                    label="數據指標"
+                    value={selectedProject.metrics}
+                    onChange={(value) => updateProject(selectedProject.id, { metrics: value })}
+                  />
+                  <StringListField
+                    label="技術標籤"
+                    value={selectedProject.tech}
+                    onChange={(value) => updateProject(selectedProject.id, { tech: value })}
+                    placeholder="例如：AI、Next.js"
+                    addLabel="新增標籤"
+                    emptyHint="尚未新增標籤。"
+                  />
                   <JsonField
-                    label="Product Page JSON"
+                    label="產品頁 JSON"
                     value={selectedProject.productPage}
                     onChange={(value) => updateProject(selectedProject.id, { productPage: value as Project["productPage"] })}
                   />
                   <div className="form-actions">
                     <button className="button primary" onClick={() => saveProject(selectedProject)} type="button">
                       <Save size={16} />
-                      Save project
+                      儲存專案
                     </button>
                     <Link className="button" href={`/projects/${selectedProject.slug}`} target="_blank">
-                      Preview
+                      預覽
                     </Link>
                   </div>
                 </div>
@@ -792,18 +1057,34 @@ export function AdminShell({ initialTab = "dashboard" }: AdminShellProps) {
 
         {tab === "blog" ? (
           <section className="blog-workbench">
-            <header className="blog-workbench-header">
-              <div>
-                <p className="eyebrow">Blog CMS · SEO / GEO</p>
-                <h1>部落格內容營運台</h1>
-                <p className="muted">
-                  ALTOS LAB 編輯台會把 AI 趨勢整理成快訊、專欄與專題，並用品質審核員確保內容有來源、有觀點、有圖文，能長期養 SEO / GEO。
-                </p>
+            <header className="blog-workbench-header blog-command-center">
+              <div className="blog-command-copy">
+                <p className="eyebrow">部落格營運台</p>
+                <h1>部落格後台</h1>
+                <p className="muted">從文章佇列、內容編輯、發布檢查到上線狀態，集中在同一條清楚的工作流。</p>
+              </div>
+              <div className="blog-command-metrics" aria-label="Blog overview">
+                <span>
+                  <strong>{blogStats.total}</strong>
+                  全部
+                </span>
+                <span>
+                  <strong>{blogStats.needsReview}</strong>
+                  待審
+                </span>
+                <span>
+                  <strong>{blogStats.published}</strong>
+                  已發布
+                </span>
+                <span>
+                  <strong>{contentFactoryStats.traceCount}</strong>
+                  AI 軌跡
+                </span>
               </div>
               <div className="admin-actions-stack">
                 <button className="button primary" onClick={generatePost} type="button">
                   <Sparkles size={16} />
-                  本機 worker 產生
+                  AI 產生四語草稿
                 </button>
                 <button className="button" onClick={() => createPost()} type="button">
                   <Plus size={16} />
@@ -812,83 +1093,18 @@ export function AdminShell({ initialTab = "dashboard" }: AdminShellProps) {
               </div>
             </header>
 
-            <div className="blog-ops-strip">
-              <article>
-                <CalendarClock size={17} />
-                <div>
-                  <strong>每日兩批四語自動發文</strong>
-                  <span>09:00 / 16:00 由本機 Antigravity/Codex worker 送稿；zh/en/ja/ko 同主題，達標才發布</span>
-                </div>
-              </article>
-              <article>
-                <ShieldCheck size={17} />
-                <div>
-                  <strong>品質審核員把關</strong>
-                  <span>檢查來源可信、Labs 觀點、GEO 摘要、FAQ、圖文、多語對齊與發布門檻</span>
-                </div>
-              </article>
-              <article>
-                <ImageIcon size={17} />
-                <div>
-                  <strong>生成圖先過 QA</strong>
-                  <span>{renderBrandText("每篇主圖需有生成 prompt、Blob URL、visual checks、alt text 與圖片品質通過狀態")}</span>
-                </div>
-              </article>
-            </div>
-
-            <section className="admin-card content-factory-panel">
-              <header>
-                <div>
-                  <p className="eyebrow">Content Factory v2</p>
-                  <h2>新聞訊號 × Labs 觀點 × 可觀測自動發文</h2>
-                </div>
-                <span className="factory-ratio">快訊 40% · 專欄 35% · 專題 25%</span>
-              </header>
-              <div className="content-factory-grid">
-                <article>
-                  <Radio size={17} />
-                  <strong>內容比例</strong>
-                  <span>
-                    快訊 {contentFactoryStats.contentMix.breaking} / 專欄 {contentFactoryStats.contentMix.column} / 專題{" "}
-                    {contentFactoryStats.contentMix.feature}
-                  </span>
-                </article>
-                <article>
-                  <Database size={17} />
-                  <strong>來源雷達</strong>
-                  <span>
-                    {contentFactoryStats.topSources.length
-                      ? contentFactoryStats.topSources.map(([host, count]) => `${host} ${count}`).join(" · ")
-                      : "等待第一批來源化文章"}
-                  </span>
-                </article>
-                <article>
-                  <Cpu size={17} />
-                  <strong>本機生成遙測</strong>
-                  <span>
-                    local {contentFactoryStats.localTraceCount} / total {contentFactoryStats.traceCount} traces · 平均 {contentFactoryStats.averageLatencyMs || 0}ms ·{" "}
-                    {compactNumber(contentFactoryStats.usage.totalTokens)} tokens
-                  </span>
-                </article>
-                <article>
-                  <Activity size={17} />
-                  <strong>審核與發布帳本</strong>
-                  <span>
-                    文章通過 {contentFactoryStats.qualityPassed} · 圖片通過 {contentFactoryStats.imagePassed} · 留稿 {contentFactoryStats.held} · 最近{" "}
-                    {contentFactoryStats.recentGenerated
-                      .map((post) => `${languageShortLabel(post.language)}:${post.status}`)
-                      .join(" / ") || "尚無自動草稿"}
-                  </span>
-                </article>
-              </div>
-            </section>
-
             <section className="blog-workbench-grid">
               <aside className="blog-sidebar">
-                <section className="admin-card blog-generator-panel">
-                  <h2>本機 worker 提醒</h2>
-                  <p className="muted">正式文章由本機 Antigravity/Codex worker 生成，再透過 signed ingest API 送進後台。這裡保留主題欄位作為編輯 brief。</p>
-                  <div className="admin-form">
+                <details className="admin-card blog-generator-panel">
+                  <summary>
+                    <span>
+                      <Sparkles size={16} />
+                      AI 草稿設定
+                    </span>
+                    <small>{contentTypeLabels[generator.contentType]} · {generator.newsCategory}</small>
+                  </summary>
+                  <p className="muted">手動產生時可指定主題；每日排程會自動從 AI / 搜尋 / 產品趨勢來源抓題材。</p>
+                  <div className="admin-form compact">
                     <label>
                       <span>主題</span>
                       <input
@@ -933,7 +1149,7 @@ export function AdminShell({ initialTab = "dashboard" }: AdminShellProps) {
                         </select>
                       </label>
                       <label>
-                        <span>消息分類</span>
+                        <span>分類</span>
                         <input
                           value={generator.newsCategory}
                           onChange={(event) => setGenerator({ ...generator, newsCategory: event.target.value })}
@@ -942,15 +1158,15 @@ export function AdminShell({ initialTab = "dashboard" }: AdminShellProps) {
                     </div>
                     <button className="button primary" onClick={generatePost} type="button">
                       <Sparkles size={16} />
-                      顯示 worker 說明
+                      產生四語草稿
                     </button>
                   </div>
-                </section>
+                </details>
 
-                <section className="admin-card">
+                <section className="admin-card blog-list-panel">
                   <div className="blog-filter-title">
                     <Search size={16} />
-                    <h2>文章列表</h2>
+                    <h2>文章佇列</h2>
                   </div>
                   <div className="blog-stat-row">
                     <span>{blogStats.total} 全部</span>
@@ -967,6 +1183,18 @@ export function AdminShell({ initialTab = "dashboard" }: AdminShellProps) {
                         onChange={(event) => setBlogFilters({ ...blogFilters, query: event.target.value })}
                         placeholder="標題、slug、主題或標籤"
                       />
+                    </label>
+                    <label>
+                      <span>分組方式</span>
+                      <select
+                        value={blogGroupBy}
+                        onChange={(event) => setBlogGroupBy(event.target.value as BlogGroupBy)}
+                      >
+                        <option value="group">翻譯群組（同主題 4 語言）</option>
+                        <option value="type">文章型態</option>
+                        <option value="category">消息分類</option>
+                        <option value="none">不分組</option>
+                      </select>
                     </label>
                     <div className="form-row">
                       <label>
@@ -1033,24 +1261,64 @@ export function AdminShell({ initialTab = "dashboard" }: AdminShellProps) {
 
                   <div className="admin-list blog-post-list">
                     {filteredBlogPosts.length ? (
-                      filteredBlogPosts.map((post) => (
-                        <button
-                          className={post.id === selectedPost?.id ? "active" : ""}
-                          key={post.id}
-                          onClick={() => setSelectedPostId(post.id)}
-                          type="button"
-                        >
-                          <span className="blog-list-row-top">
-                            <strong>{post.title}</strong>
-                            <span className={`status-pill ${post.status}`}>{statusLabels[post.status]}</span>
-                          </span>
-                          <span className="blog-list-meta">
-                            {languageLabel(post.language)} · {contentTypeLabels[post.contentType || "column"]} ·{" "}
-                            {reviewLabels[post.reviewStatus]} ·{" "}
-                            {slotLabels[post.generationSlot || "manual"]}
-                          </span>
-                        </button>
-                      ))
+                      groupedBlogPosts.map((group) => {
+                        const groupType = group.posts[0]?.contentType || "column";
+                        return (
+                          <div className="blog-post-group" key={group.key}>
+                            {group.label ? (
+                              <div className="blog-group-head">
+                                {blogGroupBy === "type" ? (
+                                  <span className={`tag-pill type-${group.key}`}>{group.label}</span>
+                                ) : (
+                                  <>
+                                    {blogGroupBy === "group" ? (
+                                      <span className={`tag-pill type-${groupType}`}>{contentTypeLabels[groupType]}</span>
+                                    ) : null}
+                                    <span className="blog-group-title">{group.label}</span>
+                                  </>
+                                )}
+                                <span className="blog-group-count">{group.posts.length} 篇</span>
+                              </div>
+                            ) : null}
+                            {group.posts.map((post) => {
+                              const postMissingChecks = publishReadiness(post).filter((item) => !item.ok).length;
+                              const grouped = blogGroupBy === "group";
+                              return (
+                                <button
+                                  className={`blog-post-row blog-status-${post.status} review-${post.reviewStatus} ${
+                                    postMissingChecks ? "needs-work" : "ready"
+                                  }${post.id === selectedPost?.id ? " active" : ""}${grouped ? " compact" : ""}`}
+                                  key={post.id}
+                                  onClick={() => setSelectedPostId(post.id)}
+                                  type="button"
+                                >
+                                  <span className="blog-list-row-top">
+                                    <strong>{grouped ? languageLabel(post.language) : post.title}</strong>
+                                    <span className={`tag-pill status-${post.status}`}>{statusLabels[post.status]}</span>
+                                  </span>
+                                  <span className="blog-list-tags">
+                                    {!grouped ? (
+                                      <span className="tag-pill lang">{languageShortLabel(post.language)}</span>
+                                    ) : null}
+                                    {blogGroupBy === "none" || blogGroupBy === "category" ? (
+                                      <span className={`tag-pill type-${post.contentType || "column"}`}>
+                                        {contentTypeLabels[post.contentType || "column"]}
+                                      </span>
+                                    ) : null}
+                                    <span className={`tag-pill review-${post.reviewStatus}`}>
+                                      {reviewLabels[post.reviewStatus]}
+                                    </span>
+                                    <span className={`blog-check ${postMissingChecks ? "signal-review" : "signal-ready"}`}>
+                                      檢查 {publishReadinessSummary(post)}
+                                    </span>
+                                    <span className="blog-check-date">{formatAdminDate(post.updatedAt || post.createdAt)}</span>
+                                  </span>
+                                </button>
+                              );
+                            })}
+                          </div>
+                        );
+                      })
                     ) : (
                       <p className="muted">目前沒有符合條件的文章。</p>
                     )}
@@ -1101,6 +1369,7 @@ export function AdminShell({ initialTab = "dashboard" }: AdminShellProps) {
                         className={blogEditorTab === key ? "active" : ""}
                         key={String(key)}
                         onClick={() => setBlogEditorTab(key as BlogEditorTab)}
+                        aria-pressed={blogEditorTab === key}
                         type="button"
                       >
                         <Icon size={15} />
@@ -1126,7 +1395,7 @@ export function AdminShell({ initialTab = "dashboard" }: AdminShellProps) {
                             />
                           </label>
                           <label>
-                            <span>Slug</span>
+                            <span>網址 slug</span>
                             <input
                               value={selectedPost.slug}
                               onChange={(event) => updatePost(selectedPost.id, { slug: event.target.value })}
@@ -1221,10 +1490,13 @@ export function AdminShell({ initialTab = "dashboard" }: AdminShellProps) {
                             onChange={(event) => updatePost(selectedPost.id, { body: event.target.value })}
                           />
                         </label>
-                        <JsonField
-                          label="重點摘要 JSON"
+                        <StringListField
+                          label="重點摘要"
                           value={selectedPost.keyTakeaways}
-                          onChange={(value) => updatePost(selectedPost.id, { keyTakeaways: value as string[] })}
+                          onChange={(value) => updatePost(selectedPost.id, { keyTakeaways: value })}
+                          placeholder="一句重點"
+                          addLabel="新增重點"
+                          emptyHint="尚未新增重點摘要。"
                         />
                       </>
                     ) : null}
@@ -1232,14 +1504,14 @@ export function AdminShell({ initialTab = "dashboard" }: AdminShellProps) {
                     {blogEditorTab === "seo" ? (
                       <>
                         <label>
-                          <span>SEO Title</span>
+                          <span>SEO 標題</span>
                           <input
                             value={selectedPost.seoTitle || ""}
                             onChange={(event) => updatePost(selectedPost.id, { seoTitle: event.target.value })}
                           />
                         </label>
                         <label>
-                          <span>SEO Description</span>
+                          <span>SEO 描述</span>
                           <textarea
                             rows={3}
                             value={selectedPost.seoDescription || ""}
@@ -1275,7 +1547,7 @@ export function AdminShell({ initialTab = "dashboard" }: AdminShellProps) {
                         ) : null}
                         {selectedPost.coverPrompt || selectedPost.coverGeneration ? (
                           <div className="quality-panel">
-                            <p className="eyebrow">Cover generation</p>
+                            <p className="eyebrow">封面生成</p>
                             <p>
                               來源：{selectedPost.coverSource || "manual"} · 狀態：
                               {selectedPost.coverGeneration?.status || "manual"} · 模型：
@@ -1311,15 +1583,15 @@ export function AdminShell({ initialTab = "dashboard" }: AdminShellProps) {
 
                     {blogEditorTab === "sources" ? (
                       <>
-                        <JsonField
-                          label="FAQ JSON（頁面可見時才會輸出 FAQ schema）"
+                        <FaqListField
+                          label="常見問題 FAQ（有項目時才會輸出 FAQ schema）"
                           value={selectedPost.faqs}
-                          onChange={(value) => updatePost(selectedPost.id, { faqs: value as BlogPost["faqs"] })}
+                          onChange={(value) => updatePost(selectedPost.id, { faqs: value })}
                         />
-                        <JsonField
-                          label="Source links JSON（AI 草稿發布前必須有來源）"
+                        <SourceLinkListField
+                          label="來源連結（AI 草稿發布前必須有來源）"
                           value={selectedPost.sourceLinks}
-                          onChange={(value) => updateSourceLinks(selectedPost, value)}
+                          onChange={(value) => updatePost(selectedPost.id, { sourceLinks: value })}
                         />
                         <button className="button" onClick={() => duplicateTranslation(selectedPost)} type="button">
                           <Languages size={16} />
@@ -1363,7 +1635,7 @@ export function AdminShell({ initialTab = "dashboard" }: AdminShellProps) {
                         </div>
                         <div className="form-row">
                           <label>
-                            <span>Translation group ID</span>
+                            <span>翻譯群組 ID</span>
                             <input
                               value={selectedPost.translationGroupId}
                               onChange={(event) =>
@@ -1511,27 +1783,27 @@ export function AdminShell({ initialTab = "dashboard" }: AdminShellProps) {
 
         {tab === "leads" ? (
           <section className="admin-card">
-            <h2>Contact Leads</h2>
+            <h2>表單名單</h2>
             <div className="admin-list">
               {data.contactLeads.length ? (
                 data.contactLeads.map((lead) => (
                   <div className="project-detail-card" key={lead.id}>
                     <div className="form-row">
                       <div>
-                        <span className={`status-pill ${lead.status}`}>{lead.status}</span>
+                        <span className={`status-pill ${lead.status}`}>{leadStatusLabels[lead.status]}</span>
                         <h3>{lead.who}</h3>
                         <p className="muted">{lead.contact}</p>
                         <p>{lead.message}</p>
                         <p className="muted">{new Date(lead.createdAt).toLocaleString("zh-TW")}</p>
                       </div>
                       <label>
-                        <span>Status</span>
+                        <span>狀態</span>
                         <select value={lead.status} onChange={(event) => updateLead(lead.id, event.target.value as ContactLeadStatus)}>
-                          <option value="new">new</option>
-                          <option value="contacted">contacted</option>
-                          <option value="qualified">qualified</option>
-                          <option value="closed">closed</option>
-                          <option value="spam">spam</option>
+                          <option value="new">新進</option>
+                          <option value="contacted">已聯繫</option>
+                          <option value="qualified">已確認</option>
+                          <option value="closed">已結案</option>
+                          <option value="spam">垃圾訊息</option>
                         </select>
                       </label>
                     </div>
