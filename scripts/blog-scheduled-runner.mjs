@@ -100,6 +100,48 @@ async function appendLog(filePath, message) {
   await fs.appendFile(filePath, `${new Date().toISOString()} ${message}\n`, "utf8");
 }
 
+function parseJsonObject(raw) {
+  try {
+    return JSON.parse(raw || "{}");
+  } catch {
+    return null;
+  }
+}
+
+function globalScheduleLogPath() {
+  return path.join(runRoot(), "scheduled-runner.log");
+}
+
+function compactDoctorResult(doctor) {
+  const parsed = doctor.json || parseJsonObject(doctor.stdout);
+  return parsed
+    ? {
+        ok: parsed.ok === true,
+        checkedAt: parsed.checkedAt,
+        errorCount: parsed.errors?.length || 0,
+        warningCount: parsed.warnings?.length || 0,
+        candidate: parsed.summary?.candidate
+          ? {
+              status: parsed.summary.candidate.status,
+              postCount: parsed.summary.candidate.postCount,
+              manifestPath: parsed.summary.candidate.manifestPath
+            }
+          : undefined,
+        production: parsed.summary?.production?.health
+          ? {
+              cmsProvider: parsed.summary.production.health.cmsStorage?.provider,
+              cmsWritable: parsed.summary.production.health.cmsStorage?.writable,
+              legacyDeepSeekCronDisabled: parsed.summary.production.health.legacyDeepSeekCronDisabled
+            }
+          : undefined
+      }
+    : {
+        ok: doctor.ok === true,
+        errorCount: doctor.ok ? 0 : 1,
+        warningCount: 0
+      };
+}
+
 async function runDoctor({ mode, date, slot }) {
   if (hasFlag("skip-doctor")) return { ok: true, skipped: true };
   const result = await runCommand(process.execPath, [
@@ -117,14 +159,16 @@ async function runDoctor({ mode, date, slot }) {
       skipped: false,
       code: result.code,
       stdout: result.stdout,
-      stderr: result.stderr
+      stderr: result.stderr,
+      json: parseJsonObject(result.stdout)
     };
   }
   return {
     ok: true,
     skipped: false,
     stdout: result.stdout,
-    stderr: result.stderr
+    stderr: result.stderr,
+    json: parseJsonObject(result.stdout)
   };
 }
 
@@ -163,6 +207,7 @@ function runCommand(command, args, { cwd, env = process.env }) {
 
 async function createPrep({ date, slot }) {
   const doctor = await runDoctor({ mode: "prep", date, slot });
+  await appendLog(globalScheduleLogPath(), JSON.stringify({ phase: "prep-doctor", date, slot, doctor: compactDoctorResult(doctor) }));
   if (!doctor.ok) {
     return { ok: false, phase: "prep-doctor", stdout: doctor.stdout, stderr: doctor.stderr };
   }
@@ -176,7 +221,8 @@ async function createPrep({ date, slot }) {
         skipped: true,
         phase: "prep",
         reason: `candidate already exists with status=${existing.status}`,
-        manifestPath: existing.manifestPath || indexPath
+        manifestPath: existing.manifestPath || indexPath,
+        doctor: compactDoctorResult(doctor)
       };
     }
   }
@@ -263,7 +309,7 @@ ${await fs.readFile(orchestratorPromptPath, "utf8").catch(() => "")}
   };
   await writeJson(manifestPath, manifest);
   await writeJson(indexPath, { ...manifest, manifestPath });
-  return { ok: true, skipped: false, phase: "prep", runDir, promptPath, articleSetPath, manifestPath, indexPath };
+  return { ok: true, skipped: false, phase: "prep", runDir, promptPath, articleSetPath, manifestPath, indexPath, doctor: compactDoctorResult(doctor) };
 }
 
 function releaseGateIssues(manifest, { date, slot }) {
@@ -304,18 +350,19 @@ function releaseWindowIssue({ date, slot }) {
 
 async function release({ date, slot }) {
   const doctor = await runDoctor({ mode: "release", date, slot });
+  await appendLog(globalScheduleLogPath(), JSON.stringify({ phase: "release-doctor", date, slot, doctor: compactDoctorResult(doctor) }));
   if (!doctor.ok) {
     return { ok: false, skipped: false, phase: "release-doctor", stdout: doctor.stdout, stderr: doctor.stderr };
   }
 
   const indexPath = candidateIndexPath(date, slot);
   if (!(await exists(indexPath))) {
-    return { ok: true, skipped: true, phase: "release", reason: "missing prepared candidate", indexPath };
+    return { ok: true, skipped: true, phase: "release", reason: "missing prepared candidate", indexPath, doctor: compactDoctorResult(doctor) };
   }
   const index = await readJson(indexPath);
   const manifestPath = index.manifestPath || indexPath;
   if (!(await exists(manifestPath))) {
-    return { ok: true, skipped: true, phase: "release", reason: "prepared candidate manifest file missing", manifestPath };
+    return { ok: true, skipped: true, phase: "release", reason: "prepared candidate manifest file missing", manifestPath, doctor: compactDoctorResult(doctor) };
   }
   const manifest = await readJson(manifestPath);
   const issues = releaseGateIssues(manifest, { date, slot });
@@ -325,7 +372,7 @@ async function release({ date, slot }) {
     issues.push("articleSetPath file is missing");
   }
   if (issues.length) {
-    return { ok: true, skipped: true, phase: "release", reason: "release gate held", issues, manifestPath };
+    return { ok: true, skipped: true, phase: "release", reason: "release gate held", issues, manifestPath, doctor: compactDoctorResult(doctor) };
   }
 
   const result = await runCommand(process.execPath, [
@@ -376,6 +423,7 @@ async function release({ date, slot }) {
       warnings: verified.warnings || [],
       summary: verified.summary || {}
     },
+    doctor: compactDoctorResult(doctor),
     manifestPath
   };
 }

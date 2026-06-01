@@ -128,6 +128,7 @@ assert(scheduledRunner.includes("force-release"), "scheduled release has an expl
 assert(scheduledRunner.includes("missing prepared candidate"), "scheduled release skips safely when no candidate exists");
 assert(scheduledRunner.includes("articleSetPath file is missing"), "scheduled release checks that the ready article set still exists");
 assert(scheduledRunner.includes("scripts/blog-sop-doctor.mjs"), "scheduled prep/release runs the SOP doctor before continuing");
+assert(scheduledRunner.includes("compactDoctorResult") && scheduledRunner.includes("scheduled-runner.log"), "scheduled runner records compact doctor evidence in output and logs");
 assert(scheduledRunner.includes("scripts/verify-blog-release.mjs"), "scheduled release runs post-release verification before reporting success");
 assert(sopDoctor.includes("BLOG_DISABLE_DEEPSEEK_CRON must be true"), "SOP doctor requires the legacy DeepSeek cron to stay disabled");
 assert(sopDoctor.includes("production cmsStorage.provider must be cloudflare-kv"), "SOP doctor verifies the Cloudflare KV production CMS store");
