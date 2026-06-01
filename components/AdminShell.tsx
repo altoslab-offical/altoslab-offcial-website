@@ -22,9 +22,11 @@ import {
   Search,
   Sparkles,
   Trash2,
+  Upload,
   Users
 } from "lucide-react";
 import { BLOG_LANGUAGES, blogCoverForLanguage, blogPostPath, languageLabel, languageShortLabel } from "@/lib/blog-utils";
+import { PUBLIC_BLOG_AUTHORS } from "@/lib/blog-authors";
 import type {
   BlogLanguage,
   BlogContentType,
@@ -65,7 +67,7 @@ const statusLabels: Record<PublishStatus, string> = {
 };
 
 const reviewLabels: Record<BlogReviewStatus, string> = {
-  "ai-draft": "AI 草稿",
+  "ai-draft": "生成草稿",
   "human-review": "人工審稿",
   approved: "已核准",
   "needs-revision": "需修改"
@@ -154,6 +156,18 @@ async function api<T>(url: string, init?: RequestInit): Promise<T> {
     throw new Error(payload.error || payload.errors?.join(", ") || "Request failed");
   }
   return payload as T;
+}
+
+function arrayBufferToBase64(buffer: ArrayBuffer) {
+  const bytes = new Uint8Array(buffer);
+  const chunkSize = 0x8000;
+  let binary = "";
+
+  for (let index = 0; index < bytes.length; index += chunkSize) {
+    binary += String.fromCharCode(...bytes.subarray(index, index + chunkSize));
+  }
+
+  return window.btoa(binary);
 }
 
 function JsonField({
@@ -418,6 +432,7 @@ export function AdminShell({ initialTab = "dashboard" }: AdminShellProps) {
   });
   const [blogEditorTab, setBlogEditorTab] = useState<BlogEditorTab>("content");
   const [blogGroupBy, setBlogGroupBy] = useState<BlogGroupBy>("group");
+  const [coverUploadingPostId, setCoverUploadingPostId] = useState("");
 
   async function refresh() {
     setLoading(true);
@@ -609,6 +624,66 @@ export function AdminShell({ initialTab = "dashboard" }: AdminShellProps) {
     }));
   }
 
+  async function replacePostCover(post: BlogPost, file?: File | null) {
+    if (!file) return;
+
+    const allowedTypes = new Set(["image/png", "image/jpeg", "image/webp"]);
+    if (!allowedTypes.has(file.type)) {
+      setError("封面只支援 PNG、JPG 或 WebP。");
+      return;
+    }
+    if (file.size > 8_000_000) {
+      setError("封面檔案不能超過 8MB。");
+      return;
+    }
+
+    setMessage("");
+    setError("");
+    setCoverUploadingPostId(post.id);
+    try {
+      const base64 = arrayBufferToBase64(await file.arrayBuffer());
+      const payload = await api<{
+        ok: boolean;
+        url: string;
+        provider: string;
+        pathname: string;
+        contentType: string;
+        size: number;
+      }>("/api/admin/blog/media", {
+        method: "POST",
+        body: JSON.stringify({
+          filename: file.name,
+          contentType: file.type,
+          base64,
+          ingestRunId: `admin-${post.slug || post.id}`
+        })
+      });
+
+      updatePost(post.id, {
+        cover: payload.url,
+        coverSource: "manual",
+        coverAlt: post.coverAlt || `${post.title} 封面圖`,
+        coverCredit: post.coverCredit || "ALTOS LAB 編輯視覺",
+        coverGeneration: {
+          source: "manual",
+          provider: "admin-upload",
+          generatedAt: new Date().toISOString(),
+          status: "generated",
+          storedUrl: payload.url
+        },
+        qualityChecks: {
+          ...post.qualityChecks,
+          hasImageFit: false
+        }
+      });
+      setMessage("封面已上傳並替換。確認 alt text 與圖文符合後，請儲存文章。");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "封面上傳失敗");
+    } finally {
+      setCoverUploadingPostId("");
+    }
+  }
+
   function applyBodyHighlight(post: BlogPost) {
     const textarea = bodyTextareaRef.current;
     const body = post.body || "";
@@ -767,12 +842,16 @@ export function AdminShell({ initialTab = "dashboard" }: AdminShellProps) {
       { label: "有 SEO title / description", ok: Boolean(post.seoTitle && post.seoDescription) },
       { label: "有 GEO 回答摘要", ok: Boolean(post.geoSummary) },
       { label: "有封面圖與 alt", ok: Boolean(post.cover && post.coverAlt) },
-      { label: "AI 草稿有合法主題配圖", ok: !post.generatedBy || post.coverSource === "curated" || post.coverSource === "generated" },
+      {
+        label: "生成草稿有合法主題配圖",
+        ok: !post.generatedBy || post.coverSource === "curated" || post.coverSource === "generated" || post.coverSource === "manual"
+      },
       { label: "文章品質 gate 通過", ok: !post.generatedBy || post.qualityStatus === "passed" },
       { label: "圖片品質 gate 通過", ok: !post.generatedBy || post.imageQualityStatus === "passed" },
       { label: "有可見 FAQ", ok: post.faqs.length > 0 },
-      { label: "AI 草稿有來源連結", ok: !post.generatedBy || post.sourceLinks.length > 0 },
+      { label: "生成草稿有來源連結", ok: !post.generatedBy || post.sourceLinks.length > 0 },
       { label: "來源可信與圖文符合", ok: Boolean(post.qualityChecks.hasSourceTrust && post.qualityChecks.hasImageFit) },
+      { label: "讀者吸引力通過", ok: !post.generatedBy || Boolean(post.qualityChecks.hasReaderEngagement) },
       { label: "Anti-slop 寫作品質通過", ok: !post.generatedBy || Boolean(post.qualityChecks.hasAntiSlopReview) },
       { label: "人工或品質審核已通過", ok: !post.generatedBy || hasReviewApproval }
     ];
@@ -1361,7 +1440,7 @@ export function AdminShell({ initialTab = "dashboard" }: AdminShellProps) {
                       <p className="eyebrow">{statusSummary(selectedPost)}</p>
                       <h2>{selectedPost.title || "未命名文章"}</h2>
                       <p className="muted">
-                        {selectedPost.generatedBy ? `AI 來源：${selectedPost.generatedBy}` : "手動文章"} ·{" "}
+                        {selectedPost.generatedBy ? `生成來源：${selectedPost.generatedBy}` : "手動文章"} ·{" "}
                         {selectedPost.scheduledFor
                           ? `排程：${new Date(selectedPost.scheduledFor).toLocaleString("zh-TW")}`
                           : "未設定排程"}
@@ -1450,20 +1529,33 @@ export function AdminShell({ initialTab = "dashboard" }: AdminShellProps) {
                             </select>
                           </label>
                           <label>
-                            <span>標籤（逗號分隔）</span>
-                            <input
-                              value={selectedPost.tags.join(", ")}
-                              onChange={(event) =>
-                                updatePost(selectedPost.id, {
-                                  tags: event.target.value
-                                    .split(",")
-                                    .map((tag) => tag.trim())
-                                    .filter(Boolean)
-                                })
-                              }
-                            />
+                            <span>作者</span>
+                            <select
+                              value={selectedPost.author}
+                              onChange={(event) => updatePost(selectedPost.id, { author: event.target.value })}
+                            >
+                              {PUBLIC_BLOG_AUTHORS.map((author) => (
+                                <option value={author} key={author}>
+                                  {author}
+                                </option>
+                              ))}
+                            </select>
                           </label>
                         </div>
+                        <label>
+                          <span>標籤（逗號分隔）</span>
+                          <input
+                            value={selectedPost.tags.join(", ")}
+                            onChange={(event) =>
+                              updatePost(selectedPost.id, {
+                                tags: event.target.value
+                                  .split(",")
+                                  .map((tag) => tag.trim())
+                                  .filter(Boolean)
+                              })
+                            }
+                          />
+                        </label>
                         <div className="form-row">
                           <label>
                             <span>文章型態</span>
@@ -1578,6 +1670,29 @@ export function AdminShell({ initialTab = "dashboard" }: AdminShellProps) {
                             />
                           </label>
                         </div>
+                        <div className="admin-cover-tools">
+                          <label className={`button admin-cover-upload ${coverUploadingPostId === selectedPost.id ? "is-loading" : ""}`}>
+                            <Upload size={15} />
+                            {coverUploadingPostId === selectedPost.id ? "上傳中" : "替換封面"}
+                            <input
+                              type="file"
+                              accept="image/png,image/jpeg,image/webp"
+                              disabled={coverUploadingPostId === selectedPost.id}
+                              onChange={(event) => {
+                                replacePostCover(selectedPost, event.target.files?.[0] || null);
+                                event.target.value = "";
+                              }}
+                            />
+                          </label>
+                          {selectedPost.cover ? (
+                            <a className="button" href={selectedPost.cover} target="_blank" rel="noreferrer">
+                              開啟圖片
+                            </a>
+                          ) : null}
+                          <p className="admin-cover-meta">
+                            支援 PNG、JPG、WebP，單張上限 8MB。替換後會先把「圖文符合」退回待確認，避免未審圖片直接當成通過。
+                          </p>
+                        </div>
                         {selectedPost.cover ? (
                           <img className="admin-cover-preview" src={selectedPost.cover} alt={selectedPost.coverAlt || ""} />
                         ) : null}
@@ -1607,7 +1722,7 @@ export function AdminShell({ initialTab = "dashboard" }: AdminShellProps) {
                           </div>
                         ) : null}
                         <label>
-                          <span>AI 內容揭露</span>
+                          <span>編輯審核備註</span>
                           <textarea
                             rows={2}
                             value={selectedPost.aiDisclosure || ""}
@@ -1719,6 +1834,7 @@ export function AdminShell({ initialTab = "dashboard" }: AdminShellProps) {
                             ["hasSearchIntentAnswer", "有回答搜尋意圖"],
                             ["hasLabsPointOfView", "Labs 觀點"],
                             ["hasCreativeAngle", "創意角度"],
+                            ["hasReaderEngagement", "讀者吸引力"],
                             ["hasImageFit", "圖文符合"],
                             ["hasAntiSlopReview", "Anti-slop 通過"],
                             ["hasBilingualParity", "多語對齊"]

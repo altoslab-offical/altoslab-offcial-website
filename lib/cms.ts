@@ -6,6 +6,8 @@ import {
   estimateReadTimeMinutes,
   normalizeSourceLinks
 } from "./blog-utils";
+import { normalizeBlogAuthor, publicCoverCreditForPost, publicEditorialReviewNote } from "./blog-authors";
+import { getCloudflareKvConfig, getCloudflareKvNamespace } from "./cloudflare-kv";
 import { readCmsDataFromStorage, writeCmsDataToStorage } from "./cms-storage";
 import { seedData } from "./seed";
 import type {
@@ -22,6 +24,12 @@ import type {
 } from "./types";
 
 const PUBLIC_STATUSES = new Set(["published"]);
+const PUBLIC_CMS_CACHE_TTL_MS = 15_000;
+const PUBLIC_BLOG_CACHE_TTL_MS = 60_000;
+const PUBLIC_BLOG_CACHE_LIMIT_PER_LANGUAGE = Number(process.env.PUBLIC_BLOG_CACHE_LIMIT_PER_LANGUAGE || 80);
+
+let publicRawCmsCache: { data: CmsData; expiresAt: number } | null = null;
+let publicBlogPostsCache: { posts: BlogPost[]; expiresAt: number } | null = null;
 
 export function nowIso() {
   return new Date().toISOString();
@@ -54,23 +62,49 @@ function cloneSeedData(): CmsData {
 }
 
 async function readPublicCmsData(): Promise<CmsData> {
+  const raw = await readPublicRawCmsData();
+  return hydrateCmsData(raw);
+}
+
+async function readPublicRawCmsData(): Promise<CmsData> {
+  noStore();
+  if (publicRawCmsCache && publicRawCmsCache.expiresAt > Date.now()) {
+    return publicRawCmsCache.data;
+  }
+
   try {
-    return await readCmsData();
+    const data = await readCmsDataFromStorage();
+    publicRawCmsCache = { data, expiresAt: Date.now() + PUBLIC_CMS_CACHE_TTL_MS };
+    return data;
   } catch (error) {
     console.warn(
       "[cms] Falling back to seed CMS data for public read:",
       error instanceof Error ? error.message : error
     );
-    return hydrateCmsData(cloneSeedData());
+    const data = cloneSeedData();
+    publicRawCmsCache = { data, expiresAt: Date.now() + PUBLIC_CMS_CACHE_TTL_MS };
+    return data;
   }
 }
 
 export async function writeCmsData(data: CmsData) {
+  publicRawCmsCache = null;
+  publicBlogPostsCache = null;
   await writeCmsDataToStorage(data);
+  await writePublicBlogCacheFromData(data).catch((error) => {
+    console.warn("[cms] Unable to refresh public blog cache:", error instanceof Error ? error.message : error);
+  });
 }
 
 export async function mutateCmsData<T>(mutator: (data: CmsData) => T | Promise<T>): Promise<T> {
   const data = await readCmsData();
+  const result = await mutator(data);
+  await writeCmsData(data);
+  return result;
+}
+
+export async function mutateRawCmsData<T>(mutator: (data: CmsData) => T | Promise<T>): Promise<T> {
+  const data = await readCmsDataFromStorage();
   const result = await mutator(data);
   await writeCmsData(data);
   return result;
@@ -84,15 +118,59 @@ function visibleStatus(status: PublishStatus | Project["status"]) {
   return PUBLIC_STATUSES.has(status);
 }
 
+const INLINE_FAQ_HEADINGS = new Set([
+  "常見問題",
+  "FAQ",
+  "FAQs",
+  "Frequently Asked Questions",
+  "よくある質問",
+  "자주 묻는 질문"
+]);
+
+function stripInlineFaqSection(body: string, hasStructuredFaqs: boolean) {
+  if (!hasStructuredFaqs || !body.includes("##")) return body;
+
+  const lines = body.split(/\r?\n/);
+  const faqStart = lines.findIndex((line) => {
+    const match = line.match(/^##\s+(.+?)\s*$/);
+    return match ? INLINE_FAQ_HEADINGS.has(match[1].trim()) : false;
+  });
+
+  if (faqStart < 0) return body;
+
+  const faqEnd = lines.findIndex((line, index) => index > faqStart && /^##\s+/.test(line));
+  const nextSectionIndex = faqEnd >= 0 ? faqEnd : lines.length;
+  const before = lines.slice(0, faqStart);
+  const after = lines.slice(nextSectionIndex);
+
+  return [...before, ...after].join("\n").replace(/\n{3,}/g, "\n\n").trim();
+}
+
 function hydrateBlogPost(post: BlogPost): BlogPost {
   const language = normalizeBlogLanguage(post.language);
-  const body = post.body || "";
+  const body = stripInlineFaqSection(post.body || "", Boolean(post.faqs?.length));
   const sourceLinks = normalizeSourceLinks(post.sourceLinks);
   const estimatedReadTime = estimateReadTimeMinutes(body, language);
+  const author = normalizeBlogAuthor(post.author, {
+    slot: post.generationSlot,
+    seed: post.translationGroupId || post.ingestRunId || post.slug
+  });
+  const editorialReviewNote = /AI[-\s]?generated|AI-assisted|AI 內容揭露|AI 協助|AI 生成|AI 開示|AI公開|AI公開|自動品質|automated quality/i.test(
+    post.aiDisclosure || ""
+  )
+    ? publicEditorialReviewNote(language)
+    : post.aiDisclosure || publicEditorialReviewNote(language);
+  const coverSource = post.coverSource ?? (post.generatedBy ? "fallback" : "manual");
+  const coverCredit = publicCoverCreditForPost({
+    coverCredit: post.coverCredit,
+    coverSource,
+    language
+  });
 
   return {
     ...post,
     language,
+    author,
     translationGroupId: post.translationGroupId || `seed-${post.slug}`,
     sourceLinks,
     readTimeMinutes: Math.max(estimatedReadTime, Number(post.readTimeMinutes || 0) || 0),
@@ -123,15 +201,15 @@ function hydrateBlogPost(post: BlogPost): BlogPost {
     releaseDecision: post.releaseDecision,
     qualityIssues: post.qualityIssues,
     ingestRunId: post.ingestRunId,
-    aiDisclosure: post.aiDisclosure,
+    aiDisclosure: editorialReviewNote,
     generationDate: post.generationDate,
     generationSlot: post.generationSlot,
     scheduledFor: post.scheduledFor,
     coverAlt: post.coverAlt,
     coverPrompt: post.coverPrompt,
-    coverSource: post.coverSource ?? (post.generatedBy ? "fallback" : "manual"),
+    coverSource,
     coverGeneration: post.coverGeneration,
-    coverCredit: post.coverCredit,
+    coverCredit,
     coverCreditUrl: post.coverCreditUrl,
     coverLicense: post.coverLicense,
     coverLicenseUrl: post.coverLicenseUrl,
@@ -144,6 +222,113 @@ function hydrateCmsData(data: CmsData): CmsData {
     ...data,
     blogPosts: data.blogPosts.map(hydrateBlogPost)
   };
+}
+
+function publicBlogCacheKey() {
+  const config = getCloudflareKvConfig();
+  return config ? `${config.cmsPathname}:public-blog:v1` : "";
+}
+
+function compactPublicBlogPost(post: BlogPost): BlogPost {
+  return {
+    ...post,
+    coverPrompt: undefined,
+    coverGeneration: post.coverGeneration
+      ? {
+          source: post.coverGeneration.source,
+          provider: post.coverGeneration.provider,
+          generatedAt: post.coverGeneration.generatedAt,
+          status: post.coverGeneration.status,
+          storedUrl: post.coverGeneration.storedUrl
+        }
+      : undefined,
+    qualityIssues: post.qualityIssues?.slice(0, 8) || [],
+    qualityChecks: defaultQualityChecks({
+      hasHumanReview: post.qualityChecks.hasHumanReview,
+      hasQualityReviewerApproval: post.qualityChecks.hasQualityReviewerApproval,
+      hasVisibleSources: post.qualityChecks.hasVisibleSources,
+      hasNoFabricatedClaims: post.qualityChecks.hasNoFabricatedClaims,
+      hasSearchIntentAnswer: post.qualityChecks.hasSearchIntentAnswer,
+      hasBilingualParity: post.qualityChecks.hasBilingualParity,
+      hasSourceTrust: post.qualityChecks.hasSourceTrust,
+      hasLabsPointOfView: post.qualityChecks.hasLabsPointOfView,
+      hasCreativeAngle: post.qualityChecks.hasCreativeAngle,
+      hasReaderEngagement: post.qualityChecks.hasReaderEngagement,
+      hasImageFit: post.qualityChecks.hasImageFit,
+      hasAntiSlopReview: post.qualityChecks.hasAntiSlopReview,
+      qualityScore: post.qualityChecks.qualityScore,
+      antiSlopScore: post.qualityChecks.antiSlopScore
+    }),
+    generationTrace: undefined
+  };
+}
+
+function publicBlogPostsFromData(data: CmsData) {
+  const published = data.blogPosts
+    .filter((post) => post.status === "published")
+    .map(hydrateBlogPost)
+    .map(compactPublicBlogPost);
+
+  return BLOG_LANGUAGES.flatMap((language) =>
+    sortedByOrder(published.filter((post) => normalizeBlogLanguage(post.language) === language)).slice(
+      0,
+      PUBLIC_BLOG_CACHE_LIMIT_PER_LANGUAGE
+    )
+  );
+}
+
+async function readPublicBlogCache() {
+  if (publicBlogPostsCache && publicBlogPostsCache.expiresAt > Date.now()) return publicBlogPostsCache.posts;
+
+  const namespace = getCloudflareKvNamespace();
+  const key = publicBlogCacheKey();
+  if (!namespace || !key) return null;
+
+  const raw = await namespace.get(key).catch(() => null);
+  if (!raw) return null;
+
+  try {
+    const parsed = JSON.parse(raw) as { posts?: BlogPost[] };
+    if (!Array.isArray(parsed.posts)) return null;
+    publicBlogPostsCache = { posts: parsed.posts, expiresAt: Date.now() + PUBLIC_BLOG_CACHE_TTL_MS };
+    return parsed.posts;
+  } catch (error) {
+    console.warn("[cms] Public blog cache is unreadable:", error instanceof Error ? error.message : error);
+    return null;
+  }
+}
+
+async function writePublicBlogCacheFromData(data: CmsData) {
+  const namespace = getCloudflareKvNamespace();
+  const key = publicBlogCacheKey();
+  if (!namespace || !key) return;
+
+  const posts = publicBlogPostsFromData(data);
+  await namespace.put(
+    key,
+    JSON.stringify({
+      version: 1,
+      updatedAt: nowIso(),
+      limitPerLanguage: PUBLIC_BLOG_CACHE_LIMIT_PER_LANGUAGE,
+      posts
+    }),
+    {
+      metadata: {
+        contentType: "application/json",
+        updatedAt: nowIso(),
+        source: "cms-public-blog-cache"
+      }
+    }
+  );
+  publicBlogPostsCache = { posts, expiresAt: Date.now() + PUBLIC_BLOG_CACHE_TTL_MS };
+}
+
+async function readPublishedBlogPostsForPublic() {
+  const cached = await readPublicBlogCache();
+  if (cached) return cached;
+
+  const data = await readPublicRawCmsData();
+  return publicBlogPostsFromData(data);
 }
 
 export function toPublicPage(page: SitePage): SitePage {
@@ -161,38 +346,35 @@ export function toPublicPage(page: SitePage): SitePage {
 }
 
 export async function getPublishedHomePage() {
-  const data = await readPublicCmsData();
+  const data = await readPublicRawCmsData();
   const page = data.sitePages.find((item) => item.slug === "home" && item.status === "published");
   return page ? toPublicPage(page) : null;
 }
 
 export async function getPublishedPage(slug: string) {
-  const data = await readPublicCmsData();
+  const data = await readPublicRawCmsData();
   const page = data.sitePages.find((item) => item.slug === slug && item.status === "published");
   return page ? toPublicPage(page) : null;
 }
 
 export async function getPublishedProjects() {
-  const data = await readPublicCmsData();
+  const data = await readPublicRawCmsData();
   return sortedByOrder(data.projects.filter((project) => project.status === "published"));
 }
 
 export async function getPublishedProject(slug: string) {
-  const data = await readPublicCmsData();
+  const data = await readPublicRawCmsData();
   return data.projects.find((project) => project.slug === slug && project.status === "published") ?? null;
 }
 
 export async function getPublishedBlogPosts() {
-  const data = await readPublicCmsData();
-  return sortedByOrder(data.blogPosts.filter((post) => post.status === "published"));
+  return sortedByOrder(await readPublishedBlogPostsForPublic());
 }
 
 export async function getPublishedBlogPostsByLanguage(language?: BlogLanguage) {
-  const data = await readPublicCmsData();
+  const posts = await readPublishedBlogPostsForPublic();
   return sortedByOrder(
-    data.blogPosts.filter(
-      (post) => post.status === "published" && (!language || normalizeBlogLanguage(post.language) === language)
-    )
+    posts.filter((post) => post.status === "published" && (!language || normalizeBlogLanguage(post.language) === language))
   );
 }
 
@@ -213,20 +395,19 @@ function matchesBlogSlug(postSlug: string, requestedSlug: string) {
 }
 
 export async function getPublishedBlogPost(slug: string, language?: BlogLanguage) {
-  const data = await readPublicCmsData();
-  return (
-    data.blogPosts.find(
-      (post) =>
-        matchesBlogSlug(post.slug, slug) &&
-        post.status === "published" &&
-        (!language || normalizeBlogLanguage(post.language) === language)
-    ) ?? null
+  const posts = await readPublishedBlogPostsForPublic();
+  const post = posts.find(
+    (item) =>
+      matchesBlogSlug(item.slug, slug) &&
+      item.status === "published" &&
+      (!language || normalizeBlogLanguage(item.language) === language)
   );
+  return post || null;
 }
 
 export async function getPublishedBlogAlternates(post: BlogPost) {
-  const data = await readPublicCmsData();
-  return data.blogPosts.filter(
+  const posts = await readPublishedBlogPostsForPublic();
+  return posts.filter(
     (item) =>
       item.status === "published" &&
       item.translationGroupId === post.translationGroupId &&
@@ -247,10 +428,10 @@ function blogSourceHosts(post: BlogPost) {
 }
 
 export async function getRelatedPublishedBlogPosts(post: BlogPost, limit = 4) {
-  const data = await readPublicCmsData();
+  const posts = await readPublishedBlogPostsForPublic();
   const tagSet = new Set(post.tags.map((tag) => tag.toLowerCase()));
   const sourceHosts = new Set(blogSourceHosts(post));
-  return data.blogPosts
+  return posts
     .filter((item) => item.status === "published" && item.id !== post.id && normalizeBlogLanguage(item.language) === post.language)
     .map((item) => {
       const sharedTags = item.tags.filter((tag) => tagSet.has(tag.toLowerCase())).length;
@@ -317,6 +498,10 @@ export function normalizeBlogPostInput(input: Partial<BlogPost>, existing?: Blog
   const body = input.body ?? existing?.body ?? "";
   const estimatedReadTime = estimateReadTimeMinutes(body, language);
   const sourceLinks = normalizeSourceLinks(input.sourceLinks ?? existing?.sourceLinks);
+  const author = normalizeBlogAuthor(input.author ?? existing?.author, {
+    slot: input.generationSlot ?? existing?.generationSlot,
+    seed: input.translationGroupId ?? existing?.translationGroupId ?? input.slug ?? existing?.slug
+  });
   const qualityChecks = defaultQualityChecks({
     ...existing?.qualityChecks,
     ...input.qualityChecks,
@@ -348,7 +533,7 @@ export function normalizeBlogPostInput(input: Partial<BlogPost>, existing?: Blog
     faqs: input.faqs ?? existing?.faqs ?? [],
     sourceLinks,
     tags: input.tags ?? existing?.tags ?? ["AI", "GEO"],
-    author: input.author ?? existing?.author ?? "ALTOS LAB",
+    author,
     cover: input.cover ?? existing?.cover ?? blogCoverForLanguage(language),
     coverAlt: input.coverAlt ?? existing?.coverAlt ?? `${title} cover image`,
     coverPrompt: input.coverPrompt ?? existing?.coverPrompt,
@@ -370,7 +555,7 @@ export function normalizeBlogPostInput(input: Partial<BlogPost>, existing?: Blog
     aiDisclosure:
       input.aiDisclosure ??
       existing?.aiDisclosure ??
-      "This draft may be assisted by AI and should be reviewed by ALTOS LAB before publication.",
+      publicEditorialReviewNote(language),
     generationDate: input.generationDate ?? existing?.generationDate,
     generationSlot: input.generationSlot ?? existing?.generationSlot,
     scheduledFor: input.scheduledFor ?? existing?.scheduledFor,
@@ -433,41 +618,43 @@ export function publishValidationForBlogPost(post: BlogPost) {
   if (!post.translationGroupId) errors.push("translationGroupId is required");
   if (!post.readTimeMinutes) errors.push("readTimeMinutes is required");
   if (!post.faqs.length) errors.push("at least one visible FAQ is required for GEO");
-  if (post.generatedBy && !post.sourceLinks.length) errors.push("AI-generated posts require at least one source link");
-  if (post.generatedBy && post.coverSource !== "curated" && post.coverSource !== "generated") {
-    errors.push("AI-generated posts require a topic-matched curated or generated cover before publishing");
+  if (post.generatedBy && !post.sourceLinks.length) errors.push("generated posts require at least one source link");
+  const hasApprovedCoverSource =
+    post.coverSource === "curated" || post.coverSource === "generated" || post.coverSource === "manual";
+  if (post.generatedBy && !hasApprovedCoverSource) {
+    errors.push("generated posts require a topic-matched curated, generated or human-approved manual cover before publishing");
   }
-  if (post.generatedBy && (post.coverSource === "curated" || post.coverSource === "generated") && !post.coverCredit) {
-    errors.push("AI-generated posts require cover attribution before publishing");
+  if (post.generatedBy && hasApprovedCoverSource && !post.coverCredit) {
+    errors.push("generated posts require cover attribution before publishing");
   }
   if (post.generatedBy && post.coverSource === "generated" && !post.coverGeneration?.prompt) {
-    errors.push("AI-generated cover images require the stored generation prompt before publishing");
+    errors.push("generated cover images require the stored generation prompt before publishing");
   }
   if (post.generatedBy && post.coverSource === "generated" && !post.coverGeneration?.provider) {
-    errors.push("AI-generated cover images require the image provider before publishing");
+    errors.push("generated cover images require the image provider before publishing");
   }
   if (post.generatedBy && post.qualityStatus && post.qualityStatus !== "passed") {
-    errors.push("AI-generated posts require qualityStatus passed before publishing");
+    errors.push("generated posts require qualityStatus passed before publishing");
   }
   if (post.generatedBy && post.imageQualityStatus && post.imageQualityStatus !== "passed") {
-    errors.push("AI-generated posts require imageQualityStatus passed before publishing");
+    errors.push("generated posts require imageQualityStatus passed before publishing");
   }
   if (
     post.generatedBy &&
     !post.qualityChecks.hasHumanReview &&
     !post.qualityChecks.hasQualityReviewerApproval
   ) {
-    errors.push("AI-generated posts require human review or quality reviewer approval before publishing");
+    errors.push("generated posts require human review or quality reviewer approval before publishing");
   }
   if (post.generatedBy && !post.qualityChecks.hasAntiSlopReview) {
-    errors.push("AI-generated posts require anti-slop writing review before publishing");
+    errors.push("generated posts require anti-slop writing review before publishing");
   }
   if (
     post.generatedBy &&
     typeof post.qualityChecks.antiSlopScore === "number" &&
     post.qualityChecks.antiSlopScore < 35
   ) {
-    errors.push("AI-generated posts require anti-slop score 35/50 or higher before publishing");
+    errors.push("generated posts require anti-slop score 35/50 or higher before publishing");
   }
   return errors;
 }

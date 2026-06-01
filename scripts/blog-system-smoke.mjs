@@ -7,6 +7,12 @@ function read(file) {
   return fs.readFileSync(path.join(root, file), "utf8");
 }
 
+function readFirst(files) {
+  const found = files.find((file) => fs.existsSync(path.join(root, file)));
+  if (!found) throw new Error(`Missing required file: ${files.join(" or ")}`);
+  return read(found);
+}
+
 function assert(condition, message) {
   if (!condition) {
     console.error(`FAIL ${message}`);
@@ -25,7 +31,7 @@ const ingestRoute = read("app/api/admin/blog/ingest-set/route.ts");
 const mediaRoute = read("app/api/admin/blog/media/route.ts");
 const generatedMediaRoute = read("app/api/blog/generated-media/[filename]/route.ts");
 const healthRoute = read("app/api/health/route.ts");
-const proxy = read("proxy.ts");
+const proxy = readFirst(["middleware.ts", "proxy.ts"]);
 const localWorker = read("scripts/blog-local-worker.mjs");
 const orchestrator = read("scripts/blog-antigravity-orchestrator.mjs");
 const launchAgentInstaller = read("scripts/install-blog-launch-agent.sh");

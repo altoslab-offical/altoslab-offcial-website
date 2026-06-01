@@ -7,8 +7,17 @@ import { RichText } from "@/components/RichText";
 import { SafeBlogImage } from "@/components/SafeBlogImage";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { SiteHeader } from "@/components/site/SiteHeader";
+import {
+  blogAuthorForPost,
+  blogAuthorInitials,
+  blogAuthorProfile,
+  publicCoverCreditForPost,
+  publicEditorialReviewNote
+} from "@/lib/blog-authors";
 import { blogContentTypeLabel, blogIndexPath, blogPostPath, languageLabel } from "@/lib/blog-utils";
+import { toBlogVisualPost } from "@/lib/blog-visual";
 import { getRelatedPublishedBlogPosts } from "@/lib/cms";
+import { publicTaxonomyLabel, publicTaxonomyLabels } from "@/lib/public-taxonomy";
 import { articleJsonLd, breadcrumbJsonLd, faqJsonLd } from "@/lib/seo";
 import type { BlogPost } from "@/lib/types";
 
@@ -24,11 +33,9 @@ const copy = {
     related: "延伸閱讀",
     relatedTitle: "Keep reading",
     relatedMore: "查看全部",
-    disclosure: "AI 內容揭露",
+    disclosure: "編輯審核",
     tags: "文章標籤",
-    authorLabel: "ALTOS LAB editorial note",
-    authorName: "ALTOS LAB",
-    authorBio: "專注於 AI 導入、生成式搜尋與企業數位策略的研究團隊。我們把第一線的實作經驗，整理成可被引用的觀點。"
+    authorLabel: "作者"
   },
   en: {
     back: "← Blog",
@@ -41,11 +48,9 @@ const copy = {
     related: "Related reading",
     relatedTitle: "Keep reading",
     relatedMore: "View all",
-    disclosure: "AI disclosure",
+    disclosure: "Editorial review",
     tags: "Article tags",
-    authorLabel: "ALTOS LAB editorial note",
-    authorName: "ALTOS LAB",
-    authorBio: "A research team focused on AI adoption, generative search, and enterprise digital strategy. We turn hands-on implementation work into viewpoints others can cite."
+    authorLabel: "Author"
   },
   ja: {
     back: "← Blog",
@@ -58,11 +63,9 @@ const copy = {
     related: "関連記事",
     relatedTitle: "Keep reading",
     relatedMore: "すべて見る",
-    disclosure: "AI 開示",
+    disclosure: "編集レビュー",
     tags: "記事タグ",
-    authorLabel: "ALTOS LAB editorial note",
-    authorName: "ALTOS LAB",
-    authorBio: "AI 導入、生成型検索、企業のデジタル戦略を研究するチームです。現場での実装経験を、引用可能な視点として整理しています。"
+    authorLabel: "著者"
   },
   ko: {
     back: "← Blog",
@@ -75,13 +78,25 @@ const copy = {
     related: "관련 글",
     relatedTitle: "Keep reading",
     relatedMore: "전체 보기",
-    disclosure: "AI 공개",
+    disclosure: "편집 검토",
     tags: "글 태그",
-    authorLabel: "ALTOS LAB editorial note",
-    authorName: "ALTOS LAB",
-    authorBio: "AI 도입, 생성형 검색, 기업 디지털 전략을 연구하는 팀입니다. 현장의 실행 경험을 인용 가능한 관점으로 정리합니다."
+    authorLabel: "작성자"
   }
 };
+
+function articleTaxonomy(post: BlogPost) {
+  const seen = new Set<string>();
+  const typeLabel = blogContentTypeLabel(post.contentType, post.language).toLowerCase();
+  return publicTaxonomyLabels([post.newsCategory || "", ...post.tags.slice(0, 3)], post.language)
+    .filter(Boolean)
+    .filter((item) => {
+      const key = item.toLowerCase();
+      if (key === typeLabel) return false;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+}
 
 const sourceTranslationHeadings = new Set([
   "來源與轉譯備註",
@@ -92,6 +107,8 @@ const sourceTranslationHeadings = new Set([
   "출처 및 번역 메모",
   "출처와 번역 메모"
 ]);
+
+const inlineFaqHeadings = new Set(["常見問題", "FAQ", "よくある質問", "자주 묻는 질문"]);
 
 function extractSourceTranslationNote(body: string) {
   const lines = body.split("\n");
@@ -117,11 +134,38 @@ function extractSourceTranslationNote(body: string) {
   return { body: nextBody, noteTitle, noteBody };
 }
 
+function removeInlineFaqSection(body: string) {
+  const lines = body.split("\n");
+  const headingIndex = lines.findIndex((line) => {
+    const match = line.trim().match(/^##\s+(.+)$/);
+    return Boolean(match?.[1] && inlineFaqHeadings.has(match[1].trim()));
+  });
+
+  if (headingIndex < 0) return body;
+
+  const nextHeadingIndex = lines.findIndex((line, index) => index > headingIndex && /^##\s+/.test(line.trim()));
+  const endIndex = nextHeadingIndex < 0 ? lines.length : nextHeadingIndex;
+  return [...lines.slice(0, headingIndex), ...lines.slice(endIndex)].join("\n").replace(/\n{3,}/g, "\n\n").trim();
+}
+
+function formatSourceDate(value: string | undefined, locale: string) {
+  if (!value) return "";
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? "" : date.toLocaleDateString(locale);
+}
+
 export async function BlogArticle({ post }: { post: BlogPost }) {
   const dictionary = copy[post.language];
+  const taxonomy = articleTaxonomy(post);
   const sourceTranslationNote = extractSourceTranslationNote(post.body);
+  const articleBody = post.faqs.length ? removeInlineFaqSection(sourceTranslationNote.body) : sourceTranslationNote.body;
   const relatedPosts = await getRelatedPublishedBlogPosts(post, 3);
   const locale = post.language === "en" ? "en" : "zh-TW";
+  const author = blogAuthorForPost(post);
+  const authorProfile = blogAuthorProfile(author, post.language);
+  const publicCoverCredit = publicCoverCreditForPost(post);
+  const editorialReviewNote = publicEditorialReviewNote(post.language);
+  const coverPost = toBlogVisualPost(post);
 
   return (
     <div className="site-home blog-site-shell">
@@ -155,6 +199,7 @@ export async function BlogArticle({ post }: { post: BlogPost }) {
               <span className={`blog-craft-type-badge is-${post.contentType}`}>
                 {blogContentTypeLabel(post.contentType, post.language)}
               </span>
+              <span>{taxonomy.join(" / ")}</span>
               <span>{dictionary.readTime(post.readTimeMinutes)}</span>
             </p>
             <h1>{renderBrandText(post.title)}</h1>
@@ -167,18 +212,18 @@ export async function BlogArticle({ post }: { post: BlogPost }) {
             <p className="hero-copy">{renderBrandText(post.excerpt)}</p>
             {post.cover ? (
               <>
-                <SafeBlogImage className="article-cover" loading="eager" post={post} />
-                {post.coverCredit ? (
+                <SafeBlogImage className="article-cover" loading="eager" post={coverPost} />
+                {publicCoverCredit ? (
                   <p className="article-cover-credit">
                     Cover image:{" "}
-                    {post.coverCreditUrl ? (
+                    {post.coverCreditUrl && publicCoverCredit === post.coverCredit ? (
                       <a href={post.coverCreditUrl} target="_blank" rel="noreferrer">
-                        {renderBrandText(post.coverCredit)}
+                        {renderBrandText(publicCoverCredit)}
                       </a>
                     ) : (
-                      renderBrandText(post.coverCredit)
+                      renderBrandText(publicCoverCredit)
                     )}
-                    {post.coverLicense ? (
+                    {post.coverLicense && publicCoverCredit === post.coverCredit ? (
                       <>
                         {" "}
                         ·{" "}
@@ -195,7 +240,7 @@ export async function BlogArticle({ post }: { post: BlogPost }) {
                 ) : null}
               </>
             ) : (
-              <BlogEditorialVisual post={post} />
+              <BlogEditorialVisual post={coverPost} />
             )}
           </header>
 
@@ -204,7 +249,7 @@ export async function BlogArticle({ post }: { post: BlogPost }) {
           </aside>
 
           {post.keyTakeaways.length ? (
-            <section className="project-detail-card">
+            <section className="project-detail-card article-takeaways">
               <p className="eyebrow">{dictionary.takeaways}</p>
               <ul>
                 {post.keyTakeaways.map((item) => (
@@ -214,7 +259,7 @@ export async function BlogArticle({ post }: { post: BlogPost }) {
             </section>
           ) : null}
 
-          <RichText text={sourceTranslationNote.body} />
+          <RichText text={articleBody} />
 
           {post.sourceLinks.length ? (
             <section className="source-list">
@@ -225,7 +270,11 @@ export async function BlogArticle({ post }: { post: BlogPost }) {
                     <a href={source.url} target="_blank" rel="noreferrer">
                       {renderBrandText(source.title)}
                     </a>
-                    {source.publisher ? <span> · {renderBrandText(source.publisher)}</span> : null}
+                    <span className="source-meta">
+                      {source.publisher ? <> · {renderBrandText(source.publisher)}</> : null}
+                      {formatSourceDate(source.publishedAt, locale) ? <> · {formatSourceDate(source.publishedAt, locale)}</> : null}
+                    </span>
+                    {source.summary ? <p className="source-summary">{renderBrandText(source.summary)}</p> : null}
                   </li>
                 ))}
               </ul>
@@ -233,7 +282,8 @@ export async function BlogArticle({ post }: { post: BlogPost }) {
           ) : null}
 
           {post.faqs.length ? (
-            <section className="article-faq-section">
+            <section style={{ marginTop: 48 }}>
+              <p className="eyebrow">FAQ</p>
               <h2>{dictionary.faq}</h2>
               <div className="faq-list">
                 {post.faqs.map((faq) => (
@@ -253,15 +303,15 @@ export async function BlogArticle({ post }: { post: BlogPost }) {
             </aside>
           ) : null}
 
-          {post.aiDisclosure ? (
+          {post.aiDisclosure || post.generatedBy ? (
             <aside className="ai-disclosure">
-              <strong>{dictionary.disclosure}:</strong> {renderBrandText(post.aiDisclosure)}
+              <strong>{dictionary.disclosure}:</strong> {renderBrandText(editorialReviewNote)}
             </aside>
           ) : null}
 
           {post.tags.length ? (
             <nav className="article-tag-strip" aria-label={dictionary.tags}>
-              {post.tags.slice(0, 5).map((tag) => (
+              {publicTaxonomyLabels(post.tags.slice(0, 5), post.language).map((tag) => (
                 <Link className="article-tag-chip" href={`${blogIndexPath(post.language)}?tag=${encodeURIComponent(tag)}`} key={tag}>
                   {tag}
                 </Link>
@@ -271,11 +321,11 @@ export async function BlogArticle({ post }: { post: BlogPost }) {
 
           <section className="article-author-card" aria-label={dictionary.authorLabel}>
             <span className="article-author-mark" aria-hidden="true">
-              AL
+              {authorProfile.avatar ? <img src={authorProfile.avatar} alt="" loading="lazy" /> : blogAuthorInitials(author)}
             </span>
             <div>
-              <h2>{dictionary.authorName}</h2>
-              <p>{dictionary.authorBio}</p>
+              <h2>{authorProfile.name}</h2>
+              <p>{authorProfile.bio}</p>
             </div>
           </section>
 
@@ -299,6 +349,7 @@ export async function BlogArticle({ post }: { post: BlogPost }) {
                     </span>
                     <span className="related-article-eyebrow">
                       {[blogContentTypeLabel(related.contentType, related.language), related.newsCategory || related.tags[0]]
+                        .map((item) => publicTaxonomyLabel(item, related.language))
                         .filter(Boolean)
                         .join(" · ")}
                     </span>

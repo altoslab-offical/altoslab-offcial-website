@@ -1,80 +1,10 @@
 import type { Metadata, Viewport } from "next";
 import { GoogleTagManager } from "@next/third-parties/google";
 import { headers } from "next/headers";
-import {
-  Geist,
-  Inter,
-  JetBrains_Mono,
-  Newsreader,
-  Noto_Sans_JP,
-  Noto_Sans_KR,
-  Noto_Sans_TC,
-  Noto_Serif_TC,
-  Space_Grotesk
-} from "next/font/google";
 import "./globals.css";
 import { CtaAnalytics } from "@/components/AnalyticsEvents";
 import { gtmId, isGtmConfigured } from "@/lib/analytics";
 import { searchVerificationMetadata, siteName, siteUrl } from "@/lib/seo";
-
-const inter = Inter({
-  subsets: ["latin"],
-  variable: "--font-inter",
-  display: "swap"
-});
-
-const geist = Geist({
-  subsets: ["latin"],
-  variable: "--font-geist",
-  display: "swap",
-  weight: "variable"
-});
-
-const newsreader = Newsreader({
-  subsets: ["latin"],
-  variable: "--font-newsreader",
-  display: "swap",
-  style: ["italic"],
-  weight: "variable"
-});
-
-const jetBrainsMono = JetBrains_Mono({
-  subsets: ["latin"],
-  variable: "--font-jetbrains-mono",
-  display: "swap",
-  weight: "variable"
-});
-
-const notoSansTc = Noto_Sans_TC({
-  subsets: ["latin"],
-  variable: "--font-noto-tc",
-  display: "swap"
-});
-
-const notoSansJp = Noto_Sans_JP({
-  subsets: ["latin"],
-  variable: "--font-noto-jp",
-  display: "swap"
-});
-
-const notoSansKr = Noto_Sans_KR({
-  subsets: ["latin"],
-  variable: "--font-noto-kr",
-  display: "swap"
-});
-
-const notoSerifTc = Noto_Serif_TC({
-  subsets: ["latin"],
-  variable: "--font-noto-serif-tc",
-  display: "swap",
-  weight: ["400", "700"]
-});
-
-const spaceGrotesk = Space_Grotesk({
-  subsets: ["latin"],
-  variable: "--font-space-grotesk",
-  display: "swap"
-});
 
 const verification = searchVerificationMetadata();
 
@@ -146,10 +76,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         : "zh-Hant-TW";
 
   return (
-    <html
-      lang={language}
-      className={`${geist.variable} ${inter.variable} ${newsreader.variable} ${jetBrainsMono.variable} ${notoSansTc.variable} ${notoSansJp.variable} ${notoSansKr.variable} ${notoSerifTc.variable} ${spaceGrotesk.variable}`}
-    >
+    <html lang={language}>
       <body>
         {children}
         <CtaAnalytics />

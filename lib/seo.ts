@@ -1,5 +1,7 @@
 import { blogCoverForLanguage, blogPostPath, htmlLanguage } from "./blog-utils";
 import type { BlogPost, Project, SitePage } from "./types";
+import { publicTaxonomyLabel } from "./public-taxonomy";
+import { blogAuthorForPost, blogAuthorProfile } from "./blog-authors";
 
 export const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || "https://altoslab.com").replace(/\/$/, "");
 export const siteName = "ALTOS LAB";
@@ -35,8 +37,33 @@ function escapeHtmlAttribute(value: string) {
 }
 
 export function absoluteUrl(path = "/") {
-  if (path.startsWith("http")) return path;
+  if (path.startsWith("http")) {
+    try {
+      const url = new URL(path);
+      const hostname = url.hostname.toLowerCase();
+      if (
+        hostname === canonicalHost.toLowerCase() ||
+        hostname === "altoslab-official-website.altoslab-ai.workers.dev" ||
+        hostname.endsWith(".altoslab-ai.workers.dev")
+      ) {
+        return `${siteUrl}${url.pathname}${url.search}`;
+      }
+    } catch {
+      return path;
+    }
+    return path;
+  }
   return `${siteUrl}${path.startsWith("/") ? path : `/${path}`}`;
+}
+
+function blogAuthorJsonLd(post: BlogPost) {
+  const author = blogAuthorForPost(post);
+  const profile = blogAuthorProfile(author, post.language);
+  return {
+    "@type": "Person",
+    name: author,
+    image: absoluteUrl(profile.avatar)
+  };
 }
 
 export function canonicalRedirectHosts() {
@@ -113,9 +140,9 @@ export function organizationJsonLd() {
     email: "hello@altoslab.com",
     logo: absoluteUrl("/geo-cover.png"),
     image: absoluteUrl("/geo-cover.png"),
-    description: "AI implementation lab and product studio for agents, automation, AI products, CMS, SEO/GEO content systems and applied AI research.",
+    description: "AI implementation lab and product studio for agents, automation, AI products, CMS, search-ready content systems and applied AI research.",
     areaServed: ["Taiwan", "APAC"],
-    knowsAbout: ["AI Agent", "AI product studio", "workflow automation", "AI operations", "SEO", "GEO", "generative AI"],
+    knowsAbout: ["AI Agent", "AI product studio", "workflow automation", "AI operations", "search visibility", "generative AI"],
     contactPoint: {
       "@type": "ContactPoint",
       email: "hello@altoslab.com",
@@ -151,7 +178,7 @@ export function homepageWebPageJsonLd() {
     url: siteUrl,
     name: "ALTOS LAB AI Studio 人工智慧工作室",
     description:
-      "ALTOS LAB 深耕互聯網產品開發與 AI 系統整合，協助企業導入 AI Skill、AI Agent、系統串接、後台 CMS、SEO/GEO 內容系統與智能行銷。",
+      "ALTOS LAB 深耕互聯網產品開發與 AI 系統整合，協助企業導入 AI Skill、AI Agent、系統串接、後台 CMS、搜尋可見度內容系統與智能行銷。",
     inLanguage: "zh-Hant-TW",
     isPartOf: { "@id": `${siteUrl}/#website` },
     about: { "@id": `${siteUrl}/#organization` },
@@ -166,7 +193,7 @@ export function professionalServiceJsonLd() {
     "Workflow automation",
     "AI customer service systems",
     "CMS and backoffice development",
-    "SEO/GEO content operations"
+    "Search visibility content operations"
   ];
 
   return {
@@ -213,7 +240,7 @@ export function blogIndexItemListJsonLd(posts: BlogPost[], url: string, name: st
         image: absoluteUrl(post.cover || blogCoverForLanguage(post.language)),
         datePublished: post.publishedAt || post.createdAt,
         dateModified: post.updatedAt,
-        author: { "@type": "Organization", name: post.author || siteName },
+        author: blogAuthorJsonLd(post),
         publisher: { "@id": `${siteUrl}/#organization` },
         inLanguage: htmlLanguage(post.language)
       }
@@ -228,7 +255,7 @@ export function servicesJsonLd(projects: Project[]) {
     name: siteName,
     url: siteUrl,
     areaServed: "Taiwan and APAC",
-    serviceType: ["AI implementation", "AI product studio", "AI automation", "GEO content operations", "CMS development"],
+    serviceType: ["AI implementation", "AI product studio", "AI automation", "search visibility content operations", "CMS development"],
     hasOfferCatalog: {
       "@type": "OfferCatalog",
       name: "ALTOS LAB AI services",
@@ -250,20 +277,23 @@ export function pageMetadata(page: SitePage | null) {
     url: absoluteUrl("/geo-cover.png"),
     width: 1200,
     height: 630,
-    alt: "ALTOS LAB AI implementation and GEO studio"
+    alt: "ALTOS LAB AI implementation and search visibility studio"
   };
+  const publicTitle = publicTaxonomyLabel(page?.seoTitle || "ALTOS LAB｜AI 自動化、AI Agent 顧問工作室", "zh-Hant");
+  const publicDescription = publicTaxonomyLabel(
+    page?.seoDescription || "ALTOS LAB 協助企業導入 AI Agent、流程自動化、AI 客服、後台 CMS 與搜尋可見度內容系統。",
+    "zh-Hant"
+  );
 
   return {
-    title: page?.seoTitle || "ALTOS LAB｜AI 自動化、AI Agent 與 GEO 顧問工作室",
-    description:
-      page?.seoDescription ||
-      "ALTOS LAB 協助企業導入 AI Agent、流程自動化、AI 客服、後台 CMS 與 GEO 內容系統。",
+    title: publicTitle,
+    description: publicDescription,
     alternates: {
       canonical: siteUrl
     },
     openGraph: {
-      title: page?.seoTitle || "ALTOS LAB",
-      description: page?.seoDescription || "AI implementation studio in Taiwan.",
+      title: publicTitle || "ALTOS LAB",
+      description: publicDescription || "AI implementation studio in Taiwan.",
       url: siteUrl,
       siteName,
       locale: "zh_TW",
@@ -272,10 +302,8 @@ export function pageMetadata(page: SitePage | null) {
     },
     twitter: {
       card: "summary_large_image",
-      title: page?.seoTitle || "ALTOS LAB｜AI 自動化、AI Agent 與 GEO 顧問工作室",
-      description:
-        page?.seoDescription ||
-        "ALTOS LAB 協助企業導入 AI Agent、流程自動化、AI 客服、後台 CMS 與 GEO 內容系統。",
+      title: publicTitle,
+      description: publicDescription,
       images: [image]
     }
   };
@@ -296,7 +324,7 @@ export function articleJsonLd(post: BlogPost) {
     headline: post.title,
     description: post.seoDescription || post.excerpt,
     image: [absoluteUrl(post.cover || blogCoverForLanguage(post.language))],
-    author: { "@type": "Organization", name: post.author || siteName },
+    author: blogAuthorJsonLd(post),
     publisher: { "@type": "Organization", name: siteName },
     datePublished: post.publishedAt || post.createdAt,
     dateModified: post.updatedAt,
