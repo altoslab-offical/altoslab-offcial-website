@@ -86,7 +86,14 @@ node scripts/blog-local-worker.mjs \
 
 10. If validation fails, main brain sends the exact quality and image issues back to the worker.
 11. If validation and main-brain quality review pass, the manifest becomes `ready`. Release time runs the same command with `--publish`; the local worker signs a `qualityManifest` and writes only through production `release-set`.
-12. Main brain verifies live URLs, admin readback, RSS, sitemap, content hash, image QA, and quality metadata.
+12. Release time immediately runs the post-release verifier:
+
+```bash
+node scripts/verify-blog-release.mjs \
+  --manifest <runDir>/prepared-candidate.json
+```
+
+13. Main brain reviews the verifier output and reports live URLs, public/API metadata, optional admin readback, RSS, sitemap, `llms.txt`, content hash, image QA, OG/Twitter image status, and any warnings.
 
 ## Release Rule
 
@@ -101,6 +108,7 @@ Publish only when all are true:
 - all covers were created through GPT/ChatGPT or explicit human-approved editorial design QA
 - all covers include aesthetic visual checks: brand fit, editorial specificity, visual hierarchy, thumbnail readability, no cliché, and mobile crop resilience
 - production returns published IDs
+- `scripts/verify-blog-release.mjs` passes after publication
 
 If any gate fails, hold the set and report the exact reasons. Do not publish a lower-quality replacement just to satisfy the schedule.
 

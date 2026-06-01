@@ -306,6 +306,25 @@ async function release({ date, slot }) {
     return { ok: false, skipped: false, phase: "release", code: result.code, stdout: result.stdout, stderr: result.stderr, manifestPath };
   }
   const released = await readJson(manifestPath).catch(() => manifest);
+  const verification = await runCommand(process.execPath, [
+    "scripts/verify-blog-release.mjs",
+    "--manifest",
+    manifestPath
+  ], { cwd: process.cwd() });
+  await appendLog(path.join(path.dirname(manifestPath), "scheduled-release.log"), verification.stdout.trim());
+  if (verification.stderr.trim()) await appendLog(path.join(path.dirname(manifestPath), "scheduled-release.log"), verification.stderr.trim());
+  if (verification.code !== 0) {
+    return {
+      ok: false,
+      skipped: false,
+      phase: "release-verification",
+      code: verification.code,
+      stdout: verification.stdout,
+      stderr: verification.stderr,
+      manifestPath
+    };
+  }
+  const verified = JSON.parse(verification.stdout || "{}");
   return {
     ok: true,
     skipped: false,
@@ -313,6 +332,12 @@ async function release({ date, slot }) {
     status: released.status,
     publishedIds: released.publish?.publishedIds || [],
     heldDraftIds: released.publish?.heldDraftIds || [],
+    releaseVerification: {
+      ok: verified.ok === true,
+      errors: verified.errors || [],
+      warnings: verified.warnings || [],
+      summary: verified.summary || {}
+    },
     manifestPath
   };
 }
