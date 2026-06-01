@@ -41,9 +41,10 @@ The Codex app heartbeat automation is the primary scheduler for this workflow:
 
 - Automation id: `altos-blog-subagent-production-loop`
 - Target: current main-brain thread
-- Times: `08:10`, `09:00`, `15:10`, and `16:00` Asia/Taipei
+- Times: `08:10`, `09:00`, `09:04`, `15:10`, `16:00`, and `16:04` Asia/Taipei
 - Prep windows: `08:10` and `15:10`
 - Release windows: `09:00` and `16:00`
+- Post-release follow-up windows: `09:04` and `16:04`
 
 The macOS LaunchAgent is the deterministic safety runner. It wakes at the same four windows and does only two things:
 
@@ -64,6 +65,7 @@ It does not pretend to operate Gemini or ChatGPT. Browser/Gemini/GPT production 
 
 At prep time, the main brain must prepare a publishable candidate manifest before the release window.
 At release time, the main brain must not start fresh generation. If no prepared, validate-only-passed, design-approved candidate exists, skip publishing.
+At post-release follow-up time, the main brain must not start fresh generation. It verifies a released manifest or reruns the release gate once if the manifest is still ready and the five-minute release grace window is still open.
 The manifest contract lives in `docs/content/blog-prepared-candidate-manifest.md`.
 The prompt-card contract lives in `docs/content/blog-prompt-card-template.md`.
 
