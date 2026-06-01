@@ -11,10 +11,21 @@ export function RichText({ text }: { text: string }) {
   let isChart = false;
 
   function inlineMarkdown(value: string) {
-    const parts = value.split(/(\*\*[^*]+\*\*)/g).filter(Boolean);
+    const parts = value.split(/(\*\*[^*\n]+\*\*|==[^=\n]+==)/g).filter(Boolean);
     return parts.map((part, index) => {
       const strong = part.match(/^\*\*([^*]+)\*\*$/);
-      return strong ? <strong key={`${part}-${index}`}>{renderBrandText(strong[1])}</strong> : renderBrandText(part);
+      if (strong) return <strong key={`${part}-${index}`}>{renderBrandText(strong[1])}</strong>;
+
+      const highlight = part.match(/^==([^=]+)==$/);
+      if (highlight) {
+        return (
+          <mark className="rich-highlight" key={`${part}-${index}`}>
+            {renderBrandText(highlight[1])}
+          </mark>
+        );
+      }
+
+      return renderBrandText(part);
     });
   }
 

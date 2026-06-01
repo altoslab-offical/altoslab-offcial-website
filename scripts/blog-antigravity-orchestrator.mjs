@@ -134,7 +134,7 @@ Required JSON shape:
       "topic": "",
       "audience": "",
       "geoSummary": "",
-      "body": "Markdown body with H2 sections.",
+      "body": "Markdown body with H2 sections. Use ==important sentence== for one short highlighted sentence when helpful.",
       "keyTakeaways": ["", "", ""],
       "faqs": [{ "question": "", "answer": "" }],
       "sourceLinks": [{ "title": "", "url": "", "publisher": "", "publishedAt": "", "summary": "" }],

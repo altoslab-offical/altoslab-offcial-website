@@ -353,7 +353,7 @@ function trustedHostFragments() {
 function plainText(markdown: string) {
   return markdown
     .replace(/```[\s\S]*?```/g, " ")
-    .replace(/[#>*_`[\]()!-]+/g, " ")
+    .replace(/[#>=*_`[\]()!-]+/g, " ")
     .replace(/\s+/g, " ")
     .trim();
 }

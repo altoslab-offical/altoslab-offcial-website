@@ -895,6 +895,7 @@ Quality rules:
 - Foreign-source sections must be plain-language source translation, not jargon display. They must answer: what did the source say, what does it mean for the reader's workflow, what should not be overclaimed, and what action or check follows.
 - Do not leave technical terms unexplained. If you use terms like trace, eval, rollback, orchestration, retrieval, routing, agent workflow, plugin or observability, define them in the article's language the first time they appear. For zh-Hant, prefer "操作紀錄", "固定測試題/評測", "回滾/退回舊流程", "工作流編排", "檢索", "路由", "可觀測性".
 - Use bold sparingly to help scanning: bold the one-sentence judgment, key operator questions, or concrete checklist phrase. Do not bold entire paragraphs.
+- Use ==important sentence== for one short in-article highlight only when a sentence should receive ALTOS LAB's fixed #A4FF00 emphasis underline. Do not use more than 1-2 highlighted sentences per article.
 - If a smart non-engineer would ask "所以這跟我有什麼關係？", rewrite the paragraph with a workflow example and a next decision.
 - At least one body section must connect a concrete outside news event to the reader's business decision. Do not leave foreign sources only in sourceLinks.
 - The article must be an original ALTOS LAB synthesis: summarize facts in your own words, cite the source URLs, and add implementation judgment.
@@ -983,6 +984,7 @@ Reject generic trend framing. The repaired title must contain a concrete questio
 Rewrite the excerpt as a strong visible subtitle/standfirst: concrete source/event or operator tension first, then the reader decision or tradeoff. It must not be a bland summary, must not repeat the title, and must not start with "本文", "這篇文章", "This article", "learn how", "explore", "この記事", or "이 글".
 Make every technical section easy for a busy non-specialist to understand. Translate jargon into plain language on first use. If the draft uses trace, eval, rollback, orchestration, retrieval, routing, plugin or observability, explain the human meaning immediately, such as operation logs, test questions, returning to the old workflow, source lookup, or seeing where the system failed.
 Use bold sparingly to mark the core judgment, the three operator questions, or a checklist phrase that helps scanning. Never use bold as decoration.
+Use ==important sentence== for at most one short in-article highlight when a repaired sentence deserves ALTOS LAB's fixed #A4FF00 emphasis underline.
 If the article feels templated, pick a stronger narrative mode: scene hook, market route comparison, company-signal analysis, lab notebook, or contrarian operator column. Keep the sources, but make the human reading experience less predictable.
 
 Language: ${post.language}

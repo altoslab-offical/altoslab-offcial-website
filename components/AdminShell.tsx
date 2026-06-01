@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { sendAnalyticsEvent } from "@/components/AnalyticsEvents";
 import { BrandText } from "@/components/BrandText";
@@ -386,6 +386,7 @@ function SourceLinkListField({
 }
 
 export function AdminShell({ initialTab = "dashboard" }: AdminShellProps) {
+  const bodyTextareaRef = useRef<HTMLTextAreaElement | null>(null);
   const [tab, setTab] = useState<Tab>(initialTab);
   const [data, setData] = useState<CmsData>(emptyData);
   const [loading, setLoading] = useState(true);
@@ -606,6 +607,33 @@ export function AdminShell({ initialTab = "dashboard" }: AdminShellProps) {
       ...current,
       blogPosts: current.blogPosts.map((post) => (post.id === id ? { ...post, ...patch } : post))
     }));
+  }
+
+  function applyBodyHighlight(post: BlogPost) {
+    const textarea = bodyTextareaRef.current;
+    const body = post.body || "";
+    const fallback = "重點句";
+
+    if (!textarea) {
+      updatePost(post.id, { body: `${body}${body.endsWith("\n") || !body ? "" : "\n\n"}==${fallback}==` });
+      return;
+    }
+
+    const start = textarea.selectionStart ?? body.length;
+    const end = textarea.selectionEnd ?? start;
+    const selectedText = body.slice(start, end);
+    const hasSelection = selectedText.trim().length > 0;
+    const nextBody = hasSelection
+      ? `${body.slice(0, start)}==${selectedText}==${body.slice(end)}`
+      : `${body.slice(0, start)}==${fallback}==${body.slice(start)}`;
+    const nextStart = start + 2;
+    const nextEnd = hasSelection ? end + 2 : start + 2 + fallback.length;
+
+    updatePost(post.id, { body: nextBody });
+    window.requestAnimationFrame(() => {
+      textarea.focus();
+      textarea.setSelectionRange(nextStart, nextEnd);
+    });
   }
 
   async function savePage(page: SitePage) {
@@ -1482,14 +1510,22 @@ export function AdminShell({ initialTab = "dashboard" }: AdminShellProps) {
                             onChange={(event) => updatePost(selectedPost.id, { excerpt: event.target.value })}
                           />
                         </label>
-                        <label>
-                          <span>正文（支援 ## 標題）</span>
+                        <div className="blog-body-editor">
+                          <div className="blog-body-editor-head">
+                            <span>正文（支援 ## 標題、==重點畫線==）</span>
+                            <button className="button" onClick={() => applyBodyHighlight(selectedPost)} type="button">
+                              <PenLine size={15} />
+                              重點畫線
+                            </button>
+                          </div>
                           <textarea
+                            aria-label="正文"
+                            ref={bodyTextareaRef}
                             rows={18}
                             value={selectedPost.body}
                             onChange={(event) => updatePost(selectedPost.id, { body: event.target.value })}
                           />
-                        </label>
+                        </div>
                         <StringListField
                           label="重點摘要"
                           value={selectedPost.keyTakeaways}

@@ -2628,6 +2628,29 @@ img {
   max-width: 900px;
 }
 
+.admin-shell .blog-body-editor {
+  display: grid;
+  gap: 8px;
+}
+
+.admin-shell .blog-body-editor-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  color: var(--admin-fg-muted);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+.admin-shell .blog-body-editor-head .button {
+  min-height: 34px;
+  padding: 0 12px;
+  font-size: 0.78rem;
+}
+
 .admin-shell .blog-editor-form textarea:not(.json-area) {
   font-size: 1rem;
   line-height: 1.72;
@@ -3577,6 +3600,16 @@ img {
 .blog-site-shell .source-translation-note strong,
 .blog-site-shell .ai-disclosure strong {
   color: var(--al-blog-ink);
+}
+
+.blog-site-shell .rich-highlight {
+  --article-highlight-line: #A4FF00;
+  background: linear-gradient(to top, var(--article-highlight-line) 0 0.38em, transparent 0.38em);
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+  color: var(--al-blog-ink);
+  font-weight: var(--fw-bold);
+  padding: 0 0.06em;
 }
 
 .blog-site-shell .project-detail-card li,
