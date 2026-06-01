@@ -2,6 +2,8 @@ altoslab-site/
 node_modules/
 .DS_Store
 .next/
+.open-next/
+.wrangler/
 out/
 dist/
 .env*.local
@@ -12,3 +14,4 @@ data/cms.json
 data/generated-blog-media/
 data/blog-worker-runs/
 public/blog-generated/
+public/altoslab-homepage.html

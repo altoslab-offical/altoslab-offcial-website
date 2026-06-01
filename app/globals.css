@@ -3645,11 +3645,11 @@ img {
 }
 
 .blog-site-shell .rich-highlight {
-  --article-highlight-line: #A4FF00;
+  --article-highlight-line: rgb(164 255 0 / 0.18);
   background: linear-gradient(to top, var(--article-highlight-line) 0 0.38em, transparent 0.38em);
   box-decoration-break: clone;
   -webkit-box-decoration-break: clone;
-  color: var(--al-blog-ink);
+  color: #000000;
   font-weight: var(--fw-bold);
   padding: 0 0.06em;
 }

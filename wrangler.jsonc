@@ -1,0 +1,55 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "altoslab-official-website",
+  "main": ".open-next/worker.js",
+  "compatibility_date": "2026-05-31",
+  "compatibility_flags": [
+    "nodejs_compat",
+    "global_fetch_strictly_public"
+  ],
+  "workers_dev": true,
+  "routes": [
+    {
+      "pattern": "altoslab-ai.cc",
+      "custom_domain": true,
+      "zone_name": "altoslab-ai.cc"
+    },
+    {
+      "pattern": "www.altoslab-ai.cc",
+      "custom_domain": true,
+      "zone_name": "altoslab-ai.cc"
+    }
+  ],
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
+  "services": [
+    {
+      "binding": "WORKER_SELF_REFERENCE",
+      "service": "altoslab-official-website"
+    }
+  ],
+  "kv_namespaces": [
+    {
+      "binding": "ALTOS_BLOG_KV",
+      "id": "f22f8737839449dd9a2557a8e5d1bc78"
+    }
+  ],
+  "vars": {
+    "NEXT_PUBLIC_SITE_URL": "https://altoslab-ai.cc",
+    "NEXT_PUBLIC_GTM_ID": "GTM-WJ96VR7V",
+    "NEXT_PUBLIC_GA_MEASUREMENT_ID": "G-5VSLFNVD28",
+    "CANONICAL_REDIRECT_HOSTS": "www.altoslab-ai.cc,altoslab.com,www.altoslab.com,altoslab-offcial-website.vercel.app,altoslab-offcial-website-altoslaboffical-3015s-projects.vercel.app",
+    "CMS_STORAGE_KEY": "altoslab:cms:v1",
+    "CLOUDFLARE_KV_ENABLED": "1",
+    "CLOUDFLARE_KV_BINDING": "ALTOS_BLOG_KV",
+    "CLOUDFLARE_R2_ENABLED": "0",
+    "CLOUDFLARE_R2_BINDING": "ALTOS_BLOG_R2",
+    "AUTO_PUBLISH_BLOG": "true",
+    "BLOG_DISABLE_DEEPSEEK_CRON": "true",
+    "BLOG_IMAGE_ALLOW_NON_BLOB": "0",
+    "BLOG_IMAGE_VERIFY_REMOTE": "true",
+    "BLOG_MEDIA_ALLOW_LOCAL_STORAGE": "0"
+  }
+}
