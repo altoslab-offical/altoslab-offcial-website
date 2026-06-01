@@ -818,8 +818,11 @@ function reviewPost(post: BlogPost, multilingual: ReviewResult): PostReview {
   if (post.generatedBy?.includes("local-bilingual-geo-template") || post.generatedBy?.includes("local-bilingual-lab-template")) {
     issues.push("local fallback template cannot auto-publish");
   }
-  if (post.generatedBy && !post.generatedBy.includes("deepseek") && !post.generatedBy.includes("local-antigravity")) {
-    warnings.push("provider is not DeepSeek; auto-publish should be conservative");
+  if (post.generatedBy && !post.generatedBy.toLowerCase().includes("gemini")) {
+    issues.push("official blog articles must be drafted or revised through Gemini before auto-publish");
+  }
+  if (post.coverSource === "generated" && !/(chatgpt|gpt|openai)/i.test(post.coverGeneration?.provider || "")) {
+    issues.push("official generated covers must come from ChatGPT/GPT before auto-publish");
   }
 
   const score = Object.values(breakdown).reduce((sum, value) => sum + value, 0);

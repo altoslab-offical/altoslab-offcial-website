@@ -72,5 +72,13 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|.*\\..*).*)"]
+  matcher: [
+    "/((?!_next/static|_next/image|favicon.ico|.*\\..*).*)",
+    "/feed.xml",
+    "/llms-full.txt",
+    "/llms.txt",
+    "/manifest.webmanifest",
+    "/robots.txt",
+    "/sitemap.xml"
+  ]
 };

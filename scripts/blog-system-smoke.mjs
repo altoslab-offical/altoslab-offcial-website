@@ -48,7 +48,6 @@ assert((sourceRegistry.match(/tier: "official-rss"/g) || []).length >= 8, "sourc
 assert((sourceRegistry.match(/tier: "licensed-image"/g) || []).length >= 3, "source registry has licensed image providers");
 assert(!/pinterest\.(com|[a-z]+)/i.test(sourceRegistry), "source registry does not use Pinterest as an image source");
 
-assert(generation.includes("deepSeekModelForTask(\"content-draft\")"), "content generation uses DeepSeek model routing");
 assert(generation.includes("BLOG_PROMPT_VERSION"), "generation records prompt version");
 assert(generation.includes("sourceRegistryEntryForUrl"), "generation ranks sources with registry metadata");
 assert(!generation.includes("deepseek-chat"), "generation does not use deprecated deepseek-chat alias");
@@ -69,7 +68,8 @@ assert(quality.includes("weakSubtitlePatterns"), "quality gate rejects weak gene
 assert(quality.includes("subtitleEvidencePattern"), "quality gate requires subtitle evidence or operator tension");
 assert(quality.includes("rawZhEnglishJargonPattern"), "quality gate rejects raw English AI-ops jargon in zh-Hant articles");
 assert(quality.includes("technicalJargonPattern"), "quality gate requires jargon-heavy paragraphs to explain terms plainly");
-assert(quality.includes("local-antigravity"), "quality gate treats local Antigravity as an approved external generation provider");
+assert(quality.includes("through Gemini"), "quality gate requires Gemini-written/revised production articles");
+assert(quality.includes("ChatGPT/GPT"), "quality gate requires ChatGPT/GPT-generated production covers");
 assert(covers.includes("BLOG_IMAGE_STORE_BLOB"), "image pipeline supports optional Vercel Blob persistence");
 assert(covers.includes("searchPexels") && covers.includes("searchPixabay"), "image pipeline supports expanded free image APIs");
 assert(covers.includes("pinterest") && covers.includes("approvedImageUrl"), "image pipeline rejects Pinterest URLs while allowing style inspiration");
@@ -81,6 +81,8 @@ assert(ingestRoute.includes("verifyBlogIngestRequest"), "ingest route verifies H
 assert(ingestRoute.includes("validateOnly"), "ingest route supports validateOnly dry runs");
 assert(ingestRoute.includes("reviewBlogImagesForRelease"), "ingest route runs production image QA before release");
 assert(ingestRoute.includes("publish-if-valid"), "ingest route supports publish-if-valid fail-closed mode");
+assert(ingestRoute.includes("generation.provider must be gemini-chatgpt"), "ingest route requires the Gemini + GPT production provider");
+assert(ingestRoute.includes("duplicateTopicIssues"), "ingest route blocks repeated topics/source angles");
 assert(mediaRoute.includes("verifyBlogIngestRequest"), "media upload route is protected by the same signed request contract");
 assert(mediaRoute.includes("@vercel/blob"), "media upload route stores production images in Vercel Blob");
 assert(mediaRoute.includes("BLOG_MEDIA_ALLOW_LOCAL_STORAGE"), "media upload route supports local-only image storage for end-to-end testing");
@@ -88,14 +90,15 @@ assert(generatedMediaRoute.includes("generated-blog-media"), "local generated me
 assert(healthRoute.includes("externalBlogIngestConfigured"), "health check reports whether signed external blog ingest is configured");
 assert(healthRoute.includes("legacyDeepSeekCronDisabled"), "health check reports whether the legacy DeepSeek cron path is disabled");
 assert(proxy.includes("isPublicSignedIngestRoute"), "proxy lets signed ingest reach the route without admin cookies");
+assert(proxy.includes("/sitemap.xml") && proxy.includes("/robots.txt"), "proxy canonical redirect also covers public metadata routes");
 assert(localWorker.includes("localPreflight"), "local worker performs local preflight before production ingest");
 assert(localWorker.includes("X-Altos-Signature"), "local worker signs ingest requests");
 assert(localWorker.includes("requestMediaUpload"), "local worker uploads generated cover files before ingest");
-assert(localWorker.includes("generate-missing-covers"), "local worker can generate safe bitmap covers when Antigravity only writes the article set");
-assert(localWorker.includes("encodePng"), "local generated covers are real PNG bitmaps");
-assert(orchestrator.includes("antigravity") && orchestrator.includes("chat"), "orchestrator calls local Antigravity chat");
-assert(orchestrator.includes("waitForArticleSet"), "orchestrator waits for Antigravity to write a valid article set");
-assert(orchestrator.includes("--generate-missing-covers"), "orchestrator routes missing covers through the local image generator");
+assert(localWorker.includes("Local fallback cover generation is disabled"), "local worker fails closed on fallback cover generation");
+assert(localWorker.includes("coverGeneration.provider must be ChatGPT/GPT"), "local worker requires GPT cover provenance");
+assert(orchestrator.includes("Gemini must write/revise") && orchestrator.includes("ChatGPT/GPT must generate"), "orchestrator documents Gemini copy and GPT cover requirements");
+assert(orchestrator.includes("Close or release Gemini/GPT tabs"), "orchestrator includes Chrome tab cleanup requirements");
+assert(!orchestrator.includes("--generate-missing-covers"), "orchestrator does not route production covers through local fallback art");
 assert(launchAgentInstaller.includes("replace-with|test-secret"), "LaunchAgent installer refuses placeholder or test ingest secrets");
 assert(launchAgentInstaller.includes("launchctl bootstrap"), "LaunchAgent installer can bootstrap the scheduled local worker");
 assert(blogArticle.includes("extractSourceTranslationNote"), "article renderer extracts source translation note from main body");
@@ -157,10 +160,10 @@ assert(cron.includes("BLOG_DISABLE_DEEPSEEK_CRON"), "legacy DeepSeek cron is dis
 assert(cron.includes("hour: \"16:00\""), "afternoon slot is aligned to 16:00 Asia/Taipei");
 assert(!vercel.crons?.length, "Vercel no longer runs DeepSeek blog generation crons");
 assert(envExample.includes("BLOG_INGEST_HMAC_SECRET"), "env example documents the signed ingest secret");
-assert(envExample.includes("ALTOS_ANTIGRAVITY_BIN"), "env example documents local Antigravity CLI path");
 assert(envExample.includes("ALTOS_BLOG_WORKER_WAIT_MINUTES"), "env example documents orchestrator timeout");
 assert(envExample.includes("BLOG_IMAGE_ALLOW_NON_BLOB"), "env example documents generated image Blob enforcement");
 assert(envExample.includes("BLOG_MEDIA_ALLOW_LOCAL_STORAGE"), "env example documents local-only media upload mode");
+assert(envExample.includes("BLOG_ALLOW_LOCAL_FALLBACK_COVERS=0"), "env example keeps local fallback covers disabled");
 
 for (const language of ["zh-Hant", "en", "ja", "ko"]) {
   const languagePosts = seedPosts.filter((post) => post.language === language);

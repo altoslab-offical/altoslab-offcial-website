@@ -2,22 +2,23 @@
 
 Production blog publishing is now fail-closed:
 
-1. Local worker creates a multilingual article set with Antigravity as the primary writer.
+1. Gemini creates or revises the multilingual article set in the ALTOS Blog QA Chrome group.
 2. Local worker runs preflight checks before contacting production.
-3. Local worker uploads generated covers through signed `POST /api/admin/blog/media`.
+3. ChatGPT/GPT creates generated covers; the local worker uploads them through signed `POST /api/admin/blog/media`.
 4. Production accepts only signed `POST /api/admin/blog/ingest-set` requests.
-5. Production runs content quality, source, multilingual parity and generated-image QA again.
+5. Production runs content quality, duplicate-topic, source, multilingual parity and generated-image QA again.
 6. Posts publish only when every gate passes; otherwise the whole article set is held as draft.
 
 ## Required Payload
 
 - `slot`: `morning` or `afternoon`.
 - `publishMode`: `publish-if-valid`.
-- `generation.provider`: `local-antigravity`.
+- `generation.provider`: `gemini-chatgpt`.
 - `posts`: exactly one `zh-Hant`, `en`, `ja` and `ko` post.
 - All posts share the same `translationGroupId` and `sourceLinks`.
+- Each post records `generatedBy` containing `gemini`.
 - Every post uses `coverSource: "generated"`.
-- Every generated cover includes `coverGeneration.provider`, `prompt`, `generatedAt`, `visualChecks`, `coverAlt` and `coverCredit`.
+- Every generated cover includes a ChatGPT/GPT/OpenAI `coverGeneration.provider`, `prompt`, `generatedAt`, `visualChecks`, `coverAlt` and `coverCredit`.
 
 ## Auth
 
@@ -52,10 +53,11 @@ Install `scripts/com.altoslab.blog-local-worker.plist.example` as a LaunchAgent 
 Use `scripts/install-blog-launch-agent.sh` after the env file is filled. It refuses to install when
 the secret is missing, too short, or still a placeholder/test value.
 
-The orchestrator writes a run folder under `data/blog-worker-runs`, opens local Antigravity with a
-prompt that instructs it to write `article-set.json`, waits for valid JSON, generates missing safe
-bitmap covers, uploads them through the signed media route, runs `validateOnly`, and publishes only
-if production returns `wouldPublish: true`.
+The orchestrator writes a run folder under `data/blog-worker-runs` and produces a prompt for the
+browser production run. The subagent uses Gemini for article copy and ChatGPT/GPT for covers inside
+the ALTOS Blog QA Chrome group, then closes or releases those tabs after the run. The worker waits for
+valid JSON, uploads the GPT-generated cover files through the signed media route, runs `validateOnly`,
+and publishes only if production returns `wouldPublish: true`.
 
-If Antigravity does not write valid JSON before the timeout, if a cover is broken, or if any quality
-gate fails, the run exits without publishing.
+If Gemini/GPT output is missing, if a cover is broken, if the topic duplicates an existing article, or
+if any quality gate fails, the run exits without publishing.

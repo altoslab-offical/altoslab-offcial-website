@@ -5,24 +5,34 @@
 - The cron job reads a source registry of official RSS/API/docs, trusted media and licensed image sources as research signals.
 - The default publishing mix is `breaking` 40%, `column` 35%, `feature` 25% so the blog includes fresh market news instead of only evergreen self-written essays.
 - It does not scrape or republish full articles.
-- DeepSeek must write original ALTOS LAB synthesis in its own words.
+- Gemini must write or revise original ALTOS LAB synthesis in its own words.
 - Every generated article keeps visible `sourceLinks` for attribution and fact checking.
 - Source images, charts, screenshots and article art are not copied.
 - Pinterest can be used only as visual direction. It must not be used as an image source.
 
-## DeepSeek Orchestration v2
+## Gemini + GPT Production Contract
 
-- `DEEPSEEK_ROUTER_MODEL` defaults to `deepseek-v4-flash` for source planning and low-cost routing work.
-- `DEEPSEEK_CONTENT_MODEL` defaults to `deepseek-v4-pro` for article drafting.
-- `DEEPSEEK_REVIEW_MODEL` defaults to the content model for LLM-as-judge review.
-- Every DeepSeek call records `promptVersion`, `model`, `latencyMs`, finish reason and token/cache usage when the provider returns it.
-- Prompt prefixes are stable so DeepSeek context cache can help repeated cron/editorial jobs.
+- Gemini is the production article workspace. Codex may orchestrate, research,
+  QA and publish, but production copy must pass through Gemini before ingest.
+- ChatGPT/GPT is the production cover workspace. Local generated art and stock
+  fallbacks are not production covers.
+- The worker must record `generation.provider=gemini-chatgpt`,
+  `generatedBy` containing `gemini`, and `coverGeneration.provider` containing
+  `ChatGPT`, `GPT` or `OpenAI`.
+- The ALTOS Blog QA Chrome group is used only while the run needs Gemini/GPT.
+  Tabs opened or claimed for the run must be closed or released afterward to
+  avoid Chrome memory pressure.
+- DeepSeek is legacy/admin fallback only and is not part of the formal daily
+  publishing pipeline.
 
 ## Cover Image Strategy
 
-- Preferred production path: source topic-matched open-licensed images from Openverse, store a copy in Vercel Blob, and keep visible attribution metadata.
-- Optional expanded sources: Pexels API, Pixabay API, Openverse, Wikimedia/Openverse results, NASA and museum/public-domain registries through the source registry.
-- Pinterest can be used as style inspiration, but the automation must not copy Pinterest images because Pinterest does not grant commercial rights to the pinned image.
+- Preferred production path: generate a topic-specific, wordless cover through
+  ChatGPT/GPT, store/upload it to Vercel Blob, and keep prompt/provider metadata.
+- Optional curated/source images are for manual editorial exceptions only, not
+  the daily production default.
+- Pinterest, Midjourney galleries and design references can be used only as
+  style inspiration. The automation must not copy third-party images.
 - Required env:
   - optional `BLOG_IMAGE_PROVIDER=openverse`
   - optional `AUTO_GENERATE_BLOG_COVERS=true`
@@ -31,19 +41,24 @@
   - optional `PIXABAY_API_KEY=<pixabay-key>`
   - optional `BLOG_IMAGE_STORE_BLOB=true`
   - optional `BLOB_READ_WRITE_TOKEN=<vercel-blob-token>`
-- If legal image sourcing fails, the system uses internal fallback assets, but AI-generated posts will not pass auto-publish quality review.
+- If GPT image generation or image QA fails, the article is held. The system
+  must not substitute local fallback art just to publish.
 
 ## Publishing Rule
 
 Auto-publishing requires:
 
-- DeepSeek article generation.
+- Gemini article drafting/revision.
+- ChatGPT/GPT-generated cover image.
+- Duplicate-topic/source-angle check against published and draft posts.
 - Trusted visible source links.
-- Topic-matched legally sourced cover image with attribution.
+- Topic-matched generated cover image with prompt/provider metadata and credit.
 - Quality score at or above the content-type threshold.
 - LLM-as-judge review approval when `BLOG_LLM_REVIEW` is enabled.
 - Anti-slop writing score at or above the content-type threshold.
 - No unsupported claims or copied source content.
+- Post-release monitoring through GA/GTM, Search Console, live URL checks, RSS
+  and sitemap evidence. Publishing is not counted as success by itself.
 
 ## Anti-Slop Writing Gate
 

@@ -51,6 +51,7 @@ CRON_SECRET=<long-random-cron-secret>
 BLOG_DISABLE_DEEPSEEK_CRON=true
 BLOG_INGEST_HMAC_SECRET=<long-random-external-ingest-secret>
 AUTO_PUBLISH_BLOG=true
+BLOG_ALLOW_LOCAL_FALLBACK_COVERS=0
 ```
 
 Notes:
@@ -67,16 +68,19 @@ Notes:
 - The current Vercel Blob store is public-access, so `BLOB_ACCESS=public` and `CMS_ENCRYPTION_KEY` are required in production. CMS JSON is encrypted server-side before it is written to Blob.
 - Upstash Redis is also supported and takes priority when `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` are configured. The token must be the standard write token, not the read-only token.
 - Without Vercel Blob or Upstash env vars, production can still render seed content, but admin edits and contact leads will not persist.
-- `AUTO_PUBLISH_BLOG=true` allows external Antigravity/Codex article sets to publish automatically only after deterministic article quality, multilingual parity, source and image QA gates approve the full four-language set. Fallback template output, malformed model output, thin content, missing sources, missing images, invalid HTTPS links or failed multilingual pairing stay draft/held.
+- `AUTO_PUBLISH_BLOG=true` allows external Gemini + GPT/Codex article sets to publish automatically only after deterministic article quality, multilingual parity, duplicate-topic, source and image QA gates approve the full four-language set. Fallback template output, malformed model output, thin content, repeated topics, missing sources, missing images, invalid HTTPS links or failed multilingual pairing stay draft/held.
 - `BLOG_INGEST_HMAC_SECRET` protects `POST /api/admin/blog/ingest-set` and `POST /api/admin/blog/media`. The local worker must use the same secret in `~/.altoslab-blog-worker.env`.
 - `BLOG_DISABLE_DEEPSEEK_CRON=true` keeps the legacy DeepSeek cron path disabled. DeepSeek can remain configured for manual/admin fallback work, but it is not part of the formal daily publishing pipeline.
 - `CRON_SECRET` protects the legacy `/api/cron/blog-drafts` routes if they are manually invoked. Vercel production should not schedule those routes for the formal blog workflow.
-- Daily generation/publishing is now local-first: Tommy's Mac LaunchAgent runs `scripts/blog-antigravity-orchestrator.mjs --publish` at 09:00 and 16:00 Asia/Taipei. Antigravity writes the article set locally; the worker uploads generated covers, calls production `validateOnly`, and publishes only if production returns `wouldPublish: true`.
+- Daily generation/publishing is now browser-first and fail-closed: Gemini writes/revises the article set in the ALTOS Blog QA Chrome group; ChatGPT/GPT generates the covers; Codex/worker uploads covers, calls production `validateOnly`, checks duplicate topics, and publishes only if production returns `wouldPublish: true`.
+- Browser tabs used for Gemini/GPT production are opened or claimed only while needed, then closed or released after the run to avoid Chrome memory pressure.
+- `BLOG_ALLOW_LOCAL_FALLBACK_COVERS=0` keeps programmatic/local cover generation out of production. Set it to `1` only for local fixture tests, never for formal blog publishing.
 - Install the local LaunchAgent with `scripts/install-blog-launch-agent.sh` after `~/.altoslab-blog-worker.env` contains the real production `BLOG_INGEST_HMAC_SECRET`. The installer refuses placeholder or test secrets.
 - The source registry controls the default mix: 40% `breaking`, 35% `column`, 25% `feature`. Breaking posts prioritize latest official/trusted news; columns turn fresh signals into operator decisions; features turn recent sources into durable frameworks.
 - `BLOG_TREND_SOURCES` is optional. If unset, the app uses `lib/blog-source-registry.ts`, which includes official AI/product/search sources and trusted media. If set, it should contain only live RSS/Atom feeds.
 - `BLOG_IMAGE_STORE_BLOB=true` copies selected legal cover images into Vercel Blob when `BLOB_READ_WRITE_TOKEN` is available. If Blob copy fails, the original licensed image URL stays in place and the issue is recorded in cover generation metadata.
 - Search verification env vars are optional until the matching Search Console/Webmaster account provides the token. Once set and redeployed, the homepage and App Router pages emit the required verification meta tags.
+- Performance monitoring is part of the publishing loop. After release, check GA/GTM events, Search Console indexing/query data, RSS/sitemap visibility and live image URLs; do not treat a successful publish response as proof that the article is performing.
 
 ## Vercel Project Settings
 
@@ -132,6 +136,11 @@ Expected results:
 Before promoting a deployment, verify:
 
 - Homepage source does not contain `altoslab-site2`.
+- Canonical host checks are clean:
+  - `https://altoslab-ai.cc/*` public pages return `200`.
+  - `https://www.altoslab-ai.cc/*` public pages and metadata endpoints redirect to the apex host with `308`.
+  - `/robots.txt`, `/sitemap.xml`, `/feed.xml`, `/llms.txt`, `/llms-full.txt` and `/manifest.webmanifest` do not serve duplicate `www` metadata.
+  - In Search Console, "Page with redirect" is acceptable only for alternate host URLs such as `www`; canonical apex URLs should remain indexable.
 - Homepage has canonical, OpenGraph/Twitter image, Organization and WebSite JSON-LD, RSS and LLM alternate links.
 - Homepage and App Router pages expose Search Console/Webmaster verification meta tags when the corresponding verification env var is set.
 - `/robots.txt` references `/sitemap.xml`, allows public pages and answer-engine crawlers, and disallows private admin/API surfaces.
@@ -147,14 +156,14 @@ Before promoting a deployment, verify:
 
 1. Log in at `/admin`.
 2. Use the Blog CMS workbench to generate drafts, filter by language/status/review state, edit SEO/GEO fields, manage source links and run the publishing checklist.
-3. Local Antigravity/Codex-generated posts publish automatically only when the production quality gate approves the full zh-Hant/en/ja/ko set and all generated covers pass image QA. If a post is held, review the listed quality issues before manual publishing.
+3. Gemini + GPT/Codex-generated posts publish automatically only when the production quality gate approves the full zh-Hant/en/ja/ko set and all generated covers pass image QA. If a post is held, review the listed quality issues before manual publishing.
 4. Before manually publishing or overriding a held post, confirm:
    - SEO title and description are specific.
    - GEO summary directly answers the search intent.
    - Article body contains visible answer paragraphs, not only keywords.
    - Source links support trend claims.
    - FAQ answers are present in the article and mirrored in structured data.
-   - Cover image is generated, stored in Vercel Blob, visually safe, topic-matched, and has accurate alt text plus `coverCredit: "AI-generated by ALTOS LAB"`.
+   - Cover image is generated through ChatGPT/GPT, stored in Vercel Blob, visually safe, topic-matched, and has accurate alt text plus editorial credit.
    - `qualityChecks.hasHumanReview=true` or `qualityChecks.hasQualityReviewerApproval=true`, and `reviewStatus=approved`.
 5. Do not manually publish fallback template output without rewriting it into a real article.
 

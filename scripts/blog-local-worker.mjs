@@ -30,7 +30,7 @@ Required publish flow:
 Useful dry runs:
   node scripts/blog-local-worker.mjs --article-set ./article-set.json --slot afternoon --validate-only
   node scripts/blog-local-worker.mjs --make-prompt --slot morning --topic "AI agents in customer operations"
-  node scripts/blog-local-worker.mjs --article-set ./article-set.json --slot morning --generate-missing-covers --publish
+  node scripts/blog-local-worker.mjs --article-set ./article-set.json --slot morning --publish
 
 Environment:
   BLOG_INGEST_HMAC_SECRET   Shared HMAC secret configured in Vercel
@@ -262,6 +262,9 @@ async function generateCoverPng(post, index, outputDir, ingestRunId) {
 
 async function generateMissingCovers(payload, slot) {
   if (!hasFlag("generate-missing-covers")) return payload;
+  if (process.env.BLOG_ALLOW_LOCAL_FALLBACK_COVERS !== "1") {
+    throw new Error("Local fallback cover generation is disabled for production. Use ChatGPT/GPT-generated covers instead.");
+  }
   const posts = Array.isArray(payload.posts) ? payload.posts : [];
   const outputDir =
     arg("cover-dir") ||
@@ -345,6 +348,12 @@ function localPreflight(payload) {
     if (!generation.provider || !generation.prompt || !generation.generatedAt) {
       issues.push(`${post.language || "unknown"} coverGeneration must include provider, prompt and generatedAt`);
     }
+    if (!String(post.generatedBy || payload.generation?.provider || "").toLowerCase().includes("gemini")) {
+      issues.push(`${post.language || "unknown"} article must be drafted or revised through Gemini`);
+    }
+    if (!/(chatgpt|gpt|openai)/i.test(String(generation.provider || ""))) {
+      issues.push(`${post.language || "unknown"} coverGeneration.provider must be ChatGPT/GPT`);
+    }
     const checks = generation.visualChecks || {};
     for (const field of ["topicFit", "noTextArtifacts", "noLogos", "noPeople", "noTrademarkRisk", "noGenericStockLook"]) {
       if (checks[field] !== true) issues.push(`${post.language || "unknown"} visualChecks.${field} must be true`);
@@ -363,8 +372,8 @@ async function readArticleSet(filePath, slot) {
     scheduledFor: payload.scheduledFor || scheduledFor(date, slot),
     publishMode: payload.publishMode || "publish-if-valid",
     generation: {
-      provider: "local-antigravity",
-      promptVersion: payload.generation?.promptVersion || "altos-local-antigravity-v1",
+      provider: payload.generation?.provider || "gemini-chatgpt",
+      promptVersion: payload.generation?.promptVersion || "altos-gemini-gpt-browser-v1",
       model: payload.generation?.model,
       sourceCount: payload.generation?.sourceCount
     },
@@ -431,7 +440,7 @@ async function uploadLocalCovers(payload) {
 }
 
 function articlePrompt(slot, topic) {
-  return `# ALTOS LAB Antigravity article set prompt
+  return `# ALTOS LAB Gemini + GPT article set prompt
 
 Slot: ${slot} (${SLOT_HOURS[slot]} Asia/Taipei)
 Topic: ${topic || "pick the strongest AI market signal from today's sources"}
@@ -439,6 +448,10 @@ Topic: ${topic || "pick the strongest AI market signal from today's sources"}
 Create one article set in zh-Hant, en, ja, ko.
 
 Hard requirements:
+- Draft and revise the article text through Gemini in the ALTOS Blog QA Chrome group.
+- Generate every cover image through ChatGPT/GPT in the ALTOS Blog QA Chrome group.
+- Close or release the Gemini/GPT tabs after the run so Chrome memory is not held.
+- Do not repeat an existing published/draft topic, headline angle or source package.
 - Use zh-Hant as the editorial source of truth, then localize the other languages.
 - Keep one translationGroupId and identical sourceLinks across all four languages.
 - Write like a sharp AI product/editorial studio, not an SEO farm.
@@ -452,7 +465,7 @@ Return only JSON shaped for POST /api/admin/blog/ingest-set:
   "slot": "${slot}",
   "translationGroupId": "same-group-id",
   "publishMode": "publish-if-valid",
-  "generation": { "provider": "local-antigravity", "promptVersion": "altos-local-antigravity-v1" },
+  "generation": { "provider": "gemini-chatgpt", "promptVersion": "altos-gemini-gpt-browser-v1" },
   "posts": []
 }
 `;
@@ -464,7 +477,7 @@ async function makePrompt() {
   const prompt = articlePrompt(slot, arg("topic"));
   const outputDir = path.join(os.tmpdir(), "altoslab-blog-worker");
   await fs.mkdir(outputDir, { recursive: true });
-  const outputPath = path.join(outputDir, `antigravity-${taiwanDate()}-${slot}.md`);
+  const outputPath = path.join(outputDir, `gemini-gpt-${taiwanDate()}-${slot}.md`);
   await fs.writeFile(outputPath, prompt, "utf8");
   console.log(outputPath);
 }
