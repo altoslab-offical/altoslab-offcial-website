@@ -142,6 +142,7 @@ assert(releaseVerifier.includes("/feed.xml") && releaseVerifier.includes("/sitem
 assert(releaseVerifier.includes("AI-generated") && releaseVerifier.includes("SEO\\s*\\/\\s*GEO"), "release verifier blocks public leakage of internal production copy");
 assert(launchAgentPlist.includes("blog-scheduled-runner.mjs --scheduled"), "LaunchAgent runs the scheduled prep/release runner");
 assert(launchAgentPlist.includes("<integer>8</integer>") && launchAgentPlist.includes("<integer>15</integer>"), "LaunchAgent includes prep windows");
+assert(launchAgentPlist.includes("<integer>4</integer>"), "LaunchAgent includes post-release follow-up minutes");
 assert(launchAgentInstaller.includes("replace-with|test-secret"), "LaunchAgent installer refuses placeholder or test ingest secrets");
 assert(launchAgentInstaller.includes("launchctl bootstrap"), "LaunchAgent installer can bootstrap the scheduled local worker");
 assert(blogArticle.includes("extractSourceTranslationNote"), "article renderer extracts source translation note from main body");

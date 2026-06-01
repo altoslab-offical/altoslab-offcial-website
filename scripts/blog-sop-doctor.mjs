@@ -193,14 +193,16 @@ function checkLaunchAgent(errors, warnings) {
   for (const [hour, minute] of [
     [8, 10],
     [9, 0],
+    [9, 4],
     [15, 10],
-    [16, 0]
+    [16, 0],
+    [16, 4]
   ]) {
     if (!output.includes(`"Hour" => ${hour}`) || !output.includes(`"Minute" => ${minute}`)) {
       addIssue(errors, `LaunchAgent is missing ${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")} calendar trigger`);
     }
   }
-  if (!output.includes("last exit code = 0")) {
+  if (!output.includes("last exit code = 0") && !output.includes("last exit code = (never exited)")) {
     addWarning(warnings, "LaunchAgent last exit code was not observed as 0");
   }
   return { loaded: true };

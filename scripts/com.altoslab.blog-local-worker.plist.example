@@ -27,6 +27,12 @@
     </dict>
     <dict>
       <key>Hour</key>
+      <integer>9</integer>
+      <key>Minute</key>
+      <integer>4</integer>
+    </dict>
+    <dict>
+      <key>Hour</key>
       <integer>15</integer>
       <key>Minute</key>
       <integer>10</integer>
@@ -36,6 +42,12 @@
       <integer>16</integer>
       <key>Minute</key>
       <integer>0</integer>
+    </dict>
+    <dict>
+      <key>Hour</key>
+      <integer>16</integer>
+      <key>Minute</key>
+      <integer>4</integer>
     </dict>
   </array>
   <key>StandardOutPath</key>

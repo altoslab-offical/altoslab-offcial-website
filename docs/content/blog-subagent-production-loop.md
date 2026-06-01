@@ -46,7 +46,7 @@ The Codex app heartbeat automation is the primary scheduler for this workflow:
 - Release windows: `09:00` and `16:00`
 - Post-release follow-up windows: `09:04` and `16:04`
 
-The macOS LaunchAgent is the deterministic safety runner. It wakes at the same four windows and does only two things:
+The macOS LaunchAgent is the deterministic safety runner. It wakes at the same six windows and does only two things:
 
 - prep windows: create a run folder, prompt card, and `awaiting_browser_production` manifest skeleton;
 - release windows: publish only an already `ready` manifest.
