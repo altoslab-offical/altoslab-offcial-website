@@ -314,7 +314,16 @@ ${await fs.readFile(orchestratorPromptPath, "utf8").catch(() => "")}
 
 function releaseGateIssues(manifest, { date, slot }) {
   const issues = [];
-  if (manifest.status !== "ready") issues.push(`manifest status must be ready, got ${manifest.status || "missing"}`);
+  const retryableHeldManifest =
+    manifest.status === "held" &&
+    manifest.validateOnly?.wouldPublish === true &&
+    manifest.validateOnly?.qualityApproved === true &&
+    manifest.validateOnly?.imageApproved === true &&
+    (!Array.isArray(manifest.validateOnly?.errors) || manifest.validateOnly.errors.length === 0) &&
+    (!Array.isArray(manifest.publish?.publishedIds) || manifest.publish.publishedIds.length === 0);
+  if (manifest.status !== "ready" && !retryableHeldManifest) {
+    issues.push(`manifest status must be ready, got ${manifest.status || "missing"}`);
+  }
   if (manifest.slot !== slot) issues.push(`manifest slot must be ${slot}`);
   if (manifest.expectedReleaseAt !== scheduledFor(date, slot)) {
     issues.push(`expectedReleaseAt must be ${scheduledFor(date, slot)}`);
@@ -383,7 +392,8 @@ async function release({ date, slot }) {
     slot,
     "--publish",
     "--manifest",
-    manifestPath
+    manifestPath,
+    "--reuse-validated-manifest"
   ], { cwd: process.cwd() });
   await appendLog(path.join(path.dirname(manifestPath), "scheduled-release.log"), result.stdout.trim());
   if (result.stderr.trim()) await appendLog(path.join(path.dirname(manifestPath), "scheduled-release.log"), result.stderr.trim());

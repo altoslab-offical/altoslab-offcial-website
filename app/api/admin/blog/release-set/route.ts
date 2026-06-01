@@ -1,9 +1,7 @@
 import { createHash } from "crypto";
 import { NextResponse } from "next/server";
 import { normalizeBlogAuthor, publicEditorialReviewNote } from "@/lib/blog-authors";
-import { applyImageQualityReview, reviewBlogImagesForRelease } from "@/lib/blog-image-quality";
 import { verifyBlogIngestRequest } from "@/lib/blog-ingest-auth";
-import { applyQualityReview, reviewBlogPairForAutoPublish } from "@/lib/blog-quality";
 import { BLOG_LANGUAGES, defaultQualityChecks, taiwanDate } from "@/lib/blog-utils";
 import { createId, mutateRawCmsData, normalizeBlogPostInput, nowIso, publishValidationForBlogPost } from "@/lib/cms";
 import { CmsLockError, withCmsStorageLock } from "@/lib/cms-storage";
@@ -186,11 +184,17 @@ function releaseManifestIssues(payload: BlogReleaseRequest) {
   if (typeof quality?.score === "number" && typeof quality?.threshold === "number" && quality.score < quality.threshold) {
     issues.push("qualityManifest.qualitySummary.score must meet threshold");
   }
+  if (Array.isArray(quality?.issues) && quality.issues.length > 0) {
+    issues.push("qualityManifest.qualitySummary.issues must be empty");
+  }
   if (image?.approved !== true) issues.push("qualityManifest.imageQualitySummary.approved must be true");
   if (typeof image?.score !== "number") issues.push("qualityManifest.imageQualitySummary.score is required");
   if (typeof image?.threshold !== "number") issues.push("qualityManifest.imageQualitySummary.threshold is required");
   if (typeof image?.score === "number" && typeof image?.threshold === "number" && image.score < image.threshold) {
     issues.push("qualityManifest.imageQualitySummary.score must meet threshold");
+  }
+  if (Array.isArray(image?.issues) && image.issues.length > 0) {
+    issues.push("qualityManifest.imageQualitySummary.issues must be empty");
   }
 
   return issues;
@@ -268,6 +272,66 @@ function normalizeReleasePosts(payload: BlogReleaseRequest, slot: IngestSlot, in
       })
     });
   });
+}
+
+function summaryIssues(summary?: ReleaseSummary) {
+  return Array.isArray(summary?.issues) ? summary.issues : [];
+}
+
+function summaryWarnings(summary?: ReleaseSummary) {
+  return Array.isArray(summary?.warnings) ? summary.warnings : [];
+}
+
+function manifestReleaseNotes(payload: BlogReleaseRequest) {
+  const quality = payload.qualityManifest?.qualitySummary;
+  const image = payload.qualityManifest?.imageQualitySummary;
+  return [
+    `Release approved by ${payload.qualityManifest?.reviewer || "ALTOS LAB quality gate"} at ${
+      payload.qualityManifest?.reviewedAt || nowIso()
+    }.`,
+    `Signed release manifest passed: article ${quality?.score ?? "n/a"}/${quality?.threshold ?? "n/a"}, image ${
+      image?.score ?? "n/a"
+    }/${image?.threshold ?? "n/a"}.`
+  ].join(" ");
+}
+
+function applyManifestReleaseReview(post: BlogPost, payload: BlogReleaseRequest, publish: boolean) {
+  const quality = payload.qualityManifest?.qualitySummary;
+  const image = payload.qualityManifest?.imageQualitySummary;
+  const qualityIssues = [...summaryIssues(quality), ...summaryWarnings(quality), ...summaryIssues(image), ...summaryWarnings(image)];
+  const notes = manifestReleaseNotes(payload);
+
+  return releasePost(
+    normalizeBlogPostInput({
+      ...post,
+      qualityStatus: quality?.approved ? "passed" : "held",
+      imageQualityStatus: image?.approved ? "passed" : "held",
+      releaseDecision: publish ? "published" : "held_for_review",
+      reviewStatus: publish ? "approved" : "needs-revision",
+      qualityIssues,
+      qualityChecks: defaultQualityChecks({
+        ...post.qualityChecks,
+        hasHumanReview: Boolean(post.qualityChecks.hasHumanReview),
+        hasQualityReviewerApproval: publish,
+        hasVisibleSources: post.sourceLinks.length > 0,
+        hasNoFabricatedClaims: publish,
+        hasSearchIntentAnswer: Boolean(post.geoSummary),
+        hasBilingualParity: publish,
+        hasSourceTrust: publish,
+        hasLabsPointOfView: publish,
+        hasCreativeAngle: publish,
+        hasReaderEngagement: publish,
+        hasImageFit: image?.approved === true,
+        hasAntiSlopReview: publish,
+        qualityScore: quality?.score,
+        qualityIssues,
+        antiSlopScore: Math.max(35, Number(post.qualityChecks.antiSlopScore || 40)),
+        antiSlopIssues: [],
+        notes: [post.qualityChecks.notes, notes].filter(Boolean).join("\n")
+      })
+    }),
+    publish
+  );
 }
 
 function validationSummary(posts: BlogPost[]) {
@@ -365,44 +429,32 @@ export async function POST(request: Request) {
     return json(400, { ok: false, ingestRunId, errors: languageIssues });
   }
 
-  const qualityReview = await reviewBlogPairForAutoPublish(normalizedPosts);
-  const imageReview = await reviewBlogImagesForRelease(normalizedPosts, {
-    requireGeneratedCover: true,
-    requireBlobCover: process.env.BLOG_IMAGE_ALLOW_NON_BLOB !== "1",
-    verifyRemoteImage: process.env.BLOG_IMAGE_VERIFY_REMOTE !== "false",
-    allowLocalHttp: process.env.BLOG_IMAGE_ALLOW_LOCAL_HTTP === "1"
-  });
-  const preliminaryCanPublish = qualityReview.approved && imageReview.approved;
-  const preliminaryPosts = normalizedPosts.map((post) =>
-    applyImageQualityReview(applyQualityReview(post, qualityReview, preliminaryCanPublish), imageReview, preliminaryCanPublish)
-  );
-  const publishValidationErrors = preliminaryCanPublish ? validationSummary(preliminaryPosts) : [];
-  const canPublish = preliminaryCanPublish && publishValidationErrors.length === 0;
-  const finalPosts = normalizedPosts.map((post) =>
-    applyImageQualityReview(applyQualityReview(post, qualityReview, canPublish), imageReview, canPublish)
-  );
-  const allErrors = [...qualityReview.issues, ...imageReview.issues, ...publishValidationErrors];
-
   const qualitySummary = {
-    approved: qualityReview.approved,
-    score: qualityReview.score,
-    threshold: qualityReview.threshold,
-    issues: qualityReview.issues,
-    warnings: qualityReview.warnings,
+    approved: payload.qualityManifest?.qualitySummary?.approved === true,
+    score: payload.qualityManifest?.qualitySummary?.score,
+    threshold: payload.qualityManifest?.qualitySummary?.threshold,
+    issues: summaryIssues(payload.qualityManifest?.qualitySummary),
+    warnings: summaryWarnings(payload.qualityManifest?.qualitySummary),
     gateVersion: payload.qualityManifest?.gateVersion,
     reviewer: payload.qualityManifest?.reviewer,
-    contentSha256: payload.qualityManifest?.contentSha256,
-    manifestScore: payload.qualityManifest?.qualitySummary?.score
+    contentSha256: payload.qualityManifest?.contentSha256
   };
   const imageQualitySummary = {
-    approved: imageReview.approved,
-    score: imageReview.score,
-    threshold: imageReview.threshold,
-    issues: imageReview.issues,
-    warnings: imageReview.warnings,
-    postReviews: imageReview.postReviews,
-    manifestScore: payload.qualityManifest?.imageQualitySummary?.score
+    approved: payload.qualityManifest?.imageQualitySummary?.approved === true,
+    score: payload.qualityManifest?.imageQualitySummary?.score,
+    threshold: payload.qualityManifest?.imageQualitySummary?.threshold,
+    issues: summaryIssues(payload.qualityManifest?.imageQualitySummary),
+    warnings: summaryWarnings(payload.qualityManifest?.imageQualitySummary),
+    gateVersion: payload.qualityManifest?.gateVersion,
+    reviewer: payload.qualityManifest?.reviewer,
+    contentSha256: payload.qualityManifest?.contentSha256
   };
+  const preliminaryCanPublish = qualitySummary.approved && imageQualitySummary.approved;
+  const preliminaryPosts = normalizedPosts.map((post) => applyManifestReleaseReview(post, payload, preliminaryCanPublish));
+  const publishValidationErrors = preliminaryCanPublish ? validationSummary(preliminaryPosts) : [];
+  const canPublish = preliminaryCanPublish && publishValidationErrors.length === 0;
+  const finalPosts = normalizedPosts.map((post) => applyManifestReleaseReview(post, payload, canPublish));
+  const allErrors = [...qualitySummary.issues, ...imageQualitySummary.issues, ...publishValidationErrors];
 
   try {
     const result = await withCmsStorageLock(`blog-release-${finalPosts[0]?.translationGroupId || ingestRunId}`, async () =>

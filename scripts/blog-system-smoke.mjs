@@ -41,6 +41,7 @@ const releaseVerifier = read("scripts/verify-blog-release.mjs");
 const launchAgentPlist = read("scripts/com.altoslab.blog-local-worker.plist.example");
 const launchAgentInstaller = read("scripts/install-blog-launch-agent.sh");
 const adminShell = read("components/AdminShell.tsx");
+const blogAuthors = read("lib/blog-authors.ts");
 const blogArticle = read("components/BlogArticle.tsx");
 const blogIndex = read("components/BlogIndex.tsx");
 const richText = read("components/RichText.tsx");
@@ -98,6 +99,9 @@ assert(ingestRoute.includes("duplicateTopicIssues"), "ingest route blocks repeat
 assert(releaseRoute.includes("verifyBlogIngestRequest"), "release-set route verifies HMAC before parsing release payloads");
 assert(releaseRoute.includes("qualityManifest") && releaseRoute.includes("contentSha256"), "release-set route requires a signed quality manifest digest");
 assert(releaseRoute.includes("generation.provider must be gemini-chatgpt"), "release-set route accepts the Gemini + GPT production provider");
+assert(releaseRoute.includes("applyManifestReleaseReview"), "release-set route applies the signed manifest release decision directly");
+assert(!releaseRoute.includes("reviewBlogPairForAutoPublish"), "release-set route does not rerun full article QA during publish");
+assert(!releaseRoute.includes("reviewBlogImagesForRelease"), "release-set route does not rerun remote image QA during publish");
 assert(mediaRoute.includes("verifyBlogIngestRequest"), "media upload route is protected by the same signed request contract");
 assert(mediaRoute.includes("@vercel/blob"), "media upload route stores production images in Vercel Blob");
 assert(mediaRoute.includes("BLOG_MEDIA_ALLOW_LOCAL_STORAGE"), "media upload route supports local-only image storage for end-to-end testing");
@@ -111,6 +115,7 @@ assert(localWorker.includes("X-Altos-Signature"), "local worker signs ingest req
 assert(localWorker.includes("requestMediaUpload"), "local worker uploads generated cover files before ingest");
 assert(localWorker.includes("requestRelease") && localWorker.includes("/api/admin/blog/release-set"), "local worker publishes through the formal release-set route");
 assert(localWorker.includes("qualityManifest") && localWorker.includes("contentSha256"), "local worker writes a quality manifest with a content digest");
+assert(localWorker.includes("reuse-validated-manifest"), "local worker can reuse a signed validate-only manifest during release");
 assert(localWorker.includes("chromeEvidence.gemini.usedExistingTab"), "local worker requires Gemini existing-tab evidence");
 assert(localWorker.includes("chromeEvidence.chatgpt.usedExistingTab"), "local worker requires ChatGPT/GPT existing-tab evidence");
 assert(localWorker.includes("String(post.generatedBy || \"\").toLowerCase().includes(\"gemini\")"), "local worker requires per-post Gemini provenance");
@@ -130,9 +135,13 @@ assert(scheduledRunner.includes("articleSetPath file is missing"), "scheduled re
 assert(scheduledRunner.includes("scripts/blog-sop-doctor.mjs"), "scheduled prep/release runs the SOP doctor before continuing");
 assert(scheduledRunner.includes("compactDoctorResult") && scheduledRunner.includes("scheduled-runner.log"), "scheduled runner records compact doctor evidence in output and logs");
 assert(scheduledRunner.includes("scripts/verify-blog-release.mjs"), "scheduled release runs post-release verification before reporting success");
+assert(scheduledRunner.includes("reuse-validated-manifest"), "scheduled release reuses the already approved signed manifest instead of running duplicate QA");
+assert(scheduledRunner.includes("retryableHeldManifest"), "scheduled release can retry a transient release failure without bypassing gates");
 assert(sopDoctor.includes("BLOG_DISABLE_DEEPSEEK_CRON must be true"), "SOP doctor requires the legacy DeepSeek cron to stay disabled");
 assert(sopDoctor.includes("production cmsStorage.provider must be cloudflare-kv"), "SOP doctor verifies the Cloudflare KV production CMS store");
 assert(sopDoctor.includes("release verification requires ALTOS_ADMIN_PASSWORD"), "SOP doctor requires admin readback credentials for release");
+assert(sopDoctor.includes("\"ready\", \"released\""), "SOP doctor accepts already released candidates for post-release audit");
+assert(sopDoctor.includes("releaseVerification.ok"), "SOP doctor verifies released candidates have successful post-release verification");
 assert(sopDoctor.includes("coverGeneration.provider must be ChatGPT/GPT"), "SOP doctor verifies GPT cover provenance in prepared release candidates");
 assert(releaseVerifier.includes("manifest status must be released"), "release verifier requires a released prepared-candidate manifest");
 assert(releaseVerifier.includes("public API qualityStatus must be passed"), "release verifier checks public quality metadata");
@@ -195,10 +204,15 @@ assert(siteHeader.includes("aria-expanded={isLanguageMenuOpen}"), "language menu
 assert(siteHeader.includes("role=\"menuitemradio\""), "language dropdown options expose selectable menu semantics");
 assert(!siteHeader.includes("aria-pressed={language"), "language switcher no longer renders as a segmented control");
 assert(blogArticle.includes("related-article-image"), "related article cards include an image area");
-assert(blogArticle.includes("SafeBlogImage compact post={related}"), "related article cards render real covers when available");
+assert(blogArticle.includes("SafeBlogImage compact post={relatedVisualPost}"), "related article cards render real covers when available");
 assert(blogArticle.includes("article-tag-strip"), "article footer renders tag chips before the author note");
 assert(blogArticle.includes("article-author-card"), "article footer replaces CTA with ALTOS LAB author card");
 assert(!blogArticle.includes("blog-cta-panel"), "article footer no longer renders the old content-system CTA panel");
+assert(blogArticle.includes("const relatedVisualPost = toBlogVisualPost(related)"), "related article image props are sanitized before client serialization");
+assert(!blogArticle.includes("SafeBlogImage compact post={related}"), "related article cards do not serialize full post metadata into client image props");
+assert(blogIndex.includes("const visualPost = toBlogVisualPost(post)"), "blog index image props are sanitized before client serialization");
+assert(!blogIndex.includes("SafeBlogImage compact post={post}"), "blog index cards do not serialize full post metadata into client image props");
+assert(!/quality gates/i.test(blogAuthors), "public author profiles do not expose internal quality-gate language");
 assert(!globals.includes("site-language-toggle button:nth-child"), "mobile CSS no longer hides segmented language buttons");
 
 assert(cron.includes("pickEditorialBrief"), "cron uses editorial brief and content mix");

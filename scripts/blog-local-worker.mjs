@@ -33,6 +33,7 @@ Useful dry runs:
   node scripts/blog-local-worker.mjs --article-set ./article-set.json --slot morning --validate-only --browser-evidence ./browser-evidence.json --approve-design-qa
   node scripts/blog-local-worker.mjs --make-prompt --slot morning --topic "AI agents in customer operations"
   node scripts/blog-local-worker.mjs --article-set ./article-set.json --slot morning --publish
+  node scripts/blog-local-worker.mjs --article-set ./article-set.json --slot morning --publish --reuse-validated-manifest --manifest ./prepared-candidate.json
 
 Environment:
   BLOG_INGEST_HMAC_SECRET   Shared HMAC secret configured in Vercel
@@ -541,6 +542,71 @@ async function writePreparedCandidateManifest({ manifestPath, articleSetPath, re
   return manifest;
 }
 
+function reusableManifestIssues(manifest, payload) {
+  const issues = [];
+  const qualityManifest = manifest?.qualityManifest || {};
+  const quality = qualityManifest.qualitySummary || {};
+  const image = qualityManifest.imageQualitySummary || {};
+  const validateOnly = manifest?.validateOnly || {};
+
+  if (!["ready", "held"].includes(manifest?.status)) {
+    issues.push(`manifest status must be ready or retryable held, got ${manifest?.status || "missing"}`);
+  }
+  if (validateOnly.wouldPublish !== true) issues.push("validateOnly.wouldPublish must be true");
+  if (validateOnly.qualityApproved !== true) issues.push("validateOnly.qualityApproved must be true");
+  if (validateOnly.imageApproved !== true) issues.push("validateOnly.imageApproved must be true");
+  if (Array.isArray(validateOnly.errors) && validateOnly.errors.length > 0) {
+    issues.push(`validateOnly errors must be empty: ${validateOnly.errors.join("; ")}`);
+  }
+  if (quality.approved !== true) issues.push("qualityManifest.qualitySummary.approved must be true");
+  if (image.approved !== true) issues.push("qualityManifest.imageQualitySummary.approved must be true");
+  if (Array.isArray(quality.issues) && quality.issues.length > 0) {
+    issues.push(`qualityManifest quality issues must be empty: ${quality.issues.join("; ")}`);
+  }
+  if (Array.isArray(image.issues) && image.issues.length > 0) {
+    issues.push(`qualityManifest image issues must be empty: ${image.issues.join("; ")}`);
+  }
+  if (qualityManifest.contentSha256 !== releaseContentSha256(payload)) {
+    issues.push("qualityManifest.contentSha256 does not match current article set");
+  }
+  const manifestPosts = Array.isArray(qualityManifest.posts) ? qualityManifest.posts : [];
+  for (const post of payload.posts || []) {
+    const manifestPost = manifestPosts.find((item) => item.language === post.language && item.slug === post.slug);
+    if (!manifestPost) {
+      issues.push(`${post.language || "unknown"}/${post.slug || "missing-slug"} missing manifest digest`);
+    } else {
+      if (manifestPost.bodySha256 !== bodySha256(post)) {
+        issues.push(`${post.language || "unknown"}/${post.slug || "missing-slug"} body digest changed after validate-only`);
+      }
+      if (manifestPost.cover !== post.cover) {
+        issues.push(`${post.language || "unknown"}/${post.slug || "missing-slug"} cover changed after validate-only`);
+      }
+    }
+  }
+  return issues;
+}
+
+async function reusableValidateFromManifest(manifestPath, payload) {
+  if (!manifestPath) throw new Error("--manifest is required with --reuse-validated-manifest");
+  const manifest = JSON.parse(await fs.readFile(path.resolve(manifestPath), "utf8"));
+  const issues = reusableManifestIssues(manifest, payload);
+  if (issues.length) {
+    throw new Error(`validated manifest cannot be reused: ${issues.join("; ")}`);
+  }
+  return {
+    status: manifest.validateOnly?.status || 200,
+    ok: true,
+    json: {
+      ok: true,
+      wouldPublish: true,
+      errors: [],
+      qualitySummary: manifest.qualityManifest.qualitySummary,
+      imageQualitySummary: manifest.qualityManifest.imageQualitySummary,
+      reusedQualityManifest: true
+    }
+  };
+}
+
 async function readArticleSet(filePath, slot) {
   const raw = await fs.readFile(filePath, "utf8");
   const payload = JSON.parse(raw);
@@ -724,8 +790,22 @@ async function main() {
     await writeJsonFile(releaseArticleSetPath, payload);
   }
 
-  const validate = await requestIngest(payload, true);
-  console.log(JSON.stringify({ phase: "validateOnly", status: validate.status, response: validate.json }, null, 2));
+  const validate =
+    hasFlag("publish") && hasFlag("reuse-validated-manifest")
+      ? await reusableValidateFromManifest(manifestPath, payload)
+      : await requestIngest(payload, true);
+  console.log(
+    JSON.stringify(
+      {
+        phase: "validateOnly",
+        status: validate.status,
+        reusedQualityManifest: validate.json?.reusedQualityManifest === true,
+        response: validate.json
+      },
+      null,
+      2
+    )
+  );
   await writePreparedCandidateManifest({
     manifestPath,
     articleSetPath: path.resolve(articleSet),

@@ -222,7 +222,18 @@ function checkReleaseCandidate({ date, slot }, errors, warnings) {
   }
   const manifest = readJson(manifestPath);
   const articleSetPath = manifest.articleSetPath || index.articleSetPath;
-  if (manifest.status !== "ready") addIssue(errors, `release candidate status must be ready, got ${manifest.status || "missing"}`);
+  if (!["ready", "released"].includes(manifest.status)) {
+    addIssue(errors, `release candidate status must be ready or released, got ${manifest.status || "missing"}`);
+  }
+  if (manifest.status === "released" && manifest.releaseVerification?.ok !== true) {
+    addIssue(errors, "released candidate must have releaseVerification.ok true");
+  }
+  if (
+    manifest.status === "released" &&
+    (!Array.isArray(manifest.publish?.publishedIds) || manifest.publish.publishedIds.length !== LANGUAGES.length)
+  ) {
+    addIssue(errors, "released candidate must include four publishedIds");
+  }
   if (manifest.slot !== slot) addIssue(errors, `release candidate slot must be ${slot}`);
   if (manifest.expectedReleaseAt !== scheduledFor(date, slot)) {
     addIssue(errors, `release candidate expectedReleaseAt must be ${scheduledFor(date, slot)}`);

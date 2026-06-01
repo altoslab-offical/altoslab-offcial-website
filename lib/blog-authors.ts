@@ -47,10 +47,10 @@ export function blogAuthorProfile(author: PublicBlogAuthor, language: BlogLangua
     },
     Ken: {
       "zh-Hant":
-        "ALTOS LAB 研究與工程編輯，聚焦 AI Agent、資料流程、品質門禁與產品化風險。",
-      en: "ALTOS LAB research and engineering editor, focused on AI agents, data workflows, quality gates and productization risk.",
-      ja: "ALTOS LAB のリサーチ／エンジニアリング編集者。AIエージェント、データフロー、品質ゲート、プロダクト化リスクを追います。",
-      ko: "ALTOS LAB 리서치 및 엔지니어링 에디터. AI Agent, 데이터 흐름, 품질 게이트, 제품화 리스크를 봅니다."
+        "ALTOS LAB 研究與工程編輯，聚焦 AI Agent、資料流程、審核機制與產品化風險。",
+      en: "ALTOS LAB research and engineering editor, focused on AI agents, data workflows, review systems and productization risk.",
+      ja: "ALTOS LAB のリサーチ／エンジニアリング編集者。AIエージェント、データフロー、レビュー設計、プロダクト化リスクを追います。",
+      ko: "ALTOS LAB 리서치 및 엔지니어링 에디터. AI Agent, 데이터 흐름, 리뷰 설계, 제품화 리스크를 봅니다."
     }
   } satisfies Record<PublicBlogAuthor, Record<BlogLanguage, string>>;
 

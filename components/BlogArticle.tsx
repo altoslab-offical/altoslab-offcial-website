@@ -338,25 +338,28 @@ export async function BlogArticle({ post }: { post: BlogPost }) {
                 </Link>
               </div>
               <div className="related-article-grid">
-                {relatedPosts.map((related) => (
-                  <Link className="related-article-card" href={blogPostPath(related)} key={related.id}>
-                    <span className="related-article-image" aria-hidden="true">
-                      {related.cover ? (
-                        <SafeBlogImage compact post={related} />
-                      ) : (
-                        <BlogEditorialVisual compact post={related} />
-                      )}
-                    </span>
-                    <span className="related-article-eyebrow">
-                      {[blogContentTypeLabel(related.contentType, related.language), related.newsCategory || related.tags[0]]
-                        .map((item) => publicTaxonomyLabel(item, related.language))
-                        .filter(Boolean)
-                        .join(" · ")}
-                    </span>
-                    <strong>{renderBrandText(related.title)}</strong>
-                    <small>{dictionary.readTime(related.readTimeMinutes)}</small>
-                  </Link>
-                ))}
+                {relatedPosts.map((related) => {
+                  const relatedVisualPost = toBlogVisualPost(related);
+                  return (
+                    <Link className="related-article-card" href={blogPostPath(related)} key={related.id}>
+                      <span className="related-article-image" aria-hidden="true">
+                        {related.cover ? (
+                          <SafeBlogImage compact post={relatedVisualPost} />
+                        ) : (
+                          <BlogEditorialVisual compact post={relatedVisualPost} />
+                        )}
+                      </span>
+                      <span className="related-article-eyebrow">
+                        {[blogContentTypeLabel(related.contentType, related.language), related.newsCategory || related.tags[0]]
+                          .map((item) => publicTaxonomyLabel(item, related.language))
+                          .filter(Boolean)
+                          .join(" · ")}
+                      </span>
+                      <strong>{renderBrandText(related.title)}</strong>
+                      <small>{dictionary.readTime(related.readTimeMinutes)}</small>
+                    </Link>
+                  );
+                })}
               </div>
             </section>
           ) : null}
