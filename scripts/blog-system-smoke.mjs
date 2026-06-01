@@ -133,7 +133,10 @@ assert(blogArticle.includes("extractSourceTranslationNote"), "article renderer e
 assert(blogArticle.includes("source-translation-note"), "article renderer displays source translation note as a compact support block");
 assert(richText.includes("rich-highlight"), "rich text renderer supports in-article highlight marks");
 assert(richText.includes("==[^=\\n]+=="), "rich text renderer parses ==highlight== syntax");
-assert(globals.includes("--article-highlight-line: #A4FF00;"), "article highlight underline uses the fixed ALTOS LAB lime color");
+assert(
+  globals.includes("--article-highlight-line: rgb(164 255 0 / 0.18);") && globals.includes("color: #000000;"),
+  "article highlight underline uses ALTOS LAB lime at 18% opacity with black text"
+);
 assert(adminShell.includes("applyBodyHighlight"), "admin editor can insert article highlight syntax from the body editor");
 assert(generation.includes("#A4FF00 emphasis underline"), "generation prompt teaches the fixed article highlight convention");
 assert(!blogArticle.includes("alternates.map"), "article renderer does not show the extra language pill row above the headline");

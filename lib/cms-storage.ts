@@ -1,7 +1,20 @@
 import { promises as fs } from "fs";
 import { createCipheriv, createDecipheriv, createHash, randomBytes } from "crypto";
 import path from "path";
-import { del, get, list, put } from "@vercel/blob";
+import {
+  getCloudflareR2Bucket,
+  getCloudflareR2Config,
+  requireCloudflareR2Bucket,
+  type CloudflareR2Config,
+  type R2BucketLike
+} from "./cloudflare-r2";
+import {
+  getCloudflareKvConfig,
+  getCloudflareKvNamespace,
+  requireCloudflareKvNamespace,
+  type CloudflareKvConfig,
+  type KvNamespaceLike
+} from "./cloudflare-kv";
 import { seedData } from "./seed";
 import type { CmsData } from "./types";
 
@@ -33,6 +46,11 @@ type EncryptedCmsBlob = {
   tag: string;
   data: string;
 };
+
+async function vercelBlobClient() {
+  const packageName = "@vercel/" + "blob";
+  return import(packageName) as Promise<typeof import("@vercel/blob")>;
+}
 
 export class CmsLockError extends Error {
   constructor(message = "CMS lock is already held") {
@@ -85,8 +103,34 @@ function canWriteLocalFile() {
 }
 
 export function getCmsStorageStatus() {
+  const cloudflareKv = getCloudflareKvConfig();
+  const cloudflareR2 = getCloudflareR2Config();
   const upstash = getUpstashConfig();
   const blob = getBlobConfig();
+  if (cloudflareKv) {
+    return {
+      provider: "cloudflare-kv",
+      durable: true,
+      writable: true,
+      configured: true,
+      key: cloudflareKv.cmsKey,
+      binding: cloudflareKv.binding,
+      encrypted: Boolean(process.env.CMS_ENCRYPTION_KEY)
+    };
+  }
+
+  if (cloudflareR2) {
+    return {
+      provider: "cloudflare-r2",
+      durable: true,
+      writable: true,
+      configured: true,
+      key: cloudflareR2.cmsKey,
+      binding: cloudflareR2.binding,
+      encrypted: Boolean(process.env.CMS_ENCRYPTION_KEY)
+    };
+  }
+
   if (upstash) {
     return {
       provider: "upstash-redis",
@@ -229,6 +273,7 @@ async function readPublicListedBlob(blob: { url: string; etag?: string }) {
 }
 
 async function readPublicBlobText(pathname: string) {
+  const { list } = await vercelBlobClient();
   const result = await list({ prefix: pathname, limit: 10 });
   const blob = result.blobs.find((item) => item.pathname === pathname);
   return blob ? readPublicListedBlob(blob) : null;
@@ -243,7 +288,208 @@ function cmsVersionPathname(pathname: string) {
   return `${cmsVersionPrefix(pathname)}${stamp}-${randomBytes(4).toString("hex")}.json`;
 }
 
+async function readR2Text(bucket: R2BucketLike, pathname: string) {
+  const object = await bucket.get(pathname);
+  if (!object) return null;
+  return {
+    etag: object.etag,
+    text: await object.text()
+  };
+}
+
+async function readKvText(namespace: KvNamespaceLike, key: string) {
+  const value = await namespace.get(key);
+  if (!value) return null;
+  return { text: value };
+}
+
+function cmsKvVersionPrefix(key: string) {
+  return `${key}:versions:`;
+}
+
+function cmsKvVersionKey(key: string) {
+  const stamp = new Date().toISOString().replace(/[:.]/g, "-");
+  return `${cmsKvVersionPrefix(key)}${stamp}:${randomBytes(4).toString("hex")}`;
+}
+
+async function readVersionedKvCmsData(namespace: KvNamespaceLike, key: string) {
+  const primary = await readKvText(namespace, key).catch(() => null);
+  if (primary) {
+    try {
+      return parseCmsBlobText(primary.text);
+    } catch (error) {
+      console.warn(
+        "[cms] Primary Cloudflare KV CMS payload is unreadable; trying version history:",
+        error instanceof Error ? error.message : error
+      );
+    }
+  }
+
+  const versions = await namespace.list({ prefix: cmsKvVersionPrefix(key), limit: 1000 });
+  const latestVersions = versions.keys
+    .filter((item) => item.name)
+    .sort((a, b) => b.name.localeCompare(a.name));
+
+  for (const version of latestVersions.slice(0, 20)) {
+    const raw = await readKvText(namespace, version.name).catch(() => null);
+    if (!raw) continue;
+    try {
+      return parseCmsBlobText(raw.text);
+    } catch (error) {
+      console.warn(
+        "[cms] Skipping unreadable Cloudflare KV CMS version:",
+        version.name,
+        error instanceof Error ? error.message : error
+      );
+    }
+  }
+
+  return null;
+}
+
+async function writeVersionedKvJson(namespace: KvNamespaceLike, config: CloudflareKvConfig, value: unknown) {
+  const content = JSON.stringify(value, null, 2);
+  const metadata = {
+    contentType: "application/json",
+    updatedAt: new Date().toISOString()
+  };
+  await namespace.put(cmsKvVersionKey(config.cmsPathname), content, { metadata });
+  await namespace.put(config.cmsPathname, content, { metadata });
+}
+
+async function withKvSoftLock<T>(
+  namespace: KvNamespaceLike,
+  config: CloudflareKvConfig,
+  name: string,
+  task: () => Promise<T>,
+  ttlMs: number
+) {
+  const lockKey = `${config.cmsPathname}:lock:${name.replace(/[^a-z0-9_-]+/gi, "-")}`;
+  const token = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+  const expiresAt = Date.now() + ttlMs;
+  const existing = await namespace.get(lockKey);
+
+  if (existing) {
+    const payload = JSON.parse(existing) as { expiresAt?: number };
+    if (!payload.expiresAt || payload.expiresAt > Date.now()) throw new CmsLockError();
+  }
+
+  await namespace.put(lockKey, JSON.stringify({ token, expiresAt }), {
+    expirationTtl: Math.max(60, Math.ceil(ttlMs / 1000))
+  });
+
+  try {
+    return await task();
+  } finally {
+    const current = await namespace.get(lockKey).catch(() => null);
+    if (current) {
+      const payload = JSON.parse(current) as { token?: string };
+      if (payload.token === token) await namespace.delete(lockKey).catch(() => undefined);
+    }
+  }
+}
+
+async function readVersionedR2CmsData(bucket: R2BucketLike, pathname: string) {
+  const primary = await readR2Text(bucket, pathname).catch(() => null);
+  if (primary) {
+    try {
+      return parseCmsBlobText(primary.text);
+    } catch (error) {
+      console.warn(
+        "[cms] Primary Cloudflare R2 CMS payload is unreadable; trying version history:",
+        error instanceof Error ? error.message : error
+      );
+    }
+  }
+
+  const versions = await bucket.list({ prefix: cmsVersionPrefix(pathname), limit: 1000 });
+  const latestVersions = versions.objects
+    .filter((item) => item.key.endsWith(".json"))
+    .sort((a, b) => {
+      const aTime = a.uploaded ? new Date(a.uploaded).getTime() : 0;
+      const bTime = b.uploaded ? new Date(b.uploaded).getTime() : 0;
+      return bTime - aTime;
+    });
+
+  for (const version of latestVersions.slice(0, 20)) {
+    const raw = await readR2Text(bucket, version.key).catch(() => null);
+    if (!raw) continue;
+    try {
+      return parseCmsBlobText(raw.text);
+    } catch (error) {
+      console.warn(
+        "[cms] Skipping unreadable Cloudflare R2 CMS version:",
+        version.key,
+        error instanceof Error ? error.message : error
+      );
+    }
+  }
+
+  return null;
+}
+
+async function writeR2Json(bucket: R2BucketLike, pathname: string, value: unknown, ifMatch?: string) {
+  const content = JSON.stringify(value, null, 2);
+  const result = await bucket.put(pathname, content, {
+    httpMetadata: {
+      contentType: "application/json",
+      cacheControl: "no-store"
+    },
+    ...(ifMatch ? { onlyIf: { etagMatches: ifMatch } } : {})
+  });
+  if (!result) throw new CmsLockError();
+}
+
+async function writeVersionedR2Json(bucket: R2BucketLike, config: CloudflareR2Config, value: unknown) {
+  await writeR2Json(bucket, cmsVersionPathname(config.cmsPathname), value);
+  await writeR2Json(bucket, config.cmsPathname, value);
+}
+
+async function withR2Lock<T>(
+  bucket: R2BucketLike,
+  config: CloudflareR2Config,
+  name: string,
+  task: () => Promise<T>,
+  ttlMs: number
+) {
+  const lockPathname = config.cmsPathname.replace(/\.json$/, `.lock.${name.replace(/[^a-z0-9_-]+/gi, "-")}.json`);
+  const token = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+  const expiresAt = Date.now() + ttlMs;
+  const lockPayload = JSON.stringify({ token, expiresAt });
+
+  const created = await bucket.put(lockPathname, lockPayload, {
+    onlyIf: { etagDoesNotMatch: "*" },
+    httpMetadata: {
+      contentType: "application/json",
+      cacheControl: "no-store"
+    }
+  });
+
+  if (!created) {
+    const existing = await readR2Text(bucket, lockPathname);
+    if (!existing) throw new CmsLockError();
+
+    const payload = JSON.parse(existing.text) as { expiresAt?: number };
+    if (!payload.expiresAt || payload.expiresAt > Date.now()) throw new CmsLockError();
+
+    await writeR2Json(bucket, lockPathname, { token, expiresAt }, existing.etag);
+  }
+
+  try {
+    return await task();
+  } finally {
+    const current = await readR2Text(bucket, lockPathname).catch(() => null);
+    if (current) {
+      const payload = JSON.parse(current.text) as { token?: string };
+      if (payload.token === token) {
+        await bucket.delete(lockPathname).catch(() => undefined);
+      }
+    }
+  }
+}
+
 async function readVersionedPublicCmsBlobText(pathname: string) {
+  const { list } = await vercelBlobClient();
   const result = await list({ prefix: cmsVersionPrefix(pathname), limit: 1000 });
   const latest = result.blobs
     .filter((item) => item.pathname.endsWith(".json"))
@@ -264,6 +510,7 @@ async function readVersionedPublicCmsData(pathname: string) {
 
   if (primaryProbe === "blocked") return null;
 
+  const { list } = await vercelBlobClient();
   const result = await list({ prefix: cmsVersionPrefix(pathname), limit: 1000 });
   const versions = result.blobs
     .filter((item) => item.pathname.endsWith(".json"))
@@ -302,6 +549,7 @@ async function readVersionedPublicCmsData(pathname: string) {
 
 async function readPrivateBlobText(config: BlobConfig, pathname: string) {
   try {
+    const { get } = await vercelBlobClient();
     const result = await get(pathname, { access: config.access, useCache: false });
     if (!result || result.statusCode !== 200 || !result.stream) return null;
     return {
@@ -326,6 +574,7 @@ async function readBlobText(config: BlobConfig, pathname: string) {
 async function writeBlobJson(config: BlobConfig, pathname: string, value: unknown, ifMatch?: string) {
   const shouldWriteVersion = config.access === "public" && pathname === config.pathname && !ifMatch;
 
+  const { put } = await vercelBlobClient();
   await put(shouldWriteVersion ? cmsVersionPathname(pathname) : pathname, JSON.stringify(value, null, 2), {
     access: config.access,
     addRandomSuffix: false,
@@ -342,6 +591,7 @@ async function withBlobLock<T>(config: BlobConfig, name: string, task: () => Pro
   const expiresAt = Date.now() + ttlMs;
 
   try {
+    const { put } = await vercelBlobClient();
     await put(lockPathname, JSON.stringify({ token, expiresAt }), {
       access: config.access,
       addRandomSuffix: false,
@@ -377,6 +627,7 @@ async function withBlobLock<T>(config: BlobConfig, name: string, task: () => Pro
     if (current) {
       const payload = JSON.parse(current.text) as { token?: string };
       if (payload.token === token) {
+        const { del } = await vercelBlobClient();
         await del(lockPathname, { ifMatch: current.etag }).catch(() => undefined);
       }
     }
@@ -388,6 +639,20 @@ export async function withCmsStorageLock<T>(
   task: () => Promise<T>,
   ttlMs = 120_000
 ): Promise<T> {
+  const cloudflareKvConfig = getCloudflareKvConfig();
+  const cloudflareKvNamespace = getCloudflareKvNamespace();
+  if (cloudflareKvConfig) {
+    if (!cloudflareKvNamespace) throw new Error("Cloudflare KV is enabled but the namespace binding is unavailable.");
+    return withKvSoftLock(cloudflareKvNamespace, cloudflareKvConfig, name, task, ttlMs);
+  }
+
+  const cloudflareR2Config = getCloudflareR2Config();
+  const cloudflareR2Bucket = getCloudflareR2Bucket();
+  if (cloudflareR2Config) {
+    if (!cloudflareR2Bucket) throw new Error("Cloudflare R2 is enabled but the bucket binding is unavailable.");
+    return withR2Lock(cloudflareR2Bucket, cloudflareR2Config, name, task, ttlMs);
+  }
+
   const upstash = getUpstashConfig();
   const blob = getBlobConfig();
   if (!upstash) {
@@ -413,6 +678,30 @@ export async function withCmsStorageLock<T>(
 }
 
 export async function readCmsDataFromStorage(): Promise<CmsData> {
+  const cloudflareKvConfig = getCloudflareKvConfig();
+  const cloudflareKvNamespace = getCloudflareKvNamespace();
+  if (cloudflareKvConfig) {
+    if (!cloudflareKvNamespace) {
+      console.warn("[cms] Cloudflare KV is configured but unavailable in this runtime; using seed data fallback.");
+      return cloneSeedData();
+    }
+
+    const data = await readVersionedKvCmsData(cloudflareKvNamespace, cloudflareKvConfig.cmsPathname);
+    return data || cloneSeedData();
+  }
+
+  const cloudflareR2Config = getCloudflareR2Config();
+  const cloudflareR2Bucket = getCloudflareR2Bucket();
+  if (cloudflareR2Config) {
+    if (!cloudflareR2Bucket) {
+      console.warn("[cms] Cloudflare R2 is configured but unavailable in this runtime; using seed data fallback.");
+      return cloneSeedData();
+    }
+
+    const data = await readVersionedR2CmsData(cloudflareR2Bucket, cloudflareR2Config.cmsPathname);
+    return data || cloneSeedData();
+  }
+
   const upstash = getUpstashConfig();
   const blob = getBlobConfig();
   if (upstash) {
@@ -437,6 +726,20 @@ export async function readCmsDataFromStorage(): Promise<CmsData> {
 }
 
 export async function writeCmsDataToStorage(data: CmsData) {
+  const cloudflareKvConfig = getCloudflareKvConfig();
+  if (cloudflareKvConfig) {
+    const { config, namespace } = requireCloudflareKvNamespace();
+    await writeVersionedKvJson(namespace, config, encryptCmsData(data));
+    return;
+  }
+
+  const cloudflareR2Config = getCloudflareR2Config();
+  if (cloudflareR2Config) {
+    const { config, bucket } = requireCloudflareR2Bucket();
+    await writeVersionedR2Json(bucket, config, encryptCmsData(data));
+    return;
+  }
+
   const upstash = getUpstashConfig();
   const blob = getBlobConfig();
   if (upstash) {
