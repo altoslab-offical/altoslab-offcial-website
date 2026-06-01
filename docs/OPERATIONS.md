@@ -25,7 +25,7 @@ Set these in Vercel Project Settings -> Environment Variables -> Production, the
 
 ```env
 NEXT_PUBLIC_SITE_URL=https://altoslab.com
-NEXT_PUBLIC_GTM_ID=GTM-XXXXXXX
+NEXT_PUBLIC_GTM_ID=GTM-WJ96VR7V
 GOOGLE_SITE_VERIFICATION=<google-search-console-token>
 BING_SITE_VERIFICATION=<bing-webmaster-tools-token>
 YANDEX_SITE_VERIFICATION=<optional-yandex-token>
@@ -55,6 +55,13 @@ AUTO_PUBLISH_BLOG=true
 
 Notes:
 
+- Google Analytics is routed through the official GTM container. Current official tracking IDs:
+  - GTM account: `ALTOS LAB` (`6358339921`)
+  - GTM container: `altoslab-ai.cc` / `GTM-WJ96VR7V` (`254100713`)
+  - GTM live version: `2` / `GA4 base tag`
+  - GA4 property: `ALTOS LAB Official Website` (`539513224`)
+  - GA4 web stream: `14979358723`
+  - GA4 measurement ID: `G-5VSLFNVD28`
 - `ADMIN_SESSION_TOKEN` should be at least 32 random bytes.
 - Vercel Blob is the default durable CMS store. `BLOB_READ_WRITE_TOKEN` is created when the `altoslab-cms` Blob store is linked to the Vercel project.
 - The current Vercel Blob store is public-access, so `BLOB_ACCESS=public` and `CMS_ENCRYPTION_KEY` are required in production. CMS JSON is encrypted server-side before it is written to Blob.
