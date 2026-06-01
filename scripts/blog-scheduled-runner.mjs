@@ -14,6 +14,7 @@ const RELEASE_WINDOWS = {
   morning: { hour: 9, minute: 0 },
   afternoon: { hour: 16, minute: 0 }
 };
+const RELEASE_GRACE_MINUTES = 5;
 
 function arg(name, fallback = "") {
   const index = process.argv.indexOf(`--${name}`);
@@ -151,7 +152,7 @@ async function createPrep({ date, slot }) {
   const promptPath = path.join(runDir, "prompt-card.md");
   const articleSetPath = path.join(runDir, "article-set.json");
   const manifestPath = path.join(runDir, "prepared-candidate.json");
-  const orchestratorPromptPath = path.join(runDir, "antigravity-prompt.md");
+  const orchestratorPromptPath = path.join(runDir, "browser-production-prompt.md");
 
   await fs.mkdir(runDir, { recursive: true });
   const orchestrator = await runCommand(process.execPath, [
@@ -259,8 +260,11 @@ function releaseWindowIssue({ date, slot }) {
   const parts = taiwanParts();
   const nowDate = `${parts.year}-${parts.month}-${parts.day}`;
   const window = RELEASE_WINDOWS[slot];
-  if (nowDate !== date || Number(parts.hour) !== window.hour || Number(parts.minute) !== window.minute) {
-    return `release window is not open; expected ${scheduledFor(date, slot)}`;
+  const nowMinutes = Number(parts.hour) * 60 + Number(parts.minute);
+  const releaseMinutes = window.hour * 60 + window.minute;
+  const minutesAfterRelease = nowMinutes - releaseMinutes;
+  if (nowDate !== date || minutesAfterRelease < 0 || minutesAfterRelease > RELEASE_GRACE_MINUTES) {
+    return `release window is not open; expected ${scheduledFor(date, slot)} within ${RELEASE_GRACE_MINUTES} minutes`;
   }
   return "";
 }

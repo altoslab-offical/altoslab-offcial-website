@@ -278,7 +278,7 @@ async function reviewPostImage(post: BlogPost, options: Required<BlogImageQualit
   if (post.coverAlt && post.coverAlt.length > 180) warnings.push("cover alt text is too long");
 
   if (options.requireGeneratedCover && post.coverSource !== "generated") {
-    issues.push("external Antigravity pipeline requires coverSource generated");
+    issues.push("external browser production pipeline requires coverSource generated");
   }
 
   if (post.coverSource === "generated") {

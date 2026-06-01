@@ -9,7 +9,7 @@
     <string>/usr/bin/env</string>
     <string>zsh</string>
     <string>-lc</string>
-    <string>source "$HOME/.altoslab-blog-worker.env" 2&gt;/dev/null || true; cd /Users/asdc163/Documents/官方網站 &amp;&amp; "${ALTOS_BLOG_NODE_BIN:-/Users/asdc163/.nvm/versions/node/v22.22.0/bin/node}" scripts/blog-scheduled-runner.mjs --scheduled</string>
+    <string>set -a; source "$HOME/.altoslab-blog-worker.env" 2&gt;/dev/null || true; set +a; cd /Users/asdc163/Documents/官方網站 &amp;&amp; "${ALTOS_BLOG_NODE_BIN:-/Users/asdc163/.nvm/versions/node/v22.22.0/bin/node}" scripts/blog-scheduled-runner.mjs --scheduled</string>
   </array>
   <key>StartCalendarInterval</key>
   <array>

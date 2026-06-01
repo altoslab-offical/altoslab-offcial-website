@@ -19,7 +19,7 @@ ALTOS LAB now supports a Cloudflare-first production path to avoid Vercel Blob b
 - CMS JSON and generated blog covers are stored in Cloudflare KV namespace `ALTOS_BLOG_KV` on the free plan.
 - R2 support remains in the codebase as a future object-storage upgrade, but it is not required for the free-first path.
 - Generated covers are served through same-origin `/api/blog/generated-media/:filename`, so the production image QA gate can verify content type, size and dimensions without requiring a public bucket domain.
-- The local Antigravity/Codex worker still writes and publishes the article set because Antigravity is a local/free writing engine. Cloudflare is the production release, storage and public serving layer.
+- Gemini writes the article set in the dedicated Blog QA browser workflow, ChatGPT/GPT produces the cover, and the local Codex worker only validates, signs, schedules and releases. Cloudflare is the production release, storage and public serving layer.
 - DeepSeek remains disabled for the formal daily blog workflow.
 
 Run before Cloudflare deploy:
@@ -38,7 +38,7 @@ The setup script reads `~/.altoslab-blog-worker.env` when present and syncs requ
 
 目前 `altoslab.com` 和 `www.altoslab.com` 仍指向 Netlify，`altoslab-ai.cc` 仍是目前 canonical domain。Cloudflare free-first 版本已先跑在 workers.dev；要把正式網域完整切到 Cloudflare，下一步是在 Cloudflare Workers routes/custom domain 裡綁定正式網域，並把 DNS 指到 Cloudflare。
 
-Before cutover, keep `~/.altoslab-blog-worker.env` pointing to the workers.dev URL so the local Antigravity/Codex worker writes into Cloudflare KV production storage.
+Before cutover, keep `~/.altoslab-blog-worker.env` pointing to the workers.dev URL so the local Codex worker writes into Cloudflare KV production storage.
 
 ## Required Production Environment Variables
 
@@ -89,7 +89,7 @@ Notes:
 - The current Vercel Blob store is public-access, so `BLOB_ACCESS=public` and `CMS_ENCRYPTION_KEY` are required in production. CMS JSON is encrypted server-side before it is written to Blob.
 - Upstash Redis is also supported and takes priority when `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` are configured. The token must be the standard write token, not the read-only token.
 - Without Vercel Blob or Upstash env vars, production can still render seed content, but admin edits and contact leads will not persist.
-- `AUTO_PUBLISH_BLOG=true` allows external Antigravity/Codex article sets to publish automatically only after deterministic article quality, multilingual parity, source and image QA gates approve the full four-language set. Fallback template output, malformed model output, thin content, missing sources, missing images, invalid HTTPS links or failed multilingual pairing stay draft/held.
+- `AUTO_PUBLISH_BLOG=true` allows external Gemini/GPT browser article sets to publish automatically only after deterministic article quality, multilingual parity, source and image QA gates approve the full four-language set. Fallback template output, malformed model output, thin content, missing sources, missing images, invalid HTTPS links or failed multilingual pairing stay draft/held.
 - `BLOG_INGEST_HMAC_SECRET` protects `POST /api/admin/blog/ingest-set`, `POST /api/admin/blog/release-set` and `POST /api/admin/blog/media`. The local worker must use the same secret in `~/.altoslab-blog-worker.env`.
 - `BLOG_DISABLE_DEEPSEEK_CRON=true` keeps the legacy DeepSeek cron path disabled. DeepSeek can remain configured for manual/admin fallback work, but it is not part of the formal daily publishing pipeline.
 - `CRON_SECRET` protects the legacy `/api/cron/blog-drafts` routes if they are manually invoked. Cloudflare production should not schedule those routes for the formal blog workflow.
@@ -171,7 +171,7 @@ Before promoting a deployment, verify:
 
 1. Log in at `/admin`.
 2. Use the Blog CMS workbench to generate drafts, filter by language/status/review state, edit SEO/GEO fields, manage source links and run the publishing checklist.
-3. Local Antigravity/Codex-generated posts publish automatically only when the production quality gate approves the full zh-Hant/en/ja/ko set and all generated covers pass image QA. If a post is held, review the listed quality issues before manual publishing.
+3. Gemini/GPT browser-produced posts publish automatically only when the production quality gate approves the full zh-Hant/en/ja/ko set and all generated covers pass image QA. If a post is held, review the listed quality issues before manual publishing.
 4. Before manually publishing or overriding a held post, confirm:
    - SEO title and description are specific.
    - GEO summary directly answers the search intent.

@@ -33,7 +33,7 @@ type BlogReleaseRequest = {
   publishMode?: "publish-if-valid";
   replaceExistingPublished?: boolean;
   generation?: {
-    provider?: "local-antigravity" | "local";
+    provider?: "gemini-chatgpt" | "local-antigravity" | "local";
     model?: string;
     promptVersion?: string;
     sourceCount?: number;
@@ -204,7 +204,10 @@ function normalizeReleasePosts(payload: BlogReleaseRequest, slot: IngestSlot, in
     payload.posts?.find((post) => post.translationGroupId)?.translationGroupId ||
     createId("translation");
   const scheduled = payload.scheduledFor || scheduledFor(generationDate, slot);
-  const provider = payload.generation?.provider === "local" ? "local-antigravity" : payload.generation?.provider || "local-antigravity";
+  const provider =
+    payload.generation?.provider === "local" || payload.generation?.provider === "local-antigravity"
+      ? "gemini-chatgpt"
+      : payload.generation?.provider || "gemini-chatgpt";
   const qualityScore = payload.qualityManifest?.qualitySummary?.score;
   const notes = `Release approved by ${payload.qualityManifest?.reviewer || "ALTOS LAB quality gate"} at ${
     payload.qualityManifest?.reviewedAt || now
@@ -343,8 +346,13 @@ export async function POST(request: Request) {
   if (Array.isArray(payload.posts) && payload.posts.length !== BLOG_LANGUAGES.length) {
     inputIssues.push("posts must contain exactly four language versions");
   }
-  if (payload.generation?.provider && payload.generation.provider !== "local-antigravity" && payload.generation.provider !== "local") {
-    inputIssues.push("generation.provider must be local-antigravity");
+  if (
+    payload.generation?.provider &&
+    payload.generation.provider !== "gemini-chatgpt" &&
+    payload.generation.provider !== "local-antigravity" &&
+    payload.generation.provider !== "local"
+  ) {
+    inputIssues.push("generation.provider must be gemini-chatgpt");
   }
   inputIssues.push(...releaseManifestIssues(payload));
   if (inputIssues.length || !slot || !Array.isArray(payload.posts)) {

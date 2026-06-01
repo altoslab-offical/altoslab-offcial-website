@@ -25,12 +25,13 @@ Do not claim, inspect, or operate unrelated user tabs.
 
 Hard tab rule:
 
-- Use `browser.user.openTabs()` and claim only the existing Gemini and ChatGPT tabs.
-- Do not create new tabs.
+- Use `browser.user.openTabs()` and claim only the existing Gemini and ChatGPT tabs when they are present.
+- If the previous run closed those task tabs, open only `https://gemini.google.com/app` and `https://chatgpt.com/` as task-scoped tabs for this run.
 - Do not start new conversations.
 - Do not reload or navigate away from those existing tabs unless the main brain explicitly approves a recovery step.
 - Do not change the user's selected model or account.
-- If either fixed tab is missing or blocked, stop and report `missing fixed user tab` or the exact blocker.
+- Close task-scoped Gemini/ChatGPT tabs after evidence capture so Chrome memory does not accumulate.
+- If either fixed tab is blocked after a recovery attempt, stop and report the exact blocker.
 
 Do not include secrets, HMAC keys, admin passwords, cookies, or private customer data in any Gemini or ChatGPT prompt.
 
@@ -97,7 +98,7 @@ Publish only when all are true:
 - `qualityManifest.contentSha256` matches the release payload
 - four languages are present
 - all covers are reachable generated media
-- all covers were created through GPT/ChatGPT, Gemini/Imagen, or explicit human-approved editorial design QA
+- all covers were created through GPT/ChatGPT or explicit human-approved editorial design QA
 - all covers include aesthetic visual checks: brand fit, editorial specificity, visual hierarchy, thumbnail readability, no cliché, and mobile crop resilience
 - production returns published IDs
 

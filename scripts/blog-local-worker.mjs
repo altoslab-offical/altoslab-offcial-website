@@ -370,7 +370,7 @@ function localPreflight(payload) {
       issues.push(`${post.language || "unknown"} sourceLinks differ from the multilingual set`);
     }
     if (post.coverSource !== "generated") issues.push(`${post.language || "unknown"} coverSource must be generated`);
-    if (!isAllowedCoverUrl(post.cover)) issues.push(`${post.language || "unknown"} cover must be an https Blob URL`);
+    if (!isAllowedCoverUrl(post.cover)) issues.push(`${post.language || "unknown"} cover must be a managed https media URL`);
     if (!post.coverAlt || post.coverAlt.length < 18) issues.push(`${post.language || "unknown"} coverAlt is missing or too thin`);
     const generation = post.coverGeneration || {};
     if (!generation.provider || !generation.prompt || !generation.generatedAt) {
@@ -587,7 +587,7 @@ async function requestRelease(payload, qualityManifest) {
     ...payload,
     generation: {
       ...payload.generation,
-      provider: "local-antigravity"
+      provider: "gemini-chatgpt"
     },
     qualityManifest
   });
@@ -662,11 +662,11 @@ Hard requirements:
 - Write like a sharp AI product/editorial studio, not an SEO farm.
 - Opening must answer the reader's decision in the first 40-80 words.
 - Include ALTOS LAB judgment, source translation note, FAQ, SEO title/meta and GEO summary.
-- Cover images must be generated per article, uploaded to Vercel Blob, and include provider, prompt, generatedAt, coverCredit and visualChecks.
+- Cover images must be generated per article, uploaded through the signed ALTOS LAB media route, and include provider, prompt, generatedAt, coverCredit and visualChecks.
 
 Return only JSON shaped for POST /api/admin/blog/ingest-set:
 {
-  "ingestRunId": "local-antigravity-YYYY-MM-DD-${slot}-short-topic",
+  "ingestRunId": "browser-gemini-gpt-YYYY-MM-DD-${slot}-short-topic",
   "slot": "${slot}",
   "translationGroupId": "same-group-id",
   "publishMode": "publish-if-valid",

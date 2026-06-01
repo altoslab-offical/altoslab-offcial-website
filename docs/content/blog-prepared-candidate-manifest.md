@@ -65,7 +65,6 @@ Publish only when all are true:
 - `validateOnly.wouldPublish` is true.
 - `validateOnly.errors` is empty.
 - `humanDesignQa.approved` is true.
-- Covers are generated through GPT/ChatGPT, Gemini/Imagen, or explicit human-approved editorial QA.
+- Covers are generated through GPT/ChatGPT or explicit human-approved editorial QA.
 
 If any field is missing or false, skip publishing and report the exact missing reason.
-

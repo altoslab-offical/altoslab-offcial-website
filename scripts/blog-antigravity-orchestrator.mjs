@@ -25,7 +25,7 @@ Daily scheduler entrypoint:
 
 Useful checks:
   node scripts/blog-antigravity-orchestrator.mjs --dry-run --slot morning --topic "AI agents"
-  node scripts/blog-antigravity-orchestrator.mjs --skip-antigravity --article-set ./article-set.json --publish
+  node scripts/blog-antigravity-orchestrator.mjs --skip-browser-wait --article-set ./article-set.json --publish
 
 Environment:
   BLOG_INGEST_HMAC_SECRET      Shared HMAC secret configured in Vercel
@@ -97,7 +97,7 @@ Editorial bar:
 - Use a clear ALTOS LAB judgment. Do not write a generic news summary.
 - No fake case studies, unsupported metrics, keyword stuffing, or templated AI filler.
 - Keep paragraphs scannable. Include one practical decision, not just context.
-- Add FAQ, SEO title/meta, GEO summary, key takeaways, visible source links and AI disclosure.
+- Add FAQ, SEO title/meta, GEO summary, key takeaways and visible source links. Do not include public AI-generation disclosure copy.
 
 Source bar:
 - breaking/news article: at least 2 reliable sources.
@@ -106,7 +106,7 @@ Source bar:
 - All four languages must use the exact same sourceLinks array and one translationGroupId.
 
 Image bar:
-- For each post, attach a ChatGPT/GPT-generated image as coverLocalPath or an uploaded HTTPS Blob cover URL before validate-only.
+- For each post, attach a ChatGPT/GPT-generated image as coverLocalPath or an uploaded managed HTTPS media URL before validate-only.
 - coverGeneration.provider must say ChatGPT, GPT or OpenAI image generation.
 - Never use local fallback art, stock photo URLs, third-party copyrighted images, real people, logos, trademarks, screenshots, fake UI, or text-heavy graphics.
 
@@ -156,7 +156,7 @@ Required JSON shape:
       "faqs": [{ "question": "", "answer": "" }],
       "sourceLinks": [{ "title": "", "url": "", "publisher": "", "publishedAt": "", "summary": "" }],
       "tags": ["AI", "ALTOS LAB"],
-      "author": "ALTOS LAB",
+      "author": "${slot === "morning" ? "Tommy" : "Ken"}",
       "coverAlt": "",
       "coverSource": "generated",
       "coverCredit": "ALTOS LAB editorial visual",
@@ -229,7 +229,7 @@ async function main() {
   const stamp = taiwanStamp();
   const runDir = path.resolve(arg("run-dir") || path.join(runRoot(), `${date}-${slot}-${stamp}`));
   const articleSetPath = path.resolve(arg("article-set") || path.join(runDir, "article-set.json"));
-  const promptPath = path.join(runDir, "antigravity-prompt.md");
+  const promptPath = path.join(runDir, "browser-production-prompt.md");
   const logPath = path.join(runDir, "orchestrator.log");
   const coverDir = path.join(runDir, "covers");
   const prompt = buildPrompt({ slot, date, articleSetPath, topic: arg("topic") });
@@ -242,10 +242,10 @@ async function main() {
     return;
   }
 
-  if (!hasFlag("skip-antigravity")) {
+  if (!hasFlag("skip-antigravity") && !hasFlag("skip-browser-wait")) {
     await appendLog(logPath, `browser Gemini/GPT production required; prompt written to ${promptPath}`);
     throw new Error(
-      `Browser Gemini/GPT production must write the article set first. Use the ALTOS Blog QA Chrome group with ${promptPath}, then rerun with --skip-antigravity --article-set ${articleSetPath}.`
+      `Browser Gemini/GPT production must write the article set first. Use the ALTOS Blog QA Chrome group with ${promptPath}, then rerun with --skip-browser-wait --article-set ${articleSetPath}.`
     );
   }
 

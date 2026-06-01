@@ -5,34 +5,28 @@
 - The cron job reads a source registry of official RSS/API/docs, trusted media and licensed image sources as research signals.
 - The default publishing mix is `breaking` 40%, `column` 35%, `feature` 25% so the blog includes fresh market news instead of only evergreen self-written essays.
 - It does not scrape or republish full articles.
-- Gemini must write or revise original ALTOS LAB synthesis in its own words.
+- The production path must write original ALTOS LAB synthesis in its own words.
 - Every generated article keeps visible `sourceLinks` for attribution and fact checking.
-- Source images, charts, screenshots and article art are not copied.
+- Source images, charts, screenshots and article art are not copied or rehosted just because attribution is present.
+- For news posts, each source becomes a visible source-card/dossier item: title, publisher, date, URL and a concise original summary of what the source supports.
+- Source article images may only be used when the license or official press-kit permission is explicit and stored. The default is a generated ALTOS LAB editorial visual.
 - Pinterest can be used only as visual direction. It must not be used as an image source.
 
-## Gemini + GPT Production Contract
+## Subagent Orchestration v3
 
-- Gemini is the production article workspace. Codex may orchestrate, research,
-  QA and publish, but production copy must pass through Gemini before ingest.
-- ChatGPT/GPT is the production cover workspace. Local generated art and stock
-  fallbacks are not production covers.
-- The worker must record `generation.provider=gemini-chatgpt`,
-  `generatedBy` containing `gemini`, and `coverGeneration.provider` containing
-  `ChatGPT`, `GPT` or `OpenAI`.
-- The ALTOS Blog QA Chrome group is used only while the run needs Gemini/GPT.
-  Tabs opened or claimed for the run must be closed or released afterward to
-  avoid Chrome memory pressure.
-- DeepSeek is legacy/admin fallback only and is not part of the formal daily
-  publishing pipeline.
+- DeepSeek is no longer part of the formal publishing path.
+- The current production loop uses the main Codex thread as the release controller and a `gpt-5.3-codex-spark` worker for repetitive drafting, multilingual revision and validate-only iteration.
+- Gemini and ChatGPT/GPT are browser workbenches, not release authorities. They may help draft prose or images only inside the dedicated Chrome tabs documented in `docs/content/blog-subagent-production-loop.md`.
+- The main brain is the only role allowed to call `--release`.
+- The LaunchAgent is a deterministic safety runner for prep/release timing, while Gemini/GPT browser production is handled by the Codex heartbeat/main-brain workflow.
 
 ## Cover Image Strategy
 
-- Preferred production path: generate a topic-specific, wordless cover through
-  ChatGPT/GPT, store/upload it to Vercel Blob, and keep prompt/provider metadata.
-- Optional curated/source images are for manual editorial exceptions only, not
-  the daily production default.
-- Pinterest, Midjourney galleries and design references can be used only as
-  style inspiration. The automation must not copy third-party images.
+- Preferred production path: generate topic-matched ALTOS LAB editorial visuals in the dedicated GPT/ChatGPT image tab, upload them through the signed media route, and keep internal provider/prompt/QA metadata.
+- Public generated-cover credit should read `ALTOS LAB editorial visual`; provider and prompt remain internal quality metadata.
+- Licensed third-party images are allowed only when the license, credit URL and landing page are stored and checked.
+- Optional expanded sources: Pexels API, Pixabay API, Openverse, Wikimedia/Openverse results, NASA and museum/public-domain registries through the source registry.
+- Pinterest can be used as style inspiration, but the automation must not copy Pinterest images because Pinterest does not grant commercial rights to the pinned image.
 - Required env:
   - optional `BLOG_IMAGE_PROVIDER=openverse`
   - optional `AUTO_GENERATE_BLOG_COVERS=true`
@@ -41,24 +35,23 @@
   - optional `PIXABAY_API_KEY=<pixabay-key>`
   - optional `BLOG_IMAGE_STORE_BLOB=true`
   - optional `BLOB_READ_WRITE_TOKEN=<vercel-blob-token>`
-- If GPT image generation or image QA fails, the article is held. The system
-  must not substitute local fallback art just to publish.
+- The preferred path is generated imagery, saved through the signed media upload route and served from Cloudflare generated media.
+- If GPT image generation is used, it must happen only in the dedicated ChatGPT/GPT image tab and the final image still has to pass production image QA.
+- If GPT image generation is unavailable, the candidate is held; local fallback art is disabled for production publishing.
 
 ## Publishing Rule
 
 Auto-publishing requires:
 
-- Gemini article drafting/revision.
-- ChatGPT/GPT-generated cover image.
-- Duplicate-topic/source-angle check against published and draft posts.
+- A local/subagent-generated four-language article set.
 - Trusted visible source links.
-- Topic-matched generated cover image with prompt/provider metadata and credit.
+- Topic-matched legally sourced cover image with attribution.
 - Quality score at or above the content-type threshold.
-- LLM-as-judge review approval when `BLOG_LLM_REVIEW` is enabled.
 - Anti-slop writing score at or above the content-type threshold.
 - No unsupported claims or copied source content.
-- Post-release monitoring through GA/GTM, Search Console, live URL checks, RSS
-  and sitemap evidence. Publishing is not counted as success by itself.
+- Public author is either `Tommy` or `Ken`; morning uses Tommy and afternoon uses Ken by default.
+- Body uses site-supported Markdown only: `##` sections, lists, tables, charts and short `**bold emphasis**`. FAQ items live in the `faqs` field, not as raw `###` headings in the body.
+- Public review copy uses ALTOS LAB editorial responsibility wording, not AI-generation disclosure copy.
 
 ## Anti-Slop Writing Gate
 
