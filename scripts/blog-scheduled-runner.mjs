@@ -100,6 +100,34 @@ async function appendLog(filePath, message) {
   await fs.appendFile(filePath, `${new Date().toISOString()} ${message}\n`, "utf8");
 }
 
+async function runDoctor({ mode, date, slot }) {
+  if (hasFlag("skip-doctor")) return { ok: true, skipped: true };
+  const result = await runCommand(process.execPath, [
+    "scripts/blog-sop-doctor.mjs",
+    "--mode",
+    mode,
+    "--date",
+    date,
+    "--slot",
+    slot
+  ], { cwd: process.cwd() });
+  if (result.code !== 0) {
+    return {
+      ok: false,
+      skipped: false,
+      code: result.code,
+      stdout: result.stdout,
+      stderr: result.stderr
+    };
+  }
+  return {
+    ok: true,
+    skipped: false,
+    stdout: result.stdout,
+    stderr: result.stderr
+  };
+}
+
 function usage() {
   console.log(`
 ALTOS LAB scheduled blog runner
@@ -134,6 +162,11 @@ function runCommand(command, args, { cwd, env = process.env }) {
 }
 
 async function createPrep({ date, slot }) {
+  const doctor = await runDoctor({ mode: "prep", date, slot });
+  if (!doctor.ok) {
+    return { ok: false, phase: "prep-doctor", stdout: doctor.stdout, stderr: doctor.stderr };
+  }
+
   const indexPath = candidateIndexPath(date, slot);
   if ((await exists(indexPath)) && !hasFlag("force")) {
     const existing = await readJson(indexPath);
@@ -270,6 +303,11 @@ function releaseWindowIssue({ date, slot }) {
 }
 
 async function release({ date, slot }) {
+  const doctor = await runDoctor({ mode: "release", date, slot });
+  if (!doctor.ok) {
+    return { ok: false, skipped: false, phase: "release-doctor", stdout: doctor.stdout, stderr: doctor.stderr };
+  }
+
   const indexPath = candidateIndexPath(date, slot);
   if (!(await exists(indexPath))) {
     return { ok: true, skipped: true, phase: "release", reason: "missing prepared candidate", indexPath };

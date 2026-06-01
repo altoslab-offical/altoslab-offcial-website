@@ -50,6 +50,16 @@ The macOS LaunchAgent is the deterministic safety runner. It wakes at the same f
 - prep windows: create a run folder, prompt card, and `awaiting_browser_production` manifest skeleton;
 - release windows: publish only an already `ready` manifest.
 
+Before either path continues, the runner executes:
+
+```bash
+node scripts/blog-sop-doctor.mjs \
+  --mode prep|release \
+  --slot morning|afternoon
+```
+
+The doctor checks the local worker env, LaunchAgent registration, production `/api/health`, Cloudflare KV CMS status, disabled legacy DeepSeek cron, and release candidate readiness. Release mode also requires admin readback credentials so the post-release verifier can inspect protected blog metadata.
+
 It does not pretend to operate Gemini or ChatGPT. Browser/Gemini/GPT production remains owned by the Codex heartbeat/main-brain workflow because it has Chrome extension access and can enforce tab-group rules.
 
 At prep time, the main brain must prepare a publishable candidate manifest before the release window.
