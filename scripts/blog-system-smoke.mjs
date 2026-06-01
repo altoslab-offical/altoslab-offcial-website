@@ -84,7 +84,8 @@ assert(covers.includes("searchPexels") && covers.includes("searchPixabay"), "ima
 assert(covers.includes("pinterest") && covers.includes("approvedImageUrl"), "image pipeline rejects Pinterest URLs while allowing style inspiration");
 assert(imageQuality.includes("visualChecks"), "image QA requires visualChecks for generated covers");
 assert(imageQuality.includes("MIN_IMAGE_WIDTH = 1200"), "image QA checks generated cover dimensions");
-assert(imageQuality.includes("Vercel Blob"), "image QA requires generated covers to be stored on Vercel Blob");
+assert(imageQuality.includes("isManagedGeneratedCoverUrl"), "image QA accepts managed generated media URLs for Cloudflare or legacy Blob storage");
+assert(imageQuality.includes("/api/blog/generated-media/"), "image QA accepts Cloudflare generated-media cover URLs");
 assert(ingestAuth.includes("createHmac") && ingestAuth.includes("timingSafeEqual"), "ingest API uses HMAC and timing-safe signature comparison");
 assert(ingestRoute.includes("verifyBlogIngestRequest"), "ingest route verifies HMAC before parsing release payloads");
 assert(ingestRoute.includes("validateOnly"), "ingest route supports validateOnly dry runs");
@@ -119,6 +120,8 @@ assert(!orchestrator.includes("--generate-missing-covers"), "orchestrator does n
 assert(scheduledRunner.includes("PREP_WINDOWS") && scheduledRunner.includes("RELEASE_WINDOWS"), "scheduled runner separates prep and release windows");
 assert(scheduledRunner.includes("awaiting_browser_production"), "scheduled prep creates a manifest skeleton instead of pretending to publish");
 assert(scheduledRunner.includes("releaseGateIssues"), "scheduled release checks the prepared candidate manifest before publishing");
+assert(scheduledRunner.includes("releaseWindowIssue"), "scheduled release refuses to publish outside the configured release window");
+assert(scheduledRunner.includes("force-release"), "scheduled release has an explicit manual override for emergency operation");
 assert(scheduledRunner.includes("missing prepared candidate"), "scheduled release skips safely when no candidate exists");
 assert(scheduledRunner.includes("articleSetPath file is missing"), "scheduled release checks that the ready article set still exists");
 assert(launchAgentPlist.includes("blog-scheduled-runner.mjs --scheduled"), "LaunchAgent runs the scheduled prep/release runner");

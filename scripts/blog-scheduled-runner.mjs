@@ -254,6 +254,17 @@ function releaseGateIssues(manifest, { date, slot }) {
   return issues;
 }
 
+function releaseWindowIssue({ date, slot }) {
+  if (hasFlag("force-release")) return "";
+  const parts = taiwanParts();
+  const nowDate = `${parts.year}-${parts.month}-${parts.day}`;
+  const window = RELEASE_WINDOWS[slot];
+  if (nowDate !== date || Number(parts.hour) !== window.hour || Number(parts.minute) !== window.minute) {
+    return `release window is not open; expected ${scheduledFor(date, slot)}`;
+  }
+  return "";
+}
+
 async function release({ date, slot }) {
   const indexPath = candidateIndexPath(date, slot);
   if (!(await exists(indexPath))) {
@@ -266,6 +277,8 @@ async function release({ date, slot }) {
   }
   const manifest = await readJson(manifestPath);
   const issues = releaseGateIssues(manifest, { date, slot });
+  const windowIssue = releaseWindowIssue({ date, slot });
+  if (windowIssue) issues.push(windowIssue);
   if (manifest.articleSetPath && !(await exists(path.resolve(manifest.articleSetPath)))) {
     issues.push("articleSetPath file is missing");
   }

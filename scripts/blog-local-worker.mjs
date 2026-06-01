@@ -457,6 +457,11 @@ async function writeJsonFile(filePath, payload) {
   await fs.writeFile(filePath, `${JSON.stringify(payload, null, 2)}\n`, "utf8");
 }
 
+function preparedCandidateIndexPath(payload, slot) {
+  const date = payload.generationDate || taiwanDate();
+  return path.join(process.cwd(), "data/blog-prepared-candidates", `${date}-${slot}.json`);
+}
+
 async function writePreparedCandidateManifest({ manifestPath, articleSetPath, releaseArticleSetPath, payload, slot, validate, publish }) {
   const errors = Array.isArray(validate.json?.errors) ? validate.json.errors : [];
   const qualitySummary = validate.json?.qualitySummary || {};
@@ -476,6 +481,7 @@ async function writePreparedCandidateManifest({ manifestPath, articleSetPath, re
     translationGroupId: payload.translationGroupId,
     articleSetPath: releaseArticleSetPath || articleSetPath,
     sourceArticleSetPath: articleSetPath,
+    manifestPath: manifestPath ? path.resolve(manifestPath) : undefined,
     coverFiles: (payload.posts || []).map((post) => post.coverLocalPath).filter(Boolean),
     coverUrls: (payload.posts || []).map((post) => post.cover).filter(Boolean),
     chromeEvidence: payload.chromeEvidence || {},
@@ -528,7 +534,10 @@ async function writePreparedCandidateManifest({ manifestPath, articleSetPath, re
         }
       : undefined
   };
-  if (manifestPath) await writeJsonFile(manifestPath, manifest);
+  if (manifestPath) {
+    await writeJsonFile(manifestPath, manifest);
+    await writeJsonFile(preparedCandidateIndexPath(payload, slot), manifest);
+  }
   return manifest;
 }
 

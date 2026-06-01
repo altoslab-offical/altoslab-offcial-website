@@ -61,10 +61,15 @@ const unsafeImageMetadataPattern =
 const genericGeneratedImagePattern =
   /(generic|abstract background|glowing dashboard|futuristic dashboard|server room|business meeting|robot handshake|stock photo|科技感背景|抽象科技|會議室|儀表板|伺服器機房|汎用|抽象|会議|서버룸|회의실|추상 배경)/i;
 
-function isVercelBlobUrl(url: string) {
+function isManagedGeneratedCoverUrl(url: string) {
   try {
-    const host = new URL(url).hostname;
-    return host.endsWith(".blob.vercel-storage.com") || host.endsWith(".public.blob.vercel-storage.com");
+    const parsed = new URL(url);
+    const host = parsed.hostname;
+    return (
+      host.endsWith(".blob.vercel-storage.com") ||
+      host.endsWith(".public.blob.vercel-storage.com") ||
+      parsed.pathname.startsWith("/api/blog/generated-media/")
+    );
   } catch {
     return false;
   }
@@ -318,8 +323,8 @@ async function reviewPostImage(post: BlogPost, options: Required<BlogImageQualit
     const allowedLocalHttp = options.allowLocalHttp && isAllowedLocalHttpUrl(post.cover);
     if (!/^https:\/\//.test(post.cover) && !allowedLocalHttp) {
       issues.push("generated cover must use a public https URL");
-    } else if (options.requireBlobCover && !isVercelBlobUrl(post.cover)) {
-      issues.push("generated cover must be stored on Vercel Blob before ingest");
+    } else if (options.requireBlobCover && !isManagedGeneratedCoverUrl(post.cover)) {
+      issues.push("generated cover must be stored in managed generated media before ingest");
     }
     if (options.verifyRemoteImage && (/^https:\/\//.test(post.cover) || allowedLocalHttp)) {
       probe = await probeRemoteImage(post.cover);
