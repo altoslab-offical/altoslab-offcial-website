@@ -50,6 +50,7 @@ Optional:
   --article-set <path>      Override manifest.articleSetPath
   --base-url <url>          Defaults to ALTOS_BLOG_BASE_URL or ${DEFAULT_BASE_URL}
   --admin-token <token>     Optional admin readback cookie value
+  --admin-password <value>  Optional admin password for login + readback
   --no-write-manifest       Do not append releaseVerification to the manifest
 `);
 }
@@ -436,9 +437,9 @@ async function verifyMetadataSurfaces(posts, root, errors, warnings) {
 }
 
 async function verifyAdminReadback(posts, root, errors, warnings) {
-  const token = arg("admin-token") || process.env.ALTOS_ADMIN_SESSION_TOKEN || process.env.ADMIN_SESSION_TOKEN || "";
-  if (!token) {
-    pushWarning(warnings, "admin readback skipped because no admin session token was provided");
+  const cookie = await adminCookie(root, warnings);
+  if (!cookie) {
+    pushWarning(warnings, "admin readback skipped because no admin token or password was provided");
     return null;
   }
 
@@ -446,7 +447,7 @@ async function verifyAdminReadback(posts, root, errors, warnings) {
     `${root}/api/admin/blog`,
     errors,
     { surface: "admin-blog" },
-    { Cookie: `altos_admin=${encodeURIComponent(token)}` }
+    { Cookie: cookie }
   );
   if (!response?.ok || !Array.isArray(json?.posts)) return null;
 
@@ -472,6 +473,40 @@ async function verifyAdminReadback(posts, root, errors, warnings) {
     }
   }
   return { count: adminPosts.length };
+}
+
+async function adminCookie(root, warnings) {
+  const token = arg("admin-token") || process.env.ALTOS_ADMIN_SESSION_TOKEN || process.env.ADMIN_SESSION_TOKEN || "";
+  if (token) return `altos_admin=${encodeURIComponent(token)}`;
+
+  const password = arg("admin-password") || process.env.ALTOS_ADMIN_PASSWORD || process.env.ADMIN_PASSWORD || "";
+  if (!password) return "";
+
+  try {
+    const response = await fetchWithTimeout(`${root}/api/admin/auth/login`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        "User-Agent": "altos-blog-release-verifier/1.0"
+      },
+      body: JSON.stringify({ password })
+    });
+    if (!response.ok) {
+      pushWarning(warnings, `admin login readback failed with HTTP ${response.status}`);
+      return "";
+    }
+    const setCookie = response.headers.get("set-cookie") || "";
+    const match = setCookie.match(/(?:^|,\s*)(altos_admin=[^;]+)/);
+    if (!match?.[1]) {
+      pushWarning(warnings, "admin login succeeded but did not return an altos_admin cookie");
+      return "";
+    }
+    return match[1];
+  } catch (error) {
+    pushWarning(warnings, `admin login readback failed: ${error instanceof Error ? error.message : "unknown error"}`);
+    return "";
+  }
 }
 
 async function main() {

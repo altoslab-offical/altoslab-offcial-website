@@ -93,7 +93,7 @@ node scripts/verify-blog-release.mjs \
   --manifest <runDir>/prepared-candidate.json
 ```
 
-13. Main brain reviews the verifier output and reports live URLs, public/API metadata, optional admin readback, RSS, sitemap, `llms.txt`, content hash, image QA, OG/Twitter image status, and any warnings.
+13. Main brain reviews the verifier output and reports live URLs, public/API metadata, admin readback when `ALTOS_ADMIN_PASSWORD`, `ADMIN_PASSWORD`, `ALTOS_ADMIN_SESSION_TOKEN`, or `ADMIN_SESSION_TOKEN` is available, RSS, sitemap, `llms.txt`, content hash, image QA, OG/Twitter image status, and any warnings.
 
 ## Release Rule
 

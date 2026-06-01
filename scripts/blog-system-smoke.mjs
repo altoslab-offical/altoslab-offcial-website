@@ -129,6 +129,7 @@ assert(scheduledRunner.includes("articleSetPath file is missing"), "scheduled re
 assert(scheduledRunner.includes("scripts/verify-blog-release.mjs"), "scheduled release runs post-release verification before reporting success");
 assert(releaseVerifier.includes("manifest status must be released"), "release verifier requires a released prepared-candidate manifest");
 assert(releaseVerifier.includes("public API qualityStatus must be passed"), "release verifier checks public quality metadata");
+assert(releaseVerifier.includes("ALTOS_ADMIN_PASSWORD") && releaseVerifier.includes("/api/admin/auth/login"), "release verifier can log in for protected admin readback");
 assert(releaseVerifier.includes("og:image") && releaseVerifier.includes("twitter:image"), "release verifier checks social preview images");
 assert(releaseVerifier.includes("/feed.xml") && releaseVerifier.includes("/sitemap.xml") && releaseVerifier.includes("/llms.txt"), "release verifier checks public metadata surfaces");
 assert(releaseVerifier.includes("AI-generated") && releaseVerifier.includes("SEO\\s*\\/\\s*GEO"), "release verifier blocks public leakage of internal production copy");
