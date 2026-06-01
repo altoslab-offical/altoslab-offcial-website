@@ -21,9 +21,7 @@ if grep -Eq 'replace-with|test-secret' "$ENV_FILE"; then
   exit 1
 fi
 
-if [[ ! -x "$ROOT_DIR/scripts/blog-antigravity-orchestrator.mjs" ]]; then
-  chmod +x "$ROOT_DIR/scripts/blog-antigravity-orchestrator.mjs"
-fi
+chmod +x "$ROOT_DIR/scripts/blog-antigravity-orchestrator.mjs" "$ROOT_DIR/scripts/blog-local-worker.mjs" "$ROOT_DIR/scripts/blog-scheduled-runner.mjs"
 
 mkdir -p "$HOME/Library/LaunchAgents" "$HOME/Library/Logs"
 cp "$PLIST_SOURCE" "$PLIST_TARGET"

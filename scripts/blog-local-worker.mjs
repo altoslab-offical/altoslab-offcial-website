@@ -29,6 +29,8 @@ Required publish flow:
 
 Useful dry runs:
   node scripts/blog-local-worker.mjs --article-set ./article-set.json --slot afternoon --validate-only
+  node scripts/blog-local-worker.mjs --article-set ./article-set.json --slot morning --validate-only --manifest ./prepared-candidate.json
+  node scripts/blog-local-worker.mjs --article-set ./article-set.json --slot morning --validate-only --browser-evidence ./browser-evidence.json --approve-design-qa
   node scripts/blog-local-worker.mjs --make-prompt --slot morning --topic "AI agents in customer operations"
   node scripts/blog-local-worker.mjs --article-set ./article-set.json --slot morning --publish
 
@@ -82,6 +84,21 @@ function hashString(input) {
     hash = Math.imul(hash, 16777619);
   }
   return hash >>> 0;
+}
+
+function stableJson(value) {
+  if (Array.isArray(value)) return `[${value.map(stableJson).join(",")}]`;
+  if (value && typeof value === "object") {
+    return `{${Object.keys(value)
+      .sort()
+      .map((key) => `${JSON.stringify(key)}:${stableJson(value[key])}`)
+      .join(",")}}`;
+  }
+  return JSON.stringify(value);
+}
+
+function sha256(input) {
+  return crypto.createHash("sha256").update(String(input)).digest("hex");
 }
 
 function clampColor(value) {
@@ -322,6 +339,17 @@ function isAllowedCoverUrl(url) {
 function localPreflight(payload) {
   const issues = [];
   const posts = Array.isArray(payload.posts) ? payload.posts : [];
+  const chromeEvidence = payload.chromeEvidence || {};
+  const geminiEvidence = chromeEvidence.gemini || {};
+  const chatgptEvidence = chromeEvidence.chatgpt || {};
+  const humanDesignQa = payload.humanDesignQa || {};
+
+  if (geminiEvidence.usedExistingTab !== true) issues.push("chromeEvidence.gemini.usedExistingTab must be true");
+  if (geminiEvidence.changedModel === true) issues.push("chromeEvidence.gemini.changedModel must not be true");
+  if (chatgptEvidence.usedExistingTab !== true) issues.push("chromeEvidence.chatgpt.usedExistingTab must be true");
+  if (chatgptEvidence.changedModel === true) issues.push("chromeEvidence.chatgpt.changedModel must not be true");
+  if (humanDesignQa.approved !== true) issues.push("humanDesignQa.approved must be true before validate-only can mark a candidate ready");
+
   const languages = posts.map((post) => post.language);
   for (const language of LANGUAGES) {
     if (!languages.includes(language)) issues.push(`missing ${language} post`);
@@ -348,7 +376,7 @@ function localPreflight(payload) {
     if (!generation.provider || !generation.prompt || !generation.generatedAt) {
       issues.push(`${post.language || "unknown"} coverGeneration must include provider, prompt and generatedAt`);
     }
-    if (!String(post.generatedBy || payload.generation?.provider || "").toLowerCase().includes("gemini")) {
+    if (!String(post.generatedBy || "").toLowerCase().includes("gemini")) {
       issues.push(`${post.language || "unknown"} article must be drafted or revised through Gemini`);
     }
     if (!/(chatgpt|gpt|openai)/i.test(String(generation.provider || ""))) {
@@ -362,9 +390,156 @@ function localPreflight(payload) {
   return issues;
 }
 
+function manifestStatusFromValidate(validate, payload) {
+  const errors = Array.isArray(validate.json?.errors) ? validate.json.errors : [];
+  const quality = validate.json?.qualitySummary || {};
+  const image = validate.json?.imageQualitySummary || {};
+  const designApproved = payload.humanDesignQa?.approved === true;
+  return validate.ok &&
+    validate.json?.wouldPublish === true &&
+    errors.length === 0 &&
+    quality.approved === true &&
+    image.approved === true &&
+    designApproved
+    ? "ready"
+    : "held";
+}
+
+function digestSourcePost(post) {
+  return {
+    language: post.language,
+    slug: post.slug,
+    title: post.title,
+    seoTitle: post.seoTitle,
+    seoDescription: post.seoDescription,
+    excerpt: post.excerpt,
+    contentType: post.contentType,
+    newsCategory: post.newsCategory,
+    topic: post.topic,
+    audience: post.audience,
+    geoSummary: post.geoSummary,
+    body: post.body,
+    keyTakeaways: post.keyTakeaways,
+    faqs: post.faqs,
+    sourceLinks: post.sourceLinks,
+    tags: post.tags,
+    author: post.author,
+    cover: post.cover,
+    coverAlt: post.coverAlt,
+    coverSource: post.coverSource,
+    coverGeneration: post.coverGeneration,
+    coverCredit: post.coverCredit,
+    aiDisclosure: post.aiDisclosure
+  };
+}
+
+function releaseContentSha256(payload) {
+  const posts = [...(payload.posts || [])]
+    .map(digestSourcePost)
+    .sort((a, b) => String(a.language || "").localeCompare(String(b.language || "")));
+  return sha256(
+    stableJson({
+      translationGroupId: payload.translationGroupId || payload.posts?.find((post) => post.translationGroupId)?.translationGroupId,
+      slot: payload.slot,
+      generationDate: payload.generationDate,
+      scheduledFor: payload.scheduledFor,
+      posts
+    })
+  );
+}
+
+function bodySha256(post) {
+  return sha256(String(post.body || ""));
+}
+
+async function writeJsonFile(filePath, payload) {
+  await fs.mkdir(path.dirname(filePath), { recursive: true });
+  await fs.writeFile(filePath, `${JSON.stringify(payload, null, 2)}\n`, "utf8");
+}
+
+async function writePreparedCandidateManifest({ manifestPath, articleSetPath, releaseArticleSetPath, payload, slot, validate, publish }) {
+  const errors = Array.isArray(validate.json?.errors) ? validate.json.errors : [];
+  const qualitySummary = validate.json?.qualitySummary || {};
+  const imageQualitySummary = validate.json?.imageQualitySummary || {};
+  const status = publish
+    ? publish.ok && publish.json?.publishedIds?.length > 0
+      ? "released"
+      : "held"
+    : manifestStatusFromValidate(validate, payload);
+  const manifest = {
+    status,
+    slot,
+    expectedReleaseAt: payload.scheduledFor || scheduledFor(payload.generationDate || taiwanDate(), slot),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    ingestRunId: payload.ingestRunId,
+    translationGroupId: payload.translationGroupId,
+    articleSetPath: releaseArticleSetPath || articleSetPath,
+    sourceArticleSetPath: articleSetPath,
+    coverFiles: (payload.posts || []).map((post) => post.coverLocalPath).filter(Boolean),
+    coverUrls: (payload.posts || []).map((post) => post.cover).filter(Boolean),
+    chromeEvidence: payload.chromeEvidence || {},
+    validateOnly: {
+      status: validate.status,
+      wouldPublish: validate.json?.wouldPublish === true,
+      qualityApproved: qualitySummary.approved === true,
+      qualityScore: qualitySummary.score,
+      qualityThreshold: qualitySummary.threshold,
+      imageApproved: imageQualitySummary.approved === true,
+      imageScore: imageQualitySummary.score,
+      imageThreshold: imageQualitySummary.threshold,
+      errors,
+      warnings: [...(qualitySummary.warnings || []), ...(imageQualitySummary.warnings || [])]
+    },
+    qualityManifest: {
+      gateVersion: "altos-blog-local-worker-v1",
+      reviewer: payload.humanDesignQa?.reviewedBy || "main-brain",
+      reviewedAt: payload.humanDesignQa?.reviewedAt || new Date().toISOString(),
+      contentSha256: releaseContentSha256(payload),
+      posts: (payload.posts || []).map((post) => ({
+        language: post.language,
+        slug: post.slug,
+        bodySha256: bodySha256(post),
+        cover: post.cover
+      })),
+      qualitySummary: {
+        approved: qualitySummary.approved === true,
+        score: qualitySummary.score,
+        threshold: qualitySummary.threshold,
+        issues: qualitySummary.issues || [],
+        warnings: qualitySummary.warnings || []
+      },
+      imageQualitySummary: {
+        approved: imageQualitySummary.approved === true,
+        score: imageQualitySummary.score,
+        threshold: imageQualitySummary.threshold,
+        issues: imageQualitySummary.issues || [],
+        warnings: imageQualitySummary.warnings || []
+      }
+    },
+    humanDesignQa: payload.humanDesignQa || { approved: false },
+    publish: publish
+      ? {
+          status: publish.status,
+          publishedIds: publish.json?.publishedIds || [],
+          heldDraftIds: publish.json?.heldDraftIds || [],
+          errors: publish.json?.errors || [],
+          event: publish.json?.event
+        }
+      : undefined
+  };
+  if (manifestPath) await writeJsonFile(manifestPath, manifest);
+  return manifest;
+}
+
 async function readArticleSet(filePath, slot) {
   const raw = await fs.readFile(filePath, "utf8");
   const payload = JSON.parse(raw);
+  const browserEvidencePath = arg("browser-evidence");
+  if (browserEvidencePath) {
+    const browserEvidence = JSON.parse(await fs.readFile(browserEvidencePath, "utf8"));
+    payload.chromeEvidence = browserEvidence.chromeEvidence || browserEvidence;
+  }
   const date = payload.generationDate || taiwanDate();
   return {
     slot,
@@ -387,6 +562,27 @@ async function requestIngest(payload, validateOnly) {
 
   const body = JSON.stringify({ ...payload, validateOnly });
   const response = await fetch(`${baseUrl()}/api/admin/blog/ingest-set${validateOnly ? "?validateOnly=true" : ""}`, {
+    method: "POST",
+    headers: signedHeaders(secret, body),
+    body
+  });
+  const json = await response.json().catch(() => ({}));
+  return { status: response.status, ok: response.ok, json };
+}
+
+async function requestRelease(payload, qualityManifest) {
+  const secret = process.env.BLOG_INGEST_HMAC_SECRET;
+  if (!secret) throw new Error("BLOG_INGEST_HMAC_SECRET is required");
+
+  const body = JSON.stringify({
+    ...payload,
+    generation: {
+      ...payload.generation,
+      provider: "local-antigravity"
+    },
+    qualityManifest
+  });
+  const response = await fetch(`${baseUrl()}/api/admin/blog/release-set`, {
     method: "POST",
     headers: signedHeaders(secret, body),
     body
@@ -497,22 +693,62 @@ async function main() {
   if (!articleSet) throw new Error("--article-set is required unless --make-prompt is used");
   if (!SLOT_HOURS[slot]) throw new Error("--slot must be morning or afternoon");
 
+  const manifestPath = arg("manifest");
   const payload = await uploadLocalCovers(await generateMissingCovers(await readArticleSet(articleSet, slot), slot));
+  if (hasFlag("approve-design-qa")) {
+    payload.humanDesignQa = {
+      approved: true,
+      reviewedBy: "main-brain",
+      reviewedAt: new Date().toISOString(),
+      notes: arg("design-qa-notes", "Approved after main-brain article and image QA.")
+    };
+  }
   const issues = localPreflight(payload);
   if (issues.length) {
     console.error(JSON.stringify({ ok: false, phase: "local-preflight", issues }, null, 2));
     process.exit(1);
   }
 
+  let releaseArticleSetPath = "";
+  if (manifestPath) {
+    releaseArticleSetPath = path.join(path.dirname(path.resolve(manifestPath)), "article-set.release.json");
+    await writeJsonFile(releaseArticleSetPath, payload);
+  }
+
   const validate = await requestIngest(payload, true);
   console.log(JSON.stringify({ phase: "validateOnly", status: validate.status, response: validate.json }, null, 2));
+  await writePreparedCandidateManifest({
+    manifestPath,
+    articleSetPath: path.resolve(articleSet),
+    releaseArticleSetPath,
+    payload,
+    slot,
+    validate
+  });
   if (!validate.ok || !validate.json?.wouldPublish) {
     process.exit(validate.ok ? 2 : 1);
   }
 
   if (hasFlag("publish")) {
-    const publish = await requestIngest(payload, false);
-    console.log(JSON.stringify({ phase: "publish", status: publish.status, response: publish.json }, null, 2));
+    const preparedManifest = await writePreparedCandidateManifest({
+      manifestPath,
+      articleSetPath: path.resolve(articleSet),
+      releaseArticleSetPath,
+      payload,
+      slot,
+      validate
+    });
+    const publish = await requestRelease(payload, preparedManifest.qualityManifest);
+    console.log(JSON.stringify({ phase: "release", status: publish.status, response: publish.json }, null, 2));
+    await writePreparedCandidateManifest({
+      manifestPath,
+      articleSetPath: path.resolve(articleSet),
+      releaseArticleSetPath,
+      payload,
+      slot,
+      validate,
+      publish
+    });
     if (!publish.ok) process.exit(1);
     return;
   }

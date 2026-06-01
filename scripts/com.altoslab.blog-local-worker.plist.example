@@ -9,15 +9,27 @@
     <string>/usr/bin/env</string>
     <string>zsh</string>
     <string>-lc</string>
-    <string>source "$HOME/.altoslab-blog-worker.env" 2&gt;/dev/null || true; cd /Users/asdc163/Documents/官方網站 &amp;&amp; node scripts/blog-antigravity-orchestrator.mjs --publish</string>
+    <string>source "$HOME/.altoslab-blog-worker.env" 2&gt;/dev/null || true; cd /Users/asdc163/Documents/官方網站 &amp;&amp; "${ALTOS_BLOG_NODE_BIN:-/Users/asdc163/.nvm/versions/node/v22.22.0/bin/node}" scripts/blog-scheduled-runner.mjs --scheduled</string>
   </array>
   <key>StartCalendarInterval</key>
   <array>
     <dict>
       <key>Hour</key>
+      <integer>8</integer>
+      <key>Minute</key>
+      <integer>10</integer>
+    </dict>
+    <dict>
+      <key>Hour</key>
       <integer>9</integer>
       <key>Minute</key>
       <integer>0</integer>
+    </dict>
+    <dict>
+      <key>Hour</key>
+      <integer>15</integer>
+      <key>Minute</key>
+      <integer>10</integer>
     </dict>
     <dict>
       <key>Hour</key>

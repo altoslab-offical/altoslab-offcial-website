@@ -122,6 +122,22 @@ Required JSON shape:
     "promptVersion": "altos-gemini-gpt-browser-v1",
     "model": "Gemini copy + ChatGPT/GPT image browser workflow"
   },
+  "chromeEvidence": {
+    "gemini": {
+      "usedExistingTab": true,
+      "continuedExistingConversation": true,
+      "changedModel": false,
+      "title": "",
+      "url": "https://gemini.google.com/app"
+    },
+    "chatgpt": {
+      "usedExistingTab": true,
+      "continuedExistingConversation": true,
+      "changedModel": false,
+      "title": "",
+      "url": "https://chatgpt.com/"
+    }
+  },
   "posts": [
     {
       "language": "zh-Hant",

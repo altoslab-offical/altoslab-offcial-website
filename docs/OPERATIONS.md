@@ -3,29 +3,51 @@
 ## Production URLs
 
 - Vercel production alias: https://altoslab-offcial-website.vercel.app
+- Cloudflare Workers target: `altoslab-official-website`
+- Cloudflare Workers production URL: https://altoslab-official-website.altoslab-ai.workers.dev
 - Target custom domain: https://altoslab.com
+- Current canonical production domain: https://altoslab-ai.cc
 - Admin: `/admin`
 - Blog: `/blog`
 - Health check: `/api/health`
 
+## Cloudflare Free-First Architecture
+
+ALTOS LAB now supports a Cloudflare-first production path to avoid Vercel Blob being a hard dependency:
+
+- Next.js runs on Cloudflare Workers via OpenNext (`@opennextjs/cloudflare`).
+- CMS JSON and generated blog covers are stored in Cloudflare KV namespace `ALTOS_BLOG_KV` on the free plan.
+- R2 support remains in the codebase as a future object-storage upgrade, but it is not required for the free-first path.
+- Generated covers are served through same-origin `/api/blog/generated-media/:filename`, so the production image QA gate can verify content type, size and dimensions without requiring a public bucket domain.
+- The local Antigravity/Codex worker still writes and publishes the article set because Antigravity is a local/free writing engine. Cloudflare is the production release, storage and public serving layer.
+- DeepSeek remains disabled for the formal daily blog workflow.
+
+Run before Cloudflare deploy:
+
+```bash
+npm run cloudflare:whoami
+scripts/cloudflare-free-deploy-setup.sh
+npm run deploy:cloudflare
+```
+
+`npm run deploy:cloudflare` runs the Cloudflare build first, syncs the homepage static asset into Workers Assets, then deploys the current `.open-next` worker bundle.
+
+The setup script reads `~/.altoslab-blog-worker.env` when present and syncs required Cloudflare secrets without printing values.
+
 ## Domain Cutover
 
-目前 `altoslab.com` 和 `www.altoslab.com` 仍指向 Netlify。要讓正式網域吃到 Vercel 版本，DNS 需要切到 Vercel 專案顯示的值。
+目前 `altoslab.com` 和 `www.altoslab.com` 仍指向 Netlify，`altoslab-ai.cc` 仍是目前 canonical domain。Cloudflare free-first 版本已先跑在 workers.dev；要把正式網域完整切到 Cloudflare，下一步是在 Cloudflare Workers routes/custom domain 裡綁定正式網域，並把 DNS 指到 Cloudflare。
 
-Typical Vercel values:
-
-- Apex `altoslab.com`: A record `76.76.21.21`
-- `www.altoslab.com`: CNAME `cname.vercel-dns-0.com` or the value shown in Vercel Domains
-
-Always confirm the exact records in Vercel Project Settings -> Domains before changing DNS.
+Before cutover, keep `~/.altoslab-blog-worker.env` pointing to the workers.dev URL so the local Antigravity/Codex worker writes into Cloudflare KV production storage.
 
 ## Required Production Environment Variables
 
-Set these in Vercel Project Settings -> Environment Variables -> Production, then redeploy:
+Set these in Cloudflare Worker secrets/vars for the Cloudflare production path. Vercel values remain legacy fallback only.
 
 ```env
 NEXT_PUBLIC_SITE_URL=https://altoslab.com
 NEXT_PUBLIC_GTM_ID=GTM-WJ96VR7V
+NEXT_PUBLIC_GA_MEASUREMENT_ID=G-5VSLFNVD28
 GOOGLE_SITE_VERIFICATION=<google-search-console-token>
 BING_SITE_VERIFICATION=<bing-webmaster-tools-token>
 YANDEX_SITE_VERIFICATION=<optional-yandex-token>
@@ -51,36 +73,32 @@ CRON_SECRET=<long-random-cron-secret>
 BLOG_DISABLE_DEEPSEEK_CRON=true
 BLOG_INGEST_HMAC_SECRET=<long-random-external-ingest-secret>
 AUTO_PUBLISH_BLOG=true
-BLOG_ALLOW_LOCAL_FALLBACK_COVERS=0
+CLOUDFLARE_KV_ENABLED=1
+CLOUDFLARE_KV_BINDING=ALTOS_BLOG_KV
+CLOUDFLARE_R2_ENABLED=0
+CLOUDFLARE_R2_BINDING=ALTOS_BLOG_R2
 ```
 
 Notes:
 
-- Google Analytics is routed through the official GTM container. Current official tracking IDs:
-  - GTM account: `ALTOS LAB` (`6358339921`)
-  - GTM container: `altoslab-ai.cc` / `GTM-WJ96VR7V` (`254100713`)
-  - GTM live version: `2` / `GA4 base tag`
-  - GA4 property: `ALTOS LAB Official Website` (`539513224`)
-  - GA4 web stream: `14979358723`
-  - GA4 measurement ID: `G-5VSLFNVD28`
+- Google Analytics is routed through the official GTM container. Current production source confirms `GTM-WJ96VR7V` and GA4 measurement ID `G-5VSLFNVD28` on `https://altoslab-ai.cc`.
 - `ADMIN_SESSION_TOKEN` should be at least 32 random bytes.
+- Cloudflare production should prefer `cmsStorage.provider = cloudflare-kv`. Vercel Blob is now a legacy fallback, not the primary official blog storage path.
+- Cloudflare KV stores encrypted CMS JSON when `CMS_ENCRYPTION_KEY` is configured. Generated blog covers are not encrypted because they are public website assets.
 - Vercel Blob is the default durable CMS store. `BLOB_READ_WRITE_TOKEN` is created when the `altoslab-cms` Blob store is linked to the Vercel project.
 - The current Vercel Blob store is public-access, so `BLOB_ACCESS=public` and `CMS_ENCRYPTION_KEY` are required in production. CMS JSON is encrypted server-side before it is written to Blob.
 - Upstash Redis is also supported and takes priority when `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` are configured. The token must be the standard write token, not the read-only token.
 - Without Vercel Blob or Upstash env vars, production can still render seed content, but admin edits and contact leads will not persist.
-- `AUTO_PUBLISH_BLOG=true` allows external Gemini + GPT/Codex article sets to publish automatically only after deterministic article quality, multilingual parity, duplicate-topic, source and image QA gates approve the full four-language set. Fallback template output, malformed model output, thin content, repeated topics, missing sources, missing images, invalid HTTPS links or failed multilingual pairing stay draft/held.
-- `BLOG_INGEST_HMAC_SECRET` protects `POST /api/admin/blog/ingest-set` and `POST /api/admin/blog/media`. The local worker must use the same secret in `~/.altoslab-blog-worker.env`.
+- `AUTO_PUBLISH_BLOG=true` allows external Antigravity/Codex article sets to publish automatically only after deterministic article quality, multilingual parity, source and image QA gates approve the full four-language set. Fallback template output, malformed model output, thin content, missing sources, missing images, invalid HTTPS links or failed multilingual pairing stay draft/held.
+- `BLOG_INGEST_HMAC_SECRET` protects `POST /api/admin/blog/ingest-set`, `POST /api/admin/blog/release-set` and `POST /api/admin/blog/media`. The local worker must use the same secret in `~/.altoslab-blog-worker.env`.
 - `BLOG_DISABLE_DEEPSEEK_CRON=true` keeps the legacy DeepSeek cron path disabled. DeepSeek can remain configured for manual/admin fallback work, but it is not part of the formal daily publishing pipeline.
-- `CRON_SECRET` protects the legacy `/api/cron/blog-drafts` routes if they are manually invoked. Vercel production should not schedule those routes for the formal blog workflow.
-- Daily generation/publishing is now browser-first and fail-closed: Gemini writes/revises the article set in the ALTOS Blog QA Chrome group; ChatGPT/GPT generates the covers; Codex/worker uploads covers, calls production `validateOnly`, checks duplicate topics, and publishes only if production returns `wouldPublish: true`.
-- Browser tabs used for Gemini/GPT production are opened or claimed only while needed, then closed or released after the run to avoid Chrome memory pressure.
-- `BLOG_ALLOW_LOCAL_FALLBACK_COVERS=0` keeps programmatic/local cover generation out of production. Set it to `1` only for local fixture tests, never for formal blog publishing.
-- Install the local LaunchAgent with `scripts/install-blog-launch-agent.sh` after `~/.altoslab-blog-worker.env` contains the real production `BLOG_INGEST_HMAC_SECRET`. The installer refuses placeholder or test secrets.
+- `CRON_SECRET` protects the legacy `/api/cron/blog-drafts` routes if they are manually invoked. Cloudflare production should not schedule those routes for the formal blog workflow.
+- Daily generation/publishing is local-first and Cloudflare release-gated. Gemini writes the article set in the dedicated Chrome Blog QA tab, GPT/ChatGPT generates covers in the matching Blog QA tab, Codex/main-brain records browser evidence and signs a `qualityManifest`, and production writes only through `POST /api/admin/blog/release-set` after HMAC, content digest, four-language completeness, publish metadata and generated-cover image QA all pass. The older full `ingest-set?validateOnly=true` route remains the required dry-run diagnostic before release; release-time jobs must never generate fresh content.
+- Install the local LaunchAgent with `scripts/install-blog-launch-agent.sh` after `~/.altoslab-blog-worker.env` contains the real production `BLOG_INGEST_HMAC_SECRET`. The installer refuses placeholder or test secrets. The LaunchAgent runs `scripts/blog-scheduled-runner.mjs --scheduled` at `08:10`, `09:00`, `15:10`, and `16:00` Asia/Taipei. It creates/reads prepared candidate manifests and fails closed; it does not operate Chrome by itself.
 - The source registry controls the default mix: 40% `breaking`, 35% `column`, 25% `feature`. Breaking posts prioritize latest official/trusted news; columns turn fresh signals into operator decisions; features turn recent sources into durable frameworks.
 - `BLOG_TREND_SOURCES` is optional. If unset, the app uses `lib/blog-source-registry.ts`, which includes official AI/product/search sources and trusted media. If set, it should contain only live RSS/Atom feeds.
 - `BLOG_IMAGE_STORE_BLOB=true` copies selected legal cover images into Vercel Blob when `BLOB_READ_WRITE_TOKEN` is available. If Blob copy fails, the original licensed image URL stays in place and the issue is recorded in cover generation metadata.
 - Search verification env vars are optional until the matching Search Console/Webmaster account provides the token. Once set and redeployed, the homepage and App Router pages emit the required verification meta tags.
-- Performance monitoring is part of the publishing loop. After release, check GA/GTM events, Search Console indexing/query data, RSS/sitemap visibility and live image URLs; do not treat a successful publish response as proof that the article is performing.
 
 ## Vercel Project Settings
 
@@ -101,6 +119,7 @@ Run locally before pushing:
 npm run typecheck
 npm run test:blog
 npm run build
+npm run build:cloudflare
 ```
 
 After Vercel deploys:
@@ -121,13 +140,14 @@ Expected results:
 
 - `/` returns 200 and preserves the original UI from `index.html`.
 - `/admin` redirects to `/admin/login` when not signed in.
-- `/api/health` reports `adminConfigured: true`, `integrations.externalBlogIngestConfigured: true`, `integrations.legacyDeepSeekCronDisabled: true`, and `cmsStorage.provider` as `vercel-blob` or `upstash-redis` in production.
+- `/api/health` reports `adminConfigured: true`, `integrations.externalBlogIngestConfigured: true`, `integrations.legacyDeepSeekCronDisabled: true`, `integrations.imageCloudflareKvConfigured: true`, and `cmsStorage.provider` as `cloudflare-kv` on Cloudflare production.
 - `/blog` returns 200 and remains indexable.
 - `/feed.xml` returns RSS XML for published blog posts.
 - `/llms.txt` returns a concise LLM-readable site map.
 - `/llms-full.txt` returns expanded answer-engine context for services, projects and published articles.
 - `/api/*` and `/admin/*` return `X-Robots-Tag: noindex, nofollow, noarchive`.
 - `/api/admin/blog/ingest-set` returns 401 without signed ingest headers and supports `?validateOnly=true`.
+- `/api/admin/blog/release-set` returns 401 without signed ingest headers and only accepts an approved `qualityManifest`, matching content digests, four-language completeness, valid publish metadata and a fresh production image QA pass.
 - Production smoke must cover five routes: unsigned 401, validate-only success, image QA failure held, content quality failure held, and complete four-language publish success.
 - `/api/cron/blog-drafts` returns 401 without `CRON_SECRET`; when `BLOG_DISABLE_DEEPSEEK_CRON=true`, authenticated calls return a skipped legacy response rather than generating official daily posts.
 
@@ -136,11 +156,6 @@ Expected results:
 Before promoting a deployment, verify:
 
 - Homepage source does not contain `altoslab-site2`.
-- Canonical host checks are clean:
-  - `https://altoslab-ai.cc/*` public pages return `200`.
-  - `https://www.altoslab-ai.cc/*` public pages and metadata endpoints redirect to the apex host with `308`.
-  - `/robots.txt`, `/sitemap.xml`, `/feed.xml`, `/llms.txt`, `/llms-full.txt` and `/manifest.webmanifest` do not serve duplicate `www` metadata.
-  - In Search Console, "Page with redirect" is acceptable only for alternate host URLs such as `www`; canonical apex URLs should remain indexable.
 - Homepage has canonical, OpenGraph/Twitter image, Organization and WebSite JSON-LD, RSS and LLM alternate links.
 - Homepage and App Router pages expose Search Console/Webmaster verification meta tags when the corresponding verification env var is set.
 - `/robots.txt` references `/sitemap.xml`, allows public pages and answer-engine crawlers, and disallows private admin/API surfaces.
@@ -156,14 +171,15 @@ Before promoting a deployment, verify:
 
 1. Log in at `/admin`.
 2. Use the Blog CMS workbench to generate drafts, filter by language/status/review state, edit SEO/GEO fields, manage source links and run the publishing checklist.
-3. Gemini + GPT/Codex-generated posts publish automatically only when the production quality gate approves the full zh-Hant/en/ja/ko set and all generated covers pass image QA. If a post is held, review the listed quality issues before manual publishing.
+3. Local Antigravity/Codex-generated posts publish automatically only when the production quality gate approves the full zh-Hant/en/ja/ko set and all generated covers pass image QA. If a post is held, review the listed quality issues before manual publishing.
 4. Before manually publishing or overriding a held post, confirm:
    - SEO title and description are specific.
    - GEO summary directly answers the search intent.
    - Article body contains visible answer paragraphs, not only keywords.
    - Source links support trend claims.
    - FAQ answers are present in the article and mirrored in structured data.
-   - Cover image is generated through ChatGPT/GPT, stored in Vercel Blob, visually safe, topic-matched, and has accurate alt text plus editorial credit.
+   - Cover image is generated or explicitly licensed, stored in Cloudflare generated media or legacy Vercel Blob, visually safe, topic-matched, and has accurate alt text plus public `coverCredit: "ALTOS LAB editorial visual"` for generated covers.
+   - Public author is `Tommy` or `Ken`; public review copy uses ALTOS LAB editorial responsibility wording rather than AI-generation disclosure copy.
    - `qualityChecks.hasHumanReview=true` or `qualityChecks.hasQualityReviewerApproval=true`, and `reviewStatus=approved`.
 5. Do not manually publish fallback template output without rewriting it into a real article.
 

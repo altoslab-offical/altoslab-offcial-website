@@ -48,7 +48,9 @@ export function middleware(request: NextRequest) {
     pathname === "/api/admin/auth/login" ||
     pathname === "/api/admin/auth/logout";
   const isPublicSignedIngestRoute =
-    pathname === "/api/admin/blog/ingest-set" || pathname === "/api/admin/blog/media";
+    pathname === "/api/admin/blog/ingest-set" ||
+    pathname === "/api/admin/blog/release-set" ||
+    pathname === "/api/admin/blog/media";
 
   if ((!isAdminPage && !isAdminApi) || isPublicAuthRoute || isPublicSignedIngestRoute) {
     return nextWithPathname(request);
