@@ -83,20 +83,6 @@ const copy = {
   }
 };
 
-function articleTaxonomy(post: BlogPost) {
-  const seen = new Set<string>();
-  const typeLabel = blogContentTypeLabel(post.contentType, post.language).toLowerCase();
-  return [post.newsCategory, ...post.tags.slice(0, 3)]
-    .filter(Boolean)
-    .filter((item) => {
-      const key = item.toLowerCase();
-      if (key === typeLabel) return false;
-      if (seen.has(key)) return false;
-      seen.add(key);
-      return true;
-    });
-}
-
 const sourceTranslationHeadings = new Set([
   "來源與轉譯備註",
   "Source and translation note",
@@ -133,7 +119,6 @@ function extractSourceTranslationNote(body: string) {
 
 export async function BlogArticle({ post }: { post: BlogPost }) {
   const dictionary = copy[post.language];
-  const taxonomy = articleTaxonomy(post);
   const sourceTranslationNote = extractSourceTranslationNote(post.body);
   const relatedPosts = await getRelatedPublishedBlogPosts(post, 3);
   const locale = post.language === "en" ? "en" : "zh-TW";
@@ -170,7 +155,6 @@ export async function BlogArticle({ post }: { post: BlogPost }) {
               <span className={`blog-craft-type-badge is-${post.contentType}`}>
                 {blogContentTypeLabel(post.contentType, post.language)}
               </span>
-              <span>{taxonomy.join(" / ")}</span>
               <span>{dictionary.readTime(post.readTimeMinutes)}</span>
             </p>
             <h1>{renderBrandText(post.title)}</h1>
