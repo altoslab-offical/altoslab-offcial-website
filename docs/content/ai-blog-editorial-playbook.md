@@ -181,9 +181,10 @@ bold as visual decoration.
 Publish only when the article can pass:
 
 - Production generation contract: Gemini is the required writing/revision
-  workspace, and ChatGPT/GPT is the required generated-cover workspace. Codex
-  can orchestrate, QA and publish, but should not replace those tools with
-  local fallback copy or local fallback art.
+  workspace. Market-news covers must use credited, non-reused source images;
+  ChatGPT/GPT is the required generated-cover workspace for columns/features.
+  Codex can orchestrate, QA and publish, but should not replace those tools
+  with local fallback copy or local fallback art.
 - Duplicate gate: before drafting, compare the candidate against published and
   draft posts. Hold the run if the topic, headline angle, source package or
   practical takeaway substantially repeats an existing article.

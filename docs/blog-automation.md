@@ -22,7 +22,7 @@
 
 ## Cover Image Strategy
 
-- Preferred production path: generate topic-matched ALTOS LAB editorial visuals in the dedicated GPT/ChatGPT image tab, upload them through the signed media route, and keep internal provider/prompt/QA metadata.
+- Preferred production path: market news uses credited, non-reused source images; columns/features use topic-matched ALTOS LAB editorial visuals generated in the dedicated GPT/ChatGPT image tab, uploaded through the signed media route with internal provider/prompt/QA metadata.
 - Public generated-cover credit should read `ALTOS LAB editorial visual`; provider and prompt remain internal quality metadata.
 - Licensed third-party images are allowed only when the license, credit URL and landing page are stored and checked.
 - Optional expanded sources: Pexels API, Pixabay API, Openverse, Wikimedia/Openverse results, NASA and museum/public-domain registries through the source registry.

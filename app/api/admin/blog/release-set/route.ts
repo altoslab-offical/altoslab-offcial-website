@@ -127,6 +127,9 @@ function digestSourcePost(post: Partial<BlogPost>) {
     coverSource: post.coverSource,
     coverGeneration: post.coverGeneration,
     coverCredit: post.coverCredit,
+    coverCreditUrl: post.coverCreditUrl,
+    coverLicense: post.coverLicense,
+    coverLicenseUrl: post.coverLicenseUrl,
     aiDisclosure: post.aiDisclosure
   };
 }

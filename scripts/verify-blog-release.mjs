@@ -118,6 +118,9 @@ function digestSourcePost(post) {
     coverSource: post.coverSource,
     coverGeneration: post.coverGeneration,
     coverCredit: post.coverCredit,
+    coverCreditUrl: post.coverCreditUrl,
+    coverLicense: post.coverLicense,
+    coverLicenseUrl: post.coverLicenseUrl,
     aiDisclosure: post.aiDisclosure
   };
 }
@@ -384,9 +387,18 @@ async function verifyPostLive(post, root, errors, warnings) {
   if (!String(publicPost.generatedBy || "").toLowerCase().includes("gemini")) {
     pushIssue(errors, "public API generatedBy does not show Gemini provenance", context);
   }
-  const coverProvider = String(publicPost.coverGeneration?.provider || post.coverGeneration?.provider || "");
-  if (!/(chatgpt|gpt|openai)/i.test(coverProvider)) {
-    pushIssue(errors, `public API coverGeneration.provider must be ChatGPT/GPT, got ${coverProvider || "missing"}`, context);
+  if (post.contentType === "breaking") {
+    if (publicPost.coverSource !== "source") {
+      pushIssue(errors, `public API market news coverSource must be source, got ${publicPost.coverSource || "missing"}`, context);
+    }
+    if (!publicPost.coverCreditUrl || !publicPost.coverLicense) {
+      pushIssue(errors, "public API market news source image attribution is missing", context);
+    }
+  } else {
+    const coverProvider = String(publicPost.coverGeneration?.provider || post.coverGeneration?.provider || "");
+    if (!/(chatgpt|gpt|openai)/i.test(coverProvider)) {
+      pushIssue(errors, `public API coverGeneration.provider must be ChatGPT/GPT, got ${coverProvider || "missing"}`, context);
+    }
   }
   if (!publicPost.coverAlt || publicPost.coverAlt.length < 18) pushIssue(errors, "public API coverAlt is missing or too thin", context);
 

@@ -77,7 +77,7 @@ function buildPrompt({ slot, date, articleSetPath, topic }) {
   const runIdHint = `browser-gemini-gpt-${date}-${slot}-short-topic`;
   return `# ALTOS LAB daily AI blog article set
 
-You are the browser-operated production workspace for ALTOS LAB's official website blog. Gemini must write/revise the article copy, and ChatGPT/GPT must generate the cover image. Create one high-quality article set and write the final JSON to this exact path:
+You are the browser-operated production workspace for ALTOS LAB's official website blog. Gemini must write/revise the article copy. ChatGPT/GPT generates covers only for columns/features; market news must use the credited source article or official announcement image. Create one high-quality article set and write the final JSON to this exact path:
 
 ${articleSetPath}
 
@@ -89,7 +89,8 @@ Topic: ${topic || "Choose the strongest current AI market signal from reliable s
 
 Editorial bar:
 - Article copy must be drafted and revised through Gemini in the ALTOS Blog QA Chrome group.
-- Cover images must be generated through ChatGPT/GPT in the ALTOS Blog QA Chrome group.
+- Market news/breaking posts must use the source article or official announcement image with visible attribution; do not use GPT art for market news.
+- Column/feature cover images must be generated through ChatGPT/GPT in the ALTOS Blog QA Chrome group.
 - Close or release Gemini/GPT tabs after the run so Chrome memory is not held.
 - Check existing published/draft articles first; do not repeat a topic, headline angle or source package.
 - Write zh-Hant first as the source of truth, then localize en, ja and ko from the same argument.
@@ -106,9 +107,10 @@ Source bar:
 - All four languages must use the exact same sourceLinks array and one translationGroupId.
 
 Image bar:
-- For each post, attach a ChatGPT/GPT-generated image as coverLocalPath or an uploaded managed HTTPS media URL before validate-only.
-- coverGeneration.provider must say ChatGPT, GPT or OpenAI image generation.
-- Never use local fallback art, stock photo URLs, third-party copyrighted images, real people, logos, trademarks, screenshots, fake UI, or text-heavy graphics.
+- For market news, attach a source image URL from the source article or official announcement, set coverSource to "source", and include coverCredit, coverCreditUrl and coverLicense. Do not reuse a cover from an existing published/draft article.
+- For columns/features, attach a ChatGPT/GPT-generated image as coverLocalPath or an uploaded managed HTTPS media URL before validate-only.
+- For generated covers, coverGeneration.provider must say ChatGPT, GPT or OpenAI image generation.
+- Never use local fallback art, generic stock photo URLs, repeated covers, real people, misleading logos, fake UI, or text-heavy graphics.
 
 Required JSON shape:
 {
@@ -158,9 +160,10 @@ Required JSON shape:
       "tags": ["AI", "ALTOS LAB"],
       "author": "${slot === "morning" ? "Tommy" : "Ken"}",
       "coverAlt": "",
-      "coverSource": "generated",
-      "coverCredit": "ALTOS LAB editorial visual",
-      "coverGeneration": { "provider": "ChatGPT/GPT", "prompt": "", "generatedAt": "", "status": "generated" },
+      "coverSource": "source",
+      "coverCredit": "Source image: [publisher or official source]",
+      "coverCreditUrl": "https://source-article-or-official-announcement.example",
+      "coverLicense": "source-attributed",
       "generatedBy": "gemini",
       "aiDisclosure": ""
     }

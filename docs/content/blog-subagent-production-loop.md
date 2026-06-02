@@ -9,7 +9,7 @@ This is the current long-term production path for AI blog publishing.
 - Prompt research worker: a `gpt-5.3-codex-spark` subagent. It owns market/media pattern research, source-pack compression, prompt-card drafting, and QA issue extraction. It does not operate fixed tabs unless the main brain explicitly delegates that exact tab task.
 - Browser workbench: dedicated Chrome tabs only.
   - Gemini tab: article writing and rewrite assistance.
-  - ChatGPT/GPT tab: generated cover prompts or image generation assistance.
+  - ChatGPT/GPT tab: generated cover prompts or image generation assistance for columns/features. Market-news covers come from credited source images.
 
 The worker is not allowed to publish. Publishing is only done by the main brain after production returns `wouldPublish: true`.
 The worker is also not allowed to send prompts from memory. A prompt-card must exist first, and the main brain approves it before anything is pasted into Gemini or ChatGPT.
@@ -25,8 +25,8 @@ Do not claim, inspect, or operate unrelated user tabs.
 
 Hard tab rule:
 
-- Use `browser.user.openTabs()` and claim only the existing Gemini and ChatGPT tabs when they are present.
-- If the previous run closed those task tabs, open only `https://gemini.google.com/app` and `https://chatgpt.com/` as task-scoped tabs for this run.
+- Use `browser.user.openTabs()` and claim only the existing Gemini and, when generated covers are needed, ChatGPT tabs.
+- If the previous run closed those task tabs, open only the task-scoped tabs required for this run: `https://gemini.google.com/app` always, and `https://chatgpt.com/` only for generated column/feature covers.
 - Do not start new conversations.
 - Do not reload or navigate away from those existing tabs unless the main brain explicitly approves a recovery step.
 - Do not change the user's selected model or account.

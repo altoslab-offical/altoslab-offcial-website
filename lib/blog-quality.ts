@@ -224,6 +224,32 @@ function isApprovedCoverUrl(url: string) {
   }
 }
 
+function safeUrl(value?: string) {
+  if (!value) return null;
+  try {
+    return new URL(value);
+  } catch {
+    return null;
+  }
+}
+
+function sourceHostMatches(creditUrl: string, sourceUrl: string) {
+  const credit = safeUrl(creditUrl);
+  const source = safeUrl(sourceUrl);
+  if (!credit || !source) return false;
+  const creditHost = credit.hostname.toLowerCase().replace(/^www\./, "");
+  const sourceHost = source.hostname.toLowerCase().replace(/^www\./, "");
+  return creditHost === sourceHost || creditHost.endsWith(`.${sourceHost}`) || sourceHost.endsWith(`.${creditHost}`);
+}
+
+function hasCreditedSourceCover(post: BlogPost) {
+  if (post.coverSource !== "source") return false;
+  if (!post.coverCredit?.trim() || !post.coverCreditUrl?.trim() || !post.coverLicense?.trim()) return false;
+  const credit = safeUrl(post.coverCreditUrl);
+  if (!credit || (credit.protocol !== "https:" && credit.protocol !== "http:")) return false;
+  return post.sourceLinks.some((source) => sourceHostMatches(post.coverCreditUrl || "", source.url));
+}
+
 const blockedPhrases = [
   "lorem ipsum",
   "todo",
@@ -912,15 +938,21 @@ export function reviewImageFit(post: BlogPost): ReviewResult {
   if (!post.cover || !post.coverAlt) {
     issues.push("cover image and alt text are required");
   } else {
-    if (!isApprovedCoverUrl(post.cover)) issues.push("cover image must use an approved ALTOS LAB asset, managed generated media URL or open-licensed image URL");
+    const sourceCoverOk = hasCreditedSourceCover(post);
+    if (!sourceCoverOk && !isApprovedCoverUrl(post.cover)) {
+      issues.push("cover image must use an approved ALTOS LAB asset, managed generated media URL, open-licensed image URL or credited source article image");
+    }
     if (post.coverAlt.trim().length < 18) issues.push("cover alt text is too thin");
     const hasApprovedCoverSource =
-      post.coverSource === "curated" || post.coverSource === "generated" || post.coverSource === "manual";
+      post.coverSource === "curated" || post.coverSource === "generated" || post.coverSource === "manual" || post.coverSource === "source";
     if (post.generatedBy && !hasApprovedCoverSource) {
-      issues.push("AI generated articles require a topic-matched curated, generated or human-approved manual cover before auto-publish");
+      issues.push("AI generated articles require a topic-matched curated, generated, source or human-approved manual cover before auto-publish");
     }
     if ((post.coverSource === "curated" || post.coverSource === "manual") && !post.coverCredit) {
       issues.push("curated or manually approved cover images require visible attribution metadata");
+    }
+    if (post.coverSource === "source" && !sourceCoverOk) {
+      issues.push("source cover images require visible credit, source-rights metadata and a credit URL matching the article source list");
     }
     if (post.coverSource === "generated") {
       if (!post.coverCredit) issues.push("generated cover images require ALTOS LAB attribution metadata");
@@ -935,17 +967,21 @@ export function reviewImageFit(post: BlogPost): ReviewResult {
     }
     const topicWords = `${post.topic} ${post.newsCategory} ${post.tags.join(" ")}`.toLowerCase();
     const imageContext = `${post.coverAlt} ${post.coverPrompt || ""}`.toLowerCase();
-    if (rejectedCoverWords.test(imageContext)) {
+    if (post.coverSource === "generated" && rejectedCoverWords.test(imageContext)) {
       issues.push("cover image is unsafe, off-brand or visually mismatched for ALTOS LAB editorial quality");
     }
     if (!topicWords.split(/\s+|、|\/|,|，/).some((word) => word.length > 2 && imageContext.includes(word))) {
       warnings.push("cover prompt or alt text should describe the article topic more clearly");
     }
-    if (genericCoverWords.test(imageContext) && !/(agent|ai|geo|search|network|引用|搜尋|知識網路|エージェント|検索|에이전트|검색)/i.test(imageContext)) {
+    if (
+      post.coverSource === "generated" &&
+      genericCoverWords.test(imageContext) &&
+      !/(agent|ai|geo|search|network|引用|搜尋|知識網路|エージェント|検索|에이전트|검색)/i.test(imageContext)
+    ) {
       issues.push("cover image context is too generic for a quality SEO/GEO article");
     }
-    if (post.contentType === "breaking" && post.coverSource !== "generated" && (!post.coverCreditUrl || !post.coverLicense)) {
-      issues.push("news posts must not copy source article images unless license and credit URL are explicit; generated ALTOS LAB visuals are preferred");
+    if (post.contentType === "breaking" && post.coverSource !== "source") {
+      issues.push("market news posts must use a credited source article or official announcement image; generated covers are held");
     }
   }
 
@@ -1040,6 +1076,9 @@ function reviewPost(post: BlogPost, multilingual: ReviewResult): PostReview {
   }
   if (post.coverSource === "generated" && !/(chatgpt|gpt|openai)/i.test(post.coverGeneration?.provider || "")) {
     issues.push("generated production covers must be created through ChatGPT/GPT before release");
+  }
+  if (post.contentType === "breaking" && post.coverSource !== "source") {
+    issues.push("market news production covers must come from the source article image lane before release");
   }
 
   const score = Object.values(breakdown).reduce((sum, value) => sum + value, 0);

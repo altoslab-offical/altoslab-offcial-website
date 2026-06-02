@@ -246,12 +246,15 @@ function checkReleaseCandidate({ date, slot }, errors, warnings) {
     addIssue(errors, `validateOnly.errors must be empty: ${manifest.validateOnly.errors.join("; ")}`);
   }
   if (manifest.chromeEvidence?.gemini?.usedExistingTab !== true) addIssue(errors, "Gemini browser evidence is missing");
-  if (manifest.chromeEvidence?.chatgpt?.usedExistingTab !== true) addIssue(errors, "ChatGPT/GPT browser evidence is missing");
   if (manifest.humanDesignQa?.approved !== true) addIssue(errors, "humanDesignQa.approved must be true");
 
   if (articleSetPath && fs.existsSync(articleSetPath)) {
     const articleSet = readJson(articleSetPath);
     const posts = Array.isArray(articleSet.posts) ? articleSet.posts : [];
+    const requiresGptCover = posts.some((post) => post.contentType !== "breaking");
+    if (requiresGptCover && manifest.chromeEvidence?.chatgpt?.usedExistingTab !== true) {
+      addIssue(errors, "ChatGPT/GPT browser evidence is missing for generated covers");
+    }
     if (posts.length !== LANGUAGES.length) addIssue(errors, `article set must contain four posts, got ${posts.length}`);
     for (const language of LANGUAGES) {
       if (posts.filter((post) => post.language === language).length !== 1) addIssue(errors, `article set must contain exactly one ${language} post`);
@@ -260,10 +263,17 @@ function checkReleaseCandidate({ date, slot }, errors, warnings) {
       if (!String(post.generatedBy || "").toLowerCase().includes("gemini")) {
         addIssue(errors, `${post.language}/${post.slug}: generatedBy must include gemini`);
       }
-      if (!/(chatgpt|gpt|openai)/i.test(String(post.coverGeneration?.provider || ""))) {
-        addIssue(errors, `${post.language}/${post.slug}: coverGeneration.provider must be ChatGPT/GPT`);
+      if (post.contentType === "breaking") {
+        if (post.coverSource !== "source") addIssue(errors, `${post.language}/${post.slug}: market news coverSource must be source`);
+        if (!post.coverCredit || !post.coverCreditUrl || !post.coverLicense) {
+          addIssue(errors, `${post.language}/${post.slug}: source cover must include coverCredit, coverCreditUrl and coverLicense`);
+        }
+      } else {
+        if (!/(chatgpt|gpt|openai)/i.test(String(post.coverGeneration?.provider || ""))) {
+          addIssue(errors, `${post.language}/${post.slug}: coverGeneration.provider must be ChatGPT/GPT`);
+        }
+        if (post.coverSource !== "generated") addIssue(errors, `${post.language}/${post.slug}: coverSource must be generated`);
       }
-      if (post.coverSource !== "generated") addIssue(errors, `${post.language}/${post.slug}: coverSource must be generated`);
     }
     return {
       indexPath,

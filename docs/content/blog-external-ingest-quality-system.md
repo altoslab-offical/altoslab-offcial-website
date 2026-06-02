@@ -4,10 +4,10 @@ Production blog publishing is now fail-closed:
 
 1. Gemini creates and revises the multilingual article set in the dedicated ALTOS Blog QA browser workflow.
 2. Local worker runs preflight checks before contacting production.
-3. Local worker uploads generated covers through signed `POST /api/admin/blog/media`.
+3. Local worker keeps market-news source images as credited external source URLs and uploads only generated column/feature covers through signed `POST /api/admin/blog/media`.
 4. Production accepts signed `POST /api/admin/blog/ingest-set` requests for full validation diagnostics.
 5. The formal Cloudflare Free release path is signed `POST /api/admin/blog/release-set`.
-6. `release-set` requires an approved `qualityManifest`, matching content/body hashes, four-language completeness, valid publish metadata and a fresh generated-image QA pass.
+6. `release-set` requires an approved `qualityManifest`, matching content/body hashes, four-language completeness, valid publish metadata and a fresh image QA pass.
 7. Posts publish only when every release gate passes; otherwise the whole article set is held or rejected.
 
 ## Required Payload
@@ -17,8 +17,8 @@ Production blog publishing is now fail-closed:
 - `generation.provider`: `gemini-chatgpt`.
 - `posts`: exactly one `zh-Hant`, `en`, `ja` and `ko` post.
 - All posts share the same `translationGroupId` and `sourceLinks`.
-- Every post uses `coverSource: "generated"`.
-- Every generated cover includes `coverGeneration.provider`, `prompt`, `generatedAt`, `visualChecks`, `coverAlt` and `coverCredit`.
+- `contentType: "breaking"` posts use `coverSource: "source"` and include `coverCredit`, `coverCreditUrl`, `coverLicense`, `coverAlt` and a non-reused source image URL.
+- `contentType: "column"` and `contentType: "feature"` posts use `coverSource: "generated"` and include `coverGeneration.provider`, `prompt`, `generatedAt`, `visualChecks`, `coverAlt` and `coverCredit`.
 
 ## Auth
 
@@ -47,8 +47,8 @@ Use release only after the main-brain quality gate has approved the same article
 
 The active production scheduler is the Codex app heartbeat automation documented in
 `docs/content/blog-subagent-production-loop.md`. It wakes the main-brain thread at `08:10`, `09:00`,
-`15:10` and `16:00` Asia/Taipei. Prep windows use Gemini for article writing and ChatGPT/GPT for
-the cover, then run production `validateOnly`. Release windows publish only an already-ready
+`15:10` and `16:00` Asia/Taipei. Prep windows use Gemini for article writing, source images for
+market news, and ChatGPT/GPT for column/feature covers, then run production `validateOnly`. Release windows publish only an already-ready
 candidate after all quality gates pass.
 
 The old macOS LaunchAgent installer remains in the repo as a fallback for a future CLI-only writer

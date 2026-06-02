@@ -263,10 +263,10 @@ Article set output: ${articleSetPath}
 Prepared manifest: ${manifestPath}
 
 Use only the ALTOS Blog QA Chrome tab group.
-Gemini writes/revises the article set. ChatGPT/GPT creates the cover image.
+Gemini writes/revises the article set. Market news uses the credited source image; ChatGPT/GPT creates covers only for columns/features.
 Do not publish during prep. Do not change accounts or model selectors.
 
-After Gemini/GPT output is saved, run:
+After the Gemini/source-image/GPT output is saved, run:
 
 \`\`\`bash
 node scripts/blog-local-worker.mjs \\
@@ -312,8 +312,10 @@ ${await fs.readFile(orchestratorPromptPath, "utf8").catch(() => "")}
   return { ok: true, skipped: false, phase: "prep", runDir, promptPath, articleSetPath, manifestPath, indexPath, doctor: compactDoctorResult(doctor) };
 }
 
-function releaseGateIssues(manifest, { date, slot }) {
+function releaseGateIssues(manifest, { date, slot, articleSet }) {
   const issues = [];
+  const posts = Array.isArray(articleSet?.posts) ? articleSet.posts : [];
+  const requiresGptCover = posts.some((post) => post.contentType !== "breaking");
   const retryableHeldManifest =
     manifest.status === "held" &&
     manifest.validateOnly?.wouldPublish === true &&
@@ -331,7 +333,9 @@ function releaseGateIssues(manifest, { date, slot }) {
   if (!manifest.articleSetPath) issues.push("articleSetPath is required");
   if (manifest.chromeEvidence?.gemini?.usedExistingTab !== true) issues.push("Gemini existing-tab evidence is missing");
   if (manifest.chromeEvidence?.gemini?.changedModel === true) issues.push("Gemini model was changed");
-  if (manifest.chromeEvidence?.chatgpt?.usedExistingTab !== true) issues.push("ChatGPT/GPT existing-tab evidence is missing");
+  if (requiresGptCover && manifest.chromeEvidence?.chatgpt?.usedExistingTab !== true) {
+    issues.push("ChatGPT/GPT existing-tab evidence is missing for generated covers");
+  }
   if (manifest.chromeEvidence?.chatgpt?.changedModel === true) issues.push("ChatGPT/GPT model was changed");
   if (manifest.validateOnly?.wouldPublish !== true) issues.push("validateOnly.wouldPublish is not true");
   if (manifest.validateOnly?.qualityApproved !== true) issues.push("quality gate is not approved");
@@ -374,10 +378,12 @@ async function release({ date, slot }) {
     return { ok: true, skipped: true, phase: "release", reason: "prepared candidate manifest file missing", manifestPath, doctor: compactDoctorResult(doctor) };
   }
   const manifest = await readJson(manifestPath);
-  const issues = releaseGateIssues(manifest, { date, slot });
+  const articleSetPath = manifest.articleSetPath ? path.resolve(manifest.articleSetPath) : "";
+  const articleSet = articleSetPath && (await exists(articleSetPath)) ? await readJson(articleSetPath) : null;
+  const issues = releaseGateIssues(manifest, { date, slot, articleSet });
   const windowIssue = releaseWindowIssue({ date, slot });
   if (windowIssue) issues.push(windowIssue);
-  if (manifest.articleSetPath && !(await exists(path.resolve(manifest.articleSetPath)))) {
+  if (manifest.articleSetPath && !articleSet) {
     issues.push("articleSetPath file is missing");
   }
   if (issues.length) {

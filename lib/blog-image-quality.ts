@@ -42,6 +42,8 @@ export type BlogImageQualityReview = {
 
 export type BlogImageQualityOptions = {
   requireGeneratedCover?: boolean;
+  requireGeneratedCoverForNonBreaking?: boolean;
+  requireSourceCoverForBreaking?: boolean;
   requireBlobCover?: boolean;
   verifyRemoteImage?: boolean;
   allowLocalHttp?: boolean;
@@ -82,6 +84,20 @@ function isAllowedLocalHttpUrl(url: string) {
   } catch {
     return false;
   }
+}
+
+function isHttpUrl(url?: string) {
+  if (!url) return false;
+  try {
+    const parsed = new URL(url);
+    return parsed.protocol === "https:" || parsed.protocol === "http:";
+  } catch {
+    return false;
+  }
+}
+
+function isBreakingNews(post: BlogPost) {
+  return post.contentType === "breaking";
 }
 
 function imageContext(post: BlogPost) {
@@ -233,7 +249,7 @@ async function probeRemoteImage(url: string): Promise<ImageProbe> {
   if (contentType && !SAFE_IMAGE_TYPES.includes(contentType)) {
     issues.push(`cover content-type must be jpeg, png or webp; received ${contentType}`);
   }
-  if (contentLength && contentLength < MIN_IMAGE_BYTES) issues.push("cover image file is too small for a generated hero image");
+  if (contentLength && contentLength < MIN_IMAGE_BYTES) issues.push("cover image file is too small for a blog hero image");
   if (contentLength && contentLength > MAX_IMAGE_BYTES) issues.push("cover image file is too large for blog delivery");
 
   try {
@@ -271,6 +287,9 @@ async function reviewPostImage(post: BlogPost, options: Required<BlogImageQualit
   const issues: string[] = [];
   const warnings: string[] = [];
   let probe: ImageProbe | undefined;
+  const breakingNews = isBreakingNews(post);
+  const sourceCover = post.coverSource === "source";
+  const generatedCover = post.coverSource === "generated";
 
   if (!post.cover) issues.push("cover image URL is required");
   if (!post.coverAlt?.trim()) issues.push("cover alt text is required");
@@ -280,8 +299,14 @@ async function reviewPostImage(post: BlogPost, options: Required<BlogImageQualit
   if (options.requireGeneratedCover && post.coverSource !== "generated") {
     issues.push("external browser production pipeline requires coverSource generated");
   }
+  if (options.requireGeneratedCoverForNonBreaking && !breakingNews && !generatedCover) {
+    issues.push("non-news production covers must use coverSource generated from ChatGPT/GPT");
+  }
+  if (options.requireSourceCoverForBreaking && breakingNews && !sourceCover) {
+    issues.push("market news cover must use coverSource source from the source article or official announcement");
+  }
 
-  if (post.coverSource === "generated") {
+  if (generatedCover) {
     if (post.coverGeneration?.status !== "generated") issues.push("generated cover status must be generated");
     if (!post.coverGeneration?.provider) issues.push("generated cover provider is required");
     if (!post.coverGeneration?.prompt) issues.push("generated cover prompt is required");
@@ -307,11 +332,17 @@ async function reviewPostImage(post: BlogPost, options: Required<BlogImageQualit
     }
   }
 
+  if (sourceCover) {
+    if (!post.coverCredit?.trim()) issues.push("source cover requires visible source credit");
+    if (!isHttpUrl(post.coverCreditUrl)) issues.push("source cover requires a public source credit URL");
+    if (!post.coverLicense?.trim()) issues.push("source cover requires license or source-rights metadata");
+  }
+
   const context = imageContext(post);
-  if (unsafeImageMetadataPattern.test(context)) {
+  if (generatedCover && unsafeImageMetadataPattern.test(context)) {
     issues.push("cover metadata indicates text artifacts, logos, people, trademark or unsafe visual risk");
   }
-  if (genericGeneratedImagePattern.test(context)) {
+  if (generatedCover && genericGeneratedImagePattern.test(context)) {
     issues.push("cover metadata reads like generic stock or abstract AI art");
   }
   const lowerContext = context.toLowerCase();
@@ -322,8 +353,8 @@ async function reviewPostImage(post: BlogPost, options: Required<BlogImageQualit
   if (post.cover) {
     const allowedLocalHttp = options.allowLocalHttp && isAllowedLocalHttpUrl(post.cover);
     if (!/^https:\/\//.test(post.cover) && !allowedLocalHttp) {
-      issues.push("generated cover must use a public https URL");
-    } else if (options.requireBlobCover && !isManagedGeneratedCoverUrl(post.cover)) {
+      issues.push("cover must use a public https URL");
+    } else if (generatedCover && options.requireBlobCover && !isManagedGeneratedCoverUrl(post.cover)) {
       issues.push("generated cover must be stored in managed generated media before ingest");
     }
     if (options.verifyRemoteImage && (/^https:\/\//.test(post.cover) || allowedLocalHttp)) {
@@ -358,6 +389,8 @@ export async function reviewBlogImagesForRelease(
 ): Promise<BlogImageQualityReview> {
   const resolvedOptions: Required<BlogImageQualityOptions> = {
     requireGeneratedCover: options.requireGeneratedCover ?? false,
+    requireGeneratedCoverForNonBreaking: options.requireGeneratedCoverForNonBreaking ?? false,
+    requireSourceCoverForBreaking: options.requireSourceCoverForBreaking ?? false,
     requireBlobCover: options.requireBlobCover ?? false,
     verifyRemoteImage: options.verifyRemoteImage ?? true,
     allowLocalHttp: options.allowLocalHttp ?? false

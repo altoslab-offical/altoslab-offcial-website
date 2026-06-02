@@ -81,7 +81,8 @@ assert(quality.includes("subtitleEvidencePattern"), "quality gate requires subti
 assert(quality.includes("rawZhEnglishJargonPattern"), "quality gate rejects raw English AI-ops jargon in zh-Hant articles");
 assert(quality.includes("technicalJargonPattern"), "quality gate requires jargon-heavy paragraphs to explain terms plainly");
 assert(quality.includes("through Gemini"), "quality gate requires Gemini-written/revised production articles");
-assert(quality.includes("ChatGPT/GPT"), "quality gate requires ChatGPT/GPT-generated production covers");
+assert(quality.includes("market news posts must use a credited source article or official announcement image"), "quality gate requires market-news source covers");
+assert(quality.includes("ChatGPT/GPT"), "quality gate requires ChatGPT/GPT-generated production covers for generated-cover lanes");
 assert(covers.includes("BLOG_IMAGE_STORE_BLOB"), "image pipeline supports optional Vercel Blob persistence");
 assert(covers.includes("searchPexels") && covers.includes("searchPixabay"), "image pipeline supports expanded free image APIs");
 assert(covers.includes("pinterest") && covers.includes("approvedImageUrl"), "image pipeline rejects Pinterest URLs while allowing style inspiration");
@@ -96,6 +97,8 @@ assert(ingestRoute.includes("reviewBlogImagesForRelease"), "ingest route runs pr
 assert(ingestRoute.includes("publish-if-valid"), "ingest route supports publish-if-valid fail-closed mode");
 assert(ingestRoute.includes("generation.provider must be gemini-chatgpt"), "ingest route requires the Gemini + GPT production provider");
 assert(ingestRoute.includes("duplicateTopicIssues"), "ingest route blocks repeated topics/source angles");
+assert(ingestRoute.includes("duplicateCoverIssues"), "ingest route blocks repeated cover images across different article groups");
+assert(ingestRoute.includes("market news coverSource must be source"), "ingest route requires source images for market-news posts");
 assert(releaseRoute.includes("verifyBlogIngestRequest"), "release-set route verifies HMAC before parsing release payloads");
 assert(releaseRoute.includes("qualityManifest") && releaseRoute.includes("contentSha256"), "release-set route requires a signed quality manifest digest");
 assert(releaseRoute.includes("generation.provider must be gemini-chatgpt"), "release-set route accepts the Gemini + GPT production provider");
@@ -117,11 +120,12 @@ assert(localWorker.includes("requestRelease") && localWorker.includes("/api/admi
 assert(localWorker.includes("qualityManifest") && localWorker.includes("contentSha256"), "local worker writes a quality manifest with a content digest");
 assert(localWorker.includes("reuse-validated-manifest"), "local worker can reuse a signed validate-only manifest during release");
 assert(localWorker.includes("chromeEvidence.gemini.usedExistingTab"), "local worker requires Gemini existing-tab evidence");
-assert(localWorker.includes("chromeEvidence.chatgpt.usedExistingTab"), "local worker requires ChatGPT/GPT existing-tab evidence");
+assert(localWorker.includes("requiresGptCover"), "local worker only requires ChatGPT/GPT evidence when generated covers are needed");
 assert(localWorker.includes("String(post.generatedBy || \"\").toLowerCase().includes(\"gemini\")"), "local worker requires per-post Gemini provenance");
 assert(localWorker.includes("Local fallback cover generation is disabled"), "local worker fails closed on fallback cover generation");
 assert(localWorker.includes("coverGeneration.provider must be ChatGPT/GPT"), "local worker requires GPT cover provenance");
-assert(orchestrator.includes("Gemini must write/revise") && orchestrator.includes("ChatGPT/GPT must generate"), "orchestrator documents Gemini copy and GPT cover requirements");
+assert(orchestrator.includes("Gemini must write/revise") && orchestrator.includes("market news must use the credited source article"), "orchestrator documents Gemini copy and market-news source image requirements");
+assert(orchestrator.includes("Column/feature cover images must be generated through ChatGPT/GPT"), "orchestrator documents GPT covers for columns/features");
 assert(orchestrator.includes("Close or release Gemini/GPT tabs"), "orchestrator includes Chrome tab cleanup requirements");
 assert(!orchestrator.includes("--generate-missing-covers"), "orchestrator does not route production covers through local fallback art");
 assert(scheduledRunner.includes("PREP_WINDOWS") && scheduledRunner.includes("RELEASE_WINDOWS"), "scheduled runner separates prep and release windows");
@@ -142,9 +146,11 @@ assert(sopDoctor.includes("production cmsStorage.provider must be cloudflare-kv"
 assert(sopDoctor.includes("release verification requires ALTOS_ADMIN_PASSWORD"), "SOP doctor requires admin readback credentials for release");
 assert(sopDoctor.includes("\"ready\", \"released\""), "SOP doctor accepts already released candidates for post-release audit");
 assert(sopDoctor.includes("releaseVerification.ok"), "SOP doctor verifies released candidates have successful post-release verification");
+assert(sopDoctor.includes("market news coverSource must be source"), "SOP doctor verifies source cover provenance in market-news candidates");
 assert(sopDoctor.includes("coverGeneration.provider must be ChatGPT/GPT"), "SOP doctor verifies GPT cover provenance in prepared release candidates");
 assert(releaseVerifier.includes("manifest status must be released"), "release verifier requires a released prepared-candidate manifest");
 assert(releaseVerifier.includes("public API qualityStatus must be passed"), "release verifier checks public quality metadata");
+assert(releaseVerifier.includes("public API market news coverSource must be source"), "release verifier checks market-news source cover metadata");
 assert(releaseVerifier.includes("ALTOS_ADMIN_PASSWORD") && releaseVerifier.includes("/api/admin/auth/login"), "release verifier can log in for protected admin readback");
 assert(releaseVerifier.includes("og:image") && releaseVerifier.includes("twitter:image"), "release verifier checks social preview images");
 assert(releaseVerifier.includes("/feed.xml") && releaseVerifier.includes("/sitemap.xml") && releaseVerifier.includes("/llms.txt"), "release verifier checks public metadata surfaces");

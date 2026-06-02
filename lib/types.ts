@@ -202,7 +202,7 @@ export type BlogQualityChecks = {
   notes?: string;
 };
 
-export type BlogCoverSource = "curated" | "manual" | "fallback" | "generated";
+export type BlogCoverSource = "curated" | "manual" | "fallback" | "generated" | "source";
 
 export type BlogCoverVisualChecks = {
   topicFit: boolean;

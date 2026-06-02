@@ -281,7 +281,7 @@ async function generateCoverPng(post, index, outputDir, ingestRunId) {
 async function generateMissingCovers(payload, slot) {
   if (!hasFlag("generate-missing-covers")) return payload;
   if (process.env.BLOG_ALLOW_LOCAL_FALLBACK_COVERS !== "1") {
-    throw new Error("Local fallback cover generation is disabled for production. Use ChatGPT/GPT-generated covers instead.");
+    throw new Error("Local fallback cover generation is disabled for production. Use credited source images for market news or ChatGPT/GPT-generated covers for columns/features.");
   }
   const posts = Array.isArray(payload.posts) ? payload.posts : [];
   const outputDir =
@@ -344,10 +344,11 @@ function localPreflight(payload) {
   const geminiEvidence = chromeEvidence.gemini || {};
   const chatgptEvidence = chromeEvidence.chatgpt || {};
   const humanDesignQa = payload.humanDesignQa || {};
+  const requiresGptCover = posts.some((post) => post.contentType !== "breaking");
 
   if (geminiEvidence.usedExistingTab !== true) issues.push("chromeEvidence.gemini.usedExistingTab must be true");
   if (geminiEvidence.changedModel === true) issues.push("chromeEvidence.gemini.changedModel must not be true");
-  if (chatgptEvidence.usedExistingTab !== true) issues.push("chromeEvidence.chatgpt.usedExistingTab must be true");
+  if (requiresGptCover && chatgptEvidence.usedExistingTab !== true) issues.push("chromeEvidence.chatgpt.usedExistingTab must be true for generated covers");
   if (chatgptEvidence.changedModel === true) issues.push("chromeEvidence.chatgpt.changedModel must not be true");
   if (humanDesignQa.approved !== true) issues.push("humanDesignQa.approved must be true before validate-only can mark a candidate ready");
 
@@ -370,22 +371,34 @@ function localPreflight(payload) {
     if (JSON.stringify(sourceUrls(post)) !== JSON.stringify(referenceSources)) {
       issues.push(`${post.language || "unknown"} sourceLinks differ from the multilingual set`);
     }
-    if (post.coverSource !== "generated") issues.push(`${post.language || "unknown"} coverSource must be generated`);
-    if (!isAllowedCoverUrl(post.cover)) issues.push(`${post.language || "unknown"} cover must be a managed https media URL`);
+    const marketNews = post.contentType === "breaking";
+    if (marketNews && post.coverSource !== "source") {
+      issues.push(`${post.language || "unknown"} market news coverSource must be source`);
+    }
+    if (!marketNews && post.coverSource !== "generated") {
+      issues.push(`${post.language || "unknown"} non-news coverSource must be generated`);
+    }
+    if (!isAllowedCoverUrl(post.cover)) issues.push(`${post.language || "unknown"} cover must be a public https URL`);
     if (!post.coverAlt || post.coverAlt.length < 18) issues.push(`${post.language || "unknown"} coverAlt is missing or too thin`);
     const generation = post.coverGeneration || {};
-    if (!generation.provider || !generation.prompt || !generation.generatedAt) {
-      issues.push(`${post.language || "unknown"} coverGeneration must include provider, prompt and generatedAt`);
+    if (marketNews) {
+      if (!post.coverCredit || !post.coverCreditUrl || !post.coverLicense) {
+        issues.push(`${post.language || "unknown"} source cover must include coverCredit, coverCreditUrl and coverLicense`);
+      }
+    } else {
+      if (!generation.provider || !generation.prompt || !generation.generatedAt) {
+        issues.push(`${post.language || "unknown"} coverGeneration must include provider, prompt and generatedAt`);
+      }
+      if (!/(chatgpt|gpt|openai)/i.test(String(generation.provider || ""))) {
+        issues.push(`${post.language || "unknown"} coverGeneration.provider must be ChatGPT/GPT`);
+      }
+      const checks = generation.visualChecks || {};
+      for (const field of ["topicFit", "noTextArtifacts", "noLogos", "noPeople", "noTrademarkRisk", "noGenericStockLook"]) {
+        if (checks[field] !== true) issues.push(`${post.language || "unknown"} visualChecks.${field} must be true`);
+      }
     }
     if (!String(post.generatedBy || "").toLowerCase().includes("gemini")) {
       issues.push(`${post.language || "unknown"} article must be drafted or revised through Gemini`);
-    }
-    if (!/(chatgpt|gpt|openai)/i.test(String(generation.provider || ""))) {
-      issues.push(`${post.language || "unknown"} coverGeneration.provider must be ChatGPT/GPT`);
-    }
-    const checks = generation.visualChecks || {};
-    for (const field of ["topicFit", "noTextArtifacts", "noLogos", "noPeople", "noTrademarkRisk", "noGenericStockLook"]) {
-      if (checks[field] !== true) issues.push(`${post.language || "unknown"} visualChecks.${field} must be true`);
     }
   }
   return issues;
@@ -720,7 +733,8 @@ Create one article set in zh-Hant, en, ja, ko.
 
 Hard requirements:
 - Draft and revise the article text through Gemini in the ALTOS Blog QA Chrome group.
-- Generate every cover image through ChatGPT/GPT in the ALTOS Blog QA Chrome group.
+- For market news/breaking posts, use the source article or official announcement image with visible source credit; do not use GPT art or a previously used cover.
+- For column/feature posts, generate the cover image through ChatGPT/GPT in the ALTOS Blog QA Chrome group.
 - Close or release the Gemini/GPT tabs after the run so Chrome memory is not held.
 - Do not repeat an existing published/draft topic, headline angle or source package.
 - Use zh-Hant as the editorial source of truth, then localize the other languages.
@@ -728,7 +742,8 @@ Hard requirements:
 - Write like a sharp AI product/editorial studio, not an SEO farm.
 - Opening must answer the reader's decision in the first 40-80 words.
 - Include ALTOS LAB judgment, source translation note, FAQ, SEO title/meta and GEO summary.
-- Cover images must be generated per article, uploaded through the signed ALTOS LAB media route, and include provider, prompt, generatedAt, coverCredit and visualChecks.
+- Column/feature cover images must be generated per article, uploaded through the signed ALTOS LAB media route, and include provider, prompt, generatedAt, coverCredit and visualChecks.
+- Market news cover images must use coverSource "source" with coverCredit, coverCreditUrl and coverLicense; if the source image is missing, unsafe or already used, hold the candidate.
 
 Return only JSON shaped for POST /api/admin/blog/ingest-set:
 {

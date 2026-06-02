@@ -620,12 +620,21 @@ export function publishValidationForBlogPost(post: BlogPost) {
   if (!post.faqs.length) errors.push("at least one visible FAQ is required for GEO");
   if (post.generatedBy && !post.sourceLinks.length) errors.push("generated posts require at least one source link");
   const hasApprovedCoverSource =
-    post.coverSource === "curated" || post.coverSource === "generated" || post.coverSource === "manual";
+    post.coverSource === "curated" ||
+    post.coverSource === "generated" ||
+    post.coverSource === "manual" ||
+    post.coverSource === "source";
   if (post.generatedBy && !hasApprovedCoverSource) {
-    errors.push("generated posts require a topic-matched curated, generated or human-approved manual cover before publishing");
+    errors.push("generated posts require a topic-matched curated, generated, source or human-approved manual cover before publishing");
   }
   if (post.generatedBy && hasApprovedCoverSource && !post.coverCredit) {
     errors.push("generated posts require cover attribution before publishing");
+  }
+  if (post.generatedBy && post.contentType === "breaking" && post.coverSource !== "source") {
+    errors.push("market news posts require a source article cover image before publishing");
+  }
+  if (post.generatedBy && post.coverSource === "source" && (!post.coverCreditUrl || !post.coverLicense)) {
+    errors.push("source cover images require public credit URL and source-rights metadata before publishing");
   }
   if (post.generatedBy && post.coverSource === "generated" && !post.coverGeneration?.prompt) {
     errors.push("generated cover images require the stored generation prompt before publishing");

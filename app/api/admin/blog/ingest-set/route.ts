@@ -79,30 +79,63 @@ function normalizedDuplicateKey(value = "") {
     .trim();
 }
 
+function normalizedCoverKey(value = "") {
+  const trimmed = value.trim();
+  if (!trimmed) return "";
+  try {
+    const parsed = new URL(trimmed);
+    return `${parsed.protocol}//${parsed.hostname.toLowerCase()}${parsed.pathname}`.replace(/\/$/, "");
+  } catch {
+    return trimmed.toLowerCase();
+  }
+}
+
+function isHttpUrl(value?: string) {
+  if (!value) return false;
+  try {
+    const parsed = new URL(value);
+    return parsed.protocol === "https:" || parsed.protocol === "http:";
+  } catch {
+    return false;
+  }
+}
+
 function generationContractIssues(posts: BlogPost[]) {
   return posts.flatMap((post) => {
     const issues: string[] = [];
     const generatedBy = post.generatedBy?.toLowerCase() || "";
     const coverProvider = post.coverGeneration?.provider?.toLowerCase() || "";
+    const isMarketNews = post.contentType === "breaking";
 
     if (!generatedBy.includes("gemini")) {
       issues.push(`${post.language}/${post.slug}: article must be drafted or revised through Gemini before ingest`);
     }
-    if (!/(chatgpt|gpt|openai)/i.test(coverProvider)) {
-      issues.push(`${post.language}/${post.slug}: generated cover must come from ChatGPT/GPT, not ${post.coverGeneration?.provider || "unknown"}`);
+    if (isMarketNews) {
+      if (post.coverSource !== "source") {
+        issues.push(`${post.language}/${post.slug}: market news coverSource must be source, not ${post.coverSource || "missing"}`);
+      }
+      if (!post.coverCredit?.trim()) {
+        issues.push(`${post.language}/${post.slug}: market news source image requires visible coverCredit`);
+      }
+      if (!isHttpUrl(post.coverCreditUrl)) {
+        issues.push(`${post.language}/${post.slug}: market news source image requires a public coverCreditUrl`);
+      }
+      if (!post.coverLicense?.trim()) {
+        issues.push(`${post.language}/${post.slug}: market news source image requires coverLicense/source-rights metadata`);
+      }
+    } else {
+      if (post.coverSource !== "generated") {
+        issues.push(`${post.language}/${post.slug}: non-news coverSource must be generated through ChatGPT/GPT`);
+      }
+      if (!/(chatgpt|gpt|openai)/i.test(coverProvider)) {
+        issues.push(`${post.language}/${post.slug}: generated cover must come from ChatGPT/GPT, not ${post.coverGeneration?.provider || "unknown"}`);
+      }
     }
     return issues;
   });
 }
 
-async function duplicateTopicIssues(posts: BlogPost[]) {
-  let existingPosts: BlogPost[];
-  try {
-    existingPosts = (await readCmsData()).blogPosts;
-  } catch (error) {
-    return [`duplicate check could not read existing blog posts: ${error instanceof Error ? error.message : "CMS read failed"}`];
-  }
-
+function duplicateTopicIssues(posts: BlogPost[], existingPosts: BlogPost[]) {
   const incomingGroupIds = new Set(posts.map((post) => post.translationGroupId));
   const incomingByLanguage = posts.map((post) => ({
     post,
@@ -130,6 +163,37 @@ async function duplicateTopicIssues(posts: BlogPost[]) {
     }
     return issues;
   });
+}
+
+function duplicateCoverIssues(posts: BlogPost[], existingPosts: BlogPost[]) {
+  const issues: string[] = [];
+  const incomingByKey = new Map<string, BlogPost>();
+  const incomingGroupIds = new Set(posts.map((post) => post.translationGroupId));
+
+  for (const post of posts) {
+    const key = normalizedCoverKey(post.cover || "");
+    if (!key) continue;
+    const previous = incomingByKey.get(key);
+    if (previous && previous.translationGroupId !== post.translationGroupId) {
+      issues.push(`${post.language}/${post.slug}: cover image duplicates incoming article ${previous.slug}`);
+    }
+    incomingByKey.set(key, post);
+  }
+
+  for (const post of posts) {
+    const key = normalizedCoverKey(post.cover || "");
+    if (!key) continue;
+    for (const existing of existingPosts) {
+      if (incomingGroupIds.has(existing.translationGroupId)) continue;
+      if (existing.status !== "published" && existing.status !== "draft") continue;
+      if (normalizedCoverKey(existing.cover || "") === key) {
+        issues.push(`${post.language}/${post.slug}: cover image repeats existing article ${existing.slug}`);
+        break;
+      }
+    }
+  }
+
+  return issues;
 }
 
 function normalizeIngestPosts(payload: BlogIngestRequest, slot: IngestSlot, ingestRunId: string) {
@@ -231,14 +295,24 @@ export async function POST(request: Request) {
   const normalizedPosts = normalizeIngestPosts(payload, slot, ingestRunId);
   const languageIssues = missingLanguageIssues(normalizedPosts);
   const contractIssues = generationContractIssues(normalizedPosts);
-  const duplicateIssues = await duplicateTopicIssues(normalizedPosts);
+  let existingPosts: BlogPost[] = [];
+  const duplicateReadIssues: string[] = [];
+  try {
+    existingPosts = (await readCmsData()).blogPosts;
+  } catch (error) {
+    duplicateReadIssues.push(`duplicate check could not read existing blog posts: ${error instanceof Error ? error.message : "CMS read failed"}`);
+  }
+  const duplicateIssues = duplicateReadIssues.length
+    ? duplicateReadIssues
+    : [...duplicateTopicIssues(normalizedPosts, existingPosts), ...duplicateCoverIssues(normalizedPosts, existingPosts)];
   if (languageIssues.length || contractIssues.length || duplicateIssues.length) {
     return json(400, { ok: false, ingestRunId, errors: [...languageIssues, ...contractIssues, ...duplicateIssues] });
   }
 
   const qualityReview = await reviewBlogPairForAutoPublish(normalizedPosts);
   const imageReview = await reviewBlogImagesForRelease(normalizedPosts, {
-    requireGeneratedCover: true,
+    requireGeneratedCoverForNonBreaking: true,
+    requireSourceCoverForBreaking: true,
     requireBlobCover: process.env.BLOG_IMAGE_ALLOW_NON_BLOB !== "1",
     verifyRemoteImage: process.env.BLOG_IMAGE_VERIFY_REMOTE !== "false",
     allowLocalHttp: process.env.BLOG_IMAGE_ALLOW_LOCAL_HTTP === "1"
