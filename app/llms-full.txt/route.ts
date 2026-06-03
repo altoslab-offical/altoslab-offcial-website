@@ -1,5 +1,6 @@
 import { getPublishedBlogPosts, getPublishedProjects } from "@/lib/cms";
 import { blogPostPath, languageLabel } from "@/lib/blog-utils";
+import { publicTaxonomyLabel } from "@/lib/public-taxonomy";
 import { siteName, siteUrl } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
@@ -8,12 +9,16 @@ function normalizePlainText(value: string) {
   return value.replace(/\r/g, "").replace(/\n{3,}/g, "\n\n").trim();
 }
 
+function publicProjectText(value: string) {
+  return publicTaxonomyLabel(normalizePlainText(value), "zh-Hant");
+}
+
 export async function GET() {
   const [posts, projects] = await Promise.all([getPublishedBlogPosts(), getPublishedProjects()]);
   const lines = [
     `# ${siteName} full LLM context`,
     "",
-    "ALTOS LAB is an AI implementation studio in Taiwan serving founders, operators and teams that need AI agents, workflow automation, CMS, SEO and GEO systems.",
+    "ALTOS LAB is an AI implementation studio in Taiwan serving founders, operators and teams that need AI agents, workflow automation, CMS and search-ready content systems.",
     "",
     "## Canonical resources",
     `- Website: ${siteUrl}`,
@@ -24,14 +29,16 @@ export async function GET() {
     "## What ALTOS LAB helps with",
     "- AI agent planning and implementation",
     "- AI workflow automation and internal tools",
-    "- CMS and content operations for SEO and GEO",
+    "- CMS and content operations for search visibility",
     "- Website and product experience implementation",
     "- Measurement, GTM events and content review workflows",
     "",
     "## Published services and projects",
     ...projects.map(
       (project) =>
-        `### ${project.title}\nURL: ${siteUrl}/projects/${project.slug}\nCategory: ${project.tag}\nSummary: ${project.desc}\nDetail: ${normalizePlainText(project.detail)}`
+        `### ${publicProjectText(project.title)}\nURL: ${siteUrl}/projects/${project.slug}\nCategory: ${publicProjectText(
+          project.tag
+        )}\nSummary: ${publicProjectText(project.desc)}\nDetail: ${publicProjectText(project.detail)}`
     ),
     "",
     "## Published articles",
@@ -41,18 +48,18 @@ export async function GET() {
         : "- No external sources listed";
 
       return [
-        `### ${post.title}`,
+        `### ${publicTaxonomyLabel(post.title, post.language)}`,
         `URL: ${siteUrl}${blogPostPath(post)}`,
         `Language: ${languageLabel(post.language)}`,
-        `Topic: ${post.topic}`,
-        `Audience: ${post.audience}`,
-        `SEO description: ${post.seoDescription || post.excerpt}`,
-        `TL;DR: ${post.geoSummary}`,
-        `Key takeaways: ${post.keyTakeaways.join(" | ")}`,
+        `Topic: ${publicTaxonomyLabel(post.topic, post.language)}`,
+        `Audience: ${publicTaxonomyLabel(post.audience, post.language)}`,
+        `Search description: ${publicTaxonomyLabel(post.seoDescription || post.excerpt, post.language)}`,
+        `TL;DR: ${publicTaxonomyLabel(post.geoSummary, post.language)}`,
+        `Key takeaways: ${post.keyTakeaways.map((item) => publicTaxonomyLabel(item, post.language)).join(" | ")}`,
         "Sources:",
         sources,
         "Body:",
-        normalizePlainText(post.body)
+        publicTaxonomyLabel(normalizePlainText(post.body), post.language)
       ].join("\n");
     })
   ];

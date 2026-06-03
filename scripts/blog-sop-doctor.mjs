@@ -6,7 +6,20 @@ import process from "node:process";
 import { spawnSync } from "node:child_process";
 
 const DEFAULT_BASE_URL = "https://altoslab-ai.cc";
-const LANGUAGES = ["zh-Hant", "en", "ja", "ko"];
+const LANGUAGES = ["zh-Hant", "en", "ja", "ko", "id", "vi", "th", "ms", "fil"];
+const PRODUCTION_CMS_PROVIDERS = new Set(["cloudflare-kv", "gcs"]);
+const GENERIC_STOCK_IMAGE_HOSTS = [
+  "unsplash.com",
+  "images.unsplash.com",
+  "pexels.com",
+  "images.pexels.com",
+  "pixabay.com",
+  "cdn.pixabay.com",
+  "openverse.org",
+  "openverse.engineering",
+  "api.openverse.org",
+  "api.openverse.engineering"
+];
 const SLOTS = {
   morning: "09:00",
   afternoon: "16:00"
@@ -69,6 +82,37 @@ function scheduledFor(date, slot) {
 
 function readJson(filePath) {
   return JSON.parse(fs.readFileSync(filePath, "utf8"));
+}
+
+function parsedHost(value) {
+  try {
+    return new URL(value || "").hostname.toLowerCase().replace(/^www\./, "");
+  } catch {
+    return "";
+  }
+}
+
+function isGenericStockImageUrl(value) {
+  const host = parsedHost(value);
+  return Boolean(host && GENERIC_STOCK_IMAGE_HOSTS.some((stockHost) => host === stockHost || host.endsWith(`.${stockHost}`)));
+}
+
+function sourceHostMatches(creditUrl, sourceUrl) {
+  const creditHost = parsedHost(creditUrl);
+  const sourceHost = parsedHost(sourceUrl);
+  return Boolean(
+    creditHost &&
+      sourceHost &&
+      (creditHost === sourceHost || creditHost.endsWith(`.${sourceHost}`) || sourceHost.endsWith(`.${creditHost}`))
+  );
+}
+
+function sourceCoverCreditMatchesSource(post) {
+  return (post.sourceLinks || []).some((source) => sourceHostMatches(post.coverCreditUrl || "", source.url || ""));
+}
+
+function isColumnOrFeature(post) {
+  return post.contentType === "column" || post.contentType === "feature";
 }
 
 function loadEnvFile() {
@@ -146,7 +190,9 @@ async function checkProductionHealth(errors, warnings) {
       return { root, health: null };
     }
     const integrations = json.integrations || {};
-    if (json.cmsStorage?.provider !== "cloudflare-kv") addIssue(errors, "production cmsStorage.provider must be cloudflare-kv");
+    if (!PRODUCTION_CMS_PROVIDERS.has(json.cmsStorage?.provider)) {
+      addIssue(errors, "production cmsStorage.provider must be cloudflare-kv or gcs");
+    }
     for (const field of ["durable", "writable", "configured"]) {
       if (json.cmsStorage?.[field] !== true) addIssue(errors, `production cmsStorage.${field} must be true`);
     }
@@ -154,7 +200,7 @@ async function checkProductionHealth(errors, warnings) {
     if (integrations.legacyDeepSeekCronDisabled !== true) addIssue(errors, "production legacyDeepSeekCronDisabled must be true");
     if (integrations.autoPublishBlog !== true) addIssue(errors, "production autoPublishBlog must be true");
     if (!Array.isArray(integrations.blogLanguages) || LANGUAGES.some((language) => !integrations.blogLanguages.includes(language))) {
-      addIssue(errors, "production blogLanguages must include zh-Hant, en, ja and ko");
+      addIssue(errors, `production blogLanguages must include ${LANGUAGES.join(", ")}`);
     }
     return {
       root,
@@ -232,7 +278,7 @@ function checkReleaseCandidate({ date, slot }, errors, warnings) {
     manifest.status === "released" &&
     (!Array.isArray(manifest.publish?.publishedIds) || manifest.publish.publishedIds.length !== LANGUAGES.length)
   ) {
-    addIssue(errors, "released candidate must include four publishedIds");
+    addIssue(errors, `released candidate must include ${LANGUAGES.length} publishedIds`);
   }
   if (manifest.slot !== slot) addIssue(errors, `release candidate slot must be ${slot}`);
   if (manifest.expectedReleaseAt !== scheduledFor(date, slot)) {
@@ -255,9 +301,25 @@ function checkReleaseCandidate({ date, slot }, errors, warnings) {
     if (requiresGptCover && manifest.chromeEvidence?.chatgpt?.usedExistingTab !== true) {
       addIssue(errors, "ChatGPT/GPT browser evidence is missing for generated covers");
     }
-    if (posts.length !== LANGUAGES.length) addIssue(errors, `article set must contain four posts, got ${posts.length}`);
+    if (posts.length !== LANGUAGES.length) addIssue(errors, `article set must contain ${LANGUAGES.length} posts, got ${posts.length}`);
     for (const language of LANGUAGES) {
       if (posts.filter((post) => post.language === language).length !== 1) addIssue(errors, `article set must contain exactly one ${language} post`);
+    }
+    const columnPosts = posts.filter(isColumnOrFeature);
+    if (columnPosts.length) {
+      const counts = [...new Set(columnPosts.map((post) => (Array.isArray(post.contentImages) ? post.contentImages.length : 0)))];
+      if (counts.length !== 1) {
+        addIssue(errors, `translated column/feature posts must share the same content image count, got ${counts.join(", ")}`);
+      }
+      const expectedCount = counts[0] || 0;
+      if (expectedCount < 2) addIssue(errors, "column/feature posts require at least two in-article images");
+      if (expectedCount > 3) addIssue(errors, "column/feature posts should keep in-article images to three or fewer");
+      for (let index = 0; index < expectedCount; index += 1) {
+        const urls = [...new Set(columnPosts.map((post) => post.contentImages?.[index]?.url).filter(Boolean))];
+        if (urls.length !== 1) {
+          addIssue(errors, `translated column/feature posts must share contentImages[${index}] URL, got ${urls.join(", ") || "missing"}`);
+        }
+      }
     }
     for (const post of posts) {
       if (!String(post.generatedBy || "").toLowerCase().includes("gemini")) {
@@ -268,11 +330,35 @@ function checkReleaseCandidate({ date, slot }, errors, warnings) {
         if (!post.coverCredit || !post.coverCreditUrl || !post.coverLicense) {
           addIssue(errors, `${post.language}/${post.slug}: source cover must include coverCredit, coverCreditUrl and coverLicense`);
         }
+        if (isGenericStockImageUrl(post.cover) || isGenericStockImageUrl(post.coverCreditUrl)) {
+          addIssue(errors, `${post.language}/${post.slug}: market news source image must come from the source article or official announcement, not stock/free image providers`);
+        }
+        if (!sourceCoverCreditMatchesSource(post)) {
+          addIssue(errors, `${post.language}/${post.slug}: market news coverCreditUrl must match one of the sourceLinks`);
+        }
       } else {
         if (!/(chatgpt|gpt|openai)/i.test(String(post.coverGeneration?.provider || ""))) {
           addIssue(errors, `${post.language}/${post.slug}: coverGeneration.provider must be ChatGPT/GPT`);
         }
         if (post.coverSource !== "generated") addIssue(errors, `${post.language}/${post.slug}: coverSource must be generated`);
+        const contentImages = Array.isArray(post.contentImages) ? post.contentImages : [];
+        if (contentImages.length < 2) addIssue(errors, `${post.language}/${post.slug}: column/feature requires at least two in-article images`);
+        if (contentImages.length > 3) addIssue(errors, `${post.language}/${post.slug}: column/feature should use no more than three in-article images`);
+        for (const [index, image] of contentImages.entries()) {
+          const label = `${post.language}/${post.slug} contentImages[${index}]`;
+          if (!image?.url) addIssue(errors, `${label}: URL is missing`);
+          if (image?.source !== "generated") addIssue(errors, `${label}: source must be generated`);
+          if (!/(chatgpt|gpt|openai)/i.test(String(image?.provider || ""))) addIssue(errors, `${label}: provider must be ChatGPT/GPT`);
+          if (!image?.prompt || String(image.prompt).length < 40) addIssue(errors, `${label}: prompt metadata is missing or too thin`);
+          if (!image?.generatedAt) addIssue(errors, `${label}: generatedAt is missing`);
+          if (!image?.alt || String(image.alt).length < 18) addIssue(errors, `${label}: alt is missing or too thin`);
+          if (!image?.caption) addIssue(errors, `${label}: caption is missing`);
+          if (!image?.credit) addIssue(errors, `${label}: credit is missing`);
+          const visualChecks = image?.visualChecks || {};
+          for (const key of ["topicFit", "noTextArtifacts", "noLogos", "noPeople", "noTrademarkRisk", "noGenericStockLook"]) {
+            if (visualChecks[key] !== true) addIssue(errors, `${label}: visualChecks.${key} must be true`);
+          }
+        }
       }
     }
     return {

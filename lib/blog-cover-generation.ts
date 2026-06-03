@@ -82,7 +82,12 @@ const languageHints: Record<BlogLanguage, string[]> = {
   "zh-Hant": ["taiwan business", "asia startup", "founder desk", "technology team"],
   en: ["business technology", "startup office", "enterprise software", "strategy notebook"],
   ja: ["japan design", "minimal workspace", "technology craft", "editorial business"],
-  ko: ["korea startup", "technology office", "creative business", "software team"]
+  ko: ["korea startup", "technology office", "creative business", "software team"],
+  id: ["indonesia business", "jakarta startup", "southeast asia technology", "operator desk"],
+  vi: ["vietnam business", "ho chi minh startup", "southeast asia technology", "operations team"],
+  th: ["thailand business", "bangkok startup", "southeast asia technology", "strategy workspace"],
+  ms: ["malaysia business", "kuala lumpur startup", "southeast asia technology", "enterprise team"],
+  fil: ["philippines business", "manila startup", "southeast asia technology", "product team"]
 };
 
 export function isBlogImageGenerationConfigured() {

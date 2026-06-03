@@ -1,3 +1,5 @@
+import { initOpenNextCloudflareForDev } from "@opennextjs/cloudflare";
+
 const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || "https://altoslab.com").replace(/\/$/, "");
 const canonicalHost = new URL(siteUrl).host;
 const canonicalRedirectHosts = Array.from(
@@ -19,8 +21,14 @@ const canonicalRedirectHosts = Array.from(
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   typedRoutes: false,
+  ...(process.env.NEXT_OUTPUT_STANDALONE === "1" ? { output: "standalone" } : {}),
   images: {
     unoptimized: true
+  },
+  turbopack: {
+    resolveAlias: {
+      sharp: "./lib/sharp-disabled.ts"
+    }
   },
   async redirects() {
     return canonicalRedirectHosts.map((host) => ({
@@ -33,3 +41,7 @@ const nextConfig = {
 };
 
 export default nextConfig;
+
+if (process.env.NODE_ENV === "development") {
+  initOpenNextCloudflareForDev();
+}

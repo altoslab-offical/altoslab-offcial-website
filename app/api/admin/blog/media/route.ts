@@ -5,6 +5,7 @@ import { adminCookieName, getAdminSessionToken } from "@/lib/auth";
 import { verifyBlogIngestRequest } from "@/lib/blog-ingest-auth";
 import { cloudflareKvMediaPathname, getCloudflareKvConfig, requireCloudflareKvNamespace } from "@/lib/cloudflare-kv";
 import { cloudflareR2MediaPathname, getCloudflareR2Config, requireCloudflareR2Bucket } from "@/lib/cloudflare-r2";
+import { gcsMediaPathname, getGcsStorageConfig, requireGcsStorageConfig, writeGcsObject } from "@/lib/gcp-storage";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -26,7 +27,7 @@ function safeFilename(input = "cover.png") {
   return `${stem || "cover"}${safeExt}`;
 }
 
-function localBaseUrl(request: Request) {
+function publicBaseUrl(request: Request) {
   return process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") || new URL(request.url).origin;
 }
 
@@ -54,7 +55,7 @@ async function storeLocalPublicImage(filename: string, bytes: Buffer, request: R
   await fs.mkdir(path.dirname(output), { recursive: true });
   await fs.writeFile(output, bytes);
   return {
-    url: `${localBaseUrl(request)}/api/blog/generated-media/${encodeURIComponent(filename)}`,
+    url: `${publicBaseUrl(request)}/api/blog/generated-media/${encodeURIComponent(filename)}`,
     pathname,
     provider: "local-public"
   };
@@ -87,7 +88,7 @@ async function storeCloudflareR2Image(filename: string, bytes: Buffer, contentTy
     }
   });
   return {
-    url: `${requestOrigin(request)}/api/blog/generated-media/${encodeURIComponent(filename)}`,
+    url: `${publicBaseUrl(request)}/api/blog/generated-media/${encodeURIComponent(filename)}`,
     pathname,
     provider: "cloudflare-r2"
   };
@@ -105,9 +106,20 @@ async function storeCloudflareKvImage(filename: string, bytes: Buffer, contentTy
     }
   });
   return {
-    url: `${requestOrigin(request)}/api/blog/generated-media/${encodeURIComponent(filename)}`,
+    url: `${publicBaseUrl(request)}/api/blog/generated-media/${encodeURIComponent(filename)}`,
     pathname,
     provider: "cloudflare-kv"
+  };
+}
+
+async function storeGcsImage(filename: string, bytes: Buffer, contentType: string, request: Request) {
+  const config = requireGcsStorageConfig();
+  const pathname = gcsMediaPathname(filename);
+  await writeGcsObject(config, pathname, bytes, contentType);
+  return {
+    url: `${publicBaseUrl(request)}/api/blog/generated-media/${encodeURIComponent(filename)}`,
+    pathname,
+    provider: "gcs"
   };
 }
 
@@ -144,6 +156,8 @@ export async function POST(request: Request) {
       ? await storeCloudflareKvImage(filename, bytes, contentType, request)
       : getCloudflareR2Config()
       ? await storeCloudflareR2Image(filename, bytes, contentType, request)
+      : getGcsStorageConfig()
+      ? await storeGcsImage(filename, bytes, contentType, request)
       : process.env.BLOG_MEDIA_ALLOW_LOCAL_STORAGE === "1"
       ? await storeLocalPublicImage(filename, bytes, request)
       : await storeBlobImage(filename, bytes, contentType);

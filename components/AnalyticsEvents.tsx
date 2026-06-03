@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { sendGTMEvent } from "@next/third-parties/google";
+import { blogLanguageFromPath, htmlLanguage } from "@/lib/blog-utils";
 
 type AnalyticsEventName =
   | "cta_clicked"
@@ -59,13 +60,7 @@ export function CtaAnalytics() {
     const path = window.location.pathname;
     const params = new URLSearchParams(window.location.search);
     const aiReferralPattern = /(chatgpt\.com|openai\.com|perplexity\.ai|claude\.ai|gemini\.google\.com|copilot\.microsoft\.com|you\.com|phind\.com)/i;
-    document.documentElement.lang = path.startsWith("/en/")
-      ? "en"
-      : path.startsWith("/ja/")
-        ? "ja"
-        : path.startsWith("/ko/")
-          ? "ko"
-        : "zh-Hant-TW";
+    document.documentElement.lang = htmlLanguage(blogLanguageFromPath(path) || "zh-Hant");
 
     const referrer = document.referrer || "";
     const utmSource = params.get("utm_source") || "";

@@ -1,26 +1,24 @@
 import type { Metadata } from "next";
 import { BlogIndex } from "@/components/BlogIndex";
-import { blogCoverForLanguage } from "@/lib/blog-utils";
+import { BLOG_LANGUAGES, blogCoverForLanguage, blogIndexPath, metadataLanguageKey } from "@/lib/blog-utils";
 import { siteUrl } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "AI Lab Notes | ALTOS LAB Journal",
-  description: "ALTOS LAB の AI プロダクト、エージェント、自動化、SEO/GEO、事例、AI 市場観測ノート。",
+  description: "ALTOS LAB の AI プロダクト、エージェント、自動化、検索での見え方、事例、AI 市場観測ノート。",
   alternates: {
     canonical: `${siteUrl}/ja/blog`,
-    languages: {
-      "zh-Hant-TW": `${siteUrl}/blog`,
-      en: `${siteUrl}/en/blog`,
-      ja: `${siteUrl}/ja/blog`,
-      ko: `${siteUrl}/ko/blog`,
-      "x-default": `${siteUrl}/blog`
-    }
+    languages: Object.fromEntries(
+      BLOG_LANGUAGES.map((language) => [metadataLanguageKey(language), `${siteUrl}${blogIndexPath(language)}`]).concat([
+        ["x-default", `${siteUrl}${blogIndexPath("zh-Hant")}`]
+      ])
+    )
   },
   openGraph: {
     title: "AI Lab Notes | ALTOS LAB Journal",
-    description: "ALTOS LAB の AI プロダクト、エージェント、自動化、SEO/GEO、事例、AI 市場観測ノート。",
+    description: "ALTOS LAB の AI プロダクト、エージェント、自動化、検索での見え方、事例、AI 市場観測ノート。",
     url: `${siteUrl}/ja/blog`,
     siteName: "ALTOS LAB",
     locale: "ja_JP",
@@ -30,7 +28,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "AI Lab Notes | ALTOS LAB Journal",
-    description: "ALTOS LAB の AI プロダクト、エージェント、自動化、SEO/GEO、事例、AI 市場観測ノート。",
+    description: "ALTOS LAB の AI プロダクト、エージェント、自動化、検索での見え方、事例、AI 市場観測ノート。",
     images: [`${siteUrl}${blogCoverForLanguage("ja")}`]
   }
 };

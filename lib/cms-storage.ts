@@ -15,6 +15,16 @@ import {
   type CloudflareKvConfig,
   type KvNamespaceLike
 } from "./cloudflare-kv";
+import {
+  deleteGcsObject,
+  GcsPreconditionError,
+  getGcsStorageConfig,
+  listGcsObjects,
+  readGcsText,
+  requireGcsStorageConfig,
+  writeGcsObject,
+  type GcsStorageConfig
+} from "./gcp-storage";
 import { seedData } from "./seed";
 import type { CmsData } from "./types";
 
@@ -105,6 +115,7 @@ function canWriteLocalFile() {
 export function getCmsStorageStatus() {
   const cloudflareKv = getCloudflareKvConfig();
   const cloudflareR2 = getCloudflareR2Config();
+  const gcs = getGcsStorageConfig();
   const upstash = getUpstashConfig();
   const blob = getBlobConfig();
   if (cloudflareKv) {
@@ -127,6 +138,19 @@ export function getCmsStorageStatus() {
       configured: true,
       key: cloudflareR2.cmsKey,
       binding: cloudflareR2.binding,
+      encrypted: Boolean(process.env.CMS_ENCRYPTION_KEY)
+    };
+  }
+
+  if (gcs) {
+    return {
+      provider: "gcs",
+      durable: true,
+      writable: true,
+      configured: true,
+      key: gcs.cmsKey,
+      bucket: gcs.bucket,
+      pathname: gcs.cmsPathname,
       encrypted: Boolean(process.env.CMS_ENCRYPTION_KEY)
     };
   }
@@ -488,6 +512,89 @@ async function withR2Lock<T>(
   }
 }
 
+async function readVersionedGcsCmsData(config: GcsStorageConfig, pathname: string) {
+  const primary = await readGcsText(config, pathname).catch(() => null);
+  if (primary) {
+    try {
+      return parseCmsBlobText(primary.text);
+    } catch (error) {
+      console.warn(
+        "[cms] Primary GCS CMS payload is unreadable; trying version history:",
+        error instanceof Error ? error.message : error
+      );
+    }
+  }
+
+  const versions = await listGcsObjects(config, cmsVersionPrefix(pathname), 1000);
+  const latestVersions = versions
+    .filter((item) => item.name.endsWith(".json"))
+    .sort((a, b) => {
+      const aTime = a.updated ? new Date(a.updated).getTime() : 0;
+      const bTime = b.updated ? new Date(b.updated).getTime() : 0;
+      return bTime - aTime;
+    });
+
+  for (const version of latestVersions.slice(0, 20)) {
+    const raw = await readGcsText(config, version.name).catch(() => null);
+    if (!raw) continue;
+    try {
+      return parseCmsBlobText(raw.text);
+    } catch (error) {
+      console.warn(
+        "[cms] Skipping unreadable GCS CMS version:",
+        version.name,
+        error instanceof Error ? error.message : error
+      );
+    }
+  }
+
+  return null;
+}
+
+async function writeGcsJson(config: GcsStorageConfig, pathname: string, value: unknown, ifGenerationMatch?: string | number) {
+  await writeGcsObject(config, pathname, JSON.stringify(value, null, 2), "application/json", ifGenerationMatch);
+}
+
+async function writeVersionedGcsJson(config: GcsStorageConfig, value: unknown) {
+  await writeGcsJson(config, cmsVersionPathname(config.cmsPathname), value);
+  await writeGcsJson(config, config.cmsPathname, value);
+}
+
+async function withGcsLock<T>(config: GcsStorageConfig, name: string, task: () => Promise<T>, ttlMs: number) {
+  const lockPathname = config.cmsPathname.replace(/\.json$/, `.lock.${name.replace(/[^a-z0-9_-]+/gi, "-")}.json`);
+  const token = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+  const expiresAt = Date.now() + ttlMs;
+
+  try {
+    await writeGcsJson(config, lockPathname, { token, expiresAt }, 0);
+  } catch (error) {
+    if (!(error instanceof GcsPreconditionError)) throw error;
+
+    const existing = await readGcsText(config, lockPathname);
+    if (!existing) throw new CmsLockError();
+
+    const payload = JSON.parse(existing.text) as { expiresAt?: number };
+    if (!payload.expiresAt || payload.expiresAt > Date.now()) throw new CmsLockError();
+
+    try {
+      await writeGcsJson(config, lockPathname, { token, expiresAt }, existing.generation);
+    } catch (overwriteError) {
+      if (overwriteError instanceof GcsPreconditionError) throw new CmsLockError();
+      throw overwriteError;
+    }
+  }
+
+  try {
+    return await task();
+  } finally {
+    const current = await readGcsText(config, lockPathname).catch(() => null);
+    if (current) {
+      const payload = JSON.parse(current.text) as { token?: string };
+      if (payload.token === token) await deleteGcsObject(config, lockPathname).catch(() => undefined);
+    }
+  }
+}
+
 async function readVersionedPublicCmsBlobText(pathname: string) {
   const { list } = await vercelBlobClient();
   const result = await list({ prefix: cmsVersionPrefix(pathname), limit: 1000 });
@@ -653,6 +760,9 @@ export async function withCmsStorageLock<T>(
     return withR2Lock(cloudflareR2Bucket, cloudflareR2Config, name, task, ttlMs);
   }
 
+  const gcs = getGcsStorageConfig();
+  if (gcs) return withGcsLock(gcs, name, task, ttlMs);
+
   const upstash = getUpstashConfig();
   const blob = getBlobConfig();
   if (!upstash) {
@@ -702,6 +812,12 @@ export async function readCmsDataFromStorage(): Promise<CmsData> {
     return data || cloneSeedData();
   }
 
+  const gcs = getGcsStorageConfig();
+  if (gcs) {
+    const data = await readVersionedGcsCmsData(gcs, gcs.cmsPathname);
+    return data || cloneSeedData();
+  }
+
   const upstash = getUpstashConfig();
   const blob = getBlobConfig();
   if (upstash) {
@@ -740,6 +856,12 @@ export async function writeCmsDataToStorage(data: CmsData) {
     return;
   }
 
+  const gcs = getGcsStorageConfig();
+  if (gcs) {
+    await writeVersionedGcsJson(requireGcsStorageConfig(), encryptCmsData(data));
+    return;
+  }
+
   const upstash = getUpstashConfig();
   const blob = getBlobConfig();
   if (upstash) {
@@ -754,7 +876,7 @@ export async function writeCmsDataToStorage(data: CmsData) {
 
   if (!canWriteLocalFile()) {
     throw new Error(
-      "CMS storage is not configured. Set BLOB_READ_WRITE_TOKEN or UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN in production."
+      "CMS storage is not configured. Set GCS_BUCKET, BLOB_READ_WRITE_TOKEN, or UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN in production."
     );
   }
 

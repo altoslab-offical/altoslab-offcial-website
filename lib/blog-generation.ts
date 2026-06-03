@@ -824,7 +824,17 @@ Format repair instruction:
           ? "Write in natural Japanese for business readers in Japan. Do not sound like a literal translation."
           : language === "ko"
             ? "Write in natural Korean for business readers in Korea. Do not sound like a literal translation."
-            : "Write in natural business English.";
+            : language === "id"
+              ? "Write in natural Bahasa Indonesia for Indonesian business readers. Avoid literal translation tone."
+              : language === "vi"
+                ? "Write in natural Vietnamese for Vietnamese business readers. Avoid literal translation tone."
+                : language === "th"
+                  ? "Write in natural Thai for Thai business readers. Avoid literal translation tone."
+                  : language === "ms"
+                    ? "Write in natural Bahasa Melayu for Malaysian business readers. Avoid literal translation tone."
+                    : language === "fil"
+                      ? "Write in natural Filipino for Philippine business readers. Avoid literal translation tone."
+                      : "Write in natural business English.";
     const languageLabel = language;
     const contentType = contentTypeFromInput(input);
     const newsCategory = localizedNewsCategory(input, language);
@@ -838,7 +848,7 @@ Format repair instruction:
 
     return `You are writing one ${languageLabel} company-blog draft for ALTOS LAB, an AI implementation lab and product studio.
 
-This is one side of a multilingual article set for zh-Hant, en, ja and ko. Use the same angle, claims and source-backed reasoning as the paired language versions will use, while making the language sound native.
+This is one side of a multilingual article set for zh-Hant, en, ja, ko, id, vi, th, ms and fil. Use the same angle, claims and source-backed reasoning as the paired language versions will use, while making the language sound native.
 
 Topic: ${topic}
 Primary keyword: ${input.keyword || topic}

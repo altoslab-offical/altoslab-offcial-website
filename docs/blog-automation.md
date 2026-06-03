@@ -35,7 +35,7 @@
   - optional `PIXABAY_API_KEY=<pixabay-key>`
   - optional `BLOG_IMAGE_STORE_BLOB=true`
   - optional `BLOB_READ_WRITE_TOKEN=<vercel-blob-token>`
-- The preferred path is generated imagery, saved through the signed media upload route and served from Cloudflare generated media.
+- The preferred path for columns/features is generated imagery, saved through the signed media upload route and served from GCS-backed same-origin generated media. Market-news posts use credited source or official announcement images instead of GPT art.
 - If GPT image generation is used, it must happen only in the dedicated ChatGPT/GPT image tab and the final image still has to pass production image QA.
 - If GPT image generation is unavailable, the candidate is held; local fallback art is disabled for production publishing.
 
@@ -43,7 +43,7 @@
 
 Auto-publishing requires:
 
-- A local/subagent-generated four-language article set.
+- A local/subagent-generated full multilingual article set: `zh-Hant`, `en`, `ja`, `ko`, `id`, `vi`, `th`, `ms`, `fil`.
 - Trusted visible source links.
 - Topic-matched legally sourced cover image with attribution.
 - Quality score at or above the content-type threshold.

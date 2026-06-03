@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Fragment } from "react";
 import { AnalyticsEvent } from "@/components/AnalyticsEvents";
 import { BlogEditorialVisual } from "@/components/BlogEditorialVisual";
 import { renderBrandText } from "@/components/BrandText";
@@ -19,7 +20,7 @@ import { toBlogVisualPost } from "@/lib/blog-visual";
 import { getRelatedPublishedBlogPosts } from "@/lib/cms";
 import { publicTaxonomyLabel, publicTaxonomyLabels } from "@/lib/public-taxonomy";
 import { articleJsonLd, breadcrumbJsonLd, faqJsonLd } from "@/lib/seo";
-import type { BlogPost } from "@/lib/types";
+import type { BlogInlineImage, BlogPost } from "@/lib/types";
 
 const copy = {
   "zh-Hant": {
@@ -81,6 +82,81 @@ const copy = {
     disclosure: "편집 검토",
     tags: "글 태그",
     authorLabel: "작성자"
+  },
+  id: {
+    back: "← Blog",
+    updated: "Diperbarui",
+    readTime: (minutes: number) => `${minutes} menit baca`,
+    geoSummary: "Ringkasan",
+    takeaways: "Poin Utama",
+    faq: "Pertanyaan Umum",
+    sources: "Sumber dan Rujukan",
+    related: "Bacaan terkait",
+    relatedTitle: "Keep reading",
+    relatedMore: "Lihat semua",
+    disclosure: "Tinjauan editor",
+    tags: "Tag artikel",
+    authorLabel: "Penulis"
+  },
+  vi: {
+    back: "← Blog",
+    updated: "Cập nhật",
+    readTime: (minutes: number) => `${minutes} phút đọc`,
+    geoSummary: "Tóm tắt nhanh",
+    takeaways: "Ý chính",
+    faq: "Câu hỏi thường gặp",
+    sources: "Nguồn tham khảo",
+    related: "Bài liên quan",
+    relatedTitle: "Keep reading",
+    relatedMore: "Xem tất cả",
+    disclosure: "Biên tập kiểm duyệt",
+    tags: "Thẻ bài viết",
+    authorLabel: "Tác giả"
+  },
+  th: {
+    back: "← Blog",
+    updated: "อัปเดต",
+    readTime: (minutes: number) => `อ่าน ${minutes} นาที`,
+    geoSummary: "สรุปสั้น",
+    takeaways: "ประเด็นสำคัญ",
+    faq: "คำถามที่พบบ่อย",
+    sources: "แหล่งอ้างอิง",
+    related: "บทความที่เกี่ยวข้อง",
+    relatedTitle: "Keep reading",
+    relatedMore: "ดูทั้งหมด",
+    disclosure: "ตรวจทานโดยบรรณาธิการ",
+    tags: "แท็กบทความ",
+    authorLabel: "ผู้เขียน"
+  },
+  ms: {
+    back: "← Blog",
+    updated: "Dikemas kini",
+    readTime: (minutes: number) => `${minutes} minit bacaan`,
+    geoSummary: "Ringkasan",
+    takeaways: "Isi Utama",
+    faq: "Soalan Lazim",
+    sources: "Sumber dan Rujukan",
+    related: "Bacaan berkaitan",
+    relatedTitle: "Keep reading",
+    relatedMore: "Lihat semua",
+    disclosure: "Semakan editorial",
+    tags: "Tag artikel",
+    authorLabel: "Penulis"
+  },
+  fil: {
+    back: "← Blog",
+    updated: "Updated",
+    readTime: (minutes: number) => `${minutes} min read`,
+    geoSummary: "Quick summary",
+    takeaways: "Key Points",
+    faq: "FAQ",
+    sources: "Sources",
+    related: "Related reading",
+    relatedTitle: "Keep reading",
+    relatedMore: "View all",
+    disclosure: "Editorial review",
+    tags: "Article tags",
+    authorLabel: "Author"
   }
 };
 
@@ -105,10 +181,24 @@ const sourceTranslationHeadings = new Set([
   "出典と翻訳メモ",
   "出典・翻訳メモ",
   "출처 및 번역 메모",
-  "출처와 번역 메모"
+  "출처와 번역 메모",
+  "Sumber dan catatan terjemahan",
+  "Nguồn và ghi chú bản dịch",
+  "แหล่งที่มาและบันทึกการแปล",
+  "Sumber dan nota terjemahan",
+  "Source and localization note"
 ]);
 
-const inlineFaqHeadings = new Set(["常見問題", "FAQ", "よくある質問", "자주 묻는 질문"]);
+const inlineFaqHeadings = new Set([
+  "常見問題",
+  "FAQ",
+  "よくある質問",
+  "자주 묻는 질문",
+  "Pertanyaan Umum",
+  "Câu hỏi thường gặp",
+  "คำถามที่พบบ่อย",
+  "Soalan Lazim"
+]);
 
 function extractSourceTranslationNote(body: string) {
   const lines = body.split("\n");
@@ -152,6 +242,89 @@ function formatSourceDate(value: string | undefined, locale: string) {
   if (!value) return "";
   const date = new Date(value);
   return Number.isNaN(date.getTime()) ? "" : date.toLocaleDateString(locale);
+}
+
+function splitArticleSections(body: string) {
+  const lines = body.split("\n");
+  const sections: string[] = [];
+  let current: string[] = [];
+
+  for (const line of lines) {
+    if (/^##\s+/.test(line) && current.join("\n").trim()) {
+      sections.push(current.join("\n").trim());
+      current = [line];
+    } else {
+      current.push(line);
+    }
+  }
+
+  if (current.join("\n").trim()) sections.push(current.join("\n").trim());
+  return sections.length ? sections : [body];
+}
+
+function contentImageIndex(image: BlogInlineImage, imageIndex: number, sectionCount: number) {
+  if (image.placement === "after-lead") return 0;
+  if (image.placement === "before-faq") return Math.max(0, sectionCount - 1);
+  if (image.placement === "mid-article") return Math.max(0, Math.floor(sectionCount / 2));
+  if (imageIndex === 0) return 0;
+  if (imageIndex === 1) return Math.max(0, Math.floor(sectionCount / 2));
+  return Math.max(0, sectionCount - 1);
+}
+
+function ArticleInlineImage({ image }: { image: BlogInlineImage }) {
+  if (!image.url) return null;
+  const aspectRatio = image.aspectRatio === "square" || image.aspectRatio === "portrait" ? image.aspectRatio : "wide";
+  const credit = image.credit || (image.source === "generated" ? "ALTOS LAB editorial visual" : "");
+  return (
+    <figure className={`article-inline-figure is-${aspectRatio}`}>
+      <img src={image.url} alt={image.alt} loading="lazy" />
+      {image.caption || credit ? (
+        <figcaption>
+          {image.caption ? <span>{renderBrandText(image.caption)}</span> : null}
+          {credit ? (
+            <>
+              {image.caption ? " " : ""}
+              <span className="article-inline-credit">
+                {image.creditUrl ? (
+                  <a href={image.creditUrl} target="_blank" rel="noreferrer">
+                    {renderBrandText(credit)}
+                  </a>
+                ) : (
+                  renderBrandText(credit)
+                )}
+                {image.license ? <> · {image.license}</> : null}
+              </span>
+            </>
+          ) : null}
+        </figcaption>
+      ) : null}
+    </figure>
+  );
+}
+
+function ArticleBodyWithImages({ text, images }: { text: string; images: BlogInlineImage[] }) {
+  const validImages = images.filter((image) => image.url && image.alt).slice(0, 3);
+  if (!validImages.length) return <RichText text={text} />;
+
+  const sections = splitArticleSections(text);
+  const buckets = new Map<number, BlogInlineImage[]>();
+  validImages.forEach((image, index) => {
+    const sectionIndex = contentImageIndex(image, index, sections.length);
+    buckets.set(sectionIndex, [...(buckets.get(sectionIndex) || []), image]);
+  });
+
+  return (
+    <div className="article-body-with-images">
+      {sections.map((section, sectionIndex) => (
+        <Fragment key={`${sectionIndex}-${section.slice(0, 24)}`}>
+          <RichText text={section} />
+          {(buckets.get(sectionIndex) || []).map((image, imageIndex) => (
+            <ArticleInlineImage image={image} key={`${image.url}-${imageIndex}`} />
+          ))}
+        </Fragment>
+      ))}
+    </div>
+  );
 }
 
 export async function BlogArticle({ post }: { post: BlogPost }) {
@@ -259,7 +432,7 @@ export async function BlogArticle({ post }: { post: BlogPost }) {
             </section>
           ) : null}
 
-          <RichText text={articleBody} />
+          <ArticleBodyWithImages images={post.contentImages || []} text={articleBody} />
 
           {post.sourceLinks.length ? (
             <section className="source-list">

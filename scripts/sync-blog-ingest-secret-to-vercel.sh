@@ -5,6 +5,9 @@ ROOT_DIR="/Users/asdc163/Documents/官方網站"
 ENV_FILE="${ALTOS_BLOG_WORKER_ENV_FILE:-$HOME/.altoslab-blog-worker.env}"
 SCOPE="${VERCEL_SCOPE:-altoslaboffical-3015s-projects}"
 PROJECT_NAME="${VERCEL_PROJECT_NAME:-altoslab-offcial-website}"
+PROJECT_ID="${VERCEL_PROJECT_ID:-prj_KRN5DfbHeKEiksVhSTFc3ApZVYDe}"
+TEAM_ID="${VERCEL_TEAM_ID:-team_nVIL3yKSHLYY7I7wdinJOn8e}"
+SYNC_ENVIRONMENTS="${VERCEL_SYNC_ENVIRONMENTS:-production}"
 
 vercel_whoami() {
   local output_file pid code
@@ -54,22 +57,31 @@ if ! vercel_whoami; then
   exit 1
 fi
 
-if ! npx --yes vercel projects ls --scope "$SCOPE" 2>/dev/null | grep -Fq "$PROJECT_NAME"; then
-  echo "The Vercel scope '$SCOPE' is authenticated but does not expose project '$PROJECT_NAME'." >&2
-  echo "This usually means the CLI is logged into the wrong Vercel account/team." >&2
-  echo "Available teams for the current login:" >&2
-  npx --yes vercel teams ls 2>/dev/null >&2 || true
-  exit 1
-fi
-
 cd "$ROOT_DIR"
 
 if [[ ! -f .vercel/project.json && ! -f .vercel/repo.json ]]; then
-  npx --yes vercel link --repo --scope "$SCOPE" --yes
+  npx --yes vercel link --scope "$SCOPE" --project "$PROJECT_NAME" --yes
 fi
 
-for env in production preview development; do
-  printf '%s' "$SECRET" | npx --yes vercel env add BLOG_INGEST_HMAC_SECRET "$env" --force --sensitive --yes --scope "$SCOPE"
+if [[ -f .vercel/project.json ]]; then
+  linked_project_id="$(node -e "const fs=require('fs'); const j=JSON.parse(fs.readFileSync('.vercel/project.json','utf8')); console.log(j.projectId || '')")"
+  linked_org_id="$(node -e "const fs=require('fs'); const j=JSON.parse(fs.readFileSync('.vercel/project.json','utf8')); console.log(j.orgId || '')")"
+  if [[ "$linked_project_id" != "$PROJECT_ID" || "$linked_org_id" != "$TEAM_ID" ]]; then
+    echo ".vercel/project.json is linked to the wrong Vercel project or team." >&2
+    echo "Expected project/team: $PROJECT_ID / $TEAM_ID" >&2
+    echo "Actual project/team:   $linked_project_id / $linked_org_id" >&2
+    exit 1
+  fi
+elif ! npx --yes vercel projects ls --scope "$SCOPE" 2>&1 | grep -Fq "$PROJECT_NAME"; then
+  echo "The Vercel scope '$SCOPE' is authenticated but does not expose project '$PROJECT_NAME'." >&2
+  echo "This usually means the CLI is logged into the wrong Vercel account/team." >&2
+  echo "Available teams for the current login:" >&2
+  npx --yes vercel teams ls >&2 || true
+  exit 1
+fi
+
+for env in $SYNC_ENVIRONMENTS; do
+  npx --yes vercel env add BLOG_INGEST_HMAC_SECRET "$env" --value "$SECRET" --force --sensitive --yes --scope "$SCOPE"
 done
 
 npx --yes vercel deploy --prod --yes --scope "$SCOPE"

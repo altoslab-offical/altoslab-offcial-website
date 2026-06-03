@@ -59,7 +59,7 @@ node scripts/blog-sop-doctor.mjs \
   --slot morning|afternoon
 ```
 
-The doctor checks the local worker env, LaunchAgent registration, production `/api/health`, Cloudflare KV CMS status, disabled legacy DeepSeek cron, and release candidate readiness. Release mode also requires admin readback credentials so the post-release verifier can inspect protected blog metadata.
+The doctor checks the local worker env, LaunchAgent registration, production `/api/health`, durable CMS status (`gcs` or `cloudflare-kv`), disabled legacy DeepSeek cron, and release candidate readiness. Release mode also requires admin readback credentials so the post-release verifier can inspect protected blog metadata.
 
 It does not pretend to operate Gemini or ChatGPT. Browser/Gemini/GPT production remains owned by the Codex heartbeat/main-brain workflow because it has Chrome extension access and can enforce tab-group rules.
 
@@ -76,7 +76,7 @@ The prompt-card contract lives in `docs/content/blog-prompt-card-template.md`.
 3. Main brain prepares or delegates a `prompt-card.md` using `docs/content/blog-prompt-card-template.md`.
 4. Main brain approves the prompt-card. If the prompt-card does not clearly define the reader hook, source limits, image angle, tab target, user-selected model policy, and fail-closed QA rules, the run is held.
 5. Main brain spawns a `gpt-5.3-codex-spark` worker with a bounded task:
-   - write or revise exactly one four-language article set,
+   - write or revise exactly one full multilingual article set,
    - keep one `translationGroupId`,
    - keep identical `sourceLinks`,
    - do not publish,
@@ -115,7 +115,7 @@ Publish only when all are true:
 - `qualitySummary.approved: true`
 - `imageQualitySummary.approved: true`
 - `qualityManifest.contentSha256` matches the release payload
-- four languages are present
+- all configured languages are present: `zh-Hant`, `en`, `ja`, `ko`, `id`, `vi`, `th`, `ms`, `fil`
 - all covers are reachable generated media
 - all covers were created through GPT/ChatGPT or explicit human-approved editorial design QA
 - all covers include aesthetic visual checks: brand fit, editorial specificity, visual hierarchy, thumbnail readability, no cliché, and mobile crop resilience

@@ -1,5 +1,6 @@
 import { getPublishedBlogPosts } from "@/lib/cms";
 import { blogPostPath } from "@/lib/blog-utils";
+import { publicTaxonomyLabel } from "@/lib/public-taxonomy";
 import { absoluteUrl, siteName, siteUrl } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
@@ -26,7 +27,7 @@ export async function GET() {
         <description>${escapeXml(post.excerpt)}</description>
         <pubDate>${new Date(post.publishedAt || post.createdAt).toUTCString()}</pubDate>
         <category>${escapeXml(post.contentType || "column")}</category>
-        <category>${escapeXml(post.newsCategory || post.topic)}</category>
+        <category>${escapeXml(publicTaxonomyLabel(post.newsCategory || post.topic, post.language))}</category>
       </item>`;
     })
     .join("\n");
@@ -36,7 +37,7 @@ export async function GET() {
     <channel>
       <title>${escapeXml(siteName)} Blog</title>
       <link>${siteUrl}/blog</link>
-      <description>${escapeXml("AI products, agents, automation, SEO/GEO, case studies and market signals from ALTOS LAB.")}</description>
+      <description>${escapeXml("AI products, agents, automation, case studies, search visibility and market signals from ALTOS LAB.")}</description>
       <language>zh-TW</language>
       <lastBuildDate>${new Date().toUTCString()}</lastBuildDate>
       ${items}

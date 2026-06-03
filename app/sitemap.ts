@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 import { getPublishedBlogPosts, getPublishedProjects } from "@/lib/cms";
-import { blogPostPath, metadataLanguageKey } from "@/lib/blog-utils";
+import { BLOG_LANGUAGES, blogIndexPath, blogPostPath, metadataLanguageKey } from "@/lib/blog-utils";
 import { siteUrl } from "@/lib/seo";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
@@ -17,30 +17,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "weekly",
       priority: 1
     },
-    {
-      url: `${siteUrl}/blog`,
+    ...BLOG_LANGUAGES.map((language, index) => ({
+      url: `${siteUrl}${blogIndexPath(language)}`,
       lastModified: now,
-      changeFrequency: "weekly",
-      priority: 0.8
-    },
-    {
-      url: `${siteUrl}/en/blog`,
-      lastModified: now,
-      changeFrequency: "weekly",
-      priority: 0.7
-    },
-    {
-      url: `${siteUrl}/ja/blog`,
-      lastModified: now,
-      changeFrequency: "weekly",
-      priority: 0.65
-    },
-    {
-      url: `${siteUrl}/ko/blog`,
-      lastModified: now,
-      changeFrequency: "weekly",
-      priority: 0.65
-    },
+      changeFrequency: "weekly" as const,
+      priority: index === 0 ? 0.8 : 0.65
+    })),
     {
       url: `${siteUrl}/projects`,
       lastModified: now,

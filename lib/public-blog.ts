@@ -35,6 +35,7 @@ export type PublicBlogPost = Pick<
   | "coverCreditUrl"
   | "coverLicense"
   | "coverLicenseUrl"
+  | "contentImages"
   | "readTimeMinutes"
   | "featured"
   | "createdAt"
@@ -75,6 +76,7 @@ export function toPublicBlogPost(post: BlogPost): PublicBlogPost {
     coverCreditUrl: canExposeCoverAttribution ? post.coverCreditUrl : undefined,
     coverLicense: canExposeCoverAttribution ? post.coverLicense : undefined,
     coverLicenseUrl: canExposeCoverAttribution ? post.coverLicenseUrl : undefined,
+    contentImages: post.contentImages || [],
     readTimeMinutes: post.readTimeMinutes,
     featured: post.featured,
     createdAt: post.createdAt,

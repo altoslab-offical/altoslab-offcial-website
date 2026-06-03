@@ -6,6 +6,8 @@ import process from "node:process";
 import { spawn } from "node:child_process";
 
 const SLOT_HOURS = { morning: "09:00", afternoon: "16:00" };
+const LANGUAGES = ["zh-Hant", "en", "ja", "ko", "id", "vi", "th", "ms", "fil"];
+const LANGUAGE_LABEL = LANGUAGES.join(", ");
 const PREP_WINDOWS = {
   morning: { hour: 8, minute: 10 },
   afternoon: { hour: 15, minute: 10 }
@@ -14,6 +16,13 @@ const RELEASE_WINDOWS = {
   morning: { hour: 9, minute: 0 },
   afternoon: { hour: 16, minute: 0 }
 };
+const MARKET_SCAN_WINDOWS = [
+  { hour: 10, minute: 30 },
+  { hour: 12, minute: 30 },
+  { hour: 14, minute: 30 },
+  { hour: 18, minute: 30 },
+  { hour: 20, minute: 30 }
+];
 const RELEASE_GRACE_MINUTES = 5;
 
 function arg(name, fallback = "") {
@@ -69,6 +78,13 @@ function slotFromClock(kind, input = new Date()) {
   return hour < 12 ? "morning" : "afternoon";
 }
 
+function isMarketScanClock(input = new Date()) {
+  const parts = taiwanParts(input);
+  const hour = Number(parts.hour);
+  const minute = Number(parts.minute);
+  return MARKET_SCAN_WINDOWS.some((window) => window.hour === hour && window.minute === minute);
+}
+
 function runRoot() {
   return path.resolve(process.env.ALTOS_BLOG_WORKER_RUN_DIR || path.join(process.cwd(), "data/blog-worker-runs"));
 }
@@ -101,6 +117,7 @@ async function appendLog(filePath, message) {
 }
 
 function parseJsonObject(raw) {
+  if (!raw || !String(raw).trim()) return null;
   try {
     return JSON.parse(raw || "{}");
   } catch {
@@ -182,10 +199,13 @@ Daily flow:
 Manual checks:
   node scripts/blog-scheduled-runner.mjs --prep --slot morning
   node scripts/blog-scheduled-runner.mjs --release --slot afternoon
+  node scripts/blog-scheduled-runner.mjs --market-scan
 
-This runner never creates production content by itself. Prep creates a prompt
-and manifest skeleton. Release publishes only a ready prepared-candidate
-manifest produced after Gemini/GPT + validate-only + main-brain QA.
+This runner never creates production content by itself. Column prep creates a
+prompt and manifest skeleton. Market scan creates a separate fast-lane source
+prompt only when the main brain can then use Gemini and a credited source image.
+Release publishes only a ready prepared-candidate manifest produced after
+Gemini/source-image-or-GPT + validate-only + main-brain QA.
 `);
 }
 
@@ -239,6 +259,8 @@ async function createPrep({ date, slot }) {
     "--dry-run",
     "--slot",
     slot,
+    "--lane",
+    "column",
     "--date",
     date,
     "--run-dir",
@@ -263,7 +285,9 @@ Article set output: ${articleSetPath}
 Prepared manifest: ${manifestPath}
 
 Use only the ALTOS Blog QA Chrome tab group.
-Gemini writes/revises the article set. Market news uses the credited source image; ChatGPT/GPT creates covers only for columns/features.
+This is a daily column slot. Gemini writes/revises the article set; ChatGPT/GPT creates one shared cover and 2-3 shared in-article images for the ${LANGUAGES.length} language versions.
+Required languages: ${LANGUAGE_LABEL}.
+Column contentImages must serve three editorial jobs: opening anchor, mechanism/evidence, and optional closing synthesis. Use the same image URLs across every language version.
 Do not publish during prep. Do not change accounts or model selectors.
 
 After the Gemini/source-image/GPT output is saved, run:
@@ -310,6 +334,112 @@ ${await fs.readFile(orchestratorPromptPath, "utf8").catch(() => "")}
   await writeJson(manifestPath, manifest);
   await writeJson(indexPath, { ...manifest, manifestPath });
   return { ok: true, skipped: false, phase: "prep", runDir, promptPath, articleSetPath, manifestPath, indexPath, doctor: compactDoctorResult(doctor) };
+}
+
+async function createMarketScan({ date }) {
+  const slot = Number(taiwanParts().hour) < 12 ? "morning" : "afternoon";
+  const doctor = await runDoctor({ mode: "prep", date, slot });
+  await appendLog(globalScheduleLogPath(), JSON.stringify({ phase: "market-scan-doctor", date, slot, doctor: compactDoctorResult(doctor) }));
+  if (!doctor.ok) {
+    return { ok: false, phase: "market-scan-doctor", stdout: doctor.stdout, stderr: doctor.stderr };
+  }
+
+  const runDir = path.resolve(arg("run-dir") || path.join(runRoot(), `${date}-market-scan-${taiwanStamp()}`));
+  const promptPath = path.join(runDir, "market-fast-lane-prompt-card.md");
+  const articleSetPath = path.join(runDir, "article-set.json");
+  const manifestPath = path.join(runDir, "prepared-candidate.json");
+  const orchestratorPromptPath = path.join(runDir, "browser-production-prompt.md");
+
+  await fs.mkdir(runDir, { recursive: true });
+  const orchestrator = await runCommand(process.execPath, [
+    "scripts/blog-antigravity-orchestrator.mjs",
+    "--dry-run",
+    "--lane",
+    "market",
+    "--slot",
+    slot,
+    "--date",
+    date,
+    "--run-dir",
+    runDir
+  ], { cwd: process.cwd() });
+  if (orchestrator.code !== 0) {
+    return {
+      ok: false,
+      phase: "market-scan",
+      error: "orchestrator dry-run failed",
+      stdout: orchestrator.stdout,
+      stderr: orchestrator.stderr
+    };
+  }
+
+  const promptCard = `# ALTOS LAB Market News Fast-Lane Prompt Card
+
+Run date: ${date}
+Detected slot context: ${slot}
+Article set output: ${articleSetPath}
+Prepared manifest: ${manifestPath}
+
+Use only the ALTOS Blog QA Chrome tab group.
+Gemini writes/revises the market-news article set. The cover must be the source article or official announcement image, shared by all ${LANGUAGES.length} languages.
+Required languages: ${LANGUAGE_LABEL}. Every market-news item must be translated/localized into all of them before validate-only.
+Do not use GPT art, Unsplash, Pexels, Pixabay, Openverse, reused covers, or local fallback art for market news.
+If no qualified source image exists, hold the candidate and report no publish.
+
+After source image + Gemini output is saved, run:
+
+\`\`\`bash
+node scripts/blog-local-worker.mjs \\
+  --article-set "${articleSetPath}" \\
+  --slot ${slot} \\
+  --validate-only \\
+  --manifest "${manifestPath}" \\
+  --approve-design-qa
+\`\`\`
+
+If validate-only and main-brain QA pass, publish immediately with:
+
+\`\`\`bash
+node scripts/blog-local-worker.mjs \\
+  --article-set "${articleSetPath}" \\
+  --slot ${slot} \\
+  --publish \\
+  --manifest "${manifestPath}" \\
+  --reuse-validated-manifest \\
+  --approve-design-qa
+node scripts/verify-blog-release.mjs --manifest "${manifestPath}"
+\`\`\`
+
+Detailed browser prompt:
+
+\`\`\`text
+${await fs.readFile(orchestratorPromptPath, "utf8").catch(() => "")}
+\`\`\`
+`;
+  await fs.writeFile(promptPath, promptCard, "utf8");
+
+  const manifest = {
+    status: "awaiting_market_browser_production",
+    lane: "market",
+    slot,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    runDir,
+    promptPath,
+    articleSetPath,
+    manifestPath,
+    chromeEvidence: {
+      gemini: { usedExistingTab: false, changedModel: false },
+      chatgpt: { usedExistingTab: false, changedModel: false }
+    },
+    validateOnly: {
+      wouldPublish: false,
+      errors: ["Market scan has not produced a Gemini/source-image validated article set yet."]
+    },
+    humanDesignQa: { approved: false }
+  };
+  await writeJson(manifestPath, manifest);
+  return { ok: true, skipped: false, phase: "market-scan", runDir, promptPath, articleSetPath, manifestPath, doctor: compactDoctorResult(doctor) };
 }
 
 function releaseGateIssues(manifest, { date, slot, articleSet }) {
@@ -451,16 +581,17 @@ async function main() {
   }
   const date = arg("date") || taiwanDate();
   let mode = hasFlag("prep") ? "prep" : hasFlag("release") ? "release" : "";
+  if (hasFlag("market-scan")) mode = "market-scan";
   if (hasFlag("scheduled")) {
     const parts = taiwanParts();
     const hour = Number(parts.hour);
-    mode = hour === PREP_WINDOWS.morning.hour || hour === PREP_WINDOWS.afternoon.hour ? "prep" : "release";
+    mode = isMarketScanClock() ? "market-scan" : hour === PREP_WINDOWS.morning.hour || hour === PREP_WINDOWS.afternoon.hour ? "prep" : "release";
   }
-  if (!mode) throw new Error("Use --scheduled, --prep or --release");
+  if (!mode) throw new Error("Use --scheduled, --prep, --release or --market-scan");
   const slot = arg("slot") || slotFromClock(mode);
-  if (!SLOT_HOURS[slot]) throw new Error("--slot must be morning or afternoon");
+  if (mode !== "market-scan" && !SLOT_HOURS[slot]) throw new Error("--slot must be morning or afternoon");
 
-  const result = mode === "prep" ? await createPrep({ date, slot }) : await release({ date, slot });
+  const result = mode === "prep" ? await createPrep({ date, slot }) : mode === "market-scan" ? await createMarketScan({ date }) : await release({ date, slot });
   console.log(JSON.stringify(result, null, 2));
   if (result.ok === false) process.exit(1);
 }

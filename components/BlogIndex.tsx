@@ -55,7 +55,7 @@ const copy = {
     otherLanguage: "English",
     mobileTopicTitle: "Tech",
     mobileTopicDescription: "AI 實作、工具與產品筆記。",
-    sidebarTopics: ["Latest", "Breaking", "Column", "Feature", "AI Trends", "Agents", "Automation", "GEO", "Build Notes"]
+    sidebarTopics: ["Latest", "市場快訊", "市場專欄", "專題", "AI 趨勢", "Agents", "Automation", "GEO", "Build Notes"]
   },
   en: {
     eyebrow: "ALTOS LAB Journal · Research / Build / Growth",
@@ -95,7 +95,7 @@ const copy = {
     otherLanguage: "繁體中文",
     mobileTopicTitle: "Tech",
     mobileTopicDescription: "How we build AI systems, product by product.",
-    sidebarTopics: ["Latest", "Breaking", "Column", "Feature", "AI Trends", "Agents", "Automation", "GEO", "Build Notes"]
+    sidebarTopics: ["Latest", "Market Briefs", "Market Columns", "Features", "AI Trends", "Agents", "Automation", "GEO", "Build Notes"]
   },
   ja: {
     eyebrow: "ALTOS LAB Journal · Research / Build / Growth",
@@ -135,7 +135,7 @@ const copy = {
     otherLanguage: "繁體中文",
     mobileTopicTitle: "Tech",
     mobileTopicDescription: "AI 実装、ツール、プロダクトのノート。",
-    sidebarTopics: ["Latest", "Breaking", "Column", "Feature", "AI Trends", "Agents", "Automation", "GEO", "Build Notes"]
+    sidebarTopics: ["Latest", "市場ブリーフ", "市場コラム", "特集", "AI Trends", "Agents", "Automation", "GEO", "Build Notes"]
   },
   ko: {
     eyebrow: "ALTOS LAB Journal · Research / Build / Growth",
@@ -175,20 +175,241 @@ const copy = {
     otherLanguage: "繁體中文",
     mobileTopicTitle: "Tech",
     mobileTopicDescription: "AI 구현, 도구, 제품 노트.",
-    sidebarTopics: ["Latest", "Breaking", "Column", "Feature", "AI Trends", "Agents", "Automation", "GEO", "Build Notes"]
+    sidebarTopics: ["Latest", "시장 브리프", "시장 칼럼", "기획", "AI Trends", "Agents", "Automation", "GEO", "Build Notes"]
+  },
+  id: {
+    eyebrow: "ALTOS LAB Journal · Research / Build / Growth",
+    title: "Catatan Lab AI",
+    brandTitle: "AI",
+    brandScript: "& Craft",
+    description: "Catatan tentang masa depan kerja, ditulis dari sudut pandang tim yang membangunnya.",
+    labTitle: "Kami meneliti, membangun, lalu menerbitkan temuan yang bisa dijadikan rujukan.",
+    labBody:
+      "Jurnal ini membahas desain sistem AI, alur kerja perusahaan, konten, visibilitas pencarian, dan eksperimen produk yang bisa benar-benar dikirim ke pasar.",
+    lanes: [
+      { label: "AI Products", body: "Produk AI, MVP, alur pengguna, dan pelajaran implementasi" },
+      { label: "Agents & Automation", body: "AI Agent, workflow, knowledge base, dan otomasi operasional" },
+      { label: "Search & GEO", body: "Fondasi SEO, pencarian generatif, dan struktur konten yang mudah dikutip" },
+      { label: "Build Notes", body: "Bedah kasus, pilihan arsitektur, alat, dan sinyal pasar" }
+    ],
+    featured: "Pilihan Editor",
+    visualContext: "Gambar artikel",
+    latest: "Artikel Terbaru",
+    categories: "Kategori",
+    categoriesHint: "Cari tulisan berdasarkan jalur topik yang paling relevan.",
+    startHere: "Mulai di sini",
+    postsLabel: "artikel",
+    topicsLabel: "topik",
+    searchLabel: "Cari artikel",
+    searchPlaceholder: "Cari AI, Agent, GEO...",
+    searchSubmit: "Cari",
+    all: "Semua",
+    read: "Baca artikel",
+    updated: "Diperbarui",
+    readTime: (minutes: number) => `${minutes} menit baca`,
+    empty: "Belum ada artikel yang cocok.",
+    ctaTitle: "Ingin mengubah eksperimen AI menjadi sistem operasional?",
+    ctaBody:
+      "ALTOS LAB membantu merangkai produk AI, workflow internal, CMS, tracking, dan otomasi publikasi menjadi kemampuan yang bisa dipelihara.",
+    cta: "Diskusikan proyek",
+    otherLanguage: "繁體中文",
+    mobileTopicTitle: "Tech",
+    mobileTopicDescription: "Catatan implementasi AI, alat, dan produk.",
+    sidebarTopics: ["Latest", "Kabar Pasar", "Kolom Pasar", "Laporan Khusus", "AI Trends", "Agents", "Automation", "GEO", "Build Notes"]
+  },
+  vi: {
+    eyebrow: "ALTOS LAB Journal · Research / Build / Growth",
+    title: "Ghi Chép Phòng Lab AI",
+    brandTitle: "AI",
+    brandScript: "& Craft",
+    description: "Những ghi chú về tương lai công việc, từ góc nhìn của đội ngũ đang xây dựng nó.",
+    labTitle: "Chúng tôi nghiên cứu, xây dựng, rồi biến kinh nghiệm thành tri thức có thể trích dẫn.",
+    labBody:
+      "Journal này đi từ thiết kế hệ thống AI, workflow doanh nghiệp, nội dung, khả năng hiển thị trong tìm kiếm đến các thử nghiệm sản phẩm có thể triển khai thật.",
+    lanes: [
+      { label: "AI Products", body: "Sản phẩm AI, MVP, luồng người dùng và bài học triển khai" },
+      { label: "Agents & Automation", body: "AI Agent, workflow, knowledge base và vận hành tự động" },
+      { label: "Search & GEO", body: "Nền tảng SEO, tìm kiếm tạo sinh và cấu trúc nội dung dễ được trích dẫn" },
+      { label: "Build Notes", body: "Phân tích case, lựa chọn kiến trúc, công cụ và tín hiệu thị trường" }
+    ],
+    featured: "Bài nổi bật",
+    visualContext: "Hình bài viết",
+    latest: "Bài mới nhất",
+    categories: "Chuyên mục",
+    categoriesHint: "Tìm nhanh chủ đề bạn muốn đọc.",
+    startHere: "Bắt đầu ở đây",
+    postsLabel: "bài viết",
+    topicsLabel: "chủ đề",
+    searchLabel: "Tìm bài viết",
+    searchPlaceholder: "Tìm AI, Agent, GEO...",
+    searchSubmit: "Tìm",
+    all: "Tất cả",
+    read: "Đọc bài",
+    updated: "Cập nhật",
+    readTime: (minutes: number) => `${minutes} phút đọc`,
+    empty: "Chưa có bài viết phù hợp.",
+    ctaTitle: "Muốn biến thử nghiệm AI thành hệ thống vận hành được?",
+    ctaBody:
+      "ALTOS LAB giúp kết nối sản phẩm AI, workflow nội bộ, CMS, tracking event và tự động hoá xuất bản thành một năng lực có thể duy trì.",
+    cta: "Trao đổi dự án",
+    otherLanguage: "繁體中文",
+    mobileTopicTitle: "Tech",
+    mobileTopicDescription: "Ghi chú về triển khai AI, công cụ và sản phẩm.",
+    sidebarTopics: ["Latest", "Tin thị trường", "Chuyên mục thị trường", "Bài chuyên sâu", "AI Trends", "Agents", "Automation", "GEO", "Build Notes"]
+  },
+  th: {
+    eyebrow: "ALTOS LAB Journal · Research / Build / Growth",
+    title: "บันทึกจากแล็บ AI",
+    brandTitle: "AI",
+    brandScript: "& Craft",
+    description: "บันทึกเรื่องอนาคตของงาน จากมุมมองของทีมที่ลงมือสร้างจริง",
+    labTitle: "เราศึกษา สร้าง และเผยแพร่บทเรียนให้กลายเป็นความรู้ที่อ้างอิงได้",
+    labBody:
+      "Journal นี้ครอบคลุมการออกแบบระบบ AI, workflow ในองค์กร, คอนเทนต์, การมองเห็นในการค้นหา และการทดลองผลิตภัณฑ์ที่นำไปใช้งานจริงได้",
+    lanes: [
+      { label: "AI Products", body: "การทำผลิตภัณฑ์ AI, MVP, user flow และบทเรียนจากการส่งมอบ" },
+      { label: "Agents & Automation", body: "AI Agent, workflow, knowledge base และ automation ในการทำงาน" },
+      { label: "Search & GEO", body: "พื้นฐาน SEO, generative search และโครงสร้างเนื้อหาที่ถูกอ้างอิงได้" },
+      { label: "Build Notes", body: "แกะกรณีศึกษา, การเลือกสถาปัตยกรรม, เครื่องมือ และสัญญาณตลาด" }
+    ],
+    featured: "บทความแนะนำ",
+    visualContext: "ภาพบทความ",
+    latest: "บทความล่าสุด",
+    categories: "หมวดหมู่",
+    categoriesHint: "เลือกอ่านตามหัวข้อที่คุณสนใจ",
+    startHere: "เริ่มที่นี่",
+    postsLabel: "บทความ",
+    topicsLabel: "หัวข้อ",
+    searchLabel: "ค้นหาบทความ",
+    searchPlaceholder: "ค้นหา AI, Agent, GEO...",
+    searchSubmit: "ค้นหา",
+    all: "ทั้งหมด",
+    read: "อ่านบทความ",
+    updated: "อัปเดต",
+    readTime: (minutes: number) => `อ่าน ${minutes} นาที`,
+    empty: "ยังไม่มีบทความที่ตรงกับเงื่อนไข",
+    ctaTitle: "อยากเปลี่ยนการทดลอง AI ให้เป็นระบบที่ใช้งานจริงได้ไหม?",
+    ctaBody:
+      "ALTOS LAB ช่วยเชื่อมผลิตภัณฑ์ AI, workflow ภายใน, CMS, event tracking และระบบเผยแพร่อัตโนมัติให้เป็นความสามารถที่ดูแลต่อได้",
+    cta: "คุยเรื่องโปรเจกต์",
+    otherLanguage: "繁體中文",
+    mobileTopicTitle: "Tech",
+    mobileTopicDescription: "บันทึกเรื่องการสร้าง AI, เครื่องมือ และผลิตภัณฑ์",
+    sidebarTopics: ["Latest", "ข่าวตลาด", "คอลัมน์ตลาด", "บทความเจาะลึก", "AI Trends", "Agents", "Automation", "GEO", "Build Notes"]
+  },
+  ms: {
+    eyebrow: "ALTOS LAB Journal · Research / Build / Growth",
+    title: "Nota Makmal AI",
+    brandTitle: "AI",
+    brandScript: "& Craft",
+    description: "Catatan tentang masa depan kerja daripada pasukan yang membinanya sendiri.",
+    labTitle: "Kami mengkaji, membina, kemudian menerbitkan pengalaman sebagai pengetahuan yang boleh dirujuk.",
+    labBody:
+      "Jurnal ini merangkumi reka bentuk sistem AI, workflow perusahaan, kandungan, keterlihatan carian dan eksperimen produk yang boleh dilancarkan.",
+    lanes: [
+      { label: "AI Products", body: "Produk AI, MVP, aliran pengguna dan pelajaran pelaksanaan" },
+      { label: "Agents & Automation", body: "AI Agent, workflow, pangkalan pengetahuan dan automasi operasi" },
+      { label: "Search & GEO", body: "Asas SEO, carian generatif dan struktur kandungan yang mudah dirujuk" },
+      { label: "Build Notes", body: "Pecahan kes, pilihan seni bina, alat dan isyarat pasaran" }
+    ],
+    featured: "Pilihan",
+    visualContext: "Imej artikel",
+    latest: "Artikel Terkini",
+    categories: "Kategori",
+    categoriesHint: "Cari laluan bacaan mengikut topik.",
+    startHere: "Mula di sini",
+    postsLabel: "artikel",
+    topicsLabel: "topik",
+    searchLabel: "Cari artikel",
+    searchPlaceholder: "Cari AI, Agent, GEO...",
+    searchSubmit: "Cari",
+    all: "Semua",
+    read: "Baca artikel",
+    updated: "Dikemas kini",
+    readTime: (minutes: number) => `${minutes} minit bacaan`,
+    empty: "Belum ada artikel yang sepadan.",
+    ctaTitle: "Mahu jadikan eksperimen AI sebagai sistem operasi sebenar?",
+    ctaBody:
+      "ALTOS LAB membantu menghubungkan produk AI, workflow dalaman, CMS, event tracking dan automasi penerbitan menjadi keupayaan yang boleh diselenggara.",
+    cta: "Bincang projek",
+    otherLanguage: "繁體中文",
+    mobileTopicTitle: "Tech",
+    mobileTopicDescription: "Nota pelaksanaan AI, alat dan produk.",
+    sidebarTopics: ["Latest", "Berita Pasaran", "Kolum Pasaran", "Rencana Khas", "AI Trends", "Agents", "Automation", "GEO", "Build Notes"]
+  },
+  fil: {
+    eyebrow: "ALTOS LAB Journal · Research / Build / Growth",
+    title: "AI Lab Notes",
+    brandTitle: "AI",
+    brandScript: "& Craft",
+    description: "Mga tala tungkol sa future of work mula sa team na mismong gumagawa nito.",
+    labTitle: "Nagre-research kami, bumubuo, at inilalabas ang natutunan bilang kaalamang puwedeng i-reference.",
+    labBody:
+      "Saklaw ng journal ang AI system design, enterprise workflows, content, search visibility, at product experiments na puwedeng i-ship.",
+    lanes: [
+      { label: "AI Products", body: "AI productization, MVP, user flows, at delivery lessons" },
+      { label: "Agents & Automation", body: "AI agents, workflows, knowledge bases, at operations automation" },
+      { label: "Search & GEO", body: "SEO foundations, generative search, at citation-ready content structure" },
+      { label: "Build Notes", body: "Case breakdowns, architecture tradeoffs, tools, at market signals" }
+    ],
+    featured: "Featured",
+    visualContext: "Article image",
+    latest: "Latest Articles",
+    categories: "Categories",
+    categoriesHint: "Hanapin ang tamang reading lane ayon sa topic.",
+    startHere: "Start here",
+    postsLabel: "articles",
+    topicsLabel: "topics",
+    searchLabel: "Search articles",
+    searchPlaceholder: "Search AI, agents, GEO...",
+    searchSubmit: "Search",
+    all: "All",
+    read: "Read article",
+    updated: "Updated",
+    readTime: (minutes: number) => `${minutes} min read`,
+    empty: "Wala pang matching articles.",
+    ctaTitle: "Gusto mong gawing operating system ang AI experiments?",
+    ctaBody:
+      "ALTOS LAB can connect AI products, internal workflows, CMS, tracking events, and publishing automation into one maintainable capability.",
+    cta: "Discuss a project",
+    otherLanguage: "繁體中文",
+    mobileTopicTitle: "Tech",
+    mobileTopicDescription: "AI implementation, tools, and product notes.",
+    sidebarTopics: ["Latest", "Market Briefs", "Market Columns", "Features", "AI Trends", "Agents", "Automation", "GEO", "Build Notes"]
   }
 };
 
 const topicAliases: Record<string, string[]> = {
   latest: [],
   breaking: ["breaking", "快訊", "速報", "속보"],
-  column: ["column", "專欄", "コラム", "칼럼"],
+  "市場快訊": ["breaking", "快訊", "市場快訊", "market brief", "brief", "速報", "속보", "kabar pasar", "tin thị trường", "ข่าวตลาด", "berita pasaran"],
+  "market briefs": ["breaking", "market brief", "brief", "市場快訊"],
+  "市場ブリーフ": ["breaking", "市場ブリーフ", "速報", "market brief"],
+  "시장 브리프": ["breaking", "시장 브리프", "속보", "market brief"],
+  "kabar pasar": ["breaking", "kabar pasar", "market brief"],
+  "tin thị trường": ["breaking", "tin thị trường", "market brief"],
+  "ข่าวตลาด": ["breaking", "ข่าวตลาด", "market brief"],
+  "berita pasaran": ["breaking", "berita pasaran", "market brief"],
+  column: ["column", "專欄", "市場專欄", "market column", "market columns", "コラム", "市場コラム", "칼럼", "시장 칼럼"],
+  "市場專欄": ["column", "專欄", "市場專欄", "market column", "market columns"],
+  "market columns": ["column", "market column", "market columns", "專欄"],
+  "市場コラム": ["column", "市場コラム", "コラム"],
+  "시장 칼럼": ["column", "시장 칼럼", "칼럼"],
+  "kolom pasar": ["column", "kolom pasar", "kolom"],
+  "chuyên mục thị trường": ["column", "chuyên mục thị trường", "chuyên mục"],
+  "คอลัมน์ตลาด": ["column", "คอลัมน์ตลาด"],
+  "kolum pasaran": ["column", "kolum pasaran", "kolum"],
   feature: ["feature", "專題", "特集", "기획"],
+  features: ["feature", "feature", "專題"],
+  "laporan khusus": ["feature", "laporan khusus"],
+  "bài chuyên sâu": ["feature", "bài chuyên sâu"],
+  "บทความเจาะลึก": ["feature", "บทความเจาะลึก"],
+  "rencana khas": ["feature", "rencana khas"],
   "ai trends": ["ai trends", "ai 趨勢", "aiトレンド", "ai 트렌드", "ai 平台趨勢"],
   agents: ["agent", "agents", "ai agent", "エージェント", "에이전트"],
-  automation: ["automation", "自動化", "자동화"],
-  geo: ["geo", "seo", "搜尋", "検索", "검색"],
-  "build notes": ["build notes", "build", "case", "案例", "構築", "빌드"]
+  automation: ["automation", "自動化", "자동화", "otomasi", "automasi", "tự động", "อัตโนมัติ"],
+  geo: ["geo", "seo", "搜尋", "検索", "검색", "pencarian", "tìm kiếm", "ค้นหา", "carian"],
+  "build notes": ["build notes", "build", "case", "案例", "構築", "빌드", "catatan", "ghi chép", "nota"]
 };
 
 function matchesTopic(post: Awaited<ReturnType<typeof getPublishedBlogPostsByLanguage>>[number], item: string) {

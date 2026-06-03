@@ -4,14 +4,24 @@ const SEARCH_CITATION_LABELS: Record<BlogLanguage, string> = {
   "zh-Hant": "AI 搜尋引用",
   en: "AI search visibility",
   ja: "AI検索での引用",
-  ko: "AI 검색 인용"
+  ko: "AI 검색 인용",
+  id: "visibilitas AI search",
+  vi: "khả năng xuất hiện trong AI search",
+  th: "การถูกอ้างอิงใน AI search",
+  ms: "keterlihatan AI search",
+  fil: "AI search visibility"
 };
 
 const SEARCH_CONTENT_LABELS: Record<BlogLanguage, string> = {
   "zh-Hant": "搜尋可見度",
   en: "search visibility",
   ja: "検索での見え方",
-  ko: "검색 가시성"
+  ko: "검색 가시성",
+  id: "visibilitas pencarian",
+  vi: "khả năng hiển thị tìm kiếm",
+  th: "การมองเห็นในการค้นหา",
+  ms: "keterlihatan carian",
+  fil: "search visibility"
 };
 
 export function publicTaxonomyLabel(value: string | undefined, language: BlogLanguage) {

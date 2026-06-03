@@ -5,17 +5,34 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
 
-const LANGUAGES = ["zh-Hant", "en", "ja", "ko"];
+const LANGUAGES = ["zh-Hant", "en", "ja", "ko", "id", "vi", "th", "ms", "fil"];
 const DEFAULT_BASE_URL = "https://altoslab-ai.cc";
 const MIN_COVER_BYTES = 8_000;
 const MIN_COVER_WIDTH = 1200;
 const MIN_COVER_HEIGHT = 630;
+const GENERIC_STOCK_IMAGE_HOSTS = [
+  "unsplash.com",
+  "images.unsplash.com",
+  "pexels.com",
+  "images.pexels.com",
+  "pixabay.com",
+  "cdn.pixabay.com",
+  "openverse.org",
+  "openverse.engineering",
+  "api.openverse.org",
+  "api.openverse.engineering"
+];
 
 const LANGUAGE_PATH_PREFIX = {
   "zh-Hant": "",
   en: "/en",
   ja: "/ja",
-  ko: "/ko"
+  ko: "/ko",
+  id: "/id",
+  vi: "/vi",
+  th: "/th",
+  ms: "/ms",
+  fil: "/fil"
 };
 
 const PUBLIC_INTERNAL_COPY_PATTERNS = [
@@ -79,6 +96,33 @@ function normalizeText(value = "") {
   return String(value).replace(/\s+/g, " ").trim();
 }
 
+function parsedHost(value) {
+  try {
+    return new URL(value || "").hostname.toLowerCase().replace(/^www\./, "");
+  } catch {
+    return "";
+  }
+}
+
+function isGenericStockImageUrl(value) {
+  const host = parsedHost(value);
+  return Boolean(host && GENERIC_STOCK_IMAGE_HOSTS.some((stockHost) => host === stockHost || host.endsWith(`.${stockHost}`)));
+}
+
+function sourceHostMatches(creditUrl, sourceUrl) {
+  const creditHost = parsedHost(creditUrl);
+  const sourceHost = parsedHost(sourceUrl);
+  return Boolean(
+    creditHost &&
+      sourceHost &&
+      (creditHost === sourceHost || creditHost.endsWith(`.${sourceHost}`) || sourceHost.endsWith(`.${creditHost}`))
+  );
+}
+
+function sourceCoverCreditMatchesSource(post) {
+  return (post.sourceLinks || []).some((source) => sourceHostMatches(post.coverCreditUrl || "", source.url || ""));
+}
+
 function stableJson(value) {
   if (Array.isArray(value)) return `[${value.map(stableJson).join(",")}]`;
   if (value && typeof value === "object") {
@@ -121,6 +165,7 @@ function digestSourcePost(post) {
     coverCreditUrl: post.coverCreditUrl,
     coverLicense: post.coverLicense,
     coverLicenseUrl: post.coverLicenseUrl,
+    contentImages: post.contentImages,
     aiDisclosure: post.aiDisclosure
   };
 }
@@ -142,6 +187,10 @@ function releaseContentSha256(articleSet) {
 
 function bodySha256(post) {
   return sha256(String(post.body || ""));
+}
+
+function isColumnOrFeature(post) {
+  return post.contentType === "column" || post.contentType === "feature";
 }
 
 function blogPostPath(post) {
@@ -304,18 +353,34 @@ function verifyManifest(manifest, articleSet, errors, warnings) {
   const posts = Array.isArray(articleSet.posts) ? articleSet.posts : [];
   if (manifest.status !== "released") pushIssue(errors, `manifest status must be released, got ${manifest.status || "missing"}`);
   if (!Array.isArray(manifest.publish?.publishedIds) || manifest.publish.publishedIds.length !== LANGUAGES.length) {
-    pushIssue(errors, "manifest.publish.publishedIds must contain four published IDs");
+    pushIssue(errors, `manifest.publish.publishedIds must contain ${LANGUAGES.length} published IDs`);
   }
   if (Array.isArray(manifest.publish?.errors) && manifest.publish.errors.length > 0) {
     pushIssue(errors, `manifest.publish.errors is not empty: ${manifest.publish.errors.join("; ")}`);
   }
-  if (posts.length !== LANGUAGES.length) pushIssue(errors, `article set must contain four posts, got ${posts.length}`);
+  if (posts.length !== LANGUAGES.length) pushIssue(errors, `article set must contain ${LANGUAGES.length} posts, got ${posts.length}`);
   for (const language of LANGUAGES) {
     const count = posts.filter((post) => post.language === language).length;
     if (count !== 1) pushIssue(errors, `article set must contain exactly one ${language} post, got ${count}`);
   }
   const groupIds = new Set(posts.map((post) => post.translationGroupId || articleSet.translationGroupId).filter(Boolean));
   if (groupIds.size !== 1) pushIssue(errors, `article set must use one translationGroupId, got ${[...groupIds].join(", ") || "missing"}`);
+  const columnPosts = posts.filter(isColumnOrFeature);
+  if (columnPosts.length) {
+    const contentImageCounts = [...new Set(columnPosts.map((post) => (Array.isArray(post.contentImages) ? post.contentImages.length : 0)))];
+    if (contentImageCounts.length !== 1) {
+      pushIssue(errors, `translated column/feature posts must share the same content image count, got ${contentImageCounts.join(", ")}`);
+    }
+    const expectedCount = contentImageCounts[0] || 0;
+    if (expectedCount < 2) pushIssue(errors, "column/feature release requires at least two in-article images");
+    if (expectedCount > 3) pushIssue(errors, "column/feature release should keep in-article images to three or fewer");
+    for (let index = 0; index < expectedCount; index += 1) {
+      const urls = [...new Set(columnPosts.map((post) => post.contentImages?.[index]?.url).filter(Boolean))];
+      if (urls.length !== 1) {
+        pushIssue(errors, `translated column/feature posts must share contentImages[${index}] URL, got ${urls.join(", ") || "missing"}`);
+      }
+    }
+  }
 
   const expectedDigest = releaseContentSha256(articleSet);
   if (manifest.qualityManifest?.contentSha256 !== expectedDigest) {
@@ -332,6 +397,14 @@ function verifyManifest(manifest, articleSet, errors, warnings) {
     }
     if (manifestPost.cover !== post.cover) {
       pushIssue(errors, "qualityManifest cover URL does not match article cover", { language: post.language, slug: post.slug });
+    }
+    const manifestContentImages = Array.isArray(manifestPost.contentImages) ? manifestPost.contentImages : [];
+    const postContentImages = Array.isArray(post.contentImages) ? post.contentImages.map((image) => image.url).filter(Boolean) : [];
+    if (isColumnOrFeature(post) && manifestContentImages.length !== postContentImages.length) {
+      pushIssue(errors, "qualityManifest content image count does not match article set", { language: post.language, slug: post.slug });
+    }
+    if (isColumnOrFeature(post) && JSON.stringify(manifestContentImages) !== JSON.stringify(postContentImages)) {
+      pushIssue(errors, "qualityManifest content image URLs do not match article set", { language: post.language, slug: post.slug });
     }
   }
   if (manifest.validateOnly?.qualityApproved !== true) pushIssue(errors, "manifest validateOnly qualityApproved must be true");
@@ -377,16 +450,6 @@ async function verifyPostLive(post, root, errors, warnings) {
     return { liveUrl, apiUrl, image: null };
   }
   if (publicPost.status !== "published") pushIssue(errors, `public API status must be published, got ${publicPost.status}`, context);
-  if (publicPost.qualityStatus !== "passed") pushIssue(errors, `public API qualityStatus must be passed, got ${publicPost.qualityStatus}`, context);
-  if (publicPost.imageQualityStatus !== "passed") {
-    pushIssue(errors, `public API imageQualityStatus must be passed, got ${publicPost.imageQualityStatus}`, context);
-  }
-  if (publicPost.releaseDecision !== "published") {
-    pushIssue(errors, `public API releaseDecision must be published, got ${publicPost.releaseDecision}`, context);
-  }
-  if (!String(publicPost.generatedBy || "").toLowerCase().includes("gemini")) {
-    pushIssue(errors, "public API generatedBy does not show Gemini provenance", context);
-  }
   if (post.contentType === "breaking") {
     if (publicPost.coverSource !== "source") {
       pushIssue(errors, `public API market news coverSource must be source, got ${publicPost.coverSource || "missing"}`, context);
@@ -394,10 +457,63 @@ async function verifyPostLive(post, root, errors, warnings) {
     if (!publicPost.coverCreditUrl || !publicPost.coverLicense) {
       pushIssue(errors, "public API market news source image attribution is missing", context);
     }
+    if (isGenericStockImageUrl(publicPost.cover || post.cover) || isGenericStockImageUrl(publicPost.coverCreditUrl || post.coverCreditUrl)) {
+      pushIssue(errors, "public API market news source image must come from the source article or official announcement, not stock/free image providers", context);
+    }
+    if (!sourceCoverCreditMatchesSource(publicPost)) {
+      pushIssue(errors, "public API market news coverCreditUrl does not match sourceLinks", context);
+    }
   } else {
     const coverProvider = String(publicPost.coverGeneration?.provider || post.coverGeneration?.provider || "");
     if (!/(chatgpt|gpt|openai)/i.test(coverProvider)) {
       pushIssue(errors, `public API coverGeneration.provider must be ChatGPT/GPT, got ${coverProvider || "missing"}`, context);
+    }
+    if (isColumnOrFeature(post)) {
+      const publicImages = Array.isArray(publicPost.contentImages) ? publicPost.contentImages : [];
+      const sourceImages = Array.isArray(post.contentImages) ? post.contentImages : [];
+      if (publicImages.length < 2) pushIssue(errors, "public API column/feature contentImages must include at least two images", context);
+      if (publicImages.length > 3) pushIssue(errors, "public API column/feature contentImages must not exceed three images", context);
+      if (publicImages.length !== sourceImages.length) {
+        pushIssue(errors, "public API contentImages count does not match the release article set", context);
+      }
+      for (const [index, sourceImage] of sourceImages.entries()) {
+        const imageContext = { ...context, contentImageIndex: index };
+        const publicImage = publicImages[index] || {};
+        const sourceUrl = absoluteUrl(sourceImage.url, root);
+        const publicUrl = absoluteUrl(publicImage.url, root);
+        if (!sourceUrl) pushIssue(errors, `contentImages[${index}] URL is missing from article set`, imageContext);
+        if (!publicUrl) pushIssue(errors, `public API contentImages[${index}] URL is missing`, imageContext);
+        if (sourceUrl && publicUrl && sourceUrl !== publicUrl) {
+          pushIssue(errors, `public API contentImages[${index}] URL does not match article set`, { ...imageContext, sourceUrl, publicUrl });
+        }
+        if (!publicImage.alt || publicImage.alt.length < 18) {
+          pushIssue(errors, `public API contentImages[${index}] alt is missing or too thin`, imageContext);
+        }
+        if (!publicImage.caption) {
+          pushWarning(warnings, `public API contentImages[${index}] caption is missing`, imageContext);
+        }
+        if (sourceImage.source !== "generated") {
+          pushIssue(errors, `contentImages[${index}] must be generated for column/feature posts`, imageContext);
+        }
+        const provider = String(sourceImage.provider || "");
+        if (!/(chatgpt|gpt|openai)/i.test(provider)) {
+          pushIssue(errors, `contentImages[${index}] provider must be ChatGPT/GPT, got ${provider || "missing"}`, imageContext);
+        }
+        if (!sourceImage.prompt || String(sourceImage.prompt).length < 40) {
+          pushIssue(errors, `contentImages[${index}] prompt metadata is missing or too thin`, imageContext);
+        }
+        if (!sourceImage.generatedAt) {
+          pushIssue(errors, `contentImages[${index}] generatedAt is missing`, imageContext);
+        }
+        if (!sourceImage.credit) {
+          pushIssue(errors, `contentImages[${index}] credit is missing`, imageContext);
+        }
+        const visualChecks = sourceImage.visualChecks || {};
+        for (const key of ["topicFit", "noTextArtifacts", "noLogos", "noPeople", "noTrademarkRisk", "noGenericStockLook"]) {
+          if (visualChecks[key] !== true) pushIssue(errors, `contentImages[${index}] visualChecks.${key} must be true`, imageContext);
+        }
+        if (publicUrl) await verifyImage(publicUrl, errors, warnings, imageContext);
+      }
     }
   }
   if (!publicPost.coverAlt || publicPost.coverAlt.length < 18) pushIssue(errors, "public API coverAlt is missing or too thin", context);
@@ -482,6 +598,12 @@ async function verifyAdminReadback(posts, root, errors, warnings) {
           slug: post.slug
         });
       }
+    }
+    if (!String(adminPost.generatedBy || "").toLowerCase().includes("gemini")) {
+      pushIssue(errors, "admin readback generatedBy must keep Gemini provenance", {
+        language: post.language,
+        slug: post.slug
+      });
     }
   }
   return { count: adminPosts.length };

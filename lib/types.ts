@@ -1,7 +1,7 @@
 export type PublishStatus = "draft" | "published" | "archived" | "deleted";
 export type ProjectStatus = "draft" | "published" | "archived";
 export type ContactLeadStatus = "new" | "contacted" | "qualified" | "closed" | "spam";
-export type BlogLanguage = "zh-Hant" | "en" | "ja" | "ko";
+export type BlogLanguage = "zh-Hant" | "en" | "ja" | "ko" | "id" | "vi" | "th" | "ms" | "fil";
 export type BlogReviewStatus = "ai-draft" | "human-review" | "approved" | "needs-revision";
 export type BlogGenerationSlot = "manual" | "morning" | "afternoon";
 export type BlogContentType = "breaking" | "column" | "feature";
@@ -185,6 +185,7 @@ export type BlogQualityChecks = {
   hasReaderEngagement?: boolean;
   hasImageFit?: boolean;
   hasAntiSlopReview?: boolean;
+  hasSeoGeoReview?: boolean;
   qualityScoreBreakdown?: {
     sourceTrust: number;
     labsPointOfView: number;
@@ -196,6 +197,8 @@ export type BlogQualityChecks = {
   };
   qualityScore?: number;
   qualityIssues?: string[];
+  seoGeoScore?: number;
+  seoGeoIssues?: string[];
   antiSlopScore?: number;
   antiSlopIssues?: string[];
   llmEvaluation?: BlogLlmQualityEvaluation;
@@ -235,6 +238,25 @@ export type BlogCoverGeneration = {
   visualChecks?: BlogCoverVisualChecks;
 };
 
+export type BlogInlineImage = {
+  url?: string;
+  localPath?: string;
+  alt: string;
+  caption?: string;
+  source: BlogCoverSource;
+  credit?: string;
+  creditUrl?: string;
+  license?: string;
+  licenseUrl?: string;
+  aspectRatio?: "wide" | "square" | "portrait";
+  placement?: "after-lead" | "mid-article" | "before-faq";
+  prompt?: string;
+  provider?: string;
+  model?: string;
+  generatedAt?: string;
+  visualChecks?: BlogCoverVisualChecks;
+};
+
 export type BlogPost = {
   id: string;
   slug: string;
@@ -266,6 +288,7 @@ export type BlogPost = {
   coverCreditUrl?: string;
   coverLicense?: string;
   coverLicenseUrl?: string;
+  contentImages?: BlogInlineImage[];
   readTimeMinutes: number;
   featured: boolean;
   reviewStatus: BlogReviewStatus;

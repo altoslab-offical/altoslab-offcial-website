@@ -1,10 +1,10 @@
 import type { BlogContentType, BlogLanguage, BlogPost, BlogQualityChecks, BlogSourceLink } from "./types";
 
-export const BLOG_LANGUAGES: BlogLanguage[] = ["zh-Hant", "en", "ja", "ko"];
+export const BLOG_LANGUAGES: BlogLanguage[] = ["zh-Hant", "en", "ja", "ko", "id", "vi", "th", "ms", "fil"];
 
 const BLOG_LANGUAGE_CONFIG: Record<
   BlogLanguage,
-  { indexPath: string; html: string; metadata: string; label: string; shortLabel: string; cover: string }
+  { indexPath: string; html: string; metadata: string; label: string; shortLabel: string; cover: string; ogLocale: string }
 > = {
   "zh-Hant": {
     indexPath: "/blog",
@@ -12,7 +12,8 @@ const BLOG_LANGUAGE_CONFIG: Record<
     metadata: "zh-Hant-TW",
     label: "繁體中文",
     shortLabel: "中文",
-    cover: "/blog-cover-zh-hant.png"
+    cover: "/blog-cover-zh-hant.png",
+    ogLocale: "zh_TW"
   },
   en: {
     indexPath: "/en/blog",
@@ -20,7 +21,8 @@ const BLOG_LANGUAGE_CONFIG: Record<
     metadata: "en",
     label: "English",
     shortLabel: "EN",
-    cover: "/blog-cover-en.png"
+    cover: "/blog-cover-en.png",
+    ogLocale: "en_US"
   },
   ja: {
     indexPath: "/ja/blog",
@@ -28,7 +30,8 @@ const BLOG_LANGUAGE_CONFIG: Record<
     metadata: "ja",
     label: "日本語",
     shortLabel: "日本語",
-    cover: "/blog-cover-ja.png"
+    cover: "/blog-cover-ja.png",
+    ogLocale: "ja_JP"
   },
   ko: {
     indexPath: "/ko/blog",
@@ -36,7 +39,53 @@ const BLOG_LANGUAGE_CONFIG: Record<
     metadata: "ko",
     label: "한국어",
     shortLabel: "한국어",
-    cover: "/blog-cover-ko.png"
+    cover: "/blog-cover-ko.png",
+    ogLocale: "ko_KR"
+  },
+  id: {
+    indexPath: "/id/blog",
+    html: "id",
+    metadata: "id",
+    label: "Bahasa Indonesia",
+    shortLabel: "ID",
+    cover: "/blog-cover-en.png",
+    ogLocale: "id_ID"
+  },
+  vi: {
+    indexPath: "/vi/blog",
+    html: "vi",
+    metadata: "vi",
+    label: "Tiếng Việt",
+    shortLabel: "VI",
+    cover: "/blog-cover-en.png",
+    ogLocale: "vi_VN"
+  },
+  th: {
+    indexPath: "/th/blog",
+    html: "th",
+    metadata: "th",
+    label: "ไทย",
+    shortLabel: "TH",
+    cover: "/blog-cover-en.png",
+    ogLocale: "th_TH"
+  },
+  ms: {
+    indexPath: "/ms/blog",
+    html: "ms",
+    metadata: "ms",
+    label: "Bahasa Melayu",
+    shortLabel: "MY",
+    cover: "/blog-cover-en.png",
+    ogLocale: "ms_MY"
+  },
+  fil: {
+    indexPath: "/fil/blog",
+    html: "fil",
+    metadata: "fil",
+    label: "Filipino",
+    shortLabel: "PH",
+    cover: "/blog-cover-en.png",
+    ogLocale: "en_PH"
   }
 };
 
@@ -60,8 +109,65 @@ const BLOG_CONTENT_TYPE_LABELS: Record<BlogLanguage, Record<BlogContentType, str
     breaking: "시장 브리프",
     column: "칼럼",
     feature: "기획"
+  },
+  id: {
+    breaking: "Kabar Pasar",
+    column: "Kolom",
+    feature: "Laporan Khusus"
+  },
+  vi: {
+    breaking: "Tin thị trường",
+    column: "Chuyên mục",
+    feature: "Hồ sơ chuyên sâu"
+  },
+  th: {
+    breaking: "ข่าวตลาด",
+    column: "คอลัมน์",
+    feature: "บทความพิเศษ"
+  },
+  ms: {
+    breaking: "Berita Pasaran",
+    column: "Kolum",
+    feature: "Rencana Khas"
+  },
+  fil: {
+    breaking: "Balitang Merkado",
+    column: "Kolum",
+    feature: "Special Feature"
   }
 };
+
+export function isBlogLanguage(value: unknown): value is BlogLanguage {
+  return BLOG_LANGUAGES.includes(value as BlogLanguage);
+}
+
+export function blogLanguageConfig(language: BlogLanguage) {
+  return BLOG_LANGUAGE_CONFIG[language];
+}
+
+export function blogLanguageFromPath(pathname: string | null | undefined): BlogLanguage | null {
+  if (!pathname) return null;
+  if (pathname === "/blog" || pathname.startsWith("/blog/")) return "zh-Hant";
+  return BLOG_LANGUAGES.find((language) => {
+    if (language === "zh-Hant") return false;
+    const prefix = BLOG_LANGUAGE_CONFIG[language].indexPath.replace(/\/blog$/, "");
+    return pathname === prefix || pathname.startsWith(`${prefix}/`);
+  }) || null;
+}
+
+export function blogLanguageOptions() {
+  return BLOG_LANGUAGES.map((language) => ({
+    label: BLOG_LANGUAGE_CONFIG[language].label,
+    shortLabel: BLOG_LANGUAGE_CONFIG[language].shortLabel,
+    value: language
+  }));
+}
+
+export function blogLanguageAlternates() {
+  return Object.fromEntries(
+    BLOG_LANGUAGES.map((language) => [metadataLanguageKey(language), blogIndexPath(language)]).concat([["x-default", blogIndexPath("zh-Hant")]])
+  );
+}
 
 export function blogSlugPathSegment(slug: string) {
   return encodeURIComponent(slug);
@@ -102,6 +208,10 @@ export function metadataLanguageKey(language: BlogLanguage) {
   return BLOG_LANGUAGE_CONFIG[language].metadata;
 }
 
+export function openGraphLocale(language: BlogLanguage) {
+  return BLOG_LANGUAGE_CONFIG[language].ogLocale;
+}
+
 export function blogCoverForLanguage(language: BlogLanguage) {
   return BLOG_LANGUAGE_CONFIG[language].cover;
 }
@@ -115,13 +225,13 @@ export function estimateReadTimeMinutes(text: string, language: BlogLanguage = "
   const trimmed = text.replace(/\s+/g, " ").trim();
   if (!trimmed) return 1;
 
-  if (language === "en") {
+  if (["en", "id", "vi", "ms", "fil"].includes(language)) {
     const words = trimmed.split(/\s+/).filter(Boolean).length;
     return Math.max(3, Math.ceil(words / 220));
   }
 
-  const cjkChars = (trimmed.match(/[\u3040-\u30ff\u3400-\u9fff\uf900-\ufaff\uac00-\ud7af]/g) || []).length;
-  const latinWords = (trimmed.replace(/[\u3040-\u30ff\u3400-\u9fff\uf900-\ufaff\uac00-\ud7af]/g, " ").match(/[a-z0-9]+/gi) || []).length;
+  const cjkChars = (trimmed.match(/[\u0e00-\u0e7f\u3040-\u30ff\u3400-\u9fff\uf900-\ufaff\uac00-\ud7af]/g) || []).length;
+  const latinWords = (trimmed.replace(/[\u0e00-\u0e7f\u3040-\u30ff\u3400-\u9fff\uf900-\ufaff\uac00-\ud7af]/g, " ").match(/[a-z0-9]+/gi) || []).length;
   return Math.max(3, Math.ceil((cjkChars + latinWords * 1.4) / 500));
 }
 
@@ -133,19 +243,27 @@ export function defaultQualityChecks(patch?: Partial<BlogQualityChecks>): BlogQu
     hasNoFabricatedClaims: false,
     hasSearchIntentAnswer: false,
     hasBilingualParity: false,
+    hasReaderEngagement: false,
     hasAntiSlopReview: false,
     ...patch
   };
 }
 
 export function normalizeSourceLinks(sourceLinks?: BlogSourceLink[]) {
+  const cleanSummary = (value: unknown) =>
+    String(value || "")
+      .replace(/<[^>]*>/g, " ")
+      .replace(/\s+/g, " ")
+      .trim()
+      .slice(0, 320);
+
   return (sourceLinks || [])
     .map((source) => ({
       title: String(source.title || source.url || "").trim(),
       url: String(source.url || "").trim(),
       publisher: source.publisher ? String(source.publisher).trim() : undefined,
       publishedAt: source.publishedAt ? String(source.publishedAt).trim() : undefined,
-      summary: source.summary ? String(source.summary).trim() : undefined
+      summary: source.summary ? cleanSummary(source.summary) : undefined
     }))
     .filter((source) => source.title && /^https?:\/\//.test(source.url))
     .slice(0, 8);

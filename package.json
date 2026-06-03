@@ -5,12 +5,15 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "build:gcp": "NEXT_OUTPUT_STANDALONE=1 next build",
     "build:cloudflare": "node scripts/sync-cloudflare-homepage.mjs && opennextjs-cloudflare build",
     "start": "next start",
+    "deploy:gcp": "scripts/gcp-deploy-cloudrun.sh",
     "preview:cloudflare": "opennextjs-cloudflare preview",
     "deploy:cloudflare": "npm run build:cloudflare && opennextjs-cloudflare deploy -- --keep-vars",
     "cloudflare:whoami": "wrangler whoami",
     "cloudflare:types": "wrangler types --env-interface CloudflareEnv",
+    "verify:gcp": "node scripts/gcp-production-smoke.mjs",
     "typecheck": "tsc --noEmit",
     "test:blog": "node scripts/blog-system-smoke.mjs",
     "blog:worker": "node scripts/blog-local-worker.mjs",
@@ -19,6 +22,7 @@
     "blog:doctor": "node scripts/blog-sop-doctor.mjs",
     "blog:verify-release": "node scripts/verify-blog-release.mjs",
     "blog:install-agent": "scripts/install-blog-launch-agent.sh",
+    "seo:geo-report": "node scripts/seo-geo-insight-report.mjs",
     "test": "npm run typecheck && npm run test:blog"
   },
   "dependencies": {

@@ -1,0 +1,32 @@
+substitutions:
+  _IMAGE: us-central1-docker.pkg.dev/$PROJECT_ID/altoslab-web/altoslab-official-website:manual
+  _NEXT_PUBLIC_SITE_URL: https://altoslab-ai.cc
+  _NEXT_PUBLIC_GTM_ID: GTM-WJ96VR7V
+  _NEXT_PUBLIC_GA_MEASUREMENT_ID: G-5VSLFNVD28
+  _CANONICAL_REDIRECT_HOSTS: www.altoslab-ai.cc,altoslab.com,www.altoslab.com,altoslab-offcial-website.vercel.app
+
+steps:
+  - name: gcr.io/cloud-builders/docker
+    args:
+      - build
+      - --build-arg
+      - NEXT_PUBLIC_SITE_URL=${_NEXT_PUBLIC_SITE_URL}
+      - --build-arg
+      - NEXT_PUBLIC_GTM_ID=${_NEXT_PUBLIC_GTM_ID}
+      - --build-arg
+      - NEXT_PUBLIC_GA_MEASUREMENT_ID=${_NEXT_PUBLIC_GA_MEASUREMENT_ID}
+      - --build-arg
+      - CANONICAL_REDIRECT_HOSTS=${_CANONICAL_REDIRECT_HOSTS}
+      - -t
+      - ${_IMAGE}
+      - .
+  - name: gcr.io/cloud-builders/docker
+    args:
+      - push
+      - ${_IMAGE}
+
+images:
+  - ${_IMAGE}
+
+options:
+  logging: CLOUD_LOGGING_ONLY

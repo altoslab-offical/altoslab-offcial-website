@@ -1191,7 +1191,7 @@ export function AdminShell({ initialTab = "dashboard" }: AdminShellProps) {
               <div className="admin-actions-stack">
                 <button className="button primary" onClick={generatePost} type="button">
                   <Sparkles size={16} />
-                  AI 產生四語草稿
+                  AI 產生多語草稿
                 </button>
                 <button className="button" onClick={() => createPost()} type="button">
                   <Plus size={16} />
@@ -1265,7 +1265,7 @@ export function AdminShell({ initialTab = "dashboard" }: AdminShellProps) {
                     </div>
                     <button className="button primary" onClick={generatePost} type="button">
                       <Sparkles size={16} />
-                      產生四語草稿
+                      產生多語草稿
                     </button>
                   </div>
                 </details>

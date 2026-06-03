@@ -1,0 +1,15 @@
+.git
+.next
+.open-next
+node_modules
+npm-debug.log
+.DS_Store
+.env
+.env.*
+!.env.example
+data/blog-worker-runs
+data/blog-prepared-candidates
+data/generated-blog-media
+logs
+playwright-report
+test-results

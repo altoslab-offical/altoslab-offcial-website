@@ -3,6 +3,7 @@ import path from "path";
 import { NextResponse } from "next/server";
 import { cloudflareKvMediaPathname, getCloudflareKvConfig, getCloudflareKvNamespace } from "@/lib/cloudflare-kv";
 import { cloudflareR2MediaPathname, getCloudflareR2Config, getCloudflareR2Bucket } from "@/lib/cloudflare-r2";
+import { gcsMediaPathname, getGcsStorageConfig, readGcsObject } from "@/lib/gcp-storage";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -52,6 +53,21 @@ export async function GET(_: Request, context: Params) {
           "Cache-Control": object.httpMetadata?.cacheControl || "public, max-age=31536000, immutable",
           "Content-Length": String(object.size),
           ETag: object.httpEtag || object.etag
+        }
+      });
+    }
+  }
+
+  const gcsConfig = getGcsStorageConfig();
+  if (gcsConfig) {
+    const object = await readGcsObject(gcsConfig, gcsMediaPathname(safeFilename));
+    if (object) {
+      return new NextResponse(object.arrayBuffer, {
+        headers: {
+          "Content-Type": object.contentType || contentTypeFor(safeFilename),
+          "Cache-Control": "public, max-age=31536000, immutable",
+          "Content-Length": String(object.size),
+          ...(object.generation ? { ETag: object.generation } : {})
         }
       });
     }

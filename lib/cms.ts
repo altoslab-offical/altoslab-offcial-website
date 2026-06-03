@@ -12,6 +12,7 @@ import { readCmsDataFromStorage, writeCmsDataToStorage } from "./cms-storage";
 import { seedData } from "./seed";
 import type {
   BlogLanguage,
+  BlogInlineImage,
   BlogPost,
   CmsData,
   ContactLead,
@@ -124,8 +125,65 @@ const INLINE_FAQ_HEADINGS = new Set([
   "FAQs",
   "Frequently Asked Questions",
   "よくある質問",
-  "자주 묻는 질문"
+  "자주 묻는 질문",
+  "Pertanyaan Umum",
+  "Câu hỏi thường gặp",
+  "คำถามที่พบบ่อย",
+  "Soalan Lazim"
 ]);
+
+function normalizeContentImage(image: Partial<BlogInlineImage>): BlogInlineImage | null {
+  const url = typeof image.url === "string" ? image.url.trim() : undefined;
+  const localPath = typeof image.localPath === "string" ? image.localPath.trim() : undefined;
+  const alt = typeof image.alt === "string" ? image.alt.trim() : "";
+  if (!alt || (!url && !localPath)) return null;
+  const aspectRatio =
+    image.aspectRatio === "square" || image.aspectRatio === "portrait" || image.aspectRatio === "wide"
+      ? image.aspectRatio
+      : "wide";
+  const placement =
+    image.placement === "after-lead" || image.placement === "before-faq" || image.placement === "mid-article"
+      ? image.placement
+      : "mid-article";
+
+  return {
+    ...(url ? { url } : {}),
+    ...(localPath ? { localPath } : {}),
+    alt,
+    caption: typeof image.caption === "string" ? image.caption.trim() : undefined,
+    source: image.source || "manual",
+    credit: typeof image.credit === "string" ? image.credit.trim() : undefined,
+    creditUrl: typeof image.creditUrl === "string" ? image.creditUrl.trim() : undefined,
+    license: typeof image.license === "string" ? image.license.trim() : undefined,
+    licenseUrl: typeof image.licenseUrl === "string" ? image.licenseUrl.trim() : undefined,
+    aspectRatio,
+    placement,
+    prompt: typeof image.prompt === "string" ? image.prompt.trim() : undefined,
+    provider: typeof image.provider === "string" ? image.provider.trim() : undefined,
+    model: typeof image.model === "string" ? image.model.trim() : undefined,
+    generatedAt: typeof image.generatedAt === "string" ? image.generatedAt.trim() : undefined,
+    visualChecks: image.visualChecks
+  };
+}
+
+function normalizeContentImages(images?: Partial<BlogInlineImage>[]) {
+  return (Array.isArray(images) ? images : []).map(normalizeContentImage).filter(Boolean) as BlogInlineImage[];
+}
+
+function publicContentImages(images?: BlogInlineImage[]) {
+  return (images || []).map(({ url, alt, caption, source, credit, creditUrl, license, licenseUrl, aspectRatio, placement }) => ({
+    url,
+    alt,
+    caption,
+    source,
+    credit,
+    creditUrl,
+    license,
+    licenseUrl,
+    aspectRatio,
+    placement
+  }));
+}
 
 function stripInlineFaqSection(body: string, hasStructuredFaqs: boolean) {
   if (!hasStructuredFaqs || !body.includes("##")) return body;
@@ -166,6 +224,7 @@ function hydrateBlogPost(post: BlogPost): BlogPost {
     coverSource,
     language
   });
+  const contentImages = normalizeContentImages(post.contentImages);
 
   return {
     ...post,
@@ -213,6 +272,7 @@ function hydrateBlogPost(post: BlogPost): BlogPost {
     coverCreditUrl: post.coverCreditUrl,
     coverLicense: post.coverLicense,
     coverLicenseUrl: post.coverLicenseUrl,
+    contentImages,
     generationTrace: post.generationTrace
   };
 }
@@ -242,6 +302,7 @@ function compactPublicBlogPost(post: BlogPost): BlogPost {
           storedUrl: post.coverGeneration.storedUrl
         }
       : undefined,
+    contentImages: publicContentImages(post.contentImages),
     qualityIssues: post.qualityIssues?.slice(0, 8) || [],
     qualityChecks: defaultQualityChecks({
       hasHumanReview: post.qualityChecks.hasHumanReview,
@@ -256,7 +317,9 @@ function compactPublicBlogPost(post: BlogPost): BlogPost {
       hasReaderEngagement: post.qualityChecks.hasReaderEngagement,
       hasImageFit: post.qualityChecks.hasImageFit,
       hasAntiSlopReview: post.qualityChecks.hasAntiSlopReview,
+      hasSeoGeoReview: post.qualityChecks.hasSeoGeoReview,
       qualityScore: post.qualityChecks.qualityScore,
+      seoGeoScore: post.qualityChecks.seoGeoScore,
       antiSlopScore: post.qualityChecks.antiSlopScore
     }),
     generationTrace: undefined
@@ -498,6 +561,7 @@ export function normalizeBlogPostInput(input: Partial<BlogPost>, existing?: Blog
   const body = input.body ?? existing?.body ?? "";
   const estimatedReadTime = estimateReadTimeMinutes(body, language);
   const sourceLinks = normalizeSourceLinks(input.sourceLinks ?? existing?.sourceLinks);
+  const contentImages = normalizeContentImages(input.contentImages ?? existing?.contentImages);
   const author = normalizeBlogAuthor(input.author ?? existing?.author, {
     slot: input.generationSlot ?? existing?.generationSlot,
     seed: input.translationGroupId ?? existing?.translationGroupId ?? input.slug ?? existing?.slug
@@ -543,6 +607,7 @@ export function normalizeBlogPostInput(input: Partial<BlogPost>, existing?: Blog
     coverCreditUrl: input.coverCreditUrl ?? existing?.coverCreditUrl,
     coverLicense: input.coverLicense ?? existing?.coverLicense,
     coverLicenseUrl: input.coverLicenseUrl ?? existing?.coverLicenseUrl,
+    contentImages,
     readTimeMinutes: Math.max(estimatedReadTime, Number(input.readTimeMinutes ?? existing?.readTimeMinutes ?? 0) || 0),
     featured: Boolean(input.featured ?? existing?.featured ?? false),
     reviewStatus: input.reviewStatus ?? existing?.reviewStatus ?? "ai-draft",
@@ -641,6 +706,27 @@ export function publishValidationForBlogPost(post: BlogPost) {
   }
   if (post.generatedBy && post.coverSource === "generated" && !post.coverGeneration?.provider) {
     errors.push("generated cover images require the image provider before publishing");
+  }
+  if (post.generatedBy && (post.contentType === "column" || post.contentType === "feature")) {
+    const contentImages = post.contentImages || [];
+    if (contentImages.length < 2) {
+      errors.push("column and feature posts require at least two in-article images before publishing");
+    }
+    if (contentImages.length > 3) {
+      errors.push("column and feature posts should use no more than three in-article images");
+    }
+    contentImages.forEach((image, index) => {
+      if (!image.url) errors.push(`content image ${index + 1} requires a public URL`);
+      if (image.url && !/^https:\/\//.test(image.url)) {
+        errors.push(`content image ${index + 1} must use a public https URL`);
+      }
+      if (!image.alt || image.alt.trim().length < 18) {
+        errors.push(`content image ${index + 1} requires descriptive alt text`);
+      }
+      if (image.source === "generated" && !/(chatgpt|gpt|openai)/i.test(image.provider || "")) {
+        errors.push(`content image ${index + 1} must be generated through ChatGPT/GPT`);
+      }
+    });
   }
   if (post.generatedBy && post.qualityStatus && post.qualityStatus !== "passed") {
     errors.push("generated posts require qualityStatus passed before publishing");

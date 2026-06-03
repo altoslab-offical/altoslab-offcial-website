@@ -120,7 +120,7 @@ Judge rubric:
 - ALTOS LAB POV: posts must sound like an AI implementation lab/product studio with practical judgment, not a generic AI news scraper or SEO tool page.
 - SEO/GEO: title, meta, opening, headings, FAQ, sources and citable passages must help search engines and AI answer systems understand the content.
 - Anti-slop: reject generic hype, meta openings, repeated fixed phrases, thin summaries and keyword stuffing.
-- Multilingual parity: zh-Hant, en, ja and ko should share the same source-backed angle while sounding native.
+- Multilingual parity: zh-Hant, en, ja, ko, id, vi, th, ms and fil should share the same source-backed angle while sounding native.
 - Image/license fit: cover metadata must be topic-relevant, legal and credited.
 
 Return one JSON object:

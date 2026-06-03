@@ -1,6 +1,6 @@
 import { readFile } from "fs/promises";
 import path from "path";
-import { gtmHeadSnippet, gtmNoScriptSnippet, homepageAnalyticsSnippet } from "@/lib/analytics";
+import { gaHeadSnippet, gtmHeadSnippet, gtmNoScriptSnippet, homepageAnalyticsSnippet } from "@/lib/analytics";
 import {
   homepageWebPageJsonLd,
   organizationJsonLd,
@@ -13,6 +13,10 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 const CLOUDFLARE_HOMEPAGE_ASSET = "/altoslab-homepage";
+const FAVICON_LINKS = `<link rel="icon" href="/icon.svg" type="image/svg+xml" />
+    <link rel="shortcut icon" href="/icon.svg" type="image/svg+xml" />
+    <link rel="mask-icon" href="/icon.svg" color="#A4FF00" />
+    <link rel="manifest" href="/manifest.webmanifest" />`;
 
 function withLaunchMetadata(html: string) {
   const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || "https://altoslab.com").replace(/\/$/, "");
@@ -29,7 +33,7 @@ function withLaunchMetadata(html: string) {
   const seoNoScriptFallback = `<noscript>
       <main>
         <h1>ALTOS LAB AI Studio 人工智慧工作室</h1>
-        <p>ALTOS LAB 深耕互聯網產品開發與 AI 系統整合，協助企業導入 AI Skill、AI Agent、系統串接、後台 CMS、SEO/GEO 內容系統與智能行銷。</p>
+        <p>ALTOS LAB 深耕互聯網產品開發與 AI 系統整合，協助企業導入 AI Skill、AI Agent、系統串接、後台 CMS、搜尋可見度內容系統與智能行銷。</p>
         <nav aria-label="ALTOS LAB key pages">
           <a href="/blog">AI 實驗室筆記</a>
           <a href="/projects">專案案例</a>
@@ -40,12 +44,11 @@ function withLaunchMetadata(html: string) {
   const metadata = `<title>${title}</title>
     <meta name="description" content="${description}" />
     <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
-    <link rel="icon" type="image/svg+xml" href="/icon.svg" />
-    <link rel="shortcut icon" type="image/svg+xml" href="/icon.svg" />
     ${searchVerificationMetaTags()}
+    ${FAVICON_LINKS}
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@700;800;900&display=swap" rel="stylesheet" />
     <link rel="canonical" href="${siteUrl}" />
     <link rel="alternate" href="${siteUrl}" hreflang="zh-Hant-TW" />
     <link rel="alternate" href="${siteUrl}" hreflang="x-default" />
@@ -64,23 +67,13 @@ function withLaunchMetadata(html: string) {
     <meta name="twitter:description" content="${description}" />
     <meta name="twitter:image" content="${image}" />
     ${jsonLd}
+    ${gaHeadSnippet()}
     ${gtmHeadSnippet()}`;
-	  const homepageHeader = `
-	    <style>
-	      @font-face {
-	        font-family: "Space Grotesk";
-	        font-style: normal;
-	        font-weight: 400 900;
-	        font-display: swap;
-	        src: url("/fonts/space-grotesk-latin.woff2") format("woff2");
-	        unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304,
-	          U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF,
-	          U+FFFD;
-	      }
-
-	      body > nav.fixed.top-0,
-	      #root nav.fixed.top-0 {
-	        display: none !important;
+  const homepageHeader = `
+    <style>
+      body > nav.fixed.top-0,
+      #root nav.fixed.top-0 {
+        display: none !important;
       }
 
       .altos-home-header {
@@ -112,7 +105,7 @@ function withLaunchMetadata(html: string) {
         font-family: "Space Grotesk", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
         font-size: clamp(0.85rem, 1vw, 1rem);
         font-weight: 900;
-        letter-spacing: 0.18em;
+        letter-spacing: 0.24em;
         line-height: 1;
         opacity: 0;
         pointer-events: none;
@@ -143,13 +136,6 @@ function withLaunchMetadata(html: string) {
         letter-spacing: 0.08em;
         transition: color 160ms ease;
         white-space: nowrap;
-      }
-
-      [class~="mix-blend-difference"][class~="tracking-[0.25em]"],
-      [class~="mix-blend-difference"][class~="tracking-[0.2em]"] {
-        font-family: "Space Grotesk", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
-        font-weight: 900 !important;
-        letter-spacing: 0.18em !important;
       }
 
       .altos-home-nav a:hover,
@@ -383,13 +369,10 @@ function withLaunchMetadata(html: string) {
       })();
     </script>`;
 
-  const htmlWithoutLegacyIcons = html.replace(
-    /<link\b(?=[^>]*\brel=["'](?:icon|shortcut icon|apple-touch-icon)["'])[^>]*>\s*/gi,
-    ""
-  );
-
-  return htmlWithoutLegacyIcons
+  return html
     .replace('<html lang="en">', '<html lang="zh-Hant-TW">')
+    .replace(/<link\s+rel=["'](?:shortcut\s+icon|icon|mask-icon)["'][^>]*>\s*/gi, "")
+    .replace(/<link\s+[^>]*rel=["']manifest["'][^>]*>\s*/gi, "")
     .replace(/<title>[\s\S]*?<\/title>/, metadata)
     .replace("<body>", `<body>${gtmNoScriptSnippet()}${seoNoScriptFallback}`)
     .replace("</body>", `${homepageHeader}${homepageAnalyticsSnippet()}</body>`);

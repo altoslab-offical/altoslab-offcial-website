@@ -60,11 +60,16 @@ function parsePayload(body: string): BlogIngestRequest {
 function missingLanguageIssues(posts: BlogPost[]) {
   const issues: string[] = [];
   const languages = posts.map((post) => post.language);
+  const isMarketNewsSet = posts.some((post) => post.contentType === "breaking");
+  const missingLanguages = BLOG_LANGUAGES.filter((language) => !languages.includes(language));
   for (const language of BLOG_LANGUAGES) {
     if (!languages.includes(language)) issues.push(`missing ${language} article`);
   }
   for (const language of BLOG_LANGUAGES) {
     if (languages.filter((item) => item === language).length > 1) issues.push(`duplicate ${language} article`);
+  }
+  if (isMarketNewsSet && missingLanguages.length) {
+    issues.push(`market news fast lane requires translated versions for every configured language; missing ${missingLanguages.join(", ")}`);
   }
   return issues;
 }
@@ -100,6 +105,47 @@ function isHttpUrl(value?: string) {
   }
 }
 
+const genericStockImageHosts = [
+  "unsplash.com",
+  "images.unsplash.com",
+  "pexels.com",
+  "images.pexels.com",
+  "pixabay.com",
+  "cdn.pixabay.com",
+  "openverse.org",
+  "openverse.engineering",
+  "api.openverse.org",
+  "api.openverse.engineering"
+];
+
+function parsedHost(value?: string) {
+  if (!value) return "";
+  try {
+    return new URL(value).hostname.toLowerCase().replace(/^www\./, "");
+  } catch {
+    return "";
+  }
+}
+
+function sourceHostMatches(creditUrl: string, sourceUrl: string) {
+  const creditHost = parsedHost(creditUrl);
+  const sourceHost = parsedHost(sourceUrl);
+  return Boolean(
+    creditHost &&
+      sourceHost &&
+      (creditHost === sourceHost || creditHost.endsWith(`.${sourceHost}`) || sourceHost.endsWith(`.${creditHost}`))
+  );
+}
+
+function isGenericStockImageUrl(value?: string) {
+  const host = parsedHost(value);
+  return Boolean(host && genericStockImageHosts.some((stockHost) => host === stockHost || host.endsWith(`.${stockHost}`)));
+}
+
+function sourceCoverCreditMatchesSource(post: BlogPost) {
+  return post.sourceLinks.some((source) => sourceHostMatches(post.coverCreditUrl || "", source.url));
+}
+
 function generationContractIssues(posts: BlogPost[]) {
   return posts.flatMap((post) => {
     const issues: string[] = [];
@@ -122,6 +168,12 @@ function generationContractIssues(posts: BlogPost[]) {
       }
       if (!post.coverLicense?.trim()) {
         issues.push(`${post.language}/${post.slug}: market news source image requires coverLicense/source-rights metadata`);
+      }
+      if (isGenericStockImageUrl(post.cover) || isGenericStockImageUrl(post.coverCreditUrl)) {
+        issues.push(`${post.language}/${post.slug}: market news source image must come from the source article or official announcement, not stock/free image providers`);
+      }
+      if (!sourceCoverCreditMatchesSource(post)) {
+        issues.push(`${post.language}/${post.slug}: market news coverCreditUrl must match one of the sourceLinks`);
       }
     } else {
       if (post.coverSource !== "generated") {

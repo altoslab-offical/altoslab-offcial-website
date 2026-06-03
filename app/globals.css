@@ -3261,10 +3261,14 @@ img {
 }
 
 .blog-site-shell .site-logo {
-  font-family: var(--font-body);
+  font-family: var(--font-space);
   font-size: 1.12rem;
   font-weight: 900;
   letter-spacing: 0.18em;
+}
+
+.blog-site-shell .site-logo .brand-text {
+  font-family: inherit;
 }
 
 .blog-site-shell .site-nav nav {
@@ -3595,6 +3599,61 @@ img {
   font-family: var(--font-body);
   font-size: var(--fs-prose);
   line-height: var(--lh-relaxed);
+}
+
+.article-body-with-images {
+  display: grid;
+  gap: 0;
+}
+
+.article-inline-figure {
+  box-sizing: border-box;
+  width: min(760px, 100%);
+  margin: 34px auto 20px;
+}
+
+.article-inline-figure img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border: 1px solid var(--al-blog-border);
+  border-radius: var(--r-md);
+  background: var(--al-blog-panel);
+  object-fit: cover;
+  object-position: center;
+  box-shadow: var(--al-shadow-blog-card);
+}
+
+.article-inline-figure.is-square {
+  width: min(620px, 100%);
+}
+
+.article-inline-figure.is-square img {
+  aspect-ratio: 1;
+}
+
+.article-inline-figure.is-portrait {
+  width: min(560px, 100%);
+}
+
+.article-inline-figure.is-portrait img {
+  aspect-ratio: 4 / 5;
+}
+
+.article-inline-figure figcaption {
+  margin: 9px auto 0;
+  color: var(--al-blog-muted);
+  font-size: 12px;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.article-inline-figure a {
+  color: var(--al-blog-accent);
+}
+
+.article-inline-credit {
+  color: var(--al-blog-muted);
 }
 
 .blog-site-shell .rich-text p,
@@ -4827,6 +4886,7 @@ img {
   }
 
   .blog-site-shell .site-logo {
+    font-family: var(--font-space);
     font-size: 0.9rem;
     letter-spacing: 0.18em;
   }

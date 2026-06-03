@@ -1,7 +1,7 @@
 import { BLOG_LANGUAGES, defaultQualityChecks } from "./blog-utils";
 import { PUBLIC_BLOG_AUTHORS, publicEditorialReviewNote } from "./blog-authors";
 import { registryTrustedHostFragments } from "./blog-source-registry";
-import type { BlogContentType, BlogLanguage, BlogLlmQualityEvaluation, BlogPost } from "./types";
+import type { BlogContentType, BlogInlineImage, BlogLanguage, BlogLlmQualityEvaluation, BlogPost } from "./types";
 
 type ReviewArea =
   | "sourceTrust"
@@ -27,6 +27,7 @@ type PostReview = {
   issues: string[];
   warnings: string[];
   breakdown: Record<ReviewArea, number>;
+  seoGeoIssues: string[];
   antiSlopScore: number;
   antiSlopIssues: string[];
   antiSlopDimensions: Record<AntiSlopDimension, number>;
@@ -141,7 +142,7 @@ const readerTensionPattern =
   /(使用者|讀者|行銷主管|創辦人|老闆|團隊|企業|品牌|客戶|買家|operator|founder|team|buyer|customer|reader|marketing lead|executive|manager|読者|チーム|企業|고객|팀|독자|실무자).{0,120}(判斷|決策|取捨|風險|預算|排名|引用|轉換|導入|workflow|decision|tradeoff|risk|budget|rank|citation|conversion|implementation|判断|意思決定|引用|전환|판단|결정|위험|예산|인용)/i;
 
 const readerActionPattern =
-  /(本週|今天|下一步|行動清單|檢查|盤點|優先級|先做|不要做|判斷標準|scorecard|checklist|next step|priority|what to check|what to do|this week|audit|今週|次に|チェック|優先順位|이번 주|다음 단계|체크|우선순위)/i;
+  /(本週|今天|下一步|行動清單|檢查|盤點|優先級|先做|不要做|判斷標準|scorecard|checklist|next step|priority|what to check|what to do|this week|audit|今週|次に|チェック|優先順位|이번 주|다음 단계|체크|우선순위|minggu ini|langkah berikut|periksa|prioritas|tuần này|bước tiếp theo|kiểm tra|ưu tiên|สัปดาห์นี้|ขั้นต่อไป|ตรวจ|ลำดับความสำคัญ|susunod|suriin|prayoridad)/i;
 
 const quotableJudgmentPattern =
   /(可引用段落|ALTOS LAB (判斷|觀點|編輯)|實驗室判斷|編輯台觀點|thought leadership|quotable|pull quote|blockquote|引用したい判断|인용할 판단|^>\s+)/im;
@@ -250,6 +251,37 @@ function hasCreditedSourceCover(post: BlogPost) {
   return post.sourceLinks.some((source) => sourceHostMatches(post.coverCreditUrl || "", source.url));
 }
 
+function isPublicImageUrl(value?: string) {
+  if (!value) return false;
+  if (/^https:\/\//.test(value)) return true;
+  if (process.env.BLOG_IMAGE_ALLOW_LOCAL_HTTP === "1") {
+    try {
+      const parsed = new URL(value);
+      return parsed.protocol === "http:" && ["localhost", "127.0.0.1", "::1"].includes(parsed.hostname);
+    } catch {
+      return false;
+    }
+  }
+  return false;
+}
+
+function generatedImageChecksIssues(image: BlogInlineImage, label: string) {
+  const issues: string[] = [];
+  if (!/(chatgpt|gpt|openai)/i.test(image.provider || "")) issues.push(`${label} must be generated through ChatGPT/GPT`);
+  if (!image.prompt?.trim()) issues.push(`${label} requires the stored image prompt`);
+  if (!image.generatedAt?.trim()) issues.push(`${label} requires generatedAt metadata`);
+  if (!image.credit?.trim()) issues.push(`${label} requires visible editorial credit`);
+  const checks = image.visualChecks;
+  if (!checks) {
+    issues.push(`${label} requires visualChecks from image QA`);
+  } else {
+    for (const field of ["topicFit", "noTextArtifacts", "noLogos", "noPeople", "noTrademarkRisk", "noGenericStockLook"] as const) {
+      if (checks[field] !== true) issues.push(`${label} visualChecks.${field} must be true`);
+    }
+  }
+  return issues;
+}
+
 const blockedPhrases = [
   "lorem ipsum",
   "todo",
@@ -271,6 +303,7 @@ const blockedPhrases = [
   "本文整理",
   "這篇文章將",
   "這篇文章會",
+  "hentai",
   "高階主管必須關注",
   "企業不可忽視"
 ];
@@ -299,6 +332,17 @@ const labsSignals = [
   "Agent",
   "automation",
   "自動化",
+  "produk",
+  "workflow",
+  "otomasi",
+  "automasi",
+  "quy trình",
+  "sản phẩm",
+  "tự động",
+  "เวิร์กโฟลว์",
+  "ระบบ",
+  "produkto",
+  "operasyon",
   "決策",
   "運營",
   "運用",
@@ -341,6 +385,17 @@ const creativeSignals = [
   "實驗室判斷",
   "ALTOS LAB 觀點",
   "ALTOS LAB 編輯",
+  "kerangka",
+  "risiko",
+  "catatan editor",
+  "khung",
+  "rủi ro",
+  "ghi chú",
+  "กรอบ",
+  "ความเสี่ยง",
+  "กรณีศึกษา",
+  "balangkas",
+  "panganib",
   "method",
   "framework",
   "playbook",
@@ -389,7 +444,7 @@ const creativeSignals = [
 ];
 
 const labsPointOfViewPattern =
-  /(ALTOS LAB (判斷|觀點|編輯|現場筆記|實驗室筆記|implementation note|lab note|Lab note|Lab POV|editorial|field note)|實驗室判斷|編輯台觀點|編輯筆記|現場筆記|Lab POV|Lab note|editorial read|field note|ALTOS LAB編集|ALTOS LAB の判断|ALTOS LAB 편집|ALTOS LAB 관점)/i;
+  /(ALTOS LAB (判斷|觀點|編輯|現場筆記|實驗室筆記|implementation note|lab note|Lab note|Lab POV|editorial|field note)|實驗室判斷|編輯台觀點|編輯筆記|現場筆記|Lab POV|Lab note|editorial read|field note|ALTOS LAB編集|ALTOS LAB の判断|ALTOS LAB 편집|ALTOS LAB 관점|ALTOS LAB nhấn mạnh|Góc nhìn ALTOS LAB|มุมมอง ALTOS LAB|ALTOS LAB ชี้|Binigyang-diin ng ALTOS LAB|Pananaw ng ALTOS LAB)/i;
 
 const genericCoverWords =
   /(dashboard|analytics dashboard|team meeting|server room|workspace|generic|seo analytics|儀表板|會議|伺服器機房|ワークスペース|회의|서버룸)/i;
@@ -472,20 +527,30 @@ function plainText(markdown: string) {
 
 function wordishLength(markdown: string, language: BlogLanguage) {
   const text = plainText(markdown);
-  if (language === "en") return text.split(/\s+/).filter(Boolean).length;
+  if (["en", "id", "vi", "ms", "fil"].includes(language)) return text.split(/\s+/).filter(Boolean).length;
   if (language === "zh-Hant") return (text.match(/[\u4e00-\u9fff]/g) || []).length;
   if (language === "ja") return (text.match(/[\u3040-\u30ff\u4e00-\u9fff]/g) || []).length;
+  if (language === "th") return (text.match(/[\u0e00-\u0e7f]/g) || []).length;
   return (text.match(/[\uac00-\ud7af]/g) || []).length;
 }
 
+function normalizedParityLength(markdown: string, language: BlogLanguage) {
+  const length = wordishLength(markdown, language);
+  if (language === "zh-Hant") return length / 1.8;
+  if (language === "ja" || language === "ko") return length / 2;
+  if (language === "th") return length / 4.5;
+  return length;
+}
+
 function minimumBodyLength(contentType: BlogContentType, language: BlogLanguage) {
+  const latinLanguage = ["en", "id", "vi", "ms", "fil"].includes(language);
   if (contentType === "breaking") {
-    return language === "en" ? 260 : 360;
+    return latinLanguage ? 260 : 360;
   }
   if (contentType === "feature") {
-    return language === "en" ? 900 : 1300;
+    return latinLanguage ? 900 : 1300;
   }
-  return language === "en" ? 620 : 900;
+  return latinLanguage ? 620 : 900;
 }
 
 function markdownHeadingCount(body: string) {
@@ -825,10 +890,38 @@ function reviewSeoGeoStructure(post: BlogPost): ReviewResult {
   const issues: string[] = [];
   const warnings: string[] = [];
   const seoDescriptionLength = post.seoDescription?.trim().length || 0;
+  const seoTitleLength = post.seoTitle?.trim().length || 0;
   const excerpt = post.excerpt?.trim() || "";
+  const contentType = post.contentType || "column";
+  const firstBlock = firstAnswerBlock(post.body);
+  const h2Count = markdownHeadingCount(post.body);
+  const sourceSummaries = post.sourceLinks.filter((source) => source.summary?.trim());
+  const bodyText = plainText(post.body);
+  const entities = [
+    "OpenAI",
+    "Anthropic",
+    "Google",
+    "Gemini",
+    "ChatGPT",
+    "Claude",
+    "Perplexity",
+    "Microsoft",
+    "NVIDIA",
+    "Hugging Face",
+    "AI Agent",
+    "AI Search"
+  ];
+  const entityHits = entities.filter((entity) => `${post.title}\n${post.excerpt}\n${post.geoSummary}\n${post.body}`.includes(entity));
 
   if (!post.title || post.title.length < 12) issues.push("title is too short");
+  if (!post.seoTitle?.trim()) issues.push("seoTitle is required for search snippets");
+  if (seoTitleLength && (seoTitleLength < 24 || seoTitleLength > 72)) {
+    warnings.push("seoTitle should usually stay between 24 and 72 characters for readable search snippets");
+  }
   if (!post.slug) issues.push("slug is missing");
+  if (post.slug && !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(post.slug)) {
+    warnings.push("slug should be lowercase, stable and hyphenated for shareable URLs");
+  }
   if (seoDescriptionLength < MIN_SEO_DESCRIPTION || seoDescriptionLength > MAX_SEO_DESCRIPTION) {
     issues.push("seoDescription must be 70-180 characters");
   }
@@ -846,14 +939,39 @@ function reviewSeoGeoStructure(post: BlogPost): ReviewResult {
     warnings.push("subtitle/excerpt appears to repeat the title instead of adding a second angle");
   }
   if (!post.geoSummary || post.geoSummary.length < 80) issues.push("geoSummary is too thin");
+  if (post.geoSummary && post.geoSummary === post.excerpt) {
+    warnings.push("geoSummary should be a citation-ready summary, not the same text as the public subtitle");
+  }
+  if (post.geoSummary && !/(來源|引用|決策|判斷|source|citation|decision|framework|出典|引用|판단|출처|sumber|rujukan|nguồn|trích dẫn|แหล่งที่มา|อ้างอิง|pinagmulan|sanggunian)/i.test(post.geoSummary)) {
+    warnings.push("geoSummary should contain a source, citation, decision or framework cue for AI-answer retrieval");
+  }
   if (!post.tags.length) issues.push("tags are required");
-  const firstBlock = firstAnswerBlock(post.body);
+  if (post.tags.length < 3) warnings.push("use at least three tags so related posts and AI summaries can cluster the topic");
   if (!firstBlock) issues.push("body needs a direct answer opening");
   if (/(本文|這篇文章|in this article|this article|we will|we'll|cuts through|この記事では|本稿では|이 글에서는|이번 글에서는)/i.test(firstBlock)) {
     issues.push("opening must answer the query directly instead of introducing the article");
   }
   if (!/(ALTOS LAB|GEO|SEO|AI|Agent|agent|automation|workflow|導入|產品|流程|自動化|実装|運用|도입|자동화)/i.test(firstBlock)) {
     issues.push("opening answer needs concrete entities, not a generic setup paragraph");
+  }
+  if (firstBlock.length < 80) warnings.push("opening answer may be too thin for search intent and AI-answer extraction");
+  if (h2Count < CONTENT_TYPE_MINIMUMS[contentType].h2) {
+    issues.push("H2 structure is too thin for search and AI answer extraction");
+  }
+  if (post.faqs.length < CONTENT_TYPE_MINIMUMS[contentType].faqs) {
+    issues.push("FAQ coverage is too thin for schema and answer-engine extraction");
+  }
+  if (sourceSummaries.length < Math.min(post.sourceLinks.length, CONTENT_TYPE_MINIMUMS[contentType].sources)) {
+    issues.push("source summaries are required for citation-ready source dossier");
+  }
+  if (post.sourceLinks.length && !post.sourceLinks.some((source) => bodyText.includes(source.publisher || source.title))) {
+    warnings.push("body should name at least one source/publisher so AI answers can trace claims");
+  }
+  if (!entityHits.length) {
+    warnings.push("article should include at least one clear entity name for AI-search entity matching");
+  }
+  if (!/(\d{4}|\d+%|\d+\s*(?:million|billion|萬|億|件|家|篇|次|분|件|ราย|คน))/i.test(`${post.excerpt}\n${post.body}`)) {
+    warnings.push("article has little concrete date/stat evidence; add one verifiable date or number when the source supports it");
   }
   if (post.geoSummary.includes("...")) issues.push("geoSummary should not contain truncation ellipsis");
   if (post.faqs.some((faq) => !faq.question || !faq.answer)) issues.push("FAQ entries must include question and answer");
@@ -985,6 +1103,32 @@ export function reviewImageFit(post: BlogPost): ReviewResult {
     }
   }
 
+  if (post.contentType === "column" || post.contentType === "feature") {
+    const contentImages = post.contentImages || [];
+    if (contentImages.length < 2) {
+      issues.push("column and feature posts require at least two in-article images for editorial pacing");
+    }
+    if (contentImages.length > 3) {
+      warnings.push("column and feature posts should keep in-article images to three or fewer");
+    }
+    contentImages.forEach((image, index) => {
+      const label = `content image ${index + 1}`;
+      if (!isPublicImageUrl(image.url)) issues.push(`${label} must use a public image URL`);
+      if (!image.alt || image.alt.trim().length < 18) issues.push(`${label} alt text is too thin`);
+      if (!image.caption?.trim() && !image.credit?.trim()) warnings.push(`${label} should include a caption or visible credit`);
+      if (image.source === "generated") {
+        issues.push(...generatedImageChecksIssues(image, label));
+        const context = `${image.alt || ""} ${image.caption || ""} ${image.prompt || ""}`.toLowerCase();
+        if (rejectedCoverWords.test(context) || genericCoverWords.test(context)) {
+          issues.push(`${label} is unsafe, too generic or mismatched for editorial quality`);
+        }
+      }
+      if (image.source === "source" && (!image.credit?.trim() || !image.creditUrl?.trim())) {
+        issues.push(`${label} source image requires visible credit and credit URL`);
+      }
+    });
+  }
+
   return reviewWeighted(10, issues, warnings);
 }
 
@@ -997,7 +1141,9 @@ export function reviewMultilingualParity(posts: BlogPost[]): ReviewResult {
   const contentTypes = new Set(posts.map((post) => post.contentType || "column"));
   const categories = new Set(posts.map((post) => post.newsCategory || ""));
 
-  if (posts.length !== BLOG_LANGUAGES.length) issues.push("auto-publish requires zh-Hant, en, ja and ko posts");
+  if (posts.length !== BLOG_LANGUAGES.length) {
+    issues.push(`auto-publish requires ${BLOG_LANGUAGES.length} language posts: ${BLOG_LANGUAGES.join(", ")}`);
+  }
   for (const language of BLOG_LANGUAGES) {
     if (!languages.has(language)) issues.push(`missing ${language} article in multilingual group`);
   }
@@ -1016,7 +1162,7 @@ export function reviewMultilingualParity(posts: BlogPost[]): ReviewResult {
     }
   }
 
-  const lengths = posts.map((post) => wordishLength(post.body, post.language)).filter(Boolean);
+  const lengths = posts.map((post) => normalizedParityLength(post.body, post.language)).filter(Boolean);
   const max = Math.max(...lengths, 0);
   const min = Math.min(...lengths, Number.POSITIVE_INFINITY);
   if (Number.isFinite(min) && max > 0 && min / max < 0.35) {
@@ -1089,6 +1235,7 @@ function reviewPost(post: BlogPost, multilingual: ReviewResult): PostReview {
     issues,
     warnings,
     breakdown,
+    seoGeoIssues: [...seoGeoStructure.issues, ...seoGeoStructure.warnings],
     antiSlopScore: antiSlop.score,
     antiSlopIssues: [...antiSlop.issues, ...antiSlop.warnings],
     antiSlopDimensions: antiSlop.dimensions
@@ -1219,9 +1366,12 @@ export function applyQualityReview(post: BlogPost, review: BlogPairQualityReview
       hasReaderEngagement: postReview ? postReview.breakdown.readerEngagement >= 14 : publish,
       hasImageFit: postReview ? postReview.breakdown.imageFit >= 8 : publish,
       hasAntiSlopReview: postReview ? postReview.antiSlopScore >= ANTI_SLOP_THRESHOLDS[review.contentType] : publish,
+      hasSeoGeoReview: postReview ? postReview.breakdown.seoGeoStructure >= 12 : publish,
       qualityScoreBreakdown: postReview?.breakdown,
       qualityScore: review.score,
       qualityIssues,
+      seoGeoScore: postReview?.breakdown.seoGeoStructure,
+      seoGeoIssues: postReview?.seoGeoIssues,
       antiSlopScore: postReview?.antiSlopScore,
       antiSlopIssues: postReview?.antiSlopIssues,
       llmEvaluation: review.llmEvaluation,

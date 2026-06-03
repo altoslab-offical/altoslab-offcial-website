@@ -1,5 +1,5 @@
 import { defaultQualityChecks } from "./blog-utils";
-import type { BlogPost, BlogQualityStatus } from "./types";
+import type { BlogInlineImage, BlogPost, BlogQualityStatus } from "./types";
 
 type ImageDimensions = {
   width: number;
@@ -13,6 +13,8 @@ type ImageProbe = {
   issues: string[];
   warnings: string[];
 };
+
+type MultilingualCoverPost = Partial<Pick<BlogPost, "language" | "slug" | "translationGroupId" | "cover" | "contentImages">>;
 
 export type BlogImagePostReview = {
   language: BlogPost["language"];
@@ -56,12 +58,39 @@ const MIN_IMAGE_HEIGHT = 630;
 const MIN_IMAGE_BYTES = 40_000;
 const MAX_IMAGE_BYTES = 8_000_000;
 const SAFE_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
+const GENERIC_STOCK_IMAGE_HOSTS = [
+  "unsplash.com",
+  "images.unsplash.com",
+  "pexels.com",
+  "images.pexels.com",
+  "pixabay.com",
+  "cdn.pixabay.com",
+  "openverse.org",
+  "openverse.engineering",
+  "api.openverse.org",
+  "api.openverse.engineering"
+];
 
 const unsafeImageMetadataPattern =
   /(dead|corpse|prisoner|concentration camp|nazi|war crime|weapon|gun|blood|accident|disaster|protest|politician|minister|government|military|army|logo|trademark|celebrity|real person|portrait of|screenshot|ui screenshot|fake dashboard|亂碼|錯字|商標|真人|肖像|政治人物|ロゴ|商標|実在人物|초상|상표|로고)/i;
 
 const genericGeneratedImagePattern =
-  /(generic|abstract background|glowing dashboard|futuristic dashboard|server room|business meeting|robot handshake|stock photo|科技感背景|抽象科技|會議室|儀表板|伺服器機房|汎用|抽象|会議|서버룸|회의실|추상 배경)/i;
+  /(generic|abstract background|glowing dashboard|futuristic dashboard|server room|business meeting|robot handshake|stock photo|科技感背景|抽象科技|會議室|儀表板|伺服器機房|汎用|会議|서버룸|회의실|추상 배경)/i;
+
+function removeNegativeImageConstraints(input: string) {
+  return input
+    .replace(/\bno\s+(readable\s+)?text\b/gi, "")
+    .replace(/\bno\s+(fake\s+)?logos?\b/gi, "")
+    .replace(/\bno\s+(real\s+)?people\b/gi, "")
+    .replace(/\bno\s+real-person\s+likeness(?:es)?\b/gi, "")
+    .replace(/\bno\s+(fake\s+)?ui\b/gi, "")
+    .replace(/\bno\s+fake\s+dashboards?\b/gi, "")
+    .replace(/\bno\s+(microsoft\s+)?branding\b/gi, "")
+    .replace(/\bno\s+trademarks?\b/gi, "")
+    .replace(/不要(?:可讀)?文字|不要標誌|不要商標|不要真人|不要肖像|不要假介面|不要假儀表板/g, "")
+    .replace(/ロゴなし|商標なし|実在人物なし/g, "")
+    .replace(/로고 없음|상표 없음|실제 인물 없음/g, "");
+}
 
 function isManagedGeneratedCoverUrl(url: string) {
   try {
@@ -86,6 +115,10 @@ function isAllowedLocalHttpUrl(url: string) {
   }
 }
 
+function isProductionRuntime() {
+  return process.env.NODE_ENV === "production" || Boolean(process.env.K_SERVICE || process.env.VERCEL_ENV === "production");
+}
+
 function isHttpUrl(url?: string) {
   if (!url) return false;
   try {
@@ -96,12 +129,41 @@ function isHttpUrl(url?: string) {
   }
 }
 
+function parsedHost(url?: string) {
+  if (!url) return "";
+  try {
+    return new URL(url).hostname.toLowerCase().replace(/^www\./, "");
+  } catch {
+    return "";
+  }
+}
+
+function sourceHostMatches(creditUrl: string, sourceUrl: string) {
+  const creditHost = parsedHost(creditUrl);
+  const sourceHost = parsedHost(sourceUrl);
+  return Boolean(
+    creditHost &&
+      sourceHost &&
+      (creditHost === sourceHost || creditHost.endsWith(`.${sourceHost}`) || sourceHost.endsWith(`.${creditHost}`))
+  );
+}
+
+function isGenericStockImageUrl(url?: string) {
+  const host = parsedHost(url);
+  return Boolean(host && GENERIC_STOCK_IMAGE_HOSTS.some((stockHost) => host === stockHost || host.endsWith(`.${stockHost}`)));
+}
+
+function sourceCoverMatchesSourceList(post: BlogPost) {
+  return post.sourceLinks.some((source) => sourceHostMatches(post.coverCreditUrl || "", source.url));
+}
+
 function isBreakingNews(post: BlogPost) {
   return post.contentType === "breaking";
 }
 
 function imageContext(post: BlogPost) {
-  return [
+  return removeNegativeImageConstraints(
+    [
     post.title,
     post.topic,
     post.newsCategory,
@@ -112,7 +174,8 @@ function imageContext(post: BlogPost) {
     post.coverGeneration?.visualChecks?.notes
   ]
     .filter(Boolean)
-    .join("\n");
+      .join("\n")
+  );
 }
 
 function topicWords(post: BlogPost) {
@@ -283,6 +346,29 @@ async function probeRemoteImage(url: string): Promise<ImageProbe> {
   }
 }
 
+function generatedInlineImageIssues(image: BlogInlineImage, label: string) {
+  const issues: string[] = [];
+  if (!/(chatgpt|gpt|openai)/i.test(image.provider || "")) issues.push(`${label} provider must be ChatGPT/GPT`);
+  if (!image.prompt?.trim()) issues.push(`${label} prompt is required`);
+  if (!image.generatedAt?.trim()) issues.push(`${label} generatedAt is required`);
+  if (!image.credit?.trim()) issues.push(`${label} credit is required`);
+  const checks = image.visualChecks;
+  if (!checks) {
+    issues.push(`${label} visualChecks are required`);
+  } else {
+    const failedChecks = [
+      ["topicFit", checks.topicFit],
+      ["noTextArtifacts", checks.noTextArtifacts],
+      ["noLogos", checks.noLogos],
+      ["noPeople", checks.noPeople],
+      ["noTrademarkRisk", checks.noTrademarkRisk],
+      ["noGenericStockLook", checks.noGenericStockLook]
+    ].filter(([, ok]) => ok !== true);
+    if (failedChecks.length) issues.push(`${label} visual QA failed: ${failedChecks.map(([name]) => name).join(", ")}`);
+  }
+  return issues;
+}
+
 async function reviewPostImage(post: BlogPost, options: Required<BlogImageQualityOptions>): Promise<BlogImagePostReview> {
   const issues: string[] = [];
   const warnings: string[] = [];
@@ -336,6 +422,12 @@ async function reviewPostImage(post: BlogPost, options: Required<BlogImageQualit
     if (!post.coverCredit?.trim()) issues.push("source cover requires visible source credit");
     if (!isHttpUrl(post.coverCreditUrl)) issues.push("source cover requires a public source credit URL");
     if (!post.coverLicense?.trim()) issues.push("source cover requires license or source-rights metadata");
+    if (isGenericStockImageUrl(post.cover) || isGenericStockImageUrl(post.coverCreditUrl)) {
+      issues.push("market news source cover must come from the source article or official announcement, not a stock/free image provider");
+    }
+    if (!sourceCoverMatchesSourceList(post)) {
+      issues.push("source cover credit URL must match one of the article source links");
+    }
   }
 
   const context = imageContext(post);
@@ -352,6 +444,9 @@ async function reviewPostImage(post: BlogPost, options: Required<BlogImageQualit
 
   if (post.cover) {
     const allowedLocalHttp = options.allowLocalHttp && isAllowedLocalHttpUrl(post.cover);
+    if (isProductionRuntime() && isAllowedLocalHttpUrl(post.cover)) {
+      issues.push("production cover must not use localhost or private development URLs");
+    }
     if (!/^https:\/\//.test(post.cover) && !allowedLocalHttp) {
       issues.push("cover must use a public https URL");
     } else if (generatedCover && options.requireBlobCover && !isManagedGeneratedCoverUrl(post.cover)) {
@@ -361,6 +456,38 @@ async function reviewPostImage(post: BlogPost, options: Required<BlogImageQualit
       probe = await probeRemoteImage(post.cover);
       issues.push(...probe.issues);
       warnings.push(...probe.warnings);
+    }
+  }
+
+  if (post.contentType === "column" || post.contentType === "feature") {
+    const contentImages = post.contentImages || [];
+    if (contentImages.length < 2) issues.push("column/feature posts require at least two in-article images");
+    if (contentImages.length > 3) warnings.push("column/feature posts should keep in-article images to three or fewer");
+    for (const [index, image] of contentImages.entries()) {
+      const label = `content image ${index + 1}`;
+      if (!image.url) issues.push(`${label} URL is required`);
+      if (!image.alt?.trim()) issues.push(`${label} alt text is required`);
+      if (image.alt && image.alt.trim().length < 18) issues.push(`${label} alt text is too thin`);
+      if (image.alt && image.alt.length > 180) warnings.push(`${label} alt text is too long`);
+      if (!image.caption?.trim() && !image.credit?.trim()) warnings.push(`${label} should include a caption or visible credit`);
+      if (image.source === "generated") issues.push(...generatedInlineImageIssues(image, label));
+      if (image.source === "source" && (!image.credit?.trim() || !image.creditUrl?.trim())) {
+        issues.push(`${label} source image requires credit and creditUrl`);
+      }
+      if (image.url) {
+        const allowedLocalHttp = options.allowLocalHttp && isAllowedLocalHttpUrl(image.url);
+        if (isProductionRuntime() && isAllowedLocalHttpUrl(image.url)) issues.push(`${label} must not use localhost or private development URLs`);
+        if (!/^https:\/\//.test(image.url) && !allowedLocalHttp) {
+          issues.push(`${label} must use a public https URL`);
+        } else if (image.source === "generated" && options.requireBlobCover && !isManagedGeneratedCoverUrl(image.url)) {
+          issues.push(`${label} must be stored in managed generated media before ingest`);
+        }
+        if (options.verifyRemoteImage && (/^https:\/\//.test(image.url) || allowedLocalHttp)) {
+          const inlineProbe = await probeRemoteImage(image.url);
+          issues.push(...inlineProbe.issues.map((issue) => `${label}: ${issue}`));
+          warnings.push(...inlineProbe.warnings.map((warning) => `${label}: ${warning}`));
+        }
+      }
     }
   }
 
@@ -383,6 +510,40 @@ async function reviewPostImage(post: BlogPost, options: Required<BlogImageQualit
   };
 }
 
+export function multilingualCoverConsistencyIssues(posts: MultilingualCoverPost[]) {
+  const issues: string[] = [];
+  const groups = new Map<string, MultilingualCoverPost[]>();
+  for (const post of posts) {
+    const group = post.translationGroupId || "__article_set__";
+    groups.set(group, [...(groups.get(group) || []), post]);
+  }
+
+  for (const [group, groupPosts] of groups) {
+    if (groupPosts.length < 2) continue;
+    const covers = [...new Set(groupPosts.map((post) => post.cover?.trim()).filter(Boolean))];
+    if (covers.length > 1) {
+      issues.push(
+        `all language versions in an article set must share the same cover URL (${group}: ${groupPosts
+          .map((post) => `${post.language}/${post.slug}`)
+          .join(", ")})`
+      );
+    }
+    const contentImageCounts = [...new Set(groupPosts.map((post) => post.contentImages?.length || 0))];
+    if (contentImageCounts.length > 1) {
+      issues.push(`all language versions in an article set must share the same number of content images (${group})`);
+    }
+    const maxContentImages = Math.max(...contentImageCounts, 0);
+    for (let index = 0; index < maxContentImages; index += 1) {
+      const urls = [...new Set(groupPosts.map((post) => post.contentImages?.[index]?.url?.trim()).filter(Boolean))];
+      if (urls.length > 1) {
+        issues.push(`all language versions in an article set must share content image ${index + 1} URL (${group})`);
+      }
+    }
+  }
+
+  return issues;
+}
+
 export async function reviewBlogImagesForRelease(
   posts: BlogPost[],
   options: BlogImageQualityOptions = {}
@@ -396,10 +557,14 @@ export async function reviewBlogImagesForRelease(
     allowLocalHttp: options.allowLocalHttp ?? false
   };
   const postReviews = await Promise.all(posts.map((post) => reviewPostImage(post, resolvedOptions)));
-  const issues = postReviews.flatMap((review) => review.issues.map((issue) => `${review.language}/${review.slug}: ${issue}`));
+  const setIssues = multilingualCoverConsistencyIssues(posts);
+  const issues = [
+    ...setIssues,
+    ...postReviews.flatMap((review) => review.issues.map((issue) => `${review.language}/${review.slug}: ${issue}`))
+  ];
   const warnings = postReviews.flatMap((review) => review.warnings.map((warning) => `${review.language}/${review.slug}: ${warning}`));
-  const score = postReviews.length ? Math.min(...postReviews.map((review) => review.score)) : 0;
-  const approved = postReviews.length > 0 && postReviews.every((review) => review.approved);
+  const score = postReviews.length ? Math.max(0, Math.min(...postReviews.map((review) => review.score)) - setIssues.length * 18) : 0;
+  const approved = postReviews.length > 0 && postReviews.every((review) => review.approved) && setIssues.length === 0;
   const notes = approved
     ? `ALTOS LAB image QA approved all covers. Score ${score}/${IMAGE_THRESHOLD}.`
     : `ALTOS LAB image QA held publish. Score ${score}/${IMAGE_THRESHOLD}. Issues: ${issues.join("; ")}`;

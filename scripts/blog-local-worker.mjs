@@ -7,9 +7,10 @@ import path from "node:path";
 import process from "node:process";
 import zlib from "node:zlib";
 
-const LANGUAGES = ["zh-Hant", "en", "ja", "ko"];
+const LANGUAGES = ["zh-Hant", "en", "ja", "ko", "id", "vi", "th", "ms", "fil"];
 const SLOT_HOURS = { morning: "09:00", afternoon: "16:00" };
 const DEFAULT_BASE_URL = "https://altoslab-ai.cc";
+const LANGUAGE_LABEL = LANGUAGES.join(", ");
 
 function arg(name, fallback = "") {
   const index = process.argv.indexOf(`--${name}`);
@@ -337,6 +338,107 @@ function isAllowedCoverUrl(url) {
   return false;
 }
 
+const genericStockImageHosts = new Set([
+  "unsplash.com",
+  "images.unsplash.com",
+  "pexels.com",
+  "images.pexels.com",
+  "pixabay.com",
+  "cdn.pixabay.com",
+  "openverse.org",
+  "openverse.engineering",
+  "api.openverse.org",
+  "api.openverse.engineering"
+]);
+
+function parsedHost(value) {
+  try {
+    return new URL(value || "").hostname.toLowerCase().replace(/^www\./, "");
+  } catch {
+    return "";
+  }
+}
+
+function isGenericStockImageUrl(value) {
+  const host = parsedHost(value);
+  return Boolean(host && [...genericStockImageHosts].some((stockHost) => host === stockHost || host.endsWith(`.${stockHost}`)));
+}
+
+function sourceHostMatches(creditUrl, sourceUrl) {
+  const creditHost = parsedHost(creditUrl);
+  const sourceHost = parsedHost(sourceUrl);
+  return Boolean(
+    creditHost &&
+      sourceHost &&
+      (creditHost === sourceHost || creditHost.endsWith(`.${sourceHost}`) || sourceHost.endsWith(`.${creditHost}`))
+  );
+}
+
+function sourceCoverCreditMatchesSource(post) {
+  return sourceUrls(post).some((url) => sourceHostMatches(post.coverCreditUrl || "", url));
+}
+
+function articleSetCoverIssues(posts) {
+  const issues = [];
+  const groups = new Map();
+  for (const post of posts) {
+    const group = post.translationGroupId || "__article_set__";
+    groups.set(group, [...(groups.get(group) || []), post]);
+  }
+
+  for (const [group, groupPosts] of groups) {
+    if (groupPosts.length < 2) continue;
+    const covers = [...new Set(groupPosts.map((post) => String(post.cover || "").trim()).filter(Boolean))];
+    if (covers.length > 1) {
+      issues.push(
+        `all language versions in an article set must share the same cover URL (${group}: ${groupPosts
+          .map((post) => `${post.language || "unknown"}/${post.slug || "missing-slug"}`)
+          .join(", ")})`
+      );
+    }
+  }
+
+  return issues;
+}
+
+function articleSetContentImageIssues(posts) {
+  const issues = [];
+  const groups = new Map();
+  for (const post of posts) {
+    const group = post.translationGroupId || "__article_set__";
+    groups.set(group, [...(groups.get(group) || []), post]);
+  }
+
+  for (const [group, groupPosts] of groups) {
+    if (groupPosts.length < 2) continue;
+    const counts = [...new Set(groupPosts.map((post) => (Array.isArray(post.contentImages) ? post.contentImages.length : 0)))];
+    if (counts.length > 1) {
+      issues.push(`all language versions in an article set must share the same number of content images (${group})`);
+    }
+    const maxCount = Math.max(...counts, 0);
+    for (let index = 0; index < maxCount; index += 1) {
+      const urls = [...new Set(groupPosts.map((post) => String(post.contentImages?.[index]?.url || "").trim()).filter(Boolean))];
+      if (urls.length > 1) {
+        issues.push(`all language versions in an article set must share content image ${index + 1} URL (${group})`);
+      }
+    }
+  }
+
+  return issues;
+}
+
+function generatedContentImageIssues(image, label) {
+  const issues = [];
+  if (!/(chatgpt|gpt|openai)/i.test(String(image.provider || ""))) issues.push(`${label} provider must be ChatGPT/GPT`);
+  if (!image.prompt) issues.push(`${label} prompt is required`);
+  if (!image.generatedAt) issues.push(`${label} generatedAt is required`);
+  const checks = image.visualChecks || {};
+  for (const field of ["topicFit", "noTextArtifacts", "noLogos", "noPeople", "noTrademarkRisk", "noGenericStockLook"]) {
+    if (checks[field] !== true) issues.push(`${label} visualChecks.${field} must be true`);
+  }
+  return issues;
+}
+
 function localPreflight(payload) {
   const issues = [];
   const posts = Array.isArray(payload.posts) ? payload.posts : [];
@@ -345,6 +447,7 @@ function localPreflight(payload) {
   const chatgptEvidence = chromeEvidence.chatgpt || {};
   const humanDesignQa = payload.humanDesignQa || {};
   const requiresGptCover = posts.some((post) => post.contentType !== "breaking");
+  const isMarketNewsSet = posts.some((post) => post.contentType === "breaking");
 
   if (geminiEvidence.usedExistingTab !== true) issues.push("chromeEvidence.gemini.usedExistingTab must be true");
   if (geminiEvidence.changedModel === true) issues.push("chromeEvidence.gemini.changedModel must not be true");
@@ -357,9 +460,17 @@ function localPreflight(payload) {
     if (!languages.includes(language)) issues.push(`missing ${language} post`);
     if (languages.filter((item) => item === language).length > 1) issues.push(`duplicate ${language} post`);
   }
+  if (isMarketNewsSet) {
+    const missingMarketLanguages = LANGUAGES.filter((language) => !languages.includes(language));
+    if (missingMarketLanguages.length) {
+      issues.push(`market news fast lane requires translated versions for every configured language; missing ${missingMarketLanguages.join(", ")}`);
+    }
+  }
   if (!payload.translationGroupId && !posts.every((post) => post.translationGroupId)) {
     issues.push("translationGroupId is required at payload or post level");
   }
+  issues.push(...articleSetCoverIssues(posts));
+  issues.push(...articleSetContentImageIssues(posts));
 
   const referenceSources = sourceUrls(posts[0] || {});
   for (const post of posts) {
@@ -381,9 +492,16 @@ function localPreflight(payload) {
     if (!isAllowedCoverUrl(post.cover)) issues.push(`${post.language || "unknown"} cover must be a public https URL`);
     if (!post.coverAlt || post.coverAlt.length < 18) issues.push(`${post.language || "unknown"} coverAlt is missing or too thin`);
     const generation = post.coverGeneration || {};
+    const contentImages = Array.isArray(post.contentImages) ? post.contentImages : [];
     if (marketNews) {
       if (!post.coverCredit || !post.coverCreditUrl || !post.coverLicense) {
         issues.push(`${post.language || "unknown"} source cover must include coverCredit, coverCreditUrl and coverLicense`);
+      }
+      if (isGenericStockImageUrl(post.cover) || isGenericStockImageUrl(post.coverCreditUrl)) {
+        issues.push(`${post.language || "unknown"} market news source image must come from the source article or official announcement, not stock/free image providers`);
+      }
+      if (!sourceCoverCreditMatchesSource(post)) {
+        issues.push(`${post.language || "unknown"} market news coverCreditUrl must match one of the sourceLinks`);
       }
     } else {
       if (!generation.provider || !generation.prompt || !generation.generatedAt) {
@@ -395,6 +513,15 @@ function localPreflight(payload) {
       const checks = generation.visualChecks || {};
       for (const field of ["topicFit", "noTextArtifacts", "noLogos", "noPeople", "noTrademarkRisk", "noGenericStockLook"]) {
         if (checks[field] !== true) issues.push(`${post.language || "unknown"} visualChecks.${field} must be true`);
+      }
+      if (contentImages.length < 2) issues.push(`${post.language || "unknown"} column/feature requires at least two in-article images`);
+      if (contentImages.length > 3) issues.push(`${post.language || "unknown"} column/feature should use no more than three in-article images`);
+      for (const [index, image] of contentImages.entries()) {
+        const label = `${post.language || "unknown"} contentImages[${index}]`;
+        if (!isAllowedCoverUrl(image.url)) issues.push(`${label} must be a public https URL`);
+        if (!image.alt || image.alt.length < 18) issues.push(`${label}.alt is missing or too thin`);
+        if (image.source !== "generated") issues.push(`${label}.source must be generated for columns/features`);
+        issues.push(...generatedContentImageIssues(image, label));
       }
     }
     if (!String(post.generatedBy || "").toLowerCase().includes("gemini")) {
@@ -443,6 +570,10 @@ function digestSourcePost(post) {
     coverSource: post.coverSource,
     coverGeneration: post.coverGeneration,
     coverCredit: post.coverCredit,
+    coverCreditUrl: post.coverCreditUrl,
+    coverLicense: post.coverLicense,
+    coverLicenseUrl: post.coverLicenseUrl,
+    contentImages: post.contentImages,
     aiDisclosure: post.aiDisclosure
   };
 }
@@ -498,6 +629,8 @@ async function writePreparedCandidateManifest({ manifestPath, articleSetPath, re
     manifestPath: manifestPath ? path.resolve(manifestPath) : undefined,
     coverFiles: (payload.posts || []).map((post) => post.coverLocalPath).filter(Boolean),
     coverUrls: (payload.posts || []).map((post) => post.cover).filter(Boolean),
+    contentImageFiles: (payload.posts || []).flatMap((post) => (post.contentImages || []).map((image) => image.localPath).filter(Boolean)),
+    contentImageUrls: (payload.posts || []).flatMap((post) => (post.contentImages || []).map((image) => image.url).filter(Boolean)),
     chromeEvidence: payload.chromeEvidence || {},
     validateOnly: {
       status: validate.status,
@@ -520,7 +653,8 @@ async function writePreparedCandidateManifest({ manifestPath, articleSetPath, re
         language: post.language,
         slug: post.slug,
         bodySha256: bodySha256(post),
-        cover: post.cover
+        cover: post.cover,
+        contentImages: (post.contentImages || []).map((image) => image.url).filter(Boolean)
       })),
       qualitySummary: {
         approved: qualitySummary.approved === true,
@@ -582,6 +716,7 @@ function reusableManifestIssues(manifest, payload) {
   if (qualityManifest.contentSha256 !== releaseContentSha256(payload)) {
     issues.push("qualityManifest.contentSha256 does not match current article set");
   }
+  issues.push(...articleSetCoverIssues(payload.posts || []));
   const manifestPosts = Array.isArray(qualityManifest.posts) ? qualityManifest.posts : [];
   for (const post of payload.posts || []) {
     const manifestPost = manifestPosts.find((item) => item.language === post.language && item.slug === post.slug);
@@ -710,15 +845,35 @@ async function requestMediaUpload(filePath, ingestRunId) {
 
 async function uploadLocalCovers(payload) {
   const posts = Array.isArray(payload.posts) ? payload.posts : [];
+  const uploadByPath = new Map();
+  async function uploadOnce(filePath, purpose) {
+    const absolutePath = path.resolve(filePath);
+    if (!uploadByPath.has(absolutePath)) {
+      uploadByPath.set(
+        absolutePath,
+        requestMediaUpload(absolutePath, payload.ingestRunId || payload.translationGroupId || purpose)
+      );
+    }
+    return uploadByPath.get(absolutePath);
+  }
   for (const post of posts) {
     if (!post.coverLocalPath) continue;
-    const upload = await requestMediaUpload(post.coverLocalPath, payload.ingestRunId || payload.translationGroupId || "blog-cover");
+    const upload = await uploadOnce(post.coverLocalPath, "blog-cover");
     post.cover = upload.url;
     post.coverGeneration = {
       ...(post.coverGeneration || {}),
       storedUrl: upload.url
     };
     delete post.coverLocalPath;
+  }
+  for (const post of posts) {
+    if (!Array.isArray(post.contentImages)) continue;
+    for (const image of post.contentImages) {
+      if (!image.localPath) continue;
+      const upload = await uploadOnce(image.localPath, "blog-content-image");
+      image.url = upload.url;
+      delete image.localPath;
+    }
   }
   return payload;
 }
@@ -729,20 +884,22 @@ function articlePrompt(slot, topic) {
 Slot: ${slot} (${SLOT_HOURS[slot]} Asia/Taipei)
 Topic: ${topic || "pick the strongest AI market signal from today's sources"}
 
-Create one article set in zh-Hant, en, ja, ko.
+Create one article set in ${LANGUAGE_LABEL}.
 
 Hard requirements:
 - Draft and revise the article text through Gemini in the ALTOS Blog QA Chrome group.
 - For market news/breaking posts, use the source article or official announcement image with visible source credit; do not use GPT art or a previously used cover.
 - For column/feature posts, generate the cover image through ChatGPT/GPT in the ALTOS Blog QA Chrome group.
+- For column/feature posts, generate 2-3 in-article images through ChatGPT/GPT: one opening anchor image, one mechanism/evidence image, and optionally one closing synthesis image.
 - Close or release the Gemini/GPT tabs after the run so Chrome memory is not held.
 - Do not repeat an existing published/draft topic, headline angle or source package.
-- Use zh-Hant as the editorial source of truth, then localize the other languages.
-- Keep one translationGroupId and identical sourceLinks across all four languages.
+- Use zh-Hant as the editorial source of truth, then localize the other languages for local readers.
+- Keep one translationGroupId, identical sourceLinks, one shared cover URL and one shared contentImages URL set across all ${LANGUAGES.length} languages.
 - Write like a sharp AI product/editorial studio, not an SEO farm.
 - Opening must answer the reader's decision in the first 40-80 words.
-- Include ALTOS LAB judgment, source translation note, FAQ, SEO title/meta and GEO summary.
+- Include ALTOS LAB judgment, source translation note, FAQ, SEO title/meta and GEO summary as schema/backend fields; do not expose SEO/GEO/AI-generation/process terms in public copy.
 - Column/feature cover images must be generated per article, uploaded through the signed ALTOS LAB media route, and include provider, prompt, generatedAt, coverCredit and visualChecks.
+- Column/feature contentImages must include url or localPath, alt, caption, source "generated", credit "ALTOS LAB editorial visual", aspectRatio, placement, provider, prompt, generatedAt and visualChecks.
 - Market news cover images must use coverSource "source" with coverCredit, coverCreditUrl and coverLicense; if the source image is missing, unsafe or already used, hold the candidate.
 
 Return only JSON shaped for POST /api/admin/blog/ingest-set:

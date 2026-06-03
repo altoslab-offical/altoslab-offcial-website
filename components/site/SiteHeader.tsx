@@ -5,40 +5,24 @@ import { usePathname } from "next/navigation";
 import { ArrowUpRight, Globe } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { BrandText } from "@/components/BrandText";
+import { blogIndexPath, blogLanguageFromPath, blogLanguageOptions, isBlogLanguage } from "@/lib/blog-utils";
 import { homeNavigation } from "@/lib/site-content";
 import type { BlogLanguage } from "@/lib/types";
 
 const STORAGE_KEY = "altoslab:language";
 const LANGUAGE_EVENT = "altoslab:languagechange";
-const languageOptions: Array<{ label: string; shortLabel: string; value: BlogLanguage }> = [
-  { label: "繁體中文", shortLabel: "中文", value: "zh-Hant" },
-  { label: "English", shortLabel: "EN", value: "en" },
-  { label: "日本語", shortLabel: "JP", value: "ja" },
-  { label: "한국어", shortLabel: "KR", value: "ko" }
-];
+const languageOptions: Array<{ label: string; shortLabel: string; value: BlogLanguage }> = blogLanguageOptions();
 
 function readStoredLanguage(): BlogLanguage {
   if (typeof window === "undefined") return "zh-Hant";
   const storedLanguage = window.localStorage.getItem(STORAGE_KEY);
-  if (storedLanguage === "en" || storedLanguage === "ja" || storedLanguage === "ko") {
-    return storedLanguage;
-  }
-  return "zh-Hant";
-}
-
-function languageFromPath(pathname: string | null): BlogLanguage | null {
-  if (!pathname) return null;
-  if (pathname.startsWith("/en")) return "en";
-  if (pathname.startsWith("/ja")) return "ja";
-  if (pathname.startsWith("/ko")) return "ko";
-  if (pathname.startsWith("/blog")) return "zh-Hant";
-  return null;
+  return isBlogLanguage(storedLanguage) ? storedLanguage : "zh-Hant";
 }
 
 export function SiteHeader() {
   const pathname = usePathname();
   const isHomePage = pathname === "/";
-  const routeLanguage = languageFromPath(pathname);
+  const routeLanguage = blogLanguageFromPath(pathname);
   const [language, setLanguage] = useState<BlogLanguage>(routeLanguage ?? "zh-Hant");
   const [isLanguageMenuOpen, setIsLanguageMenuOpen] = useState(false);
   const languageMenuRef = useRef<HTMLDivElement>(null);
@@ -73,20 +57,11 @@ export function SiteHeader() {
   const navigation = useMemo(
     () =>
       homeNavigation.filter((item) => item.href !== "#contact").map((item) => {
-        if (language === "en" && item.href === "#about") return { label: "About", href: item.href };
-        if (language === "en" && item.href === "#services") return { label: "Services", href: item.href };
-        if (language === "en" && item.href === "#portfolio") return { label: "Work", href: item.href };
-        if (language === "ja" && item.href === "#about") return { label: "About", href: item.href };
-        if (language === "ja" && item.href === "#services") return { label: "Services", href: item.href };
-        if (language === "ja" && item.href === "#portfolio") return { label: "Work", href: item.href };
-        if (language === "ko" && item.href === "#about") return { label: "About", href: item.href };
-        if (language === "ko" && item.href === "#services") return { label: "Services", href: item.href };
-        if (language === "ko" && item.href === "#portfolio") return { label: "Work", href: item.href };
+        if (language !== "zh-Hant" && item.href === "#about") return { label: "About", href: item.href };
+        if (language !== "zh-Hant" && item.href === "#services") return { label: "Services", href: item.href };
+        if (language !== "zh-Hant" && item.href === "#portfolio") return { label: "Work", href: item.href };
         if (item.href !== "/blog") return item;
-        if (language === "en") return { label: "Blog", href: "/en/blog" };
-        if (language === "ja") return { label: "Blog", href: "/ja/blog" };
-        if (language === "ko") return { label: "Blog", href: "/ko/blog" };
-        return item;
+        return { label: "Blog", href: blogIndexPath(language) };
       }),
     [language]
   );
@@ -102,42 +77,8 @@ export function SiteHeader() {
     window.localStorage.setItem(STORAGE_KEY, nextLanguage);
     window.dispatchEvent(new CustomEvent(LANGUAGE_EVENT, { detail: { language: nextLanguage } }));
 
-    if (pathname === "/blog" && nextLanguage === "en") {
-      window.location.assign("/en/blog");
-    }
-    if (pathname === "/blog" && nextLanguage === "ja") {
-      window.location.assign("/ja/blog");
-    }
-    if (pathname === "/blog" && nextLanguage === "ko") {
-      window.location.assign("/ko/blog");
-    }
-
-    if (pathname === "/en/blog" && nextLanguage === "zh-Hant") {
-      window.location.assign("/blog");
-    }
-    if (pathname === "/en/blog" && nextLanguage === "ja") {
-      window.location.assign("/ja/blog");
-    }
-    if (pathname === "/en/blog" && nextLanguage === "ko") {
-      window.location.assign("/ko/blog");
-    }
-    if (pathname === "/ja/blog" && nextLanguage === "zh-Hant") {
-      window.location.assign("/blog");
-    }
-    if (pathname === "/ja/blog" && nextLanguage === "en") {
-      window.location.assign("/en/blog");
-    }
-    if (pathname === "/ja/blog" && nextLanguage === "ko") {
-      window.location.assign("/ko/blog");
-    }
-    if (pathname === "/ko/blog" && nextLanguage === "zh-Hant") {
-      window.location.assign("/blog");
-    }
-    if (pathname === "/ko/blog" && nextLanguage === "en") {
-      window.location.assign("/en/blog");
-    }
-    if (pathname === "/ko/blog" && nextLanguage === "ja") {
-      window.location.assign("/ja/blog");
+    if (blogLanguageFromPath(pathname)) {
+      window.location.assign(blogIndexPath(nextLanguage));
     }
   }
 

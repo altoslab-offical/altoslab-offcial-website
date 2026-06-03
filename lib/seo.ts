@@ -1,4 +1,4 @@
-import { blogCoverForLanguage, blogPostPath, htmlLanguage } from "./blog-utils";
+import { BLOG_LANGUAGES, blogCoverForLanguage, blogPostPath, htmlLanguage, languageLabel } from "./blog-utils";
 import type { BlogPost, Project, SitePage } from "./types";
 import { publicTaxonomyLabel } from "./public-taxonomy";
 import { blogAuthorForPost, blogAuthorProfile } from "./blog-authors";
@@ -147,7 +147,7 @@ export function organizationJsonLd() {
       "@type": "ContactPoint",
       email: "hello@altoslab.com",
       contactType: "business inquiries",
-      availableLanguage: ["zh-Hant", "en", "ja", "ko"]
+      availableLanguage: BLOG_LANGUAGES.map(languageLabel)
     },
     sameAs: ["https://github.com/altoslab-offical"]
   };

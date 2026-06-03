@@ -1,26 +1,24 @@
 import type { Metadata } from "next";
 import { BlogIndex } from "@/components/BlogIndex";
-import { blogCoverForLanguage } from "@/lib/blog-utils";
+import { BLOG_LANGUAGES, blogCoverForLanguage, blogIndexPath, metadataLanguageKey } from "@/lib/blog-utils";
 import { siteUrl } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "AI Lab Notes | ALTOS LAB Journal",
-  description: "ALTOS LAB journal on AI products, agents, automation, SEO/GEO, case studies and market signals.",
+  description: "ALTOS LAB journal on AI products, agents, automation, search visibility, case studies and market signals.",
   alternates: {
     canonical: `${siteUrl}/en/blog`,
-    languages: {
-      "zh-Hant-TW": `${siteUrl}/blog`,
-      en: `${siteUrl}/en/blog`,
-      ja: `${siteUrl}/ja/blog`,
-      ko: `${siteUrl}/ko/blog`,
-      "x-default": `${siteUrl}/blog`
-    }
+    languages: Object.fromEntries(
+      BLOG_LANGUAGES.map((language) => [metadataLanguageKey(language), `${siteUrl}${blogIndexPath(language)}`]).concat([
+        ["x-default", `${siteUrl}${blogIndexPath("zh-Hant")}`]
+      ])
+    )
   },
   openGraph: {
     title: "AI Lab Notes | ALTOS LAB Journal",
-    description: "ALTOS LAB journal on AI products, agents, automation, SEO/GEO, case studies and market signals.",
+    description: "ALTOS LAB journal on AI products, agents, automation, search visibility, case studies and market signals.",
     url: `${siteUrl}/en/blog`,
     siteName: "ALTOS LAB",
     locale: "en_US",
@@ -30,7 +28,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "AI Lab Notes | ALTOS LAB Journal",
-    description: "ALTOS LAB journal on AI products, agents, automation, SEO/GEO, case studies and market signals.",
+    description: "ALTOS LAB journal on AI products, agents, automation, search visibility, case studies and market signals.",
     images: [`${siteUrl}${blogCoverForLanguage("en")}`]
   }
 };

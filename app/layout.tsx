@@ -1,9 +1,10 @@
 import type { Metadata, Viewport } from "next";
-import { GoogleTagManager } from "@next/third-parties/google";
+import { GoogleAnalytics, GoogleTagManager } from "@next/third-parties/google";
 import { headers } from "next/headers";
 import "./globals.css";
 import { CtaAnalytics } from "@/components/AnalyticsEvents";
-import { gtmId, isGtmConfigured } from "@/lib/analytics";
+import { gaMeasurementId, gtmId, isGaConfigured, isGtmConfigured } from "@/lib/analytics";
+import { blogLanguageFromPath, htmlLanguage } from "@/lib/blog-utils";
 import { searchVerificationMetadata, siteName, siteUrl } from "@/lib/seo";
 
 const verification = searchVerificationMetadata();
@@ -67,19 +68,14 @@ export const viewport: Viewport = {
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const pathname = (await headers()).get("x-altos-pathname") || "";
-  const language = pathname.startsWith("/en")
-    ? "en"
-    : pathname.startsWith("/ja")
-      ? "ja"
-      : pathname.startsWith("/ko")
-        ? "ko"
-        : "zh-Hant-TW";
+  const language = htmlLanguage(blogLanguageFromPath(pathname) || "zh-Hant");
 
   return (
     <html lang={language}>
       <body>
         {children}
         <CtaAnalytics />
+        {isGaConfigured() && gaMeasurementId ? <GoogleAnalytics gaId={gaMeasurementId} /> : null}
         {isGtmConfigured() && gtmId ? <GoogleTagManager gtmId={gtmId} /> : null}
       </body>
     </html>

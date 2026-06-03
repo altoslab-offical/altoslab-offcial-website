@@ -1,9 +1,15 @@
 const GTM_ID_PATTERN = /^GTM-[A-Z0-9]+$/i;
+const GA_MEASUREMENT_ID_PATTERN = /^G-[A-Z0-9]+$/i;
 
 export const gtmId = process.env.NEXT_PUBLIC_GTM_ID?.trim();
+export const gaMeasurementId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID?.trim();
 
 export function isGtmConfigured() {
   return Boolean(gtmId && GTM_ID_PATTERN.test(gtmId));
+}
+
+export function isGaConfigured() {
+  return Boolean(gaMeasurementId && GA_MEASUREMENT_ID_PATTERN.test(gaMeasurementId));
 }
 
 export function gtmHeadSnippet() {
@@ -18,6 +24,17 @@ export function gtmHeadSnippet() {
 export function gtmNoScriptSnippet() {
   if (!isGtmConfigured()) return "";
   return `<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=${gtmId}" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>`;
+}
+
+export function gaHeadSnippet() {
+  if (!isGaConfigured()) return "";
+  return `<script async src="https://www.googletagmanager.com/gtag/js?id=${gaMeasurementId}"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    window.gtag = window.gtag || function(){ window.dataLayer.push(arguments); };
+    window.gtag("js", new Date());
+    window.gtag("config", "${gaMeasurementId}", { send_page_view: true });
+  </script>`;
 }
 
 export function homepageAnalyticsSnippet() {

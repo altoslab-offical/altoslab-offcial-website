@@ -2,6 +2,7 @@ import { createHash } from "crypto";
 import { NextResponse } from "next/server";
 import { normalizeBlogAuthor, publicEditorialReviewNote } from "@/lib/blog-authors";
 import { verifyBlogIngestRequest } from "@/lib/blog-ingest-auth";
+import { multilingualCoverConsistencyIssues } from "@/lib/blog-image-quality";
 import { BLOG_LANGUAGES, defaultQualityChecks, taiwanDate } from "@/lib/blog-utils";
 import { createId, mutateRawCmsData, normalizeBlogPostInput, nowIso, publishValidationForBlogPost } from "@/lib/cms";
 import { CmsLockError, withCmsStorageLock } from "@/lib/cms-storage";
@@ -46,6 +47,7 @@ type BlogReleaseRequest = {
       slug?: string;
       bodySha256?: string;
       cover?: string;
+      contentImages?: string[];
     }[];
     qualitySummary?: ReleaseSummary;
     imageQualitySummary?: ReleaseSummary;
@@ -79,11 +81,16 @@ function parsePayload(body: string): BlogReleaseRequest {
 function missingLanguageIssues(posts: BlogPost[]) {
   const issues: string[] = [];
   const languages = posts.map((post) => post.language);
+  const isMarketNewsSet = posts.some((post) => post.contentType === "breaking");
+  const missingLanguages = BLOG_LANGUAGES.filter((language) => !languages.includes(language));
   for (const language of BLOG_LANGUAGES) {
     if (!languages.includes(language)) issues.push(`missing ${language} article`);
   }
   for (const language of BLOG_LANGUAGES) {
     if (languages.filter((item) => item === language).length > 1) issues.push(`duplicate ${language} article`);
+  }
+  if (isMarketNewsSet && missingLanguages.length) {
+    issues.push(`market news fast lane requires translated versions for every configured language; missing ${missingLanguages.join(", ")}`);
   }
   return issues;
 }
@@ -130,6 +137,7 @@ function digestSourcePost(post: Partial<BlogPost>) {
     coverCreditUrl: post.coverCreditUrl,
     coverLicense: post.coverLicense,
     coverLicenseUrl: post.coverLicenseUrl,
+    contentImages: post.contentImages,
     aiDisclosure: post.aiDisclosure
   };
 }
@@ -151,6 +159,76 @@ function releaseContentSha256(payload: BlogReleaseRequest) {
 
 function bodySha256(post: Partial<BlogPost>) {
   return sha256(String(post.body || ""));
+}
+
+function isLocalOrHttpCoverUrl(url?: string) {
+  if (!url) return false;
+  try {
+    const parsed = new URL(url);
+    return parsed.protocol === "http:" || ["localhost", "127.0.0.1", "::1"].includes(parsed.hostname);
+  } catch {
+    return false;
+  }
+}
+
+function isPublicHttpsUrl(url?: string) {
+  if (!url) return false;
+  try {
+    const parsed = new URL(url);
+    return parsed.protocol === "https:" && !["localhost", "127.0.0.1", "::1"].includes(parsed.hostname);
+  } catch {
+    return false;
+  }
+}
+
+function isColumnOrFeature(post: Partial<BlogPost>) {
+  return post.contentType === "column" || post.contentType === "feature";
+}
+
+function releaseCoverContractIssues(posts: Partial<BlogPost>[] = []) {
+  const issues = multilingualCoverConsistencyIssues(posts);
+  const columnPosts = posts.filter(isColumnOrFeature);
+  if (columnPosts.length) {
+    const counts = [...new Set(columnPosts.map((post) => (Array.isArray(post.contentImages) ? post.contentImages.length : 0)))];
+    if (counts.length !== 1) {
+      issues.push(`translated column/feature posts must share the same content image count, got ${counts.join(", ")}`);
+    }
+    const expectedCount = counts[0] || 0;
+    if (expectedCount < 2) issues.push("column/feature posts require at least two in-article images");
+    if (expectedCount > 3) issues.push("column/feature posts should keep in-article images to three or fewer");
+    for (let index = 0; index < expectedCount; index += 1) {
+      const urls = [...new Set(columnPosts.map((post) => post.contentImages?.[index]?.url).filter(Boolean))];
+      if (urls.length !== 1) {
+        issues.push(`translated column/feature posts must share contentImages[${index}] URL, got ${urls.join(", ") || "missing"}`);
+      }
+    }
+  }
+  for (const post of posts) {
+    if (isLocalOrHttpCoverUrl(post.cover)) {
+      issues.push(`${post.language || "unknown"}/${post.slug || "missing-slug"} release cover must use a public https URL, not localhost or http`);
+    }
+    if (isColumnOrFeature(post)) {
+      const contentImages = Array.isArray(post.contentImages) ? post.contentImages : [];
+      if (contentImages.length < 2) issues.push(`${post.language || "unknown"}/${post.slug || "missing-slug"} column/feature requires at least two in-article images`);
+      if (contentImages.length > 3) issues.push(`${post.language || "unknown"}/${post.slug || "missing-slug"} column/feature should use no more than three in-article images`);
+      for (const [index, image] of contentImages.entries()) {
+        const label = `${post.language || "unknown"}/${post.slug || "missing-slug"} contentImages[${index}]`;
+        if (!isPublicHttpsUrl(image?.url)) issues.push(`${label}: URL must be public https`);
+        if (image?.source !== "generated") issues.push(`${label}: source must be generated`);
+        if (!/(chatgpt|gpt|openai)/i.test(String(image?.provider || ""))) issues.push(`${label}: provider must be ChatGPT/GPT`);
+        if (!image?.prompt || String(image.prompt).length < 40) issues.push(`${label}: prompt metadata is missing or too thin`);
+        if (!image?.generatedAt) issues.push(`${label}: generatedAt is missing`);
+        if (!image?.alt || String(image.alt).length < 18) issues.push(`${label}: alt is missing or too thin`);
+        if (!image?.caption) issues.push(`${label}: caption is missing`);
+        if (!image?.credit) issues.push(`${label}: credit is missing`);
+        const visualChecks = image?.visualChecks || {};
+        for (const key of ["topicFit", "noTextArtifacts", "noLogos", "noPeople", "noTrademarkRisk", "noGenericStockLook"]) {
+          if ((visualChecks as Record<string, unknown>)[key] !== true) issues.push(`${label}: visualChecks.${key} must be true`);
+        }
+      }
+    }
+  }
+  return issues;
 }
 
 function releaseManifestIssues(payload: BlogReleaseRequest) {
@@ -178,6 +256,12 @@ function releaseManifestIssues(payload: BlogReleaseRequest) {
         issues.push(`${post.language || "unknown"}/${post.slug || "missing-slug"} bodySha256 does not match release payload`);
       } else if (manifestPost.cover !== post.cover) {
         issues.push(`${post.language || "unknown"}/${post.slug || "missing-slug"} cover URL does not match release payload`);
+      } else if (isColumnOrFeature(post)) {
+        const manifestContentImages = Array.isArray(manifestPost.contentImages) ? manifestPost.contentImages : [];
+        const payloadContentImages = Array.isArray(post.contentImages) ? post.contentImages.map((image) => image.url).filter(Boolean) : [];
+        if (JSON.stringify(manifestContentImages) !== JSON.stringify(payloadContentImages)) {
+          issues.push(`${post.language || "unknown"}/${post.slug || "missing-slug"} contentImages URLs do not match release payload`);
+        }
       }
     }
   }
@@ -199,6 +283,7 @@ function releaseManifestIssues(payload: BlogReleaseRequest) {
   if (Array.isArray(image?.issues) && image.issues.length > 0) {
     issues.push("qualityManifest.imageQualitySummary.issues must be empty");
   }
+  issues.push(...releaseCoverContractIssues(payload.posts || []));
 
   return issues;
 }
@@ -411,7 +496,7 @@ export async function POST(request: Request) {
   if (payload.publishMode !== "publish-if-valid") inputIssues.push("publishMode must be publish-if-valid");
   if (!Array.isArray(payload.posts)) inputIssues.push("posts must be an array");
   if (Array.isArray(payload.posts) && payload.posts.length !== BLOG_LANGUAGES.length) {
-    inputIssues.push("posts must contain exactly four language versions");
+    inputIssues.push(`posts must contain exactly ${BLOG_LANGUAGES.length} language versions`);
   }
   if (
     payload.generation?.provider &&

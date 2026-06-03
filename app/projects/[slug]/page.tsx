@@ -8,7 +8,7 @@ import { absoluteUrl, breadcrumbJsonLd } from "@/lib/seo";
 export const dynamic = "force-dynamic";
 
 type PageProps = {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ slug: string }> | { slug: string };
 };
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
