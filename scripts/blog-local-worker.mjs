@@ -612,7 +612,7 @@ async function writePreparedCandidateManifest({ manifestPath, articleSetPath, re
   const qualitySummary = validate.json?.qualitySummary || {};
   const imageQualitySummary = validate.json?.imageQualitySummary || {};
   const status = publish
-    ? publish.ok && publish.json?.publishedIds?.length > 0
+    ? publish.ok && publish.json?.skipped !== true && (publish.json?.publishedIds?.length || 0) >= (payload.posts || []).length
       ? "released"
       : "held"
     : manifestStatusFromValidate(validate, payload);

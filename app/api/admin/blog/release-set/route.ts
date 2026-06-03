@@ -553,6 +553,32 @@ export async function POST(request: Request) {
         );
         const protectedExisting = existing.filter((post) => !isReplaceableExistingPost(post, payload));
         if (protectedExisting.length) {
+          const protectedLanguages = new Set(protectedExisting.map((post) => post.language));
+          const protectedSlugs = new Set(protectedExisting.map((post) => post.slug));
+          const additivePosts = finalPosts.filter(
+            (post) => !protectedLanguages.has(post.language) && !protectedSlugs.has(post.slug)
+          );
+          if (additivePosts.length) {
+            const additiveLanguages = new Set(additivePosts.map((post) => post.language));
+            const additiveSlugs = new Set(additivePosts.map((post) => post.slug));
+            const removedIds: string[] = [];
+            data.blogPosts = data.blogPosts.filter((post) => {
+              const inExistingSet = post.ingestRunId === ingestRunId || (translationGroupId && post.translationGroupId === translationGroupId);
+              if (!inExistingSet) return true;
+              if (protectedExisting.some((protectedPost) => protectedPost.id === post.id)) return true;
+              const shouldRemove = additiveLanguages.has(post.language) || additiveSlugs.has(post.slug);
+              if (shouldRemove) removedIds.push(post.id);
+              return !shouldRemove;
+            });
+            data.blogPosts.unshift(...additivePosts);
+            return {
+              ok: true,
+              skipped: false,
+              reason: "Protected existing posts kept; missing language versions added",
+              posts: [...protectedExisting, ...additivePosts],
+              replacedIds: removedIds
+            };
+          }
           return {
             ok: true,
             skipped: true,
