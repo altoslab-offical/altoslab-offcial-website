@@ -180,6 +180,20 @@ bold as visual decoration.
 
 Publish only when the article can pass:
 
+- Production generation contract: Gemini is the required writing/revision
+  workspace. Market-news covers must use credited, non-reused source images;
+  ChatGPT/GPT is the required generated-cover workspace for columns/features.
+  Codex can orchestrate, QA and publish, but should not replace those tools
+  with local fallback copy or local fallback art.
+- Duplicate gate: before drafting, compare the candidate against published and
+  draft posts. Hold the run if the topic, headline angle, source package or
+  practical takeaway substantially repeats an existing article.
+- Browser hygiene: use the ALTOS Blog QA Chrome group only while a run needs
+  Gemini or ChatGPT/GPT. Close or release those tabs after the run so Chrome
+  memory is not held open.
+- Performance loop: publishing is not success. After release, check GA/GTM,
+  Search Console and live URL evidence over time, then feed repeated errors,
+  low engagement or AI-search misreadings back into the next content brief.
 - Accuracy and source trust
 - ALTOS LAB point of view
 - SEO/GEO structure

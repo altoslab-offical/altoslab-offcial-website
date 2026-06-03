@@ -6,6 +6,7 @@ import { SafeBlogImage } from "@/components/SafeBlogImage";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { SiteHeader } from "@/components/site/SiteHeader";
 import { blogContentTypeLabel, blogIndexPath, blogPostPath } from "@/lib/blog-utils";
+import { toBlogVisualPost } from "@/lib/blog-visual";
 import { getPublishedBlogPostsByLanguage } from "@/lib/cms";
 import { blogIndexItemListJsonLd, breadcrumbJsonLd } from "@/lib/seo";
 import type { BlogLanguage } from "@/lib/types";
@@ -297,30 +298,33 @@ export async function BlogIndex({ language, tag, query }: BlogIndexProps) {
             </div>
 
             <div className="blog-craft-grid">
-              {filtered.map((post) => (
-                <article className="blog-craft-card" key={post.id}>
-                  <Link className="blog-craft-card-image" href={blogPostPath(post)}>
-                    {post.cover ? (
-                      <SafeBlogImage compact post={post} />
-                    ) : (
-                      <BlogEditorialVisual compact post={post} />
-                    )}
-                  </Link>
-                  <div className="blog-craft-card-body">
-                    <h3>
-                      <Link href={blogPostPath(post)}>{renderBrandText(post.title)}</Link>
-                    </h3>
-                    <p>{renderBrandText(post.excerpt)}</p>
-                    <div className="blog-craft-card-meta">
-                      <span className={`blog-craft-type-badge is-${post.contentType}`}>
-                        {blogContentTypeLabel(post.contentType, post.language)}
-                      </span>
-                      <span className="blog-craft-card-taxonomy">{post.newsCategory || post.tags[0]}</span>
-                      <small>{dictionary.readTime(post.readTimeMinutes)}</small>
+              {filtered.map((post) => {
+                const visualPost = toBlogVisualPost(post);
+                return (
+                  <article className="blog-craft-card" key={post.id}>
+                    <Link className="blog-craft-card-image" href={blogPostPath(post)}>
+                      {post.cover ? (
+                        <SafeBlogImage compact post={visualPost} />
+                      ) : (
+                        <BlogEditorialVisual compact post={visualPost} />
+                      )}
+                    </Link>
+                    <div className="blog-craft-card-body">
+                      <h3>
+                        <Link href={blogPostPath(post)}>{renderBrandText(post.title)}</Link>
+                      </h3>
+                      <p>{renderBrandText(post.excerpt)}</p>
+                      <div className="blog-craft-card-meta">
+                        <span className={`blog-craft-type-badge is-${post.contentType}`}>
+                          {blogContentTypeLabel(post.contentType, post.language)}
+                        </span>
+                        <span className="blog-craft-card-taxonomy">{post.newsCategory || post.tags[0]}</span>
+                        <small>{dictionary.readTime(post.readTimeMinutes)}</small>
+                      </div>
                     </div>
-                  </div>
-                </article>
-              ))}
+                  </article>
+                );
+              })}
               {!filtered.length ? <p className="muted">{dictionary.empty}</p> : null}
             </div>
           </section>

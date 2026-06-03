@@ -153,7 +153,7 @@ export type BlogLlmQualityEvaluation = {
 };
 
 export type BlogGenerationTrace = {
-  provider: "deepseek" | "fallback" | "local" | "local-antigravity" | "codex-image" | "chatgpt-image";
+  provider: "deepseek" | "fallback" | "local" | "local-antigravity" | "gemini-chatgpt" | "codex-image" | "chatgpt-image";
   task: BlogGenerationTask;
   model?: string;
   promptVersion?: string;
@@ -182,12 +182,14 @@ export type BlogQualityChecks = {
   hasSourceTrust?: boolean;
   hasLabsPointOfView?: boolean;
   hasCreativeAngle?: boolean;
+  hasReaderEngagement?: boolean;
   hasImageFit?: boolean;
   hasAntiSlopReview?: boolean;
   qualityScoreBreakdown?: {
     sourceTrust: number;
     labsPointOfView: number;
     seoGeoStructure: number;
+    readerEngagement?: number;
     readability: number;
     imageFit: number;
     multilingualParity: number;
@@ -200,7 +202,7 @@ export type BlogQualityChecks = {
   notes?: string;
 };
 
-export type BlogCoverSource = "curated" | "manual" | "fallback" | "generated";
+export type BlogCoverSource = "curated" | "manual" | "fallback" | "generated" | "source";
 
 export type BlogCoverVisualChecks = {
   topicFit: boolean;
@@ -209,6 +211,12 @@ export type BlogCoverVisualChecks = {
   noPeople: boolean;
   noTrademarkRisk: boolean;
   noGenericStockLook: boolean;
+  brandFit?: boolean;
+  editorialSpecificity?: boolean;
+  visualHierarchy?: boolean;
+  thumbnailReadability?: boolean;
+  noCliche?: boolean;
+  mobileCropResilience?: boolean;
   checkedBy?: string;
   checkedAt?: string;
   notes?: string;

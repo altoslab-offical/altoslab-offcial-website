@@ -5,16 +5,25 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "build:cloudflare": "node scripts/sync-cloudflare-homepage.mjs && opennextjs-cloudflare build",
     "start": "next start",
+    "preview:cloudflare": "opennextjs-cloudflare preview",
+    "deploy:cloudflare": "npm run build:cloudflare && opennextjs-cloudflare deploy -- --keep-vars",
+    "cloudflare:whoami": "wrangler whoami",
+    "cloudflare:types": "wrangler types --env-interface CloudflareEnv",
     "typecheck": "tsc --noEmit",
     "test:blog": "node scripts/blog-system-smoke.mjs",
     "blog:worker": "node scripts/blog-local-worker.mjs",
     "blog:orchestrate": "node scripts/blog-antigravity-orchestrator.mjs",
+    "blog:scheduled": "node scripts/blog-scheduled-runner.mjs",
+    "blog:doctor": "node scripts/blog-sop-doctor.mjs",
+    "blog:verify-release": "node scripts/verify-blog-release.mjs",
     "blog:install-agent": "scripts/install-blog-launch-agent.sh",
     "test": "npm run typecheck && npm run test:blog"
   },
   "dependencies": {
     "@next/third-parties": "^16.2.6",
+    "@opennextjs/cloudflare": "^1.19.11",
     "@vercel/blob": "^2.4.0",
     "lucide-react": "latest",
     "next": "latest",
@@ -29,6 +38,7 @@
     "@types/node": "latest",
     "@types/react": "latest",
     "@types/react-dom": "latest",
-    "typescript": "latest"
+    "typescript": "latest",
+    "wrangler": "^4.95.0"
   }
 }

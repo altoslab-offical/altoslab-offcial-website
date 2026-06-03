@@ -12,6 +12,8 @@ import {
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
+const CLOUDFLARE_HOMEPAGE_ASSET = "/altoslab-homepage";
+
 function withLaunchMetadata(html: string) {
   const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || "https://altoslab.com").replace(/\/$/, "");
   const title = "ALTOS LAB｜AI Studio 人工智慧工作室";
@@ -393,8 +395,37 @@ function withLaunchMetadata(html: string) {
     .replace("</body>", `${homepageHeader}${homepageAnalyticsSnippet()}</body>`);
 }
 
-export async function GET() {
-  const html = await readFile(path.join(process.cwd(), "index.html"), "utf8");
+async function readHomepageHtml(request: Request) {
+  if (process.env.CLOUDFLARE_KV_ENABLED === "1") {
+    const assetUrl = new URL(CLOUDFLARE_HOMEPAGE_ASSET, request.url);
+
+    try {
+      const { getCloudflareContext } = await import("@opennextjs/cloudflare");
+      const context = getCloudflareContext();
+      const assets = (context.env as { ASSETS?: { fetch(input: Request): Promise<Response> } }).ASSETS;
+      if (assets?.fetch) {
+        const response = await assets.fetch(new Request(assetUrl));
+        if (response.ok) return response.text();
+      }
+    } catch {
+      // Try the same static asset through the Worker fetch path before failing closed.
+    }
+
+    try {
+      const response = await fetch(assetUrl, { redirect: "follow" });
+      if (response.ok) return response.text();
+    } catch {
+      // Cloudflare runtimes cannot read the project filesystem; do not fall through there.
+    }
+
+    throw new Error(`Homepage asset unavailable at ${CLOUDFLARE_HOMEPAGE_ASSET}`);
+  }
+
+  return readFile(path.join(process.cwd(), "index.html"), "utf8");
+}
+
+export async function GET(request: Request) {
+  const html = await readHomepageHtml(request);
 
   return new Response(withLaunchMetadata(html), {
     headers: {

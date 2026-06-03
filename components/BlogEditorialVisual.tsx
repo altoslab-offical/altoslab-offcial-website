@@ -1,7 +1,7 @@
-import type { BlogPost } from "@/lib/types";
+import type { BlogVisualPost } from "@/lib/blog-visual";
 
 type BlogEditorialVisualProps = {
-  post: BlogPost;
+  post: BlogVisualPost;
   compact?: boolean;
 };
 
@@ -12,7 +12,7 @@ const languageClass = {
   ko: "ko"
 };
 
-function visualVariant(post: BlogPost) {
+function visualVariant(post: BlogVisualPost) {
   const seed = post.slug || post.id || post.title;
   return Array.from(seed).reduce((sum, char) => sum + char.charCodeAt(0), 0) % 4;
 }

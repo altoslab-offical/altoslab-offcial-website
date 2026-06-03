@@ -90,7 +90,7 @@ export async function runBlogDraftCron(request: Request, forcedSlot?: CronSlot) 
       {
         ok: true,
         skipped: true,
-        reason: "Legacy DeepSeek blog cron is disabled. Use the signed local Antigravity ingest pipeline.",
+        reason: "Legacy DeepSeek blog cron is disabled. Use the signed Gemini/GPT browser ingest pipeline.",
         generationSlot: slot
       },
       { status: 200 }

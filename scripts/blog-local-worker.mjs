@@ -29,8 +29,11 @@ Required publish flow:
 
 Useful dry runs:
   node scripts/blog-local-worker.mjs --article-set ./article-set.json --slot afternoon --validate-only
+  node scripts/blog-local-worker.mjs --article-set ./article-set.json --slot morning --validate-only --manifest ./prepared-candidate.json
+  node scripts/blog-local-worker.mjs --article-set ./article-set.json --slot morning --validate-only --browser-evidence ./browser-evidence.json --approve-design-qa
   node scripts/blog-local-worker.mjs --make-prompt --slot morning --topic "AI agents in customer operations"
-  node scripts/blog-local-worker.mjs --article-set ./article-set.json --slot morning --generate-missing-covers --publish
+  node scripts/blog-local-worker.mjs --article-set ./article-set.json --slot morning --publish
+  node scripts/blog-local-worker.mjs --article-set ./article-set.json --slot morning --publish --reuse-validated-manifest --manifest ./prepared-candidate.json
 
 Environment:
   BLOG_INGEST_HMAC_SECRET   Shared HMAC secret configured in Vercel
@@ -82,6 +85,21 @@ function hashString(input) {
     hash = Math.imul(hash, 16777619);
   }
   return hash >>> 0;
+}
+
+function stableJson(value) {
+  if (Array.isArray(value)) return `[${value.map(stableJson).join(",")}]`;
+  if (value && typeof value === "object") {
+    return `{${Object.keys(value)
+      .sort()
+      .map((key) => `${JSON.stringify(key)}:${stableJson(value[key])}`)
+      .join(",")}}`;
+  }
+  return JSON.stringify(value);
+}
+
+function sha256(input) {
+  return crypto.createHash("sha256").update(String(input)).digest("hex");
 }
 
 function clampColor(value) {
@@ -262,6 +280,9 @@ async function generateCoverPng(post, index, outputDir, ingestRunId) {
 
 async function generateMissingCovers(payload, slot) {
   if (!hasFlag("generate-missing-covers")) return payload;
+  if (process.env.BLOG_ALLOW_LOCAL_FALLBACK_COVERS !== "1") {
+    throw new Error("Local fallback cover generation is disabled for production. Use credited source images for market news or ChatGPT/GPT-generated covers for columns/features.");
+  }
   const posts = Array.isArray(payload.posts) ? payload.posts : [];
   const outputDir =
     arg("cover-dir") ||
@@ -319,6 +340,18 @@ function isAllowedCoverUrl(url) {
 function localPreflight(payload) {
   const issues = [];
   const posts = Array.isArray(payload.posts) ? payload.posts : [];
+  const chromeEvidence = payload.chromeEvidence || {};
+  const geminiEvidence = chromeEvidence.gemini || {};
+  const chatgptEvidence = chromeEvidence.chatgpt || {};
+  const humanDesignQa = payload.humanDesignQa || {};
+  const requiresGptCover = posts.some((post) => post.contentType !== "breaking");
+
+  if (geminiEvidence.usedExistingTab !== true) issues.push("chromeEvidence.gemini.usedExistingTab must be true");
+  if (geminiEvidence.changedModel === true) issues.push("chromeEvidence.gemini.changedModel must not be true");
+  if (requiresGptCover && chatgptEvidence.usedExistingTab !== true) issues.push("chromeEvidence.chatgpt.usedExistingTab must be true for generated covers");
+  if (chatgptEvidence.changedModel === true) issues.push("chromeEvidence.chatgpt.changedModel must not be true");
+  if (humanDesignQa.approved !== true) issues.push("humanDesignQa.approved must be true before validate-only can mark a candidate ready");
+
   const languages = posts.map((post) => post.language);
   for (const language of LANGUAGES) {
     if (!languages.includes(language)) issues.push(`missing ${language} post`);
@@ -338,24 +371,263 @@ function localPreflight(payload) {
     if (JSON.stringify(sourceUrls(post)) !== JSON.stringify(referenceSources)) {
       issues.push(`${post.language || "unknown"} sourceLinks differ from the multilingual set`);
     }
-    if (post.coverSource !== "generated") issues.push(`${post.language || "unknown"} coverSource must be generated`);
-    if (!isAllowedCoverUrl(post.cover)) issues.push(`${post.language || "unknown"} cover must be an https Blob URL`);
+    const marketNews = post.contentType === "breaking";
+    if (marketNews && post.coverSource !== "source") {
+      issues.push(`${post.language || "unknown"} market news coverSource must be source`);
+    }
+    if (!marketNews && post.coverSource !== "generated") {
+      issues.push(`${post.language || "unknown"} non-news coverSource must be generated`);
+    }
+    if (!isAllowedCoverUrl(post.cover)) issues.push(`${post.language || "unknown"} cover must be a public https URL`);
     if (!post.coverAlt || post.coverAlt.length < 18) issues.push(`${post.language || "unknown"} coverAlt is missing or too thin`);
     const generation = post.coverGeneration || {};
-    if (!generation.provider || !generation.prompt || !generation.generatedAt) {
-      issues.push(`${post.language || "unknown"} coverGeneration must include provider, prompt and generatedAt`);
+    if (marketNews) {
+      if (!post.coverCredit || !post.coverCreditUrl || !post.coverLicense) {
+        issues.push(`${post.language || "unknown"} source cover must include coverCredit, coverCreditUrl and coverLicense`);
+      }
+    } else {
+      if (!generation.provider || !generation.prompt || !generation.generatedAt) {
+        issues.push(`${post.language || "unknown"} coverGeneration must include provider, prompt and generatedAt`);
+      }
+      if (!/(chatgpt|gpt|openai)/i.test(String(generation.provider || ""))) {
+        issues.push(`${post.language || "unknown"} coverGeneration.provider must be ChatGPT/GPT`);
+      }
+      const checks = generation.visualChecks || {};
+      for (const field of ["topicFit", "noTextArtifacts", "noLogos", "noPeople", "noTrademarkRisk", "noGenericStockLook"]) {
+        if (checks[field] !== true) issues.push(`${post.language || "unknown"} visualChecks.${field} must be true`);
+      }
     }
-    const checks = generation.visualChecks || {};
-    for (const field of ["topicFit", "noTextArtifacts", "noLogos", "noPeople", "noTrademarkRisk", "noGenericStockLook"]) {
-      if (checks[field] !== true) issues.push(`${post.language || "unknown"} visualChecks.${field} must be true`);
+    if (!String(post.generatedBy || "").toLowerCase().includes("gemini")) {
+      issues.push(`${post.language || "unknown"} article must be drafted or revised through Gemini`);
     }
   }
   return issues;
 }
 
+function manifestStatusFromValidate(validate, payload) {
+  const errors = Array.isArray(validate.json?.errors) ? validate.json.errors : [];
+  const quality = validate.json?.qualitySummary || {};
+  const image = validate.json?.imageQualitySummary || {};
+  const designApproved = payload.humanDesignQa?.approved === true;
+  return validate.ok &&
+    validate.json?.wouldPublish === true &&
+    errors.length === 0 &&
+    quality.approved === true &&
+    image.approved === true &&
+    designApproved
+    ? "ready"
+    : "held";
+}
+
+function digestSourcePost(post) {
+  return {
+    language: post.language,
+    slug: post.slug,
+    title: post.title,
+    seoTitle: post.seoTitle,
+    seoDescription: post.seoDescription,
+    excerpt: post.excerpt,
+    contentType: post.contentType,
+    newsCategory: post.newsCategory,
+    topic: post.topic,
+    audience: post.audience,
+    geoSummary: post.geoSummary,
+    body: post.body,
+    keyTakeaways: post.keyTakeaways,
+    faqs: post.faqs,
+    sourceLinks: post.sourceLinks,
+    tags: post.tags,
+    author: post.author,
+    cover: post.cover,
+    coverAlt: post.coverAlt,
+    coverSource: post.coverSource,
+    coverGeneration: post.coverGeneration,
+    coverCredit: post.coverCredit,
+    aiDisclosure: post.aiDisclosure
+  };
+}
+
+function releaseContentSha256(payload) {
+  const posts = [...(payload.posts || [])]
+    .map(digestSourcePost)
+    .sort((a, b) => String(a.language || "").localeCompare(String(b.language || "")));
+  return sha256(
+    stableJson({
+      translationGroupId: payload.translationGroupId || payload.posts?.find((post) => post.translationGroupId)?.translationGroupId,
+      slot: payload.slot,
+      generationDate: payload.generationDate,
+      scheduledFor: payload.scheduledFor,
+      posts
+    })
+  );
+}
+
+function bodySha256(post) {
+  return sha256(String(post.body || ""));
+}
+
+async function writeJsonFile(filePath, payload) {
+  await fs.mkdir(path.dirname(filePath), { recursive: true });
+  await fs.writeFile(filePath, `${JSON.stringify(payload, null, 2)}\n`, "utf8");
+}
+
+function preparedCandidateIndexPath(payload, slot) {
+  const date = payload.generationDate || taiwanDate();
+  return path.join(process.cwd(), "data/blog-prepared-candidates", `${date}-${slot}.json`);
+}
+
+async function writePreparedCandidateManifest({ manifestPath, articleSetPath, releaseArticleSetPath, payload, slot, validate, publish }) {
+  const errors = Array.isArray(validate.json?.errors) ? validate.json.errors : [];
+  const qualitySummary = validate.json?.qualitySummary || {};
+  const imageQualitySummary = validate.json?.imageQualitySummary || {};
+  const status = publish
+    ? publish.ok && publish.json?.publishedIds?.length > 0
+      ? "released"
+      : "held"
+    : manifestStatusFromValidate(validate, payload);
+  const manifest = {
+    status,
+    slot,
+    expectedReleaseAt: payload.scheduledFor || scheduledFor(payload.generationDate || taiwanDate(), slot),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    ingestRunId: payload.ingestRunId,
+    translationGroupId: payload.translationGroupId,
+    articleSetPath: releaseArticleSetPath || articleSetPath,
+    sourceArticleSetPath: articleSetPath,
+    manifestPath: manifestPath ? path.resolve(manifestPath) : undefined,
+    coverFiles: (payload.posts || []).map((post) => post.coverLocalPath).filter(Boolean),
+    coverUrls: (payload.posts || []).map((post) => post.cover).filter(Boolean),
+    chromeEvidence: payload.chromeEvidence || {},
+    validateOnly: {
+      status: validate.status,
+      wouldPublish: validate.json?.wouldPublish === true,
+      qualityApproved: qualitySummary.approved === true,
+      qualityScore: qualitySummary.score,
+      qualityThreshold: qualitySummary.threshold,
+      imageApproved: imageQualitySummary.approved === true,
+      imageScore: imageQualitySummary.score,
+      imageThreshold: imageQualitySummary.threshold,
+      errors,
+      warnings: [...(qualitySummary.warnings || []), ...(imageQualitySummary.warnings || [])]
+    },
+    qualityManifest: {
+      gateVersion: "altos-blog-local-worker-v1",
+      reviewer: payload.humanDesignQa?.reviewedBy || "main-brain",
+      reviewedAt: payload.humanDesignQa?.reviewedAt || new Date().toISOString(),
+      contentSha256: releaseContentSha256(payload),
+      posts: (payload.posts || []).map((post) => ({
+        language: post.language,
+        slug: post.slug,
+        bodySha256: bodySha256(post),
+        cover: post.cover
+      })),
+      qualitySummary: {
+        approved: qualitySummary.approved === true,
+        score: qualitySummary.score,
+        threshold: qualitySummary.threshold,
+        issues: qualitySummary.issues || [],
+        warnings: qualitySummary.warnings || []
+      },
+      imageQualitySummary: {
+        approved: imageQualitySummary.approved === true,
+        score: imageQualitySummary.score,
+        threshold: imageQualitySummary.threshold,
+        issues: imageQualitySummary.issues || [],
+        warnings: imageQualitySummary.warnings || []
+      }
+    },
+    humanDesignQa: payload.humanDesignQa || { approved: false },
+    publish: publish
+      ? {
+          status: publish.status,
+          publishedIds: publish.json?.publishedIds || [],
+          heldDraftIds: publish.json?.heldDraftIds || [],
+          errors: publish.json?.errors || [],
+          event: publish.json?.event
+        }
+      : undefined
+  };
+  if (manifestPath) {
+    await writeJsonFile(manifestPath, manifest);
+    await writeJsonFile(preparedCandidateIndexPath(payload, slot), manifest);
+  }
+  return manifest;
+}
+
+function reusableManifestIssues(manifest, payload) {
+  const issues = [];
+  const qualityManifest = manifest?.qualityManifest || {};
+  const quality = qualityManifest.qualitySummary || {};
+  const image = qualityManifest.imageQualitySummary || {};
+  const validateOnly = manifest?.validateOnly || {};
+
+  if (!["ready", "held"].includes(manifest?.status)) {
+    issues.push(`manifest status must be ready or retryable held, got ${manifest?.status || "missing"}`);
+  }
+  if (validateOnly.wouldPublish !== true) issues.push("validateOnly.wouldPublish must be true");
+  if (validateOnly.qualityApproved !== true) issues.push("validateOnly.qualityApproved must be true");
+  if (validateOnly.imageApproved !== true) issues.push("validateOnly.imageApproved must be true");
+  if (Array.isArray(validateOnly.errors) && validateOnly.errors.length > 0) {
+    issues.push(`validateOnly errors must be empty: ${validateOnly.errors.join("; ")}`);
+  }
+  if (quality.approved !== true) issues.push("qualityManifest.qualitySummary.approved must be true");
+  if (image.approved !== true) issues.push("qualityManifest.imageQualitySummary.approved must be true");
+  if (Array.isArray(quality.issues) && quality.issues.length > 0) {
+    issues.push(`qualityManifest quality issues must be empty: ${quality.issues.join("; ")}`);
+  }
+  if (Array.isArray(image.issues) && image.issues.length > 0) {
+    issues.push(`qualityManifest image issues must be empty: ${image.issues.join("; ")}`);
+  }
+  if (qualityManifest.contentSha256 !== releaseContentSha256(payload)) {
+    issues.push("qualityManifest.contentSha256 does not match current article set");
+  }
+  const manifestPosts = Array.isArray(qualityManifest.posts) ? qualityManifest.posts : [];
+  for (const post of payload.posts || []) {
+    const manifestPost = manifestPosts.find((item) => item.language === post.language && item.slug === post.slug);
+    if (!manifestPost) {
+      issues.push(`${post.language || "unknown"}/${post.slug || "missing-slug"} missing manifest digest`);
+    } else {
+      if (manifestPost.bodySha256 !== bodySha256(post)) {
+        issues.push(`${post.language || "unknown"}/${post.slug || "missing-slug"} body digest changed after validate-only`);
+      }
+      if (manifestPost.cover !== post.cover) {
+        issues.push(`${post.language || "unknown"}/${post.slug || "missing-slug"} cover changed after validate-only`);
+      }
+    }
+  }
+  return issues;
+}
+
+async function reusableValidateFromManifest(manifestPath, payload) {
+  if (!manifestPath) throw new Error("--manifest is required with --reuse-validated-manifest");
+  const manifest = JSON.parse(await fs.readFile(path.resolve(manifestPath), "utf8"));
+  const issues = reusableManifestIssues(manifest, payload);
+  if (issues.length) {
+    throw new Error(`validated manifest cannot be reused: ${issues.join("; ")}`);
+  }
+  return {
+    status: manifest.validateOnly?.status || 200,
+    ok: true,
+    json: {
+      ok: true,
+      wouldPublish: true,
+      errors: [],
+      qualitySummary: manifest.qualityManifest.qualitySummary,
+      imageQualitySummary: manifest.qualityManifest.imageQualitySummary,
+      reusedQualityManifest: true
+    }
+  };
+}
+
 async function readArticleSet(filePath, slot) {
   const raw = await fs.readFile(filePath, "utf8");
   const payload = JSON.parse(raw);
+  const browserEvidencePath = arg("browser-evidence");
+  if (browserEvidencePath) {
+    const browserEvidence = JSON.parse(await fs.readFile(browserEvidencePath, "utf8"));
+    payload.chromeEvidence = browserEvidence.chromeEvidence || browserEvidence;
+  }
   const date = payload.generationDate || taiwanDate();
   return {
     slot,
@@ -363,8 +635,8 @@ async function readArticleSet(filePath, slot) {
     scheduledFor: payload.scheduledFor || scheduledFor(date, slot),
     publishMode: payload.publishMode || "publish-if-valid",
     generation: {
-      provider: "local-antigravity",
-      promptVersion: payload.generation?.promptVersion || "altos-local-antigravity-v1",
+      provider: payload.generation?.provider || "gemini-chatgpt",
+      promptVersion: payload.generation?.promptVersion || "altos-gemini-gpt-browser-v1",
       model: payload.generation?.model,
       sourceCount: payload.generation?.sourceCount
     },
@@ -378,6 +650,27 @@ async function requestIngest(payload, validateOnly) {
 
   const body = JSON.stringify({ ...payload, validateOnly });
   const response = await fetch(`${baseUrl()}/api/admin/blog/ingest-set${validateOnly ? "?validateOnly=true" : ""}`, {
+    method: "POST",
+    headers: signedHeaders(secret, body),
+    body
+  });
+  const json = await response.json().catch(() => ({}));
+  return { status: response.status, ok: response.ok, json };
+}
+
+async function requestRelease(payload, qualityManifest) {
+  const secret = process.env.BLOG_INGEST_HMAC_SECRET;
+  if (!secret) throw new Error("BLOG_INGEST_HMAC_SECRET is required");
+
+  const body = JSON.stringify({
+    ...payload,
+    generation: {
+      ...payload.generation,
+      provider: "gemini-chatgpt"
+    },
+    qualityManifest
+  });
+  const response = await fetch(`${baseUrl()}/api/admin/blog/release-set`, {
     method: "POST",
     headers: signedHeaders(secret, body),
     body
@@ -431,7 +724,7 @@ async function uploadLocalCovers(payload) {
 }
 
 function articlePrompt(slot, topic) {
-  return `# ALTOS LAB Antigravity article set prompt
+  return `# ALTOS LAB Gemini + GPT article set prompt
 
 Slot: ${slot} (${SLOT_HOURS[slot]} Asia/Taipei)
 Topic: ${topic || "pick the strongest AI market signal from today's sources"}
@@ -439,20 +732,26 @@ Topic: ${topic || "pick the strongest AI market signal from today's sources"}
 Create one article set in zh-Hant, en, ja, ko.
 
 Hard requirements:
+- Draft and revise the article text through Gemini in the ALTOS Blog QA Chrome group.
+- For market news/breaking posts, use the source article or official announcement image with visible source credit; do not use GPT art or a previously used cover.
+- For column/feature posts, generate the cover image through ChatGPT/GPT in the ALTOS Blog QA Chrome group.
+- Close or release the Gemini/GPT tabs after the run so Chrome memory is not held.
+- Do not repeat an existing published/draft topic, headline angle or source package.
 - Use zh-Hant as the editorial source of truth, then localize the other languages.
 - Keep one translationGroupId and identical sourceLinks across all four languages.
 - Write like a sharp AI product/editorial studio, not an SEO farm.
 - Opening must answer the reader's decision in the first 40-80 words.
 - Include ALTOS LAB judgment, source translation note, FAQ, SEO title/meta and GEO summary.
-- Cover images must be generated per article, uploaded to Vercel Blob, and include provider, prompt, generatedAt, coverCredit and visualChecks.
+- Column/feature cover images must be generated per article, uploaded through the signed ALTOS LAB media route, and include provider, prompt, generatedAt, coverCredit and visualChecks.
+- Market news cover images must use coverSource "source" with coverCredit, coverCreditUrl and coverLicense; if the source image is missing, unsafe or already used, hold the candidate.
 
 Return only JSON shaped for POST /api/admin/blog/ingest-set:
 {
-  "ingestRunId": "local-antigravity-YYYY-MM-DD-${slot}-short-topic",
+  "ingestRunId": "browser-gemini-gpt-YYYY-MM-DD-${slot}-short-topic",
   "slot": "${slot}",
   "translationGroupId": "same-group-id",
   "publishMode": "publish-if-valid",
-  "generation": { "provider": "local-antigravity", "promptVersion": "altos-local-antigravity-v1" },
+  "generation": { "provider": "gemini-chatgpt", "promptVersion": "altos-gemini-gpt-browser-v1" },
   "posts": []
 }
 `;
@@ -464,7 +763,7 @@ async function makePrompt() {
   const prompt = articlePrompt(slot, arg("topic"));
   const outputDir = path.join(os.tmpdir(), "altoslab-blog-worker");
   await fs.mkdir(outputDir, { recursive: true });
-  const outputPath = path.join(outputDir, `antigravity-${taiwanDate()}-${slot}.md`);
+  const outputPath = path.join(outputDir, `gemini-gpt-${taiwanDate()}-${slot}.md`);
   await fs.writeFile(outputPath, prompt, "utf8");
   console.log(outputPath);
 }
@@ -484,22 +783,76 @@ async function main() {
   if (!articleSet) throw new Error("--article-set is required unless --make-prompt is used");
   if (!SLOT_HOURS[slot]) throw new Error("--slot must be morning or afternoon");
 
+  const manifestPath = arg("manifest");
   const payload = await uploadLocalCovers(await generateMissingCovers(await readArticleSet(articleSet, slot), slot));
+  if (hasFlag("approve-design-qa")) {
+    payload.humanDesignQa = {
+      approved: true,
+      reviewedBy: "main-brain",
+      reviewedAt: new Date().toISOString(),
+      notes: arg("design-qa-notes", "Approved after main-brain article and image QA.")
+    };
+  }
   const issues = localPreflight(payload);
   if (issues.length) {
     console.error(JSON.stringify({ ok: false, phase: "local-preflight", issues }, null, 2));
     process.exit(1);
   }
 
-  const validate = await requestIngest(payload, true);
-  console.log(JSON.stringify({ phase: "validateOnly", status: validate.status, response: validate.json }, null, 2));
+  let releaseArticleSetPath = "";
+  if (manifestPath) {
+    releaseArticleSetPath = path.join(path.dirname(path.resolve(manifestPath)), "article-set.release.json");
+    await writeJsonFile(releaseArticleSetPath, payload);
+  }
+
+  const validate =
+    hasFlag("publish") && hasFlag("reuse-validated-manifest")
+      ? await reusableValidateFromManifest(manifestPath, payload)
+      : await requestIngest(payload, true);
+  console.log(
+    JSON.stringify(
+      {
+        phase: "validateOnly",
+        status: validate.status,
+        reusedQualityManifest: validate.json?.reusedQualityManifest === true,
+        response: validate.json
+      },
+      null,
+      2
+    )
+  );
+  await writePreparedCandidateManifest({
+    manifestPath,
+    articleSetPath: path.resolve(articleSet),
+    releaseArticleSetPath,
+    payload,
+    slot,
+    validate
+  });
   if (!validate.ok || !validate.json?.wouldPublish) {
     process.exit(validate.ok ? 2 : 1);
   }
 
   if (hasFlag("publish")) {
-    const publish = await requestIngest(payload, false);
-    console.log(JSON.stringify({ phase: "publish", status: publish.status, response: publish.json }, null, 2));
+    const preparedManifest = await writePreparedCandidateManifest({
+      manifestPath,
+      articleSetPath: path.resolve(articleSet),
+      releaseArticleSetPath,
+      payload,
+      slot,
+      validate
+    });
+    const publish = await requestRelease(payload, preparedManifest.qualityManifest);
+    console.log(JSON.stringify({ phase: "release", status: publish.status, response: publish.json }, null, 2));
+    await writePreparedCandidateManifest({
+      manifestPath,
+      articleSetPath: path.resolve(articleSet),
+      releaseArticleSetPath,
+      payload,
+      slot,
+      validate,
+      publish
+    });
     if (!publish.ok) process.exit(1);
     return;
   }

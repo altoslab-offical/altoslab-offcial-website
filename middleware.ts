@@ -28,7 +28,7 @@ function nextWithPathname(request: NextRequest) {
   return response;
 }
 
-export function proxy(request: NextRequest) {
+export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const host = request.headers.get("host") || "";
 
@@ -48,7 +48,9 @@ export function proxy(request: NextRequest) {
     pathname === "/api/admin/auth/login" ||
     pathname === "/api/admin/auth/logout";
   const isPublicSignedIngestRoute =
-    pathname === "/api/admin/blog/ingest-set" || pathname === "/api/admin/blog/media";
+    pathname === "/api/admin/blog/ingest-set" ||
+    pathname === "/api/admin/blog/release-set" ||
+    pathname === "/api/admin/blog/media";
 
   if ((!isAdminPage && !isAdminApi) || isPublicAuthRoute || isPublicSignedIngestRoute) {
     return nextWithPathname(request);
@@ -72,5 +74,13 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|.*\\..*).*)"]
+  matcher: [
+    "/((?!_next/static|_next/image|favicon.ico|.*\\..*).*)",
+    "/feed.xml",
+    "/llms-full.txt",
+    "/llms.txt",
+    "/manifest.webmanifest",
+    "/robots.txt",
+    "/sitemap.xml"
+  ]
 };
