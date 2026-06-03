@@ -2,7 +2,7 @@
   "status": "awaiting_browser_production",
   "lane": "column",
   "slot": "afternoon",
-  "sequence": 2,
+  "sequence": 10,
   "expectedPosts": 9,
   "requiredLanguages": [
     "zh-Hant",
@@ -15,10 +15,10 @@
     "ms",
     "fil"
   ],
-  "runDir": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-02-column-20260603-223818",
-  "promptPath": "/Users/asdc163/Documents/官方網站/data/blog-backfill/2026-06-03/queue/02-column-prompt-card.md",
-  "articleSetPath": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-02-column-20260603-223818/article-set.json",
-  "manifestPath": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-02-column-20260603-223818/prepared-candidate.json",
+  "runDir": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-10-column-20260603-223818",
+  "promptPath": "/Users/asdc163/Documents/官方網站/data/blog-backfill/2026-06-03/queue/10-column-prompt-card.md",
+  "articleSetPath": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-10-column-20260603-223818/article-set.json",
+  "manifestPath": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-10-column-20260603-223818/prepared-candidate.json",
   "releasePolicy": "hold for the matching release gate only after Gemini copy, GPT cover/contentImages, validate-only and verification pass",
   "blockers": [
     "waiting for Gemini browser production",

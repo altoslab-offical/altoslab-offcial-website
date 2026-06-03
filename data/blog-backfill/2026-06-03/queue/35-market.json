@@ -2,7 +2,7 @@
   "status": "awaiting_market_browser_production",
   "lane": "market",
   "slot": "morning",
-  "sequence": 1,
+  "sequence": 35,
   "expectedPosts": 9,
   "requiredLanguages": [
     "zh-Hant",
@@ -15,10 +15,10 @@
     "ms",
     "fil"
   ],
-  "runDir": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-01-market-20260603-223818",
-  "promptPath": "/Users/asdc163/Documents/官方網站/data/blog-backfill/2026-06-03/queue/01-market-prompt-card.md",
-  "articleSetPath": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-01-market-20260603-223818/article-set.json",
-  "manifestPath": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-01-market-20260603-223818/prepared-candidate.json",
+  "runDir": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-35-market-20260603-223819",
+  "promptPath": "/Users/asdc163/Documents/官方網站/data/blog-backfill/2026-06-03/queue/35-market-prompt-card.md",
+  "articleSetPath": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-35-market-20260603-223819/article-set.json",
+  "manifestPath": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-35-market-20260603-223819/prepared-candidate.json",
   "releasePolicy": "publish immediately only after Gemini source-faithful copy, source-image QA, validate-only and verification pass",
   "blockers": [
     "waiting for Gemini browser production",

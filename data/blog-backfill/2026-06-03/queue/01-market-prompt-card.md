@@ -1,10 +1,10 @@
 # ALTOS LAB Blog Backfill Prompt Card
 
-Current public posts: 27. Target: 40. This is backfill set 1.
+Current public posts: 27. Per-language target: 40. Current language coverage: zh-Hant: 3/40, en: 3/40, ja: 3/40, ko: 3/40, id: 3/40, vi: 3/40, th: 3/40, ms: 3/40, fil: 3/40. This is backfill set 1.
 Lane: market
 Slot context: morning
-Article set output: /Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-01-market-20260603-215807/article-set.json
-Prepared manifest: /Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-01-market-20260603-215807/prepared-candidate.json
+Article set output: /Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-01-market-20260603-223818/article-set.json
+Prepared manifest: /Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-01-market-20260603-223818/prepared-candidate.json
 
 Use only the ALTOS Blog QA Chrome tab group.
 Market news lane: Gemini writes/revises all language versions; cover must be a credited source article or official announcement image shared across every language. No GPT art and no stock/free/fallback image.
@@ -22,10 +22,10 @@ After the browser production output is saved, run:
 
 ```bash
 node scripts/blog-local-worker.mjs \
-  --article-set "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-01-market-20260603-215807/article-set.json" \
+  --article-set "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-01-market-20260603-223818/article-set.json" \
   --slot morning \
   --validate-only \
-  --manifest "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-01-market-20260603-215807/prepared-candidate.json" \
+  --manifest "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-01-market-20260603-223818/prepared-candidate.json" \
   --approve-design-qa
 ```
 
@@ -33,13 +33,13 @@ If this is market news and validate-only/main-brain QA pass, publish immediately
 
 ```bash
 node scripts/blog-local-worker.mjs \
-  --article-set "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-01-market-20260603-215807/article-set.json" \
+  --article-set "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-01-market-20260603-223818/article-set.json" \
   --slot morning \
   --publish \
-  --manifest "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-01-market-20260603-215807/prepared-candidate.json" \
+  --manifest "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-01-market-20260603-223818/prepared-candidate.json" \
   --reuse-validated-manifest \
   --approve-design-qa
-node scripts/verify-blog-release.mjs --manifest "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-01-market-20260603-215807/prepared-candidate.json"
+node scripts/verify-blog-release.mjs --manifest "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-01-market-20260603-223818/prepared-candidate.json"
 ```
 
 Detailed Gemini/GPT browser prompt:
@@ -49,7 +49,7 @@ Detailed Gemini/GPT browser prompt:
 
 You are the browser-operated production workspace for ALTOS LAB's official website blog. Gemini must write/revise the article copy. ChatGPT/GPT generates covers only for columns/features; market news must use the credited source article or official announcement image. Create one high-quality article set and write the final JSON to this exact path:
 
-/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-01-market-20260603-215807/article-set.json
+/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-01-market-20260603-223818/article-set.json
 
 Do not publish. Do not call any ALTOS LAB API. Do not write Markdown around the JSON.
 

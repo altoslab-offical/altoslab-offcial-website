@@ -1,16 +1,121 @@
 {
   "ok": true,
   "status": "needs_backfill",
-  "createdAt": "2026-06-03T13:58:07.150Z",
+  "createdAt": "2026-06-03T14:38:19.474Z",
   "date": "2026-06-03",
   "baseUrl": "https://altoslab-ai.cc",
-  "targetPosts": 40,
+  "targetPostsPerLanguage": 40,
   "publishedPosts": 27,
-  "missingPosts": 13,
+  "currentMinPostsPerLanguage": 3,
+  "currentMaxPostsPerLanguage": 3,
+  "missingPosts": 333,
+  "missingByLanguage": [
+    {
+      "language": "zh-Hant",
+      "currentPosts": 3,
+      "missingPosts": 37
+    },
+    {
+      "language": "en",
+      "currentPosts": 3,
+      "missingPosts": 37
+    },
+    {
+      "language": "ja",
+      "currentPosts": 3,
+      "missingPosts": 37
+    },
+    {
+      "language": "ko",
+      "currentPosts": 3,
+      "missingPosts": 37
+    },
+    {
+      "language": "id",
+      "currentPosts": 3,
+      "missingPosts": 37
+    },
+    {
+      "language": "vi",
+      "currentPosts": 3,
+      "missingPosts": 37
+    },
+    {
+      "language": "th",
+      "currentPosts": 3,
+      "missingPosts": 37
+    },
+    {
+      "language": "ms",
+      "currentPosts": 3,
+      "missingPosts": 37
+    },
+    {
+      "language": "fil",
+      "currentPosts": 3,
+      "missingPosts": 37
+    }
+  ],
   "postsPerSet": 9,
-  "setsNeeded": 2,
-  "plannedSets": 2,
-  "plannedPublishedPosts": 45,
+  "setsNeeded": 37,
+  "plannedSets": 37,
+  "plannedPublishedPosts": 360,
+  "plannedPostsPerLanguage": [
+    {
+      "language": "zh-Hant",
+      "currentPosts": 3,
+      "plannedPosts": 40,
+      "targetPosts": 40
+    },
+    {
+      "language": "en",
+      "currentPosts": 3,
+      "plannedPosts": 40,
+      "targetPosts": 40
+    },
+    {
+      "language": "ja",
+      "currentPosts": 3,
+      "plannedPosts": 40,
+      "targetPosts": 40
+    },
+    {
+      "language": "ko",
+      "currentPosts": 3,
+      "plannedPosts": 40,
+      "targetPosts": 40
+    },
+    {
+      "language": "id",
+      "currentPosts": 3,
+      "plannedPosts": 40,
+      "targetPosts": 40
+    },
+    {
+      "language": "vi",
+      "currentPosts": 3,
+      "plannedPosts": 40,
+      "targetPosts": 40
+    },
+    {
+      "language": "th",
+      "currentPosts": 3,
+      "plannedPosts": 40,
+      "targetPosts": 40
+    },
+    {
+      "language": "ms",
+      "currentPosts": 3,
+      "plannedPosts": 40,
+      "targetPosts": 40
+    },
+    {
+      "language": "fil",
+      "currentPosts": 3,
+      "plannedPosts": 40,
+      "targetPosts": 40
+    }
+  ],
   "requiredLanguages": [
     "zh-Hant",
     "en",
@@ -89,7 +194,7 @@
         "coverSources": [
           "source"
         ],
-        "title": "第一個 AI Agent 試點，應該從可審核的工作流開始"
+        "title": "AI Agent 試點別先挑大場面，先挑一條能被檢查的流程"
       },
       {
         "translationGroupId": "tg_market_agent-pilot-scorecard_v1",
@@ -111,7 +216,7 @@
         "coverSources": [
           "source"
         ],
-        "title": "OpenAI tax-agent 案例提醒：AI Agent 試點先看回滾能力"
+        "title": "OpenAI tax-agent 案例：企業要測的不是自動化，而是回得去"
       },
       {
         "translationGroupId": "browser-gemini-gpt-2026-06-03-afternoon-agent-trust-stack",
@@ -133,7 +238,7 @@
         "coverSources": [
           "generated"
         ],
-        "title": "別再盲目更換模型：微軟 Build 2026 釋放的訊號，是企業代理人正式進入「可維運產品線」時代"
+        "title": "微軟 Build 2026 的提醒：企業 Agent 要先變成可控系統"
       }
     ]
   },
@@ -155,10 +260,10 @@
         "ms",
         "fil"
       ],
-      "runDir": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-01-market-20260603-215807",
+      "runDir": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-01-market-20260603-223818",
       "promptPath": "/Users/asdc163/Documents/官方網站/data/blog-backfill/2026-06-03/queue/01-market-prompt-card.md",
-      "articleSetPath": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-01-market-20260603-215807/article-set.json",
-      "manifestPath": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-01-market-20260603-215807/prepared-candidate.json",
+      "articleSetPath": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-01-market-20260603-223818/article-set.json",
+      "manifestPath": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-01-market-20260603-223818/prepared-candidate.json",
       "releasePolicy": "publish immediately only after Gemini source-faithful copy, source-image QA, validate-only and verification pass",
       "blockers": [
         "waiting for Gemini browser production",
@@ -183,14 +288,994 @@
         "ms",
         "fil"
       ],
-      "runDir": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-02-column-20260603-215807",
+      "runDir": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-02-column-20260603-223818",
       "promptPath": "/Users/asdc163/Documents/官方網站/data/blog-backfill/2026-06-03/queue/02-column-prompt-card.md",
-      "articleSetPath": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-02-column-20260603-215807/article-set.json",
-      "manifestPath": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-02-column-20260603-215807/prepared-candidate.json",
+      "articleSetPath": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-02-column-20260603-223818/article-set.json",
+      "manifestPath": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-02-column-20260603-223818/prepared-candidate.json",
       "releasePolicy": "hold for the matching release gate only after Gemini copy, GPT cover/contentImages, validate-only and verification pass",
       "blockers": [
         "waiting for Gemini browser production",
         "waiting for ChatGPT/GPT cover and 2-3 content images",
+        "waiting for validate-only quality/image/design QA"
+      ]
+    },
+    {
+      "status": "awaiting_market_browser_production",
+      "lane": "market",
+      "slot": "morning",
+      "sequence": 3,
+      "expectedPosts": 9,
+      "requiredLanguages": [
+        "zh-Hant",
+        "en",
+        "ja",
+        "ko",
+        "id",
+        "vi",
+        "th",
+        "ms",
+        "fil"
+      ],
+      "runDir": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-03-market-20260603-223818",
+      "promptPath": "/Users/asdc163/Documents/官方網站/data/blog-backfill/2026-06-03/queue/03-market-prompt-card.md",
+      "articleSetPath": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-03-market-20260603-223818/article-set.json",
+      "manifestPath": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-03-market-20260603-223818/prepared-candidate.json",
+      "releasePolicy": "publish immediately only after Gemini source-faithful copy, source-image QA, validate-only and verification pass",
+      "blockers": [
+        "waiting for Gemini browser production",
+        "waiting for credited source article/official image",
+        "waiting for validate-only quality/image/design QA"
+      ]
+    },
+    {
+      "status": "awaiting_browser_production",
+      "lane": "column",
+      "slot": "afternoon",
+      "sequence": 4,
+      "expectedPosts": 9,
+      "requiredLanguages": [
+        "zh-Hant",
+        "en",
+        "ja",
+        "ko",
+        "id",
+        "vi",
+        "th",
+        "ms",
+        "fil"
+      ],
+      "runDir": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-04-column-20260603-223818",
+      "promptPath": "/Users/asdc163/Documents/官方網站/data/blog-backfill/2026-06-03/queue/04-column-prompt-card.md",
+      "articleSetPath": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-04-column-20260603-223818/article-set.json",
+      "manifestPath": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-04-column-20260603-223818/prepared-candidate.json",
+      "releasePolicy": "hold for the matching release gate only after Gemini copy, GPT cover/contentImages, validate-only and verification pass",
+      "blockers": [
+        "waiting for Gemini browser production",
+        "waiting for ChatGPT/GPT cover and 2-3 content images",
+        "waiting for validate-only quality/image/design QA"
+      ]
+    },
+    {
+      "status": "awaiting_market_browser_production",
+      "lane": "market",
+      "slot": "morning",
+      "sequence": 5,
+      "expectedPosts": 9,
+      "requiredLanguages": [
+        "zh-Hant",
+        "en",
+        "ja",
+        "ko",
+        "id",
+        "vi",
+        "th",
+        "ms",
+        "fil"
+      ],
+      "runDir": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-05-market-20260603-223818",
+      "promptPath": "/Users/asdc163/Documents/官方網站/data/blog-backfill/2026-06-03/queue/05-market-prompt-card.md",
+      "articleSetPath": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-05-market-20260603-223818/article-set.json",
+      "manifestPath": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-05-market-20260603-223818/prepared-candidate.json",
+      "releasePolicy": "publish immediately only after Gemini source-faithful copy, source-image QA, validate-only and verification pass",
+      "blockers": [
+        "waiting for Gemini browser production",
+        "waiting for credited source article/official image",
+        "waiting for validate-only quality/image/design QA"
+      ]
+    },
+    {
+      "status": "awaiting_browser_production",
+      "lane": "column",
+      "slot": "afternoon",
+      "sequence": 6,
+      "expectedPosts": 9,
+      "requiredLanguages": [
+        "zh-Hant",
+        "en",
+        "ja",
+        "ko",
+        "id",
+        "vi",
+        "th",
+        "ms",
+        "fil"
+      ],
+      "runDir": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-06-column-20260603-223818",
+      "promptPath": "/Users/asdc163/Documents/官方網站/data/blog-backfill/2026-06-03/queue/06-column-prompt-card.md",
+      "articleSetPath": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-06-column-20260603-223818/article-set.json",
+      "manifestPath": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-06-column-20260603-223818/prepared-candidate.json",
+      "releasePolicy": "hold for the matching release gate only after Gemini copy, GPT cover/contentImages, validate-only and verification pass",
+      "blockers": [
+        "waiting for Gemini browser production",
+        "waiting for ChatGPT/GPT cover and 2-3 content images",
+        "waiting for validate-only quality/image/design QA"
+      ]
+    },
+    {
+      "status": "awaiting_market_browser_production",
+      "lane": "market",
+      "slot": "morning",
+      "sequence": 7,
+      "expectedPosts": 9,
+      "requiredLanguages": [
+        "zh-Hant",
+        "en",
+        "ja",
+        "ko",
+        "id",
+        "vi",
+        "th",
+        "ms",
+        "fil"
+      ],
+      "runDir": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-07-market-20260603-223818",
+      "promptPath": "/Users/asdc163/Documents/官方網站/data/blog-backfill/2026-06-03/queue/07-market-prompt-card.md",
+      "articleSetPath": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-07-market-20260603-223818/article-set.json",
+      "manifestPath": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-07-market-20260603-223818/prepared-candidate.json",
+      "releasePolicy": "publish immediately only after Gemini source-faithful copy, source-image QA, validate-only and verification pass",
+      "blockers": [
+        "waiting for Gemini browser production",
+        "waiting for credited source article/official image",
+        "waiting for validate-only quality/image/design QA"
+      ]
+    },
+    {
+      "status": "awaiting_browser_production",
+      "lane": "column",
+      "slot": "afternoon",
+      "sequence": 8,
+      "expectedPosts": 9,
+      "requiredLanguages": [
+        "zh-Hant",
+        "en",
+        "ja",
+        "ko",
+        "id",
+        "vi",
+        "th",
+        "ms",
+        "fil"
+      ],
+      "runDir": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-08-column-20260603-223818",
+      "promptPath": "/Users/asdc163/Documents/官方網站/data/blog-backfill/2026-06-03/queue/08-column-prompt-card.md",
+      "articleSetPath": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-08-column-20260603-223818/article-set.json",
+      "manifestPath": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-08-column-20260603-223818/prepared-candidate.json",
+      "releasePolicy": "hold for the matching release gate only after Gemini copy, GPT cover/contentImages, validate-only and verification pass",
+      "blockers": [
+        "waiting for Gemini browser production",
+        "waiting for ChatGPT/GPT cover and 2-3 content images",
+        "waiting for validate-only quality/image/design QA"
+      ]
+    },
+    {
+      "status": "awaiting_market_browser_production",
+      "lane": "market",
+      "slot": "morning",
+      "sequence": 9,
+      "expectedPosts": 9,
+      "requiredLanguages": [
+        "zh-Hant",
+        "en",
+        "ja",
+        "ko",
+        "id",
+        "vi",
+        "th",
+        "ms",
+        "fil"
+      ],
+      "runDir": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-09-market-20260603-223818",
+      "promptPath": "/Users/asdc163/Documents/官方網站/data/blog-backfill/2026-06-03/queue/09-market-prompt-card.md",
+      "articleSetPath": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-09-market-20260603-223818/article-set.json",
+      "manifestPath": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-09-market-20260603-223818/prepared-candidate.json",
+      "releasePolicy": "publish immediately only after Gemini source-faithful copy, source-image QA, validate-only and verification pass",
+      "blockers": [
+        "waiting for Gemini browser production",
+        "waiting for credited source article/official image",
+        "waiting for validate-only quality/image/design QA"
+      ]
+    },
+    {
+      "status": "awaiting_browser_production",
+      "lane": "column",
+      "slot": "afternoon",
+      "sequence": 10,
+      "expectedPosts": 9,
+      "requiredLanguages": [
+        "zh-Hant",
+        "en",
+        "ja",
+        "ko",
+        "id",
+        "vi",
+        "th",
+        "ms",
+        "fil"
+      ],
+      "runDir": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-10-column-20260603-223818",
+      "promptPath": "/Users/asdc163/Documents/官方網站/data/blog-backfill/2026-06-03/queue/10-column-prompt-card.md",
+      "articleSetPath": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-10-column-20260603-223818/article-set.json",
+      "manifestPath": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-10-column-20260603-223818/prepared-candidate.json",
+      "releasePolicy": "hold for the matching release gate only after Gemini copy, GPT cover/contentImages, validate-only and verification pass",
+      "blockers": [
+        "waiting for Gemini browser production",
+        "waiting for ChatGPT/GPT cover and 2-3 content images",
+        "waiting for validate-only quality/image/design QA"
+      ]
+    },
+    {
+      "status": "awaiting_market_browser_production",
+      "lane": "market",
+      "slot": "morning",
+      "sequence": 11,
+      "expectedPosts": 9,
+      "requiredLanguages": [
+        "zh-Hant",
+        "en",
+        "ja",
+        "ko",
+        "id",
+        "vi",
+        "th",
+        "ms",
+        "fil"
+      ],
+      "runDir": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-11-market-20260603-223818",
+      "promptPath": "/Users/asdc163/Documents/官方網站/data/blog-backfill/2026-06-03/queue/11-market-prompt-card.md",
+      "articleSetPath": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-11-market-20260603-223818/article-set.json",
+      "manifestPath": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-11-market-20260603-223818/prepared-candidate.json",
+      "releasePolicy": "publish immediately only after Gemini source-faithful copy, source-image QA, validate-only and verification pass",
+      "blockers": [
+        "waiting for Gemini browser production",
+        "waiting for credited source article/official image",
+        "waiting for validate-only quality/image/design QA"
+      ]
+    },
+    {
+      "status": "awaiting_browser_production",
+      "lane": "column",
+      "slot": "afternoon",
+      "sequence": 12,
+      "expectedPosts": 9,
+      "requiredLanguages": [
+        "zh-Hant",
+        "en",
+        "ja",
+        "ko",
+        "id",
+        "vi",
+        "th",
+        "ms",
+        "fil"
+      ],
+      "runDir": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-12-column-20260603-223818",
+      "promptPath": "/Users/asdc163/Documents/官方網站/data/blog-backfill/2026-06-03/queue/12-column-prompt-card.md",
+      "articleSetPath": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-12-column-20260603-223818/article-set.json",
+      "manifestPath": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-12-column-20260603-223818/prepared-candidate.json",
+      "releasePolicy": "hold for the matching release gate only after Gemini copy, GPT cover/contentImages, validate-only and verification pass",
+      "blockers": [
+        "waiting for Gemini browser production",
+        "waiting for ChatGPT/GPT cover and 2-3 content images",
+        "waiting for validate-only quality/image/design QA"
+      ]
+    },
+    {
+      "status": "awaiting_market_browser_production",
+      "lane": "market",
+      "slot": "morning",
+      "sequence": 13,
+      "expectedPosts": 9,
+      "requiredLanguages": [
+        "zh-Hant",
+        "en",
+        "ja",
+        "ko",
+        "id",
+        "vi",
+        "th",
+        "ms",
+        "fil"
+      ],
+      "runDir": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-13-market-20260603-223818",
+      "promptPath": "/Users/asdc163/Documents/官方網站/data/blog-backfill/2026-06-03/queue/13-market-prompt-card.md",
+      "articleSetPath": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-13-market-20260603-223818/article-set.json",
+      "manifestPath": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-13-market-20260603-223818/prepared-candidate.json",
+      "releasePolicy": "publish immediately only after Gemini source-faithful copy, source-image QA, validate-only and verification pass",
+      "blockers": [
+        "waiting for Gemini browser production",
+        "waiting for credited source article/official image",
+        "waiting for validate-only quality/image/design QA"
+      ]
+    },
+    {
+      "status": "awaiting_browser_production",
+      "lane": "column",
+      "slot": "afternoon",
+      "sequence": 14,
+      "expectedPosts": 9,
+      "requiredLanguages": [
+        "zh-Hant",
+        "en",
+        "ja",
+        "ko",
+        "id",
+        "vi",
+        "th",
+        "ms",
+        "fil"
+      ],
+      "runDir": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-14-column-20260603-223818",
+      "promptPath": "/Users/asdc163/Documents/官方網站/data/blog-backfill/2026-06-03/queue/14-column-prompt-card.md",
+      "articleSetPath": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-14-column-20260603-223818/article-set.json",
+      "manifestPath": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-14-column-20260603-223818/prepared-candidate.json",
+      "releasePolicy": "hold for the matching release gate only after Gemini copy, GPT cover/contentImages, validate-only and verification pass",
+      "blockers": [
+        "waiting for Gemini browser production",
+        "waiting for ChatGPT/GPT cover and 2-3 content images",
+        "waiting for validate-only quality/image/design QA"
+      ]
+    },
+    {
+      "status": "awaiting_market_browser_production",
+      "lane": "market",
+      "slot": "morning",
+      "sequence": 15,
+      "expectedPosts": 9,
+      "requiredLanguages": [
+        "zh-Hant",
+        "en",
+        "ja",
+        "ko",
+        "id",
+        "vi",
+        "th",
+        "ms",
+        "fil"
+      ],
+      "runDir": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-15-market-20260603-223818",
+      "promptPath": "/Users/asdc163/Documents/官方網站/data/blog-backfill/2026-06-03/queue/15-market-prompt-card.md",
+      "articleSetPath": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-15-market-20260603-223818/article-set.json",
+      "manifestPath": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-15-market-20260603-223818/prepared-candidate.json",
+      "releasePolicy": "publish immediately only after Gemini source-faithful copy, source-image QA, validate-only and verification pass",
+      "blockers": [
+        "waiting for Gemini browser production",
+        "waiting for credited source article/official image",
+        "waiting for validate-only quality/image/design QA"
+      ]
+    },
+    {
+      "status": "awaiting_browser_production",
+      "lane": "column",
+      "slot": "afternoon",
+      "sequence": 16,
+      "expectedPosts": 9,
+      "requiredLanguages": [
+        "zh-Hant",
+        "en",
+        "ja",
+        "ko",
+        "id",
+        "vi",
+        "th",
+        "ms",
+        "fil"
+      ],
+      "runDir": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-16-column-20260603-223818",
+      "promptPath": "/Users/asdc163/Documents/官方網站/data/blog-backfill/2026-06-03/queue/16-column-prompt-card.md",
+      "articleSetPath": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-16-column-20260603-223818/article-set.json",
+      "manifestPath": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-16-column-20260603-223818/prepared-candidate.json",
+      "releasePolicy": "hold for the matching release gate only after Gemini copy, GPT cover/contentImages, validate-only and verification pass",
+      "blockers": [
+        "waiting for Gemini browser production",
+        "waiting for ChatGPT/GPT cover and 2-3 content images",
+        "waiting for validate-only quality/image/design QA"
+      ]
+    },
+    {
+      "status": "awaiting_market_browser_production",
+      "lane": "market",
+      "slot": "morning",
+      "sequence": 17,
+      "expectedPosts": 9,
+      "requiredLanguages": [
+        "zh-Hant",
+        "en",
+        "ja",
+        "ko",
+        "id",
+        "vi",
+        "th",
+        "ms",
+        "fil"
+      ],
+      "runDir": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-17-market-20260603-223818",
+      "promptPath": "/Users/asdc163/Documents/官方網站/data/blog-backfill/2026-06-03/queue/17-market-prompt-card.md",
+      "articleSetPath": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-17-market-20260603-223818/article-set.json",
+      "manifestPath": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-17-market-20260603-223818/prepared-candidate.json",
+      "releasePolicy": "publish immediately only after Gemini source-faithful copy, source-image QA, validate-only and verification pass",
+      "blockers": [
+        "waiting for Gemini browser production",
+        "waiting for credited source article/official image",
+        "waiting for validate-only quality/image/design QA"
+      ]
+    },
+    {
+      "status": "awaiting_browser_production",
+      "lane": "column",
+      "slot": "afternoon",
+      "sequence": 18,
+      "expectedPosts": 9,
+      "requiredLanguages": [
+        "zh-Hant",
+        "en",
+        "ja",
+        "ko",
+        "id",
+        "vi",
+        "th",
+        "ms",
+        "fil"
+      ],
+      "runDir": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-18-column-20260603-223818",
+      "promptPath": "/Users/asdc163/Documents/官方網站/data/blog-backfill/2026-06-03/queue/18-column-prompt-card.md",
+      "articleSetPath": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-18-column-20260603-223818/article-set.json",
+      "manifestPath": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-18-column-20260603-223818/prepared-candidate.json",
+      "releasePolicy": "hold for the matching release gate only after Gemini copy, GPT cover/contentImages, validate-only and verification pass",
+      "blockers": [
+        "waiting for Gemini browser production",
+        "waiting for ChatGPT/GPT cover and 2-3 content images",
+        "waiting for validate-only quality/image/design QA"
+      ]
+    },
+    {
+      "status": "awaiting_market_browser_production",
+      "lane": "market",
+      "slot": "morning",
+      "sequence": 19,
+      "expectedPosts": 9,
+      "requiredLanguages": [
+        "zh-Hant",
+        "en",
+        "ja",
+        "ko",
+        "id",
+        "vi",
+        "th",
+        "ms",
+        "fil"
+      ],
+      "runDir": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-19-market-20260603-223818",
+      "promptPath": "/Users/asdc163/Documents/官方網站/data/blog-backfill/2026-06-03/queue/19-market-prompt-card.md",
+      "articleSetPath": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-19-market-20260603-223818/article-set.json",
+      "manifestPath": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-19-market-20260603-223818/prepared-candidate.json",
+      "releasePolicy": "publish immediately only after Gemini source-faithful copy, source-image QA, validate-only and verification pass",
+      "blockers": [
+        "waiting for Gemini browser production",
+        "waiting for credited source article/official image",
+        "waiting for validate-only quality/image/design QA"
+      ]
+    },
+    {
+      "status": "awaiting_browser_production",
+      "lane": "column",
+      "slot": "afternoon",
+      "sequence": 20,
+      "expectedPosts": 9,
+      "requiredLanguages": [
+        "zh-Hant",
+        "en",
+        "ja",
+        "ko",
+        "id",
+        "vi",
+        "th",
+        "ms",
+        "fil"
+      ],
+      "runDir": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-20-column-20260603-223818",
+      "promptPath": "/Users/asdc163/Documents/官方網站/data/blog-backfill/2026-06-03/queue/20-column-prompt-card.md",
+      "articleSetPath": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-20-column-20260603-223818/article-set.json",
+      "manifestPath": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-20-column-20260603-223818/prepared-candidate.json",
+      "releasePolicy": "hold for the matching release gate only after Gemini copy, GPT cover/contentImages, validate-only and verification pass",
+      "blockers": [
+        "waiting for Gemini browser production",
+        "waiting for ChatGPT/GPT cover and 2-3 content images",
+        "waiting for validate-only quality/image/design QA"
+      ]
+    },
+    {
+      "status": "awaiting_market_browser_production",
+      "lane": "market",
+      "slot": "morning",
+      "sequence": 21,
+      "expectedPosts": 9,
+      "requiredLanguages": [
+        "zh-Hant",
+        "en",
+        "ja",
+        "ko",
+        "id",
+        "vi",
+        "th",
+        "ms",
+        "fil"
+      ],
+      "runDir": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-21-market-20260603-223818",
+      "promptPath": "/Users/asdc163/Documents/官方網站/data/blog-backfill/2026-06-03/queue/21-market-prompt-card.md",
+      "articleSetPath": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-21-market-20260603-223818/article-set.json",
+      "manifestPath": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-21-market-20260603-223818/prepared-candidate.json",
+      "releasePolicy": "publish immediately only after Gemini source-faithful copy, source-image QA, validate-only and verification pass",
+      "blockers": [
+        "waiting for Gemini browser production",
+        "waiting for credited source article/official image",
+        "waiting for validate-only quality/image/design QA"
+      ]
+    },
+    {
+      "status": "awaiting_browser_production",
+      "lane": "column",
+      "slot": "afternoon",
+      "sequence": 22,
+      "expectedPosts": 9,
+      "requiredLanguages": [
+        "zh-Hant",
+        "en",
+        "ja",
+        "ko",
+        "id",
+        "vi",
+        "th",
+        "ms",
+        "fil"
+      ],
+      "runDir": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-22-column-20260603-223818",
+      "promptPath": "/Users/asdc163/Documents/官方網站/data/blog-backfill/2026-06-03/queue/22-column-prompt-card.md",
+      "articleSetPath": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-22-column-20260603-223818/article-set.json",
+      "manifestPath": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-22-column-20260603-223818/prepared-candidate.json",
+      "releasePolicy": "hold for the matching release gate only after Gemini copy, GPT cover/contentImages, validate-only and verification pass",
+      "blockers": [
+        "waiting for Gemini browser production",
+        "waiting for ChatGPT/GPT cover and 2-3 content images",
+        "waiting for validate-only quality/image/design QA"
+      ]
+    },
+    {
+      "status": "awaiting_market_browser_production",
+      "lane": "market",
+      "slot": "morning",
+      "sequence": 23,
+      "expectedPosts": 9,
+      "requiredLanguages": [
+        "zh-Hant",
+        "en",
+        "ja",
+        "ko",
+        "id",
+        "vi",
+        "th",
+        "ms",
+        "fil"
+      ],
+      "runDir": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-23-market-20260603-223819",
+      "promptPath": "/Users/asdc163/Documents/官方網站/data/blog-backfill/2026-06-03/queue/23-market-prompt-card.md",
+      "articleSetPath": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-23-market-20260603-223819/article-set.json",
+      "manifestPath": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-23-market-20260603-223819/prepared-candidate.json",
+      "releasePolicy": "publish immediately only after Gemini source-faithful copy, source-image QA, validate-only and verification pass",
+      "blockers": [
+        "waiting for Gemini browser production",
+        "waiting for credited source article/official image",
+        "waiting for validate-only quality/image/design QA"
+      ]
+    },
+    {
+      "status": "awaiting_browser_production",
+      "lane": "column",
+      "slot": "afternoon",
+      "sequence": 24,
+      "expectedPosts": 9,
+      "requiredLanguages": [
+        "zh-Hant",
+        "en",
+        "ja",
+        "ko",
+        "id",
+        "vi",
+        "th",
+        "ms",
+        "fil"
+      ],
+      "runDir": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-24-column-20260603-223819",
+      "promptPath": "/Users/asdc163/Documents/官方網站/data/blog-backfill/2026-06-03/queue/24-column-prompt-card.md",
+      "articleSetPath": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-24-column-20260603-223819/article-set.json",
+      "manifestPath": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-24-column-20260603-223819/prepared-candidate.json",
+      "releasePolicy": "hold for the matching release gate only after Gemini copy, GPT cover/contentImages, validate-only and verification pass",
+      "blockers": [
+        "waiting for Gemini browser production",
+        "waiting for ChatGPT/GPT cover and 2-3 content images",
+        "waiting for validate-only quality/image/design QA"
+      ]
+    },
+    {
+      "status": "awaiting_market_browser_production",
+      "lane": "market",
+      "slot": "morning",
+      "sequence": 25,
+      "expectedPosts": 9,
+      "requiredLanguages": [
+        "zh-Hant",
+        "en",
+        "ja",
+        "ko",
+        "id",
+        "vi",
+        "th",
+        "ms",
+        "fil"
+      ],
+      "runDir": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-25-market-20260603-223819",
+      "promptPath": "/Users/asdc163/Documents/官方網站/data/blog-backfill/2026-06-03/queue/25-market-prompt-card.md",
+      "articleSetPath": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-25-market-20260603-223819/article-set.json",
+      "manifestPath": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-25-market-20260603-223819/prepared-candidate.json",
+      "releasePolicy": "publish immediately only after Gemini source-faithful copy, source-image QA, validate-only and verification pass",
+      "blockers": [
+        "waiting for Gemini browser production",
+        "waiting for credited source article/official image",
+        "waiting for validate-only quality/image/design QA"
+      ]
+    },
+    {
+      "status": "awaiting_browser_production",
+      "lane": "column",
+      "slot": "afternoon",
+      "sequence": 26,
+      "expectedPosts": 9,
+      "requiredLanguages": [
+        "zh-Hant",
+        "en",
+        "ja",
+        "ko",
+        "id",
+        "vi",
+        "th",
+        "ms",
+        "fil"
+      ],
+      "runDir": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-26-column-20260603-223819",
+      "promptPath": "/Users/asdc163/Documents/官方網站/data/blog-backfill/2026-06-03/queue/26-column-prompt-card.md",
+      "articleSetPath": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-26-column-20260603-223819/article-set.json",
+      "manifestPath": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-26-column-20260603-223819/prepared-candidate.json",
+      "releasePolicy": "hold for the matching release gate only after Gemini copy, GPT cover/contentImages, validate-only and verification pass",
+      "blockers": [
+        "waiting for Gemini browser production",
+        "waiting for ChatGPT/GPT cover and 2-3 content images",
+        "waiting for validate-only quality/image/design QA"
+      ]
+    },
+    {
+      "status": "awaiting_market_browser_production",
+      "lane": "market",
+      "slot": "morning",
+      "sequence": 27,
+      "expectedPosts": 9,
+      "requiredLanguages": [
+        "zh-Hant",
+        "en",
+        "ja",
+        "ko",
+        "id",
+        "vi",
+        "th",
+        "ms",
+        "fil"
+      ],
+      "runDir": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-27-market-20260603-223819",
+      "promptPath": "/Users/asdc163/Documents/官方網站/data/blog-backfill/2026-06-03/queue/27-market-prompt-card.md",
+      "articleSetPath": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-27-market-20260603-223819/article-set.json",
+      "manifestPath": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-27-market-20260603-223819/prepared-candidate.json",
+      "releasePolicy": "publish immediately only after Gemini source-faithful copy, source-image QA, validate-only and verification pass",
+      "blockers": [
+        "waiting for Gemini browser production",
+        "waiting for credited source article/official image",
+        "waiting for validate-only quality/image/design QA"
+      ]
+    },
+    {
+      "status": "awaiting_browser_production",
+      "lane": "column",
+      "slot": "afternoon",
+      "sequence": 28,
+      "expectedPosts": 9,
+      "requiredLanguages": [
+        "zh-Hant",
+        "en",
+        "ja",
+        "ko",
+        "id",
+        "vi",
+        "th",
+        "ms",
+        "fil"
+      ],
+      "runDir": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-28-column-20260603-223819",
+      "promptPath": "/Users/asdc163/Documents/官方網站/data/blog-backfill/2026-06-03/queue/28-column-prompt-card.md",
+      "articleSetPath": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-28-column-20260603-223819/article-set.json",
+      "manifestPath": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-28-column-20260603-223819/prepared-candidate.json",
+      "releasePolicy": "hold for the matching release gate only after Gemini copy, GPT cover/contentImages, validate-only and verification pass",
+      "blockers": [
+        "waiting for Gemini browser production",
+        "waiting for ChatGPT/GPT cover and 2-3 content images",
+        "waiting for validate-only quality/image/design QA"
+      ]
+    },
+    {
+      "status": "awaiting_market_browser_production",
+      "lane": "market",
+      "slot": "morning",
+      "sequence": 29,
+      "expectedPosts": 9,
+      "requiredLanguages": [
+        "zh-Hant",
+        "en",
+        "ja",
+        "ko",
+        "id",
+        "vi",
+        "th",
+        "ms",
+        "fil"
+      ],
+      "runDir": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-29-market-20260603-223819",
+      "promptPath": "/Users/asdc163/Documents/官方網站/data/blog-backfill/2026-06-03/queue/29-market-prompt-card.md",
+      "articleSetPath": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-29-market-20260603-223819/article-set.json",
+      "manifestPath": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-29-market-20260603-223819/prepared-candidate.json",
+      "releasePolicy": "publish immediately only after Gemini source-faithful copy, source-image QA, validate-only and verification pass",
+      "blockers": [
+        "waiting for Gemini browser production",
+        "waiting for credited source article/official image",
+        "waiting for validate-only quality/image/design QA"
+      ]
+    },
+    {
+      "status": "awaiting_browser_production",
+      "lane": "column",
+      "slot": "afternoon",
+      "sequence": 30,
+      "expectedPosts": 9,
+      "requiredLanguages": [
+        "zh-Hant",
+        "en",
+        "ja",
+        "ko",
+        "id",
+        "vi",
+        "th",
+        "ms",
+        "fil"
+      ],
+      "runDir": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-30-column-20260603-223819",
+      "promptPath": "/Users/asdc163/Documents/官方網站/data/blog-backfill/2026-06-03/queue/30-column-prompt-card.md",
+      "articleSetPath": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-30-column-20260603-223819/article-set.json",
+      "manifestPath": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-30-column-20260603-223819/prepared-candidate.json",
+      "releasePolicy": "hold for the matching release gate only after Gemini copy, GPT cover/contentImages, validate-only and verification pass",
+      "blockers": [
+        "waiting for Gemini browser production",
+        "waiting for ChatGPT/GPT cover and 2-3 content images",
+        "waiting for validate-only quality/image/design QA"
+      ]
+    },
+    {
+      "status": "awaiting_market_browser_production",
+      "lane": "market",
+      "slot": "morning",
+      "sequence": 31,
+      "expectedPosts": 9,
+      "requiredLanguages": [
+        "zh-Hant",
+        "en",
+        "ja",
+        "ko",
+        "id",
+        "vi",
+        "th",
+        "ms",
+        "fil"
+      ],
+      "runDir": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-31-market-20260603-223819",
+      "promptPath": "/Users/asdc163/Documents/官方網站/data/blog-backfill/2026-06-03/queue/31-market-prompt-card.md",
+      "articleSetPath": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-31-market-20260603-223819/article-set.json",
+      "manifestPath": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-31-market-20260603-223819/prepared-candidate.json",
+      "releasePolicy": "publish immediately only after Gemini source-faithful copy, source-image QA, validate-only and verification pass",
+      "blockers": [
+        "waiting for Gemini browser production",
+        "waiting for credited source article/official image",
+        "waiting for validate-only quality/image/design QA"
+      ]
+    },
+    {
+      "status": "awaiting_browser_production",
+      "lane": "column",
+      "slot": "afternoon",
+      "sequence": 32,
+      "expectedPosts": 9,
+      "requiredLanguages": [
+        "zh-Hant",
+        "en",
+        "ja",
+        "ko",
+        "id",
+        "vi",
+        "th",
+        "ms",
+        "fil"
+      ],
+      "runDir": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-32-column-20260603-223819",
+      "promptPath": "/Users/asdc163/Documents/官方網站/data/blog-backfill/2026-06-03/queue/32-column-prompt-card.md",
+      "articleSetPath": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-32-column-20260603-223819/article-set.json",
+      "manifestPath": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-32-column-20260603-223819/prepared-candidate.json",
+      "releasePolicy": "hold for the matching release gate only after Gemini copy, GPT cover/contentImages, validate-only and verification pass",
+      "blockers": [
+        "waiting for Gemini browser production",
+        "waiting for ChatGPT/GPT cover and 2-3 content images",
+        "waiting for validate-only quality/image/design QA"
+      ]
+    },
+    {
+      "status": "awaiting_market_browser_production",
+      "lane": "market",
+      "slot": "morning",
+      "sequence": 33,
+      "expectedPosts": 9,
+      "requiredLanguages": [
+        "zh-Hant",
+        "en",
+        "ja",
+        "ko",
+        "id",
+        "vi",
+        "th",
+        "ms",
+        "fil"
+      ],
+      "runDir": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-33-market-20260603-223819",
+      "promptPath": "/Users/asdc163/Documents/官方網站/data/blog-backfill/2026-06-03/queue/33-market-prompt-card.md",
+      "articleSetPath": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-33-market-20260603-223819/article-set.json",
+      "manifestPath": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-33-market-20260603-223819/prepared-candidate.json",
+      "releasePolicy": "publish immediately only after Gemini source-faithful copy, source-image QA, validate-only and verification pass",
+      "blockers": [
+        "waiting for Gemini browser production",
+        "waiting for credited source article/official image",
+        "waiting for validate-only quality/image/design QA"
+      ]
+    },
+    {
+      "status": "awaiting_browser_production",
+      "lane": "column",
+      "slot": "afternoon",
+      "sequence": 34,
+      "expectedPosts": 9,
+      "requiredLanguages": [
+        "zh-Hant",
+        "en",
+        "ja",
+        "ko",
+        "id",
+        "vi",
+        "th",
+        "ms",
+        "fil"
+      ],
+      "runDir": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-34-column-20260603-223819",
+      "promptPath": "/Users/asdc163/Documents/官方網站/data/blog-backfill/2026-06-03/queue/34-column-prompt-card.md",
+      "articleSetPath": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-34-column-20260603-223819/article-set.json",
+      "manifestPath": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-34-column-20260603-223819/prepared-candidate.json",
+      "releasePolicy": "hold for the matching release gate only after Gemini copy, GPT cover/contentImages, validate-only and verification pass",
+      "blockers": [
+        "waiting for Gemini browser production",
+        "waiting for ChatGPT/GPT cover and 2-3 content images",
+        "waiting for validate-only quality/image/design QA"
+      ]
+    },
+    {
+      "status": "awaiting_market_browser_production",
+      "lane": "market",
+      "slot": "morning",
+      "sequence": 35,
+      "expectedPosts": 9,
+      "requiredLanguages": [
+        "zh-Hant",
+        "en",
+        "ja",
+        "ko",
+        "id",
+        "vi",
+        "th",
+        "ms",
+        "fil"
+      ],
+      "runDir": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-35-market-20260603-223819",
+      "promptPath": "/Users/asdc163/Documents/官方網站/data/blog-backfill/2026-06-03/queue/35-market-prompt-card.md",
+      "articleSetPath": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-35-market-20260603-223819/article-set.json",
+      "manifestPath": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-35-market-20260603-223819/prepared-candidate.json",
+      "releasePolicy": "publish immediately only after Gemini source-faithful copy, source-image QA, validate-only and verification pass",
+      "blockers": [
+        "waiting for Gemini browser production",
+        "waiting for credited source article/official image",
+        "waiting for validate-only quality/image/design QA"
+      ]
+    },
+    {
+      "status": "awaiting_browser_production",
+      "lane": "column",
+      "slot": "afternoon",
+      "sequence": 36,
+      "expectedPosts": 9,
+      "requiredLanguages": [
+        "zh-Hant",
+        "en",
+        "ja",
+        "ko",
+        "id",
+        "vi",
+        "th",
+        "ms",
+        "fil"
+      ],
+      "runDir": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-36-column-20260603-223819",
+      "promptPath": "/Users/asdc163/Documents/官方網站/data/blog-backfill/2026-06-03/queue/36-column-prompt-card.md",
+      "articleSetPath": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-36-column-20260603-223819/article-set.json",
+      "manifestPath": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-36-column-20260603-223819/prepared-candidate.json",
+      "releasePolicy": "hold for the matching release gate only after Gemini copy, GPT cover/contentImages, validate-only and verification pass",
+      "blockers": [
+        "waiting for Gemini browser production",
+        "waiting for ChatGPT/GPT cover and 2-3 content images",
+        "waiting for validate-only quality/image/design QA"
+      ]
+    },
+    {
+      "status": "awaiting_market_browser_production",
+      "lane": "market",
+      "slot": "morning",
+      "sequence": 37,
+      "expectedPosts": 9,
+      "requiredLanguages": [
+        "zh-Hant",
+        "en",
+        "ja",
+        "ko",
+        "id",
+        "vi",
+        "th",
+        "ms",
+        "fil"
+      ],
+      "runDir": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-37-market-20260603-223819",
+      "promptPath": "/Users/asdc163/Documents/官方網站/data/blog-backfill/2026-06-03/queue/37-market-prompt-card.md",
+      "articleSetPath": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-37-market-20260603-223819/article-set.json",
+      "manifestPath": "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-37-market-20260603-223819/prepared-candidate.json",
+      "releasePolicy": "publish immediately only after Gemini source-faithful copy, source-image QA, validate-only and verification pass",
+      "blockers": [
+        "waiting for Gemini browser production",
+        "waiting for credited source article/official image",
         "waiting for validate-only quality/image/design QA"
       ]
     }

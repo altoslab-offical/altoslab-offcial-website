@@ -26,7 +26,7 @@ function usage() {
 ALTOS LAB blog backfill planner
 
 Creates a fail-closed backfill queue when the public blog has fewer posts than
-the target. It never publishes and never fabricates production content.
+the per-language target. It never publishes and never fabricates production content.
 
 Examples:
   node scripts/blog-backfill-planner.mjs --target-posts 40 --write
@@ -174,9 +174,13 @@ function queueStatusForLane(lane) {
   return lane === "market" ? "awaiting_market_browser_production" : "awaiting_browser_production";
 }
 
+function languageBackfillSummary(languageCoverage, targetPosts) {
+  return languageCoverage.map((item) => `${item.language}: ${item.count}/${targetPosts}`).join(", ");
+}
+
 function promptCard({ date, lane, slot, sequence, targetPosts, inventory, articleSetPath, manifestPath, orchestratorPrompt }) {
   const publicCount = inventory.publishedPosts;
-  const targetLine = `Current public posts: ${publicCount}. Target: ${targetPosts}. This is backfill set ${sequence}.`;
+  const targetLine = `Current public posts: ${publicCount}. Per-language target: ${targetPosts}. Current language coverage: ${languageBackfillSummary(inventory.languageCoverage, targetPosts)}. This is backfill set ${sequence}.`;
   const laneLine =
     lane === "market"
       ? "Market news lane: Gemini writes/revises all language versions; cover must be a credited source article or official announcement image shared across every language. No GPT art and no stock/free/fallback image."
@@ -342,8 +346,13 @@ async function main() {
   const force = hasFlag("force");
 
   const inventory = await fetchPublicInventory(baseUrl);
-  const missingPosts = Math.max(0, targetPosts - inventory.publishedPosts);
-  const setsNeeded = Math.ceil(missingPosts / POSTS_PER_SET);
+  const missingByLanguage = inventory.languageCoverage.map((item) => ({
+    language: item.language,
+    currentPosts: item.count,
+    missingPosts: Math.max(0, targetPosts - item.count)
+  }));
+  const setsNeeded = Math.max(0, ...missingByLanguage.map((item) => item.missingPosts));
+  const missingPosts = missingByLanguage.reduce((sum, item) => sum + item.missingPosts, 0);
   const maxSets = Number(arg("max-sets", String(setsNeeded || 0)));
   const plannedSets = Math.max(0, Math.min(setsNeeded, Number.isFinite(maxSets) ? maxSets : setsNeeded));
   const lanes = lanesFromArgs();
@@ -351,7 +360,7 @@ async function main() {
   if (!force && (await exists(planPath))) {
     const existing = await readJson(planPath);
     const reusable =
-      existing.targetPosts === targetPosts &&
+      existing.targetPostsPerLanguage === targetPosts &&
       existing.publishedPosts === inventory.publishedPosts &&
       existing.plannedSets >= plannedSets &&
       Array.isArray(existing.queue);
@@ -393,13 +402,22 @@ async function main() {
     createdAt: new Date().toISOString(),
     date,
     baseUrl,
-    targetPosts,
+    targetPostsPerLanguage: targetPosts,
     publishedPosts: inventory.publishedPosts,
+    currentMinPostsPerLanguage: Math.min(...inventory.languageCoverage.map((item) => item.count)),
+    currentMaxPostsPerLanguage: Math.max(...inventory.languageCoverage.map((item) => item.count)),
     missingPosts,
+    missingByLanguage,
     postsPerSet: POSTS_PER_SET,
     setsNeeded,
     plannedSets,
     plannedPublishedPosts: inventory.publishedPosts + plannedSets * POSTS_PER_SET,
+    plannedPostsPerLanguage: inventory.languageCoverage.map((item) => ({
+      language: item.language,
+      currentPosts: item.count,
+      plannedPosts: item.count + plannedSets,
+      targetPosts
+    })),
     requiredLanguages: LANGUAGES,
     alternatingLanes: lanes,
     inventory,

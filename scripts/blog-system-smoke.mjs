@@ -187,6 +187,8 @@ assert(scheduledRunner.includes("retryableHeldManifest"), "scheduled release can
 assert(scheduledRunner.includes("--backfill") && scheduledRunner.includes("runBackfillPlanner"), "scheduled runner can create a backfill queue without publishing");
 assert(scheduledRunner.includes("ALTOS_BLOG_BACKFILL_TARGET_POSTS") && scheduledRunner.includes("blog-backfill-planner.mjs"), "scheduled runner wires backfill to the local launchd worker");
 assert(backfillPlanner.includes("DEFAULT_TARGET_POSTS = 40"), "backfill planner targets the 40-post recovery threshold by default");
+assert(backfillPlanner.includes("targetPostsPerLanguage") && backfillPlanner.includes("currentMinPostsPerLanguage"), "backfill planner treats the 40-post target as per-language inventory, not whole-site inventory");
+assert(backfillPlanner.includes("missingByLanguage") && backfillPlanner.includes("Math.max(0, ...missingByLanguage"), "backfill planner creates one multilingual set for each missing post in the lowest-coverage language");
 assert(backfillPlanner.includes("POSTS_PER_SET = LANGUAGES.length"), "backfill planner calculates missing posts in complete language sets");
 assert(backfillPlanner.includes('DEFAULT_LANES = ["market", "column"]'), "backfill planner alternates market-news and column lanes");
 assert(backfillPlanner.includes("awaiting_market_browser_production") && backfillPlanner.includes("awaiting_browser_production"), "backfill planner creates held browser-production queue states");

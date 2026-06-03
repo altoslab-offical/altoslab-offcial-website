@@ -1,13 +1,13 @@
 # ALTOS LAB Blog Backfill Prompt Card
 
-Current public posts: 27. Per-language target: 40. Current language coverage: zh-Hant: 3/40, en: 3/40, ja: 3/40, ko: 3/40, id: 3/40, vi: 3/40, th: 3/40, ms: 3/40, fil: 3/40. This is backfill set 2.
-Lane: column
-Slot context: afternoon
-Article set output: /Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-02-column-20260603-223818/article-set.json
-Prepared manifest: /Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-02-column-20260603-223818/prepared-candidate.json
+Current public posts: 27. Per-language target: 40. Current language coverage: zh-Hant: 3/40, en: 3/40, ja: 3/40, ko: 3/40, id: 3/40, vi: 3/40, th: 3/40, ms: 3/40, fil: 3/40. This is backfill set 37.
+Lane: market
+Slot context: morning
+Article set output: /Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-37-market-20260603-223819/article-set.json
+Prepared manifest: /Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-37-market-20260603-223819/prepared-candidate.json
 
 Use only the ALTOS Blog QA Chrome tab group.
-Column lane: Gemini writes/revises all language versions; ChatGPT/GPT creates one shared cover plus 2-3 shared in-article images for every language.
+Market news lane: Gemini writes/revises all language versions; cover must be a credited source article or official announcement image shared across every language. No GPT art and no stock/free/fallback image.
 Required languages: zh-Hant, en, ja, ko, id, vi, th, ms, fil.
 
 Hard release rule:
@@ -22,10 +22,10 @@ After the browser production output is saved, run:
 
 ```bash
 node scripts/blog-local-worker.mjs \
-  --article-set "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-02-column-20260603-223818/article-set.json" \
-  --slot afternoon \
+  --article-set "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-37-market-20260603-223819/article-set.json" \
+  --slot morning \
   --validate-only \
-  --manifest "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-02-column-20260603-223818/prepared-candidate.json" \
+  --manifest "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-37-market-20260603-223819/prepared-candidate.json" \
   --approve-design-qa
 ```
 
@@ -33,13 +33,13 @@ If this is market news and validate-only/main-brain QA pass, publish immediately
 
 ```bash
 node scripts/blog-local-worker.mjs \
-  --article-set "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-02-column-20260603-223818/article-set.json" \
-  --slot afternoon \
+  --article-set "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-37-market-20260603-223819/article-set.json" \
+  --slot morning \
   --publish \
-  --manifest "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-02-column-20260603-223818/prepared-candidate.json" \
+  --manifest "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-37-market-20260603-223819/prepared-candidate.json" \
   --reuse-validated-manifest \
   --approve-design-qa
-node scripts/verify-blog-release.mjs --manifest "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-02-column-20260603-223818/prepared-candidate.json"
+node scripts/verify-blog-release.mjs --manifest "/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-37-market-20260603-223819/prepared-candidate.json"
 ```
 
 Detailed Gemini/GPT browser prompt:
@@ -49,18 +49,18 @@ Detailed Gemini/GPT browser prompt:
 
 You are the browser-operated production workspace for ALTOS LAB's official website blog. Gemini must write/revise the article copy. ChatGPT/GPT generates covers only for columns/features; market news must use the credited source article or official announcement image. Create one high-quality article set and write the final JSON to this exact path:
 
-/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-02-column-20260603-223818/article-set.json
+/Users/asdc163/Documents/官方網站/data/blog-worker-runs/2026-06-03-backfill-37-market-20260603-223819/article-set.json
 
 Do not publish. Do not call any ALTOS LAB API. Do not write Markdown around the JSON.
 
-Slot: afternoon (16:00 Asia/Taipei)
+Slot: morning (09:00 Asia/Taipei)
 Date: 2026-06-03
-Lane: deep-column-lane
-Topic: Choose the strongest original ALTOS LAB AI column angle for founders and operators.
+Lane: market-news-fast-lane
+Topic: Choose the strongest current AI market signal from reliable sources.
 
 Editorial bar:
 - Article copy must be drafted and revised through Gemini in the ALTOS Blog QA Chrome group.
-- This run is an original ALTOS LAB column: contentType must be column, not breaking, and the cover must be generated through ChatGPT/GPT.
+- This run is market news: contentType must be breaking, facts must come from the source pack, and the cover must be the credited source article or official announcement image.
 - Market news/breaking posts must use the source article or official announcement image with visible attribution; do not use GPT art or stock/free images for market news.
 - Column/feature cover images must be generated through ChatGPT/GPT in the ALTOS Blog QA Chrome group.
 - Close or release Gemini/GPT tabs after the run so Chrome memory is not held.
@@ -91,10 +91,10 @@ Image bar:
 
 Required JSON shape:
 {
-  "ingestRunId": "browser-gemini-gpt-2026-06-03-afternoon-column",
-  "slot": "afternoon",
+  "ingestRunId": "browser-gemini-gpt-2026-06-03-morning-market-fast-lane",
+  "slot": "morning",
   "generationDate": "2026-06-03",
-  "translationGroupId": "browser-gemini-gpt-2026-06-03-afternoon-column",
+  "translationGroupId": "browser-gemini-gpt-2026-06-03-morning-market-fast-lane",
   "publishMode": "publish-if-valid",
   "generation": {
     "provider": "gemini-chatgpt",
@@ -110,8 +110,8 @@ Required JSON shape:
       "url": "https://gemini.google.com/app"
     },
     "chatgpt": {
-      "usedExistingTab": true,
-      "continuedExistingConversation": true,
+      "usedExistingTab": false,
+      "continuedExistingConversation": false,
       "changedModel": false,
       "title": "",
       "url": "https://chatgpt.com/"
@@ -125,7 +125,7 @@ Required JSON shape:
       "seoTitle": "",
       "seoDescription": "",
       "excerpt": "",
-      "contentType": "column",
+      "contentType": "breaking",
       "newsCategory": "AI",
       "topic": "",
       "audience": "",
@@ -135,14 +135,14 @@ Required JSON shape:
       "faqs": [{ "question": "", "answer": "" }],
       "sourceLinks": [{ "title": "", "url": "", "publisher": "", "publishedAt": "", "summary": "" }],
       "tags": ["AI", "ALTOS LAB"],
-      "author": "Ken",
+      "author": "Tommy",
       "coverAlt": "",
-      "coverSource": "generated",
-      "coverCredit": "ALTOS LAB 編輯視覺",
-      "coverCreditUrl": "",
-      "coverLicense": "",
-      "coverGeneration": { "source": "generated", "provider": "ChatGPT/GPT", "prompt": "", "generatedAt": "", "status": "generated", "visualChecks": { "topicFit": true, "noTextArtifacts": true, "noLogos": true, "noPeople": true, "noTrademarkRisk": true, "noGenericStockLook": true } },
-      "contentImages": [{ "url": "", "localPath": "", "alt": "", "caption": "", "source": "generated", "credit": "ALTOS LAB editorial visual", "aspectRatio": "wide", "placement": "after-lead", "provider": "ChatGPT/GPT", "prompt": "", "generatedAt": "", "visualChecks": { "topicFit": true, "noTextArtifacts": true, "noLogos": true, "noPeople": true, "noTrademarkRisk": true, "noGenericStockLook": true } }, { "url": "", "localPath": "", "alt": "", "caption": "", "source": "generated", "credit": "ALTOS LAB editorial visual", "aspectRatio": "wide", "placement": "mid-article", "provider": "ChatGPT/GPT", "prompt": "", "generatedAt": "", "visualChecks": { "topicFit": true, "noTextArtifacts": true, "noLogos": true, "noPeople": true, "noTrademarkRisk": true, "noGenericStockLook": true } }],
+      "coverSource": "source",
+      "coverCredit": "Source image: [publisher or official source]",
+      "coverCreditUrl": "https://source-article-or-official-announcement.example",
+      "coverLicense": "source-attributed",
+      "coverGeneration": null,
+      "contentImages": [],
       "generatedBy": "gemini",
       "aiDisclosure": ""
     }
