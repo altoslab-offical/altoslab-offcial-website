@@ -161,6 +161,42 @@ function base64Url(input) {
 }
 
 async function googleAccessToken(scope) {
+  const impersonatedServiceAccount = process.env.GOOGLE_IMPERSONATE_SERVICE_ACCOUNT;
+  if (impersonatedServiceAccount) {
+    try {
+      const { stdout } = await execFileAsync("gcloud", ["auth", "print-access-token"], { timeout: 12_000 });
+      const callerToken = stdout.trim();
+      if (!callerToken) return { ok: false, reason: "gcloud returned an empty caller token for service account impersonation" };
+      const response = await fetch(
+        `https://iamcredentials.googleapis.com/v1/projects/-/serviceAccounts/${encodeURIComponent(impersonatedServiceAccount)}:generateAccessToken`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${callerToken}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            scope: [scope],
+            lifetime: "3600s"
+          })
+        }
+      );
+      const json = await response.json().catch(() => ({}));
+      if (!response.ok || !json.accessToken) {
+        return {
+          ok: false,
+          reason: json.error?.message || `service account impersonation failed ${response.status}`
+        };
+      }
+      return { ok: true, accessToken: json.accessToken, provider: "service-account-impersonation" };
+    } catch (error) {
+      return {
+        ok: false,
+        reason: `service account impersonation failed: ${error instanceof Error ? error.message : String(error)}`
+      };
+    }
+  }
+
   const credentialsPath = process.env.GOOGLE_APPLICATION_CREDENTIALS || process.env.GA4_SERVICE_ACCOUNT_JSON;
   if (!credentialsPath) {
     const gcloudCommands = [
@@ -527,6 +563,14 @@ function renderTextReport(report) {
       ? `Search Console API：可讀（站台：${report.technical.searchConsoleSite}）`
       : `Search Console API：未可讀（${zhWarning(report.analytics.searchConsole.reason) || "尚未接上 API"}）`
     : `Search Console API：未設定 SITE URL（預設 ${report.technical.searchConsoleSite}）`;
+  const searchVerificationLine = report.technical.searchVerificationConfigured
+    ? "Search Console 驗證：已偵測到網站驗證碼"
+    : report.technical.searchConsoleApiReachable
+      ? `Search Console 驗證：已通過 API / DNS 驗證（${report.technical.searchConsoleSite}）`
+      : "Search Console 驗證：尚未偵測到";
+  const analyticsPlainLanguage = report.analytics.ga4.ok
+    ? `追蹤碼像門口的計數器，Data API 像每天把帳本拿出來看。現在兩邊都已經接上，所以日報可以用真實流量判斷文章表現。近 7 天總流量是 ${report.analytics.ga4.totalSessions} 次造訪。`
+    : "追蹤碼像門口的計數器，Data API 像每天把帳本拿出來看。現在門口計數器有裝，但帳本還沒接上，所以還不能用真實流量判斷文章表現。";
   const contentTypeLines = Object.entries(report.content.byType || {})
     .map(([type, count]) => `- ${typeLabel[type] || type}: ${count} 篇`)
     .join("\n");
@@ -577,7 +621,7 @@ ${incompleteLanguageLines || "- 沒有缺語言的文章組。"}
 2. GA / GTM / 搜尋資料
 - GA 追蹤碼：${report.technical.gaConfigured ? "有裝" : "沒裝"}
 - GTM 代碼：${report.technical.gtmConfigured ? "有裝" : "沒裝"}
-- Search Console 驗證：${report.technical.searchVerificationConfigured ? "已偵測到" : "尚未偵測到"}
+- ${searchVerificationLine}
 - ${ga4DataApiLine}
 - ${searchConsoleApiLine}
 - 近 7 天總流量：${report.analytics.ga4.ok ? `${report.analytics.ga4.totalSessions} 次造訪` : "目前讀不到"}
@@ -585,7 +629,7 @@ ${incompleteLanguageLines || "- 沒有缺語言的文章組。"}
 ${aiSourceLines}
 
 白話說：
-追蹤碼像門口的計數器，Data API 像每天把帳本拿出來看。現在門口計數器有裝，但帳本還沒接上，所以還不能用真實流量判斷文章表現。
+${analyticsPlainLanguage}
 
 3. 各語言入口
 ${languageIndexLines}
