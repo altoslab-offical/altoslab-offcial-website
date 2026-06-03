@@ -412,10 +412,15 @@ function buildInsights({ targetUrl, health, posts, surface, ga4, searchConsole }
       nextStep: "維持每天兩篇專欄，並用市場快訊補足即時訊號。"
     });
   }
+  const nextFocus = [];
+  if (!ga4.ok || !searchConsole.ok) nextFocus.push("把 GA/Search Console 數據接完整");
+  if (incompleteGroups.length) nextFocus.push("補齊缺語言的文章");
+  if (posts.length < 6) nextFocus.push("維持每天兩篇專欄與市場快訊節奏");
+  if (!nextFocus.length) nextFocus.push("用每日專欄與市場快訊穩定放大內容成效");
   const insight =
     seoScore >= 85 && geoScore >= 80
-      ? "網站的搜尋底座已經可用；下一步不是再看分數，而是把 GA/Search Console 數據接完整，並補齊缺語言的文章。"
-      : "網站還沒到可以放心放大的狀態；先補追蹤資料、語言完整性與文章可引用性，再增加發布量。";
+      ? `網站的搜尋底座已經可用；下一步不是再看分數，而是${nextFocus.join("，並")}。`
+      : `網站還沒到可以放心放大的狀態；先${nextFocus.join("，並")}，再增加發布量。`;
   return {
     targetUrl,
     generatedAt: new Date().toISOString(),
