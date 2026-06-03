@@ -72,12 +72,12 @@ assert(!generation.includes("deepseek-chat"), "generation does not use deprecate
 assert(generation.includes("Subtitle/standfirst craft rules"), "generation trains DeepSeek on compelling subtitle/standfirst rules");
 assert(generation.includes("Medium-style scene hook"), "generation includes creative narrative modes learned from market writing");
 assert(
-  generation.includes("Foreign-source sections must be plain-language source translation"),
+  generation.includes("Foreign-source context must be plain-language news attribution"),
   "generation requires foreign news to become plain-language source translation"
 );
 assert(
-  generation.includes("compact footnote"),
-  "generation tells DeepSeek source-translation notes render as compact footnotes"
+  generation.includes("Do not turn the article into an ALTOS LAB column"),
+  "generation prevents market-news briefs from becoming column templates"
 );
 
 assert(quality.includes("withLlmQualityEvaluation"), "quality gate can merge LLM-as-judge evaluation");
@@ -89,6 +89,7 @@ assert(quality.includes("technicalJargonPattern"), "quality gate requires jargon
 assert(quality.includes('"hentai"'), "quality gate blocks obvious off-topic adult typo terms in public blog copy");
 assert(quality.includes("through Gemini"), "quality gate requires Gemini-written/revised production articles");
 assert(quality.includes("market news posts must use a credited source article or official announcement image"), "quality gate requires market-news source covers");
+assert(quality.includes("market news posts must not expose internal source-translation"), "quality gate blocks market-news template/process headings");
 assert(quality.includes("ChatGPT/GPT"), "quality gate requires ChatGPT/GPT-generated production covers for generated-cover lanes");
 assert(covers.includes("BLOG_IMAGE_STORE_BLOB"), "image pipeline supports optional Vercel Blob persistence");
 assert(covers.includes("searchPexels") && covers.includes("searchPixabay"), "image pipeline supports expanded free image APIs");
@@ -366,8 +367,8 @@ const zhAgentPilotReadableText = zhAgentPilot
   : "";
 assert(Boolean(zhAgentPilot), "zh-Hant agent pilot baseline exists");
 assert(
-  zhAgentPilotReadableText.includes("把海外新聞翻成企業能用的判斷"),
-  "agent pilot article has a clear source-translation section heading"
+  !/(來源轉譯成企業判斷|把海外新聞翻成企業能用的判斷|來源與轉譯備註|ALTOS LAB 的實驗室判斷|本文包含海外來源轉譯)/i.test(zhAgentPilotReadableText),
+  "agent pilot market-news article does not expose internal source-translation or lab-note headings"
 );
 assert(
   !/\b(?:production traces?|eval(?:uation)? loops?|eval-driven|trace|evals?|rollback)\b/i.test(zhAgentPilotReadableText),
@@ -376,9 +377,18 @@ assert(
 assert(/\*\*[^*\n]{4,80}\*\*/.test(zhAgentPilot?.body || ""), "zh-Hant agent pilot article uses concise bold emphasis for scanability");
 
 const breakingWithoutNewsAnchor = seedPosts.filter(
-  (post) =>
-    post.contentType === "breaking" &&
-    !/最新背景|Latest context|最新背景：|최신 배경/.test(post.body || "")
+  (post) => {
+    if (post.contentType !== "breaking") return false;
+    const readable = [post.title, post.excerpt, post.geoSummary, post.body].join("\n");
+    const citesSourcePublisher = (post.sourceLinks || [])
+      .map((source) => source.publisher || "")
+      .filter(Boolean)
+      .some((publisher) => readable.toLowerCase().includes(publisher.toLowerCase().split("/")[0].trim()));
+    const citesDatedContext = /\b20\d{2}[/-]\d{1,2}[/-]\d{1,2}\b|\b20\d{2}\b|事件重點|發生了什麼|接下來要看什麼|Latest context|What happened|What to watch|最新背景：|최신 배경/i.test(
+      readable
+    );
+    return !citesSourcePublisher || !citesDatedContext;
+  }
 );
 assert(breakingWithoutNewsAnchor.length === 0, "breaking articles visibly cite latest source context");
 

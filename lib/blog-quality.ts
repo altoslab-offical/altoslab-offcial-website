@@ -135,6 +135,12 @@ const rawZhEnglishJargonPattern = /\b(?:production traces?|eval(?:uation)? loops
 const technicalJargonPattern =
   /\b(?:production traces?|eval(?:uation)? loops?|eval-driven|agentic workflow|workflow orchestration|orchestration|retrieval|routing|observability|vector database|context window|tool calls?|RAG)\b/i;
 
+const breakingTemplateLeakHeadingPattern =
+  /^(來源轉譯成企業判斷|把海外新聞翻成企業能用的判斷|海外新聞要轉譯成判斷|來源與轉譯備註|ALTOS LAB 的實驗室判斷|ALTOS LAB 實驗室判斷|ALTOS LAB 的判斷|ALTOS LAB 觀點|Source and translation note|Source translation note|Editorial read|Lab note|Lab POV|Operator note|ALTOS LAB's take)$/i;
+
+const breakingTemplateLeakBodyPattern =
+  /(本文包含海外來源轉譯|本文沒有逐字翻譯|不是把國外新聞翻成中文|我們不只是把國外新聞翻成中文|市場快訊時，會把海外新聞轉成|本週請列出三個流程|總分不到\s*\d+\s*分|先買工具再找場景)/i;
+
 const plainLanguageCuePattern =
   /(意思是|也就是|換成(?:企業)?語言|白話|可以理解成|翻成|先問|要回答|操作紀錄|固定測試題|測試題|人工審核|退回舊流程|回滾|what this means|in plain terms|put simply|for an operator|operation logs|test questions|human review|rollback path|つまり|言い換えると|쉽게 말해|운영 언어로)/i;
 
@@ -732,6 +738,13 @@ export function reviewContentTypeFit(post: BlogPost): ReviewResult {
 
   if (contentType === "breaking") {
     if (body.length > 3600) warnings.push("breaking article may be too long for a fast news format");
+    const h2Titles = [...post.body.matchAll(/^##\s+(.+)$/gm)].map((match) => match[1]?.trim() || "");
+    if (h2Titles.some((title) => breakingTemplateLeakHeadingPattern.test(title))) {
+      issues.push("market news posts must not expose internal source-translation, scorecard, lab-note or editorial-process headings");
+    }
+    if (breakingTemplateLeakBodyPattern.test(post.body)) {
+      issues.push("market news posts must read like a source-faithful news brief, not an internal translation/process note");
+    }
   } else if (contentType === "column") {
     const hasTable = /\|.+\|/.test(post.body);
     const hasNumberedFramework = /(^|\n)\d+\.\s+\S+/.test(post.body);

@@ -869,6 +869,10 @@ Editorial writing system:
 - Mode E, contrarian operator column: name the popular mistake, show why it fails, then give a sharper decision rule.
 - Strong articles usually include a memorable line, an honest take, one table/checklist, and a final judgment that a reader can repeat to a teammate.
 - Avoid same-shape articles. Do not always use the same H2 sequence, same "what changed/why it matters" frame, or same SEO/GEO ending.
+- Market-news title calibration: name the actor/source and the concrete move first, then the reader impact. Prefer verifiable nouns such as launch, availability, partnership, funding, policy, benchmark, security issue, rollout, region, price, capability or date. Avoid empty hype such as "顛覆", "終極", "改變一切", "所有人都在搶", "完整解析", "你一定要懂".
+- Market-news lead calibration: first sentence should say who is affected and what changed now. Second sentence can add one risk, open question, or operational implication. Do not open with ALTOS LAB process, internal translation method, or generic AI-era throat clearing.
+- Column calibration: the first 2-3 sentences must establish audience, time window, concrete signal and the decision tension before background. Use event + impact titles, not emotional adjectives. Every long column needs a visible boundary: region, date, source type, sample limit, or what the evidence cannot prove.
+- Column rhythm: move from background to case/source evidence, then risk, then decision/action. Use one memorable judgment per section, not a wall of tables. Bold only short decision words, risk conditions, deadlines, metrics or concrete operator questions; avoid bolding full paragraphs.
 
 Return exactly one valid JSON object. Do not include Markdown, prose, comments, analysis, XML, YAML or code fences.
 ${languageInstruction}
@@ -901,8 +905,10 @@ Quality rules:
 - Never put the content type label in the title or seoTitle. Do not prefix titles with "市場快訊", "Market brief", "Column", "Feature", "專欄", "專題", "市場ブリーフ", "コラム", "特集", "시장 브리프", "칼럼" or "기획". The website renders contentType as a separate badge.
 - Do not make the title a taxonomy bucket. The title must name the source/event/mechanism/operator question and the implication for the reader.
 - Use the listed RSS/source items as factual references only. Do not copy source wording, paragraphs, structure, images, charts, screenshots or article art.
-- If using foreign news, write it as a translated and adapted market signal. Include one short "Source and translation note" / "來源與轉譯備註" / equivalent local-language marker near the end of the body; the site renders this as a compact footnote, so keep it to 1 small paragraph and do not treat it as a main argument section.
-- Foreign-source sections must be plain-language source translation, not jargon display. They must answer: what did the source say, what does it mean for the reader's workflow, what should not be overclaimed, and what action or check follows.
+- If contentType is "breaking", write like a newsroom market brief: event first, verified facts, source attribution, uncertainty, and what readers should watch next. Do not turn the article into an ALTOS LAB column or a management framework.
+- If using foreign news, adapt the facts into original local-language copy. Do not translate paragraph by paragraph, copy the source article's section order, or reuse source-specific narrative color.
+- For breaking posts, do not use internal-editorial headings such as "來源轉譯成企業判斷", "把海外新聞翻成企業能用的判斷", "ALTOS LAB 的實驗室判斷", "source translation note", "editorial read", "lab note", "scorecard", or equivalent local-language variants. Source/credit context belongs in the source list or a compact note, not as a main H2 argument section.
+- Foreign-source context must be plain-language news attribution, not process display. It must answer: what did the source say, what is confirmed, what remains uncertain, and what readers can watch next.
 - Do not leave technical terms unexplained. If you use terms like trace, eval, rollback, orchestration, retrieval, routing, agent workflow, plugin or observability, define them in the article's language the first time they appear. For zh-Hant, prefer "操作紀錄", "固定測試題/評測", "回滾/退回舊流程", "工作流編排", "檢索", "路由", "可觀測性".
 - Use bold sparingly to help scanning: bold the one-sentence judgment, key operator questions, or concrete checklist phrase. Do not bold entire paragraphs.
 - Use ==important sentence== for one short in-article highlight only when a sentence should receive ALTOS LAB's fixed #A4FF00 emphasis underline. Do not use more than 1-2 highlighted sentences per article.
@@ -949,7 +955,7 @@ caption: One sentence explaining that values are relative editorial scores, not 
 - ${bodyLengthRule}
 - If contentType is "feature", include one Markdown comparison table and one step-by-step framework.
 - If contentType is "column", answer one concrete operator question and include tradeoffs, a decision table or numbered operator framework, plus next steps.
-- If contentType is "breaking", keep it timely and factual: what happened, why it matters, what remains uncertain, sources.
+- If contentType is "breaking", keep it timely and factual: what happened, who announced or reported it, why it matters now, what remains uncertain, and the credited sources. Avoid column-style frameworks, scorecards, lab-note headings, and internal translation-process sections.
 - Cover image metadata must be topic-specific: write coverAlt/visual language around the article's concrete subject, not generic dashboards, team meetings, server rooms or workspaces.
 - Keep status/review fields out of the JSON; the CMS will set them.`;
   }
