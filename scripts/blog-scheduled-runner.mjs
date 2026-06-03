@@ -492,24 +492,61 @@ function releaseWindowIssue({ date, slot }) {
 }
 
 async function release({ date, slot }) {
-  const doctor = await runDoctor({ mode: "release", date, slot });
-  await appendLog(globalScheduleLogPath(), JSON.stringify({ phase: "release-doctor", date, slot, doctor: compactDoctorResult(doctor) }));
-  if (!doctor.ok) {
-    return { ok: false, skipped: false, phase: "release-doctor", stdout: doctor.stdout, stderr: doctor.stderr };
-  }
-
   const indexPath = candidateIndexPath(date, slot);
   if (!(await exists(indexPath))) {
-    return { ok: true, skipped: true, phase: "release", reason: "missing prepared candidate", indexPath, doctor: compactDoctorResult(doctor) };
+    return { ok: true, skipped: true, phase: "release", reason: "missing prepared candidate", indexPath };
   }
   const index = await readJson(indexPath);
   const manifestPath = index.manifestPath || indexPath;
   if (!(await exists(manifestPath))) {
-    return { ok: true, skipped: true, phase: "release", reason: "prepared candidate manifest file missing", manifestPath, doctor: compactDoctorResult(doctor) };
+    return { ok: true, skipped: true, phase: "release", reason: "prepared candidate manifest file missing", manifestPath };
   }
   const manifest = await readJson(manifestPath);
   const articleSetPath = manifest.articleSetPath ? path.resolve(manifest.articleSetPath) : "";
   const articleSet = articleSetPath && (await exists(articleSetPath)) ? await readJson(articleSetPath) : null;
+  if (manifest.status === "released") {
+    const verification = await runCommand(process.execPath, [
+      "scripts/verify-blog-release.mjs",
+      "--manifest",
+      manifestPath
+    ], { cwd: process.cwd() });
+    await appendLog(path.join(path.dirname(manifestPath), "scheduled-release.log"), verification.stdout.trim());
+    if (verification.stderr.trim()) await appendLog(path.join(path.dirname(manifestPath), "scheduled-release.log"), verification.stderr.trim());
+    if (verification.code !== 0) {
+      return {
+        ok: false,
+        skipped: false,
+        phase: "post-release-verification",
+        code: verification.code,
+        stdout: verification.stdout,
+        stderr: verification.stderr,
+        manifestPath
+      };
+    }
+    const verified = JSON.parse(verification.stdout || "{}");
+    const releaseVerification = {
+      ok: verified.ok === true,
+      checkedAt: verified.checkedAt || new Date().toISOString(),
+      errors: verified.errors || [],
+      warnings: verified.warnings || [],
+      summary: verified.summary || {}
+    };
+    const manifestWithVerification = {
+      ...manifest,
+      updatedAt: new Date().toISOString(),
+      releaseVerification
+    };
+    await writeJson(manifestPath, manifestWithVerification);
+    await writeJson(indexPath, { ...manifestWithVerification, manifestPath });
+    return {
+      ok: true,
+      skipped: false,
+      phase: "post-release-verification",
+      status: "released",
+      releaseVerification,
+      manifestPath
+    };
+  }
   const issues = releaseGateIssues(manifest, { date, slot, articleSet });
   const windowIssue = releaseWindowIssue({ date, slot });
   if (windowIssue) issues.push(windowIssue);
@@ -517,7 +554,14 @@ async function release({ date, slot }) {
     issues.push("articleSetPath file is missing");
   }
   if (issues.length) {
-    return { ok: true, skipped: true, phase: "release", reason: "release gate held", issues, manifestPath, doctor: compactDoctorResult(doctor) };
+    await appendLog(globalScheduleLogPath(), JSON.stringify({ phase: "release-held", date, slot, manifestPath, issues }));
+    return { ok: true, skipped: true, phase: "release", reason: "release gate held", issues, manifestPath };
+  }
+
+  const doctor = await runDoctor({ mode: "release", date, slot });
+  await appendLog(globalScheduleLogPath(), JSON.stringify({ phase: "release-doctor", date, slot, doctor: compactDoctorResult(doctor) }));
+  if (!doctor.ok) {
+    return { ok: false, skipped: false, phase: "release-doctor", stdout: doctor.stdout, stderr: doctor.stderr };
   }
 
   const result = await runCommand(process.execPath, [
@@ -556,6 +600,20 @@ async function release({ date, slot }) {
     };
   }
   const verified = JSON.parse(verification.stdout || "{}");
+  const releaseVerification = {
+    ok: verified.ok === true,
+    checkedAt: verified.checkedAt || new Date().toISOString(),
+    errors: verified.errors || [],
+    warnings: verified.warnings || [],
+    summary: verified.summary || {}
+  };
+  const releasedWithVerification = {
+    ...released,
+    updatedAt: new Date().toISOString(),
+    releaseVerification
+  };
+  await writeJson(manifestPath, releasedWithVerification);
+  await writeJson(indexPath, { ...releasedWithVerification, manifestPath });
   return {
     ok: true,
     skipped: false,
@@ -563,12 +621,7 @@ async function release({ date, slot }) {
     status: released.status,
     publishedIds: released.publish?.publishedIds || [],
     heldDraftIds: released.publish?.heldDraftIds || [],
-    releaseVerification: {
-      ok: verified.ok === true,
-      errors: verified.errors || [],
-      warnings: verified.warnings || [],
-      summary: verified.summary || {}
-    },
+    releaseVerification,
     doctor: compactDoctorResult(doctor),
     manifestPath
   };

@@ -62,4 +62,4 @@ Daily status email should be sent:
 - From: `Altoslab447@gmail.com`
 - To: `Altoslab.offical@gmail.com`
 
-The sender account must be verified before sending. If the active Gmail connector is not `Altoslab447@gmail.com`, the automation must hold the send and report the mismatch; it must not send from a personal or wrong account.
+The production send path is Gmail web UI in Chrome, not the Gmail connector. The connector may be used only for read/search diagnostics when explicitly needed. Before pressing send, the operator must verify the active Gmail account is exactly `Altoslab447@gmail.com`; if the account cannot be verified, hold the send and report the mismatch instead of sending from a personal or wrong account.
