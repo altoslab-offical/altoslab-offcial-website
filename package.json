@@ -23,7 +23,8 @@
     "blog:verify-release": "node scripts/verify-blog-release.mjs",
     "blog:install-agent": "scripts/install-blog-launch-agent.sh",
     "seo:geo-report": "node scripts/seo-geo-insight-report.mjs",
-    "test": "npm run typecheck && npm run test:blog"
+    "test": "npm run typecheck && npm run test:blog",
+    "blog:market-scan": "node scripts/blog-scheduled-runner.mjs --market-scan"
   },
   "dependencies": {
     "@next/third-parties": "^16.2.6",

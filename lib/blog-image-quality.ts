@@ -564,7 +564,7 @@ export async function reviewBlogImagesForRelease(
   ];
   const warnings = postReviews.flatMap((review) => review.warnings.map((warning) => `${review.language}/${review.slug}: ${warning}`));
   const score = postReviews.length ? Math.max(0, Math.min(...postReviews.map((review) => review.score)) - setIssues.length * 18) : 0;
-  const approved = postReviews.length > 0 && postReviews.every((review) => review.approved) && setIssues.length === 0;
+  const approved = postReviews.length > 0 && postReviews.every((review) => review.approved) && setIssues.length === 0 && warnings.length === 0;
   const notes = approved
     ? `ALTOS LAB image QA approved all covers. Score ${score}/${IMAGE_THRESHOLD}.`
     : `ALTOS LAB image QA held publish. Score ${score}/${IMAGE_THRESHOLD}. Issues: ${issues.join("; ")}`;

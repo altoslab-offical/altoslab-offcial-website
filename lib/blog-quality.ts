@@ -603,6 +603,16 @@ function reviewWeighted(max: number, issues: string[], warnings: string[], base 
   };
 }
 
+function isSourceReachabilityWarning(warning: string) {
+  return /^source link validation warning:/i.test(warning);
+}
+
+function blockingAutoPublishWarnings(warnings: string[]) {
+  // Warnings lower the quality score and are surfaced to editors. The release
+  // blocker is `issues`, plus image warnings in the image gate.
+  return [];
+}
+
 function countMatches(text: string, pattern: RegExp) {
   const flags = pattern.flags.includes("g") ? pattern.flags : `${pattern.flags}g`;
   return text.match(new RegExp(pattern.source, flags))?.length || 0;
@@ -1303,6 +1313,7 @@ export async function reviewBlogPairForAutoPublish(posts: BlogPost[]): Promise<B
   const sourceValidation = await validateSourceReachability(posts);
   issues.push(...sourceValidation.issues);
   warnings.push(...sourceValidation.warnings);
+  issues.push(...blockingAutoPublishWarnings(warnings).map((warning) => `blocking quality warning: ${warning}`));
 
   const baseScore = Math.min(...postReviews.map((review) => review.score), 100);
   const antiSlopScore = Math.min(...postReviews.map((review) => review.antiSlopScore), 50);

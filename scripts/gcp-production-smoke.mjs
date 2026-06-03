@@ -139,6 +139,8 @@ async function main() {
         integrations: {
           gtmConfigured: health.integrations?.gtmConfigured,
           gaConfigured: health.integrations?.gaConfigured,
+          ga4PropertyConfigured: health.integrations?.ga4PropertyConfigured,
+          searchConsoleSiteConfigured: health.integrations?.searchConsoleSiteConfigured,
           externalBlogIngestConfigured: health.integrations?.externalBlogIngestConfigured,
           imageGcsStorageConfigured: health.integrations?.imageGcsStorageConfigured,
           legacyDeepSeekCronDisabled: health.integrations?.legacyDeepSeekCronDisabled,
@@ -156,6 +158,9 @@ async function main() {
   }
   if (health?.integrations?.gtmConfigured !== true) pushIssue(errors, "GTM must be configured", { surface: "health" });
   if (health?.integrations?.gaConfigured !== true) pushIssue(errors, "GA must be configured", { surface: "health" });
+  if (health?.integrations?.searchConsoleSiteConfigured !== true) {
+    pushIssue(errors, "Search Console site URL must be configured", { surface: "health" });
+  }
   if (health?.integrations?.externalBlogIngestConfigured !== true) {
     pushIssue(errors, "signed blog ingest must be configured", { surface: "health" });
   }

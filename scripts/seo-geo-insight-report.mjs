@@ -225,9 +225,9 @@ async function googleAccessToken(scope) {
 
 async function ga4Report() {
   const propertyId = process.env.GA4_PROPERTY_ID || process.env.GOOGLE_ANALYTICS_PROPERTY_ID;
-  if (!propertyId) return { configured: false, ok: false, reason: "GA4_PROPERTY_ID is not configured" };
+  if (!propertyId) return { configured: false, ok: false, reason: "GA4_PROPERTY_ID is not configured", propertyId: "" };
   const token = await googleAccessToken("https://www.googleapis.com/auth/analytics.readonly");
-  if (!token.ok) return { configured: true, ok: false, reason: token.reason };
+  if (!token.ok) return { configured: true, ok: false, reason: token.reason, propertyId };
   const response = await fetch(`https://analyticsdata.googleapis.com/v1beta/properties/${propertyId}:runReport`, {
     method: "POST",
     headers: {
@@ -242,7 +242,8 @@ async function ga4Report() {
     })
   });
   const json = await response.json().catch(() => ({}));
-  if (!response.ok) return { configured: true, ok: false, reason: json.error?.message || `GA4 runReport failed ${response.status}` };
+  if (!response.ok)
+    return { configured: true, ok: false, reason: json.error?.message || `GA4 runReport failed ${response.status}`, propertyId };
   const rows = Array.isArray(json.rows) ? json.rows : [];
   const normalizedRows = rows.map((row) => {
     const dimensions = row.dimensionValues?.map((value) => value.value || "") || [];
@@ -259,6 +260,7 @@ async function ga4Report() {
   return {
     configured: true,
     ok: true,
+    propertyId,
     totalSessions: normalizedRows.reduce((sum, row) => sum + row.sessions, 0),
     aiSessions: aiRows.reduce((sum, row) => sum + row.sessions, 0),
     aiEngagedSessions: aiRows.reduce((sum, row) => sum + row.engagedSessions, 0),
@@ -269,8 +271,10 @@ async function ga4Report() {
 
 async function searchConsoleReport(targetUrl) {
   const site = process.env.SEARCH_CONSOLE_SITE_URL || process.env.GOOGLE_SEARCH_CONSOLE_SITE_URL || `${targetUrl}/`;
+  const siteConfigured = Boolean(process.env.SEARCH_CONSOLE_SITE_URL || process.env.GOOGLE_SEARCH_CONSOLE_SITE_URL);
   const token = await googleAccessToken("https://www.googleapis.com/auth/webmasters.readonly");
-  if (!token.ok) return { configured: true, ok: false, reason: token.reason };
+  if (!token.ok)
+    return { configured: true, ok: false, reason: token.reason, site, siteConfigured };
   const response = await fetch(`https://www.googleapis.com/webmasters/v3/sites/${encodeURIComponent(site)}/searchAnalytics/query`, {
     method: "POST",
     headers: {
@@ -285,12 +289,21 @@ async function searchConsoleReport(targetUrl) {
     })
   });
   const json = await response.json().catch(() => ({}));
-  if (!response.ok) return { configured: true, ok: false, reason: json.error?.message || `Search Console query failed ${response.status}` };
+  if (!response.ok)
+    return {
+      configured: true,
+      ok: false,
+      reason: json.error?.message || `Search Console query failed ${response.status}`,
+      site,
+      siteConfigured
+    };
   const rows = Array.isArray(json.rows) ? json.rows : [];
   const blogRows = rows.filter((row) => String(row.keys?.[0] || "").includes(`${targetUrl}/blog`) || String(row.keys?.[0] || "").includes("/blog"));
   return {
     configured: true,
     ok: true,
+    site,
+    siteConfigured,
     totalClicks: rows.reduce((sum, row) => sum + Number(row.clicks || 0), 0),
     totalImpressions: rows.reduce((sum, row) => sum + Number(row.impressions || 0), 0),
     blogClicks: blogRows.reduce((sum, row) => sum + Number(row.clicks || 0), 0),
@@ -448,6 +461,11 @@ function buildInsights({ targetUrl, health, posts, surface, ga4, searchConsole }
       sourceDomains: sourceDomains.slice(0, 30)
     },
     technical: {
+      ga4PropertyIdConfigured: Boolean(ga4.propertyId),
+      ga4ApiReachable: Boolean(ga4.ok),
+      searchConsoleSiteConfigured: Boolean(searchConsole.siteConfigured),
+      searchConsoleSite: searchConsole.site,
+      searchConsoleApiReachable: Boolean(searchConsole.ok),
       gaConfigured: Boolean(health?.integrations?.gaConfigured),
       gtmConfigured: Boolean(health?.integrations?.gtmConfigured),
       searchVerificationConfigured: Boolean(health?.integrations?.searchVerificationConfigured),
@@ -483,6 +501,8 @@ function renderTextReport(report) {
     warning
       .replace("GA4 Data API not producing metrics: GA4_PROPERTY_ID is not configured", "GA4 後台資料還沒接上，所以目前只能確認追蹤碼有裝，還不能看到實際流量數字。")
       .replace("Search Console API not producing metrics: Request had insufficient authentication scopes.", "Search Console API 權限不足，所以目前看不到 Google 搜尋曝光與點擊資料。")
+      .replace("Request had insufficient authentication scopes.", "Search Console API 權限不足，所以目前看不到 Google 搜尋曝光與點擊資料。")
+      .replace("insufficient authentication scopes", "權限不足")
       .replace(/(\d+) translation groups are not complete for all configured languages\./, "$1 組文章還沒有補齊所有語言版本。")
       .replace(
         /(\d+) market-news groups are missing configured languages: (.*)/,
@@ -497,6 +517,16 @@ function renderTextReport(report) {
         .map(([source, count]) => `- ${source}: ${count} 次造訪`)
         .join("\n") || "- 近 7 天還沒有看到可辨識的 AI 來源流量。"
     : "- 目前還不能讀 GA4 後台數據，原因是 GA4_PROPERTY_ID / Data API 權限尚未完成。";
+  const ga4DataApiLine = report.technical.ga4PropertyIdConfigured
+    ? report.technical.ga4ApiReachable
+      ? "GA4 Data API：可讀（已成功回傳 7 天指標）"
+      : `GA4 Data API：未可讀（${zhWarning(report.analytics.ga4.reason) || "尚未接上 API"}）`
+    : "GA4 Data API：未設定 GA4_PROPERTY_ID";
+  const searchConsoleApiLine = report.technical.searchConsoleSiteConfigured
+    ? report.technical.searchConsoleApiReachable
+      ? `Search Console API：可讀（站台：${report.technical.searchConsoleSite}）`
+      : `Search Console API：未可讀（${zhWarning(report.analytics.searchConsole.reason) || "尚未接上 API"}）`
+    : `Search Console API：未設定 SITE URL（預設 ${report.technical.searchConsoleSite}）`;
   const contentTypeLines = Object.entries(report.content.byType || {})
     .map(([type, count]) => `- ${typeLabel[type] || type}: ${count} 篇`)
     .join("\n");
@@ -548,6 +578,8 @@ ${incompleteLanguageLines || "- 沒有缺語言的文章組。"}
 - GA 追蹤碼：${report.technical.gaConfigured ? "有裝" : "沒裝"}
 - GTM 代碼：${report.technical.gtmConfigured ? "有裝" : "沒裝"}
 - Search Console 驗證：${report.technical.searchVerificationConfigured ? "已偵測到" : "尚未偵測到"}
+- ${ga4DataApiLine}
+- ${searchConsoleApiLine}
 - 近 7 天總流量：${report.analytics.ga4.ok ? `${report.analytics.ga4.totalSessions} 次造訪` : "目前讀不到"}
 - 近 7 天 AI 來源流量：${report.analytics.ga4.ok ? `${report.analytics.ga4.aiSessions} 次造訪` : "目前讀不到"}
 ${aiSourceLines}

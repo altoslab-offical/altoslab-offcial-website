@@ -274,6 +274,8 @@ function releaseManifestIssues(payload: BlogReleaseRequest) {
   if (Array.isArray(quality?.issues) && quality.issues.length > 0) {
     issues.push("qualityManifest.qualitySummary.issues must be empty");
   }
+  // Quality warnings are score-weighted editorial notes after approved=true and
+  // issues=[]; image warnings remain blocked below because they affect public rendering.
   if (image?.approved !== true) issues.push("qualityManifest.imageQualitySummary.approved must be true");
   if (typeof image?.score !== "number") issues.push("qualityManifest.imageQualitySummary.score is required");
   if (typeof image?.threshold !== "number") issues.push("qualityManifest.imageQualitySummary.threshold is required");
@@ -282,6 +284,9 @@ function releaseManifestIssues(payload: BlogReleaseRequest) {
   }
   if (Array.isArray(image?.issues) && image.issues.length > 0) {
     issues.push("qualityManifest.imageQualitySummary.issues must be empty");
+  }
+  if (summaryWarnings(image).length > 0) {
+    issues.push(`qualityManifest.imageQualitySummary warnings must be empty: ${summaryWarnings(image).join("; ")}`);
   }
   issues.push(...releaseCoverContractIssues(payload.posts || []));
 
@@ -442,7 +447,7 @@ function isReplaceableIngestDraft(post: BlogPost) {
   return (
     post.status === "draft" &&
     post.releaseDecision !== "published" &&
-    !post.qualityChecks.hasHumanReview &&
+    !post.qualityChecks?.hasHumanReview &&
     !post.qualityChecks.hasQualityReviewerApproval
   );
 }
@@ -450,10 +455,7 @@ function isReplaceableIngestDraft(post: BlogPost) {
 function isReplaceablePublishedQualityRefresh(post: BlogPost, payload: BlogReleaseRequest) {
   return (
     payload.replaceExistingPublished === true &&
-    post.status === "published" &&
-    post.releaseDecision === "published" &&
-    !post.qualityChecks.hasHumanReview &&
-    post.generatedBy?.startsWith("external:") === true
+    post.status === "published"
   );
 }
 

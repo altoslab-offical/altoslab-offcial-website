@@ -159,6 +159,17 @@ assert(!orchestrator.includes("--generate-missing-covers"), "orchestrator does n
 assert(scheduledRunner.includes("PREP_WINDOWS") && scheduledRunner.includes("RELEASE_WINDOWS"), "scheduled runner separates prep and release windows");
 assert(scheduledRunner.includes("MARKET_SCAN_WINDOWS"), "scheduled runner has a separate market-news scan cadence");
 assert(scheduledRunner.includes("--market-scan"), "scheduled runner can create market-news fast-lane scan prompts");
+assert(
+  scheduledRunner.includes("{ hour: 10, minute: 30 }") &&
+    scheduledRunner.includes("{ hour: 12, minute: 30 }") &&
+    scheduledRunner.includes("{ hour: 14, minute: 30 }"),
+  "scheduled runner includes all daytime market-scan window times"
+);
+assert(
+  scheduledRunner.includes("{ hour: 18, minute: 30 }") &&
+    scheduledRunner.includes("{ hour: 20, minute: 30 }"),
+  "scheduled runner includes all late market-scan window times"
+);
 assert(scheduledRunner.includes("awaiting_browser_production"), "scheduled prep creates a manifest skeleton instead of pretending to publish");
 assert(scheduledRunner.includes("releaseGateIssues"), "scheduled release checks the prepared candidate manifest before publishing");
 assert(scheduledRunner.includes("releaseWindowIssue"), "scheduled release refuses to publish outside the configured release window");
@@ -172,6 +183,10 @@ assert(scheduledRunner.includes("scripts/verify-blog-release.mjs"), "scheduled r
 assert(scheduledRunner.includes("reuse-validated-manifest"), "scheduled release reuses the already approved signed manifest instead of running duplicate QA");
 assert(scheduledRunner.includes("retryableHeldManifest"), "scheduled release can retry a transient release failure without bypassing gates");
 assert(sopDoctor.includes("BLOG_DISABLE_DEEPSEEK_CRON must be true"), "SOP doctor requires the legacy DeepSeek cron to stay disabled");
+assert(sopDoctor.includes("[8, 10]") && sopDoctor.includes("[9, 0]") && sopDoctor.includes("[9, 4]"), "SOP doctor enforces prep/release launch windows in its trigger checks");
+assert(sopDoctor.includes("[10, 30]") && sopDoctor.includes("[12, 30]") && sopDoctor.includes("[14, 30]"), "SOP doctor enforces all market-scan launch windows");
+assert(sopDoctor.includes("[15, 10]") && sopDoctor.includes("[16, 0]") && sopDoctor.includes("[16, 4]"), "SOP doctor enforces late-day prep/release launch windows");
+assert(sopDoctor.includes("[18, 30]") && sopDoctor.includes("[20, 30]"), "SOP doctor enforces late market-scan launch windows");
 assert(sopDoctor.includes("production cmsStorage.provider must be cloudflare-kv or gcs"), "SOP doctor verifies a durable production CMS store");
 assert(sopDoctor.includes("release verification requires ALTOS_ADMIN_PASSWORD"), "SOP doctor requires admin readback credentials for release");
 assert(sopDoctor.includes("\"ready\", \"released\""), "SOP doctor accepts already released candidates for post-release audit");

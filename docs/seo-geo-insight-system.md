@@ -21,6 +21,13 @@ The report intentionally separates readiness from live performance. If GA4 Data 
 npm run seo:geo-report -- --base-url https://altoslab-ai.cc --format text
 ```
 
+腳本輸出會分 3 層判讀：
+- `GA / GTM`：是否有把 `NEXT_PUBLIC_GA_MEASUREMENT_ID` / `NEXT_PUBLIC_GTM_ID` 安裝上。
+- `GA4 Data API`：是否設定 `GA4_PROPERTY_ID`，以及 `runReport` 能否成功讀回近 7 天資料。
+- `Search Console API`：是否設定 `SEARCH_CONSOLE_SITE_URL`，以及是否能用 Google 的 Search Console API 讀回曝光、點擊。
+
+如果某一層沒有通過，報告的「2. GA / GTM / 搜尋資料」會直接列出下一步行動，不會拿假數字或猜測值。`GA4` 或 `Search Console` 未讀到資料時，預設會把警告標為「尚未可讀」，並要求先補齊授權與環境設定。
+
 Optional machine-readable report:
 
 ```bash

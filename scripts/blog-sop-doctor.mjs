@@ -20,6 +20,20 @@ const GENERIC_STOCK_IMAGE_HOSTS = [
   "api.openverse.org",
   "api.openverse.engineering"
 ];
+const LAUNCH_AGENT_TRIGGERS = [
+  [8, 10],
+  [9, 0],
+  [9, 4],
+  [10, 30],
+  [12, 30],
+  [14, 30],
+  [15, 10],
+  [16, 0],
+  [16, 4],
+  [18, 30],
+  [20, 30]
+];
+const LAUNCH_AGENT_PLIST = path.join(process.env.HOME || "", "Library/LaunchAgents/com.altoslab.blog-local-worker.plist");
 const SLOTS = {
   morning: "09:00",
   afternoon: "16:00"
@@ -236,16 +250,28 @@ function checkLaunchAgent(errors, warnings) {
   if (!output.includes("/Users/asdc163/Documents/官方網站")) {
     addIssue(errors, "LaunchAgent must run from /Users/asdc163/Documents/官方網站");
   }
-  for (const [hour, minute] of [
-    [8, 10],
-    [9, 0],
-    [9, 4],
-    [15, 10],
-    [16, 0],
-    [16, 4]
-  ]) {
-    if (!output.includes(`"Hour" => ${hour}`) || !output.includes(`"Minute" => ${minute}`)) {
-      addIssue(errors, `LaunchAgent is missing ${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")} calendar trigger`);
+  if (!fs.existsSync(LAUNCH_AGENT_PLIST)) {
+    addIssue(errors, "LaunchAgent plist is missing", { plistPath: LAUNCH_AGENT_PLIST });
+  } else {
+    const plistResult = spawnSync("plutil", ["-convert", "json", "-o", "-", LAUNCH_AGENT_PLIST], {
+      encoding: "utf8"
+    });
+    let launchAgentConfig = null;
+    try {
+      launchAgentConfig = JSON.parse(plistResult.stdout || "{}");
+    } catch {
+      addIssue(errors, "LaunchAgent plist could not be parsed as JSON", { plistPath: LAUNCH_AGENT_PLIST });
+    }
+    const intervals = Array.isArray(launchAgentConfig?.StartCalendarInterval)
+      ? launchAgentConfig.StartCalendarInterval
+      : launchAgentConfig?.StartCalendarInterval
+        ? [launchAgentConfig.StartCalendarInterval]
+        : [];
+    const triggerSet = new Set(intervals.map((interval) => `${Number(interval.Hour)}:${Number(interval.Minute)}`));
+    for (const [hour, minute] of LAUNCH_AGENT_TRIGGERS) {
+      if (!triggerSet.has(`${hour}:${minute}`)) {
+        addIssue(errors, `LaunchAgent is missing ${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")} calendar trigger`);
+      }
     }
   }
   if (!output.includes("last exit code = 0") && !output.includes("last exit code = (never exited)")) {

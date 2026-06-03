@@ -21,6 +21,7 @@ type BlogIngestRequest = {
   translationGroupId?: string;
   publishMode?: PublishMode;
   validateOnly?: boolean;
+  replaceExistingPublished?: boolean;
   generation?: {
     provider?: "gemini-chatgpt" | "local-antigravity" | "local";
     model?: string;
@@ -421,7 +422,14 @@ export async function POST(request: Request) {
         const existing = data.blogPosts.filter(
           (post) => post.ingestRunId === ingestRunId || (translationGroupId && post.translationGroupId === translationGroupId)
         );
-        const protectedExisting = existing.filter((post) => !isReplaceableIngestDraft(post));
+        const protectedExisting = existing.filter(
+          (post) =>
+            !isReplaceableIngestDraft(post) &&
+            !(
+              payload.replaceExistingPublished === true &&
+              post.status === "published"
+            )
+        );
         if (protectedExisting.length) {
           return {
             ok: true,

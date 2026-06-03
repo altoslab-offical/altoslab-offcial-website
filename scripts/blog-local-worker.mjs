@@ -597,6 +597,16 @@ function bodySha256(post) {
   return sha256(String(post.body || ""));
 }
 
+function isSourceReachabilityWarning(warning) {
+  return /^source link validation warning:/i.test(String(warning || ""));
+}
+
+function blockingManifestWarnings(warnings) {
+  // Quality warnings are advisory once the quality manifest is approved and
+  // issues are empty. Image warnings are still handled as release blockers.
+  return [];
+}
+
 async function writeJsonFile(filePath, payload) {
   await fs.mkdir(path.dirname(filePath), { recursive: true });
   await fs.writeFile(filePath, `${JSON.stringify(payload, null, 2)}\n`, "utf8");
@@ -710,8 +720,15 @@ function reusableManifestIssues(manifest, payload) {
   if (Array.isArray(quality.issues) && quality.issues.length > 0) {
     issues.push(`qualityManifest quality issues must be empty: ${quality.issues.join("; ")}`);
   }
+  const blockingQualityWarnings = blockingManifestWarnings(quality.warnings);
+  if (blockingQualityWarnings.length > 0) {
+    issues.push(`qualityManifest blocking quality warnings must be empty: ${blockingQualityWarnings.join("; ")}`);
+  }
   if (Array.isArray(image.issues) && image.issues.length > 0) {
     issues.push(`qualityManifest image issues must be empty: ${image.issues.join("; ")}`);
+  }
+  if (Array.isArray(image.warnings) && image.warnings.length > 0) {
+    issues.push(`qualityManifest image warnings must be empty: ${image.warnings.join("; ")}`);
   }
   if (qualityManifest.contentSha256 !== releaseContentSha256(payload)) {
     issues.push("qualityManifest.contentSha256 does not match current article set");

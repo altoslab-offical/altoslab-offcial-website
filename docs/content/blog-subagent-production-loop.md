@@ -41,15 +41,17 @@ The Codex app heartbeat automation is the primary scheduler for this workflow:
 
 - Automation id: `altos-blog-subagent-production-loop`
 - Target: current main-brain thread
-- Times: `08:10`, `09:00`, `09:04`, `15:10`, `16:00`, and `16:04` Asia/Taipei
+- Times: `08:10`, `09:00`, `09:04`, `10:30`, `12:30`, `14:30`, `15:10`, `16:00`, `16:04`, `18:30`, and `20:30` Asia/Taipei
 - Prep windows: `08:10` and `15:10`
 - Release windows: `09:00` and `16:00`
+- Market-scan windows: `10:30`, `12:30`, `14:30`, `18:30`, and `20:30`
 - Post-release follow-up windows: `09:04` and `16:04`
 
-The macOS LaunchAgent is the deterministic safety runner. It wakes at the same six windows and does only two things:
+The macOS LaunchAgent is the deterministic safety runner. It wakes at all above windows and does only three things:
 
 - prep windows: create a run folder, prompt card, and `awaiting_browser_production` manifest skeleton;
 - release windows: publish only an already `ready` manifest.
+- market-scan windows: refresh source-fast-lane prompts/manifests for possible follow-on Gemini browser execution;
 
 Before either path continues, the runner executes:
 
@@ -65,6 +67,7 @@ It does not pretend to operate Gemini or ChatGPT. Browser/Gemini/GPT production 
 
 At prep time, the main brain must prepare a publishable candidate manifest before the release window.
 At release time, the main brain must not start fresh generation. If no prepared, validate-only-passed, design-approved candidate exists, skip publishing.
+At market-scan windows, the runner never publishes. It only creates/updates `awaiting_market_browser_production` manifests and keeps fail-closed gate coverage unchanged for the same-day 09:00 / 16:00 publish windows.
 At post-release follow-up time, the main brain must not start fresh generation. It verifies a released manifest or reruns the release gate once if the manifest is still ready and the five-minute release grace window is still open.
 The manifest contract lives in `docs/content/blog-prepared-candidate-manifest.md`.
 The prompt-card contract lives in `docs/content/blog-prompt-card-template.md`.

@@ -21,6 +21,10 @@ export async function GET() {
     integrations: {
       gtmConfigured: isGtmConfigured(),
       gaConfigured: isGaConfigured(),
+      ga4PropertyConfigured: Boolean((process.env.GA4_PROPERTY_ID || process.env.GOOGLE_ANALYTICS_PROPERTY_ID)?.trim()),
+      searchConsoleSiteConfigured: Boolean(
+        (process.env.SEARCH_CONSOLE_SITE_URL || process.env.GOOGLE_SEARCH_CONSOLE_SITE_URL)?.trim()
+      ),
       deepSeekConfigured: Boolean(process.env.DEEPSEEK_API_KEY?.trim()),
       deepSeekContentModel: process.env.DEEPSEEK_CONTENT_MODEL || "deepseek-v4-pro",
       deepSeekRouterModel: process.env.DEEPSEEK_ROUTER_MODEL || "deepseek-v4-flash",

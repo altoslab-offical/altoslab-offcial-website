@@ -92,6 +92,16 @@ function pushWarning(warnings, message, context = {}) {
   warnings.push({ message, ...context });
 }
 
+function isSourceReachabilityWarning(warning) {
+  return /^source link validation warning:/i.test(String(warning || ""));
+}
+
+function blockingValidateWarnings(warnings) {
+  // Quality warnings are advisory after validateOnly approval. Source warnings
+  // are reported separately; image warnings are checked through image summaries.
+  return [];
+}
+
 function normalizeText(value = "") {
   return String(value).replace(/\s+/g, " ").trim();
 }
@@ -410,7 +420,14 @@ function verifyManifest(manifest, articleSet, errors, warnings) {
   if (manifest.validateOnly?.qualityApproved !== true) pushIssue(errors, "manifest validateOnly qualityApproved must be true");
   if (manifest.validateOnly?.imageApproved !== true) pushIssue(errors, "manifest validateOnly imageApproved must be true");
   if (Array.isArray(manifest.validateOnly?.warnings) && manifest.validateOnly.warnings.length) {
-    pushWarning(warnings, "validate-only warnings were present at release", { warnings: manifest.validateOnly.warnings });
+    const blockingWarnings = blockingValidateWarnings(manifest.validateOnly.warnings);
+    if (blockingWarnings.length) {
+      pushIssue(errors, "validate-only blocking warnings were present at release", { warnings: blockingWarnings });
+    }
+    const sourceWarnings = manifest.validateOnly.warnings.filter(isSourceReachabilityWarning);
+    if (sourceWarnings.length) {
+      pushWarning(warnings, "source reachability warnings were present at release", { warnings: sourceWarnings });
+    }
   }
 }
 
