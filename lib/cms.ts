@@ -289,6 +289,10 @@ function publicBlogCacheKey() {
   return config ? `${config.cmsPathname}:public-blog:v1` : "";
 }
 
+function containsUnicodeReplacement(value: unknown): boolean {
+  return typeof value === "string" ? value.includes("\uFFFD") : JSON.stringify(value).includes("\uFFFD");
+}
+
 function compactPublicBlogPost(post: BlogPost): BlogPost {
   return {
     ...post,
@@ -353,6 +357,11 @@ async function readPublicBlogCache() {
   try {
     const parsed = JSON.parse(raw) as { posts?: BlogPost[] };
     if (!Array.isArray(parsed.posts)) return null;
+    if (containsUnicodeReplacement(parsed.posts)) {
+      await namespace.delete(key).catch(() => undefined);
+      console.warn("[cms] Public blog cache contains replacement characters; rebuilding from CMS data.");
+      return null;
+    }
     publicBlogPostsCache = { posts: parsed.posts, expiresAt: Date.now() + PUBLIC_BLOG_CACHE_TTL_MS };
     return parsed.posts;
   } catch (error) {
@@ -391,7 +400,11 @@ async function readPublishedBlogPostsForPublic() {
   if (cached) return cached;
 
   const data = await readPublicRawCmsData();
-  return publicBlogPostsFromData(data);
+  const posts = publicBlogPostsFromData(data);
+  await writePublicBlogCacheFromData(data).catch((error) => {
+    console.warn("[cms] Unable to rebuild public blog cache:", error instanceof Error ? error.message : error);
+  });
+  return posts;
 }
 
 export function toPublicPage(page: SitePage): SitePage {

@@ -19,6 +19,7 @@
     "blog:worker": "node scripts/blog-local-worker.mjs",
     "blog:orchestrate": "node scripts/blog-antigravity-orchestrator.mjs",
     "blog:scheduled": "node scripts/blog-scheduled-runner.mjs",
+    "blog:backfill": "node scripts/blog-backfill-planner.mjs",
     "blog:doctor": "node scripts/blog-sop-doctor.mjs",
     "blog:verify-release": "node scripts/verify-blog-release.mjs",
     "blog:install-agent": "scripts/install-blog-launch-agent.sh",

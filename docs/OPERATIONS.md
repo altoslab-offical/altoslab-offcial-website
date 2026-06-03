@@ -101,7 +101,7 @@ BLOG_DISABLE_DEEPSEEK_CRON=true
 BLOG_INGEST_HMAC_SECRET=<long-random-external-ingest-secret>
 AUTO_PUBLISH_BLOG=true
 GCS_STORAGE_ENABLED=1
-GCS_BUCKET=altoslab-official-cms
+GCS_BUCKET=altoslab-official-cms-934551798702
 GCS_CMS_PATH=cms/altoslab-cms-v1.json
 GCS_MEDIA_PREFIX=blog-generated
 CLOUDFLARE_KV_ENABLED=0
@@ -134,6 +134,9 @@ Notes:
 - The source registry controls the default mix: 40% `breaking`, 35% `column`, 25% `feature`. Breaking posts prioritize latest official/trusted news; columns turn fresh signals into operator decisions; features turn recent sources into durable frameworks.
 - Every scheduled prep/release starts with `scripts/blog-sop-doctor.mjs`. It checks the local worker env, LaunchAgent calendar triggers, production `/api/health`, durable CMS status (`gcs` or `cloudflare-kv`), disabled legacy DeepSeek cron, and release candidate readiness before the runner can proceed.
 - `scripts/blog-scheduled-runner.mjs` writes compact doctor evidence into `data/blog-worker-runs/scheduled-runner.log` and includes the same summary in its JSON output, so a skipped or failed release has a traceable preflight reason.
+- `scripts/blog-scheduled-runner.mjs --backfill --target-posts 40` checks the live public inventory, calculates how many configured-language article sets are needed, and writes a fail-closed queue under `data/blog-backfill/<date>/`. The queue alternates market-news and column lanes, but it only creates browser-production prompt cards and held manifests. It does not publish until Gemini/GPT or source-image evidence, local preflight, validate-only, image QA, multilingual parity and design QA all pass.
+- `scripts/blog-copy-refresh.mjs --patch <patch.json>` is the controlled way to refresh already-published article titles, excerpts and metadata. It logs in through the admin API, rejects public copy that leaks internal production terms, PATCHes only the four copy fields, and verifies public readback after the update.
+- `/api/blog` is intentionally served with `Cache-Control: no-store, no-cache, must-revalidate`; title/excerpt checks should hit this endpoint with a cache-busting query when validating live copy.
 - `BLOG_TREND_SOURCES` is optional. If unset, the app uses `lib/blog-source-registry.ts`, which includes official AI/product/search sources and trusted media. If set, it should contain only live RSS/Atom feeds.
 - `BLOG_IMAGE_STORE_BLOB=true` copies selected legal cover images into Vercel Blob when `BLOB_READ_WRITE_TOKEN` is available. If Blob copy fails, the original licensed image URL stays in place and the issue is recorded in cover generation metadata.
 - Search verification env vars are optional until the matching Search Console/Webmaster account provides the token. Once set and redeployed, the homepage and App Router pages emit the required verification meta tags.

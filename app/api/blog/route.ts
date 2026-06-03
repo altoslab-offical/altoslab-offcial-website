@@ -6,5 +6,12 @@ import type { BlogLanguage } from "@/lib/types";
 export async function GET(request: Request) {
   const language = new URL(request.url).searchParams.get("language") as BlogLanguage | null;
   const posts = language ? await getPublishedBlogPostsByLanguage(language) : await getPublishedBlogPosts();
-  return NextResponse.json({ posts: posts.map(toPublicBlogPost) });
+  return NextResponse.json(
+    { posts: posts.map(toPublicBlogPost) },
+    {
+      headers: {
+        "Cache-Control": "no-store, no-cache, must-revalidate"
+      }
+    }
+  );
 }

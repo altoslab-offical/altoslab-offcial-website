@@ -200,12 +200,15 @@ Manual checks:
   node scripts/blog-scheduled-runner.mjs --prep --slot morning
   node scripts/blog-scheduled-runner.mjs --release --slot afternoon
   node scripts/blog-scheduled-runner.mjs --market-scan
+  node scripts/blog-scheduled-runner.mjs --backfill --target-posts 40
 
 This runner never creates production content by itself. Column prep creates a
 prompt and manifest skeleton. Market scan creates a separate fast-lane source
 prompt only when the main brain can then use Gemini and a credited source image.
 Release publishes only a ready prepared-candidate manifest produced after
 Gemini/source-image-or-GPT + validate-only + main-brain QA.
+Backfill creates an alternating market/column prompt queue only; it never
+publishes or bypasses the same release gates.
 `);
 }
 
@@ -442,6 +445,55 @@ ${await fs.readFile(orchestratorPromptPath, "utf8").catch(() => "")}
   return { ok: true, skipped: false, phase: "market-scan", runDir, promptPath, articleSetPath, manifestPath, doctor: compactDoctorResult(doctor) };
 }
 
+async function runBackfillPlanner({ date }) {
+  const targetPosts = arg("target-posts", String(process.env.ALTOS_BLOG_BACKFILL_TARGET_POSTS || "40"));
+  const baseUrl = arg("base-url", process.env.ALTOS_BLOG_BASE_URL || "https://altoslab-ai.cc");
+  const args = [
+    "scripts/blog-backfill-planner.mjs",
+    "--date",
+    date,
+    "--target-posts",
+    targetPosts,
+    "--base-url",
+    baseUrl,
+    "--write"
+  ];
+  const maxSets = arg("max-sets", process.env.ALTOS_BLOG_BACKFILL_MAX_SETS || "");
+  if (maxSets) args.push("--max-sets", maxSets);
+  const lanes = arg("lanes", process.env.ALTOS_BLOG_BACKFILL_LANES || "");
+  if (lanes) args.push("--lanes", lanes);
+  if (hasFlag("force")) args.push("--force");
+
+  const result = await runCommand(process.execPath, args, { cwd: process.cwd() });
+  const parsed = parseJsonObject(result.stdout);
+  const payload = parsed?.plan
+    ? {
+        ok: parsed.ok === true,
+        planPath: parsed.planPath,
+        status: parsed.plan.status,
+        publishedPosts: parsed.plan.publishedPosts,
+        targetPosts: parsed.plan.targetPosts,
+        missingPosts: parsed.plan.missingPosts,
+        setsNeeded: parsed.plan.setsNeeded,
+        plannedSets: parsed.plan.plannedSets,
+        plannedPublishedPosts: parsed.plan.plannedPublishedPosts,
+        queue: parsed.plan.queue?.map((item) => ({
+          lane: item.lane,
+          status: item.status,
+          sequence: item.sequence,
+          promptPath: item.promptPath,
+          manifestPath: item.manifestPath
+        }))
+      }
+    : { ok: result.code === 0, stdout: result.stdout, stderr: result.stderr };
+
+  await appendLog(globalScheduleLogPath(), JSON.stringify({ phase: "backfill", date, result: payload }));
+  if (result.code !== 0) {
+    return { ok: false, phase: "backfill", code: result.code, stdout: result.stdout, stderr: result.stderr };
+  }
+  return { ok: true, phase: "backfill", ...payload };
+}
+
 function releaseGateIssues(manifest, { date, slot, articleSet }) {
   const issues = [];
   const posts = Array.isArray(articleSet?.posts) ? articleSet.posts : [];
@@ -635,16 +687,27 @@ async function main() {
   const date = arg("date") || taiwanDate();
   let mode = hasFlag("prep") ? "prep" : hasFlag("release") ? "release" : "";
   if (hasFlag("market-scan")) mode = "market-scan";
+  if (hasFlag("backfill")) mode = "backfill";
   if (hasFlag("scheduled")) {
     const parts = taiwanParts();
     const hour = Number(parts.hour);
     mode = isMarketScanClock() ? "market-scan" : hour === PREP_WINDOWS.morning.hour || hour === PREP_WINDOWS.afternoon.hour ? "prep" : "release";
   }
-  if (!mode) throw new Error("Use --scheduled, --prep, --release or --market-scan");
+  if (!mode) throw new Error("Use --scheduled, --prep, --release, --market-scan or --backfill");
   const slot = arg("slot") || slotFromClock(mode);
   if (mode !== "market-scan" && !SLOT_HOURS[slot]) throw new Error("--slot must be morning or afternoon");
 
-  const result = mode === "prep" ? await createPrep({ date, slot }) : mode === "market-scan" ? await createMarketScan({ date }) : await release({ date, slot });
+  const result =
+    mode === "prep"
+      ? await createPrep({ date, slot })
+      : mode === "market-scan"
+        ? await createMarketScan({ date })
+        : mode === "backfill"
+          ? await runBackfillPlanner({ date })
+          : await release({ date, slot });
+  if (hasFlag("scheduled") && (mode === "prep" || mode === "market-scan")) {
+    result.backfill = await runBackfillPlanner({ date });
+  }
   console.log(JSON.stringify(result, null, 2));
   if (result.ok === false) process.exit(1);
 }
