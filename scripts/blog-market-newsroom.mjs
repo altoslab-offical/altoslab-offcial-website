@@ -58,6 +58,24 @@ function cleanSourceLicense(value = "") {
   return normalized;
 }
 
+function cleanCoverAlt(value = "", fallbackTitle = "", credit = "") {
+  const normalized = normalizeNewsText(value)
+    .replace(/\s+-\s+Source image:\s*.+$/i, "")
+    .replace(/\s+-\s+來源圖片：\s*.+$/i, "")
+    .replace(/^Source image:\s*/i, "")
+    .replace(/^來源圖片：\s*/i, "")
+    .trim();
+  return normalized || `${fallbackTitle} - ${credit || "source image"}`;
+}
+
+function cleanReportLead(value = "") {
+  return normalizeNewsText(value)
+    .replace(/^(報導指出|報導稱|來源指出|文章指出)[，:：]\s*/i, "")
+    .replace(/^(the report says|the article says|the source says)[:：,]?\s*/i, "")
+    .replace(/^(記事では|報道によると|보도에 따르면|laporan itu menyebut|bài viết cho biết|รายงานระบุว่า|ayon sa ulat)[:：,]?\s*/i, "")
+    .trim();
+}
+
 function formatDate(value, language) {
   const date = new Date(value);
   if (!Number.isFinite(date.getTime())) return String(value || "");
@@ -628,99 +646,99 @@ const LABELS = {
     title: (frame, source) => localizedNewsTitle("zh-Hant", frame, source),
     standfirst: (frame, source, date, summary) =>
       `${shortPublisher(source.publisher)} 於 ${date} 報導，${frame.focus["zh-Hant"]}。${summary}`,
-    headings: ["發生什麼事", "來源裡的關鍵細節", "為什麼被注意", "後續觀察"],
+    headings: ["消息落在哪個產品環節", "來源裡的具體細節", "先看採用而不是聲量", "下一步先看三個指標"],
     why: (frame) =>
       `以這則來源來看，重點是${localizedProduct("zh-Hant", frame)}已經開始碰到具體使用者與可觀察的使用量；後續才有辦法討論商業化與穩定部署。`,
     caution: "這則消息還需要看後續客戶採用、服務穩定性與實際營收表現。單一報導能說明市場有新動作，但還不能直接代表整個類別已成熟。",
-    reader: "接下來要觀察的是，這類區域化語音 AI 能否在更多產業維持低延遲、處理方言與混合語言，並把試用轉成長期付費客戶。"
+    reader: "下一步先看三個指標：實際使用量是否增加、付費或正式採用是否出現、服務穩定性是否能撐過日常高峰。"
   },
   en: {
     category: "Market Brief",
     title: (frame, source) => localizedNewsTitle("en", frame, source),
     standfirst: (frame, source, date, summary) =>
       `${shortPublisher(source.publisher)} reported on ${date} that ${frame.focus.en}. ${summary}`,
-    headings: ["What happened", "Key details from the source", "Why it drew attention", "What to watch next"],
+    headings: ["Where the product changed", "Concrete details from the source", "Adoption matters more than buzz", "Next step: watch three signals"],
     why: (frame) =>
       `The signal is that ${localizedProduct("en", frame)} is moving closer to a concrete use case, a visible user group, and measurable volume.`,
     caution: "The next question is whether customer adoption, reliability, and revenue keep pace with the reported usage. One story can show momentum, but not category maturity by itself.",
-    reader: "Watch whether regional voice AI systems can keep latency low, handle dialects and code-switching, and turn trials into durable paid deployments."
+    reader: "Next, watch three signals: real usage, paid or formal adoption, and whether reliability holds up under everyday load."
   },
   ja: {
     category: "マーケット速報",
     title: (frame, source) => localizedNewsTitle("ja", frame, source),
     standfirst: (frame, source, date, summary) =>
       `${shortPublisher(source.publisher)} は ${date}、${frame.focus.ja} と報じました。${summary}`,
-    headings: ["何が起きたか", "出典の主なポイント", "なぜ注目されたか", "次に見る点"],
+    headings: ["どの製品面が変わったか", "出典にある具体的な材料", "話題性より導入を見る", "次に見る三つの指標"],
     why: (frame) =>
       `このニュースで見るべき点は、${localizedProduct("ja", frame)} が具体的な利用場面、利用者層、測定できる利用量に近づいていることです。`,
     caution: "今後は顧客導入、信頼性、売上が利用量に伴って伸びるかを見る必要があります。単一の記事だけで市場成熟を判断することはできません。",
-    reader: "地域特化の音声 AI が低遅延、方言、コードスイッチングに対応しながら、有料利用を継続できるかが次の焦点です。"
+    reader: "次に見るのは三つです。実利用が増えるか、有料または正式導入が出るか、日常負荷でも安定するかです。"
   },
   ko: {
     category: "시장 브리프",
     title: (frame, source) => localizedNewsTitle("ko", frame, source),
     standfirst: (frame, source, date, summary) =>
       `${shortPublisher(source.publisher)}는 ${date} ${frame.focus.ko}고 보도했습니다. ${summary}`,
-    headings: ["무슨 일이 있었나", "출처의 핵심 내용", "왜 주목받나", "다음에 볼 점"],
+    headings: ["어떤 제품 지점이 바뀌었나", "출처의 구체적 내용", "화제성보다 도입을 본다", "다음에 볼 세 가지 지표"],
     why: (frame) =>
       `이 소식에서 볼 점은 ${localizedProduct("ko", frame)}가 구체적인 사용 장면, 사용자층, 측정 가능한 사용량에 가까워지고 있다는 것입니다.`,
     caution: "다음은 고객 도입, 안정성, 매출이 보도된 사용량을 따라가는지 확인해야 합니다. 기사 하나만으로 카테고리 성숙도를 단정할 수는 없습니다.",
-    reader: "지역 특화 음성 AI가 낮은 지연 시간, 방언, 코드 스위칭을 처리하면서 유료 사용을 유지할 수 있는지가 관건입니다."
+    reader: "다음에 볼 것은 세 가지입니다. 실제 사용량이 늘어나는지, 유료 또는 공식 도입이 나오는지, 일상 부하에서도 안정적인지입니다."
   },
   id: {
     category: "Kabar Pasar",
     title: (frame, source) => localizedNewsTitle("id", frame, source),
     standfirst: (frame, source, date, summary) =>
       `${shortPublisher(source.publisher)} melaporkan pada ${date} bahwa ${frame.focus.id}. ${summary}`,
-    headings: ["Apa yang terjadi", "Detail penting dari sumber", "Kenapa ini menarik", "Yang perlu dipantau"],
+    headings: ["Bagian produk yang berubah", "Detail konkret dari sumber", "Adopsi lebih penting dari buzz", "Langkah berikut: pantau tiga sinyal"],
     why: (frame) =>
       `Sinyal pentingnya: ${localizedProduct("id", frame)} makin dekat dengan use case nyata, kelompok pengguna yang jelas, dan volume yang bisa diamati.`,
     caution: "Berikutnya perlu dilihat apakah adopsi pelanggan, reliabilitas, dan pendapatan ikut tumbuh bersama volume penggunaan. Satu laporan menunjukkan momentum, bukan bukti kematangan kategori.",
-    reader: "Pantau apakah voice AI regional bisa menjaga latensi rendah, menangani dialek dan campuran bahasa, lalu mengubah uji coba menjadi pelanggan berbayar jangka panjang."
+    reader: "Langkah berikutnya: pantau penggunaan nyata, adopsi berbayar atau resmi, dan apakah reliabilitas tetap kuat saat dipakai harian."
   },
   vi: {
     category: "Tin nhanh thị trường",
     title: (frame, source) => localizedNewsTitle("vi", frame, source),
     standfirst: (frame, source, date, summary) =>
       `${shortPublisher(source.publisher)} đưa tin vào ${date} rằng ${frame.focus.vi}. ${summary}`,
-    headings: ["Chuyện gì đã xảy ra", "Chi tiết chính từ nguồn", "Vì sao đáng chú ý", "Điều cần theo dõi"],
+    headings: ["Phần sản phẩm nào thay đổi", "Chi tiết cụ thể từ nguồn", "Nhìn adoption hơn là độ ồn", "Bước tiếp theo: theo dõi ba tín hiệu"],
     why: (frame) =>
       `Điểm đáng chú ý là ${localizedProduct("vi", frame)} đang tiến gần hơn tới một use case cụ thể, một nhóm người dùng rõ ràng và lượng sử dụng có thể quan sát.`,
     caution: "Bước tiếp theo là xem việc áp dụng của khách hàng, độ ổn định và doanh thu có đi cùng lượng sử dụng được công bố hay không. Một bài viết cho thấy đà chuyển động, chưa đủ để kết luận cả thị trường đã chín.",
-    reader: "Theo dõi liệu voice AI bản địa hóa có giữ được độ trễ thấp, xử lý phương ngữ và chuyển đổi ngôn ngữ, rồi biến thử nghiệm thành khách hàng trả phí lâu dài hay không."
+    reader: "Bước tiếp theo là theo dõi ba tín hiệu: mức dùng thật, adoption trả phí hoặc chính thức, và độ ổn định khi đi vào vận hành hằng ngày."
   },
   th: {
     category: "ข่าวตลาด",
     title: (frame, source) => localizedNewsTitle("th", frame, source),
     standfirst: (frame, source, date, summary) =>
       `${shortPublisher(source.publisher)} รายงานเมื่อ ${date} ว่า ${frame.focus.th} ${summary}`,
-    headings: ["เกิดอะไรขึ้น", "รายละเอียดสำคัญจากแหล่งข่าว", "ทำไมเรื่องนี้น่าจับตา", "สิ่งที่ต้องดูต่อ"],
+    headings: ["ส่วนใดของผลิตภัณฑ์ที่เปลี่ยน", "รายละเอียดชัดเจนจากแหล่งข่าว", "ดู adoption มากกว่าเสียงฮือฮา", "ขั้นต่อไป: ดูสามสัญญาณ"],
     why: (frame) =>
       `ประเด็นสำคัญคือ ${localizedProduct("th", frame)} กำลังเข้าใกล้ use case จริง กลุ่มผู้ใช้ที่ชัดเจน และปริมาณการใช้งานที่สังเกตได้`,
     caution: "ต้องดูต่อว่าการใช้งานของลูกค้า ความเสถียร และรายได้จะเติบโตตามตัวเลขที่รายงานหรือไม่ ข่าวหนึ่งชิ้นบอก momentum ได้ แต่ยังไม่พอจะสรุปว่าตลาดสุกงอมแล้ว",
-    reader: "ประเด็นต่อไปคือ voice AI เฉพาะภูมิภาคจะรักษา latency ต่ำ จัดการสำเนียงและการสลับภาษา และเปลี่ยนการทดลองเป็นลูกค้าจ่ายเงินระยะยาวได้หรือไม่"
+    reader: "ขั้นต่อไปคือดูสามสัญญาณ: การใช้งานจริง การนำไปใช้แบบจ่ายเงินหรือแบบทางการ และความเสถียรเมื่ออยู่ในงานประจำวัน"
   },
   ms: {
     category: "Berita Pasaran",
     title: (frame, source) => localizedNewsTitle("ms", frame, source),
     standfirst: (frame, source, date, summary) =>
       `${shortPublisher(source.publisher)} melaporkan pada ${date} bahawa ${frame.focus.ms}. ${summary}`,
-    headings: ["Apa yang berlaku", "Butiran penting daripada sumber", "Mengapa ia wajar diperhatikan", "Perkara untuk dipantau"],
+    headings: ["Bahagian produk yang berubah", "Butiran konkrit daripada sumber", "Adopsi lebih penting daripada buzz", "Langkah seterusnya: pantau tiga isyarat"],
     why: (frame) =>
       `Isyarat pentingnya: ${localizedProduct("ms", frame)} semakin dekat dengan use case sebenar, kumpulan pengguna yang jelas, dan volume penggunaan yang boleh diperhatikan.`,
     caution: "Selepas ini perlu dilihat sama ada adopsi pelanggan, kebolehpercayaan dan pendapatan bergerak seiring dengan volume penggunaan. Satu laporan menunjukkan momentum, bukan bukti kematangan kategori.",
-    reader: "Pantau sama ada voice AI serantau boleh mengekalkan latensi rendah, menangani dialek dan campuran bahasa, lalu menukar percubaan kepada pelanggan berbayar jangka panjang."
+    reader: "Langkah seterusnya: pantau penggunaan sebenar, adopsi berbayar atau rasmi, dan sama ada reliabiliti kekal kuat dalam operasi harian."
   },
   fil: {
     category: "Market Brief",
     title: (frame, source) => localizedNewsTitle("fil", frame, source),
     standfirst: (frame, source, date, summary) =>
       `Iniulat ng ${shortPublisher(source.publisher)} noong ${date} na ${frame.focus.fil}. ${summary}`,
-    headings: ["Ano ang nangyari", "Mahahalagang detalye mula sa source", "Bakit ito kapansin-pansin", "Ano ang babantayan"],
+    headings: ["Aling bahagi ng produkto ang gumalaw", "Konkretong detalye mula sa source", "Mas mahalaga ang adoption kaysa ingay", "Susunod: bantayan ang tatlong signal"],
     why: (frame) =>
       `Ang mahalagang signal: mas lumalapit ang ${localizedProduct("fil", frame)} sa totoong use case, malinaw na user group, at usage volume na puwedeng obserbahan.`,
     caution: "Sunod na titingnan kung sasabay ang customer adoption, reliability, at revenue sa reported usage. Isang report lang ang nagpapakita ng momentum, hindi pa patunay na mature na ang buong category.",
-    reader: "Bantayan kung kaya ng regional voice AI na panatilihing mababa ang latency, humawak ng dialects at code-switching, at gawing long-term paid customers ang trials."
+    reader: "Susunod, bantayan ang tatlong signal: totoong usage, paid o formal adoption, at reliability kapag ginagamit na araw-araw."
   }
 };
 
@@ -894,19 +912,19 @@ function buildBody(language, frame, source) {
 function geoSummary(language, frame, source) {
   if (frame.key === "voice-ai-markets") return localizeVoiceBody(language).geoSummary;
   const date = formatDate(source.publishedAt, language);
-  const summary = truncate(localizedSourceSummary(language, source, frame), 150);
+  const summary = truncate(cleanReportLead(localizedSourceSummary(language, source, frame)), 150);
   const publisher = shortPublisher(source.publisher);
   const focus = frame.focus[language] || frame.focus.en;
   const byLanguage = {
-    "zh-Hant": `${publisher} 於 ${date} 報導，${focus}；目前可確認的重點是：${summary}`,
-    en: `${publisher} reported on ${date} that ${focus}. The confirmed source point: ${summary}`,
-    ja: `${publisher} は ${date}、${focus} と報じました。確認できる要点は ${summary}`,
-    ko: `${publisher}는 ${date} ${focus}고 보도했습니다. 확인 가능한 핵심은 ${summary}`,
-    id: `${publisher} melaporkan pada ${date} bahwa ${focus}. Poin yang terkonfirmasi dari sumber: ${summary}`,
-    vi: `${publisher} đưa tin vào ${date} rằng ${focus}. Điểm có thể xác nhận từ nguồn: ${summary}`,
-    th: `${publisher} รายงานเมื่อ ${date} ว่า ${focus} ประเด็นที่ยืนยันได้จากแหล่งข่าวคือ ${summary}`,
-    ms: `${publisher} melaporkan pada ${date} bahawa ${focus}. Poin yang disahkan daripada sumber: ${summary}`,
-    fil: `Iniulat ng ${publisher} noong ${date} na ${focus}. Ang kumpirmadong punto mula sa source: ${summary}`
+    "zh-Hant": `${publisher} 於 ${date} 報導，${focus}；報導指出：${summary}`,
+    en: `${publisher} reported on ${date} that ${focus}. The report says: ${summary}`,
+    ja: `${publisher} は ${date}、${focus} と報じました。記事では ${summary}`,
+    ko: `${publisher}는 ${date} ${focus}고 보도했습니다. 보도에 따르면 ${summary}`,
+    id: `${publisher} melaporkan pada ${date} bahwa ${focus}. Laporan itu menyebut: ${summary}`,
+    vi: `${publisher} đưa tin vào ${date} rằng ${focus}. Bài viết cho biết: ${summary}`,
+    th: `${publisher} รายงานเมื่อ ${date} ว่า ${focus} รายงานระบุว่า ${summary}`,
+    ms: `${publisher} melaporkan pada ${date} bahawa ${focus}. Laporan itu menyebut: ${summary}`,
+    fil: `Iniulat ng ${publisher} noong ${date} na ${focus}. Ayon sa ulat: ${summary}`
   };
   return byLanguage[language] || byLanguage.en;
 }
@@ -914,18 +932,18 @@ function geoSummary(language, frame, source) {
 function keyTakeaways(language, frame, source) {
   if (frame.key === "voice-ai-markets") return localizeVoiceBody(language).keyTakeaways;
   const publisher = shortPublisher(source.publisher);
-  const summary = truncate(localizedSourceSummary(language, source, frame), 135);
+  const summary = truncate(cleanReportLead(localizedSourceSummary(language, source, frame)), 135);
   const focus = frame.focus[language] || frame.focus.en;
   const items = {
-    "zh-Hant": [`${publisher} 報導：${focus}。`, `來源可驗證的重點是：${summary}`, "後續要看實際使用量、付費採用與服務穩定性，而不是只看產品敘事。"],
-    en: [`${publisher} reported that ${focus}.`, `The citable source point: ${summary}`, "Watch real usage, paid adoption, and service stability rather than the product story alone."],
-    ja: [`${publisher} は ${focus} と報じました。`, `引用できる要点：${summary}`, "今後は製品説明だけでなく、実利用、課金導入、サービス安定性を見る必要があります。"],
-    ko: [`${publisher}는 ${focus}고 보도했습니다.`, `인용 가능한 핵심: ${summary}`, "제품 설명보다 실제 사용량, 유료 도입, 서비스 안정성을 봐야 합니다."],
-    id: [`${publisher} melaporkan bahwa ${focus}.`, `Poin sumber yang bisa dikutip: ${summary}`, "Pantau penggunaan nyata, adopsi berbayar, dan stabilitas layanan, bukan cerita produk saja."],
-    vi: [`${publisher} đưa tin rằng ${focus}.`, `Điểm có thể trích dẫn từ nguồn: ${summary}`, "Theo dõi mức dùng thực tế, khách hàng trả phí và độ ổn định dịch vụ, không chỉ câu chuyện sản phẩm."],
-    th: [`${publisher} รายงานว่า ${focus}`, `ประเด็นจากแหล่งข่าวที่อ้างอิงได้: ${summary}`, "ควรดูการใช้งานจริง การใช้งานแบบจ่ายเงิน และความเสถียรของบริการ ไม่ใช่แค่เรื่องเล่าของสินค้า"],
-    ms: [`${publisher} melaporkan bahawa ${focus}.`, `Poin sumber yang boleh dirujuk: ${summary}`, "Pantau penggunaan sebenar, adopsi berbayar, dan kestabilan perkhidmatan, bukan cerita produk semata-mata."],
-    fil: [`Iniulat ng ${publisher} na ${focus}.`, `Puwedeng sipiin mula sa ulat: ${summary}`, "Bantayan ang totoong usage, paid adoption, at service stability, hindi lang product story."]
+    "zh-Hant": [`${publisher} 報導：${focus}。`, `報導指出：${summary}`, "後續看實際使用量、付費採用與服務穩定性，而不是只看產品敘事。"],
+    en: [`${publisher} reported that ${focus}.`, `The report says: ${summary}`, "Watch real usage, paid adoption, and service stability rather than the product story alone."],
+    ja: [`${publisher} は ${focus} と報じました。`, `記事では ${summary}`, "今後は製品説明だけでなく、実利用、課金導入、サービス安定性を見る必要があります。"],
+    ko: [`${publisher}는 ${focus}고 보도했습니다.`, `보도에 따르면 ${summary}`, "제품 설명보다 실제 사용량, 유료 도입, 서비스 안정성을 봐야 합니다."],
+    id: [`${publisher} melaporkan bahwa ${focus}.`, `Laporan itu menyebut: ${summary}`, "Pantau penggunaan nyata, adopsi berbayar, dan stabilitas layanan, bukan cerita produk saja."],
+    vi: [`${publisher} đưa tin rằng ${focus}.`, `Bài viết cho biết: ${summary}`, "Theo dõi mức dùng thực tế, khách hàng trả phí và độ ổn định dịch vụ, không chỉ câu chuyện sản phẩm."],
+    th: [`${publisher} รายงานว่า ${focus}`, `รายงานระบุว่า ${summary}`, "ควรดูการใช้งานจริง การใช้งานแบบจ่ายเงิน และความเสถียรของบริการ ไม่ใช่แค่เรื่องเล่าของสินค้า"],
+    ms: [`${publisher} melaporkan bahawa ${focus}.`, `Laporan itu menyebut: ${summary}`, "Pantau penggunaan sebenar, adopsi berbayar, dan kestabilan perkhidmatan, bukan cerita produk semata-mata."],
+    fil: [`Iniulat ng ${publisher} na ${focus}.`, `Ayon sa ulat: ${summary}`, "Bantayan ang totoong usage, paid adoption, at service stability, hindi lang product story."]
   };
   return items[language] || items.en;
 }
@@ -934,7 +952,7 @@ function faqs(language, frame) {
   const focus = frame.focus[language] || frame.focus.en;
   const questions = {
     "zh-Hant": [
-      { question: "這則快訊可以怎麼讀？", answer: `先把它當成市場訊號：${focus}。真正要追的是後續使用量、客戶類型與服務穩定性。` },
+      { question: "這則快訊可以怎麼讀？", answer: `先把它當成市場訊號：${focus}。後續觀察使用量、客戶類型與服務穩定性。` },
       { question: "這代表同類工具已經成熟了嗎？", answer: "還不能直接下結論。單篇報導能證明市場有動作，但成熟度仍要看更多客戶、營收、故障率與長期留存。" }
     ],
     en: [
@@ -971,7 +989,7 @@ export function buildMarketNewsroomPost({ language, pack = {}, post = {}, frame,
     language,
     slug: slug || post.slug,
     title,
-    seoTitle: truncate(title, 76),
+    seoTitle: truncate(`${title} | ${labels.category} | ALTOS LAB`, 76),
     seoDescription,
     excerpt: truncate(excerpt, 240),
     contentType: "breaking",
@@ -992,7 +1010,7 @@ export function buildMarketNewsroomPost({ language, pack = {}, post = {}, frame,
     coverCreditUrl,
     coverLicense: cleanSourceLicense(post.coverLicense || pack.coverLicense || "source image"),
     coverLicenseUrl: post.coverLicenseUrl || pack.coverLicenseUrl || coverCreditUrl,
-    coverAlt: post.coverAlt || `${title} - ${coverCredit || "source image"}`,
+    coverAlt: cleanCoverAlt(post.coverAlt, title, coverCredit),
     generatedBy: post.generatedBy || "market-source-worker",
     aiDisclosure: ""
   };

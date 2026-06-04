@@ -7,6 +7,7 @@ import { buildMarketNewsroomPost } from "./blog-market-newsroom.mjs";
 
 const DEFAULT_BASE_URL = "https://altoslab-ai.cc";
 const ADMIN_COOKIE = "altos_admin";
+const BLOG_LANGUAGES = ["zh-Hant", "en", "ja", "ko", "id", "vi", "th", "ms", "fil"];
 const FORBIDDEN_PUBLIC_PATTERNS = [
   /AI-generated/i,
   /AI generated/i,
@@ -29,14 +30,20 @@ const FORBIDDEN_PUBLIC_PATTERNS = [
   /Evidence:\s/i,
   /來源摘要/i,
   /可引用事實/i,
+  /來源可驗證/i,
+  /可引用的?要點/i,
+  /目前可確認/i,
   /讀者怎麼看/i,
+  /source-attributed official announcement image/i,
+  /Source image:/i,
   /這則消息可以拿來/i,
   /卡在哪個流程/i,
   /原因是企業決策問題/i,
   /article claims should remain anchored/i,
   /prompt card/i,
   /修稿隊列/i,
-  /rubric/i
+  /rubric/i,
+  /\bpipelines?\b/i
 ];
 
 function arg(name, fallback = "") {
@@ -102,6 +109,20 @@ async function login(root) {
   const match = setCookie.match(new RegExp(`(?:^|,\\s*)(${ADMIN_COOKIE}=[^;]+)`));
   if (!match?.[1]) throw new Error("Admin login did not return an altos_admin cookie");
   return match[1];
+}
+
+async function fetchPublicPosts(root, languageArg) {
+  if (languageArg !== "all") {
+    const { payload } = await fetchJson(`${root}/api/blog?language=${encodeURIComponent(languageArg)}&limit=120`);
+    return payload.posts || [];
+  }
+  const batches = await Promise.all(
+    BLOG_LANGUAGES.map(async (language) => {
+      const { payload } = await fetchJson(`${root}/api/blog?language=${encodeURIComponent(language)}&limit=120`);
+      return payload.posts || [];
+    })
+  );
+  return batches.flat();
 }
 
 const REPLACEMENTS = [
@@ -183,6 +204,8 @@ const REPLACEMENTS = [
   [/not only/gi, "also"],
   [/revolutionary/gi, "important"],
   [/game[-\s]?changer/gi, "meaningful shift"],
+  [/\bpipelines\b/gi, "workflows"],
+  [/\bpipeline\b/gi, "workflow"],
   [/## 何が起きたか/g, "## この更新が当たる業務"],
   [/## なぜ運用判断になるのか/g, "## 企業が先に見る三つの点"],
   [/## 今週確認したい 3 点/g, "## 二週間で小さく試す"],
@@ -263,6 +286,9 @@ function publicText(post) {
     post.excerpt,
     post.geoSummary,
     post.body,
+    post.coverCredit,
+    post.coverLicense,
+    post.coverAlt,
     ...(post.keyTakeaways || []),
     ...(post.sourceLinks || []).flatMap((source) => [source.title, source.summary]),
     ...(post.faqs || []).flatMap((faq) => [faq.question, faq.answer])
@@ -296,7 +322,14 @@ function repairPost(post) {
       keyTakeaways: newsroom.keyTakeaways,
       faqs: newsroom.faqs,
       sourceLinks: newsroom.sourceLinks,
-      aiDisclosure: ""
+      cover: newsroom.cover,
+      coverSource: newsroom.coverSource,
+      coverCredit: newsroom.coverCredit,
+      coverCreditUrl: newsroom.coverCreditUrl,
+      coverLicense: newsroom.coverLicense,
+      coverLicenseUrl: newsroom.coverLicenseUrl,
+      coverAlt: newsroom.coverAlt,
+      aiDisclosure: post.aiDisclosure ? repairText(post.aiDisclosure) : ""
     };
   }
 
@@ -311,6 +344,9 @@ function repairPost(post) {
     keyTakeaways: repairArray(post.keyTakeaways),
     faqs: repairFaqs(post.faqs),
     sourceLinks: repairSourceLinks(post.sourceLinks),
+    coverCredit: repairText(post.coverCredit || ""),
+    coverLicense: repairText(post.coverLicense || ""),
+    coverAlt: repairText(post.coverAlt || ""),
     aiDisclosure: post.aiDisclosure ? repairText(post.aiDisclosure) : ""
   };
   if (!patch.seoTitle) patch.seoTitle = patch.title;
@@ -319,19 +355,10 @@ function repairPost(post) {
 }
 
 function changed(post, patch) {
-  const compare = {
-    title: post.title || "",
-    seoTitle: post.seoTitle || "",
-    seoDescription: post.seoDescription || "",
-    excerpt: post.excerpt || "",
-    geoSummary: post.geoSummary || "",
-    body: post.body || "",
-    keyTakeaways: post.keyTakeaways || [],
-    faqs: post.faqs || [],
-    sourceLinks: post.sourceLinks || [],
-    aiDisclosure: post.aiDisclosure || ""
-  };
-  return JSON.stringify(compare) !== JSON.stringify(patch);
+  return Object.entries(patch).some(([key, value]) => {
+    const current = post[key] ?? (Array.isArray(value) ? [] : "");
+    return JSON.stringify(current) !== JSON.stringify(value);
+  });
 }
 
 async function main() {
@@ -441,7 +468,7 @@ async function main() {
     }
   }
 
-  const publicPosts = (await fetchJson(`${root}/api/blog`)).payload.posts || [];
+  const publicPosts = await fetchPublicPosts(root, languageArg);
   const leakChecks = publicPosts
     .map((post) => ({ id: post.id, language: post.language, slug: post.slug, leak: hasForbiddenLeak(post) }))
     .filter((item) => item.leak);

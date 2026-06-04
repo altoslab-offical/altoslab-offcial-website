@@ -11,6 +11,7 @@ const LANGUAGES = ["zh-Hant", "en", "ja", "ko", "id", "vi", "th", "ms", "fil"];
 const SLOT_HOURS = { morning: "09:00", afternoon: "16:00" };
 const DEFAULT_BASE_URL = "https://altoslab-ai.cc";
 const LANGUAGE_LABEL = LANGUAGES.join(", ");
+const COLUMN_DAILY_LIMIT = Number(process.env.ALTOS_BLOG_COLUMN_DAILY_LIMIT || "2");
 
 function arg(name, fallback = "") {
   const index = process.argv.indexOf(`--${name}`);
@@ -839,6 +840,54 @@ async function requestRelease(payload, qualityManifest) {
   return { status: response.status, ok: response.ok, json };
 }
 
+function postGroupId(post) {
+  return post.translationGroupId || post.slug || post.id || "";
+}
+
+function nonBreakingGroups(posts) {
+  return new Set((posts || []).filter((post) => post.contentType !== "breaking").map(postGroupId).filter(Boolean));
+}
+
+async function fetchPublishedPosts(language = "zh-Hant") {
+  const response = await fetch(`${baseUrl()}/api/blog?language=${encodeURIComponent(language)}&limit=120`, {
+    headers: { Accept: "application/json", "User-Agent": "ALTOS-LAB-blog-local-worker/1.0" }
+  });
+  const json = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(`blog cadence check failed ${response.status}: ${JSON.stringify(json)}`);
+  return json.posts || [];
+}
+
+async function columnCadenceIssues(payload) {
+  const groups = nonBreakingGroups(payload.posts || []);
+  if (groups.size === 0) return [];
+  const issues = [];
+  if (groups.size !== 1) {
+    issues.push(`column/feature release payload must contain exactly one translationGroupId, got ${groups.size}`);
+  }
+  if (hasFlag("allow-column-burst") || process.env.ALTOS_BLOG_ALLOW_COLUMN_BURST === "true") return issues;
+  if (!Number.isFinite(COLUMN_DAILY_LIMIT) || COLUMN_DAILY_LIMIT <= 0) return issues;
+
+  const today = taiwanDate();
+  const published = await fetchPublishedPosts("zh-Hant");
+  const publishedToday = new Set(
+    published
+      .filter((post) => post.contentType !== "breaking")
+      .filter((post) => {
+        const rawDate = post.publishedAt || post.createdAt || "";
+        return rawDate && taiwanDate(new Date(rawDate)) === today;
+      })
+      .map(postGroupId)
+      .filter(Boolean)
+  );
+  const newGroups = [...groups].filter((group) => !publishedToday.has(group));
+  if (publishedToday.size + newGroups.length > COLUMN_DAILY_LIMIT) {
+    issues.push(
+      `column daily release limit reached for ${today}: ${publishedToday.size} already live, ${newGroups.length} new, limit ${COLUMN_DAILY_LIMIT}`
+    );
+  }
+  return issues;
+}
+
 async function requestMediaUpload(filePath, ingestRunId) {
   const secret = process.env.BLOG_INGEST_HMAC_SECRET;
   if (!secret) throw new Error("BLOG_INGEST_HMAC_SECRET is required");
@@ -1027,6 +1076,30 @@ async function main() {
       slot,
       validate
     });
+    const cadenceIssues = await columnCadenceIssues(payload);
+    if (cadenceIssues.length) {
+      const publish = {
+        status: 409,
+        ok: false,
+        json: {
+          ok: false,
+          skipped: true,
+          event: "column-cadence-held",
+          errors: cadenceIssues
+        }
+      };
+      console.log(JSON.stringify({ phase: "release-held", status: publish.status, response: publish.json }, null, 2));
+      await writePreparedCandidateManifest({
+        manifestPath,
+        articleSetPath: path.resolve(articleSet),
+        releaseArticleSetPath,
+        payload,
+        slot,
+        validate,
+        publish
+      });
+      process.exit(1);
+    }
     const publish = await requestRelease(payload, preparedManifest.qualityManifest);
     console.log(JSON.stringify({ phase: "release", status: publish.status, response: publish.json }, null, 2));
     await writePreparedCandidateManifest({

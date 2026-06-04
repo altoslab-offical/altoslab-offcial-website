@@ -69,6 +69,14 @@ Auto-publishing requires:
 - Body uses site-supported Markdown only: `##` sections, lists, tables, charts and short `**bold emphasis**`. FAQ items live in the `faqs` field, not as raw `###` headings in the body.
 - Public review copy uses ALTOS LAB editorial responsibility wording, not AI-generation disclosure copy.
 
+## Column Cadence Guard
+
+- Market news and columns must stay separated. Market news can publish during market-scan windows when a source-verifiable item and source/official image pass QA.
+- Columns/features are capped at two translation groups per Taipei calendar day by default: one morning slot and one afternoon slot.
+- `scripts/blog-local-worker.mjs --publish` enforces `ALTOS_BLOG_COLUMN_DAILY_LIMIT=2` for non-breaking article sets. It blocks release when a payload contains more than one column/feature translation group or when the daily limit is already reached.
+- Backfill column drafts must be rewritten and released through the normal column lane instead of being bulk-published. A local batch of nine draft columns is a backlog, not a publish queue.
+- Emergency bursts require an explicit `--allow-column-burst` flag or `ALTOS_BLOG_ALLOW_COLUMN_BURST=true`; do not use that override for ordinary content catch-up.
+
 ## Anti-Slop Writing Gate
 
 - The reviewer scores directness, rhythm, trust, authenticity and density on a 50-point scale.
