@@ -1,4 +1,4 @@
-import { getPublishedBlogPosts } from "@/lib/cms";
+import { getPublishedBlogPostsForMetadata } from "@/lib/cms";
 import { blogPostPath } from "@/lib/blog-utils";
 import { publicTaxonomyLabel } from "@/lib/public-taxonomy";
 import { absoluteUrl, siteName, siteUrl } from "@/lib/seo";
@@ -15,9 +15,8 @@ function escapeXml(value: string) {
 }
 
 export async function GET() {
-  const posts = await getPublishedBlogPosts();
+  const posts = await getPublishedBlogPostsForMetadata();
   const items = posts
-    .slice(0, 30)
     .map((post) => {
       const url = absoluteUrl(blogPostPath(post));
       return `<item>

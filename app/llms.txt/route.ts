@@ -1,12 +1,32 @@
-import { getPublishedBlogPosts, getPublishedProjects } from "@/lib/cms";
-import { blogPostPath } from "@/lib/blog-utils";
+import { getPublishedBlogPostsForMetadata, getPublishedProjects } from "@/lib/cms";
+import { BLOG_LANGUAGES, blogPostPath } from "@/lib/blog-utils";
 import { publicTaxonomyLabel } from "@/lib/public-taxonomy";
 import { siteName, siteUrl } from "@/lib/seo";
+import type { BlogPost } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
+function articleTimestamp(post: BlogPost) {
+  return new Date(post.publishedAt || post.updatedAt || post.createdAt).getTime() || 0;
+}
+
+function orderedLlmsArticles(posts: BlogPost[]) {
+  const grouped = new Map<string, BlogPost[]>();
+  posts.forEach((post) => {
+    const key = post.translationGroupId || post.id;
+    grouped.set(key, [...(grouped.get(key) || []), post]);
+  });
+
+  return [...grouped.values()]
+    .sort((a, b) => Math.max(...b.map(articleTimestamp)) - Math.max(...a.map(articleTimestamp)))
+    .flatMap((group) =>
+      [...group].sort((a, b) => BLOG_LANGUAGES.indexOf(a.language) - BLOG_LANGUAGES.indexOf(b.language))
+    );
+}
+
 export async function GET() {
-  const [posts, projects] = await Promise.all([getPublishedBlogPosts(), getPublishedProjects()]);
+  const [posts, projects] = await Promise.all([getPublishedBlogPostsForMetadata(), getPublishedProjects()]);
+  const articles = orderedLlmsArticles(posts);
   const lines = [
     `# ${siteName}`,
     "",
@@ -30,15 +50,13 @@ export async function GET() {
       ),
     "",
     "## Articles",
-    ...posts
-      .slice(0, 50)
-      .map(
-        (post) =>
-          `- [${publicTaxonomyLabel(post.title, post.language)}](${siteUrl}${blogPostPath(post)}): ${publicTaxonomyLabel(
-            post.geoSummary || post.excerpt,
-            post.language
-          )}`
-      )
+    ...articles.map(
+      (post) =>
+        `- [${publicTaxonomyLabel(post.title, post.language)}](${siteUrl}${blogPostPath(post)}): ${publicTaxonomyLabel(
+          post.geoSummary || post.excerpt,
+          post.language
+        )}`
+    )
   ];
 
   return new Response(lines.join("\n"), {

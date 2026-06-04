@@ -1,4 +1,4 @@
-import { getPublishedBlogPosts, getPublishedProjects } from "@/lib/cms";
+import { getPublishedBlogPostsForMetadata, getPublishedProjects } from "@/lib/cms";
 import { blogPostPath, languageLabel } from "@/lib/blog-utils";
 import { publicTaxonomyLabel } from "@/lib/public-taxonomy";
 import { siteName, siteUrl } from "@/lib/seo";
@@ -14,7 +14,7 @@ function publicProjectText(value: string) {
 }
 
 export async function GET() {
-  const [posts, projects] = await Promise.all([getPublishedBlogPosts(), getPublishedProjects()]);
+  const [posts, projects] = await Promise.all([getPublishedBlogPostsForMetadata(), getPublishedProjects()]);
   const lines = [
     `# ${siteName} full LLM context`,
     "",

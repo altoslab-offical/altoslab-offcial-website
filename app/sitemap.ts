@@ -1,10 +1,10 @@
 import type { MetadataRoute } from "next";
-import { getPublishedBlogPosts, getPublishedProjects } from "@/lib/cms";
+import { getPublishedBlogPostsForMetadata, getPublishedProjects } from "@/lib/cms";
 import { BLOG_LANGUAGES, blogIndexPath, blogPostPath, metadataLanguageKey } from "@/lib/blog-utils";
 import { siteUrl } from "@/lib/seo";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [posts, projects] = await Promise.all([getPublishedBlogPosts(), getPublishedProjects()]);
+  const [posts, projects] = await Promise.all([getPublishedBlogPostsForMetadata(), getPublishedProjects()]);
   const now = new Date();
   const uniquePosts = Array.from(
     new Map(posts.map((post) => [`${siteUrl}${blogPostPath(post)}`, post])).values()

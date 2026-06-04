@@ -447,6 +447,11 @@ export async function getPublishedBlogPosts() {
   return sortedByOrder(await readPublishedBlogPostsForPublic());
 }
 
+export async function getPublishedBlogPostsForMetadata() {
+  const data = await readPublicRawCmsData();
+  return sortedByOrder(publicBlogPostsFromData(data));
+}
+
 export async function getPublishedBlogPostsByLanguage(language?: BlogLanguage) {
   const posts = await readPublishedBlogPostsForPublic();
   return sortedByOrder(
