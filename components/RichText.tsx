@@ -164,9 +164,9 @@ export function RichText({ text }: { text: string }) {
       elements.push(<h2 key={index}>{inlineMarkdown(line.replace(/^## /, ""))}</h2>);
       return;
     }
-    if (line.startsWith("- ")) {
+    if (/^(?:-|\*)\s+/.test(line)) {
       flushOrderedItems();
-      bullets.push(line.replace(/^- /, ""));
+      bullets.push(line.replace(/^(?:-|\*)\s+/, ""));
       return;
     }
     if (/^\d+\.\s+/.test(line)) {

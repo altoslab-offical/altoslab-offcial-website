@@ -1348,7 +1348,7 @@ img {
 }
 
 .rich-text h2 {
-  margin: 42px 0 12px;
+  margin: 2em 0 .65em;
   color: var(--al-text);
   font-size: clamp(26px, 3vw, 38px);
   line-height: 1.22;
