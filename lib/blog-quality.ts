@@ -666,9 +666,12 @@ function isSourceReachabilityWarning(warning: string) {
 }
 
 function blockingAutoPublishWarnings(warnings: string[]) {
-  // Warnings lower the quality score and are surfaced to editors. The release
-  // blocker is `issues`, plus image warnings in the image gate.
-  return [];
+  return warnings.filter((warning) => {
+    if (isSourceReachabilityWarning(warning)) return false;
+    return /anti-slop|market-news opening could be more concrete|repeated sentence rhythm|authenticity score|rhythm score|template|formulaic|raw English|technical jargon/i.test(
+      warning
+    );
+  });
 }
 
 function countMatches(text: string, pattern: RegExp) {

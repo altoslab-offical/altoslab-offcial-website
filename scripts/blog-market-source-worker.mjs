@@ -3,6 +3,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
+import { buildMarketNewsroomPost } from "./blog-market-newsroom.mjs";
 
 const REQUIRED_LANGUAGES = ["zh-Hant", "en", "ja", "ko", "id", "vi", "th", "ms", "fil"];
 const DEFAULT_DATE = new Intl.DateTimeFormat("en-CA", {
@@ -711,41 +712,33 @@ function buildBody(language, frame, pack) {
 
 function buildPost(language, pack, date) {
   const frame = inferFrame(pack);
-  const label = LABELS[language];
   const source = pack.sourceLinks[0];
-  const title = label.title(frame);
-  const body = buildBody(language, frame, pack);
-  const desc = seoDescription(language, frame, source);
-  const excerpt = `${label.subtitle(frame)} ${desc}`.slice(0, 220).trim();
-  const sourceCue = publicText(source.summary).slice(0, 220);
-  return {
+  const post = buildMarketNewsroomPost({
     language,
+    pack,
+    frame: {
+      key: frame.key,
+      entity: frame.entity,
+      product: frame.product,
+      focus: {
+        "zh-Hant": frame.zh,
+        en: frame.en,
+        ja: frame.ja,
+        ko: frame.ko,
+        id: frame.id,
+        vi: frame.vi,
+        th: frame.th,
+        ms: frame.ms,
+        fil: frame.fil
+      }
+    },
     slug: slugify(cleanTitle(source.title)),
-    title: repairPublicCopy(title),
-    seoTitle: repairPublicCopy(title.length > 76 ? `${title.slice(0, 73).replace(/\s+\S*$/, "")}…` : title),
-    seoDescription: repairPublicCopy(desc.length < 70 ? `${desc} ${label.subtitle(frame)}`.slice(0, 170) : desc),
-    excerpt: repairPublicCopy(excerpt),
-    contentType: "breaking",
-    newsCategory: label.category,
-    topic: cleanTitle(source.title),
-    audience: label.audience,
-    geoSummary: repairPublicCopy(`Source: ${source.publisher}, ${formatDate(source.publishedAt, language)}. Event: ${cleanTitle(source.title)}. Evidence: ${sourceCue}. Decision cue: test one workflow, owner, metric, and stop condition before rollout.`),
-    body: repairPublicCopy(body),
-    keyTakeaways: [
-      label.subtitle(frame),
-      `${source.publisher} is the primary source; the article should stay anchored to the published facts.`,
-      `Next action: choose one workflow, one owner, and one measurable stop condition before rollout.`
-    ],
-    faqs: [
-      { question: label.faqQ1, answer: label.faqA1(frame) },
-      { question: label.faqQ2, answer: label.faqA2 }
-    ],
-    tags: [label.category, "AI", frame.entity, frame.key].filter(Boolean).slice(0, 5),
     author: Number(pack.sequence) % 4 === 1 ? "Tommy" : "Ken",
-    readTimeMinutes: 3,
-    coverAlt: `${label.title(frame)} - ${pack.coverCredit || source.publisher}`,
-    generatedBy: "market-source-worker",
-    aiDisclosure: "",
+    readTimeMinutes: 3
+  });
+  return {
+    ...post,
+    coverAlt: `${post.title} - ${pack.coverCredit || source.publisher}`,
     updatedAt: new Date().toISOString()
   };
 }

@@ -104,9 +104,13 @@ function isSourceReachabilityWarning(warning) {
 }
 
 function blockingValidateWarnings(warnings) {
-  // Quality warnings are advisory after validateOnly approval. Source warnings
-  // are reported separately; image warnings are checked through image summaries.
-  return [];
+  return (warnings || [])
+    .filter((warning) => !isSourceReachabilityWarning(warning))
+    .filter((warning) =>
+      /anti-slop|market-news opening could be more concrete|repeated sentence rhythm|authenticity score|rhythm score|template|formulaic|raw English|technical jargon/i.test(
+        String(warning || "")
+      )
+    );
 }
 
 function normalizeText(value = "") {

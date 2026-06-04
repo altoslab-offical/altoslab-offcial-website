@@ -608,9 +608,11 @@ function isSourceReachabilityWarning(warning) {
 }
 
 function blockingManifestWarnings(warnings) {
-  // Quality warnings are advisory once the quality manifest is approved and
-  // issues are empty. Image warnings are still handled as release blockers.
-  return [];
+  return (warnings || []).filter((warning) =>
+    /anti-slop|market-news opening could be more concrete|repeated sentence rhythm|authenticity score|rhythm score|template|formulaic|raw English|technical jargon/i.test(
+      String(warning || "")
+    )
+  );
 }
 
 async function writeJsonFile(filePath, payload) {

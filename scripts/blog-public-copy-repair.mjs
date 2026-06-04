@@ -3,6 +3,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import process from "node:process";
+import { buildMarketNewsroomPost } from "./blog-market-newsroom.mjs";
 
 const DEFAULT_BASE_URL = "https://altoslab-ai.cc";
 const ADMIN_COOKIE = "altos_admin";
@@ -263,6 +264,28 @@ function hasForbiddenLeak(post) {
 }
 
 function repairPost(post) {
+  if (post.contentType === "breaking" && Array.isArray(post.sourceLinks) && post.sourceLinks.length > 0) {
+    const newsroom = buildMarketNewsroomPost({
+      language: post.language,
+      post,
+      slug: post.slug,
+      author: post.author,
+      readTimeMinutes: post.readTimeMinutes
+    });
+    return {
+      title: newsroom.title,
+      seoTitle: newsroom.seoTitle,
+      seoDescription: newsroom.seoDescription,
+      excerpt: newsroom.excerpt,
+      geoSummary: newsroom.geoSummary,
+      body: newsroom.body,
+      keyTakeaways: newsroom.keyTakeaways,
+      faqs: newsroom.faqs,
+      sourceLinks: repairSourceLinks(post.sourceLinks),
+      aiDisclosure: ""
+    };
+  }
+
   const repairedBody = ensureReaderAction(post.language, repairText(post.body || ""));
   const patch = {
     title: repairText(post.title || ""),
