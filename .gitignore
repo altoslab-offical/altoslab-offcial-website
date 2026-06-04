@@ -18,6 +18,7 @@ data/blog-worker-runs/
 data/blog-prepared-candidates/
 data/backups/
 data/reports/
+data/blog-research/*.json
 data/gcp/
 public/blog-generated/
 public/altoslab-homepage.html

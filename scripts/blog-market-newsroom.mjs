@@ -45,6 +45,19 @@ function shortPublisher(value = "") {
     .trim() || "source";
 }
 
+function cleanSourceCredit(value = "") {
+  return normalizeNewsText(value)
+    .replace(/^Source image:\s*/i, "")
+    .replace(/^來源圖片：\s*/i, "")
+    .trim();
+}
+
+function cleanSourceLicense(value = "") {
+  const normalized = normalizeNewsText(value);
+  if (!normalized || /source-attributed official announcement image/i.test(normalized)) return "source image";
+  return normalized;
+}
+
 function formatDate(value, language) {
   const date = new Date(value);
   if (!Number.isFinite(date.getTime())) return String(value || "");
@@ -714,21 +727,21 @@ const LABELS = {
 const VOICE_AI_BODY = {
   "zh-Hant": {
     excerpt:
-      "AethexAI 由 Goldman Sachs 與 Meta 背景的創辦人創立，鎖定非洲與中東的客服語音 AI 市場；它剛完成 300 萬美元 pre-seed 輪，並表示自建系統每天已處理超過 17,000 通電話。",
+      "TechCrunch 報導，AethexAI 完成 300 萬美元 pre-seed 融資，正把自建語音 AI 系統推向非洲與中東；公司稱目前每天處理超過 17,000 通電話。",
     geoSummary:
       "TechCrunch 報導的 AethexAI 故事，焦點放在它選擇避開歐美標準語音環境，直接為非洲與中東的方言、混合語言、電信基礎設施與價格條件做模型和部署。",
     keyTakeaways: [
       "AethexAI 完成 300 萬美元 pre-seed 輪，由 4DX Ventures 領投，投資人包含 Enza Capital、Dorm Room Fund、Mojo Ventures 與 Stanford GSB 26 Fund。",
       "公司自建小模型與協調層，目標是降低延遲、處理當地英語、法語與阿拉伯語口音，而非單純套用既有語音 AI orchestration 工具。",
       "AethexAI 表示，自己的 Kora 系列模型約 3 億到 17 億參數，並已在非洲與中東市場每天處理超過 17,000 通電話。",
-      "目前常見場景包含債務催收、客戶啟用與 KYC；真正要追的是後續企業採用、通話品質與付費留存。"
+      "目前常見場景包含債務催收、客戶啟用與 KYC；後續觀察包括企業採用、通話品質與付費留存。"
     ],
     body:
-      "## Goldman、Meta 背景創辦人轉向區域語音 AI\n\nTechCrunch 報導，AethexAI 由 Mariama Diallo 與 Ayooluwa Odemuyiwa 創立。Diallo 曾任職 Goldman Sachs，後來加入 YC 支持的新創 ModelML；Odemuyiwa 畢業於 Caltech，曾在 Meta 工作，並進入 Stanford Business School。兩人把題目放在非洲與中東市場的語音 AI，暫時不以歐美主流企業客服市場為第一目標。\n\nAethexAI 已完成 300 萬美元 pre-seed 輪，由 4DX Ventures 領投，Enza Capital、Dorm Room Fund、Mojo Ventures、Stanford GSB 26 Fund 參與，個人投資人則包括 Stanford 教職員、電信主管與來自 Anthropic 的 AI 研究人員。\n\n## 為什麼它自建語音 AI 工具\n\nTechCrunch 指出，客服與服務是語音 AI 最熱的領域之一，但在非洲與中東，延遲、口音、語言混用與既有電話系統會讓現成方案變得不夠順。AethexAI 因此自建小模型與 orchestration layer，用來處理當地英語、法語與阿拉伯語的實際用法。\n\n公司稱 Kora 系列模型規模約在 3 億到 17 億參數之間。它把模型做小，主要是為了壓低延遲，同時保留足夠準確度。\n\n## 資料與使用量已經開始出現\n\n為了訓練模型，AethexAI 使用來自 call center partner 的匿名錄音，也把硬碟寄到非洲多地的廣播電台蒐集音訊資料；另外，公司建立由大學生組成的貢獻者網路，協助標註資料與錄製當地姓名發音。\n\nAethexAI 表示，目前自家系統每天處理超過 17,000 通電話。常見使用場景包括債務催收、客戶啟用與 KYC 身分驗證。公司也推出企業試用平台、API 與 SDK，讓企業與開發者測試模型。\n\n## 這則新聞接下來看什麼\n\n這則消息值得看的地方，是語音 AI 市場未必只由最大模型和最大平台決定。若企業需求來自特定地區的語音、電話網路、價格與工作流程，區域化模型與在地部署能力可能會變成差異。\n\n但這仍是早期新創故事。接下來要看的是：AethexAI 能否把 17,000 通電話的日常使用量轉成穩定企業收入，並在更多產業維持低延遲、可理解度與服務品質。"
+      "## Goldman、Meta 背景創辦人轉向區域語音 AI\n\nTechCrunch 報導，AethexAI 由 Mariama Diallo 與 Ayooluwa Odemuyiwa 創立。Diallo 曾任職 Goldman Sachs，後來加入 YC 支持的新創 ModelML；Odemuyiwa 畢業於 Caltech，曾在 Meta 工作，並進入 Stanford Business School。兩人把題目放在非洲與中東市場的語音 AI，暫時不以歐美主流企業客服市場為第一目標。\n\nAethexAI 已完成 300 萬美元 pre-seed 輪，由 4DX Ventures 領投，Enza Capital、Dorm Room Fund、Mojo Ventures、Stanford GSB 26 Fund 參與，個人投資人則包括 Stanford 教職員、電信主管與來自 Anthropic 的 AI 研究人員。\n\n## 為什麼它自建語音 AI 工具\n\nTechCrunch 指出，客服與服務是語音 AI 最熱的領域之一，但在非洲與中東，延遲、口音、語言混用與既有電話系統會讓現成方案變得不夠順。AethexAI 因此自建小模型與 orchestration layer，用來處理當地英語、法語與阿拉伯語的實際用法。\n\n公司稱 Kora 系列模型規模約在 3 億到 17 億參數之間。它把模型做小，主要是為了壓低延遲，同時保留足夠準確度。\n\n## 資料與使用量已經開始出現\n\n為了訓練模型，AethexAI 使用來自 call center partner 的匿名錄音，也把硬碟寄到非洲多地的廣播電台蒐集音訊資料；另外，公司建立由大學生組成的貢獻者網路，協助標註資料與錄製當地姓名發音。\n\nAethexAI 表示，目前自家系統每天處理超過 17,000 通電話。常見使用場景包括債務催收、客戶啟用與 KYC 身分驗證。公司也推出企業試用平台、API 與 SDK，讓企業與開發者測試模型。\n\n## 後續看點\n\n這則消息顯示，語音 AI 市場未必只由最大模型和最大平台決定。若企業需求來自特定地區的語音、電話網路、價格與工作流程，區域化模型與在地部署能力可能會變成差異。\n\n但這仍是早期新創故事。接下來要看的是：AethexAI 能否把 17,000 通電話的日常使用量轉成穩定企業收入，並在更多產業維持低延遲、可理解度與服務品質。"
   },
   en: {
     excerpt:
-      "AethexAI, founded by former Goldman Sachs and Meta talent, is building voice AI for Africa and the Middle East. It has raised a $3 million pre-seed round and says its own stack now handles more than 17,000 calls a day.",
+      "TechCrunch reports that AethexAI raised a $3 million pre-seed round and is taking its own voice AI stack into Africa and the Middle East, where it says it now handles more than 17,000 calls a day.",
     geoSummary:
       "TechCrunch's AethexAI story focuses on a regional voice AI bet: Africa and the Middle East need systems built for local dialects, code-switching, telephony infrastructure, and price points that mainstream products often miss.",
     keyTakeaways: [
@@ -742,7 +755,7 @@ const VOICE_AI_BODY = {
   },
   ja: {
     excerpt:
-      "AethexAI は Goldman Sachs と Meta 出身の創業者が立ち上げた音声 AI スタートアップです。アフリカと中東市場を対象に、300 万ドルの pre-seed 資金を調達し、自社スタックで 1 日 17,000 件超の通話を処理しているとしています。",
+      "TechCrunch は、AethexAI が 300 万ドルの pre-seed 資金を調達し、自社開発の音声 AI スタックをアフリカと中東へ展開していると報じました。同社は 1 日 17,000 件超の通話を処理しているとしています。",
     geoSummary:
       "TechCrunch の AethexAI 報道で重要なのは、同社が欧米の標準的な音声環境ではなく、アフリカと中東の方言、コードスイッチング、電話網、価格条件に合わせて音声 AI を作ろうとしている点です。",
     keyTakeaways: [
@@ -756,7 +769,7 @@ const VOICE_AI_BODY = {
   },
   ko: {
     excerpt:
-      "AethexAI는 Goldman Sachs와 Meta 출신 창업자가 만든 음성 AI 스타트업입니다. 아프리카와 중동 시장을 겨냥해 300만 달러 pre-seed 투자를 유치했고, 자체 스택으로 하루 17,000건이 넘는 통화를 처리하고 있다고 밝혔습니다.",
+      "TechCrunch는 AethexAI가 300만 달러 pre-seed 투자를 유치하고 자체 음성 AI 스택을 아프리카와 중동 시장에 내놓고 있다고 보도했습니다. 회사는 하루 17,000건이 넘는 통화를 처리한다고 밝혔습니다.",
     geoSummary:
       "TechCrunch가 전한 AethexAI 이야기의 핵심은 또 하나의 음성 AI 스타트업이 아니라, 아프리카와 중동의 방언, 코드 스위칭, 전화 인프라, 가격 조건에 맞춘 시스템을 만들고 있다는 점입니다.",
     keyTakeaways: [
@@ -770,7 +783,7 @@ const VOICE_AI_BODY = {
   },
   id: {
     excerpt:
-      "AethexAI didirikan oleh talenta berlatar Goldman Sachs dan Meta untuk membangun voice AI bagi Afrika dan Timur Tengah. Startup ini mengantongi pre-seed US$3 juta dan menyebut stack internalnya sudah menangani lebih dari 17.000 panggilan per hari.",
+      "TechCrunch melaporkan AethexAI meraih pre-seed US$3 juta dan membawa stack voice AI buatannya ke Afrika serta Timur Tengah; perusahaan menyebut sistemnya kini menangani lebih dari 17.000 panggilan per hari.",
     geoSummary:
       "Laporan TechCrunch tentang AethexAI bukan sekadar cerita startup voice AI baru. Taruhannya adalah sistem yang dibangun untuk dialek lokal, code-switching, infrastruktur telepon, dan titik harga di Afrika serta Timur Tengah.",
     keyTakeaways: [
@@ -784,7 +797,7 @@ const VOICE_AI_BODY = {
   },
   vi: {
     excerpt:
-      "AethexAI do hai nhà sáng lập có nền tảng Goldman Sachs và Meta lập ra, tập trung vào voice AI cho châu Phi và Trung Đông. Startup này gọi được 3 triệu USD pre-seed và cho biết stack tự xây đã xử lý hơn 17.000 cuộc gọi mỗi ngày.",
+      "TechCrunch đưa tin AethexAI gọi được 3 triệu USD pre-seed và đang đưa voice AI stack tự xây vào châu Phi cùng Trung Đông; công ty nói hệ thống hiện xử lý hơn 17.000 cuộc gọi mỗi ngày.",
     geoSummary:
       "Bài TechCrunch về AethexAI không chỉ là một startup voice AI mới. Điểm đáng chú ý là cách họ xây hệ thống cho phương ngữ địa phương, code-switching, hạ tầng điện thoại và mức giá ở châu Phi, Trung Đông.",
     keyTakeaways: [
@@ -798,7 +811,7 @@ const VOICE_AI_BODY = {
   },
   th: {
     excerpt:
-      "AethexAI ก่อตั้งโดยผู้มีพื้นหลังจาก Goldman Sachs และ Meta เพื่อทำ voice AI สำหรับแอฟริกาและตะวันออกกลาง บริษัทระดมทุน pre-seed ได้ 3 ล้านดอลลาร์ และระบุว่า stack ที่สร้างเองรองรับสายมากกว่า 17,000 ครั้งต่อวันแล้ว",
+      "TechCrunch รายงานว่า AethexAI ระดมทุน pre-seed ได้ 3 ล้านดอลลาร์ และกำลังนำ voice AI stack ที่สร้างเองเข้าสู่ตลาดแอฟริกาและตะวันออกกลาง โดยบริษัทระบุว่าระบบรองรับสายมากกว่า 17,000 ครั้งต่อวัน",
     geoSummary:
       "รายงานของ TechCrunch เรื่อง AethexAI ไม่ใช่แค่ข่าวสตาร์ทอัพ voice AI อีกราย แต่เป็นการเดิมพันว่าตลาดแอฟริกาและตะวันออกกลางต้องการระบบที่เข้าใจ dialect, code-switching, โครงข่ายโทรศัพท์ และต้นทุนจริง",
     keyTakeaways: [
@@ -812,7 +825,7 @@ const VOICE_AI_BODY = {
   },
   ms: {
     excerpt:
-      "AethexAI diasaskan oleh pengasas berlatar Goldman Sachs dan Meta untuk membina voice AI bagi Afrika dan Timur Tengah. Startup ini mengumpul pre-seed AS$3 juta dan berkata stack sendiri kini mengendalikan lebih 17,000 panggilan sehari.",
+      "TechCrunch melaporkan AethexAI mengumpul pre-seed AS$3 juta dan membawa stack voice AI sendiri ke Afrika serta Timur Tengah; syarikat berkata sistemnya kini mengendalikan lebih 17,000 panggilan sehari.",
     geoSummary:
       "Laporan TechCrunch tentang AethexAI bukan sekadar kisah startup voice AI baharu. Taruhannya ialah sistem untuk dialek tempatan, code-switching, infrastruktur telefon dan harga sebenar di Afrika serta Timur Tengah.",
     keyTakeaways: [
@@ -826,7 +839,7 @@ const VOICE_AI_BODY = {
   },
   fil: {
     excerpt:
-      "Ang AethexAI ay itinayo ng founders na may background sa Goldman Sachs at Meta para gumawa ng voice AI para sa Africa at Middle East. Nakalikom ito ng $3 milyon na pre-seed at sinasabing ang sarili nitong stack ay humahawak na ng mahigit 17,000 tawag bawat araw.",
+      "Iniulat ng TechCrunch na nakalikom ang AethexAI ng $3 milyon na pre-seed at dinadala ang sarili nitong voice AI stack sa Africa at Middle East; sinasabi ng kumpanya na humahawak na ito ng mahigit 17,000 tawag bawat araw.",
     geoSummary:
       "Ang TechCrunch story tungkol sa AethexAI ay hindi lang tungkol sa isa pang voice AI startup. Ang taya nito: kailangan ng Africa at Middle East ng systems para sa local dialects, code-switching, telephony infrastructure at presyo na madalas hindi sakop ng mainstream products.",
     keyTakeaways: [
@@ -951,6 +964,8 @@ export function buildMarketNewsroomPost({ language, pack = {}, post = {}, frame,
       : labels.standfirst(inferredFrame, source, date, summary)
   );
   const seoDescription = truncate(excerpt, 176);
+  const coverCredit = cleanSourceCredit(post.coverCredit || pack.coverCredit || source.publisher || "");
+  const coverCreditUrl = post.coverCreditUrl || pack.coverCreditUrl || source.url || "";
 
   return {
     language,
@@ -971,7 +986,13 @@ export function buildMarketNewsroomPost({ language, pack = {}, post = {}, frame,
     tags: [labels.category, "AI", inferredFrame.entity, inferredFrame.key].filter(Boolean).slice(0, 5),
     author: author || post.author || "Ken",
     readTimeMinutes: readTimeMinutes || post.readTimeMinutes || 3,
-    coverAlt: post.coverAlt || `${title} - ${post.coverCredit || source.publisher || "source image"}`,
+    cover: post.cover || pack.primarySourceImageUrl || post.primarySourceImageUrl || "",
+    coverSource: post.coverSource || "source",
+    coverCredit,
+    coverCreditUrl,
+    coverLicense: cleanSourceLicense(post.coverLicense || pack.coverLicense || "source image"),
+    coverLicenseUrl: post.coverLicenseUrl || pack.coverLicenseUrl || coverCreditUrl,
+    coverAlt: post.coverAlt || `${title} - ${coverCredit || "source image"}`,
     generatedBy: post.generatedBy || "market-source-worker",
     aiDisclosure: ""
   };
@@ -990,5 +1011,5 @@ export function hasMarketTemplateSlop(post = {}) {
     .filter(Boolean)
     .join("\n");
 
-  return /這則消息可以拿來|企業檢查|卡在哪個流程|原因是企業決策問題|Source:\s|Event:\s|Evidence:\s|Decision cue|source brief|source index|primary source; the article should stay anchored|Next action: choose one workflow|ALTOS LAB reader note|讀者怎麼看|不是同類工具會不會更多，而是|不只是海外消息，而是/i.test(text);
+  return /這則消息可以拿來|企業檢查|卡在哪個流程|原因是企業決策問題|Source:\s|Event:\s|Evidence:\s|Decision cue|source brief|source index|primary source; the article should stay anchored|Next action: choose one workflow|ALTOS LAB reader note|讀者怎麼看|真正要追|不是同類工具會不會更多，而是|不只是海外消息，而是/i.test(text);
 }

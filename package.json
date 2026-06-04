@@ -21,6 +21,7 @@
     "blog:scheduled": "node scripts/blog-scheduled-runner.mjs",
     "blog:backfill": "node scripts/blog-backfill-planner.mjs",
     "blog:market-sources": "node scripts/blog-market-source-scanner.mjs",
+    "blog:media-style-corpus": "node scripts/blog-media-style-corpus.mjs",
     "blog:audit-ai-feeling": "node scripts/blog-ai-feeling-audit.mjs",
     "blog:doctor": "node scripts/blog-sop-doctor.mjs",
     "blog:verify-release": "node scripts/verify-blog-release.mjs",
@@ -29,6 +30,7 @@
     "test": "npm run typecheck && npm run test:blog",
     "blog:market-scan": "node scripts/blog-scheduled-runner.mjs --market-scan",
     "blog:market-worker": "node scripts/blog-market-source-worker.mjs",
+    "blog:market-public-qa": "node scripts/blog-market-news-public-qa.mjs",
     "blog:repair-copy": "node scripts/blog-public-copy-repair.mjs"
   },
   "dependencies": {
