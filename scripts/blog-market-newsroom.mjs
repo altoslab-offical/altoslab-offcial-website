@@ -306,15 +306,15 @@ function localizedSourceTitle(language, frame, source) {
   const fallback = cleanSourceTitle(source.title || frame.focus[language] || frame.focus.en);
   if (frame.key === "voice-ai-markets") {
     return {
-      "zh-Hant": "Goldman 與 Meta 前員工做語音 AI，押注大平台沒顧到的市場",
+      "zh-Hant": "兩位創辦人離開 Goldman 與 Meta，為被忽略的市場打造語音 AI",
       en: fallback,
-      ja: "Goldman と Meta 出身の創業者が、音声 AI で見落とされた市場に挑む",
-      ko: "Goldman과 Meta 출신 창업자가 대형 플랫폼이 놓친 시장에 음성 AI로 뛰어들다",
-      id: "Dua pendiri eks Goldman dan Meta membangun voice AI untuk pasar yang terlewatkan",
-      vi: "Hai nhà sáng lập rời Goldman và Meta để làm voice AI cho thị trường bị bỏ quên",
-      th: "ผู้ก่อตั้งจาก Goldman และ Meta สร้าง voice AI ให้ตลาดที่ถูกมองข้าม",
-      ms: "Dua pengasas bekas Goldman dan Meta membina voice AI untuk pasaran yang terlepas pandang",
-      fil: "Dalawang founder mula Goldman at Meta ang gumawa ng voice AI para sa markets na nalalampasan"
+      ja: "Goldman と Meta を離れた創業者が、見落とされてきた市場向けに音声 AI を作る",
+      ko: "Goldman과 Meta를 떠난 두 창업자가 소외된 시장을 위한 음성 AI를 만든다",
+      id: "Dua pendiri meninggalkan Goldman dan Meta untuk membangun voice AI bagi pasar yang terlewatkan",
+      vi: "Hai nhà sáng lập rời Goldman và Meta để xây voice AI cho các thị trường bị bỏ qua",
+      th: "ผู้ก่อตั้งสองคนออกจาก Goldman และ Meta เพื่อสร้าง voice AI ให้ตลาดที่ถูกมองข้าม",
+      ms: "Dua pengasas meninggalkan Goldman dan Meta untuk membina voice AI bagi pasaran yang terlepas pandang",
+      fil: "Dalawang founder ang umalis sa Goldman at Meta para bumuo ng voice AI para sa markets na nalalampasan"
     }[language] || fallback;
   }
   if (frame.key === "gemini-omni") {
@@ -333,18 +333,32 @@ function localizedSourceTitle(language, frame, source) {
   return fallback;
 }
 
+function cleanPublicSourceLinks(sourceLinks = []) {
+  return sourceLinks
+    .filter((source) => {
+      const text = `${source.title || ""} ${source.url || ""} ${source.summary || ""}`.toLowerCase();
+      return !/source index|category\/artificial-intelligence|article claims should remain anchored|current ai feed/.test(text);
+    })
+    .map((source) => ({
+      ...source,
+      title: cleanSourceTitle(source.title || ""),
+      summary: normalizeNewsText(source.summary || "")
+    }))
+    .filter((source) => source.title && source.url);
+}
+
 function localizedNewsTitle(language, frame, source) {
   if (frame.key === "voice-ai-markets") {
     return {
-      "zh-Hant": "Goldman、Meta 前員工押注語音 AI：大平台漏掉的市場，反而先跑出用量",
+      "zh-Hant": localizedSourceTitle("zh-Hant", frame, source),
       en: localizedSourceTitle("en", frame, source),
-      ja: "Goldman・Meta 出身者が音声 AI に賭ける：大手が見落とした市場で利用量が伸びる",
-      ko: "Goldman·Meta 출신이 음성 AI에 베팅하다: 대형 플랫폼이 놓친 시장에서 사용량이 나온다",
-      id: "Eks Goldman dan Meta bertaruh pada voice AI: pasar yang terlewat justru mulai menunjukkan volume",
-      vi: "Cựu nhân sự Goldman và Meta đặt cược vào voice AI: thị trường bị bỏ quên lại có lưu lượng thật",
-      th: "อดีต Goldman และ Meta เดิมพัน voice AI: ตลาดที่แพลตฟอร์มใหญ่พลาดเริ่มมี volume จริง",
-      ms: "Bekas Goldman dan Meta bertaruh pada voice AI: pasaran yang terlepas pandang mula menunjukkan volume",
-      fil: "Dating Goldman at Meta talent tumaya sa voice AI: lumalabas ang volume sa markets na nalampasan"
+      ja: localizedSourceTitle("ja", frame, source),
+      ko: localizedSourceTitle("ko", frame, source),
+      id: localizedSourceTitle("id", frame, source),
+      vi: localizedSourceTitle("vi", frame, source),
+      th: localizedSourceTitle("th", frame, source),
+      ms: localizedSourceTitle("ms", frame, source),
+      fil: localizedSourceTitle("fil", frame, source)
     }[language];
   }
   const publisher = shortPublisher(source.publisher);
@@ -601,101 +615,235 @@ const LABELS = {
     title: (frame, source) => localizedNewsTitle("zh-Hant", frame, source),
     standfirst: (frame, source, date, summary) =>
       `${shortPublisher(source.publisher)} 於 ${date} 報導，${frame.focus["zh-Hant"]}。${summary}`,
-    headings: ["新聞重點", "背景與脈絡", "還要追什麼", "讀者怎麼看"],
+    headings: ["發生什麼事", "來源裡的關鍵細節", "為什麼被注意", "後續觀察"],
     why: (frame) =>
       `以這則來源來看，重點是${localizedProduct("zh-Hant", frame)}已經開始碰到具體使用者與可觀察的使用量；後續才有辦法討論商業化與穩定部署。`,
-    caution: "目前仍要把來源報導、公司說法與實際成效分開看。若只有單一來源或單一數字，最好先把它當成市場訊號，而不是完整結論。",
-    reader: "如果你正在評估同類工具，先看三件事：使用者是不是原本就有明確痛點、服務是否能處理足夠大的日常量、以及失敗時是否仍能回到人工處理。"
+    caution: "這則消息還需要看後續客戶採用、服務穩定性與實際營收表現。單一報導能說明市場有新動作，但還不能直接代表整個類別已成熟。",
+    reader: "接下來要觀察的是，這類區域化語音 AI 能否在更多產業維持低延遲、處理方言與混合語言，並把試用轉成長期付費客戶。"
   },
   en: {
     category: "Market Brief",
     title: (frame, source) => localizedNewsTitle("en", frame, source),
     standfirst: (frame, source, date, summary) =>
       `${shortPublisher(source.publisher)} reported on ${date} that ${frame.focus.en}. ${summary}`,
-    headings: ["What happened", "Why it matters", "What remains unclear", "ALTOS LAB reader note"],
+    headings: ["What happened", "Key details from the source", "Why it drew attention", "What to watch next"],
     why: (frame) =>
       `The signal is that ${localizedProduct("en", frame)} is moving closer to a concrete use case, a visible user group, and measurable volume.`,
-    caution: "Keep the reported facts, company claims, and real-world outcomes separate. A single source or a single metric is a signal, not a complete conclusion.",
-    reader: "If you are evaluating a similar tool, start with the user pain, daily usage volume, and the fallback path when automation fails."
+    caution: "The next question is whether customer adoption, reliability, and revenue keep pace with the reported usage. One story can show momentum, but not category maturity by itself.",
+    reader: "Watch whether regional voice AI systems can keep latency low, handle dialects and code-switching, and turn trials into durable paid deployments."
   },
   ja: {
     category: "マーケット速報",
     title: (frame, source) => localizedNewsTitle("ja", frame, source),
     standfirst: (frame, source, date, summary) =>
       `${shortPublisher(source.publisher)} は ${date}、${frame.focus.ja} と報じました。${summary}`,
-    headings: ["何が起きたか", "なぜ注目されるか", "まだ確認が必要な点", "ALTOS LAB 読者メモ"],
+    headings: ["何が起きたか", "出典の主なポイント", "なぜ注目されたか", "次に見る点"],
     why: (frame) =>
       `このニュースで見るべき点は、${localizedProduct("ja", frame)} が具体的な利用場面、利用者層、測定できる利用量に近づいていることです。`,
-    caution: "報道された事実、企業側の説明、実際の成果は分けて読む必要があります。単一ソースや単一指標は、市場シグナルであり結論ではありません。",
-    reader: "類似ツールを評価するなら、利用者の痛み、日常的な利用量、失敗時に人へ戻せる経路から確認してください。"
+    caution: "今後は顧客導入、信頼性、売上が利用量に伴って伸びるかを見る必要があります。単一の記事だけで市場成熟を判断することはできません。",
+    reader: "地域特化の音声 AI が低遅延、方言、コードスイッチングに対応しながら、有料利用を継続できるかが次の焦点です。"
   },
   ko: {
     category: "시장 브리프",
     title: (frame, source) => localizedNewsTitle("ko", frame, source),
     standfirst: (frame, source, date, summary) =>
       `${shortPublisher(source.publisher)}는 ${date} ${frame.focus.ko}고 보도했습니다. ${summary}`,
-    headings: ["무슨 일이 있었나", "왜 볼 만한가", "아직 확인할 점", "ALTOS LAB 독자 메모"],
+    headings: ["무슨 일이 있었나", "출처의 핵심 내용", "왜 주목받나", "다음에 볼 점"],
     why: (frame) =>
       `이 소식에서 볼 점은 ${localizedProduct("ko", frame)}가 구체적인 사용 장면, 사용자층, 측정 가능한 사용량에 가까워지고 있다는 것입니다.`,
-    caution: "보도된 사실, 회사의 설명, 실제 성과를 분리해 읽어야 합니다. 단일 출처나 단일 지표는 결론이 아니라 시장 신호입니다.",
-    reader: "비슷한 도구를 검토한다면 사용자 고통, 일상 사용량, 자동화가 실패했을 때 사람이 이어받는 경로부터 확인하세요."
+    caution: "다음은 고객 도입, 안정성, 매출이 보도된 사용량을 따라가는지 확인해야 합니다. 기사 하나만으로 카테고리 성숙도를 단정할 수는 없습니다.",
+    reader: "지역 특화 음성 AI가 낮은 지연 시간, 방언, 코드 스위칭을 처리하면서 유료 사용을 유지할 수 있는지가 관건입니다."
   },
   id: {
     category: "Kabar Pasar",
     title: (frame, source) => localizedNewsTitle("id", frame, source),
     standfirst: (frame, source, date, summary) =>
       `${shortPublisher(source.publisher)} melaporkan pada ${date} bahwa ${frame.focus.id}. ${summary}`,
-    headings: ["Apa yang terjadi", "Kenapa ini menarik", "Apa yang masih perlu dicek", "Catatan pembaca ALTOS LAB"],
+    headings: ["Apa yang terjadi", "Detail penting dari sumber", "Kenapa ini menarik", "Yang perlu dipantau"],
     why: (frame) =>
       `Sinyal pentingnya: ${localizedProduct("id", frame)} makin dekat dengan use case nyata, kelompok pengguna yang jelas, dan volume yang bisa diamati.`,
-    caution: "Pisahkan fakta dari laporan, klaim perusahaan, dan hasil di lapangan. Satu sumber atau satu angka adalah sinyal pasar, bukan kesimpulan penuh.",
-    reader: "Kalau sedang menilai tool serupa, mulai dari rasa sakit pengguna, volume penggunaan harian, dan jalur fallback ketika otomatisasi gagal."
+    caution: "Berikutnya perlu dilihat apakah adopsi pelanggan, reliabilitas, dan pendapatan ikut tumbuh bersama volume penggunaan. Satu laporan menunjukkan momentum, bukan bukti kematangan kategori.",
+    reader: "Pantau apakah voice AI regional bisa menjaga latensi rendah, menangani dialek dan campuran bahasa, lalu mengubah uji coba menjadi pelanggan berbayar jangka panjang."
   },
   vi: {
     category: "Tin nhanh thị trường",
     title: (frame, source) => localizedNewsTitle("vi", frame, source),
     standfirst: (frame, source, date, summary) =>
       `${shortPublisher(source.publisher)} đưa tin vào ${date} rằng ${frame.focus.vi}. ${summary}`,
-    headings: ["Chuyện gì đã xảy ra", "Vì sao đáng chú ý", "Điều vẫn cần kiểm chứng", "Ghi chú cho độc giả ALTOS LAB"],
+    headings: ["Chuyện gì đã xảy ra", "Chi tiết chính từ nguồn", "Vì sao đáng chú ý", "Điều cần theo dõi"],
     why: (frame) =>
       `Điểm đáng chú ý là ${localizedProduct("vi", frame)} đang tiến gần hơn tới một use case cụ thể, một nhóm người dùng rõ ràng và lượng sử dụng có thể quan sát.`,
-    caution: "Cần tách riêng sự kiện được nguồn đưa tin, tuyên bố từ công ty và kết quả thực tế. Một nguồn hoặc một con số chỉ là tín hiệu thị trường, chưa phải kết luận đầy đủ.",
-    reader: "Nếu đang đánh giá công cụ tương tự, hãy bắt đầu từ nỗi đau của người dùng, lượng sử dụng hằng ngày và cách quay lại xử lý thủ công khi tự động hóa thất bại."
+    caution: "Bước tiếp theo là xem việc áp dụng của khách hàng, độ ổn định và doanh thu có đi cùng lượng sử dụng được công bố hay không. Một bài viết cho thấy đà chuyển động, chưa đủ để kết luận cả thị trường đã chín.",
+    reader: "Theo dõi liệu voice AI bản địa hóa có giữ được độ trễ thấp, xử lý phương ngữ và chuyển đổi ngôn ngữ, rồi biến thử nghiệm thành khách hàng trả phí lâu dài hay không."
   },
   th: {
     category: "ข่าวตลาด",
     title: (frame, source) => localizedNewsTitle("th", frame, source),
     standfirst: (frame, source, date, summary) =>
       `${shortPublisher(source.publisher)} รายงานเมื่อ ${date} ว่า ${frame.focus.th} ${summary}`,
-    headings: ["เกิดอะไรขึ้น", "ทำไมเรื่องนี้น่าจับตา", "อะไรที่ยังต้องตรวจสอบ", "บันทึกสำหรับผู้อ่าน ALTOS LAB"],
+    headings: ["เกิดอะไรขึ้น", "รายละเอียดสำคัญจากแหล่งข่าว", "ทำไมเรื่องนี้น่าจับตา", "สิ่งที่ต้องดูต่อ"],
     why: (frame) =>
       `ประเด็นสำคัญคือ ${localizedProduct("th", frame)} กำลังเข้าใกล้ use case จริง กลุ่มผู้ใช้ที่ชัดเจน และปริมาณการใช้งานที่สังเกตได้`,
-    caution: "ควรแยกข้อเท็จจริงจากรายงาน คำกล่าวของบริษัท และผลลัพธ์จริงออกจากกัน แหล่งข่าวเดียวหรือตัวเลขเดียวเป็นเพียงสัญญาณตลาด ไม่ใช่ข้อสรุปทั้งหมด",
-    reader: "ถ้ากำลังประเมินเครื่องมือแบบเดียวกัน ให้เริ่มจาก pain point ของผู้ใช้ ปริมาณการใช้งานประจำวัน และทางกลับไปให้มนุษย์จัดการเมื่อ automation ล้มเหลว"
+    caution: "ต้องดูต่อว่าการใช้งานของลูกค้า ความเสถียร และรายได้จะเติบโตตามตัวเลขที่รายงานหรือไม่ ข่าวหนึ่งชิ้นบอก momentum ได้ แต่ยังไม่พอจะสรุปว่าตลาดสุกงอมแล้ว",
+    reader: "ประเด็นต่อไปคือ voice AI เฉพาะภูมิภาคจะรักษา latency ต่ำ จัดการสำเนียงและการสลับภาษา และเปลี่ยนการทดลองเป็นลูกค้าจ่ายเงินระยะยาวได้หรือไม่"
   },
   ms: {
     category: "Berita Pasaran",
     title: (frame, source) => localizedNewsTitle("ms", frame, source),
     standfirst: (frame, source, date, summary) =>
       `${shortPublisher(source.publisher)} melaporkan pada ${date} bahawa ${frame.focus.ms}. ${summary}`,
-    headings: ["Apa yang berlaku", "Mengapa ia wajar diperhatikan", "Apa yang masih perlu disahkan", "Nota pembaca ALTOS LAB"],
+    headings: ["Apa yang berlaku", "Butiran penting daripada sumber", "Mengapa ia wajar diperhatikan", "Perkara untuk dipantau"],
     why: (frame) =>
       `Isyarat pentingnya: ${localizedProduct("ms", frame)} semakin dekat dengan use case sebenar, kumpulan pengguna yang jelas, dan volume penggunaan yang boleh diperhatikan.`,
-    caution: "Pisahkan fakta yang dilaporkan, dakwaan syarikat, dan hasil sebenar. Satu sumber atau satu angka ialah isyarat pasaran, bukan kesimpulan penuh.",
-    reader: "Jika menilai alat serupa, mulakan dengan kesakitan pengguna, volume penggunaan harian, dan laluan fallback apabila automasi gagal."
+    caution: "Selepas ini perlu dilihat sama ada adopsi pelanggan, kebolehpercayaan dan pendapatan bergerak seiring dengan volume penggunaan. Satu laporan menunjukkan momentum, bukan bukti kematangan kategori.",
+    reader: "Pantau sama ada voice AI serantau boleh mengekalkan latensi rendah, menangani dialek dan campuran bahasa, lalu menukar percubaan kepada pelanggan berbayar jangka panjang."
   },
   fil: {
     category: "Market Brief",
     title: (frame, source) => localizedNewsTitle("fil", frame, source),
     standfirst: (frame, source, date, summary) =>
       `Iniulat ng ${shortPublisher(source.publisher)} noong ${date} na ${frame.focus.fil}. ${summary}`,
-    headings: ["Ano ang nangyari", "Bakit ito kapansin-pansin", "Ano pa ang kailangang i-check", "Tala para sa ALTOS LAB readers"],
+    headings: ["Ano ang nangyari", "Mahahalagang detalye mula sa source", "Bakit ito kapansin-pansin", "Ano ang babantayan"],
     why: (frame) =>
       `Ang mahalagang signal: mas lumalapit ang ${localizedProduct("fil", frame)} sa totoong use case, malinaw na user group, at usage volume na puwedeng obserbahan.`,
-    caution: "Paghiwalayin ang reported facts, company claims, at real-world outcomes. Ang isang source o isang metric ay market signal, hindi kumpletong konklusyon.",
-    reader: "Kung sinusuri ang kaparehong tool, magsimula sa sakit ng user, araw-araw na usage volume, at fallback path kapag pumalya ang automation."
+    caution: "Sunod na titingnan kung sasabay ang customer adoption, reliability, at revenue sa reported usage. Isang report lang ang nagpapakita ng momentum, hindi pa patunay na mature na ang buong category.",
+    reader: "Bantayan kung kaya ng regional voice AI na panatilihing mababa ang latency, humawak ng dialects at code-switching, at gawing long-term paid customers ang trials."
   }
 };
+
+const VOICE_AI_BODY = {
+  "zh-Hant": {
+    excerpt:
+      "AethexAI 由 Goldman Sachs 與 Meta 背景的創辦人創立，鎖定非洲與中東的客服語音 AI 市場；它剛完成 300 萬美元 pre-seed 輪，並表示自建系統每天已處理超過 17,000 通電話。",
+    geoSummary:
+      "TechCrunch 報導的 AethexAI 故事，焦點放在它選擇避開歐美標準語音環境，直接為非洲與中東的方言、混合語言、電信基礎設施與價格條件做模型和部署。",
+    keyTakeaways: [
+      "AethexAI 完成 300 萬美元 pre-seed 輪，由 4DX Ventures 領投，投資人包含 Enza Capital、Dorm Room Fund、Mojo Ventures 與 Stanford GSB 26 Fund。",
+      "公司自建小模型與協調層，目標是降低延遲、處理當地英語、法語與阿拉伯語口音，而非單純套用既有語音 AI orchestration 工具。",
+      "AethexAI 表示，自己的 Kora 系列模型約 3 億到 17 億參數，並已在非洲與中東市場每天處理超過 17,000 通電話。",
+      "目前常見場景包含債務催收、客戶啟用與 KYC；真正要追的是後續企業採用、通話品質與付費留存。"
+    ],
+    body:
+      "## Goldman、Meta 背景創辦人轉向區域語音 AI\n\nTechCrunch 報導，AethexAI 由 Mariama Diallo 與 Ayooluwa Odemuyiwa 創立。Diallo 曾任職 Goldman Sachs，後來加入 YC 支持的新創 ModelML；Odemuyiwa 畢業於 Caltech，曾在 Meta 工作，並進入 Stanford Business School。兩人把題目放在非洲與中東市場的語音 AI，暫時不以歐美主流企業客服市場為第一目標。\n\nAethexAI 已完成 300 萬美元 pre-seed 輪，由 4DX Ventures 領投，Enza Capital、Dorm Room Fund、Mojo Ventures、Stanford GSB 26 Fund 參與，個人投資人則包括 Stanford 教職員、電信主管與來自 Anthropic 的 AI 研究人員。\n\n## 為什麼它自建語音 AI 工具\n\nTechCrunch 指出，客服與服務是語音 AI 最熱的領域之一，但在非洲與中東，延遲、口音、語言混用與既有電話系統會讓現成方案變得不夠順。AethexAI 因此自建小模型與 orchestration layer，用來處理當地英語、法語與阿拉伯語的實際用法。\n\n公司稱 Kora 系列模型規模約在 3 億到 17 億參數之間。它把模型做小，主要是為了壓低延遲，同時保留足夠準確度。\n\n## 資料與使用量已經開始出現\n\n為了訓練模型，AethexAI 使用來自 call center partner 的匿名錄音，也把硬碟寄到非洲多地的廣播電台蒐集音訊資料；另外，公司建立由大學生組成的貢獻者網路，協助標註資料與錄製當地姓名發音。\n\nAethexAI 表示，目前自家系統每天處理超過 17,000 通電話。常見使用場景包括債務催收、客戶啟用與 KYC 身分驗證。公司也推出企業試用平台、API 與 SDK，讓企業與開發者測試模型。\n\n## 這則新聞接下來看什麼\n\n這則消息值得看的地方，是語音 AI 市場未必只由最大模型和最大平台決定。若企業需求來自特定地區的語音、電話網路、價格與工作流程，區域化模型與在地部署能力可能會變成差異。\n\n但這仍是早期新創故事。接下來要看的是：AethexAI 能否把 17,000 通電話的日常使用量轉成穩定企業收入，並在更多產業維持低延遲、可理解度與服務品質。"
+  },
+  en: {
+    excerpt:
+      "AethexAI, founded by former Goldman Sachs and Meta talent, is building voice AI for Africa and the Middle East. It has raised a $3 million pre-seed round and says its own stack now handles more than 17,000 calls a day.",
+    geoSummary:
+      "TechCrunch's AethexAI story focuses on a regional voice AI bet: Africa and the Middle East need systems built for local dialects, code-switching, telephony infrastructure, and price points that mainstream products often miss.",
+    keyTakeaways: [
+      "AethexAI raised a $3 million pre-seed round led by 4DX Ventures, with participation from Enza Capital, Dorm Room Fund, Mojo Ventures, and Stanford GSB 26 Fund.",
+      "The company built its own small models and orchestration layer to reduce latency, rather than simply wrapping existing voice AI tools.",
+      "The company says its Kora models range from about 300 million to 1.7 billion parameters and now handle more than 17,000 calls a day.",
+      "Early use cases include debt collection, customer activation, and KYC; the next questions are adoption, call quality, and retention."
+    ],
+    body:
+      "## Former Goldman and Meta talent turns to regional voice AI\n\nTechCrunch reported that AethexAI was founded by Mariama Diallo and Ayooluwa Odemuyiwa. Diallo previously worked at Goldman Sachs and later joined YC-backed ModelML. Odemuyiwa graduated from Caltech, worked at Meta, and enrolled at Stanford Business School before co-founding the company. Their first target is voice AI for Africa and the Middle East rather than the default U.S. enterprise support market.\n\nAethexAI has raised $3 million in pre-seed funding led by 4DX Ventures. Enza Capital, Dorm Room Fund, Mojo Ventures, and Stanford GSB 26 Fund also participated, alongside individual investors including Stanford faculty, telecom executives, and AI researchers from Anthropic.\n\n## Why it built its own voice AI stack\n\nCustomer support and service are hot areas for voice AI, but TechCrunch notes that Africa and the Middle East bring different constraints: latency, dialects, code-switching, informal speech, telephony infrastructure, and cost. AethexAI therefore built its own small models and orchestration layer to handle live regional calls.\n\nThe company calls its model family Kora. The models range from about 300 million to 1.7 billion parameters. Smaller models help keep latency low while staying accurate enough for live calls.\n\n## Usage is already visible\n\nTo train the models, AethexAI used anonymized recordings from a call center partner. It also collected audio from radio stations across Africa and built a contributor network of university students to annotate data and pronounce local names.\n\nThe company says its system now handles more than 17,000 calls per day. Current use cases include debt collection, customer activation, and KYC. It is also launching an enterprise platform, APIs, and SDKs for companies and developers to test the technology.\n\n## What to watch next\n\nThe useful signal in this story is that voice AI may depend on regional data and infrastructure as much as model size. If the hard part is regional speech, telephony, pricing, and deployment, local systems can matter alongside global platforms.\n\nIt is still an early-stage startup story. The next proof points are whether AethexAI can turn call volume into durable enterprise revenue, maintain low latency, and keep quality high across more industries."
+  },
+  ja: {
+    excerpt:
+      "AethexAI は Goldman Sachs と Meta 出身の創業者が立ち上げた音声 AI スタートアップです。アフリカと中東市場を対象に、300 万ドルの pre-seed 資金を調達し、自社スタックで 1 日 17,000 件超の通話を処理しているとしています。",
+    geoSummary:
+      "TechCrunch の AethexAI 報道で重要なのは、同社が欧米の標準的な音声環境ではなく、アフリカと中東の方言、コードスイッチング、電話網、価格条件に合わせて音声 AI を作ろうとしている点です。",
+    keyTakeaways: [
+      "AethexAI は 4DX Ventures 主導で 300 万ドルの pre-seed ラウンドを調達し、Enza Capital、Dorm Room Fund、Mojo Ventures、Stanford GSB 26 Fund も参加しました。",
+      "同社は既存の音声 AI orchestration ツールを包むだけでなく、低遅延を狙って小型モデルと orchestration layer を自社開発しています。",
+      "Kora シリーズは約 3 億から 17 億パラメータで、同社は 1 日 17,000 件超の通話を処理していると説明しています。",
+      "用途は債権回収、顧客アクティベーション、KYC など。次に見るべき点は導入企業、通話品質、有料継続です。"
+    ],
+    body:
+      "## Goldman と Meta 出身の創業者が地域特化の音声 AI へ\n\nTechCrunch によると、AethexAI は Mariama Diallo と Ayooluwa Odemuyiwa が創業しました。Diallo は Goldman Sachs で働いた後、YC 支援の ModelML に参加。Odemuyiwa は Caltech 卒業後に Meta で働き、Stanford Business School に進んだ人物です。二人が選んだのは、米国企業向けの一般的な客服市場ではなく、アフリカと中東向けの音声 AI でした。\n\nAethexAI は 4DX Ventures 主導で 300 万ドルの pre-seed 資金を調達しました。Enza Capital、Dorm Room Fund、Mojo Ventures、Stanford GSB 26 Fund に加え、Stanford 関係者、通信業界の幹部、Anthropic の AI 研究者も個人投資家として参加しています。\n\n## なぜ自社スタックを作ったのか\n\nTechCrunch は、音声 AI で客服やサービス領域が熱くなる一方、アフリカと中東では遅延、方言、言語の混在、既存の電話網、価格条件が大きな制約になると説明しています。AethexAI は既存ツールの上に乗るだけでなく、小型モデルと orchestration layer を自社で作る選択をしました。\n\n同社のモデル群は Kora と呼ばれ、規模は約 3 億から 17 億パラメータ。最大モデルを競うのではなく、ライブ通話で必要な低遅延と精度の両立を狙っています。\n\n## 利用量も出始めている\n\nAethexAI は call center partner からの匿名録音を使ってモデルを訓練し、アフリカ各地のラジオ局から音声データも集めました。さらに大学生の contributor network を作り、データ注釈や現地名の発音収録を進めています。\n\n同社は、自社システムが現在 1 日 17,000 件超の通話を処理していると説明しています。用途は債権回収、顧客アクティベーション、KYC が中心で、企業向けプラットフォーム、API、SDK も公開しています。\n\n## 次に見るべきこと\n\nこのニュースが示すのは、音声 AI が最大モデルや大手プラットフォームだけで決まるわけではないということです。地域ごとの話し方、電話網、価格、導入現場が難所なら、ローカルデータと現地向けのインフラも競争力になります。\n\nただし、これはまだ初期スタートアップの話です。今後は、AethexAI が通話量を安定した企業収益へ変えられるか、低遅延を維持できるか、より多くの業種で品質を保てるかを見る必要があります。"
+  },
+  ko: {
+    excerpt:
+      "AethexAI는 Goldman Sachs와 Meta 출신 창업자가 만든 음성 AI 스타트업입니다. 아프리카와 중동 시장을 겨냥해 300만 달러 pre-seed 투자를 유치했고, 자체 스택으로 하루 17,000건이 넘는 통화를 처리하고 있다고 밝혔습니다.",
+    geoSummary:
+      "TechCrunch가 전한 AethexAI 이야기의 핵심은 또 하나의 음성 AI 스타트업이 아니라, 아프리카와 중동의 방언, 코드 스위칭, 전화 인프라, 가격 조건에 맞춘 시스템을 만들고 있다는 점입니다.",
+    keyTakeaways: [
+      "AethexAI는 4DX Ventures가 주도한 300만 달러 pre-seed 라운드를 유치했고 Enza Capital, Dorm Room Fund, Mojo Ventures, Stanford GSB 26 Fund가 참여했습니다.",
+      "기존 음성 AI orchestration 도구를 감싸는 대신, 지연 시간을 줄이기 위해 작은 모델과 orchestration layer를 직접 만들었습니다.",
+      "Kora 모델은 약 3억에서 17억 파라미터 규모이며, 회사는 하루 17,000건 이상의 통화를 처리한다고 설명합니다.",
+      "초기 사용 사례는 채권 회수, 고객 활성화, KYC입니다. 다음은 실제 도입, 통화 품질, 유료 유지율입니다."
+    ],
+    body:
+      "## Goldman과 Meta 출신 창업자가 지역 음성 AI로 간다\n\nTechCrunch에 따르면 AethexAI는 Mariama Diallo와 Ayooluwa Odemuyiwa가 창업했습니다. Diallo는 Goldman Sachs에서 일한 뒤 YC 지원 스타트업 ModelML에 합류했고, Odemuyiwa는 Caltech를 졸업한 뒤 Meta에서 일하고 Stanford Business School에 진학했습니다. 두 사람이 잡은 시장은 미국식 기업 고객센터가 아니라 아프리카와 중동의 음성 AI입니다.\n\nAethexAI는 4DX Ventures가 주도한 300만 달러 pre-seed 투자를 유치했습니다. Enza Capital, Dorm Room Fund, Mojo Ventures, Stanford GSB 26 Fund가 참여했고 Stanford 교수진, 통신업계 임원, Anthropic AI 연구자도 개인 투자자로 이름을 올렸습니다.\n\n## 왜 자체 음성 AI 스택을 만들었나\n\nTechCrunch는 고객 지원과 서비스가 음성 AI의 뜨거운 영역이지만, 아프리카와 중동에서는 지연 시간, 방언, 코드 스위칭, 비공식 말투, 전화망, 비용 조건이 다르다고 짚었습니다. AethexAI는 기존 도구 위에 얹히는 대신 작은 모델과 orchestration layer를 직접 구축했습니다.\n\n회사의 모델군은 Kora입니다. 규모는 약 3억에서 17억 파라미터입니다. 가장 큰 모델을 만들겠다는 뜻이 아니라, 실제 통화에서 필요한 낮은 지연 시간과 충분한 정확도를 맞추려는 선택입니다.\n\n## 사용량도 이미 보인다\n\nAethexAI는 call center partner의 익명화된 녹음을 훈련에 사용했고, 아프리카 여러 지역 라디오 방송국에서 오디오 데이터도 모았습니다. 또 대학생 기여자 네트워크를 만들어 데이터 주석과 현지 이름 발음을 수집했습니다.\n\n회사는 자체 시스템이 현재 하루 17,000건이 넘는 전화를 처리한다고 밝혔습니다. 사용 사례는 채권 회수, 고객 활성화, KYC가 중심이며 기업용 플랫폼, API, SDK도 공개하고 있습니다.\n\n## 다음에 볼 점\n\n이 소식이 보여주는 건 음성 AI 경쟁이 가장 큰 모델이나 글로벌 플랫폼만으로 결정되지 않을 수 있다는 점입니다. 지역 언어, 전화 인프라, 가격, 현장 배포가 어려운 부분이라면 현지 데이터와 인프라도 중요한 차이가 됩니다.\n\n다만 아직 초기 스타트업의 이야기입니다. 앞으로는 AethexAI가 통화량을 지속 가능한 기업 매출로 바꿀 수 있는지, 낮은 지연 시간을 유지하는지, 더 많은 산업에서 품질을 지키는지가 관건입니다."
+  },
+  id: {
+    excerpt:
+      "AethexAI didirikan oleh talenta berlatar Goldman Sachs dan Meta untuk membangun voice AI bagi Afrika dan Timur Tengah. Startup ini mengantongi pre-seed US$3 juta dan menyebut stack internalnya sudah menangani lebih dari 17.000 panggilan per hari.",
+    geoSummary:
+      "Laporan TechCrunch tentang AethexAI bukan sekadar cerita startup voice AI baru. Taruhannya adalah sistem yang dibangun untuk dialek lokal, code-switching, infrastruktur telepon, dan titik harga di Afrika serta Timur Tengah.",
+    keyTakeaways: [
+      "AethexAI meraih pre-seed US$3 juta yang dipimpin 4DX Ventures, dengan Enza Capital, Dorm Room Fund, Mojo Ventures, dan Stanford GSB 26 Fund ikut berpartisipasi.",
+      "Perusahaan tidak hanya membungkus tool voice AI yang sudah ada, tetapi membangun model kecil dan orchestration layer sendiri untuk menekan latensi.",
+      "Model Kora disebut berukuran sekitar 300 juta sampai 1,7 miliar parameter dan kini menangani lebih dari 17.000 panggilan per hari.",
+      "Use case awal mencakup debt collection, customer activation, dan KYC; yang perlu dipantau adalah adopsi, kualitas panggilan, dan retensi berbayar."
+    ],
+    body:
+      "## Pendiri berlatar Goldman dan Meta masuk ke voice AI regional\n\nTechCrunch melaporkan AethexAI didirikan oleh Mariama Diallo dan Ayooluwa Odemuyiwa. Diallo pernah bekerja di Goldman Sachs lalu bergabung dengan ModelML yang didukung YC. Odemuyiwa lulus dari Caltech, bekerja di Meta, dan masuk Stanford Business School sebelum ikut mendirikan perusahaan. Target mereka bukan pasar customer support enterprise AS, tetapi voice AI untuk Afrika dan Timur Tengah.\n\nAethexAI telah mengumpulkan pendanaan pre-seed US$3 juta yang dipimpin 4DX Ventures. Enza Capital, Dorm Room Fund, Mojo Ventures, dan Stanford GSB 26 Fund ikut masuk, bersama investor individu dari Stanford, eksekutif telekomunikasi, dan peneliti AI dari Anthropic.\n\n## Kenapa membangun stack sendiri\n\nCustomer support dan service memang sedang panas di voice AI. Namun TechCrunch mencatat Afrika dan Timur Tengah punya kendala berbeda: latensi, dialek, code-switching, bahasa informal, infrastruktur telepon, dan biaya. AethexAI memilih membangun model kecil dan orchestration layer sendiri, bukan sekadar berdiri di atas tool yang sudah ada.\n\nKeluarga modelnya disebut Kora, dengan ukuran sekitar 300 juta sampai 1,7 miliar parameter. Tujuannya bukan menjadi model terbesar, melainkan menjaga latensi rendah sambil cukup akurat untuk panggilan langsung.\n\n## Volume penggunaan mulai terlihat\n\nUntuk melatih model, AethexAI memakai rekaman anonim dari partner call center. Perusahaan juga mengumpulkan audio dari stasiun radio di Afrika dan membangun jaringan kontributor mahasiswa untuk anotasi data serta pelafalan nama lokal.\n\nAethexAI mengatakan sistemnya kini menangani lebih dari 17.000 panggilan per hari. Use case saat ini mencakup debt collection, customer activation, dan KYC. Perusahaan juga meluncurkan platform enterprise, API, dan SDK untuk diuji perusahaan serta developer.\n\n## Yang perlu dipantau\n\nSinyalnya: voice AI mungkin tidak hanya dimenangkan oleh model terbesar atau platform global terbesar. Jika tantangannya ada pada ucapan regional, telepon, harga, dan deployment, data lokal serta infrastruktur lapangan bisa sama pentingnya dengan ukuran model.\n\nNamun ini masih cerita startup tahap awal. Bukti berikutnya adalah apakah AethexAI bisa mengubah volume panggilan menjadi pendapatan enterprise yang tahan lama, menjaga latensi rendah, dan mempertahankan kualitas di lebih banyak industri."
+  },
+  vi: {
+    excerpt:
+      "AethexAI do hai nhà sáng lập có nền tảng Goldman Sachs và Meta lập ra, tập trung vào voice AI cho châu Phi và Trung Đông. Startup này gọi được 3 triệu USD pre-seed và cho biết stack tự xây đã xử lý hơn 17.000 cuộc gọi mỗi ngày.",
+    geoSummary:
+      "Bài TechCrunch về AethexAI không chỉ là một startup voice AI mới. Điểm đáng chú ý là cách họ xây hệ thống cho phương ngữ địa phương, code-switching, hạ tầng điện thoại và mức giá ở châu Phi, Trung Đông.",
+    keyTakeaways: [
+      "AethexAI gọi được 3 triệu USD pre-seed do 4DX Ventures dẫn dắt, cùng Enza Capital, Dorm Room Fund, Mojo Ventures và Stanford GSB 26 Fund.",
+      "Công ty không chỉ dùng lại các tool voice AI orchestration có sẵn, mà tự xây mô hình nhỏ và orchestration layer để giảm độ trễ.",
+      "Dòng model Kora được mô tả có khoảng 300 triệu đến 1,7 tỷ tham số và hiện xử lý hơn 17.000 cuộc gọi mỗi ngày.",
+      "Use case ban đầu gồm thu hồi nợ, kích hoạt khách hàng và KYC; cần theo dõi adoption, chất lượng cuộc gọi và tỷ lệ giữ chân trả phí."
+    ],
+    body:
+      "## Nhà sáng lập từ Goldman và Meta chuyển sang voice AI khu vực\n\nTheo TechCrunch, AethexAI được sáng lập bởi Mariama Diallo và Ayooluwa Odemuyiwa. Diallo từng làm ở Goldman Sachs rồi tham gia ModelML, một startup được YC hậu thuẫn. Odemuyiwa tốt nghiệp Caltech, từng làm ở Meta và vào Stanford Business School trước khi đồng sáng lập công ty. Họ không nhắm vào thị trường enterprise support kiểu Mỹ trước, mà chọn voice AI cho châu Phi và Trung Đông.\n\nAethexAI đã gọi được 3 triệu USD pre-seed do 4DX Ventures dẫn dắt. Enza Capital, Dorm Room Fund, Mojo Ventures và Stanford GSB 26 Fund tham gia vòng này, cùng các nhà đầu tư cá nhân là giảng viên Stanford, lãnh đạo viễn thông và nhà nghiên cứu AI từ Anthropic.\n\n## Vì sao họ tự xây voice AI stack\n\nCustomer support và service đang là mảng nóng của voice AI, nhưng TechCrunch chỉ ra rằng châu Phi và Trung Đông có những ràng buộc khác: độ trễ, phương ngữ, code-switching, cách nói đời thường, hạ tầng điện thoại và chi phí. AethexAI vì vậy tự xây mô hình nhỏ và orchestration layer, thay vì chỉ đứng trên các tool có sẵn.\n\nDòng model của công ty tên là Kora, có quy mô khoảng 300 triệu đến 1,7 tỷ tham số. Mục tiêu không phải chạy theo mô hình lớn nhất, mà là giữ độ trễ thấp trong cuộc gọi trực tiếp nhưng vẫn đủ chính xác.\n\n## Lượng sử dụng đã bắt đầu hiện rõ\n\nĐể huấn luyện model, AethexAI dùng bản ghi âm đã ẩn danh từ một đối tác call center. Công ty cũng thu thập âm thanh từ các đài radio ở châu Phi và xây mạng lưới sinh viên để gán nhãn dữ liệu, ghi cách phát âm tên địa phương.\n\nAethexAI cho biết hệ thống hiện xử lý hơn 17.000 cuộc gọi mỗi ngày. Các use case phổ biến gồm thu hồi nợ, kích hoạt khách hàng và KYC. Công ty cũng mở nền tảng enterprise, API và SDK để doanh nghiệp và developer thử nghiệm.\n\n## Điều cần theo dõi\n\nTín hiệu hữu ích ở đây là voice AI có thể không chỉ thuộc về mô hình lớn nhất hay platform toàn cầu lớn nhất. Nếu phần khó nằm ở giọng địa phương, điện thoại, giá và triển khai thực tế, dữ liệu bản địa và hạ tầng tại chỗ sẽ rất quan trọng.\n\nDù vậy, đây vẫn là câu chuyện startup giai đoạn sớm. Bằng chứng tiếp theo là AethexAI có biến volume cuộc gọi thành doanh thu enterprise bền vững hay không, có giữ được độ trễ thấp và chất lượng khi mở rộng sang nhiều ngành hơn hay không."
+  },
+  th: {
+    excerpt:
+      "AethexAI ก่อตั้งโดยผู้มีพื้นหลังจาก Goldman Sachs และ Meta เพื่อทำ voice AI สำหรับแอฟริกาและตะวันออกกลาง บริษัทระดมทุน pre-seed ได้ 3 ล้านดอลลาร์ และระบุว่า stack ที่สร้างเองรองรับสายมากกว่า 17,000 ครั้งต่อวันแล้ว",
+    geoSummary:
+      "รายงานของ TechCrunch เรื่อง AethexAI ไม่ใช่แค่ข่าวสตาร์ทอัพ voice AI อีกราย แต่เป็นการเดิมพันว่าตลาดแอฟริกาและตะวันออกกลางต้องการระบบที่เข้าใจ dialect, code-switching, โครงข่ายโทรศัพท์ และต้นทุนจริง",
+    keyTakeaways: [
+      "AethexAI ระดมทุน pre-seed 3 ล้านดอลลาร์ นำโดย 4DX Ventures พร้อม Enza Capital, Dorm Room Fund, Mojo Ventures และ Stanford GSB 26 Fund",
+      "บริษัทไม่ได้แค่ใช้เครื่องมือ voice AI orchestration ที่มีอยู่ แต่สร้างโมเดลขนาดเล็กและ orchestration layer เองเพื่อลด latency",
+      "โมเดล Kora มีขนาดประมาณ 300 ล้านถึง 1.7 พันล้านพารามิเตอร์ และบริษัทระบุว่ารองรับสายมากกว่า 17,000 ครั้งต่อวัน",
+      "use case แรก ๆ ได้แก่ debt collection, customer activation และ KYC สิ่งที่ต้องดูต่อคือ adoption, คุณภาพสาย และลูกค้าจ่ายเงินระยะยาว"
+    ],
+    body:
+      "## ผู้ก่อตั้งจาก Goldman และ Meta หันมาทำ voice AI เฉพาะภูมิภาค\n\nTechCrunch รายงานว่า AethexAI ก่อตั้งโดย Mariama Diallo และ Ayooluwa Odemuyiwa โดย Diallo เคยทำงานที่ Goldman Sachs ก่อนเข้าร่วม ModelML ที่ได้รับการสนับสนุนจาก YC ส่วน Odemuyiwa จบจาก Caltech เคยทำงานที่ Meta และเข้า Stanford Business School ก่อนร่วมก่อตั้งบริษัท ตลาดที่ทั้งคู่เลือกไม่ใช่ customer support enterprise แบบสหรัฐฯ แต่เป็น voice AI สำหรับแอฟริกาและตะวันออกกลาง\n\nAethexAI ระดมทุน pre-seed ได้ 3 ล้านดอลลาร์ นำโดย 4DX Ventures และมี Enza Capital, Dorm Room Fund, Mojo Ventures, Stanford GSB 26 Fund เข้าร่วม รวมถึงนักลงทุนรายบุคคลจาก Stanford ผู้บริหารโทรคมนาคม และนักวิจัย AI จาก Anthropic\n\n## ทำไมต้องสร้าง stack เอง\n\nCustomer support และ service เป็นพื้นที่ร้อนของ voice AI แต่ TechCrunch ชี้ว่าแอฟริกาและตะวันออกกลางมีข้อจำกัดต่างออกไป ทั้ง latency, dialect, code-switching, ภาษาพูดไม่เป็นทางการ, โครงข่ายโทรศัพท์ และต้นทุน AethexAI จึงเลือกสร้างโมเดลขนาดเล็กกับ orchestration layer เอง แทนที่จะวางตัวอยู่บน tool ที่มีอยู่แล้ว\n\nตระกูลโมเดลของบริษัทชื่อ Kora มีขนาดประมาณ 300 ล้านถึง 1.7 พันล้านพารามิเตอร์ เป้าหมายไม่ใช่ทำโมเดลใหญ่ที่สุด แต่คือให้ latency ต่ำพอสำหรับสายจริงและยังแม่นพอใช้งานได้\n\n## เริ่มเห็น usage แล้ว\n\nในการฝึกโมเดล AethexAI ใช้เสียงบันทึกที่ anonymized จาก call center partner และเก็บข้อมูลเสียงจากสถานีวิทยุในแอฟริกา นอกจากนี้ยังสร้างเครือข่ายนักศึกษาช่วย annotate ข้อมูลและออกเสียงชื่อท้องถิ่น\n\nบริษัทระบุว่าระบบรองรับสายมากกว่า 17,000 ครั้งต่อวันแล้ว use case ปัจจุบันมี debt collection, customer activation และ KYC พร้อมเปิดแพลตฟอร์ม enterprise, API และ SDK ให้บริษัทกับนักพัฒนาทดลอง\n\n## สิ่งที่ต้องดูต่อ\n\nสัญญาณจากข่าวนี้คือ voice AI อาจไม่ได้ชนะด้วยโมเดลใหญ่ที่สุดหรือแพลตฟอร์มระดับโลกเท่านั้น ถ้าความยากอยู่ที่ภาษาท้องถิ่น ระบบโทรศัพท์ ต้นทุน และ deployment ในพื้นที่จริง ข้อมูลท้องถิ่นกับ infrastructure ภาคสนามก็สำคัญมาก\n\nอย่างไรก็ตาม นี่ยังเป็นเรื่องของสตาร์ทอัพระยะต้น หลักฐานถัดไปคือ AethexAI จะเปลี่ยน volume การโทรให้เป็นรายได้ enterprise ที่ยั่งยืนได้หรือไม่ รักษา latency ต่ำได้หรือไม่ และคุมคุณภาพเมื่อขยายไปหลายอุตสาหกรรมได้หรือไม่"
+  },
+  ms: {
+    excerpt:
+      "AethexAI diasaskan oleh pengasas berlatar Goldman Sachs dan Meta untuk membina voice AI bagi Afrika dan Timur Tengah. Startup ini mengumpul pre-seed AS$3 juta dan berkata stack sendiri kini mengendalikan lebih 17,000 panggilan sehari.",
+    geoSummary:
+      "Laporan TechCrunch tentang AethexAI bukan sekadar kisah startup voice AI baharu. Taruhannya ialah sistem untuk dialek tempatan, code-switching, infrastruktur telefon dan harga sebenar di Afrika serta Timur Tengah.",
+    keyTakeaways: [
+      "AethexAI meraih pre-seed AS$3 juta yang diterajui 4DX Ventures, dengan penyertaan Enza Capital, Dorm Room Fund, Mojo Ventures dan Stanford GSB 26 Fund.",
+      "Syarikat itu tidak hanya membungkus tool voice AI orchestration sedia ada; ia membina model kecil dan orchestration layer sendiri untuk menurunkan latensi.",
+      "Model Kora disebut sekitar 300 juta hingga 1.7 bilion parameter, dan syarikat berkata ia mengendalikan lebih 17,000 panggilan sehari.",
+      "Use case awal termasuk debt collection, customer activation dan KYC; perkara seterusnya ialah adopsi, kualiti panggilan dan retensi berbayar."
+    ],
+    body:
+      "## Pengasas dari Goldman dan Meta beralih ke voice AI serantau\n\nTechCrunch melaporkan AethexAI diasaskan oleh Mariama Diallo dan Ayooluwa Odemuyiwa. Diallo pernah bekerja di Goldman Sachs sebelum menyertai ModelML yang disokong YC. Odemuyiwa pula lulusan Caltech, pernah bekerja di Meta dan memasuki Stanford Business School sebelum bersama-sama menubuhkan syarikat itu. Sasaran mereka bukan pasaran enterprise support gaya AS, tetapi voice AI untuk Afrika dan Timur Tengah.\n\nAethexAI telah mengumpul pendanaan pre-seed AS$3 juta diterajui 4DX Ventures. Enza Capital, Dorm Room Fund, Mojo Ventures dan Stanford GSB 26 Fund turut menyertai, bersama pelabur individu termasuk fakulti Stanford, eksekutif telekomunikasi dan penyelidik AI dari Anthropic.\n\n## Mengapa ia membina stack sendiri\n\nCustomer support dan service ialah antara bidang paling panas dalam voice AI, tetapi TechCrunch menyatakan Afrika dan Timur Tengah membawa kekangan berbeza: latensi, dialek, code-switching, pertuturan tidak formal, infrastruktur telefon dan kos. AethexAI memilih membina model kecil dan orchestration layer sendiri, bukan sekadar berada di atas tool sedia ada.\n\nKeluarga model syarikat itu dinamakan Kora, dengan saiz sekitar 300 juta hingga 1.7 bilion parameter. Matlamatnya bukan menjadi model terbesar, tetapi mengekalkan latensi rendah sambil cukup tepat untuk panggilan langsung.\n\n## Penggunaan sudah mula kelihatan\n\nUntuk melatih model, AethexAI menggunakan rakaman tanpa identiti daripada rakan call center. Ia juga mengumpul audio daripada stesen radio di Afrika dan membina rangkaian penyumbang pelajar universiti untuk anotasi data serta sebutan nama tempatan.\n\nSyarikat berkata sistemnya kini mengendalikan lebih 17,000 panggilan sehari. Use case semasa termasuk debt collection, customer activation dan KYC. Ia juga melancarkan platform enterprise, API dan SDK untuk diuji syarikat serta pembangun.\n\n## Perkara untuk dipantau\n\nIsyarat berguna di sini ialah voice AI mungkin tidak hanya dimenangi oleh model terbesar atau platform global terbesar. Jika cabarannya ialah pertuturan serantau, telefon, harga dan deployment, data tempatan serta infrastruktur lapangan boleh jadi sama penting dengan saiz model.\n\nNamun ini masih kisah startup peringkat awal. Bukti seterusnya ialah sama ada AethexAI boleh menukar volume panggilan kepada pendapatan enterprise yang tahan lama, mengekalkan latensi rendah dan menjaga kualiti merentas lebih banyak industri."
+  },
+  fil: {
+    excerpt:
+      "Ang AethexAI ay itinayo ng founders na may background sa Goldman Sachs at Meta para gumawa ng voice AI para sa Africa at Middle East. Nakalikom ito ng $3 milyon na pre-seed at sinasabing ang sarili nitong stack ay humahawak na ng mahigit 17,000 tawag bawat araw.",
+    geoSummary:
+      "Ang TechCrunch story tungkol sa AethexAI ay hindi lang tungkol sa isa pang voice AI startup. Ang taya nito: kailangan ng Africa at Middle East ng systems para sa local dialects, code-switching, telephony infrastructure at presyo na madalas hindi sakop ng mainstream products.",
+    keyTakeaways: [
+      "Nakalikom ang AethexAI ng $3 milyon na pre-seed round na pinangunahan ng 4DX Ventures, kasama ang Enza Capital, Dorm Room Fund, Mojo Ventures at Stanford GSB 26 Fund.",
+      "Hindi lang ginamit ng kumpanya ang existing voice AI orchestration tools; gumawa ito ng sariling small models at orchestration layer para bawasan ang latency.",
+      "Ang Kora models ay nasa humigit-kumulang 300 milyon hanggang 1.7 bilyong parameters, at sinasabi ng kumpanya na humahawak ito ng mahigit 17,000 tawag bawat araw.",
+      "Unang use cases ang debt collection, customer activation at KYC; ang susunod na dapat bantayan ay adoption, call quality at paid retention."
+    ],
+    body:
+      "## Founders mula Goldman at Meta, pumasok sa regional voice AI\n\nAyon sa TechCrunch, ang AethexAI ay itinatag nina Mariama Diallo at Ayooluwa Odemuyiwa. Nagtrabaho si Diallo sa Goldman Sachs at sumali kalaunan sa YC-backed ModelML. Si Odemuyiwa ay graduate ng Caltech, nagtrabaho sa Meta, at pumasok sa Stanford Business School bago mag-cofound. Ang target nila ay hindi muna ang karaniwang U.S. enterprise support market, kundi voice AI para sa Africa at Middle East.\n\nNakalikom ang AethexAI ng $3 milyon sa pre-seed funding na pinangunahan ng 4DX Ventures. Kasama rin ang Enza Capital, Dorm Room Fund, Mojo Ventures at Stanford GSB 26 Fund, pati individual investors mula sa Stanford, telecom executives at AI researchers mula Anthropic.\n\n## Bakit sariling stack ang ginawa\n\nMainit ngayon ang customer support at service sa voice AI, pero ayon sa TechCrunch, iba ang constraints sa Africa at Middle East: latency, dialects, code-switching, informal speech, telephony infrastructure at presyo. Kaya pinili ng AethexAI na gumawa ng sariling small models at orchestration layer, imbes na umasa lang sa existing tools.\n\nKora ang tawag sa model family nito, na nasa humigit-kumulang 300 milyon hanggang 1.7 bilyong parameters. Hindi ang pinakamalaking model ang goal; ang mahalaga ay mababang latency at sapat na accuracy para sa live calls.\n\n## May nakikita nang usage\n\nPara sanayin ang models, gumamit ang AethexAI ng anonymized recordings mula sa call center partner. Nangolekta rin ito ng audio mula sa radio stations sa Africa at gumawa ng contributor network ng university students para sa data annotation at local name pronunciation.\n\nSinasabi ng kumpanya na ang sistema nito ay humahawak na ng mahigit 17,000 tawag bawat araw. Kasama sa current use cases ang debt collection, customer activation at KYC. Naglulunsad din ito ng enterprise platform, APIs at SDKs para masubukan ng companies at developers.\n\n## Ano ang babantayan\n\nAng signal dito: maaaring hindi lang pinakamalaking model o pinakamalaking global platform ang manalo sa voice AI. Kung ang mahirap ay regional speech, telephony, presyo at deployment, puwedeng maging kasinghalaga ng model size ang local data at infrastructure.\n\nMaaga pa rin ang startup story na ito. Ang susunod na proof points: kaya ba ng AethexAI na gawing matagalang enterprise revenue ang call volume, panatilihing mababa ang latency, at alagaan ang quality habang lumalawak sa mas maraming industriya."
+  }
+};
+
+function localizeVoiceBody(language) {
+  if (VOICE_AI_BODY[language]) return VOICE_AI_BODY[language];
+  return VOICE_AI_BODY.en;
+}
 
 function sourceFact(language, source, date, summary) {
   const publisher = shortPublisher(source.publisher);
@@ -716,6 +864,7 @@ function sourceFact(language, source, date, summary) {
 }
 
 function buildBody(language, frame, source) {
+  if (frame.key === "voice-ai-markets") return localizeVoiceBody(language).body;
   const labels = LABELS[language] || LABELS.en;
   const date = formatDate(source.publishedAt, language);
   const summary = localizedSourceSummary(language, source, frame);
@@ -730,25 +879,27 @@ function buildBody(language, frame, source) {
 }
 
 function geoSummary(language, frame, source) {
+  if (frame.key === "voice-ai-markets") return localizeVoiceBody(language).geoSummary;
   const date = formatDate(source.publishedAt, language);
   const summary = truncate(localizedSourceSummary(language, source, frame), 150);
   const publisher = shortPublisher(source.publisher);
   const focus = frame.focus[language] || frame.focus.en;
   const byLanguage = {
-    "zh-Hant": `來源摘要：${publisher} 於 ${date} 報導，${focus}。可引用事實：${summary}`,
-    en: `Source brief: ${publisher} reported on ${date} that ${focus}. Citable fact: ${summary}`,
-    ja: `出典要約：${publisher} は ${date}、${focus} と報じました。引用できる事実：${summary}`,
-    ko: `출처 요약: ${publisher}는 ${date} ${focus}고 보도했습니다. 인용 가능한 사실: ${summary}`,
-    id: `Ringkasan sumber: ${publisher} melaporkan pada ${date} bahwa ${focus}. Fakta yang bisa dikutip: ${summary}`,
-    vi: `Tóm tắt nguồn: ${publisher} đưa tin vào ${date} rằng ${focus}. Dữ kiện có thể trích dẫn: ${summary}`,
-    th: `สรุปแหล่งข่าว: ${publisher} รายงานเมื่อ ${date} ว่า ${focus} ข้อเท็จจริงที่อ้างอิงได้: ${summary}`,
-    ms: `Ringkasan sumber: ${publisher} melaporkan pada ${date} bahawa ${focus}. Fakta boleh dirujuk: ${summary}`,
-    fil: `Source brief: iniulat ng ${publisher} noong ${date} na ${focus}. Citable fact: ${summary}`
+    "zh-Hant": `${publisher} 於 ${date} 報導，${focus}；目前可確認的重點是：${summary}`,
+    en: `${publisher} reported on ${date} that ${focus}. The confirmed source point: ${summary}`,
+    ja: `${publisher} は ${date}、${focus} と報じました。確認できる要点は ${summary}`,
+    ko: `${publisher}는 ${date} ${focus}고 보도했습니다. 확인 가능한 핵심은 ${summary}`,
+    id: `${publisher} melaporkan pada ${date} bahwa ${focus}. Poin yang terkonfirmasi dari sumber: ${summary}`,
+    vi: `${publisher} đưa tin vào ${date} rằng ${focus}. Điểm có thể xác nhận từ nguồn: ${summary}`,
+    th: `${publisher} รายงานเมื่อ ${date} ว่า ${focus} ประเด็นที่ยืนยันได้จากแหล่งข่าวคือ ${summary}`,
+    ms: `${publisher} melaporkan pada ${date} bahawa ${focus}. Poin yang disahkan daripada sumber: ${summary}`,
+    fil: `Iniulat ng ${publisher} noong ${date} na ${focus}. Ang kumpirmadong punto mula sa source: ${summary}`
   };
   return byLanguage[language] || byLanguage.en;
 }
 
 function keyTakeaways(language, frame, source) {
+  if (frame.key === "voice-ai-markets") return localizeVoiceBody(language).keyTakeaways;
   const publisher = shortPublisher(source.publisher);
   const summary = truncate(localizedSourceSummary(language, source, frame), 135);
   const focus = frame.focus[language] || frame.focus.en;
@@ -794,7 +945,11 @@ export function buildMarketNewsroomPost({ language, pack = {}, post = {}, frame,
       ? normalizeNewsText(post.title)
       : generatedTitle;
   const body = normalizeNewsText(buildBody(language, inferredFrame, source));
-  const excerpt = normalizeNewsText(labels.standfirst(inferredFrame, source, date, summary));
+  const excerpt = normalizeNewsText(
+    inferredFrame.key === "voice-ai-markets"
+      ? localizeVoiceBody(language).excerpt
+      : labels.standfirst(inferredFrame, source, date, summary)
+  );
   const seoDescription = truncate(excerpt, 176);
 
   return {
@@ -812,6 +967,7 @@ export function buildMarketNewsroomPost({ language, pack = {}, post = {}, frame,
     body,
     keyTakeaways: keyTakeaways(language, inferredFrame, source),
     faqs: faqs(language, inferredFrame),
+    sourceLinks: cleanPublicSourceLinks(pack.sourceLinks || post.sourceLinks || []),
     tags: [labels.category, "AI", inferredFrame.entity, inferredFrame.key].filter(Boolean).slice(0, 5),
     author: author || post.author || "Ken",
     readTimeMinutes: readTimeMinutes || post.readTimeMinutes || 3,
@@ -834,5 +990,5 @@ export function hasMarketTemplateSlop(post = {}) {
     .filter(Boolean)
     .join("\n");
 
-  return /這則消息可以拿來|企業檢查|卡在哪個流程|原因是企業決策問題|Source:\s|Event:\s|Evidence:\s|Decision cue|primary source; the article should stay anchored|Next action: choose one workflow|不是同類工具會不會更多，而是|不只是海外消息，而是/i.test(text);
+  return /這則消息可以拿來|企業檢查|卡在哪個流程|原因是企業決策問題|Source:\s|Event:\s|Evidence:\s|Decision cue|source brief|source index|primary source; the article should stay anchored|Next action: choose one workflow|ALTOS LAB reader note|讀者怎麼看|不是同類工具會不會更多，而是|不只是海外消息，而是/i.test(text);
 }

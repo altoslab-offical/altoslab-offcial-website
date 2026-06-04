@@ -181,6 +181,16 @@ function repairLane(post) {
   return "terminal source-faithful rewrite; no Gemini unless judgment copy is structurally weak";
 }
 
+function isPrimarySourceMarketBrief(post) {
+  return (
+    post.contentType === "breaking" &&
+    post.coverSource === "source" &&
+    Array.isArray(post.sourceLinks) &&
+    post.sourceLinks.length >= 1 &&
+    Boolean(post.coverCreditUrl)
+  );
+}
+
 function expectedThreshold(post) {
   return THRESHOLDS[post.contentType] || 88;
 }
@@ -200,6 +210,7 @@ function reviewPost(post, baseUrl) {
   for (const rule of RULES) {
     if (rule.sourceMinimum) {
       const count = Array.isArray(post.sourceLinks) ? post.sourceLinks.length : 0;
+      if (isPrimarySourceMarketBrief(post)) continue;
       if (count < rule.sourceMinimum) {
         score += rule.score;
         issues.push(rule.message);

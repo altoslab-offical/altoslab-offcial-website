@@ -49,6 +49,20 @@ const PUBLIC_INTERNAL_COPY_PATTERNS = [
   /anti[-\s]?slop/i,
   /source[-\s]?translation/i,
   /來源轉譯/i,
+  /source\s*brief/i,
+  /source\s*index/i,
+  /reader\s*note/i,
+  /Decision\s*cue/i,
+  /Next\s*action/i,
+  /Event:\s/i,
+  /Evidence:\s/i,
+  /來源摘要/i,
+  /可引用事實/i,
+  /讀者怎麼看/i,
+  /這則消息可以拿來/i,
+  /卡在哪個流程/i,
+  /原因是企業決策問題/i,
+  /article claims should remain anchored/i,
   /prompt\s*card/i,
   /修稿隊列/i,
   /rubric/i
@@ -189,6 +203,22 @@ function digestSourcePost(post) {
     contentImages: post.contentImages,
     aiDisclosure: post.aiDisclosure
   };
+}
+
+function publicPostText(post) {
+  return [
+    post?.title,
+    post?.seoTitle,
+    post?.seoDescription,
+    post?.excerpt,
+    post?.geoSummary,
+    post?.body,
+    ...(post?.keyTakeaways || []),
+    ...(post?.sourceLinks || []).flatMap((source) => [source?.title, source?.summary]),
+    ...(post?.faqs || []).flatMap((faq) => [faq?.question, faq?.answer])
+  ]
+    .filter(Boolean)
+    .join("\n");
 }
 
 function releaseContentSha256(articleSet) {
@@ -478,6 +508,10 @@ async function verifyPostLive(post, root, errors, warnings) {
     return { liveUrl, apiUrl, image: null };
   }
   if (publicPost.status !== "published") pushIssue(errors, `public API status must be published, got ${publicPost.status}`, context);
+  const publicApiText = publicPostText(publicPost);
+  for (const pattern of PUBLIC_INTERNAL_COPY_PATTERNS) {
+    if (pattern.test(publicApiText)) pushIssue(errors, `public API exposes internal copy: ${pattern}`, context);
+  }
   if (post.contentType === "breaking") {
     if (publicPost.coverSource !== "source") {
       pushIssue(errors, `public API market news coverSource must be source, got ${publicPost.coverSource || "missing"}`, context);

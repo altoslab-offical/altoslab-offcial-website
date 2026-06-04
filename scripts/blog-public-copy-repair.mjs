@@ -20,6 +20,20 @@ const FORBIDDEN_PUBLIC_PATTERNS = [
   /anti[-\s]?slop/i,
   /source[-\s]?translation/i,
   /來源轉譯/i,
+  /source\s*brief/i,
+  /source\s*index/i,
+  /reader\s*note/i,
+  /Decision\s*cue/i,
+  /Next\s*action/i,
+  /Event:\s/i,
+  /Evidence:\s/i,
+  /來源摘要/i,
+  /可引用事實/i,
+  /讀者怎麼看/i,
+  /這則消息可以拿來/i,
+  /卡在哪個流程/i,
+  /原因是企業決策問題/i,
+  /article claims should remain anchored/i,
   /prompt card/i,
   /修稿隊列/i,
   /rubric/i
@@ -281,7 +295,7 @@ function repairPost(post) {
       body: newsroom.body,
       keyTakeaways: newsroom.keyTakeaways,
       faqs: newsroom.faqs,
-      sourceLinks: repairSourceLinks(post.sourceLinks),
+      sourceLinks: newsroom.sourceLinks,
       aiDisclosure: ""
     };
   }

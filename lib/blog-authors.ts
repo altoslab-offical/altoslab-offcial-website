@@ -92,6 +92,9 @@ export function publicEditorialReviewNote(language: BlogLanguage) {
 export function publicCoverCreditForPost(post: Pick<BlogPost, "coverCredit" | "coverSource" | "language">) {
   const credit = String(post.coverCredit || "").trim();
   if (!credit) return "";
+  if (post.coverSource === "source") {
+    return credit.replace(/^Source image:\s*/i, "").replace(/^來源圖片：\s*/i, "").trim() || credit;
+  }
   if (post.coverSource === "generated" || /AI[-\s]?generated|AI 生成|AI-assisted|AI 協助/i.test(credit)) {
     if (post.language === "en") return "ALTOS LAB editorial visual";
     if (post.language === "ja") return "ALTOS LAB 編集ビジュアル";

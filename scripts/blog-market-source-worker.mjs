@@ -54,31 +54,17 @@ function publicText(value = "") {
 function repairPublicCopy(value = "") {
   return String(value || "")
     .replace(/\bAI-generated\b/gi, "generated")
-    .replace(/這不是單純產品消息，而是/g, "這則消息可以拿來")
-    .replace(/這則消息最值得注意的不是標題本身，而是/g, "這則消息的實務重點落在")
-    .replace(/最值得注意的不是標題本身，而是/g, "實務重點落在")
-    .replace(/不只在「能做什麼」，也在/g, "關鍵在")
-    .replace(/不只是海外消息，而是一張/g, "可以整理成一張")
-    .replace(/不是同類工具會不會更多，而是/g, "")
-    .replace(/不是同類工具會不會更多/g, "同類工具仍會增加")
-    .replace(/不只是/g, "除了")
-    .replace(/不再只是/g, "已經超出")
-    .replace(/不僅/g, "除了")
-    .replace(/真正值得/g, "更值得")
-    .replace(/真正的/g, "可驗證的")
-    .replace(/共同指向/g, "都讓人看到")
-    .replace(/同一件事/g, "相近的訊號")
-    .replace(/核心是/g, "關鍵在於")
-    .replace(/災難性/g, "高風險")
-    .replace(/夢魘/g, "失控成本")
-    .replace(/定時炸彈/g, "高風險流程")
-    .replace(/徹底/g, "清楚")
-    .replace(/顛覆/g, "改變")
-    .replace(/革命/g, "轉變")
-    .replace(/護城河/g, "長期優勢")
-    .replace(/競爭力的延伸/g, "維運能力的一部分")
-    .replace(/正式進入/g, "開始走進")
-    .replace(/唯一答案/g, "可行做法之一")
+    .replace(/source\s*brief/gi, "")
+    .replace(/reader\s*note/gi, "")
+    .replace(/Decision\s*cue/gi, "")
+    .replace(/Next\s*action/gi, "")
+    .replace(/article claims should remain anchored/gi, "")
+    .replace(/來源摘要/g, "")
+    .replace(/可引用事實/g, "")
+    .replace(/讀者怎麼看/g, "後續觀察")
+    .replace(/這則消息可以拿來[^。]*。?/g, "")
+    .replace(/卡在哪個流程/g, "發生什麼事")
+    .replace(/原因是企業決策問題/g, "來源裡的關鍵細節")
     .replace(/Gemini 開啟多模態推理升級，原因資料治理會先成為瓶頸/g, "Gemini 多模態推理升級後，資料治理先變成瓶頸")
     .replace(/NVIDIA 把自駕 AI 開源到 32B：企業要看的重點從炫技，是驗證流程/g, "NVIDIA 開源 32B 自駕模型：企業先看驗證流程")
     .replace(/NVIDIA 把自駕 AI 開源到 32B：企業要看的不是炫技，是驗證流程/g, "NVIDIA 開源 32B 自駕模型：企業先看驗證流程")
@@ -90,14 +76,14 @@ function repairPublicCopy(value = "") {
     .replace(/OpenAI tax-agent 案例案例：AI Agent 試點先看回滾能力/g, "OpenAI tax-agent 案例：AI Agent 試點先看回滾能力")
     .replace(/微軟 Build 2026 的案例：企業 Agent 要先變成可控系統/g, "微軟 Build 2026 留下的部署題：企業 Agent 要先變成可控系統")
     .replace(/安全收編與算力合資同時開啟：企業 AI 不只買模型，還要買治理能力/g, "Google/Wiz 與算力合資同週出現：企業 AI 也在買治理能力")
-    .replace(/## 事件核心/g, "## 這則消息卡在哪個流程")
-    .replace(/## 為什麼是企業決策問題/g, "## 企業先看三個落點")
-    .replace(/## 本週可落地的 3 個檢查/g, "## 兩週內先跑一個小測試")
-    .replace(/## 接下來看什麼/g, "## 下一步看部署是否變穩")
-    .replace(/## What Happened/g, "## Where this update meets the workflow")
-    .replace(/## Why It Becomes an Operating Decision/g, "## Three operating points to inspect")
-    .replace(/## Three Checks for This Week/g, "## Run one small test in two weeks")
-    .replace(/## What to Watch Next/g, "## Watch whether deployment gets steadier");
+    .replace(/## 事件核心/g, "## 發生什麼事")
+    .replace(/## 為什麼是企業決策問題/g, "## 來源裡的關鍵細節")
+    .replace(/## 本週可落地的 3 個檢查/g, "## 後續觀察")
+    .replace(/## 接下來看什麼/g, "## 後續觀察")
+    .replace(/## What Happened/g, "## What happened")
+    .replace(/## Why It Becomes an Operating Decision/g, "## Key details from the source")
+    .replace(/## Three Checks for This Week/g, "## What to watch next")
+    .replace(/## What to Watch Next/g, "## What to watch next");
 }
 
 function slugify(value) {
@@ -631,20 +617,47 @@ function seoDescription(language, frame, source) {
   const date = formatDate(source.publishedAt, language);
   const summary = publicText(source.summary).replace(/\.$/, "");
   const text = {
-    "zh-Hant": `${source.publisher} 在 ${date} 發布 ${source.title}。ALTOS LAB 整理 ${frame.product} 對企業工作流、採購與風險檢查的直接影響。`,
-    en: `${source.publisher} published ${source.title} on ${date}. ALTOS LAB summarizes what ${frame.product} changes for enterprise workflows, procurement, and risk checks.`,
-    ja: `${source.publisher} が ${date} に公開した ${source.title} を基に、${frame.product} が企業運用や調達判断に与える影響を整理します。`,
-    ko: `${source.publisher}가 ${date} 공개한 ${source.title}를 바탕으로, ${frame.product}가 기업 업무와 구매 판단에 주는 영향을 정리합니다.`,
-    id: `${source.publisher} merilis ${source.title} pada ${date}. ALTOS LAB merangkum dampak ${frame.product} bagi workflow, pengadaan, dan pengecekan risiko perusahaan.`,
-    vi: `${source.publisher} công bố ${source.title} vào ${date}. ALTOS LAB tóm tắt tác động của ${frame.product} tới workflow, mua sắm và kiểm soát rủi ro doanh nghiệp.`,
-    th: `${source.publisher} เผยแพร่ ${source.title} เมื่อ ${date}; ALTOS LAB สรุปผลของ ${frame.product} ต่อเวิร์กโฟลว์ การจัดซื้อ และการตรวจความเสี่ยงขององค์กร`,
-    ms: `${source.publisher} menerbitkan ${source.title} pada ${date}. ALTOS LAB merumuskan kesan ${frame.product} terhadap workflow, perolehan, dan semakan risiko syarikat.`,
-    fil: `${source.publisher} inilabas ang ${source.title} noong ${date}. ALTOS LAB binuod ang epekto ng ${frame.product} sa workflow, procurement, at risk checks ng kumpanya.`
+    "zh-Hant": `${source.publisher} 在 ${date} 報導 ${cleanTitle(source.title)}。重點包括 ${summary}`,
+    en: `${source.publisher} reported ${cleanTitle(source.title)} on ${date}. Key details include: ${summary}`,
+    ja: `${source.publisher} は ${date} に ${cleanTitle(source.title)} を報じました。主な内容: ${summary}`,
+    ko: `${source.publisher}는 ${date} ${cleanTitle(source.title)}를 보도했습니다. 핵심 내용: ${summary}`,
+    id: `${source.publisher} melaporkan ${cleanTitle(source.title)} pada ${date}. Detail utama: ${summary}`,
+    vi: `${source.publisher} đưa tin ${cleanTitle(source.title)} vào ${date}. Chi tiết chính: ${summary}`,
+    th: `${source.publisher} รายงาน ${cleanTitle(source.title)} เมื่อ ${date} รายละเอียดสำคัญ: ${summary}`,
+    ms: `${source.publisher} melaporkan ${cleanTitle(source.title)} pada ${date}. Butiran utama: ${summary}`,
+    fil: `Iniulat ng ${source.publisher} ang ${cleanTitle(source.title)} noong ${date}. Mahahalagang detalye: ${summary}`
   }[language] || summary;
   return text.length > 180 ? `${text.slice(0, 176).replace(/\s+\S*$/, "")}…` : text;
 }
 
 function buildBody(language, frame, pack) {
+  const source = pack.sourceLinks[0];
+  return buildMarketNewsroomPost({
+    language,
+    pack,
+    frame: {
+      key: frame.key,
+      entity: frame.entity,
+      product: frame.product,
+      focus: {
+        "zh-Hant": frame.zh,
+        en: frame.en,
+        ja: frame.ja,
+        ko: frame.ko,
+        id: frame.id,
+        vi: frame.vi,
+        th: frame.th,
+        ms: frame.ms,
+        fil: frame.fil
+      }
+    },
+    slug: slugify(cleanTitle(source.title)),
+    author: Number(pack.sequence) % 4 === 1 ? "Tommy" : "Ken",
+    readTimeMinutes: 3
+  }).body;
+}
+
+function legacyTemplateBuildBody(language, frame, pack) {
   const label = LABELS[language];
   const source = pack.sourceLinks[0];
   const date = formatDate(source.publishedAt, language);

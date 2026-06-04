@@ -160,6 +160,18 @@ const copy = {
   }
 };
 
+function coverImageLabel(language: BlogPost["language"]) {
+  if (language === "zh-Hant") return "圖片來源：";
+  if (language === "ja") return "画像出典：";
+  if (language === "ko") return "이미지 출처:";
+  if (language === "id") return "Sumber gambar:";
+  if (language === "vi") return "Nguồn ảnh:";
+  if (language === "th") return "ที่มาภาพ:";
+  if (language === "ms") return "Sumber imej:";
+  if (language === "fil") return "Source ng larawan:";
+  return "Image source:";
+}
+
 function articleTaxonomy(post: BlogPost) {
   const seen = new Set<string>();
   const typeLabel = blogContentTypeLabel(post.contentType, post.language).toLowerCase();
@@ -388,27 +400,14 @@ export async function BlogArticle({ post }: { post: BlogPost }) {
                 <SafeBlogImage className="article-cover" loading="eager" post={coverPost} />
                 {publicCoverCredit ? (
                   <p className="article-cover-credit">
-                    Cover image:{" "}
-                    {post.coverCreditUrl && publicCoverCredit === post.coverCredit ? (
+                    {coverImageLabel(post.language)}{" "}
+                    {post.coverCreditUrl ? (
                       <a href={post.coverCreditUrl} target="_blank" rel="noreferrer">
                         {renderBrandText(publicCoverCredit)}
                       </a>
                     ) : (
                       renderBrandText(publicCoverCredit)
                     )}
-                    {post.coverLicense && publicCoverCredit === post.coverCredit ? (
-                      <>
-                        {" "}
-                        ·{" "}
-                        {post.coverLicenseUrl ? (
-                          <a href={post.coverLicenseUrl} target="_blank" rel="noreferrer">
-                            {post.coverLicense}
-                          </a>
-                        ) : (
-                          post.coverLicense
-                        )}
-                      </>
-                    ) : null}
                   </p>
                 ) : null}
               </>
