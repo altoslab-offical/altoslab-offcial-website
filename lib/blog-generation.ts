@@ -98,6 +98,8 @@ const FALLBACK_SOURCES: TrendCandidate[] = [
   }
 ];
 
+const TREND_CANDIDATE_LIMIT = 18;
+
 const BLOG_COVER_POOL = [
   {
     src: "/geo-cover.png",
@@ -212,14 +214,14 @@ export async function fetchTrendCandidates(input: BlogGenerateInput = {}): Promi
       if (candidate && !candidates.some((item) => item.url === candidate.url)) {
         candidates.push(candidate);
       }
-      if (candidates.length >= 12) break;
+      if (candidates.length >= TREND_CANDIDATE_LIMIT) break;
     }
-    if (candidates.length >= 12) break;
+    if (candidates.length >= TREND_CANDIDATE_LIMIT) break;
   }
 
   const contentType = contentTypeFromInput(input);
   const ranked = rankTrendCandidates(candidates, contentType);
-  return ranked.length ? ranked.slice(0, 12) : FALLBACK_SOURCES;
+  return ranked.length ? ranked.slice(0, TREND_CANDIDATE_LIMIT) : FALLBACK_SOURCES;
 }
 
 function recencyScore(publishedAt?: string) {

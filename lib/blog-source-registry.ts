@@ -191,6 +191,81 @@ export const BLOG_SOURCE_REGISTRY: BlogSourceRegistryEntry[] = [
     notes: "AI infrastructure, robotics, inference and hardware ecosystem signals."
   },
   {
+    id: "aws-machine-learning-blog",
+    name: "AWS Machine Learning Blog",
+    url: "https://aws.amazon.com/blogs/machine-learning/",
+    feedUrl: "https://aws.amazon.com/blogs/machine-learning/feed/",
+    tier: "official-rss",
+    market: "global",
+    language: "en",
+    category: "Infrastructure",
+    authority: 84,
+    freshness: 84,
+    notes: "Official AWS machine learning and enterprise AI implementation signal; useful for cloud, inference, data and applied workflow market news."
+  },
+  {
+    id: "cloudflare-ai-blog",
+    name: "Cloudflare AI Blog",
+    url: "https://blog.cloudflare.com/tag/ai/",
+    feedUrl: "https://blog.cloudflare.com/tag/ai/rss/",
+    tier: "official-rss",
+    market: "global",
+    language: "en",
+    category: "Infrastructure",
+    authority: 82,
+    freshness: 83,
+    notes: "Official Cloudflare AI, edge infrastructure and developer workflow signal."
+  },
+  {
+    id: "arxiv-cs-ai",
+    name: "arXiv cs.AI RSS",
+    url: "https://arxiv.org/list/cs.AI/recent",
+    feedUrl: "https://export.arxiv.org/rss/cs.AI",
+    tier: "official-rss",
+    market: "global",
+    language: "en",
+    category: "Build Notes",
+    authority: 78,
+    freshness: 78,
+    notes: "Open research signal only; use for trend spotting and cite papers carefully, not as product news."
+  },
+  {
+    id: "gdelt-doc-api",
+    name: "GDELT DOC API",
+    url: "https://api.gdeltproject.org/api/v2/doc/doc",
+    tier: "community-signal",
+    market: "global",
+    language: "multi",
+    category: "AI Ops & Governance",
+    authority: 72,
+    freshness: 92,
+    notes: "Free real-time global news discovery API. Use only to discover source candidates; final market news still needs the original article and source-image/license checks."
+  },
+  {
+    id: "hacker-news-api",
+    name: "Hacker News API",
+    url: "https://hacker-news.firebaseio.com/v0/",
+    tier: "community-signal",
+    market: "global",
+    language: "en",
+    category: "Build Notes",
+    authority: 68,
+    freshness: 92,
+    notes: "Free developer-community signal API. Use for surfacing discussed AI tools/releases, then verify with official sources before publishing."
+  },
+  {
+    id: "semantic-scholar-api",
+    name: "Semantic Scholar API",
+    url: "https://api.semanticscholar.org/graph/v1/",
+    tier: "community-signal",
+    market: "global",
+    language: "en",
+    category: "Build Notes",
+    authority: 74,
+    freshness: 78,
+    notes: "Scholarly metadata API for AI research discovery. Use for source pack enrichment; do not use as a market-news image source."
+  },
+  {
     id: "mit-technology-review-ai",
     name: "MIT Technology Review AI",
     url: "https://www.technologyreview.com/topic/artificial-intelligence/",
@@ -215,6 +290,45 @@ export const BLOG_SOURCE_REGISTRY: BlogSourceRegistryEntry[] = [
     authority: 76,
     freshness: 95,
     notes: "Fast product/startup news signal; validate major claims with official sources."
+  },
+  {
+    id: "venturebeat-ai",
+    name: "VentureBeat AI",
+    url: "https://venturebeat.com/category/ai/",
+    feedUrl: "https://venturebeat.com/category/ai/feed/",
+    tier: "trusted-media",
+    market: "us",
+    language: "en",
+    category: "AI Products",
+    authority: 72,
+    freshness: 91,
+    notes: "Fast enterprise AI/startup news signal; use for market timing, then confirm with primary sources where possible."
+  },
+  {
+    id: "the-decoder-ai",
+    name: "The Decoder",
+    url: "https://the-decoder.com/",
+    feedUrl: "https://the-decoder.com/feed/",
+    tier: "trusted-media",
+    market: "europe",
+    language: "en",
+    category: "AI Products",
+    authority: 72,
+    freshness: 88,
+    notes: "AI product and research news signal with a European editorial lens; validate product claims with official sources."
+  },
+  {
+    id: "zdnet-ai",
+    name: "ZDNET AI",
+    url: "https://www.zdnet.com/topic/artificial-intelligence/",
+    feedUrl: "https://www.zdnet.com/topic/artificial-intelligence/rss.xml",
+    tier: "trusted-media",
+    market: "us",
+    language: "en",
+    category: "Industry Workflow",
+    authority: 70,
+    freshness: 86,
+    notes: "Enterprise technology news signal; useful for practical adoption stories and tool availability checks."
   },
   {
     id: "ai-magazine",
@@ -301,13 +415,13 @@ export function registryFeedsFromEnv() {
     .split(",")
     .map((source) => source.trim())
     .filter(Boolean);
-  if (configured.length) return configured.slice(0, 12);
+  if (configured.length) return configured.slice(0, 18);
 
   return BLOG_SOURCE_REGISTRY
     .filter((source) => source.feedUrl && source.tier !== "licensed-image")
     .sort((a, b) => b.freshness - a.freshness || b.authority - a.authority)
     .map((source) => source.feedUrl as string)
-    .slice(0, 12);
+    .slice(0, 18);
 }
 
 export function registryTrustedHostFragments() {

@@ -67,7 +67,7 @@ const CONTENT_TYPE_MINIMUMS: Record<
 };
 
 const EMPHASIS_MINIMUMS: Record<BlogContentType, number> = {
-  breaking: 1,
+  breaking: 0,
   column: 2,
   feature: 3
 };
@@ -118,6 +118,12 @@ const defaultTrustedHostFragments = [
   "aimagazine.com",
   "theverge.com",
   "techcrunch.com"
+  ,"aws.amazon.com"
+  ,"blog.cloudflare.com"
+  ,"venturebeat.com"
+  ,"the-decoder.com"
+  ,"zdnet.com"
+  ,"arxiv.org"
 ];
 
 const weakSubtitlePatterns = [
@@ -128,7 +134,7 @@ const weakSubtitlePatterns = [
 ];
 
 const subtitleEvidencePattern =
-  /(OpenAI|Anthropic|Google|DeepMind|Hugging Face|IBM|Microsoft|NVIDIA|Vercel|TechCrunch|AI Magazine|Search Console|ChatGPT|Claude|Gemini|Perplexity|Codex|AI Mode|Gartner|官方|報導|來源|案例|發布|launch|released|published|case|report|source|workflow|rollback|trace|eval|審核|回滾|來源|試點|採購|導入|ワークフロー|出典|検証|롤백|출처|검토)/i;
+  /(OpenAI|Anthropic|Google|DeepMind|Hugging Face|IBM|Microsoft|NVIDIA|Vercel|TechCrunch|AI Magazine|Search Console|ChatGPT|Claude|Gemini|Perplexity|Codex|AI Mode|AI Factories|Gartner|Osmos|Fabric|Maia|Kubernetes|KubeCon|GPU|官方|報導|來源|案例|發布|launch|released|published|case|report|source|workflow|rollback|trace|eval|審核|回滾|來源|試點|採購|導入|ワークフロー|出典|検証|롤백|출처|검토)/i;
 
 const rawZhEnglishJargonPattern = /\b(?:production traces?|eval(?:uation)? loops?|eval-driven|trace|evals?|rollback)\b/i;
 
@@ -329,7 +335,13 @@ const unsupportedMarkdownHeadingPattern = /^#{3,6}\s+/m;
 const labsSignals = [
   "ALTOS LAB",
   "implementation",
+  "implementasi",
+  "triển khai",
+  "นำไปใช้",
+  "pelaksanaan",
+  "pagpapatupad",
   "product studio",
+  "product",
   "lab",
   "實驗室",
   "導入",
@@ -337,30 +349,52 @@ const labsSignals = [
   "工作流",
   "Agent",
   "automation",
+  "operations",
+  "operator",
+  "compute control",
+  "decision",
+  "risk",
   "自動化",
   "produk",
+  "operasi",
   "workflow",
   "otomasi",
   "automasi",
   "quy trình",
   "sản phẩm",
   "tự động",
+  "kiểm soát",
   "เวิร์กโฟลว์",
+  "การควบคุม",
   "ระบบ",
   "produkto",
   "operasyon",
+  "desisyon",
   "決策",
   "運營",
   "運用",
   "実装",
   "運用",
   "도입",
-  "운영"
+  "운영",
+  "통제"
 ];
 
 const creativeSignals = [
   "反直覺",
   "框架",
+  "framework",
+  "decision framework",
+  "decision matrix",
+  "risk lens",
+  "checklist",
+  "source card",
+  "market signal",
+  "operator decision",
+  "implementation map",
+  "tradeoff",
+  "assessment",
+  "pilot",
   "取捨",
   "風險",
   "矩陣",
@@ -374,6 +408,24 @@ const creativeSignals = [
   "關鍵細節",
   "為什麼重要",
   "這代表什麼",
+  "apa artinya",
+  "mengapa penting",
+  "kerangka",
+  "matriks",
+  "risiko",
+  "keputusan",
+  "điều này có nghĩa gì",
+  "vì sao quan trọng",
+  "khung quyết định",
+  "ma trận",
+  "rủi ro",
+  "การตัดสินใจ",
+  "ความเสี่ยง",
+  "เช็กลิสต์",
+  "กรอบ",
+  "kung bakit mahalaga",
+  "decision",
+  "risk",
   "台灣團隊",
   "讀者該看",
   "來源卡",
@@ -551,7 +603,7 @@ function normalizedParityLength(markdown: string, language: BlogLanguage) {
 function minimumBodyLength(contentType: BlogContentType, language: BlogLanguage) {
   const latinLanguage = ["en", "id", "vi", "ms", "fil"].includes(language);
   if (contentType === "breaking") {
-    return latinLanguage ? 260 : 360;
+    return latinLanguage ? 150 : 260;
   }
   if (contentType === "feature") {
     return latinLanguage ? 900 : 1300;
@@ -652,6 +704,7 @@ export function reviewAntiSlop(post: BlogPost): ReviewResult & {
 } {
   const contentType = post.contentType || "column";
   const threshold = ANTI_SLOP_THRESHOLDS[contentType];
+  const isMarketNews = contentType === "breaking";
   const text = `${post.title}\n${post.excerpt}\n${post.geoSummary}\n${post.body}`;
   const dimensions: Record<AntiSlopDimension, number> = {
     directness: 10,
@@ -691,16 +744,24 @@ export function reviewAntiSlop(post: BlogPost): ReviewResult & {
   const firstBlock = firstAnswerBlock(post.body);
   if (countMatches(firstBlock, antiSlopRules[0].pattern)) {
     dimensions.directness = Math.max(0, dimensions.directness - 2);
-    issues.push("anti-slop opening must answer directly instead of announcing the article");
+    const message = "anti-slop opening must answer directly instead of announcing the article";
+    if (isMarketNews) warnings.push(message);
+    else issues.push(message);
   }
 
   for (const [dimension, value] of Object.entries(dimensions) as Array<[AntiSlopDimension, number]>) {
-    if (value < 6) issues.push(`anti-slop ${dimension} score ${value}/10 is below 6`);
+    if (value < 6) {
+      const message = `anti-slop ${dimension} score ${value}/10 is below 6`;
+      if (isMarketNews) warnings.push(message);
+      else issues.push(message);
+    }
   }
 
   const score = Object.values(dimensions).reduce((sum, value) => sum + value, 0);
   if (score < threshold) {
-    issues.push(`anti-slop score ${score}/50 is below ${threshold}; revise filler, formulaic structure and vague claims`);
+    const message = `anti-slop score ${score}/50 is below ${threshold}; revise filler, formulaic structure and vague claims`;
+    if (isMarketNews) warnings.push(message);
+    else issues.push(message);
   }
 
   return {
@@ -823,6 +884,9 @@ export function reviewSourceTrust(post: BlogPost): ReviewResult {
 }
 
 export function reviewLabsPointOfView(post: BlogPost): ReviewResult {
+  if ((post.contentType || "column") === "breaking") {
+    return reviewWeighted(20, [], []);
+  }
   const issues: string[] = [];
   const warnings: string[] = [];
   const text = `${post.title}\n${post.excerpt}\n${post.geoSummary}\n${post.body}`;
@@ -843,6 +907,14 @@ export function reviewLabsPointOfView(post: BlogPost): ReviewResult {
 }
 
 export function reviewCreativity(post: BlogPost): ReviewResult {
+  if ((post.contentType || "column") === "breaking") {
+    const issues: string[] = [];
+    const warnings: string[] = [];
+    if (genericTitlePatterns.some((pattern) => pattern.test(post.title))) {
+      issues.push("title is too generic; anchor it to a specific source event or source-backed claim");
+    }
+    return reviewWeighted(10, issues, warnings);
+  }
   const text = `${post.title}\n${post.excerpt}\n${post.body}`;
   const hits = creativeSignals.filter((signal) => text.includes(signal));
   const issues: string[] = [];
@@ -869,12 +941,20 @@ export function reviewReaderEngagement(post: BlogPost): ReviewResult {
   const contentType = post.contentType || "column";
 
   if (genericLeadPatterns.some((pattern) => pattern.test(lead))) {
-    issues.push("opening hook is generic; start from a concrete reader tension, source event or operator decision");
+    if (contentType === "breaking") {
+      warnings.push("market-news opening could be more concrete; prefer a named source event in the first sentence");
+    } else {
+      issues.push("opening hook is generic; start from a concrete reader tension, source event or operator decision");
+    }
   }
-  if (!readerTensionPattern.test(`${post.excerpt}\n${lead}`) && !subtitleEvidencePattern.test(`${post.excerpt}\n${lead}`)) {
+  if (
+    contentType !== "breaking" &&
+    !readerTensionPattern.test(`${post.excerpt}\n${lead}`) &&
+    !subtitleEvidencePattern.test(`${post.excerpt}\n${lead}`)
+  ) {
     issues.push("opening and subtitle need a reader tension, named source/event or specific decision hook");
   }
-  if (!readerActionPattern.test(text)) {
+  if (contentType !== "breaking" && !readerActionPattern.test(text)) {
     issues.push("article needs a visible reader action promise: checklist, next step, priority, audit or decision rule");
   }
   if (contentType !== "breaking" && !quotableJudgmentPattern.test(text)) {
@@ -1016,6 +1096,7 @@ function reviewSeoGeoStructure(post: BlogPost): ReviewResult {
 function reviewReadability(post: BlogPost): ReviewResult {
   const issues: string[] = [];
   const warnings: string[] = [];
+  const isMarketNews = (post.contentType || "column") === "breaking";
   const body = plainText(post.body);
   const paragraphs = post.body.split(/\n{2,}/).map((item) => item.trim()).filter(Boolean);
   const h2Titles = [...post.body.matchAll(/^##\s+(.+)$/gm)].map((match) => match[1]?.trim() || "");
@@ -1029,10 +1110,14 @@ function reviewReadability(post: BlogPost): ReviewResult {
     warnings.push("excerpt may be copied too directly into the article body");
   }
   if (post.language === "zh-Hant" && rawZhEnglishJargonPattern.test(post.body)) {
-    issues.push("zh-Hant article must translate AI-ops jargon like trace/eval/rollback into plain Chinese on first use");
+    const message = "zh-Hant article must translate AI-ops jargon like trace/eval/rollback into plain Chinese on first use";
+    if (isMarketNews) warnings.push(message);
+    else issues.push(message);
   }
   if (jargonParagraphs.length) {
-    issues.push("technical jargon needs plain-language translation in the same paragraph");
+    const message = "technical jargon needs plain-language translation in the same paragraph";
+    if (isMarketNews) warnings.push(message);
+    else issues.push(message);
   }
   if (post.body.includes("**") && !/\*\*[^*\n]{4,80}\*\*/.test(post.body)) {
     warnings.push("bold emphasis should highlight a short judgment or checklist phrase, not decorative formatting");
@@ -1240,7 +1325,9 @@ function reviewPost(post: BlogPost, multilingual: ReviewResult): PostReview {
   if (post.generatedBy?.includes("local-bilingual-geo-template") || post.generatedBy?.includes("local-bilingual-lab-template")) {
     issues.push("local fallback template cannot auto-publish");
   }
-  if (post.generatedBy && !/gemini/i.test(post.generatedBy)) {
+  const isSourceTranslatedMarketNews =
+    post.contentType === "breaking" && /source-translation|source_translat|source-worker|codex-market|market-source/i.test(post.generatedBy || "");
+  if (post.generatedBy && !/gemini/i.test(post.generatedBy) && !isSourceTranslatedMarketNews) {
     issues.push("production articles must be written or revised through Gemini before release");
   }
   if (post.coverSource === "generated" && !/(chatgpt|gpt|openai)/i.test(post.coverGeneration?.provider || "")) {

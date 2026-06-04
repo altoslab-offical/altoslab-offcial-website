@@ -23,7 +23,7 @@ type BlogIngestRequest = {
   validateOnly?: boolean;
   replaceExistingPublished?: boolean;
   generation?: {
-    provider?: "gemini-chatgpt" | "local-antigravity" | "local";
+    provider?: "gemini-chatgpt" | "source-translation" | "local-antigravity" | "local";
     model?: string;
     promptVersion?: string;
     sourceCount?: number;
@@ -153,8 +153,10 @@ function generationContractIssues(posts: BlogPost[]) {
     const generatedBy = post.generatedBy?.toLowerCase() || "";
     const coverProvider = post.coverGeneration?.provider?.toLowerCase() || "";
     const isMarketNews = post.contentType === "breaking";
+    const isSourceTranslatedMarketNews =
+      isMarketNews && /source-translation|source_translat|source-worker|codex-market|market-source/.test(generatedBy);
 
-    if (!generatedBy.includes("gemini")) {
+    if (!generatedBy.includes("gemini") && !isSourceTranslatedMarketNews) {
       issues.push(`${post.language}/${post.slug}: article must be drafted or revised through Gemini before ingest`);
     }
     if (isMarketNews) {
@@ -338,8 +340,8 @@ export async function POST(request: Request) {
 
   if (!slot) inputIssues.push("slot must be morning or afternoon");
   if (!Array.isArray(payload.posts)) inputIssues.push("posts must be an array");
-  if (payload.generation?.provider !== "gemini-chatgpt") {
-    inputIssues.push("generation.provider must be gemini-chatgpt");
+  if (payload.generation?.provider !== "gemini-chatgpt" && payload.generation?.provider !== "source-translation") {
+    inputIssues.push("generation.provider must be gemini-chatgpt or source-translation");
   }
   if (inputIssues.length || !slot || !Array.isArray(payload.posts)) {
     return json(400, { ok: false, ingestRunId, errors: inputIssues });

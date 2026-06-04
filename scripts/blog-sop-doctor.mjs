@@ -317,13 +317,17 @@ function checkReleaseCandidate({ date, slot }, errors, warnings) {
   if (Array.isArray(manifest.validateOnly?.errors) && manifest.validateOnly.errors.length) {
     addIssue(errors, `validateOnly.errors must be empty: ${manifest.validateOnly.errors.join("; ")}`);
   }
-  if (manifest.chromeEvidence?.gemini?.usedExistingTab !== true) addIssue(errors, "Gemini browser evidence is missing");
   if (manifest.humanDesignQa?.approved !== true) addIssue(errors, "humanDesignQa.approved must be true");
 
   if (articleSetPath && fs.existsSync(articleSetPath)) {
     const articleSet = readJson(articleSetPath);
     const posts = Array.isArray(articleSet.posts) ? articleSet.posts : [];
     const requiresGptCover = posts.some((post) => post.contentType !== "breaking");
+    const isSourceTranslationMarketOnly =
+      articleSet.generation?.provider === "source-translation" && posts.length > 0 && posts.every((post) => post.contentType === "breaking");
+    if (!isSourceTranslationMarketOnly && manifest.chromeEvidence?.gemini?.usedExistingTab !== true) {
+      addIssue(errors, "Gemini browser evidence is missing");
+    }
     if (requiresGptCover && manifest.chromeEvidence?.chatgpt?.usedExistingTab !== true) {
       addIssue(errors, "ChatGPT/GPT browser evidence is missing for generated covers");
     }
@@ -348,7 +352,10 @@ function checkReleaseCandidate({ date, slot }, errors, warnings) {
       }
     }
     for (const post of posts) {
-      if (!String(post.generatedBy || "").toLowerCase().includes("gemini")) {
+      const generatedBy = String(post.generatedBy || "").toLowerCase();
+      const sourceTranslatedMarketNews =
+        post.contentType === "breaking" && /source-translation|source_translat|codex-market|market-source/.test(generatedBy);
+      if (!sourceTranslatedMarketNews && !generatedBy.includes("gemini")) {
         addIssue(errors, `${post.language}/${post.slug}: generatedBy must include gemini`);
       }
       if (post.contentType === "breaking") {

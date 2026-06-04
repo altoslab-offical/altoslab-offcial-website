@@ -1,0 +1,429 @@
+#!/usr/bin/env node
+
+import fs from "node:fs";
+import path from "node:path";
+import process from "node:process";
+
+const DEFAULT_BASE_URL = "https://altoslab-ai.cc";
+const ADMIN_COOKIE = "altos_admin";
+const FORBIDDEN_PUBLIC_PATTERNS = [
+  /AI-generated/i,
+  /AI generated/i,
+  /AI 內容揭露/i,
+  /AI 協助產生/i,
+  /SEO\s*\/\s*GEO/i,
+  /GEO 結構/i,
+  /quality gate/i,
+  /品質 gate/i,
+  /AI 感/i,
+  /anti[-\s]?slop/i,
+  /source[-\s]?translation/i,
+  /來源轉譯/i,
+  /prompt card/i,
+  /修稿隊列/i,
+  /rubric/i
+];
+
+function arg(name, fallback = "") {
+  const index = process.argv.indexOf(`--${name}`);
+  return index >= 0 ? process.argv[index + 1] || fallback : fallback;
+}
+
+function hasFlag(name) {
+  return process.argv.includes(`--${name}`);
+}
+
+function loadEnvFile(filePath) {
+  if (!fs.existsSync(filePath)) return;
+  const text = fs.readFileSync(filePath, "utf8");
+  for (const line of text.split(/\r?\n/)) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith("#") || !trimmed.includes("=")) continue;
+    const [rawKey, ...rest] = trimmed.split("=");
+    const key = rawKey.trim();
+    if (!key || process.env[key]) continue;
+    let value = rest.join("=").trim();
+    if ((value.startsWith("\"") && value.endsWith("\"")) || (value.startsWith("'") && value.endsWith("'"))) {
+      value = value.slice(1, -1);
+    }
+    process.env[key] = value;
+  }
+}
+
+function baseUrl() {
+  return String(arg("base-url", process.env.ALTOS_ADMIN_BASE_URL || process.env.ALTOS_BLOG_BASE_URL || DEFAULT_BASE_URL)).replace(/\/+$/, "");
+}
+
+function password() {
+  return arg("admin-password") || process.env.ALTOS_ADMIN_PASSWORD || process.env.ADMIN_PASSWORD || "";
+}
+
+async function fetchJson(url, options = {}) {
+  const response = await fetch(url, {
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+      "User-Agent": "ALTOS-LAB-public-copy-repair/1.0",
+      ...(options.headers || {})
+    }
+  });
+  const text = await response.text();
+  const payload = text ? JSON.parse(text) : {};
+  if (!response.ok) {
+    throw new Error(`${options.method || "GET"} ${url} failed: ${response.status} ${text}`);
+  }
+  return { payload, response };
+}
+
+async function login(root) {
+  const pass = password();
+  if (!pass) throw new Error("ALTOS_ADMIN_PASSWORD or ADMIN_PASSWORD is required");
+  const { response } = await fetchJson(`${root}/api/admin/auth/login`, {
+    method: "POST",
+    body: JSON.stringify({ password: pass })
+  });
+  const setCookie = response.headers.get("set-cookie") || "";
+  const match = setCookie.match(new RegExp(`(?:^|,\\s*)(${ADMIN_COOKIE}=[^;]+)`));
+  if (!match?.[1]) throw new Error("Admin login did not return an altos_admin cookie");
+  return match[1];
+}
+
+const REPLACEMENTS = [
+  [/\bAI-generated\b/gi, "generated"],
+  [/AI generated/gi, "generated"],
+  [/這不是單純產品消息，而是/g, "這則消息可以拿來"],
+  [/這則消息最值得注意的不是標題本身，而是/g, "這則消息的實務重點落在"],
+  [/最值得注意的不是標題本身，而是/g, "實務重點落在"],
+  [/不是([^，。；\n]{0,18})而是/g, "重點從$1轉到"],
+  [/不是同類工具會不會更多，而是/g, ""],
+  [/不是同類工具會不會更多/g, "同類工具仍會增加"],
+  [/不只是/g, "除了"],
+  [/不再只是/g, "已經超出"],
+  [/不僅/g, "除了"],
+  [/真正值得/g, "更值得"],
+  [/真正的/g, "可驗證的"],
+  [/共同指向/g, "都讓人看到"],
+  [/同一件事/g, "相近的訊號"],
+  [/這件事/g, "這個變化"],
+  [/核心是/g, "關鍵在於"],
+  [/為什麼/g, "原因"],
+  [/才有資格談/g, "再談"],
+  [/別再/g, "先停下來"],
+  [/提醒：/g, "案例："],
+  [/到底/g, ""],
+  [/災難性/g, "高風險"],
+  [/夢魘/g, "失控成本"],
+  [/定時炸彈/g, "高風險流程"],
+  [/不可逆/g, "難以回復"],
+  [/徹底/g, "清楚"],
+  [/顛覆/g, "改變"],
+  [/革命/g, "轉變"],
+  [/護城河/g, "長期優勢"],
+  [/競爭力的延伸/g, "維運能力的一部分"],
+  [/正式進入/g, "開始走進"],
+  [/終局/g, "後續格局"],
+  [/唯一答案/g, "可行做法之一"],
+  [/Gemini 開啟多模態推理升級，原因資料治理會先成為瓶頸/g, "Gemini 多模態推理升級後，資料治理先變成瓶頸"],
+  [/NVIDIA 把自駕 AI 開源到 32B：企業要看的重點從炫技，是驗證流程/g, "NVIDIA 開源 32B 自駕模型：企業先看驗證流程"],
+  [/NVIDIA 把自駕 AI 開源到 32B：企業要看的不是炫技，是驗證流程/g, "NVIDIA 開源 32B 自駕模型：企業先看驗證流程"],
+  [/資料工程代理化先行，AI 落地才不是每月新痛點/g, "資料工程代理化後，AI 落地少一個月月重來的痛點"],
+  [/AI 不是加一個 Bot，先把作業制度打通才是真正加速/g, "AI 加速前，先把作業制度打通"],
+  [/KubeCon 除了技術會議：GPU 排程開源化對 AI 團隊的實質助益/g, "KubeCon GPU 排程開源化：AI 團隊先看資源調度"],
+  [/Maia 200 啟動後，AI 推理成本已經超出雲端帳單問題/g, "Maia 200 啟動後，AI 推理成本要從流程裡管"],
+  [/主權雲 \+ Trust 框架：AI 系統該在什麼地方先設停機鈕/g, "主權雲與 Trust 框架：AI 系統先把停機鈕放清楚"],
+  [/OpenAI tax-agent 案例案例：AI Agent 試點先看回滾能力/g, "OpenAI tax-agent 案例：AI Agent 試點先看回滾能力"],
+  [/微軟 Build 2026 的案例：企業 Agent 要先變成可控系統/g, "微軟 Build 2026 留下的部署題：企業 Agent 要先變成可控系統"],
+  [/安全收編與算力合資同時開啟：企業 AI 不只買模型，還要買治理能力/g, "Google/Wiz 與算力合資同週出現：企業 AI 也在買治理能力"],
+  [/NVIDIA 擴大 AI Cloud：企業該先重切算力預算/g, "NVIDIA 擴大 AI Cloud：先重切算力預算再談擴張"],
+  [/隨著 Gemini 3 Deep Think 與首個原生多模態 Embedding 模型的釋出，AI 應用的深度正在發生質變。/g, "企業把 Gemini 3 Deep Think 放進研究、文件或客服流程前，會先碰到一個現實問題：資料能不能被標記、回查，並且跨格式串起來。"],
+  [/企業導入 AI 的常見困境在於：儘管擁有尖端的模型，資料準備過程（Data Engineering）卻因繁瑣的 ETL 與格式轉換，成為穩定落地的絆腳石。/g, "很多 AI 專案卡住的地方，常常在模型前一站：資料準備仍靠人手清理、轉檔與對齊。"],
+  [/這則消息更值得企業注意的，重點從參數變大，轉到自駕開發開始把/g, "這則消息企業更要看的是，自駕開發開始把"],
+  [/這則消息更值得企業注意的，不是參數變大，而是自駕開發開始把/g, "這則消息企業更要看的是，自駕開發開始把"],
+  [/它不只產生軌跡，也強調/g, "它會產生軌跡，並強調"],
+  [/讓車「開始安全推理，而除了駕駛」/g, "讓車「開始安全推理並協助駕駛」"],
+  [/==自駕 AI 的下一個門檻，重點從單次 demo，轉到可重複的閉環驗證流程。==/g, "==自駕 AI 的下一個門檻，是可重複的閉環驗證流程。=="],
+  [/==自駕 AI 的下一個門檻，不是單次 demo，而是可重複的閉環驗證流程。==/g, "==自駕 AI 的下一個門檻，是可重複的閉環驗證流程。=="],
+  [/不是每家公司都會做 robotaxi/g, "多數公司不會做 robotaxi"],
+  [/## 這則消息卡在哪個流程自駕模型開始走向閉環訓練/g, "## 自駕模型開始走向閉環訓練"],
+  [/## 企業先看三個落點自駕 AI 的競爭點移到驗證/g, "## 自駕 AI 的競爭點移到驗證"],
+  [/## 企業先看三個落點先補模擬與責任邊界/g, "## 先補模擬與責任邊界"],
+  [/## 事件核心/g, "## 這則消息卡在哪個流程"],
+  [/## 發生什麼：?/g, "## 這則消息卡在哪個流程"],
+  [/## 市場訊號：?/g, "## 企業先看三個落點"],
+  [/## 對企業的意思：?/g, "## 企業先看三個落點"],
+  [/## 為什麼是企業決策問題/g, "## 企業先看三個落點"],
+  [/## 本週可落地的 3 個檢查/g, "## 兩週內先跑一個小測試"],
+  [/## 本週先檢查三件事/g, "## 兩週內先跑一個小測試"],
+  [/## 接下來看什麼/g, "## 下一步看部署是否變穩"],
+  [/## 常見問題/g, "## 常見問題"],
+  [/## ALTOS LAB 觀點：?/g, "## ALTOS LAB 的實務判斷"],
+  [/## ALTOS LAB 判斷：?/g, "## ALTOS LAB 的實務判斷"],
+  [/## 結語：?/g, "## 最後要留下的判斷"],
+  [/## What Happened/g, "## Where this update meets the workflow"],
+  [/## Why It Becomes an Operating Decision/g, "## Three operating points to inspect"],
+  [/## Three Checks for This Week/g, "## Run one small test in two weeks"],
+  [/## What to Watch Next/g, "## Watch whether deployment gets steadier"],
+  [/not just/gi, "also"],
+  [/not only/gi, "also"],
+  [/revolutionary/gi, "important"],
+  [/game[-\s]?changer/gi, "meaningful shift"],
+  [/## 何が起きたか/g, "## この更新が当たる業務"],
+  [/## なぜ運用判断になるのか/g, "## 企業が先に見る三つの点"],
+  [/## 今週確認したい 3 点/g, "## 二週間で小さく試す"],
+  [/## 次に見るべきこと/g, "## 次は運用が安定するかを見る"],
+  [/## 무슨 일이 있었나/g, "## 이 업데이트가 닿는 업무"],
+  [/## 왜 운영 의사결정인가/g, "## 기업이 먼저 볼 세 지점"],
+  [/## 이번 주 점검할 3가지/g, "## 2주 안에 작은 테스트부터"],
+  [/## 다음에 볼 지점/g, "## 다음은 운영 안정성"],
+  [/## Apa yang terjadi/g, "## Bagian workflow yang tersentuh"],
+  [/## Mengapa ini jadi keputusan operasional/g, "## Tiga titik yang perlu dicek"],
+  [/## 3 hal yang perlu dicek minggu ini/g, "## Mulai dari tes kecil dua minggu"],
+  [/## Apa yang perlu dipantau berikutnya/g, "## Pantau apakah operasinya makin stabil"],
+  [/## Điều gì vừa xảy ra/g, "## Phần workflow bị tác động"],
+  [/## Vì sao đây là quyết định vận hành/g, "## Ba điểm doanh nghiệp nên soi trước"],
+  [/## 3 việc nên kiểm tra trong tuần này/g, "## Thử nhỏ trong hai tuần"],
+  [/## Điều cần theo dõi tiếp/g, "## Theo dõi vận hành có ổn hơn không"],
+  [/## เกิดอะไรขึ้น/g, "## เวิร์กโฟลว์ส่วนไหนได้รับผล"],
+  [/## ทำไมจึงเป็นการตัดสินใจด้านปฏิบัติการ/g, "## สามจุดที่องค์กรควรดูก่อน"],
+  [/## 3 เรื่องที่ควรตรวจสัปดาห์นี้/g, "## เริ่มจากการทดสอบเล็กในสองสัปดาห์"],
+  [/## สิ่งที่ต้องติดตามต่อ/g, "## ดูต่อว่าการปฏิบัติงานนิ่งขึ้นไหม"],
+  [/## Apa yang berlaku/g, "## Bahagian workflow yang terkesan"],
+  [/## Kenapa ini keputusan operasi/g, "## Tiga perkara yang perlu dilihat dulu"],
+  [/## 3 semakan minggu ini/g, "## Mulakan dengan ujian kecil dua minggu"],
+  [/## Apa yang perlu dipantau selepas ini/g, "## Pantau sama ada operasi lebih stabil"],
+  [/## Ano ang nangyari/g, "## Saan tatama sa workflow"],
+  [/## Bakit ito operating decision/g, "## Tatlong puntong dapat tingnan"],
+  [/## 3 check ngayong linggo/g, "## Magsimula sa maliit na test sa loob ng dalawang linggo"],
+  [/## Ano ang susunod na babantayan/g, "## Bantayan kung mas tumatag ang operasyon"]
+];
+
+function repairText(value) {
+  if (typeof value !== "string") return value;
+  let next = value;
+  for (const [pattern, replacement] of REPLACEMENTS) {
+    next = next.replace(pattern, replacement);
+  }
+  return next.replace(/[ \t]+\n/g, "\n").replace(/\n{4,}/g, "\n\n\n").trim();
+}
+
+function ensureReaderAction(language, body) {
+  if (typeof body !== "string" || !body.trim()) return body;
+  const actionPattern =
+    /(本週|今天|下一步|先檢查|先做|不要做|判斷標準|行動清單|清單|盤點|優先|驗收|檢核|決定|this week|next step|checklist|priority|audit|今週|次に|チェック|이번 주|다음 단계|periksa|kiểm tra|ตรวจ|suriin)/i;
+  if (actionPattern.test(body)) return body;
+  if (language === "zh-Hant") {
+    return `${body}\n\n## 兩週內先跑一個小檢查\n\n本週先選一條正在使用或準備導入的流程，寫下三件事：誰負責、哪個資料來源可以被讀取、出錯時回到哪個人工步驟。兩週後再看處理時間、人工修改率與錯誤攔截率，而不是只用「感覺有變快」判斷是否擴大。`;
+  }
+  return body;
+}
+
+function repairFaqs(faqs) {
+  if (!Array.isArray(faqs)) return faqs;
+  return faqs.map((faq) => ({
+    ...faq,
+    question: repairText(faq.question || ""),
+    answer: repairText(faq.answer || "")
+  }));
+}
+
+function repairSourceLinks(sourceLinks) {
+  if (!Array.isArray(sourceLinks)) return sourceLinks;
+  return sourceLinks.map((source) => ({
+    ...source,
+    title: repairText(source.title || ""),
+    summary: repairText(source.summary || "")
+  }));
+}
+
+function repairArray(values) {
+  return Array.isArray(values) ? values.map((value) => repairText(value)) : values;
+}
+
+function publicText(post) {
+  return [
+    post.title,
+    post.seoTitle,
+    post.seoDescription,
+    post.excerpt,
+    post.geoSummary,
+    post.body,
+    ...(post.keyTakeaways || []),
+    ...(post.sourceLinks || []).flatMap((source) => [source.title, source.summary]),
+    ...(post.faqs || []).flatMap((faq) => [faq.question, faq.answer])
+  ]
+    .filter(Boolean)
+    .join("\n");
+}
+
+function hasForbiddenLeak(post) {
+  const text = publicText(post);
+  const hit = FORBIDDEN_PUBLIC_PATTERNS.find((pattern) => pattern.test(text));
+  return hit ? String(hit) : "";
+}
+
+function repairPost(post) {
+  const repairedBody = ensureReaderAction(post.language, repairText(post.body || ""));
+  const patch = {
+    title: repairText(post.title || ""),
+    seoTitle: repairText(post.seoTitle || ""),
+    seoDescription: repairText(post.seoDescription || ""),
+    excerpt: repairText(post.excerpt || ""),
+    geoSummary: repairText(post.geoSummary || ""),
+    body: repairedBody,
+    keyTakeaways: repairArray(post.keyTakeaways),
+    faqs: repairFaqs(post.faqs),
+    sourceLinks: repairSourceLinks(post.sourceLinks),
+    aiDisclosure: post.aiDisclosure ? repairText(post.aiDisclosure) : ""
+  };
+  if (!patch.seoTitle) patch.seoTitle = patch.title;
+  if (!patch.seoDescription) patch.seoDescription = patch.excerpt;
+  return patch;
+}
+
+function changed(post, patch) {
+  const compare = {
+    title: post.title || "",
+    seoTitle: post.seoTitle || "",
+    seoDescription: post.seoDescription || "",
+    excerpt: post.excerpt || "",
+    geoSummary: post.geoSummary || "",
+    body: post.body || "",
+    keyTakeaways: post.keyTakeaways || [],
+    faqs: post.faqs || [],
+    sourceLinks: post.sourceLinks || [],
+    aiDisclosure: post.aiDisclosure || ""
+  };
+  return JSON.stringify(compare) !== JSON.stringify(patch);
+}
+
+async function main() {
+  loadEnvFile(path.join(process.env.HOME || "", ".altoslab-blog-worker.env"));
+  loadEnvFile(path.join(process.cwd(), ".env.local"));
+
+  const cmsFile = arg("cms-file", "");
+  if (cmsFile) {
+    const resolved = path.resolve(cmsFile);
+    const outFile = path.resolve(arg("out-cms", resolved));
+    const dryRun = hasFlag("dry-run");
+    const languageArg = arg("language", "all");
+    const statusArg = arg("status", "published");
+    const limit = Number.parseInt(arg("limit", "0"), 10) || 0;
+    const data = JSON.parse(fs.readFileSync(resolved, "utf8"));
+    const posts = Array.isArray(data.blogPosts) ? data.blogPosts : [];
+    const selectedIds = new Set(
+      posts
+        .filter((post) => languageArg === "all" || post.language === languageArg)
+        .filter((post) => statusArg === "all" || post.status === statusArg)
+        .filter((post) => post.contentType === "breaking" || post.contentType === "column" || post.contentType === "feature")
+        .map((post) => ({ post, patch: repairPost(post) }))
+        .filter(({ post, patch }) => changed(post, patch))
+        .slice(0, limit > 0 ? limit : undefined)
+        .map(({ post }) => post.id)
+    );
+
+    let updated = 0;
+    const now = new Date().toISOString();
+    data.blogPosts = posts.map((post) => {
+      if (!selectedIds.has(post.id)) return post;
+      const patch = repairPost(post);
+      const next = { ...post, ...patch, updatedAt: now };
+      const leak = hasForbiddenLeak(next);
+      if (leak) throw new Error(`repair would leak ${leak} in ${post.slug}`);
+      updated += 1;
+      return next;
+    });
+    const leakChecks = data.blogPosts
+      .filter((post) => post.status === "published")
+      .map((post) => ({ id: post.id, language: post.language, slug: post.slug, leak: hasForbiddenLeak(post) }))
+      .filter((item) => item.leak);
+    if (!dryRun && leakChecks.length === 0) {
+      fs.writeFileSync(outFile, `${JSON.stringify(data, null, 2)}\n`, "utf8");
+    }
+    console.log(JSON.stringify({
+      ok: leakChecks.length === 0,
+      dryRun,
+      mode: "cms-file",
+      input: resolved,
+      output: dryRun ? "" : outFile,
+      updated,
+      leakChecks
+    }, null, 2));
+    if (leakChecks.length) process.exit(1);
+    return;
+  }
+
+  const root = baseUrl();
+  const dryRun = hasFlag("dry-run");
+  const languageArg = arg("language", "all");
+  const statusArg = arg("status", "published");
+  const limit = Number.parseInt(arg("limit", "0"), 10) || 0;
+
+  const cookie = await login(root);
+  const adminPosts = (await fetchJson(`${root}/api/admin/blog`, { headers: { Cookie: cookie } })).payload.posts || [];
+
+  const selected = adminPosts
+    .filter((post) => languageArg === "all" || post.language === languageArg)
+    .filter((post) => statusArg === "all" || post.status === statusArg)
+    .filter((post) => post.contentType === "breaking" || post.contentType === "column" || post.contentType === "feature")
+    .map((post) => ({ post, patch: repairPost(post) }))
+    .filter(({ post, patch }) => changed(post, patch))
+    .slice(0, limit > 0 ? limit : undefined);
+
+  const preview = selected.map(({ post, patch }) => ({
+    id: post.id,
+    language: post.language,
+    slug: post.slug,
+    contentType: post.contentType,
+    titleBefore: post.title,
+    titleAfter: patch.title
+  }));
+
+  if (dryRun) {
+    console.log(JSON.stringify({ ok: true, dryRun, root, selected: selected.length, preview: preview.slice(0, 30) }, null, 2));
+    return;
+  }
+
+  const updated = [];
+  const failures = [];
+  for (const { post, patch } of selected) {
+    const leak = hasForbiddenLeak(patch);
+    if (leak) {
+      failures.push({ id: post.id, slug: post.slug, reason: `would leak ${leak}` });
+      continue;
+    }
+    try {
+      const { payload } = await fetchJson(`${root}/api/admin/blog/${post.id}`, {
+        method: "PATCH",
+        headers: { Cookie: cookie },
+        body: JSON.stringify(patch)
+      });
+      updated.push({ id: post.id, language: payload.post.language, slug: payload.post.slug, title: payload.post.title });
+    } catch (error) {
+      failures.push({ id: post.id, slug: post.slug, reason: error instanceof Error ? error.message : String(error) });
+    }
+  }
+
+  const publicPosts = (await fetchJson(`${root}/api/blog`)).payload.posts || [];
+  const leakChecks = publicPosts
+    .map((post) => ({ id: post.id, language: post.language, slug: post.slug, leak: hasForbiddenLeak(post) }))
+    .filter((item) => item.leak);
+
+  console.log(JSON.stringify({
+    ok: failures.length === 0 && leakChecks.length === 0,
+    dryRun,
+    root,
+    selected: selected.length,
+    updated: updated.length,
+    failures,
+    leakChecks,
+    preview: preview.slice(0, 30)
+  }, null, 2));
+
+  if (failures.length || leakChecks.length) process.exit(1);
+}
+
+main().catch((error) => {
+  console.error(error instanceof Error ? error.message : error);
+  process.exit(1);
+});

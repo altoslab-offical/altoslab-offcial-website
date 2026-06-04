@@ -44,7 +44,14 @@ const PUBLIC_INTERNAL_COPY_PATTERNS = [
   /SEO\/GEO/i,
   /GEO\s*結構/i,
   /quality\s*gate/i,
-  /品質\s*gate/i
+  /品質\s*gate/i,
+  /AI\s*感/i,
+  /anti[-\s]?slop/i,
+  /source[-\s]?translation/i,
+  /來源轉譯/i,
+  /prompt\s*card/i,
+  /修稿隊列/i,
+  /rubric/i
 ];
 
 function arg(name, fallback = "") {
@@ -616,8 +623,11 @@ async function verifyAdminReadback(posts, root, errors, warnings) {
         });
       }
     }
-    if (!String(adminPost.generatedBy || "").toLowerCase().includes("gemini")) {
-      pushIssue(errors, "admin readback generatedBy must keep Gemini provenance", {
+    const generatedBy = String(adminPost.generatedBy || "").toLowerCase();
+    const sourceTranslatedMarketNews =
+      adminPost.contentType === "breaking" && /source-translation|source_translat|codex-market|market-source/.test(generatedBy);
+    if (!generatedBy.includes("gemini") && !sourceTranslatedMarketNews) {
+      pushIssue(errors, "admin readback generatedBy must keep Gemini provenance for columns/features or source-translation provenance for market news", {
         language: post.language,
         slug: post.slug
       });

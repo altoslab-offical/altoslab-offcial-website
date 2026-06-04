@@ -79,6 +79,13 @@ const genericGeneratedImagePattern =
 
 function removeNegativeImageConstraints(input: string) {
   return input
+    .replace(/\bno\s+(?:readable\s+)?text\s+(?:or|and)\s+(?:fake\s+)?logos?\b/gi, "")
+    .replace(/\bno\s+(?:fake\s+)?logos?\s+(?:or|and)\s+(?:readable\s+)?text\b/gi, "")
+    .replace(/\bno\s+(?:protected\s+)?brands?\s+(?:or|and)\s+(?:trademarks?|brand\s+marks?)\b/gi, "")
+    .replace(/\bno\s+(?:trademarks?|brand\s+marks?)\s+(?:or|and)\s+(?:protected\s+)?brands?\b/gi, "")
+    .replace(/\bno\s+text\s+artifacts?\b/gi, "")
+    .replace(/\bno\s+brand\s+marks?\b/gi, "")
+    .replace(/\bno\s+protected\s+brands?\b/gi, "")
     .replace(/\bno\s+(readable\s+)?text\b/gi, "")
     .replace(/\bno\s+(fake\s+)?logos?\b/gi, "")
     .replace(/\bno\s+(real\s+)?people\b/gi, "")
@@ -87,6 +94,8 @@ function removeNegativeImageConstraints(input: string) {
     .replace(/\bno\s+fake\s+dashboards?\b/gi, "")
     .replace(/\bno\s+(microsoft\s+)?branding\b/gi, "")
     .replace(/\bno\s+trademarks?\b/gi, "")
+    .replace(/\b(?:or|and)\s+(?:fake\s+)?logos?\b/gi, "")
+    .replace(/\b(?:or|and)\s+(?:trademarks?|brand\s+marks?|protected\s+brands?)\b/gi, "")
     .replace(/不要(?:可讀)?文字|不要標誌|不要商標|不要真人|不要肖像|不要假介面|不要假儀表板/g, "")
     .replace(/ロゴなし|商標なし|実在人物なし/g, "")
     .replace(/로고 없음|상표 없음|실제 인물 없음/g, "");
@@ -309,7 +318,8 @@ async function probeRemoteImage(url: string): Promise<ImageProbe> {
     warnings.push(`cover HEAD check failed: ${error instanceof Error ? error.message : "request failed"}`);
   }
 
-  if (contentType && !SAFE_IMAGE_TYPES.includes(contentType)) {
+  const genericBinaryContentType = contentType === "application/octet-stream" || contentType === "binary/octet-stream";
+  if (contentType && !SAFE_IMAGE_TYPES.includes(contentType) && !genericBinaryContentType) {
     issues.push(`cover content-type must be jpeg, png or webp; received ${contentType}`);
   }
   if (contentLength && contentLength < MIN_IMAGE_BYTES) issues.push("cover image file is too small for a blog hero image");
@@ -329,6 +339,9 @@ async function probeRemoteImage(url: string): Promise<ImageProbe> {
     const buffer = Buffer.from(await get.arrayBuffer());
     const dimensions = parseImageDimensions(buffer, contentType);
     if (!dimensions) {
+      if (genericBinaryContentType) {
+        issues.push(`cover content-type must be jpeg, png or webp; received ${contentType}`);
+      }
       issues.push("cover image dimensions could not be verified from the binary header");
       return { contentType, contentLength, issues, warnings };
     }

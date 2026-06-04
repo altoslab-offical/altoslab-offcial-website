@@ -448,9 +448,13 @@ function localPreflight(payload) {
   const humanDesignQa = payload.humanDesignQa || {};
   const requiresGptCover = posts.some((post) => post.contentType !== "breaking");
   const isMarketNewsSet = posts.some((post) => post.contentType === "breaking");
+  const isMarketOnlySet = posts.length > 0 && posts.every((post) => post.contentType === "breaking");
+  const isSourceTranslationLane = payload.generation?.provider === "source-translation";
 
-  if (geminiEvidence.usedExistingTab !== true) issues.push("chromeEvidence.gemini.usedExistingTab must be true");
-  if (geminiEvidence.changedModel === true) issues.push("chromeEvidence.gemini.changedModel must not be true");
+  if (!isMarketOnlySet || !isSourceTranslationLane) {
+    if (geminiEvidence.usedExistingTab !== true) issues.push("chromeEvidence.gemini.usedExistingTab must be true");
+    if (geminiEvidence.changedModel === true) issues.push("chromeEvidence.gemini.changedModel must not be true");
+  }
   if (requiresGptCover && chatgptEvidence.usedExistingTab !== true) issues.push("chromeEvidence.chatgpt.usedExistingTab must be true for generated covers");
   if (chatgptEvidence.changedModel === true) issues.push("chromeEvidence.chatgpt.changedModel must not be true");
   if (humanDesignQa.approved !== true) issues.push("humanDesignQa.approved must be true before validate-only can mark a candidate ready");
@@ -524,7 +528,9 @@ function localPreflight(payload) {
         issues.push(...generatedContentImageIssues(image, label));
       }
     }
-    if (!String(post.generatedBy || "").toLowerCase().includes("gemini")) {
+    const generatedBy = String(post.generatedBy || "").toLowerCase();
+    const sourceTranslatedMarketNews = marketNews && /source-translation|source_translat|source-worker|codex-market|market-source/.test(generatedBy);
+    if (!sourceTranslatedMarketNews && !generatedBy.includes("gemini")) {
       issues.push(`${post.language || "unknown"} article must be drafted or revised through Gemini`);
     }
   }
@@ -895,20 +901,21 @@ async function uploadLocalCovers(payload) {
   return payload;
 }
 
-function articlePrompt(slot, topic) {
-  return `# ALTOS LAB Gemini + GPT article set prompt
+function articlePrompt(slot, topic, lane = "column") {
+  const marketLane = lane === "market";
+  return `# ALTOS LAB ${marketLane ? "source-translation market-news" : "Gemini + GPT column"} article set prompt
 
 Slot: ${slot} (${SLOT_HOURS[slot]} Asia/Taipei)
-Topic: ${topic || "pick the strongest AI market signal from today's sources"}
+Lane: ${marketLane ? "market-news-fast-lane" : "deep-column-lane"}
+Topic: ${topic || (marketLane ? "pick the strongest verified AI market signal from today's official/reputable sources" : "pick one original ALTOS LAB AI column angle for founders and operators")}
 
 Create one article set in ${LANGUAGE_LABEL}.
 
 Hard requirements:
-- Draft and revise the article text through Gemini in the ALTOS Blog QA Chrome group.
-- For market news/breaking posts, use the source article or official announcement image with visible source credit; do not use GPT art or a previously used cover.
-- For column/feature posts, generate the cover image through ChatGPT/GPT in the ALTOS Blog QA Chrome group.
-- For column/feature posts, generate 2-3 in-article images through ChatGPT/GPT: one opening anchor image, one mechanism/evidence image, and optionally one closing synthesis image.
-- Close or release the Gemini/GPT tabs after the run so Chrome memory is not held.
+- ${marketLane ? "Market news uses source-translation from verified source articles. Do not use Gemini by default. Use the source article or official announcement image with visible source credit; do not use GPT art or a previously used cover." : "Gemini writes/revises one zh-Hant source-of-truth column first. Main-brain QA must pass before any localization starts."}
+- ${marketLane ? "Translate/adapt the source facts into all configured languages with native local phrasing. Do not copy source paragraphs or article structure." : "After the zh-Hant source passes, gpt-5.3-codex-spark workers localize en, ja, ko, id, vi, th, ms and fil without inventing facts or changing sources/media."}
+- ${marketLane ? "Do not open ChatGPT/GPT for market-news images." : "For column/feature posts, generate the cover image and 2-3 in-article images through ChatGPT/GPT in the ALTOS Blog QA Chrome group."}
+- Close or release any task-owned Gemini/GPT tabs after the run so Chrome memory is not held.
 - Do not repeat an existing published/draft topic, headline angle or source package.
 - Use zh-Hant as the editorial source of truth, then localize the other languages for local readers.
 - Keep one translationGroupId, identical sourceLinks, one shared cover URL and one shared contentImages URL set across all ${LANGUAGES.length} languages.
@@ -921,11 +928,11 @@ Hard requirements:
 
 Return only JSON shaped for POST /api/admin/blog/ingest-set:
 {
-  "ingestRunId": "browser-gemini-gpt-YYYY-MM-DD-${slot}-short-topic",
+  "ingestRunId": "${marketLane ? "source-translation" : "browser-gemini-gpt"}-YYYY-MM-DD-${slot}-short-topic",
   "slot": "${slot}",
   "translationGroupId": "same-group-id",
   "publishMode": "publish-if-valid",
-  "generation": { "provider": "gemini-chatgpt", "promptVersion": "altos-gemini-gpt-browser-v1" },
+  "generation": { "provider": "${marketLane ? "source-translation" : "gemini-chatgpt"}", "promptVersion": "${marketLane ? "altos-market-source-translation-v1" : "altos-gemini-gpt-browser-v1"}" },
   "posts": []
 }
 `;
@@ -934,10 +941,12 @@ Return only JSON shaped for POST /api/admin/blog/ingest-set:
 async function makePrompt() {
   const slot = arg("slot") || inferSlot();
   if (!SLOT_HOURS[slot]) throw new Error("--slot must be morning or afternoon");
-  const prompt = articlePrompt(slot, arg("topic"));
+  const lane = arg("lane", "column");
+  if (!["column", "market"].includes(lane)) throw new Error("--lane must be column or market");
+  const prompt = articlePrompt(slot, arg("topic"), lane);
   const outputDir = path.join(os.tmpdir(), "altoslab-blog-worker");
   await fs.mkdir(outputDir, { recursive: true });
-  const outputPath = path.join(outputDir, `gemini-gpt-${taiwanDate()}-${slot}.md`);
+  const outputPath = path.join(outputDir, `${lane === "market" ? "source-translation" : "gemini-gpt"}-${taiwanDate()}-${slot}.md`);
   await fs.writeFile(outputPath, prompt, "utf8");
   console.log(outputPath);
 }

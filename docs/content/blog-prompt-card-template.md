@@ -14,7 +14,7 @@ the main brain approves it.
 - `publicAuthor`: `Tommy | Ken` (`morning` defaults to Tommy, `afternoon` defaults to Ken)
 - `languages`: `zh-Hant, en, ja, ko, id, vi, th, ms, fil`
 - `imageSet`: one shared cover plus 2-3 shared `contentImages` for columns/features; source cover only for market news.
-- `fixedTabs`: `Gemini existing tab`, `ChatGPT existing tab`
+- `fixedTabs`: columns/features use `Gemini existing tab` for the approved source article and `ChatGPT existing tab` for generated visuals; market news uses source-translation and source/official image evidence instead.
 - `modelPolicy`: `user-selected model in fixed tab; do not change`
 
 ## 2. Reader Hook
@@ -73,15 +73,27 @@ The chosen pattern must shape section order and headings.
 12. 東南亞語言要用當地科技商業媒體語氣，不要逐字翻譯英文句型。市場新聞保留原始事實；ALTOS LAB 專欄可加入當地決策含意與下一步。
 ```
 
-## 6. Gemini Prompt Chain
+## 6. Gemini Source-Of-Truth Prompt Chain
 
 1. `source_brief`: facts, source URLs, confidence, risks, unsupported claims.
 2. `angle_selection`: three angles, reader tension, selected angle, why now.
 3. `outline`: 4-6 H2s, each with a job, evidence, and reader payoff.
-4. `draft`: title, standfirst, body, key takeaways, FAQ, backend visibility summary.
+4. `source_draft`: write one approved source-of-truth article first, usually `zh-Hant`.
 5. `anti_slop_rewrite`: remove generic phrasing, sharpen judgment, preserve facts.
 6. `qa_repair`: fix only failed article QA items.
-7. `cms_json`: final structured article set for local validation.
+7. `source_json`: final structured source post for local review.
+
+Do not ask Gemini to produce all nine languages in one pass unless the main brain explicitly chooses emergency fallback mode. The default path is source article first, then subagent localization.
+
+## 6.1 Subagent Localization Chain
+
+After the source article passes Codex review:
+
+1. `localization_pack`: approved source article, source pack, shared media metadata, target languages and local tone notes.
+2. `language_group_localization`: bounded Spark workers produce localized posts by group: `en-ja-ko`, `id-vi`, `th-ms-fil`.
+3. `native_tone_rewrite`: workers remove literal translation rhythm and adjust title/subtitle/body for target market norms.
+4. `parity_check`: main brain verifies thesis, facts, source links, media, `translationGroupId`, and content type are shared.
+5. `cms_json_merge`: main brain merges all languages into the final article set and runs validate-only.
 
 ## 7. ChatGPT/GPT Editorial Art Director Persona
 

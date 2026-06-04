@@ -153,7 +153,15 @@ export type BlogLlmQualityEvaluation = {
 };
 
 export type BlogGenerationTrace = {
-  provider: "deepseek" | "fallback" | "local" | "local-antigravity" | "gemini-chatgpt" | "codex-image" | "chatgpt-image";
+  provider:
+    | "deepseek"
+    | "fallback"
+    | "local"
+    | "local-antigravity"
+    | "gemini-chatgpt"
+    | "source-translation"
+    | "codex-image"
+    | "chatgpt-image";
   task: BlogGenerationTask;
   model?: string;
   promptVersion?: string;

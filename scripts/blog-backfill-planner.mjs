@@ -171,7 +171,7 @@ function lanesFromArgs() {
 }
 
 function queueStatusForLane(lane) {
-  return lane === "market" ? "awaiting_market_browser_production" : "awaiting_browser_production";
+  return lane === "market" ? "awaiting_source_translation_production" : "awaiting_browser_production";
 }
 
 function languageBackfillSummary(languageCoverage, targetPosts) {
@@ -181,10 +181,33 @@ function languageBackfillSummary(languageCoverage, targetPosts) {
 function promptCard({ date, lane, slot, sequence, targetPosts, inventory, articleSetPath, manifestPath, orchestratorPrompt }) {
   const publicCount = inventory.publishedPosts;
   const targetLine = `Current public posts: ${publicCount}. Per-language target: ${targetPosts}. Current language coverage: ${languageBackfillSummary(inventory.languageCoverage, targetPosts)}. This is backfill set ${sequence}.`;
+  const isMarket = lane === "market";
   const laneLine =
-    lane === "market"
-      ? "Market news lane: Gemini writes/revises all language versions; cover must be a credited source article or official announcement image shared across every language. No GPT art and no stock/free/fallback image."
-      : "Column lane: Gemini writes/revises all language versions; ChatGPT/GPT creates one shared cover plus 2-3 shared in-article images for every language.";
+    isMarket
+      ? "Market news lane: source-translation from verified source articles; cover must be a credited source article or official announcement image shared across every language. No Gemini requirement, no GPT art and no stock/free/fallback image."
+      : "Column lane: Gemini writes/revises one zh-Hant source-of-truth article first. Main-brain QA must pass before gpt-5.3-codex-spark workers localize en, ja, ko, id, vi, th, ms and fil. ChatGPT/GPT creates one shared cover plus 2-3 shared in-article images for every language.";
+  const evidenceLine = isMarket
+    ? "- Do not write a ready manifest until source-translation fidelity, source-image QA, local preflight, validate-only and design QA pass."
+    : "- Do not write a ready manifest until Gemini/GPT browser evidence, local preflight, validate-only, image/source QA and design QA pass.";
+  const releaseCommand = isMarket
+    ? `
+If validate-only and main-brain QA pass, publish immediately with:
+
+\`\`\`bash
+node scripts/blog-local-worker.mjs \\
+  --article-set "${articleSetPath}" \\
+  --slot ${slot} \\
+  --publish \\
+  --manifest "${manifestPath}" \\
+  --reuse-validated-manifest \\
+  --approve-design-qa
+node scripts/verify-blog-release.mjs --manifest "${manifestPath}"
+\`\`\`
+`
+    : `
+Do not publish from this backfill prompt card. Column posts wait for the scheduled release gate after the manifest becomes status="ready".
+`;
+  const detailedPromptLabel = isMarket ? "Detailed source-translation/source-image prompt" : "Detailed Gemini/GPT browser prompt";
 
   return `# ALTOS LAB Blog Backfill Prompt Card
 
@@ -200,13 +223,13 @@ Required languages: ${LANGUAGE_LABEL}.
 
 Hard release rule:
 - Do not publish from this prompt card.
-- Do not write a ready manifest until browser evidence, local preflight, validate-only, image/source QA and design QA pass.
+${evidenceLine}
 - Do not use old 4-language article sets to satisfy this queue.
 - Do not expose SEO, GEO, AI-generation, prompt, model or quality-gate language in public copy.
 - Every language version must share the same translationGroupId, sourceLinks, cover URL, cover credit and visual metadata.
 - Southeast Asia editions must be naturally localized for Indonesia, Vietnam, Thailand, Malaysia and the Philippines.
 
-After the browser production output is saved, run:
+After the ${lane === "market" ? "source-translation and source-image output" : "browser production output"} is saved, run:
 
 \`\`\`bash
 node scripts/blog-local-worker.mjs \\
@@ -216,21 +239,8 @@ node scripts/blog-local-worker.mjs \\
   --manifest "${manifestPath}" \\
   --approve-design-qa
 \`\`\`
-
-If this is market news and validate-only/main-brain QA pass, publish immediately with:
-
-\`\`\`bash
-node scripts/blog-local-worker.mjs \\
-  --article-set "${articleSetPath}" \\
-  --slot ${slot} \\
-  --publish \\
-  --manifest "${manifestPath}" \\
-  --reuse-validated-manifest \\
-  --approve-design-qa
-node scripts/verify-blog-release.mjs --manifest "${manifestPath}"
-\`\`\`
-
-Detailed Gemini/GPT browser prompt:
+${releaseCommand}
+${detailedPromptLabel}:
 
 \`\`\`text
 ${orchestratorPrompt}
@@ -295,12 +305,16 @@ async function createQueueItem({ date, lane, sequence, targetPosts, inventory })
     expectedPosts: POSTS_PER_SET,
     requiredLanguages: LANGUAGES,
     chromeEvidence: {
-      gemini: { usedExistingTab: false, changedModel: false },
-      chatgpt: { usedExistingTab: false, changedModel: false }
+      gemini: { usedExistingTab: false, changedModel: false, required: lane !== "market" },
+      chatgpt: { usedExistingTab: false, changedModel: false, required: lane !== "market" }
     },
     validateOnly: {
       wouldPublish: false,
-      errors: [`Backfill ${lane} set has not passed Gemini/GPT/source-image browser production and validate-only yet.`]
+      errors: [
+        lane === "market"
+          ? "Backfill market set has not passed source-translation/source-image production and validate-only yet."
+          : "Backfill column set has not passed Gemini/GPT browser production and validate-only yet."
+      ]
     },
     humanDesignQa: { approved: false }
   };
@@ -319,10 +333,10 @@ async function createQueueItem({ date, lane, sequence, targetPosts, inventory })
     manifestPath,
     releasePolicy:
       lane === "market"
-        ? "publish immediately only after Gemini source-faithful copy, source-image QA, validate-only and verification pass"
+        ? "publish immediately only after source-translation fidelity, source-image QA, validate-only and verification pass"
         : "hold for the matching release gate only after Gemini copy, GPT cover/contentImages, validate-only and verification pass",
     blockers: [
-      "waiting for Gemini browser production",
+      lane === "market" ? "waiting for source-translation production" : "waiting for Gemini browser production",
       lane === "market" ? "waiting for credited source article/official image" : "waiting for ChatGPT/GPT cover and 2-3 content images",
       "waiting for validate-only quality/image/design QA"
     ]
@@ -372,6 +386,7 @@ async function main() {
 
   const queue = [];
   if (write) {
+    await fs.rm(path.join(backfillRoot(date), "queue"), { recursive: true, force: true });
     for (let index = 0; index < plannedSets; index += 1) {
       const lane = lanes[index % lanes.length];
       queue.push(await createQueueItem({
@@ -423,7 +438,8 @@ async function main() {
     inventory,
     queue,
     failClosedRules: [
-      "Gemini must produce/revise public copy in ALTOS Blog QA Chrome tabs.",
+      "Columns/features must use Gemini to produce or revise one approved zh-Hant source-of-truth article before localization.",
+      "Market news must use source-translation from verified source articles and does not require Gemini by default.",
       "Original columns need ChatGPT/GPT cover plus 2-3 shared in-article images.",
       "Market news must use the credited source article or official announcement image.",
       "Old 4-language sets and candidates missing browser evidence cannot satisfy backfill.",

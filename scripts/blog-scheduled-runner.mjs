@@ -24,6 +24,15 @@ const MARKET_SCAN_WINDOWS = [
   { hour: 20, minute: 30 }
 ];
 const RELEASE_GRACE_MINUTES = 5;
+const PREP_GRACE_MINUTES = Number(process.env.ALTOS_BLOG_PREP_GRACE_MINUTES || "2");
+const MARKET_SCAN_GRACE_MINUTES = Number(process.env.ALTOS_BLOG_MARKET_SCAN_GRACE_MINUTES || "2");
+const RUNNER_LOCK_STALE_MINUTES = Number(process.env.ALTOS_BLOG_RUNNER_LOCK_STALE_MINUTES || "30");
+const CHROME_GUARD_TOTAL_RSS_MB = Number(process.env.ALTOS_BLOG_CHROME_TOTAL_RSS_MB || "5200");
+const CHROME_GUARD_RENDERER_RSS_MB = Number(process.env.ALTOS_BLOG_CHROME_RENDERER_RSS_MB || "1200");
+const CHROME_MEMORY_DOCTOR = path.join(
+  process.env.HOME || "",
+  "Library/Application Support/ChromeMemoryKit/chrome-memory-doctor"
+);
 
 function arg(name, fallback = "") {
   const index = process.argv.indexOf(`--${name}`);
@@ -32,6 +41,17 @@ function arg(name, fallback = "") {
 
 function hasFlag(name) {
   return process.argv.includes(`--${name}`);
+}
+
+function shouldRunBackfillWithScheduled(mode) {
+  if (hasFlag("skip-backfill") || process.env.ALTOS_BLOG_SKIP_BACKFILL === "true") return false;
+  if (mode === "prep") return true;
+  return mode === "market-scan" && process.env.ALTOS_BLOG_BACKFILL_ON_MARKET_SCAN === "true";
+}
+
+function currentNow() {
+  const raw = arg("now") || process.env.ALTOS_BLOG_NOW || "";
+  return raw ? new Date(raw) : new Date();
 }
 
 function taiwanParts(input = new Date()) {
@@ -85,6 +105,47 @@ function isMarketScanClock(input = new Date()) {
   return MARKET_SCAN_WINDOWS.some((window) => window.hour === hour && window.minute === minute);
 }
 
+function minutesSinceMidnight(parts) {
+  return Number(parts.hour) * 60 + Number(parts.minute);
+}
+
+function matchWindow(table, { input = new Date(), graceMinutes = 0 }) {
+  const parts = taiwanParts(input);
+  const nowMinutes = minutesSinceMidnight(parts);
+  for (const [slot, window] of Object.entries(table)) {
+    const targetMinutes = window.hour * 60 + window.minute;
+    const delta = nowMinutes - targetMinutes;
+    if (delta >= 0 && delta <= graceMinutes) return { slot, deltaMinutes: delta, window };
+  }
+  return null;
+}
+
+function matchMarketWindow({ input = new Date(), graceMinutes = 0 }) {
+  const parts = taiwanParts(input);
+  const nowMinutes = minutesSinceMidnight(parts);
+  for (const window of MARKET_SCAN_WINDOWS) {
+    const targetMinutes = window.hour * 60 + window.minute;
+    const delta = nowMinutes - targetMinutes;
+    if (delta >= 0 && delta <= graceMinutes) return { deltaMinutes: delta, window };
+  }
+  return null;
+}
+
+function scheduledModeFromClock(input = new Date()) {
+  const market = matchMarketWindow({ input, graceMinutes: MARKET_SCAN_GRACE_MINUTES });
+  if (market) return { mode: "market-scan", slot: slotFromClock("market-scan", input), match: market };
+  const prep = matchWindow(PREP_WINDOWS, { input, graceMinutes: PREP_GRACE_MINUTES });
+  if (prep) return { mode: "prep", slot: prep.slot, match: prep };
+  const release = matchWindow(RELEASE_WINDOWS, { input, graceMinutes: RELEASE_GRACE_MINUTES });
+  if (release) return { mode: "release", slot: release.slot, match: release };
+  const parts = taiwanParts(input);
+  return {
+    mode: "idle",
+    reason: `outside scheduled blog windows at ${parts.hour}:${parts.minute} Asia/Taipei`,
+    checkedAtTaipei: `${parts.year}-${parts.month}-${parts.day} ${parts.hour}:${parts.minute}:${parts.second}`
+  };
+}
+
 function runRoot() {
   return path.resolve(process.env.ALTOS_BLOG_WORKER_RUN_DIR || path.join(process.cwd(), "data/blog-worker-runs"));
 }
@@ -116,6 +177,51 @@ async function appendLog(filePath, message) {
   await fs.appendFile(filePath, `${new Date().toISOString()} ${message}\n`, "utf8");
 }
 
+async function acquireRunLock({ mode, date, slot }) {
+  if (hasFlag("no-lock")) return { ok: true, skipped: true, release: async () => {} };
+  const filePath = scheduleLockPath();
+  const payload = {
+    pid: process.pid,
+    mode,
+    date,
+    slot,
+    startedAt: new Date().toISOString()
+  };
+  await fs.mkdir(path.dirname(filePath), { recursive: true });
+  for (const attempt of [0, 1]) {
+    try {
+      await fs.writeFile(filePath, `${JSON.stringify(payload, null, 2)}\n`, { flag: "wx" });
+      return {
+        ok: true,
+        filePath,
+        payload,
+        release: async () => {
+          const current = await readJson(filePath).catch(() => null);
+          if (current?.pid === process.pid) await fs.unlink(filePath).catch(() => {});
+        }
+      };
+    } catch (error) {
+      if (error?.code !== "EEXIST") throw error;
+      const existing = await readJson(filePath).catch(() => null);
+      const startedAt = existing?.startedAt ? Date.parse(existing.startedAt) : 0;
+      const ageMinutes = startedAt ? (Date.now() - startedAt) / 60000 : Number.POSITIVE_INFINITY;
+      if (attempt === 0 && ageMinutes > RUNNER_LOCK_STALE_MINUTES) {
+        await fs.unlink(filePath).catch(() => {});
+        continue;
+      }
+      return {
+        ok: false,
+        filePath,
+        existing,
+        ageMinutes: Number.isFinite(ageMinutes) ? Math.round(ageMinutes * 10) / 10 : null,
+        staleAfterMinutes: RUNNER_LOCK_STALE_MINUTES,
+        release: async () => {}
+      };
+    }
+  }
+  return { ok: false, filePath, release: async () => {} };
+}
+
 function parseJsonObject(raw) {
   if (!raw || !String(raw).trim()) return null;
   try {
@@ -127,6 +233,10 @@ function parseJsonObject(raw) {
 
 function globalScheduleLogPath() {
   return path.join(runRoot(), "scheduled-runner.log");
+}
+
+function scheduleLockPath() {
+  return path.join(runRoot(), ".locks/blog-scheduled-runner.lock");
 }
 
 function compactDoctorResult(doctor) {
@@ -189,6 +299,42 @@ async function runDoctor({ mode, date, slot }) {
   };
 }
 
+async function checkChromeMemoryGuard({ date, slot }) {
+  if (hasFlag("skip-chrome-guard")) return { ok: true, skipped: true };
+  if (!(await exists(CHROME_MEMORY_DOCTOR))) {
+    return {
+      ok: true,
+      skipped: true,
+      missing: true,
+      warning: "ChromeMemoryKit is not installed; browser prep can proceed but memory pressure is not preflighted."
+    };
+  }
+  const result = await runCommand(CHROME_MEMORY_DOCTOR, [
+    "guard",
+    "--total-rss-mb",
+    String(CHROME_GUARD_TOTAL_RSS_MB),
+    "--renderer-rss-mb",
+    String(CHROME_GUARD_RENDERER_RSS_MB)
+  ], { cwd: process.cwd() });
+  const parsed = parseJsonObject(result.stdout);
+  const guard = {
+    ok: result.code === 0 && parsed?.status === "ok",
+    status: parsed?.status || "unknown",
+    totalRssMb: parsed?.total_rss_mb,
+    topRendererMb: parsed?.top_renderer_mb,
+    processCount: parsed?.process_count,
+    thresholds: {
+      totalRssMb: CHROME_GUARD_TOTAL_RSS_MB,
+      rendererRssMb: CHROME_GUARD_RENDERER_RSS_MB
+    },
+    warnings: parsed?.warnings || [],
+    stdout: result.stdout.trim(),
+    stderr: result.stderr.trim()
+  };
+  await appendLog(globalScheduleLogPath(), JSON.stringify({ phase: "chrome-memory-guard", date, slot, guard }));
+  return guard;
+}
+
 function usage() {
   console.log(`
 ALTOS LAB scheduled blog runner
@@ -204,9 +350,9 @@ Manual checks:
 
 This runner never creates production content by itself. Column prep creates a
 prompt and manifest skeleton. Market scan creates a separate fast-lane source
-prompt only when the main brain can then use Gemini and a credited source image.
+prompt for source-translation plus a credited source or official image.
 Release publishes only a ready prepared-candidate manifest produced after
-Gemini/source-image-or-GPT + validate-only + main-brain QA.
+lane-specific evidence + validate-only + main-brain QA.
 Backfill creates an alternating market/column prompt queue only; it never
 publishes or bypasses the same release gates.
 `);
@@ -250,7 +396,19 @@ async function createPrep({ date, slot }) {
     }
   }
 
-  const runDir = path.resolve(arg("run-dir") || path.join(runRoot(), `${date}-${slot}-scheduled-${taiwanStamp()}`));
+  const chromeGuard = await checkChromeMemoryGuard({ date, slot });
+  if (!chromeGuard.ok && !hasFlag("force")) {
+    return {
+      ok: true,
+      skipped: true,
+      phase: "prep",
+      reason: "chrome memory guard held browser production prep",
+      chromeGuard,
+      doctor: compactDoctorResult(doctor)
+    };
+  }
+
+  const runDir = path.resolve(arg("run-dir") || path.join(runRoot(), `${date}-${slot}-scheduled-${taiwanStamp(currentNow())}`));
   const promptPath = path.join(runDir, "prompt-card.md");
   const articleSetPath = path.join(runDir, "article-set.json");
   const manifestPath = path.join(runDir, "prepared-candidate.json");
@@ -288,12 +446,14 @@ Article set output: ${articleSetPath}
 Prepared manifest: ${manifestPath}
 
 Use only the ALTOS Blog QA Chrome tab group.
-This is a daily column slot. Gemini writes/revises the article set; ChatGPT/GPT creates one shared cover and 2-3 shared in-article images for the ${LANGUAGES.length} language versions.
-Required languages: ${LANGUAGE_LABEL}.
-Column contentImages must serve three editorial jobs: opening anchor, mechanism/evidence, and optional closing synthesis. Use the same image URLs across every language version.
+This is a daily column slot. Gemini writes/revises one zh-Hant source-of-truth column first. Main-brain quality QA must pass before any localization starts.
+After the zh-Hant source article passes, gpt-5.3-codex-spark subagents localize the approved article into: en, ja, ko, id, vi, th, ms, fil. The localized articles must sound native to each market and must not collapse the column into a summary.
+ChatGPT/GPT creates one shared cover and 2-3 shared in-article images for the ${LANGUAGES.length} language versions.
+Required final languages: ${LANGUAGE_LABEL}.
+Column contentImages must serve editorial jobs: opening anchor, mechanism/evidence, and optional closing synthesis. Use the same image URLs across every language version.
 Do not publish during prep. Do not change accounts or model selectors.
 
-After the Gemini/source-image/GPT output is saved, run:
+After the approved source article, localization output, and GPT visual output are merged into article-set.json, run:
 
 \`\`\`bash
 node scripts/blog-local-worker.mjs \\
@@ -306,7 +466,7 @@ node scripts/blog-local-worker.mjs \\
 
 The release window will publish only if this manifest becomes status="ready".
 
-Detailed browser prompt:
+Detailed column production prompt:
 
 \`\`\`text
 ${await fs.readFile(orchestratorPromptPath, "utf8").catch(() => "")}
@@ -332,6 +492,7 @@ ${await fs.readFile(orchestratorPromptPath, "utf8").catch(() => "")}
       wouldPublish: false,
       errors: ["Gemini/GPT browser production has not produced a validated article set yet."]
     },
+    chromeGuard,
     humanDesignQa: { approved: false }
   };
   await writeJson(manifestPath, manifest);
@@ -340,14 +501,14 @@ ${await fs.readFile(orchestratorPromptPath, "utf8").catch(() => "")}
 }
 
 async function createMarketScan({ date }) {
-  const slot = Number(taiwanParts().hour) < 12 ? "morning" : "afternoon";
+  const slot = Number(taiwanParts(currentNow()).hour) < 12 ? "morning" : "afternoon";
   const doctor = await runDoctor({ mode: "prep", date, slot });
   await appendLog(globalScheduleLogPath(), JSON.stringify({ phase: "market-scan-doctor", date, slot, doctor: compactDoctorResult(doctor) }));
   if (!doctor.ok) {
     return { ok: false, phase: "market-scan-doctor", stdout: doctor.stdout, stderr: doctor.stderr };
   }
 
-  const runDir = path.resolve(arg("run-dir") || path.join(runRoot(), `${date}-market-scan-${taiwanStamp()}`));
+  const runDir = path.resolve(arg("run-dir") || path.join(runRoot(), `${date}-market-scan-${taiwanStamp(currentNow())}`));
   const promptPath = path.join(runDir, "market-fast-lane-prompt-card.md");
   const articleSetPath = path.join(runDir, "article-set.json");
   const manifestPath = path.join(runDir, "prepared-candidate.json");
@@ -383,13 +544,15 @@ Detected slot context: ${slot}
 Article set output: ${articleSetPath}
 Prepared manifest: ${manifestPath}
 
-Use only the ALTOS Blog QA Chrome tab group.
-Gemini writes/revises the market-news article set. The cover must be the source article or official announcement image, shared by all ${LANGUAGES.length} languages.
+Market-news fast lane uses source-translation, not Gemini by default.
+Translate/adapt the verified source article into ALTOS LAB's reader-first brief format. The cover must be the source article or official announcement image, shared by all ${LANGUAGES.length} languages.
 Required languages: ${LANGUAGE_LABEL}. Every market-news item must be translated/localized into all of them before validate-only.
 Do not use GPT art, Unsplash, Pexels, Pixabay, Openverse, reused covers, or local fallback art for market news.
 If no qualified source image exists, hold the candidate and report no publish.
 
-After source image + Gemini output is saved, run:
+Set generation.provider to "source-translation" and generatedBy to "source-translation" (or a source-translation provenance string) for market-news posts.
+
+After source image + source-translation output is saved, run:
 
 \`\`\`bash
 node scripts/blog-local-worker.mjs \\
@@ -413,7 +576,7 @@ node scripts/blog-local-worker.mjs \\
 node scripts/verify-blog-release.mjs --manifest "${manifestPath}"
 \`\`\`
 
-Detailed browser prompt:
+Detailed source-production prompt:
 
 \`\`\`text
 ${await fs.readFile(orchestratorPromptPath, "utf8").catch(() => "")}
@@ -422,7 +585,7 @@ ${await fs.readFile(orchestratorPromptPath, "utf8").catch(() => "")}
   await fs.writeFile(promptPath, promptCard, "utf8");
 
   const manifest = {
-    status: "awaiting_market_browser_production",
+    status: "awaiting_source_translation_production",
     lane: "market",
     slot,
     createdAt: new Date().toISOString(),
@@ -437,7 +600,7 @@ ${await fs.readFile(orchestratorPromptPath, "utf8").catch(() => "")}
     },
     validateOnly: {
       wouldPublish: false,
-      errors: ["Market scan has not produced a Gemini/source-image validated article set yet."]
+      errors: ["Market scan has not produced a source-translation/source-image validated article set yet."]
     },
     humanDesignQa: { approved: false }
   };
@@ -500,6 +663,10 @@ async function runBackfillPlanner({ date }) {
 function releaseGateIssues(manifest, { date, slot, articleSet }) {
   const issues = [];
   const posts = Array.isArray(articleSet?.posts) ? articleSet.posts : [];
+  const isSourceTranslationMarketOnly =
+    articleSet?.generation?.provider === "source-translation" &&
+    posts.length > 0 &&
+    posts.every((post) => post.contentType === "breaking");
   const requiresGptCover = posts.some((post) => post.contentType !== "breaking");
   const retryableHeldManifest =
     manifest.status === "held" &&
@@ -516,8 +683,10 @@ function releaseGateIssues(manifest, { date, slot, articleSet }) {
     issues.push(`expectedReleaseAt must be ${scheduledFor(date, slot)}`);
   }
   if (!manifest.articleSetPath) issues.push("articleSetPath is required");
-  if (manifest.chromeEvidence?.gemini?.usedExistingTab !== true) issues.push("Gemini existing-tab evidence is missing");
-  if (manifest.chromeEvidence?.gemini?.changedModel === true) issues.push("Gemini model was changed");
+  if (!isSourceTranslationMarketOnly && manifest.chromeEvidence?.gemini?.usedExistingTab !== true) {
+    issues.push("Gemini existing-tab evidence is missing");
+  }
+  if (!isSourceTranslationMarketOnly && manifest.chromeEvidence?.gemini?.changedModel === true) issues.push("Gemini model was changed");
   if (requiresGptCover && manifest.chromeEvidence?.chatgpt?.usedExistingTab !== true) {
     issues.push("ChatGPT/GPT existing-tab evidence is missing for generated covers");
   }
@@ -534,7 +703,7 @@ function releaseGateIssues(manifest, { date, slot, articleSet }) {
 
 function releaseWindowIssue({ date, slot }) {
   if (hasFlag("force-release")) return "";
-  const parts = taiwanParts();
+  const parts = taiwanParts(currentNow());
   const nowDate = `${parts.year}-${parts.month}-${parts.day}`;
   const window = RELEASE_WINDOWS[slot];
   const nowMinutes = Number(parts.hour) * 60 + Number(parts.minute);
@@ -687,29 +856,64 @@ async function main() {
     usage();
     return;
   }
-  const date = arg("date") || taiwanDate();
+  const now = currentNow();
+  const date = arg("date") || taiwanDate(now);
   let mode = hasFlag("prep") ? "prep" : hasFlag("release") ? "release" : "";
+  let scheduledSlot = "";
+  let scheduledMatch = null;
   if (hasFlag("market-scan")) mode = "market-scan";
   if (hasFlag("backfill")) mode = "backfill";
   if (hasFlag("scheduled")) {
-    const parts = taiwanParts();
-    const hour = Number(parts.hour);
-    mode = isMarketScanClock() ? "market-scan" : hour === PREP_WINDOWS.morning.hour || hour === PREP_WINDOWS.afternoon.hour ? "prep" : "release";
+    const scheduled = scheduledModeFromClock(now);
+    if (scheduled.mode === "idle") {
+      const result = { ok: true, skipped: true, phase: "scheduled", reason: scheduled.reason, checkedAtTaipei: scheduled.checkedAtTaipei };
+      await appendLog(globalScheduleLogPath(), JSON.stringify(result));
+      console.log(JSON.stringify(result, null, 2));
+      return;
+    }
+    mode = scheduled.mode;
+    scheduledSlot = scheduled.slot || "";
+    scheduledMatch = scheduled.match || null;
   }
   if (!mode) throw new Error("Use --scheduled, --prep, --release, --market-scan or --backfill");
-  const slot = arg("slot") || slotFromClock(mode);
+  const slot = arg("slot") || scheduledSlot || slotFromClock(mode, now);
   if (mode !== "market-scan" && !SLOT_HOURS[slot]) throw new Error("--slot must be morning or afternoon");
 
-  const result =
-    mode === "prep"
-      ? await createPrep({ date, slot })
-      : mode === "market-scan"
-        ? await createMarketScan({ date })
-        : mode === "backfill"
-          ? await runBackfillPlanner({ date })
-          : await release({ date, slot });
-  if (hasFlag("scheduled") && (mode === "prep" || mode === "market-scan")) {
-    result.backfill = await runBackfillPlanner({ date });
+  const lock = await acquireRunLock({ mode, date, slot });
+  if (!lock.ok) {
+    const result = {
+      ok: true,
+      skipped: true,
+      phase: "scheduled-lock",
+      reason: "another blog scheduled runner is active",
+      lock: {
+        filePath: lock.filePath,
+        existing: lock.existing,
+        ageMinutes: lock.ageMinutes,
+        staleAfterMinutes: lock.staleAfterMinutes
+      }
+    };
+    await appendLog(globalScheduleLogPath(), JSON.stringify(result));
+    console.log(JSON.stringify(result, null, 2));
+    return;
+  }
+
+  let result;
+  try {
+    result =
+      mode === "prep"
+        ? await createPrep({ date, slot })
+        : mode === "market-scan"
+          ? await createMarketScan({ date })
+          : mode === "backfill"
+            ? await runBackfillPlanner({ date })
+            : await release({ date, slot });
+    if (scheduledMatch) result.scheduledMatch = scheduledMatch;
+    if (hasFlag("scheduled") && shouldRunBackfillWithScheduled(mode)) {
+      result.backfill = await runBackfillPlanner({ date });
+    }
+  } finally {
+    await lock.release();
   }
   console.log(JSON.stringify(result, null, 2));
   if (result.ok === false) process.exit(1);

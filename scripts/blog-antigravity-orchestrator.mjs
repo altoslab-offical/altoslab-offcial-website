@@ -77,10 +77,24 @@ function runRoot() {
 
 function buildPrompt({ slot, date, articleSetPath, topic, lane }) {
   const marketLane = lane === "market";
-  const runIdHint = `browser-gemini-gpt-${date}-${slot}-${marketLane ? "market-fast-lane" : "column"}`;
+  const runIdHint = `${marketLane ? "source-translation" : "browser-gemini-gpt"}-${date}-${slot}-${marketLane ? "market-fast-lane" : "column"}`;
+  const productionWorkspaceLine = marketLane
+    ? "You are the source-translation production workspace for ALTOS LAB's official website blog. Market news uses verified source articles, source-faithful adaptation, and the credited source article or official announcement image. Create one high-quality market-news article set only after the source pack and source image pass QA, then write the final JSON to this exact path:"
+    : "You are the production workspace for ALTOS LAB's official website blog. Columns/features use a staged workflow: Gemini writes or revises one zh-Hant source-of-truth column first, main-brain QA approves it, then gpt-5.3-codex-spark subagents localize the approved source into the other languages. ChatGPT/GPT generates covers only for columns/features. Create one high-quality article set only after the source article has passed QA, then write the final JSON to this exact path:";
+  const productionControlLines = marketLane
+    ? `- This run is market news: contentType must be breaking, facts must come from the source pack, copy is source-translated/adapted by Codex/source workers, and the cover must be the credited source article or official announcement image.
+- Do not use Gemini by default for market-news backfill. Use Gemini only if the main-brain explicitly requests an editorial rewrite after source-translation QA.
+- Market news/breaking posts must use the source article or official announcement image with visible attribution; do not use GPT art or stock/free images for market news.`
+    : `- This run is an original ALTOS LAB column: contentType must be column, not breaking. Gemini must create the zh-Hant source-of-truth first. Do not localize or assemble all languages until that source article passes main-brain QA. The cover and in-article visuals must be generated through ChatGPT/GPT.
+- Column/feature cover images must be generated through ChatGPT/GPT in the ALTOS Blog QA Chrome group.
+- Close or release Gemini/GPT tabs after the run so Chrome memory is not held.`;
+  const sourceTruthLine = marketLane
+    ? "Translate/adapt one verified source article package into zh-Hant first, then localize en, ja, ko, id, vi, th, ms, fil from the same source package."
+    : `Write zh-Hant first as the source of truth, then localize ${LANGUAGES.filter((language) => language !== "zh-Hant").join(", ")} from the same argument.`;
+
   return `# ALTOS LAB daily AI blog article set
 
-You are the browser-operated production workspace for ALTOS LAB's official website blog. Gemini must write/revise the article copy. ChatGPT/GPT generates covers only for columns/features; market news must use the credited source article or official announcement image. Create one high-quality article set and write the final JSON to this exact path:
+${productionWorkspaceLine}
 
 ${articleSetPath}
 
@@ -92,13 +106,9 @@ Lane: ${marketLane ? "market-news-fast-lane" : "deep-column-lane"}
 Topic: ${topic || (marketLane ? "Choose the strongest current AI market signal from reliable sources." : "Choose the strongest original ALTOS LAB AI column angle for founders and operators.")}
 
 Editorial bar:
-- Article copy must be drafted and revised through Gemini in the ALTOS Blog QA Chrome group.
-- ${marketLane ? "This run is market news: contentType must be breaking, facts must come from the source pack, and the cover must be the credited source article or official announcement image." : "This run is an original ALTOS LAB column: contentType must be column, not breaking, and the cover must be generated through ChatGPT/GPT."}
-- Market news/breaking posts must use the source article or official announcement image with visible attribution; do not use GPT art or stock/free images for market news.
-- Column/feature cover images must be generated through ChatGPT/GPT in the ALTOS Blog QA Chrome group.
-- Close or release Gemini/GPT tabs after the run so Chrome memory is not held.
+${productionControlLines}
 - Check existing published/draft articles first; do not repeat a topic, headline angle or source package.
-- Write zh-Hant first as the source of truth, then localize ${LANGUAGES.filter((language) => language !== "zh-Hant").join(", ")} from the same argument.
+- ${sourceTruthLine}
 - Southeast Asia editions must sound native for Indonesia, Vietnam, Thailand, Malaysia and the Philippines; do not ship literal translation tone.
 - All ${LANGUAGES.length} languages must share the same cover URL and the same contentImages URLs. The language changes; the article identity and images do not.
 - The first 40-80 words must answer why the reader should care today.
@@ -130,14 +140,14 @@ Required JSON shape:
   "translationGroupId": "${runIdHint}",
   "publishMode": "publish-if-valid",
   "generation": {
-    "provider": "gemini-chatgpt",
-    "promptVersion": "altos-gemini-gpt-browser-v1",
-    "model": "Gemini copy + ChatGPT/GPT image browser workflow"
+    "provider": "${marketLane ? "source-translation" : "gemini-chatgpt"}",
+    "promptVersion": "${marketLane ? "altos-source-translation-market-v1" : "altos-gemini-gpt-browser-v1"}",
+    "model": "${marketLane ? "Codex source translation + source image workflow" : "Gemini copy + ChatGPT/GPT image browser workflow"}"
   },
   "chromeEvidence": {
     "gemini": {
-      "usedExistingTab": true,
-      "continuedExistingConversation": true,
+      "usedExistingTab": ${marketLane ? "false" : "true"},
+      "continuedExistingConversation": ${marketLane ? "false" : "true"},
       "changedModel": false,
       "title": "",
       "url": "https://gemini.google.com/app"
@@ -176,7 +186,7 @@ Required JSON shape:
       "coverLicense": "${marketLane ? "source-attributed" : ""}",
       "coverGeneration": ${marketLane ? "null" : "{ \"source\": \"generated\", \"provider\": \"ChatGPT/GPT\", \"prompt\": \"\", \"generatedAt\": \"\", \"status\": \"generated\", \"visualChecks\": { \"topicFit\": true, \"noTextArtifacts\": true, \"noLogos\": true, \"noPeople\": true, \"noTrademarkRisk\": true, \"noGenericStockLook\": true } }"},
       "contentImages": ${marketLane ? "[]" : "[{ \"url\": \"\", \"localPath\": \"\", \"alt\": \"\", \"caption\": \"\", \"source\": \"generated\", \"credit\": \"ALTOS LAB editorial visual\", \"aspectRatio\": \"wide\", \"placement\": \"after-lead\", \"provider\": \"ChatGPT/GPT\", \"prompt\": \"\", \"generatedAt\": \"\", \"visualChecks\": { \"topicFit\": true, \"noTextArtifacts\": true, \"noLogos\": true, \"noPeople\": true, \"noTrademarkRisk\": true, \"noGenericStockLook\": true } }, { \"url\": \"\", \"localPath\": \"\", \"alt\": \"\", \"caption\": \"\", \"source\": \"generated\", \"credit\": \"ALTOS LAB editorial visual\", \"aspectRatio\": \"wide\", \"placement\": \"mid-article\", \"provider\": \"ChatGPT/GPT\", \"prompt\": \"\", \"generatedAt\": \"\", \"visualChecks\": { \"topicFit\": true, \"noTextArtifacts\": true, \"noLogos\": true, \"noPeople\": true, \"noTrademarkRisk\": true, \"noGenericStockLook\": true } }]"},
-      "generatedBy": "gemini",
+      "generatedBy": "${marketLane ? "source-translation" : "gemini"}",
       "aiDisclosure": ""
     }
   ]
@@ -260,9 +270,12 @@ async function main() {
   }
 
   if (!hasFlag("skip-antigravity") && !hasFlag("skip-browser-wait")) {
-    await appendLog(logPath, `browser Gemini/GPT production required; prompt written to ${promptPath}`);
+    const laneLabel = lane === "market" ? "source-translation/source-image production" : "browser Gemini/GPT production";
+    await appendLog(logPath, `${laneLabel} required; prompt written to ${promptPath}`);
     throw new Error(
-      `Browser Gemini/GPT production must write the article set first. Use the ALTOS Blog QA Chrome group with ${promptPath}, then rerun with --skip-browser-wait --article-set ${articleSetPath}.`
+      lane === "market"
+        ? `Source-translation market production must write the article set first from verified sources and a credited source image. Use ${promptPath}, then rerun with --skip-browser-wait --article-set ${articleSetPath}.`
+        : `Browser Gemini/GPT production must write the article set first. Use the ALTOS Blog QA Chrome group with ${promptPath}, then rerun with --skip-browser-wait --article-set ${articleSetPath}.`
     );
   }
 

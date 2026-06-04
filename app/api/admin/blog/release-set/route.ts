@@ -32,7 +32,7 @@ type BlogReleaseRequest = {
   publishMode?: "publish-if-valid";
   replaceExistingPublished?: boolean;
   generation?: {
-    provider?: "gemini-chatgpt" | "local-antigravity" | "local";
+    provider?: "gemini-chatgpt" | "source-translation" | "local-antigravity" | "local";
     model?: string;
     promptVersion?: string;
     sourceCount?: number;
@@ -503,10 +503,11 @@ export async function POST(request: Request) {
   if (
     payload.generation?.provider &&
     payload.generation.provider !== "gemini-chatgpt" &&
+    payload.generation.provider !== "source-translation" &&
     payload.generation.provider !== "local-antigravity" &&
     payload.generation.provider !== "local"
   ) {
-    inputIssues.push("generation.provider must be gemini-chatgpt");
+    inputIssues.push("generation.provider must be gemini-chatgpt or source-translation");
   }
   inputIssues.push(...releaseManifestIssues(payload));
   if (inputIssues.length || !slot || !Array.isArray(payload.posts)) {

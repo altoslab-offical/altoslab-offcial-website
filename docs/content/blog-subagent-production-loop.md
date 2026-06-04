@@ -5,11 +5,13 @@ This is the current long-term production path for AI blog publishing.
 ## Roles
 
 - Main brain: the current Codex thread. It owns source judgment, production publish decisions, Cloudflare/API verification, admin readback, and final quality reporting.
-- Writing worker: a `gpt-5.3-codex-spark` subagent. It owns repetitive article-set drafting, multilingual revision, and validate-only iteration.
+- Writing worker: a `gpt-5.3-codex-spark` subagent. It owns bounded localization and QA repair after the source-of-truth draft has passed main-brain review. It does not create the initial source article.
+- Localization workers: `gpt-5.3-codex-spark` subagents split by language group. They localize approved source-of-truth copy into natural local writing, not literal translation.
 - Prompt research worker: a `gpt-5.3-codex-spark` subagent. It owns market/media pattern research, source-pack compression, prompt-card drafting, and QA issue extraction. It does not operate fixed tabs unless the main brain explicitly delegates that exact tab task.
 - Browser workbench: dedicated Chrome tabs only.
-  - Gemini tab: article writing and rewrite assistance.
+  - Gemini tab: column/feature source-of-truth writing and rewrite assistance.
   - ChatGPT/GPT tab: generated cover prompts or image generation assistance for columns/features. Market-news covers come from credited source images.
+  - Market-news fast lane: Codex/source workers translate and adapt source articles into ALTOS LAB's reader-first brief format; Gemini is not required for ordinary source-translation market news.
 
 The worker is not allowed to publish. Publishing is only done by the main brain after production returns `wouldPublish: true`.
 The worker is also not allowed to send prompts from memory. A prompt-card must exist first, and the main brain approves it before anything is pasted into Gemini or ChatGPT.
@@ -51,7 +53,14 @@ The macOS LaunchAgent is the deterministic safety runner. It wakes at all above 
 
 - prep windows: create a run folder, prompt card, and `awaiting_browser_production` manifest skeleton;
 - release windows: publish only an already `ready` manifest.
-- market-scan windows: refresh source-fast-lane prompts/manifests for possible follow-on Gemini browser execution;
+- market-scan windows: refresh source-fast-lane prompts/manifests for source-translation production;
+
+The runner is intentionally narrow:
+
+- It accepts scheduled work only inside the configured minute windows, with a small grace period. A heartbeat that wakes outside those windows returns `skipped` instead of guessing a lane.
+- It uses a local lock under `data/blog-worker-runs/.locks/` so a slow release verification, market scan or backfill planner cannot overlap the next runner process.
+- It runs Chrome Memory Kit before creating a new column browser-production candidate. If Chrome RSS or the largest renderer is above the configured guardrail, column prep is held instead of opening more Gemini/GPT work.
+- Backfill planning runs during prep windows by default. Market-scan windows do not recompute the 40-post queue unless `ALTOS_BLOG_BACKFILL_ON_MARKET_SCAN=true` is explicitly set.
 
 Before either path continues, the runner executes:
 
@@ -63,11 +72,11 @@ node scripts/blog-sop-doctor.mjs \
 
 The doctor checks the local worker env, LaunchAgent registration, production `/api/health`, durable CMS status (`gcs` or `cloudflare-kv`), disabled legacy DeepSeek cron, and release candidate readiness. Release mode also requires admin readback credentials so the post-release verifier can inspect protected blog metadata.
 
-It does not pretend to operate Gemini or ChatGPT. Browser/Gemini/GPT production remains owned by the Codex heartbeat/main-brain workflow because it has Chrome extension access and can enforce tab-group rules.
+It does not pretend to operate Gemini or ChatGPT. Column/feature Gemini/GPT production remains owned by the Codex heartbeat/main-brain workflow because it has Chrome extension access and can enforce tab-group rules. Market-news source-translation can be prepared without Gemini when the source article, source image and attribution are verifiable.
 
 At prep time, the main brain must prepare a publishable candidate manifest before the release window.
 At release time, the main brain must not start fresh generation. If no prepared, validate-only-passed, design-approved candidate exists, skip publishing.
-At market-scan windows, the runner never publishes. It only creates/updates `awaiting_market_browser_production` manifests and keeps fail-closed gate coverage unchanged for the same-day 09:00 / 16:00 publish windows.
+At market-scan windows, the runner never publishes. It only creates/updates `awaiting_source_translation_production` manifests and keeps fail-closed gate coverage unchanged for the same-day 09:00 / 16:00 publish windows.
 At post-release follow-up time, the main brain must not start fresh generation. It verifies a released manifest or reruns the release gate once if the manifest is still ready and the five-minute release grace window is still open.
 The manifest contract lives in `docs/content/blog-prepared-candidate-manifest.md`.
 The prompt-card contract lives in `docs/content/blog-prompt-card-template.md`.
@@ -78,16 +87,17 @@ The prompt-card contract lives in `docs/content/blog-prompt-card-template.md`.
 2. Main brain prepares a source pack from official docs, product blogs, trusted technology media, or primary sources.
 3. Main brain prepares or delegates a `prompt-card.md` using `docs/content/blog-prompt-card-template.md`.
 4. Main brain approves the prompt-card. If the prompt-card does not clearly define the reader hook, source limits, image angle, tab target, user-selected model policy, and fail-closed QA rules, the run is held.
-5. Main brain spawns a `gpt-5.3-codex-spark` worker with a bounded task:
-   - write or revise exactly one full multilingual article set,
-   - keep one `translationGroupId`,
-   - keep identical `sourceLinks`,
-   - do not publish,
-   - run validate-only up to a bounded retry count.
-6. Worker may use the dedicated Gemini tab for prose assistance only after the approved prompt-card names the exact Gemini prompt chain.
-7. Worker writes `article-set.json`.
-8. Main brain obtains covers through the dedicated GPT image tab or a human-approved editorial design workflow. Local generated-cover fallback art cannot auto-publish.
-9. Main brain runs:
+5. If the lane is `column` or `feature`, main brain uses the dedicated Gemini tab to produce one source-of-truth article first, usually `zh-Hant`.
+6. If the lane is market news, main brain or a source-translation worker builds the source-faithful zh-Hant brief directly from the original source article and official/source image. Do not run ordinary market news through Gemini unless an editorial rewrite is explicitly needed.
+7. Main brain runs the source quality gate. If the title, subtitle, lead, source fidelity, body rhythm, public wording, or image policy is weak, columns/features go back to Gemini; market news goes back to source-translation repair.
+8. After the source draft passes, main brain spawns bounded `gpt-5.3-codex-spark` localization workers:
+   - `en-ja-ko`
+   - `id-vi`
+   - `th-ms-fil`
+   Each worker localizes from the approved source article and writes only its assigned parsed output files.
+9. Main brain merges the source post and localized posts into one `article-set.json`, keeping one `translationGroupId`, identical `sourceLinks`, identical cover/media metadata, and exactly one post per configured language.
+10. For columns/features, main brain obtains covers and 2-3 in-article visuals through the dedicated GPT image tab or a human-approved editorial design workflow. Local generated-cover fallback art cannot auto-publish. For market news, the cover remains the credited source or official announcement image.
+11. Main brain runs:
 
 ```bash
 node scripts/blog-local-worker.mjs \
@@ -99,16 +109,18 @@ node scripts/blog-local-worker.mjs \
   --validate-only
 ```
 
-10. If validation fails, main brain sends the exact quality and image issues back to the worker.
-11. If validation and main-brain quality review pass, the manifest becomes `ready`. Release time runs the same command with `--publish`; the local worker signs a `qualityManifest` and writes only through production `release-set`.
-12. Release time immediately runs the post-release verifier:
+12. If validation fails, main brain sends the exact quality and image issues back to the source draft or localization worker responsible for the failed field.
+13. If validation and main-brain quality review pass, the manifest becomes `ready`. Release time runs the same command with `--publish`; the local worker signs a `qualityManifest` and writes only through production `release-set`.
+14. Release time immediately runs the post-release verifier:
 
 ```bash
 node scripts/verify-blog-release.mjs \
   --manifest <runDir>/prepared-candidate.json
 ```
 
-13. Main brain reviews the verifier output and reports live URLs, public/API metadata, admin readback when `ALTOS_ADMIN_PASSWORD`, `ADMIN_PASSWORD`, `ALTOS_ADMIN_SESSION_TOKEN`, or `ADMIN_SESSION_TOKEN` is available, RSS, sitemap, `llms.txt`, content hash, image QA, OG/Twitter image status, and any warnings.
+15. Main brain reviews the verifier output and reports live URLs, public/API metadata, admin readback when `ALTOS_ADMIN_PASSWORD`, `ADMIN_PASSWORD`, `ALTOS_ADMIN_SESSION_TOKEN`, or `ADMIN_SESSION_TOKEN` is available, RSS, sitemap, `llms.txt`, content hash, image QA, OG/Twitter image status, and any warnings.
+
+The localization contract is defined in `docs/content/blog-localization-operating-model.md`.
 
 ## Release Rule
 
@@ -119,8 +131,8 @@ Publish only when all are true:
 - `imageQualitySummary.approved: true`
 - `qualityManifest.contentSha256` matches the release payload
 - all configured languages are present: `zh-Hant`, `en`, `ja`, `ko`, `id`, `vi`, `th`, `ms`, `fil`
-- all covers are reachable generated media
-- all covers were created through GPT/ChatGPT or explicit human-approved editorial design QA
+- original column/feature covers are reachable generated media created through GPT/ChatGPT or explicit human-approved editorial design QA
+- market-news covers are reachable, credited source/official images with a reviewed usage note; do not substitute GPT art for market news
 - all covers include aesthetic visual checks: brand fit, editorial specificity, visual hierarchy, thumbnail readability, no cliché, and mobile crop resilience
 - production returns published IDs
 - `scripts/verify-blog-release.mjs` passes after publication

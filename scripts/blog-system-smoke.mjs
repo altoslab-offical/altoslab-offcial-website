@@ -37,6 +37,7 @@ const localWorker = read("scripts/blog-local-worker.mjs");
 const orchestrator = read("scripts/blog-antigravity-orchestrator.mjs");
 const scheduledRunner = read("scripts/blog-scheduled-runner.mjs");
 const backfillPlanner = read("scripts/blog-backfill-planner.mjs");
+const marketSourceScanner = read("scripts/blog-market-source-scanner.mjs");
 const sopDoctor = read("scripts/blog-sop-doctor.mjs");
 const releaseVerifier = read("scripts/verify-blog-release.mjs");
 const launchAgentPlist = read("scripts/com.altoslab.blog-local-worker.plist.example");
@@ -64,6 +65,7 @@ const legacySeedLanguages = ["zh-Hant", "en", "ja", "ko"];
 
 assert(sourceRegistry.includes("BLOG_NEWS_MIX"), "source registry exposes content/news mix");
 assert((sourceRegistry.match(/tier: "official-rss"/g) || []).length >= 8, "source registry has at least 8 official RSS sources");
+assert(sourceRegistry.includes("GDELT DOC API") && sourceRegistry.includes("Hacker News API"), "source registry includes free market-news discovery APIs");
 assert((sourceRegistry.match(/tier: "licensed-image"/g) || []).length >= 3, "source registry has licensed image providers");
 assert(!/pinterest\.(com|[a-z]+)/i.test(sourceRegistry), "source registry does not use Pinterest as an image source");
 
@@ -88,7 +90,10 @@ assert(quality.includes("subtitleEvidencePattern"), "quality gate requires subti
 assert(quality.includes("rawZhEnglishJargonPattern"), "quality gate rejects raw English AI-ops jargon in zh-Hant articles");
 assert(quality.includes("technicalJargonPattern"), "quality gate requires jargon-heavy paragraphs to explain terms plainly");
 assert(quality.includes('"hentai"'), "quality gate blocks obvious off-topic adult typo terms in public blog copy");
-assert(quality.includes("through Gemini"), "quality gate requires Gemini-written/revised production articles");
+assert(
+  quality.includes("source-translation") && quality.includes("production articles must be written or revised through Gemini before release"),
+  "quality gate requires Gemini-written/revised columns/features while allowing source-translated market news"
+);
 assert(quality.includes("market news posts must use a credited source article or official announcement image"), "quality gate requires market-news source covers");
 assert(quality.includes("market news posts must not expose internal source-translation"), "quality gate blocks market-news template/process headings");
 assert(quality.includes("ChatGPT/GPT"), "quality gate requires ChatGPT/GPT-generated production covers for generated-cover lanes");
@@ -106,14 +111,14 @@ assert(ingestRoute.includes("verifyBlogIngestRequest"), "ingest route verifies H
 assert(ingestRoute.includes("validateOnly"), "ingest route supports validateOnly dry runs");
 assert(ingestRoute.includes("reviewBlogImagesForRelease"), "ingest route runs production image QA before release");
 assert(ingestRoute.includes("publish-if-valid"), "ingest route supports publish-if-valid fail-closed mode");
-assert(ingestRoute.includes("generation.provider must be gemini-chatgpt"), "ingest route requires the Gemini + GPT production provider");
+assert(ingestRoute.includes("generation.provider must be gemini-chatgpt or source-translation"), "ingest route accepts Gemini/GPT columns and source-translation market news");
 assert(ingestRoute.includes("duplicateTopicIssues"), "ingest route blocks repeated topics/source angles");
 assert(ingestRoute.includes("duplicateCoverIssues"), "ingest route blocks repeated cover images across different article groups");
 assert(ingestRoute.includes("market news coverSource must be source"), "ingest route requires source images for market-news posts");
 assert(ingestRoute.includes("not stock/free image providers"), "ingest route blocks stock/free images for market-news source covers");
 assert(releaseRoute.includes("verifyBlogIngestRequest"), "release-set route verifies HMAC before parsing release payloads");
 assert(releaseRoute.includes("qualityManifest") && releaseRoute.includes("contentSha256"), "release-set route requires a signed quality manifest digest");
-assert(releaseRoute.includes("generation.provider must be gemini-chatgpt"), "release-set route accepts the Gemini + GPT production provider");
+assert(releaseRoute.includes("generation.provider must be gemini-chatgpt or source-translation"), "release-set route accepts Gemini/GPT columns and source-translation market news");
 assert(releaseRoute.includes("releaseCoverContractIssues"), "release-set route blocks localhost/http covers and mismatched multilingual covers");
 assert(releaseRoute.includes("column/feature posts require at least two in-article images"), "release-set route blocks columns/features without required in-article images");
 assert(releaseRoute.includes("contentImages URLs do not match release payload"), "release-set route verifies signed content image URLs during publish");
@@ -137,9 +142,9 @@ assert(localWorker.includes("requestMediaUpload"), "local worker uploads generat
 assert(localWorker.includes("requestRelease") && localWorker.includes("/api/admin/blog/release-set"), "local worker publishes through the formal release-set route");
 assert(localWorker.includes("qualityManifest") && localWorker.includes("contentSha256"), "local worker writes a quality manifest with a content digest");
 assert(localWorker.includes("reuse-validated-manifest"), "local worker can reuse a signed validate-only manifest during release");
-assert(localWorker.includes("chromeEvidence.gemini.usedExistingTab"), "local worker requires Gemini existing-tab evidence");
+assert(localWorker.includes("isSourceTranslationLane"), "local worker allows source-translation market news without Gemini tab evidence");
 assert(localWorker.includes("requiresGptCover"), "local worker only requires ChatGPT/GPT evidence when generated covers are needed");
-assert(localWorker.includes("String(post.generatedBy || \"\").toLowerCase().includes(\"gemini\")"), "local worker requires per-post Gemini provenance");
+assert(localWorker.includes("sourceTranslatedMarketNews") && localWorker.includes("article must be drafted or revised through Gemini"), "local worker requires Gemini provenance except source-translated market news");
 assert(localWorker.includes("Local fallback cover generation is disabled"), "local worker fails closed on fallback cover generation");
 assert(localWorker.includes("coverGeneration.provider must be ChatGPT/GPT"), "local worker requires GPT cover provenance");
 assert(localWorker.includes("articleSetCoverIssues"), "local worker requires one shared cover URL across translated article versions");
@@ -150,7 +155,12 @@ assert(localWorker.includes("not stock/free image providers"), "local worker blo
 assert(localWorker.includes("market news fast lane requires translated versions for every configured language"), "local worker blocks market-news sets missing any configured language");
 assert(ingestRoute.includes("market news fast lane requires translated versions for every configured language"), "ingest route blocks market-news sets missing any configured language");
 assert(releaseRoute.includes("market news fast lane requires translated versions for every configured language"), "release route blocks market-news sets missing any configured language");
-assert(orchestrator.includes("Gemini must write/revise") && orchestrator.includes("market news must use the credited source article"), "orchestrator documents Gemini copy and market-news source image requirements");
+assert(
+  orchestrator.includes("source-translation") &&
+    orchestrator.includes("Market news uses verified source articles") &&
+    orchestrator.includes("Do not use Gemini by default for market-news backfill"),
+  "orchestrator documents source-translated market news without default Gemini requirements"
+);
 assert(orchestrator.includes("Column/feature cover images must be generated through ChatGPT/GPT"), "orchestrator documents GPT covers for columns/features");
 assert(orchestrator.includes("--lane must be column or market"), "orchestrator separates column and market-news lanes");
 assert(orchestrator.includes("All ${LANGUAGES.length} languages must share the same cover URL"), "orchestrator requires one shared cover across translations");
@@ -191,11 +201,18 @@ assert(backfillPlanner.includes("targetPostsPerLanguage") && backfillPlanner.inc
 assert(backfillPlanner.includes("missingByLanguage") && backfillPlanner.includes("Math.max(0, ...missingByLanguage"), "backfill planner creates one multilingual set for each missing post in the lowest-coverage language");
 assert(backfillPlanner.includes("POSTS_PER_SET = LANGUAGES.length"), "backfill planner calculates missing posts in complete language sets");
 assert(backfillPlanner.includes('DEFAULT_LANES = ["market", "column"]'), "backfill planner alternates market-news and column lanes");
-assert(backfillPlanner.includes("awaiting_market_browser_production") && backfillPlanner.includes("awaiting_browser_production"), "backfill planner creates held browser-production queue states");
+assert(
+  backfillPlanner.includes("awaiting_source_translation_production") && backfillPlanner.includes("awaiting_browser_production"),
+  "backfill planner creates lane-specific held production queue states"
+);
 assert(backfillPlanner.includes("Old 4-language sets") && backfillPlanner.includes("cannot satisfy backfill"), "backfill planner rejects old incomplete language sets as a backfill shortcut");
 assert(backfillPlanner.includes("Market news must use the credited source article") && backfillPlanner.includes("Original columns need ChatGPT/GPT"), "backfill planner preserves market source-image and column GPT-image rules");
 assert(backfillPlanner.includes("/api/blog") && backfillPlanner.includes("publishedPosts"), "backfill planner measures the live public blog inventory");
 assert(backfillPlanner.includes("plannedPublishedPosts"), "backfill planner reports the post count expected after complete multilingual sets");
+assert(marketSourceScanner.includes("og:image") && marketSourceScanner.includes("twitter:image"), "market source scanner extracts source article social images");
+assert(marketSourceScanner.includes("GDELT") || sourceRegistry.includes("GDELT DOC API"), "market source scanner is backed by expanded free discovery sources");
+assert(marketSourceScanner.includes("CONSUMER_NOISE_PATTERN"), "market source scanner filters irrelevant consumer-news noise");
+assert(marketSourceScanner.includes("liveDuplicateState"), "market source scanner checks live duplicate source URLs, covers and titles");
 assert(sopDoctor.includes("BLOG_DISABLE_DEEPSEEK_CRON must be true"), "SOP doctor requires the legacy DeepSeek cron to stay disabled");
 assert(sopDoctor.includes("[8, 10]") && sopDoctor.includes("[9, 0]") && sopDoctor.includes("[9, 4]"), "SOP doctor enforces prep/release launch windows in its trigger checks");
 assert(sopDoctor.includes("[10, 30]") && sopDoctor.includes("[12, 30]") && sopDoctor.includes("[14, 30]"), "SOP doctor enforces all market-scan launch windows");
@@ -215,7 +232,7 @@ assert(
   releaseVerifier.includes("qualityStatus: \"passed\"") && releaseVerifier.includes("admin readback ${key} must be ${expected}"),
   "release verifier checks protected admin quality metadata"
 );
-assert(releaseVerifier.includes("admin readback generatedBy must keep Gemini provenance"), "release verifier checks Gemini provenance without exposing it publicly");
+assert(releaseVerifier.includes("source-translation provenance for market news"), "release verifier checks Gemini provenance for columns/features and source-translation provenance for market news");
 assert(!releaseVerifier.includes("public API generatedBy does not show Gemini provenance"), "release verifier does not require public Gemini provenance leakage");
 assert(releaseVerifier.includes("public API market news coverSource must be source"), "release verifier checks market-news source cover metadata");
 assert(releaseVerifier.includes("not stock/free image providers"), "release verifier blocks stock/free images for market-news source covers");
@@ -232,7 +249,7 @@ assert(launchAgentPlist.includes("<integer>4</integer>"), "LaunchAgent includes 
 assert(launchAgentInstaller.includes("replace-with|test-secret"), "LaunchAgent installer refuses placeholder or test ingest secrets");
 assert(launchAgentInstaller.includes("launchctl bootstrap"), "LaunchAgent installer can bootstrap the scheduled local worker");
 assert(blogArticle.includes("extractSourceTranslationNote"), "article renderer extracts source translation note from main body");
-assert(blogArticle.includes("source-translation-note"), "article renderer displays source translation note as a compact support block");
+assert(globals.includes("source-credit-note"), "article stylesheet displays source credit note as a compact support block");
 assert(richText.includes("rich-highlight"), "rich text renderer supports in-article highlight marks");
 assert(richText.includes("==[^=\\n]+=="), "rich text renderer parses ==highlight== syntax");
 assert(

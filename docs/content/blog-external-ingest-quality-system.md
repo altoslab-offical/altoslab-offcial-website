@@ -2,19 +2,22 @@
 
 Production blog publishing is now fail-closed:
 
-1. Gemini creates and revises the multilingual article set in the dedicated ALTOS Blog QA browser workflow.
-2. Local worker runs preflight checks before contacting production.
-3. Local worker keeps market-news source images as credited external source URLs and uploads only generated column/feature covers through signed `POST /api/admin/blog/media`.
-4. Production accepts signed `POST /api/admin/blog/ingest-set` requests for full validation diagnostics.
-5. The formal GCP Cloud Run release path is signed `POST /api/admin/blog/release-set`; Cloudflare remains fallback only.
-6. `release-set` requires an approved `qualityManifest`, matching content/body hashes, configured-language completeness, valid publish metadata and a fresh image QA pass.
-7. Posts publish only when every release gate passes; otherwise the whole article set is held or rejected.
+1. Column/feature posts use Gemini to create and revise one zh-Hant source-of-truth article in the dedicated ALTOS Blog QA browser workflow, then Spark/local workers localize the approved source.
+2. Market-news posts use source-translation from verified source articles by default; Gemini is only an optional rewrite helper when the main-brain explicitly requests it.
+3. Local worker runs preflight checks before contacting production.
+4. Local worker keeps market-news source images as credited external source URLs and uploads only generated column/feature covers through signed `POST /api/admin/blog/media`.
+5. Production accepts signed `POST /api/admin/blog/ingest-set` requests for full validation diagnostics.
+6. The formal GCP Cloud Run release path is signed `POST /api/admin/blog/release-set`; Cloudflare remains fallback only.
+7. `release-set` requires an approved `qualityManifest`, matching content/body hashes, configured-language completeness, valid publish metadata and a fresh image QA pass.
+8. Posts publish only when every release gate passes; otherwise the whole article set is held or rejected.
 
 ## Required Payload
 
 - `slot`: `morning` or `afternoon`.
 - `publishMode`: `publish-if-valid`.
-- `generation.provider`: `gemini-chatgpt`.
+- `generation.provider`:
+  - `source-translation` for market-news sets where every post is `contentType: "breaking"`.
+  - `gemini-chatgpt` for `contentType: "column"` or `contentType: "feature"` sets.
 - `posts`: exactly one post for each configured language: `zh-Hant`, `en`, `ja`, `ko`, `id`, `vi`, `th`, `ms`, `fil`.
 - All posts share the same `translationGroupId` and `sourceLinks`.
 - `contentType: "breaking"` posts use `coverSource: "source"` and include `coverCredit`, `coverCreditUrl`, `coverLicense`, `coverAlt` and a non-reused source image URL.
@@ -52,7 +55,7 @@ The active production scheduler is the Codex app heartbeat automation documented
 `10:30`, `12:30`, `14:30`, `15:10`, `16:00`, `16:04`, `18:30`, and `20:30` Asia/Taipei.
 - `09:00` and `16:00` are publish checkpoints; `09:04` and `16:04` are in-window post-release follow-ups.
 - `08:10` and `15:10` are prep windows. `10:30`, `12:30`, `14:30`, `18:30`, and `20:30` are market-scan checkpoints only and do not publish.
-Prep windows use Gemini for article writing, source images for
+Prep windows use Gemini for column/feature source writing, source-translation and source images for
 market news, and ChatGPT/GPT for column/feature covers, then run production `validateOnly`. Release windows publish only an already-ready
 candidate after all quality gates pass.
 
