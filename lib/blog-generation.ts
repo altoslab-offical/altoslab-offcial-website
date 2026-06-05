@@ -863,14 +863,10 @@ Sources:
 ${sourceBrief}
 
 Editorial writing system:
-- Do not let older ALTOS LAB templates control the article. Choose one fresh narrative mode before drafting and make the structure fit the story.
-- Mode A, Medium-style scene hook: open with a concrete operator scene, failure, or decision moment, then widen into the framework.
-- Mode B, Foresight-style market brief: start from a news event, map competing routes or stakeholders, then explain what changes for readers.
-- Mode C, AI Magazine-style company signal: use one company move as a lens for market structure, valuation, enterprise demand or platform power.
-- Mode D, lab notebook: explain the mechanism, limits, uncertainty and what ALTOS LAB would test next.
-- Mode E, contrarian operator column: name the popular mistake, show why it fails, then give a sharper decision rule.
-- Strong articles usually include a memorable line, an honest take, one table/checklist, and a final judgment that a reader can repeat to a teammate.
-- Avoid same-shape articles. Do not always use the same H2 sequence, same "what changed/why it matters" frame, or same SEO/GEO ending.
+- Do not let older ALTOS LAB templates control the article. Read the sources first, notice the actual story shape, then let the title, lead, section order and ending follow that story.
+- Absorb the feel of good business media and strong operator columns: a concrete first line, named people or companies, real numbers, context in plain language, one honest judgment, and paragraphs that move because the story moves.
+- Strong articles usually include a memorable line, an honest take, one concrete example, and a final judgment that a reader can repeat to a teammate. They should not look like a filled-in framework.
+- Avoid same-shape articles. Do not always use the same H2 sequence, same "what changed/why it matters" frame, or same visibility ending.
 - Market-news title calibration: name the actor/source and the concrete move first, then the reader impact. Prefer verifiable nouns such as launch, availability, partnership, funding, policy, benchmark, security issue, rollout, region, price, capability or date. Avoid empty hype such as "顛覆", "終極", "改變一切", "所有人都在搶", "完整解析", "你一定要懂".
 - Market-news lead calibration: first sentence should say who is affected and what changed now. Second sentence can add one risk, open question, or operational implication. Do not open with ALTOS LAB process, internal translation method, or generic AI-era throat clearing.
 - Column calibration: the first 2-3 sentences must establish audience, time window, concrete signal and the decision tension before background. Use event + impact titles, not emotional adjectives. Every long column needs a visible boundary: region, date, source type, sample limit, or what the evidence cannot prove.
@@ -918,8 +914,8 @@ Quality rules:
 - At least one body section must connect a concrete outside news event to the reader's business decision. Do not leave foreign sources only in sourceLinks.
 - The article must be an original ALTOS LAB synthesis: summarize facts in your own words, cite the source URLs, and add implementation judgment.
 - Make readers feel ALTOS LAB is a serious lab: source-grounded, practical, original, careful with uncertainty and useful for decision makers.
-- Every article needs one fresh angle: a market signal, counterintuitive point, mechanism explainer, source trail, implementation framework, case breakdown, risk warning, decision matrix, comparison table or signal chart.
-- Use a sharp title pattern: specific source/event/question + operator implication + ALTOS LAB framework. Never use generic titles like "AI platform trends", "search visibility and executive decisions", "what business leaders need to know", "不可忽視", "必須關注" or "關鍵轉變".
+- Every article needs one fresh angle: a market signal, counterintuitive point, mechanism explainer, source trail, case breakdown, risk warning, product tension or operator dilemma.
+- Use a sharp title pattern: specific source/event/question + reader implication. Never use generic titles like "AI platform trends", "search visibility and executive decisions", "what business leaders need to know", "不可忽視", "必須關注" or "關鍵轉變".
 - The excerpt is the visible article subtitle. Treat it like a newsroom standfirst, not a summary field.
 - Subtitle/standfirst craft rules:
   1. Start with a concrete tension, source/event or reader problem. Avoid "本文整理", "這篇文章", "This article", "learn how", "explore", "matters because" and template summary language.
@@ -955,8 +951,8 @@ values: 72|64|81|55
 caption: One sentence explaining that values are relative editorial scores, not market size.
 :::
 - ${bodyLengthRule}
-- If contentType is "feature", include one Markdown comparison table and one step-by-step framework.
-- If contentType is "column", answer one concrete operator question and include tradeoffs, a decision table or numbered operator framework, plus next steps.
+- If contentType is "feature", include one clearly useful comparison, narrative source card, or step-by-step explainer only when it fits the story.
+- If contentType is "column", answer one concrete operator question through source evidence, examples, tradeoffs and ALTOS LAB's own judgment. Do not force a decision table, numbered framework or next-step checklist when the essay reads better without it.
 - If contentType is "breaking", keep it timely and factual: what happened, who announced or reported it, why it matters now, what remains uncertain, and the credited sources. Avoid column-style frameworks, scorecards, lab-note headings, and internal translation-process sections.
 - Cover image metadata must be topic-specific: write coverAlt/visual language around the article's concrete subject, not generic dashboards, team meetings, server rooms or workspaces.
 - Keep status/review fields out of the JSON; the CMS will set them.`;
@@ -1001,9 +997,9 @@ Remove AI-slop patterns: throat-clearing, generic hype, passive voice, "not X bu
 Reject generic trend framing. The repaired title must contain a concrete question, market signal, source-backed event, visual frame or operator decision. The opening must answer the query immediately and the article must make ALTOS LAB's editorial read visible without repeating a fixed heading.
 Rewrite the excerpt as a strong visible subtitle/standfirst: concrete source/event or operator tension first, then the reader decision or tradeoff. It must not be a bland summary, must not repeat the title, and must not start with "本文", "這篇文章", "This article", "learn how", "explore", "この記事", or "이 글".
 Make every technical section easy for a busy non-specialist to understand. Translate jargon into plain language on first use. If the draft uses trace, eval, rollback, orchestration, retrieval, routing, plugin or observability, explain the human meaning immediately, such as operation logs, test questions, returning to the old workflow, source lookup, or seeing where the system failed.
-Use bold sparingly to mark the core judgment, the three operator questions, or a checklist phrase that helps scanning. Never use bold as decoration.
+Use bold sparingly to mark the core judgment, a vivid reader tension, or one phrase worth remembering. Never use bold as decoration.
 Use ==important sentence== for at most one short in-article highlight when a repaired sentence deserves ALTOS LAB's fixed #A4FF00 emphasis underline.
-If the article feels templated, pick a stronger narrative mode: scene hook, market route comparison, company-signal analysis, lab notebook, or contrarian operator column. Keep the sources, but make the human reading experience less predictable.
+If the article feels templated, rewrite it from the actual story: what happened, who is affected, what tension is hiding underneath, and what one sharp judgment ALTOS LAB can responsibly add. Keep the sources, but make the human reading experience less predictable.
 
 Language: ${post.language}
 Content type: ${post.contentType || contentTypeFromInput(input)}

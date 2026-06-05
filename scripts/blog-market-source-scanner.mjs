@@ -319,6 +319,18 @@ async function queueMarketSequences(queueDir, maxPacks) {
 
 async function enrichCandidate(candidate) {
   const page = await fetchText(candidate.url, PAGE_TIMEOUT_MS);
+  if (!page.ok) {
+    return {
+      ...candidate,
+      pageStatus: page.status,
+      pageTitle: candidate.title,
+      pageDescription: candidate.summary,
+      imageUrl: "",
+      imageProbe: null,
+      sourceArticle: null,
+      sourceFetchFailed: true
+    };
+  }
   const imageRaw =
     candidate.feedImageUrl ||
     metaContent(page.text, "og:image") ||
@@ -615,6 +627,10 @@ async function main() {
       continue;
     }
     const enriched = await enrichCandidate(candidate);
+    if (enriched.sourceFetchFailed) {
+      skipped.push({ title: candidate.title, url: candidate.url, reason: `source page fetch failed ${enriched.pageStatus || ""}`.trim() });
+      continue;
+    }
     if (!enriched.imageUrl) {
       skipped.push({ title: candidate.title, url: candidate.url, reason: "missing og/twitter/source image" });
       continue;

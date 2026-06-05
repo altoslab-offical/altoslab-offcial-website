@@ -69,7 +69,8 @@ function splitSentences(value = "") {
   return normalizeNewsText(value)
     .split(/(?<=[.!?。！？])\s+|[。！？]\s*/g)
     .map((sentence) => sentence.trim().replace(/[。！？.!?]+$/, ""))
-    .filter((sentence) => sentence.length >= 16);
+    .filter((sentence) => sentence.length >= 16)
+    .filter((sentence) => !isSourceNoiseText(sentence));
 }
 
 function unique(values = []) {
@@ -130,20 +131,63 @@ function bestSrcFromSrcset(value = "") {
   return candidates[0]?.url || "";
 }
 
+function realImageUrl(value = "", base = "") {
+  const url = absoluteSourceUrl(value, base);
+  if (!url) return "";
+  if (/#primaryimage$/i.test(url) || /\/#primaryimage$/i.test(url)) return "";
+  if (/^https?:\/\/[^/]+\/?$/i.test(url)) return "";
+  if (/google-analytics\.com\/g\/collect/i.test(url)) return "";
+  return url;
+}
+
+function extractMetaImage(html = "", baseUrl = "") {
+  return (
+    realImageUrl(metaContent(html, "og:image"), baseUrl) ||
+    realImageUrl(metaContent(html, "twitter:image"), baseUrl) ||
+    realImageUrl(metaContent(html, "thumbnail"), baseUrl)
+  );
+}
+
+function extractArticleSection(html = "") {
+  const starts = [
+    /<div[^>]+class=["'][^"']*(?:blog-content|entry-content|wp-block-post-content|article-content|post-content|article-module__[^"']*content)[^"']*["'][^>]*>/i,
+    /<article\b[^>]*>/i,
+    /<main\b[^>]*>/i
+  ];
+  let start = -1;
+  for (const pattern of starts) {
+    const match = pattern.exec(html);
+    if (match) {
+      start = match.index;
+      break;
+    }
+  }
+  if (start < 0) return "";
+  const raw = html.slice(start, start + 110_000);
+  const stopPattern =
+    /(?:Models mentioned in this article|Datasets mentioned in this article|Related posts|Related Articles|More from|Recommended|Comments|Newsletter|Subscribe|Sign up)|<(?:footer|aside)\b|class=["'][^"']*(?:related|newsletter|author-card|post-relevant|comments|recommended|footer)[^"']*["']/i;
+  const stop = raw.search(stopPattern);
+  return stop > 0 ? raw.slice(0, stop) : raw;
+}
+
 function extractArticleImages(html = "", baseUrl = "", fallbackCredit = "") {
+  const scopedHtml = extractArticleSection(html) || html;
   const images = [];
   const seen = new Set();
-  for (const match of html.matchAll(/<img\b[^>]*>/gi)) {
+  for (const match of scopedHtml.matchAll(/<img\b[^>]*>/gi)) {
     const tag = match[0] || "";
     const rawSrc =
       attrValue(tag, ["src", "data-src", "data-original", "data-lazy-src"]) ||
       bestSrcFromSrcset(attrValue(tag, ["srcset", "data-srcset"]));
-    const url = absoluteSourceUrl(rawSrc, baseUrl);
+    const url = realImageUrl(rawSrc, baseUrl);
     if (!url || seen.has(url)) continue;
     if (/\.(?:svg|gif)(?:[?#]|$)/i.test(url)) continue;
-    if (/(avatar|profile|logo|icon|sprite|tracking|pixel|placeholder|spacer)/i.test(url)) continue;
-    seen.add(url);
+    if (/(avatar|profile|logo|icon|sprite|tracking|pixel|placeholder|spacer|gravatar|headshot|author)/i.test(url)) continue;
+    if (/[?&](?:w|width|resize)=(?:48|64|80|96|128|150)(?:&|$|,)/i.test(url) || /(?:^|[?&])h=(?:48|64|80|96|128|150)(?:&|$)/i.test(url)) continue;
+    if (/(?:w_|,w_|\/w_)(?:48|64|80|96|128)|(?:h_|,h_)(?:48|64|80|96|128)|[-_](?:48|64|80|96|128)\.(?:jpg|jpeg|png|webp)(?:[?#]|$)/i.test(url)) continue;
     const alt = stripHtml(attrValue(tag, ["alt", "aria-label", "title"]));
+    if (/^(?:[A-Z][a-z]+(?:\s+[A-Z][a-z]+){0,3}|作者)$/.test(alt) && /(?:w=150|avatar|profile|author)/i.test(url)) continue;
+    seen.add(url);
     images.push({
       url,
       alt,
@@ -154,6 +198,49 @@ function extractArticleImages(html = "", baseUrl = "", fallbackCredit = "") {
     if (images.length >= 5) break;
   }
   return images;
+}
+
+function extractArticleBodyFromHtml(html = "") {
+  const section = extractArticleSection(html);
+  if (!section) return "";
+  const paragraphs = [];
+  const seen = new Set();
+  for (const match of section.matchAll(/<(p|li)\b([^>]*)>([\s\S]*?)<\/\1>/gi)) {
+    const attrs = match[2] || "";
+    if (/\b(?:ad-unit|wp-block-tc-ads|social|newsletter|caption|credit|byline)\b/i.test(attrs)) continue;
+    const text = stripHtml(match[3] || "")
+      .replace(/\s+/g, " ")
+      .trim();
+    if (text.length < 34) continue;
+    if (isSourceNoiseText(text)) continue;
+    if (/^(Image Credits|圖片來源|作者|Tags?|Topics?|Read more|Sign up|Subscribe|Advertisement|Recommended|Related|Share this|本文獲)/i.test(text)) {
+      continue;
+    }
+    if (/newsletter|sign up|subscribe|advertisement|cookie|privacy policy|terms of service/i.test(text)) continue;
+    const key = text.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    paragraphs.push(text);
+    if (paragraphs.length >= 12) break;
+  }
+  return paragraphs.join("\n\n");
+}
+
+function isSourceNoiseText(value = "") {
+  const text = normalizeNewsText(value);
+  const compact = text.replace(/\s+/g, " ");
+  if (!compact) return true;
+  if (/404\s*(?:-|–|not found)|that page does not exist|try again or go back to the homepage/i.test(compact)) return true;
+  if (/^(Image Credits|圖片來源|作者|Tags?|Topics?|Read more|Sign up|Subscribe|Advertisement|Recommended|Related|Share this|本文獲)/i.test(compact)) return true;
+  if (/newsletter|sign up|subscribe|advertisement|cookie|privacy policy|terms of service/i.test(compact)) return true;
+  if (/Products AI Cloud AI Gateway|Core Platform CI\/CD|Resources Company Customers|Web Application Firewall|DDoS Protection/i.test(compact)) return true;
+  if (/Verge Shopping Expand|Transportation Expand|Founded in 2011, we offer our audience/i.test(compact)) return true;
+  if (/We’re on a journey to advance and democratize artificial intelligence/i.test(compact)) return true;
+  if (/^A Blog post by .* on Hugging Face\b/i.test(compact)) return true;
+  if (/^SECTION\s+\d+[:：]/i.test(compact) || (compact.match(/\bSECTION\s+\d+[:：]/gi) || []).length >= 2) return true;
+  if (/Guides have aided humanity|Prehistoric civilizations|sun and the moon|Centuries later, the introduction of the compass|GPS navigation apps/i.test(compact)) return true;
+  if (/These workflows are:\s*A|Dynamic and long-running\s*B|Possess a plethora of APIs.*\s*C/i.test(compact)) return true;
+  return false;
 }
 
 function collectJsonLdNodes(value, nodes = []) {
@@ -246,7 +333,7 @@ export function extractEntities(...values) {
 function factBulletsFromText({ title = "", summary = "", publisher = "" } = {}) {
   const facts = [];
   for (const sentence of splitSentences(summary)) facts.push(sentence);
-  if (facts.length < 3 && title) facts.unshift(`${shortPublisher(publisher)} reported: ${cleanSourceTitle(title)}`);
+  if (facts.length < 3 && title && !/404\s*(?:-|–|not found)/i.test(title)) facts.unshift(`${shortPublisher(publisher)} reported: ${cleanSourceTitle(title)}`);
   const numbers = extractNumbers(title, summary);
   if (facts.length < 3 && numbers.length) facts.push(`The source includes these concrete figures: ${numbers.join(", ")}`);
   return unique(facts).slice(0, 6);
@@ -258,8 +345,10 @@ export function normalizeSourceArticle(sourceArticle = {}, fallbackSource = {}, 
   const publisher = shortPublisher(sourceArticle.publisher || source.publisher || fallbackPack.coverCredit || "");
   const publishedAt = sourceArticle.publishedAt || source.publishedAt || "";
   const canonicalUrl = sourceArticle.canonicalUrl || sourceArticle.url || source.url || "";
-  const standfirst = normalizeNewsText(sourceArticle.standfirst || sourceArticle.description || source.summary || "");
+  const rawStandfirst = normalizeNewsText(sourceArticle.standfirst || sourceArticle.description || source.summary || "");
+  const standfirst = isSourceNoiseText(rawStandfirst) ? "" : rawStandfirst;
   const body = normalizeNewsText(sourceArticle.body || sourceArticle.articleBody || "");
+  const bodyForFacts = isSourceNoiseText(body) ? "" : body;
   const localizedLanguage = sourceArticle.localizedLanguage || "";
   const factBullets = unique(
     [
@@ -268,12 +357,13 @@ export function normalizeSourceArticle(sourceArticle = {}, fallbackSource = {}, 
         ? []
         : factBulletsFromText({
             title: headline,
-            summary: [standfirst, body.slice(0, 1600)].filter(Boolean).join(" "),
+            summary: [standfirst, bodyForFacts.slice(0, 1600)].filter(Boolean).join(" "),
             publisher
           }))
     ]
       .map((fact) => normalizeNewsText(fact))
       .filter(Boolean)
+      .filter((fact) => !isSourceNoiseText(fact))
   ).slice(0, 6);
   const entities = unique([...(sourceArticle.entities || []), ...extractEntities(headline, standfirst, factBullets.join("\n"))]).slice(0, 12);
   const numbers = unique([...(sourceArticle.numbers || []), ...extractNumbers(headline, standfirst, factBullets.join("\n"))]).slice(0, 10);
@@ -302,7 +392,7 @@ export function normalizeSourceArticle(sourceArticle = {}, fallbackSource = {}, 
     })
     .filter(Boolean)
     .slice(0, 3);
-  const minimumFacts = factBullets.length >= 3 || (standfirst && (entities.length >= 2 || numbers.length >= 1));
+  const minimumFacts = !/404\s*(?:-|–|not found)/i.test(headline) && (factBullets.length >= 3 || (standfirst && (entities.length >= 2 || numbers.length >= 1)));
   const extractionConfidence =
     Number.isFinite(Number(sourceArticle.extractionConfidence))
       ? Number(sourceArticle.extractionConfidence)
@@ -320,7 +410,7 @@ export function normalizeSourceArticle(sourceArticle = {}, fallbackSource = {}, 
     factBullets,
     entities,
     numbers,
-    body: body.slice(0, 2000),
+    body: bodyForFacts.slice(0, 2000),
     image,
     images,
     extractionConfidence
@@ -351,6 +441,13 @@ export function extractSourceArticleFromHtml(candidate = {}, html = "", image = 
     (html.match(/<link[^>]+rel=["']canonical["'][^>]+href=["']([^"']+)["'][^>]*>/i)?.[1] || "") ||
     candidate.url ||
     "";
+  const articleImages = extractArticleImages(html, canonicalUrl || candidate.url || "", image.credit || publisher);
+  const primaryImage =
+    realImageUrl(image.url, canonicalUrl || candidate.url || "") ||
+    realImageUrl(jsonLd.image?.url, canonicalUrl || candidate.url || "") ||
+    extractMetaImage(html, canonicalUrl || candidate.url || "") ||
+    articleImages[0]?.url ||
+    "";
   const normalized = normalizeSourceArticle(
     {
       headline,
@@ -358,14 +455,14 @@ export function extractSourceArticleFromHtml(candidate = {}, html = "", image = 
       publishedAt,
       canonicalUrl,
       standfirst,
-      body: jsonLd.body,
+      body: jsonLd.body || extractArticleBodyFromHtml(html),
       image: {
-        url: image.url || jsonLd.image?.url || candidate.imageUrl || "",
+        url: primaryImage || candidate.imageUrl || "",
         credit: image.credit || publisher,
         creditUrl: image.creditUrl || canonicalUrl || candidate.url || "",
         probe: image.probe || candidate.imageProbe || null
       },
-      images: extractArticleImages(html, canonicalUrl || candidate.url || "", image.credit || publisher)
+      images: articleImages
     },
     {
       title: headline || candidate.title,
@@ -375,7 +472,7 @@ export function extractSourceArticleFromHtml(candidate = {}, html = "", image = 
       url: canonicalUrl || candidate.url
     },
     {
-      primarySourceImageUrl: image.url || jsonLd.image?.url || candidate.imageUrl || "",
+      primarySourceImageUrl: primaryImage || candidate.imageUrl || "",
       coverCredit: image.credit || publisher,
       coverCreditUrl: image.creditUrl || canonicalUrl || candidate.url || "",
       scanner: { imageProbe: image.probe || candidate.imageProbe || null }

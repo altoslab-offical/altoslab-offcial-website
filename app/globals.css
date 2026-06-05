@@ -3659,11 +3659,11 @@ img {
 .blog-site-shell .rich-text p,
 .blog-site-shell .rich-text ul,
 .blog-site-shell .rich-text ol {
-  margin: 0.42em 0;
+  margin: 0.35em 0 0.65em;
 }
 
 .blog-site-shell .rich-text h2 {
-  margin: 2em 0 0.65em;
+  margin: 1.35em 0 0.5em;
   color: var(--al-blog-strong);
   font-family: var(--font-body);
   font-size: var(--fs-h2);

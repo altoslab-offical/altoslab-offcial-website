@@ -155,15 +155,15 @@ function localizedSourceSummary(language, source, frame) {
 
   if (/17,000|17000|calls per day|africa|middle east/.test(lower)) {
     return {
-      "zh-Hant": "該新創自建的語音 AI 系統，已在非洲與中東市場每天處理超過 17,000 通電話。",
-      en: "The startup says its own stack for Africa and the Middle East now handles more than 17,000 calls a day.",
-      ja: "同社は、アフリカと中東向けに構築した自社スタックが、現在 1 日 17,000 件超の通話を処理していると説明しています。",
-      ko: "이 스타트업은 아프리카와 중동을 겨냥해 만든 자체 스택이 하루 17,000건이 넘는 전화를 처리하고 있다고 설명합니다.",
-      id: "Startup ini menyebut stack internalnya untuk Afrika dan Timur Tengah kini menangani lebih dari 17.000 panggilan per hari.",
-      vi: "Startup này cho biết stack tự xây cho châu Phi và Trung Đông hiện xử lý hơn 17.000 cuộc gọi mỗi ngày.",
-      th: "สตาร์ทอัพระบุว่า stack ที่สร้างเองสำหรับตลาดแอฟริกาและตะวันออกกลาง รองรับสายโทรศัพท์มากกว่า 17,000 ครั้งต่อวันแล้ว",
-      ms: "Startup itu berkata stack sendiri untuk Afrika dan Timur Tengah kini mengendalikan lebih 17,000 panggilan sehari.",
-      fil: "Ayon sa startup, ang sarili nitong stack para sa Africa at Middle East ay humahawak na ng mahigit 17,000 tawag bawat araw."
+      "zh-Hant": "AethexAI 表示，自建的語音 AI 系統已在非洲與中東市場每天處理超過 17,000 通電話。",
+      en: "AethexAI says its own stack for Africa and the Middle East now handles more than 17,000 calls a day.",
+      ja: "AethexAI は、アフリカと中東向けに構築した自社スタックが現在 1 日 17,000 件超の通話を処理していると説明しています。",
+      ko: "AethexAI는 아프리카와 중동을 겨냥해 만든 자체 스택이 하루 17,000건이 넘는 전화를 처리한다고 설명합니다.",
+      id: "AethexAI menyebut stack internalnya untuk Afrika dan Timur Tengah kini menangani lebih dari 17.000 panggilan per hari.",
+      vi: "AethexAI cho biết stack tự xây cho châu Phi và Trung Đông hiện xử lý hơn 17.000 cuộc gọi mỗi ngày.",
+      th: "AethexAI ระบุว่า stack ที่สร้างเองสำหรับตลาดแอฟริกาและตะวันออกกลาง รองรับสายโทรศัพท์มากกว่า 17,000 ครั้งต่อวันแล้ว",
+      ms: "AethexAI berkata stack sendiri untuk Afrika dan Timur Tengah kini mengendalikan lebih 17,000 panggilan sehari.",
+      fil: "Ayon sa AethexAI, ang sarili nitong stack para sa Africa at Middle East ay humahawak na ng mahigit 17,000 tawag bawat araw."
     }[language];
   }
 
@@ -415,15 +415,15 @@ function localizedSourceTitle(language, frame, source) {
   const fallback = cleanSourceTitle(source.title || frame.focus[language] || frame.focus.en);
   if (frame.key === "voice-ai-markets") {
     return {
-      "zh-Hant": "兩位創辦人離開 Goldman 與 Meta，為被忽略的市場打造語音 AI",
+      "zh-Hant": "AethexAI 為非洲與中東打造語音 AI，創辦人來自 Goldman 與 Meta",
       en: fallback,
-      ja: "Goldman と Meta を離れた創業者が、見落とされてきた市場向けに音声 AI を作る",
-      ko: "Goldman과 Meta를 떠난 두 창업자가 소외된 시장을 위한 음성 AI를 만든다",
-      id: "Dua pendiri meninggalkan Goldman dan Meta untuk membangun voice AI bagi pasar yang terlewatkan",
-      vi: "Hai nhà sáng lập rời Goldman và Meta để xây voice AI cho các thị trường bị bỏ qua",
-      th: "ผู้ก่อตั้งสองคนออกจาก Goldman และ Meta เพื่อสร้าง voice AI ให้ตลาดที่ถูกมองข้าม",
-      ms: "Dua pengasas meninggalkan Goldman dan Meta untuk membina voice AI bagi pasaran yang terlepas pandang",
-      fil: "Dalawang founder ang umalis sa Goldman at Meta para bumuo ng voice AI para sa markets na nalalampasan"
+      ja: "Goldman と Meta 出身の創業者が AethexAI でアフリカ・中東向け音声 AI を作る",
+      ko: "Goldman·Meta 출신 창업자들이 AethexAI로 아프리카와 중동용 음성 AI를 만든다",
+      id: "AethexAI membangun voice AI untuk Afrika dan Timur Tengah, didirikan alumni Goldman dan Meta",
+      vi: "AethexAI xây voice AI cho châu Phi và Trung Đông, do cựu nhân sự Goldman và Meta sáng lập",
+      th: "AethexAI สร้าง voice AI สำหรับแอฟริกาและตะวันออกกลาง โดยผู้ก่อตั้งจาก Goldman และ Meta",
+      ms: "AethexAI membina voice AI untuk Afrika dan Timur Tengah, diasaskan bekas bakat Goldman dan Meta",
+      fil: "Gumagawa ang AethexAI ng voice AI para sa Africa at Middle East, mula sa founders na galing Goldman at Meta"
     }[language] || fallback;
   }
   if (frame.key === "gemini-omni") {
@@ -770,15 +770,15 @@ export function inferMarketFrame(input = {}) {
       entity: "Vercel",
       product: "AI Gateway",
       focus: {
-        "zh-Hant": "Vercel AI Gateway 加入更多模型，讓模型可用性變成開發者供應鏈問題",
-        en: "Vercel AI Gateway adds more models, turning model availability into a developer supply-chain issue",
-        ja: "Vercel AI Gateway がモデルを追加し、モデル可用性を開発者の供給網課題にする",
-        ko: "Vercel AI Gateway가 모델을 추가하며 모델 가용성이 개발자 공급망 이슈가 된다",
-        id: "Vercel AI Gateway menambah model baru dan membuat ketersediaan model jadi isu supply chain developer",
-        vi: "Vercel AI Gateway thêm nhiều mô hình, biến khả năng dùng mô hình thành vấn đề chuỗi cung ứng của developer",
-        th: "Vercel AI Gateway เพิ่มโมเดลใหม่ ทำให้ model availability กลายเป็นประเด็น supply chain ของนักพัฒนา",
-        ms: "Vercel AI Gateway menambah model baharu dan menjadikan ketersediaan model isu supply chain pembangun",
-        fil: "nagdaragdag ang Vercel AI Gateway ng models at ginagawang developer supply-chain issue ang model availability"
+        "zh-Hant": "Grok Imagine Video 1.5 登上 Vercel AI Gateway",
+        en: "Grok Imagine Video 1.5 is now on Vercel AI Gateway",
+        ja: "Grok Imagine Video 1.5 が Vercel AI Gateway に追加",
+        ko: "Grok Imagine Video 1.5, Vercel AI Gateway에 추가",
+        id: "Grok Imagine Video 1.5 hadir di Vercel AI Gateway",
+        vi: "Grok Imagine Video 1.5 đã có trên Vercel AI Gateway",
+        th: "Grok Imagine Video 1.5 พร้อมใช้งานบน Vercel AI Gateway",
+        ms: "Grok Imagine Video 1.5 kini tersedia di Vercel AI Gateway",
+        fil: "Grok Imagine Video 1.5 available na sa Vercel AI Gateway"
       }
     };
   }
@@ -1129,7 +1129,18 @@ function titleCompatibleWithArticle(title = "", article = {}, frame = {}) {
   if (/grok imagine|ai gateway|vercel/.test(sourceText) && !/grok|vercel|gateway|model|โมเดล|modelo|mô hình/.test(normalizedTitle)) {
     return false;
   }
+  if (/grok imagine/.test(sourceText) && !/grok|imagine|1\.5/.test(normalizedTitle)) {
+    return false;
+  }
   return true;
+}
+
+function usableSourceSummary(value = "") {
+  const text = normalizeNewsText(value);
+  if (!text) return "";
+  if (/^A Blog post by .* on Hugging Face\b/i.test(text)) return "";
+  if (/Source:\s|Event:\s|Evidence:\s|Decision cue|source index|article claims should remain anchored/i.test(text)) return "";
+  return text;
 }
 
 function includesPublisher(text = "", publisher = "") {
@@ -1139,14 +1150,14 @@ function includesPublisher(text = "", publisher = "") {
 }
 
 function sourceLeadWithPublisher(language, publisher, text = "") {
-  const cleanText = cleanMarketPublicText(text, language);
+  const cleanText = cleanReportLead(cleanMarketPublicText(text, language));
   if (!cleanText || includesPublisher(cleanText, publisher)) return cleanText;
   const cleanPublisher = sourceArticlePublisher(publisher);
   const byLanguage = {
     "zh-Hant": `${cleanPublisher} 報導，${cleanText}`,
-    en: `${cleanPublisher} reported: ${cleanText}`,
-    ja: `${cleanPublisher} は、${cleanText}`,
-    ko: `${cleanPublisher}는 ${cleanText}`,
+    en: `${cleanPublisher} reports that ${cleanText}`,
+    ja: `${cleanPublisher} によると、${cleanText}`,
+    ko: `${cleanPublisher}에 따르면 ${cleanText}`,
     id: `${cleanPublisher} melaporkan, ${cleanText}`,
     vi: `${cleanPublisher} đưa tin, ${cleanText}`,
     th: `${cleanPublisher} รายงานว่า ${cleanText}`,
@@ -1179,17 +1190,21 @@ function articleStandfirst(language, frame, source, article, profile) {
   const publisher = sourceArticlePublisher(article.publisher || source.publisher);
   const date = formatDate(article.publishedAt || source.publishedAt, language);
   const sourceSummary = publicArticleStandfirst(article, source);
+  const fallbackSummary = usableSourceSummary(source.summary || "");
   const title = articleTitle(language, frame, source, article, profile);
-  const sourceSummaryLooksEnglish = /[a-z]{4,}\s+[a-z]{4,}/i.test(sourceSummary) && !/[\u4e00-\u9fff\u3040-\u30ff\uac00-\ud7af\u0e00-\u0e7f]/.test(sourceSummary);
+  const sourceSummaryLooksEnglish =
+    article.localizedLanguage !== language &&
+    /[a-z]{4,}\s+[a-z]{4,}/i.test(sourceSummary) &&
+    !/[\u4e00-\u9fff\u3040-\u30ff\uac00-\ud7af\u0e00-\u0e7f]/.test(sourceSummary);
   let standfirst = "";
   if (language === "en" && sourceSummary) standfirst = sourceSummary;
   else if (language === "zh-Hant") {
     if (sourceSummary && !sourceSummaryLooksEnglish) standfirst = sourceSummary;
-    else standfirst = localizedSourceSummary(language, { ...source, summary: sourceSummary || source.summary || title }, frame) || title;
+    else standfirst = localizedSourceSummary(language, { ...source, summary: sourceSummary || fallbackSummary || title }, frame) || title;
   } else if (sourceSummary && !sourceSummaryLooksEnglish) {
     standfirst = sourceSummary;
   } else {
-    standfirst = localizedSourceSummary(language, { ...source, summary: sourceSummary || source.summary || title }, frame) || title;
+    standfirst = localizedSourceSummary(language, { ...source, summary: sourceSummary || fallbackSummary || title }, frame) || title;
   }
   const numberCarrier =
     language === "en" || article.localizedLanguage === language
@@ -1206,9 +1221,9 @@ function localizedFallbackFacts(language, frame, source, article, publisher, tit
   const byLanguage = {
     "zh-Hant": [
       localizedSummary,
-      entityText && numberText ? `報導提到 ${entityText}；其中 ${numberText} 是文中可核對的主要數字。` : "",
-      !numberText && entityText ? `報導主要提到 ${entityText}。` : "",
-      numberText && !entityText ? `文中提到的主要數字包括 ${numberText}。` : ""
+      entityText && numberText ? `${entityText} 是這則新聞裡的主要角色，${numberText} 是來源中可直接核對的數字。` : "",
+      !numberText && entityText ? `${entityText} 是這則新聞裡的主要角色。` : "",
+      numberText && !entityText ? `來源中可直接核對的數字包括 ${numberText}。` : ""
     ],
     en: [
       localizedSummary,
@@ -1267,8 +1282,6 @@ function factsForArticle(language, frame, source, article, profile) {
   if (profiled.length) return profiled;
   const publisher = sourceArticlePublisher(article.publisher || source.publisher);
   const title = articleTitle(language, frame, source, article, profile);
-  const numbers = (article.numbers || []).filter((number) => !/^\d$/.test(String(number).trim()));
-  const entities = (article.entities || []).filter((entity) => !/\n/.test(String(entity))).filter((entity) => !/\b(You|The|This|Source)\b/.test(String(entity)));
   const normalizedTitle = normalizeNewsText(title).toLowerCase();
   const sourceFacts = (article.factBullets || [])
     .map(publicArticleFact)
@@ -1282,15 +1295,10 @@ function factsForArticle(language, frame, source, article, profile) {
       return true;
     })
     .slice(0, 4);
-  if (article.localizedLanguage === language && sourceFacts.length >= 2) return sourceFacts;
-  if (language === "zh-Hant") {
-    if (sourceFacts.length >= 2 && !sourceFacts.some((fact) => /[a-z]{4,}\s+[a-z]{4,}/i.test(fact))) {
-      return sourceFacts;
-    }
-    return localizedFallbackFacts(language, frame, source, article, publisher, title, numbers, entities);
-  }
-  if (language === "en" && sourceFacts.length >= 2) return sourceFacts;
-  return localizedFallbackFacts(language, frame, source, article, publisher, title, numbers, entities);
+  if (article.localizedLanguage === language) return sourceFacts;
+  if (language === "en") return sourceFacts;
+  if (!sourceFacts.some((fact) => /[a-z]{4,}\s+[a-z]{4,}/i.test(fact))) return sourceFacts;
+  return [];
 }
 
 function sourceDetailParagraph(language, publisher, date, title, article = {}, source = {}, localizedFact = "") {
@@ -1345,15 +1353,67 @@ function comparableNewsText(value = "") {
     .replace(/[，。,.!?！？；;:\s]/g, "");
 }
 
+function overlapRatio(a = "", b = "") {
+  const left = comparableNewsText(a);
+  const right = comparableNewsText(b);
+  if (!left || !right) return 0;
+  const n = left.length >= 18 || right.length >= 18 ? 3 : 2;
+  const grams = (text) => {
+    if (text.length <= n) return new Set([text]);
+    const set = new Set();
+    for (let index = 0; index <= text.length - n; index += 1) set.add(text.slice(index, index + n));
+    return set;
+  };
+  const leftGrams = grams(left);
+  const rightGrams = grams(right);
+  let shared = 0;
+  for (const gram of leftGrams) {
+    if (rightGrams.has(gram)) shared += 1;
+  }
+  return shared / Math.min(leftGrams.size, rightGrams.size);
+}
+
 function factDiffersFromLead(fact = "", lead = "") {
   const normalizedFact = comparableNewsText(fact);
   const normalizedLead = comparableNewsText(lead);
   if (!normalizedFact) return false;
   if (!normalizedLead) return true;
   if (normalizedLead.includes(normalizedFact) || normalizedFact.includes(normalizedLead)) return false;
+  if (overlapRatio(fact, lead) >= 0.58) return false;
   const overlapLength = Math.min(normalizedFact.length, normalizedLead.length);
   if (overlapLength >= 48 && normalizedLead.slice(0, overlapLength).includes(normalizedFact.slice(0, Math.min(48, normalizedFact.length)))) return false;
   return true;
+}
+
+function sourceSpecificBody(language, frame, source, article) {
+  const text = `${frame?.key || ""} ${article.headline || ""} ${source.title || ""}`.toLowerCase();
+  if (/publishers.*opt.*out|opt.*out.*ai search|ai search.*publishers|ai-generated search results|google.*ai search.*publisher/.test(text)) {
+    return {
+      "zh-Hant": "TechCrunch 報導，英國監管機構要求 Google 提供新的選項，讓出版商可以選擇不讓內容被用在 AI 生成式搜尋結果中。這項安排先從英國開始，Google 也表示會把相關選項推向其他市場。\n\n這篇新聞的重點在於搜尋產品和內容授權之間的拉扯。出版商並不是單純反對搜尋曝光，而是希望在 AI 摘要、引用和流量分配變得更複雜時，能保留選擇權與可被辨識的內容邊界。",
+      en: "TechCrunch reports that UK regulators are requiring Google to offer a new option for publishers to opt out of having their content used in AI-generated search results. Google said the option would start in the UK and later roll out to other markets.\n\nThe story is about the tension between search products and content rights. Publishers are not simply rejecting search visibility; they want a clearer choice as AI summaries, attribution, and traffic distribution become harder to separate.",
+      ja: "TechCrunch によると、英国の規制当局は Google に対し、出版者が自社コンテンツを AI 生成検索結果に使わせない選択肢を提供するよう求めています。この選択肢は英国から始まり、Google は他市場にも展開するとしています。\n\nこのニュースの焦点は、検索プロダクトとコンテンツ権利の緊張関係です。出版者は検索露出そのものを拒んでいるのではなく、AI 要約、出典表示、流入配分が複雑になる中で、明確な選択権を求めています。",
+      ko: "TechCrunch에 따르면 영국 규제 당국은 Google에 출판사가 자사 콘텐츠를 AI 생성 검색 결과에 쓰지 않도록 선택할 수 있는 옵션을 제공하라고 요구했습니다. Google은 이 옵션을 영국에서 먼저 시작한 뒤 다른 시장으로 확대하겠다고 밝혔습니다.\n\n이 보도의 핵심은 검색 제품과 콘텐츠 권리 사이의 긴장입니다. 출판사들이 검색 노출 자체를 거부한다기보다, AI 요약과 출처 표시, 트래픽 배분이 복잡해지는 상황에서 더 명확한 선택권을 요구하는 것입니다.",
+      id: "TechCrunch melaporkan bahwa regulator Inggris meminta Google menyediakan opsi baru agar publisher bisa memilih untuk tidak memakai konten mereka dalam hasil pencarian yang dibuat AI. Google mengatakan opsi itu akan dimulai di Inggris dan kemudian dibawa ke pasar lain.\n\nInti beritanya ada pada tarik-menarik antara produk search dan hak konten. Publisher bukan sekadar menolak visibilitas di search; mereka ingin pilihan yang lebih jelas saat ringkasan AI, atribusi, dan distribusi traffic makin sulit dipisahkan.",
+      vi: "TechCrunch đưa tin cơ quan quản lý tại Anh yêu cầu Google cung cấp tùy chọn mới để publisher có thể không cho nội dung của họ xuất hiện trong kết quả tìm kiếm do AI tạo. Google cho biết tùy chọn này sẽ bắt đầu tại Anh rồi mở rộng sang các thị trường khác.\n\nĐiểm chính của câu chuyện là sự căng thẳng giữa sản phẩm tìm kiếm và quyền nội dung. Publisher không chỉ phản đối việc được hiển thị trên search; họ muốn có lựa chọn rõ ràng hơn khi tóm tắt AI, ghi nguồn và phân phối traffic trở nên khó tách bạch.",
+      th: "TechCrunch รายงานว่า regulator ในสหราชอาณาจักรขอให้ Google เปิดตัวเลือกใหม่เพื่อให้ publisher เลือกไม่ให้นำคอนเทนต์ของตนไปใช้ในผลการค้นหาที่สร้างโดย AI ได้ Google ระบุว่าตัวเลือกนี้จะเริ่มในสหราชอาณาจักร ก่อนขยายไปยังตลาดอื่น\n\nประเด็นของข่าวคือแรงตึงระหว่างผลิตภัณฑ์ search กับสิทธิ์ของคอนเทนต์ publisher ไม่ได้ปฏิเสธการมองเห็นบน search อย่างเดียว แต่ต้องการทางเลือกที่ชัดขึ้นเมื่อ AI summary, attribution และการกระจาย traffic แยกกันยากขึ้น",
+      ms: "TechCrunch melaporkan bahawa regulator UK meminta Google menyediakan pilihan baharu supaya publisher boleh memilih untuk tidak membenarkan kandungan mereka digunakan dalam hasil carian janaan AI. Google berkata pilihan itu akan bermula di UK sebelum diperluas ke pasaran lain.\n\nCerita ini berkisar pada ketegangan antara produk search dan hak kandungan. Publisher bukan sekadar menolak visibility dalam search; mereka mahu pilihan yang lebih jelas apabila ringkasan AI, atribusi dan agihan traffic semakin sukar dipisahkan.",
+      fil: "Iniulat ng TechCrunch na pinapagawa ng UK regulators sa Google ang bagong opsyon para makapili ang publishers na hindi gamitin ang kanilang content sa AI-generated search results. Sabi ng Google, magsisimula ito sa UK bago dalhin sa iba pang markets.\n\nTungkol ito sa tensiyon sa pagitan ng search products at content rights. Hindi lang basta tinatanggihan ng publishers ang search visibility; gusto nila ng mas malinaw na pagpili habang lumalabo ang hangganan ng AI summaries, attribution, at traffic distribution."
+    }[language];
+  }
+  if (/enterprise-agent-logic|agent logic|scalable enterprise ai adoption|beyond llms/.test(text)) {
+    return {
+      "zh-Hant": "IBM Research 在 Hugging Face 的文章把問題放在企業工作流：不少 AI pilot 停在展示或局部自動化，原因不是模型不夠大，而是 AI 沒有真正接進動態、長期、跨 API、資料庫與服務的流程。\n\n文章提出的方向是 agent logic。也就是讓 AI 不只回答問題，而能在工作流程核心處理狀態、工具與決策脈絡；代價則是更長 context、更多 token 消耗，以及需要被控制的 hallucination 風險。",
+      en: "IBM Research’s post on Hugging Face frames the issue around enterprise workflows: many AI pilots stall at demos or local automation not simply because models are too small, but because AI is not connected to dynamic, long-running workflows across APIs, databases, and services.\n\nThe post points to agent logic as the missing layer. The idea is to move AI from answering questions toward handling state, tools, and decision context inside workflows, while still accounting for longer context, higher token use, and hallucination risk.",
+      ja: "Hugging Face に掲載された IBM Research の記事は、企業ワークフローを中心に問題を整理しています。多くの AI pilot がデモや局所的な自動化で止まるのは、モデルが小さいからだけではなく、AI が API、データベース、サービスをまたぐ動的で長時間の業務に接続されていないためです。\n\n記事が示す方向は agent logic です。AI を単なる回答役から、ワークフロー内の状態、ツール、意思決定の文脈を扱う層へ移す一方で、長い context、token 消費、hallucination リスクを管理する必要があるとしています。",
+      ko: "Hugging Face에 실린 IBM Research 글은 문제를 기업 워크플로 관점에서 봅니다. 많은 AI 파일럿이 데모나 부분 자동화에 머무는 이유는 모델이 작아서만이 아니라, AI가 API, 데이터베이스, 서비스가 얽힌 동적이고 장기적인 업무 흐름에 연결되지 않았기 때문이라는 설명입니다.\n\n글이 제시하는 방향은 agent logic입니다. AI를 질문에 답하는 도구에서 워크플로 안의 상태, 도구, 의사결정 맥락을 다루는 층으로 옮기되, 긴 context, token 사용량, hallucination 위험도 함께 관리해야 한다는 뜻입니다.",
+      id: "Tulisan IBM Research di Hugging Face menempatkan masalahnya pada workflow enterprise: banyak pilot AI berhenti di demo atau otomatisasi kecil bukan hanya karena model kurang besar, tetapi karena AI belum benar-benar tersambung ke workflow yang dinamis, panjang, dan melintasi API, database, serta layanan.\n\nArah yang dibahas adalah agent logic. AI dipindahkan dari sekadar menjawab pertanyaan menjadi lapisan yang menangani state, tool, dan konteks keputusan di dalam workflow, sambil tetap memperhitungkan context yang lebih panjang, penggunaan token yang lebih besar, dan risiko hallucination.",
+      vi: "Bài viết của IBM Research trên Hugging Face đặt vấn đề ở workflow doanh nghiệp: nhiều AI pilot dừng ở demo hoặc tự động hóa cục bộ không chỉ vì mô hình chưa đủ lớn, mà vì AI chưa thật sự nối vào các workflow động, kéo dài, đi qua API, database và dịch vụ.\n\nHướng mà bài viết nhấn mạnh là agent logic. AI không chỉ trả lời câu hỏi, mà xử lý trạng thái, công cụ và bối cảnh quyết định bên trong workflow; đổi lại là context dài hơn, mức dùng token cao hơn và rủi ro hallucination cần được kiểm soát.",
+      th: "บทความของ IBM Research บน Hugging Face วางปัญหาไว้ที่ workflow ขององค์กร: AI pilot จำนวนมากหยุดอยู่ที่เดโมหรือ automation เฉพาะจุด ไม่ใช่เพราะโมเดลเล็กเกินไปอย่างเดียว แต่เพราะ AI ยังไม่ได้เชื่อมกับ workflow ที่เป็น dynamic, long-running และพาดผ่าน API, database กับ service หลายส่วนจริง ๆ\n\nทิศทางที่บทความพูดถึงคือ agent logic การพา AI จากการตอบคำถาม ไปเป็นเลเยอร์ที่จัดการ state, tool และ decision context ภายใน workflow พร้อมยอมรับต้นทุนของ context ที่ยาวขึ้น token usage ที่สูงขึ้น และ hallucination risk ที่ต้องควบคุม",
+      ms: "Artikel IBM Research di Hugging Face meletakkan masalah pada workflow perusahaan: banyak AI pilot berhenti pada demo atau automasi kecil bukan semata-mata kerana model kurang besar, tetapi kerana AI belum benar-benar disambungkan kepada workflow yang dinamik, panjang, dan merentas API, pangkalan data serta perkhidmatan.\n\nArah yang dibincangkan ialah agent logic. AI beralih daripada sekadar menjawab soalan kepada lapisan yang mengurus state, alat dan konteks keputusan dalam workflow, sambil mengambil kira context yang lebih panjang, penggunaan token yang lebih tinggi dan risiko hallucination.",
+      fil: "Itinatapat ng IBM Research post sa Hugging Face ang problema sa enterprise workflows: maraming AI pilot ang naiipit sa demo o maliit na automation hindi lang dahil kulang ang laki ng model, kundi dahil hindi pa nakakabit ang AI sa dynamic at long-running workflows na dumadaan sa APIs, databases, at services.\n\nAng direksiyong itinuturo ng post ay agent logic. Ibig sabihin, inililipat ang AI mula sa simpleng pagsagot patungo sa paghawak ng state, tools, at decision context sa loob ng workflow, habang binabantayan pa rin ang mas mahabang context, mas mataas na token use, at hallucination risk."
+    }[language];
+  }
+  return "";
 }
 
 function sourceMatterParagraph(language, article = {}, source = {}) {
@@ -1409,36 +1469,63 @@ function sourceMatterParagraph(language, article = {}, source = {}) {
 }
 
 function sourceBackedBody(language, frame, source, article, profile) {
-  const labels = labelsFor(language);
+  const specificBody = sourceSpecificBody(language, frame, source, article);
+  if (specificBody) return cleanMarketPublicText(specificBody, language);
   const publisher = sourceArticlePublisher(article.publisher || source.publisher);
-  const date = formatDate(article.publishedAt || source.publishedAt, language);
-  const title = articleTitle(language, frame, source, article, profile);
   const lead = articleStandfirst(language, frame, source, article, profile);
   const facts = factsForArticle(language, frame, source, article, profile);
-  const sourceIntro = labels.sourceIntro(publisher, date, title);
   const firstParagraph = lead && lead.toLowerCase().includes(publisher.toLowerCase())
     ? lead
-    : `${sourceIntro}${lead ? ` ${lead}` : ""}`;
-  const normalizedLead = normalizeNewsText(firstParagraph).toLowerCase();
-  const factParagraph = sentenceJoin(
-    facts
-      .filter((fact) => normalizeNewsText(fact).toLowerCase() !== normalizedLead)
-      .filter((fact) => factDiffersFromLead(fact, firstParagraph))
-      .slice(0, 4)
-  );
-  const sourceContext = profileText(profile, "context", language, "") || marketNewsContextParagraph(language, frame, source, article, firstParagraph, factParagraph);
+    : sourceLeadWithPublisher(language, publisher, lead);
+  const detailFacts = facts
+    .map((fact) => cleanMarketPublicText(fact, language))
+    .filter((fact) => !/報導主要提到|文中提到的主要數字|The report centers on|Figures mentioned in the source|出典で確認できる数字|보도는 .*중심|Angka yang disebut sumber|Các con số trong nguồn|ตัวเลขที่แหล่งข่าวระบุ|Kasama sa mga numerong/i.test(fact))
+    .filter((fact) => factDiffersFromLead(fact, firstParagraph))
+    .filter((fact, index, list) => list.findIndex((candidate) => !factDiffersFromLead(fact, candidate)) === index)
+    .slice(0, 5);
+  const detailParagraph = sentenceJoin(detailFacts.slice(0, 2));
+  const secondDetailParagraph = sentenceJoin(detailFacts.slice(2, 4));
+  const sourceContext =
+    profileText(profile, "context", language, "") ||
+    marketNewsContextParagraph(language, frame, source, article, firstParagraph, [detailParagraph, secondDetailParagraph].filter(Boolean).join(" "));
   const sourceWatch = profileText(profile, "watch", language, "");
 
   return cleanMarketPublicText([
-    firstParagraph,
-    factParagraph,
+    detailParagraph || firstParagraph,
+    secondDetailParagraph,
     sourceContext,
     sourceWatch
   ].filter(Boolean).join("\n\n"), language);
 }
 
 function marketNewsContextParagraph(language, frame, source, article, firstParagraph = "", factParagraph = "") {
-  if (normalizeNewsText(firstParagraph).length + normalizeNewsText(factParagraph).length >= 220) return "";
+  if (normalizeNewsText(factParagraph).length >= 260) return "";
+  if (frame?.key === "ai-app-platform-cloud" || /lovable|google cloud|anthropic claude|5x/i.test(`${article.headline || ""} ${source.title || ""} ${article.standfirst || ""}`)) {
+    return {
+      "zh-Hant": "TechCrunch 引述知情人士說，雙方未公開協議金額，但合作範圍包含 Google Cloud 上的 AI 用量，以及 Anthropic Claude 與 Google Gemini 的模型存取。對 Lovable 這類 AI 應用建置平台來說，雲端算力與模型額度正在變成擴張速度的一部分。",
+      en: "TechCrunch says the companies did not disclose a dollar value, but the deal covers AI usage on Google Cloud and access to Anthropic Claude and Google Gemini. For AI app-building platforms like Lovable, cloud capacity and model access are becoming part of the growth story.",
+      ja: "TechCrunch によると、両社は契約金額を明らかにしていませんが、Google Cloud 上の AI 利用と Anthropic Claude、Google Gemini へのアクセスが含まれます。Lovable のような AI アプリ構築プラットフォームでは、クラウド容量とモデルアクセスが成長の条件になりつつあります。",
+      ko: "TechCrunch에 따르면 양사는 계약 금액을 공개하지 않았지만, Google Cloud의 AI 사용량과 Anthropic Claude 및 Google Gemini 접근이 포함됩니다. Lovable 같은 AI 앱 구축 플랫폼에서는 클라우드 용량과 모델 접근성이 성장 속도의 일부가 되고 있습니다.",
+      id: "TechCrunch menyebut kedua perusahaan tidak membuka nilai kontrak, tetapi kerja sama ini mencakup penggunaan AI di Google Cloud serta akses ke Anthropic Claude dan Google Gemini. Bagi platform pembuat aplikasi AI seperti Lovable, kapasitas cloud dan akses model ikut menentukan laju ekspansi.",
+      vi: "TechCrunch cho biết hai bên không công bố giá trị hợp đồng, nhưng thỏa thuận bao gồm mức dùng AI trên Google Cloud và quyền truy cập Anthropic Claude cùng Google Gemini. Với các nền tảng xây ứng dụng AI như Lovable, năng lực cloud và quyền truy cập mô hình đang trở thành một phần của tốc độ mở rộng.",
+      th: "TechCrunch ระบุว่าทั้งสองบริษัทไม่เปิดเผยมูลค่าดีล แต่ข้อตกลงครอบคลุมการใช้ AI บน Google Cloud และการเข้าถึง Anthropic Claude กับ Google Gemini สำหรับแพลตฟอร์มสร้างแอป AI อย่าง Lovable ความจุ cloud และสิทธิ์เข้าถึงโมเดลกำลังเป็นส่วนหนึ่งของการเติบโต",
+      ms: "TechCrunch menyebut kedua-dua syarikat tidak mendedahkan nilai kontrak, tetapi kerjasama ini merangkumi penggunaan AI di Google Cloud serta akses kepada Anthropic Claude dan Google Gemini. Untuk platform pembinaan aplikasi AI seperti Lovable, kapasiti cloud dan akses model kini menjadi sebahagian daripada rentak pengembangan.",
+      fil: "Ayon sa TechCrunch, hindi inilabas ng dalawang kumpanya ang halaga ng kasunduan, pero saklaw nito ang AI usage sa Google Cloud at access sa Anthropic Claude at Google Gemini. Para sa AI app-building platforms tulad ng Lovable, nagiging bahagi ng paglago ang cloud capacity at model access."
+    }[language];
+  }
+  if (frame?.key === "ai-agent-observability" || /coralogix|observability|monitoring|troubleshoot/i.test(`${article.headline || ""} ${source.title || ""} ${article.standfirst || ""}`)) {
+    return {
+      "zh-Hant": "這筆融資把 AI agent 帶進正式環境後的監控需求放到檯面上。當企業開始讓 agent 接觸真實資料、工具與客戶流程，能不能記錄行為、追蹤錯誤並回到原因，會直接影響這類基礎設施公司的價值。",
+      en: "The financing puts a spotlight on monitoring needs that emerge once AI agents move into production. As companies connect agents to real data, tools, and customer workflows, behavior logs, troubleshooting, and root-cause visibility become part of the infrastructure value.",
+      ja: "今回の資金調達は、AI agent が本番環境に入った後の監視需要を前面に出しています。企業が agent を実データ、ツール、顧客業務につなぐほど、行動ログ、障害対応、原因追跡がインフラ価値の一部になります。",
+      ko: "이번 투자 유치는 AI agent가 운영 환경에 들어간 뒤 생기는 모니터링 수요를 부각합니다. 기업이 agent를 실제 데이터, 도구, 고객 업무와 연결할수록 행동 로그, 장애 대응, 원인 추적이 인프라 가치가 됩니다.",
+      id: "Pendanaan ini menyoroti kebutuhan monitoring setelah AI agent masuk production. Saat perusahaan menghubungkan agent ke data, tool, dan workflow pelanggan yang nyata, log perilaku, troubleshooting, dan visibilitas akar masalah menjadi nilai utama infrastruktur.",
+      vi: "Vòng gọi vốn này làm nổi bật nhu cầu giám sát khi AI agent đi vào production. Khi doanh nghiệp nối agent với dữ liệu, công cụ và workflow khách hàng thật, log hành vi, xử lý lỗi và khả năng lần về nguyên nhân trở thành giá trị của hạ tầng.",
+      th: "เงินทุนรอบนี้ทำให้ความต้องการ monitoring หลัง AI agent เข้าสู่ production เด่นชัดขึ้น เมื่อองค์กรเชื่อม agent กับข้อมูล เครื่องมือ และ workflow ลูกค้าจริง behavior logs, troubleshooting และ root-cause visibility จะกลายเป็นคุณค่าของ infrastructure",
+      ms: "Pembiayaan ini menonjolkan keperluan monitoring selepas AI agent masuk ke production. Apabila syarikat menghubungkan agent kepada data, alat dan workflow pelanggan sebenar, log tingkah laku, troubleshooting dan keterlihatan punca masalah menjadi nilai infrastruktur.",
+      fil: "Itinatampok ng financing na ito ang monitoring needs kapag pumasok na sa production ang AI agents. Habang ikinokonekta ng mga kumpanya ang agents sa tunay na data, tools, at customer workflows, nagiging infrastructure value ang behavior logs, troubleshooting, at root-cause visibility."
+    }[language];
+  }
   if (frame?.key === "ai-shopping-search" || /amazon.*(product image|shopping search)|ai-generated product images/i.test(`${article.headline || ""} ${source.title || ""} ${article.standfirst || ""}`)) {
     return {
       "zh-Hant": "Amazon 表示，這項功能的目的，是把搜尋意圖轉成更容易理解的視覺提示。對使用者來說，它不是取代商品頁照片，而是在搜尋階段先縮小方向，讓接下來瀏覽商品時比較容易判斷。",
@@ -1450,6 +1537,19 @@ function marketNewsContextParagraph(language, frame, source, article, firstParag
       th: "Amazon วางฟีเจอร์นี้เป็นส่วนหนึ่งของ search experience ไม่ใช่การแทนที่ภาพในหน้าสินค้า ภาพที่สร้างด้วย AI ทำหน้าที่เป็น visual cue ก่อนที่ผู้ใช้จะคัดตัวเลือกสินค้าให้แคบลง",
       ms: "Amazon meletakkan ciri ini sebagai sebahagian daripada pengalaman carian, bukan pengganti foto halaman produk. Imej janaan AI digunakan sebagai petunjuk visual sebelum pengguna mengecilkan pilihan.",
       fil: "Inilalagay ito ng Amazon bilang bahagi ng search experience, hindi kapalit ng product-page photos. Ginagamit ang AI-generated images bilang visual cue bago paliitin ng user ang pagpipilian."
+    }[language];
+  }
+  if (frame?.key === "vercel-ai-gateway-models" || /grok imagine|ai gateway|vercel/i.test(`${article.headline || ""} ${source.title || ""} ${article.standfirst || ""}`)) {
+    return {
+      "zh-Hant": "Vercel 將這次更新放在 AI Gateway 產品線中，讓開發者透過同一個 gateway 呼叫 xAI 模型。原文提到，Grok Imagine Video 1.5 會改善音訊品質、提示遵循、寫實感與較長序列中的角色一致性；開發者在 Gateway 中指定 xai/grok-imagine-video-1.5 就能開始測試。",
+      en: "Vercel frames the update as part of AI Gateway, where developers can call xAI models through the same gateway. The source says Grok Imagine Video 1.5 improves audio quality, prompt following, photorealism, and character consistency across longer sequences; developers can test it by setting the model to xai/grok-imagine-video-1.5.",
+      ja: "Vercel はこの更新を AI Gateway の一部として位置付け、開発者が同じ gateway から xAI モデルを呼び出せるようにしています。原文では、Grok Imagine Video 1.5 が音質、プロンプト追従、写実性、長いシーケンスでのキャラクター一貫性を改善したと説明され、model を xai/grok-imagine-video-1.5 に指定して試せます。",
+      ko: "Vercel은 이번 업데이트를 AI Gateway 제품군의 일부로 설명하며, 개발자가 같은 gateway에서 xAI 모델을 호출할 수 있게 했습니다. 원문은 Grok Imagine Video 1.5가 오디오 품질, 프롬프트 준수, 사실감, 긴 시퀀스의 캐릭터 일관성을 개선했으며 model을 xai/grok-imagine-video-1.5로 지정해 테스트할 수 있다고 설명합니다.",
+      id: "Vercel menempatkan update ini sebagai bagian dari AI Gateway, sehingga developer bisa memanggil model xAI lewat gateway yang sama. Sumbernya menyebut Grok Imagine Video 1.5 memperbaiki kualitas audio, kepatuhan prompt, fotorealisme, dan konsistensi karakter pada sequence yang lebih panjang; developer bisa mengujinya dengan model xai/grok-imagine-video-1.5.",
+      vi: "Vercel đặt cập nhật này trong dòng sản phẩm AI Gateway, nơi developer có thể gọi mô hình xAI qua cùng một gateway. Nguồn cho biết Grok Imagine Video 1.5 cải thiện chất lượng âm thanh, khả năng bám prompt, độ chân thực và tính nhất quán nhân vật ở các chuỗi dài hơn; developer có thể thử bằng model xai/grok-imagine-video-1.5.",
+      th: "Vercel วางอัปเดตนี้ไว้ในสายผลิตภัณฑ์ AI Gateway เพื่อให้นักพัฒนาเรียกใช้โมเดล xAI ผ่าน gateway เดียวกันได้ แหล่งข่าวระบุว่า Grok Imagine Video 1.5 ปรับปรุงคุณภาพเสียง การทำตาม prompt ความสมจริง และความสม่ำเสมอของตัวละครใน sequence ที่ยาวขึ้น โดยนักพัฒนาทดสอบได้ด้วย model xai/grok-imagine-video-1.5",
+      ms: "Vercel meletakkan kemas kini ini sebagai sebahagian daripada AI Gateway, supaya pembangun boleh memanggil model xAI melalui gateway yang sama. Sumber itu menyebut Grok Imagine Video 1.5 menambah baik kualiti audio, kepatuhan prompt, fotorealisme dan konsistensi watak dalam sequence yang lebih panjang; pembangun boleh mengujinya dengan model xai/grok-imagine-video-1.5.",
+      fil: "Inilagay ng Vercel ang update na ito sa AI Gateway product line, para matawag ng developers ang xAI models sa parehong gateway. Ayon sa source, pinapahusay ng Grok Imagine Video 1.5 ang audio quality, prompt following, photorealism, at character consistency sa mas mahahabang sequence; puwede itong i-test gamit ang model xai/grok-imagine-video-1.5."
     }[language];
   }
   return "";
@@ -1473,18 +1573,29 @@ function sourceFaqs(language, title, frame, source, article, profile) {
 }
 
 function sourceContentImages(language, title, article = {}, post = {}, pack = {}) {
-  const existing = Array.isArray(post.contentImages) ? post.contentImages : [];
-  const raw = existing.length ? existing : Array.isArray(article.images) ? article.images : [];
+  const raw = Array.isArray(article.images) ? article.images : [];
   const cover = post.cover || pack.primarySourceImageUrl || article.image?.url || "";
-  const seen = new Set([cover].filter(Boolean));
+  const imageIdentity = (url = "") => {
+    try {
+      const parsed = new URL(url);
+      return `${parsed.origin}${parsed.pathname}`.toLowerCase();
+    } catch {
+      return String(url || "").split("?")[0].toLowerCase();
+    }
+  };
+  const seen = new Set([cover, pack.primarySourceImageUrl, article.image?.url].filter(Boolean).map(imageIdentity));
   const credit = cleanSourceCredit(post.coverCredit || pack.coverCredit || article.image?.credit || article.publisher || "");
   const creditUrl = post.coverCreditUrl || pack.coverCreditUrl || article.image?.creditUrl || article.canonicalUrl || "";
   const placements = ["after-lead", "mid-article", "before-faq"];
   return raw
     .map((image, index) => {
       const url = image?.url || "";
-      if (!url || seen.has(url)) return null;
-      seen.add(url);
+      const identity = imageIdentity(url);
+      if (!url || seen.has(identity)) return null;
+      if (/google-analytics\.com\/g\/collect/i.test(url)) return null;
+      if (/[?&](?:w|width|resize)=(?:48|64|80|96|128|150)(?:&|$|,)/i.test(url) || /(?:avatar|profile|author|headshot|disrupt)/i.test(url)) return null;
+      if (/(?:w_|,w_|\/w_)(?:48|64|80|96|128)|(?:h_|,h_)(?:48|64|80|96|128)|[-_](?:48|64|80|96|128)\.(?:jpg|jpeg|png|webp)(?:[?#]|$)/i.test(url)) return null;
+      seen.add(identity);
       return {
         url,
         alt: normalizeNewsText(image.alt || `${title} - ${credit || "source image"}`),
@@ -1520,15 +1631,7 @@ export function buildMarketNewsroomPost({ language, pack = {}, post = {}, frame,
   const body = cleanMarketPublicText(sourceBackedBody(language, inferredFrame, source, article, profile), language);
   const excerptPublisher = sourceArticlePublisher(article.publisher || source.publisher);
   const excerpt = cleanMarketPublicText(
-    sourceLeadWithPublisher(
-      language,
-      excerptPublisher,
-      includeTitleWhenItCarriesNumbers(
-        title,
-        includeTitleWhenItCarriesNumbers(post.title || "", articleStandfirst(language, inferredFrame, source, article, profile), language),
-        language
-      )
-    ),
+    sourceLeadWithPublisher(language, excerptPublisher, articleStandfirst(language, inferredFrame, source, article, profile)),
     language
   );
   const seoDescription = truncate(excerpt, 176);

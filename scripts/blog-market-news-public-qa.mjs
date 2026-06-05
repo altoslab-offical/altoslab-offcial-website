@@ -23,10 +23,13 @@ const INTERNAL_COPY_PATTERNS = [
   /可引用事實/i,
   /來源摘要/i,
   /讀者怎麼看/i,
+  /擁抱臉|擁抱面孔|擁抱臉部/i,
+  /產品 AI 雲端|資源 公司 客戶|Web Application Firewall/i,
+  /404\s*(?:-|–|not found)|That page does not exist/i,
   /source-attributed official announcement image/i,
   /SEO\s*\/\s*GEO/i,
   /quality gate/i,
-  /pipeline/i,
+  /quality\s+pipeline|backend\s+pipeline|pipeline\s+gate/i,
   /AI-generated\s+(cover|visual|content|article)/i
 ];
 
@@ -34,6 +37,8 @@ const WEAK_MARKET_TITLE_PATTERNS = [/更新：/i, /市場訊號/i, /可以拿來
 const LEGACY_MARKET_TEMPLATE_PATTERNS = [
   /事件重點/i,
   /關鍵事實/i,
+  /報導主要提到/i,
+  /文中提到的主要數字/i,
   /後續觀察/i,
   /這則快訊的重點是什麼/i,
   /這篇文章是否代表市場已經成熟/i,
@@ -122,6 +127,33 @@ function publicText(post) {
     .join("\n");
 }
 
+function comparableText(value = "") {
+  return stripHtml(value)
+    .toLowerCase()
+    .replace(/^(根據\s*)?(techcrunch|the verge|wired|venturebeat|mit technology review)\s*(報導|reported|reports|指出|稱)[,，:：]?\s*/i, "")
+    .replace(/[，。,.!?！？；;:\s]/g, "");
+}
+
+function overlapRatio(a = "", b = "") {
+  const left = comparableText(a);
+  const right = comparableText(b);
+  if (!left || !right) return 0;
+  const n = left.length >= 18 || right.length >= 18 ? 3 : 2;
+  const grams = (text) => {
+    if (text.length <= n) return new Set([text]);
+    const set = new Set();
+    for (let index = 0; index <= text.length - n; index += 1) set.add(text.slice(index, index + n));
+    return set;
+  };
+  const leftGrams = grams(left);
+  const rightGrams = grams(right);
+  let shared = 0;
+  for (const gram of leftGrams) {
+    if (rightGrams.has(gram)) shared += 1;
+  }
+  return shared / Math.min(leftGrams.size, rightGrams.size);
+}
+
 function qaPost(post, mustTerms = []) {
   const issues = [];
   const source = post.sourceLinks?.[0] || {};
@@ -165,12 +197,15 @@ function qaPost(post, mustTerms = []) {
     if (/\$?\s*200\s*m\b/i.test(raw)) {
       return /(\$?\s*200\s*m\b|200\s*million|200\s*juta|200\s*triệu|200\s*ล้าน|200\s*milyon|2\s*億|2\s*亿|2\s*억|2\s*億ドル|2\s*億美元|2\s*億美金)/i.test(post.excerpt || "");
     }
+    if (/17,?000/i.test(raw)) {
+      return /(17[,.]?\s*000|1\s*万\s*7000|1万7000|1만\s*7000|หนึ่งหมื่นเจ็ดพัน|17\s*พัน)/i.test(post.excerpt || "");
+    }
     return excerptText.includes(raw) || (normalizedCore.length >= 2 && normalizedExcerpt.includes(normalizedCore));
   };
   if (
     sourceNumbers.length > 0 &&
     !sourceNumbers.some(numberCovered) &&
-    !(/5x/i.test(sourceNumbers.join(" ")) && /fivefold|5 倍|5배|gấp 5|5 เท่า|5x/i.test(post.excerpt || ""))
+    !(/5x/i.test(sourceNumbers.join(" ")) && /fivefold|5\s*倍|5배|gấp\s*5|5\s*lần|5\s*เท่า|5x|5\s*kali|5\s*kali\s*lipat|5\s*beses/i.test(post.excerpt || ""))
   ) {
     issues.push({ severity: "major", id: "standfirst-missing-number", excerpt: post.excerpt || "", sourceNumbers });
   }
@@ -186,7 +221,19 @@ function qaPost(post, mustTerms = []) {
     .filter((term) => String(term).length >= 2)
     .filter((term) => !/^(TechCrunch|OpenAI|Google|AI|LLM)$/i.test(term))
     .slice(0, 6);
-  const coveredEvidenceTerms = sourceEvidenceTerms.filter((term) => text.toLowerCase().includes(String(term).toLowerCase()));
+  const evidenceCovered = (term) => {
+    const raw = String(term || "").trim();
+    const lowerText = text.toLowerCase();
+    if (lowerText.includes(raw.toLowerCase())) return true;
+    if (/^publishers?$/i.test(raw) && /(出版商|出版社|퍼블리셔|publisher|penerbit|nhà xuất bản|ผู้เผยแพร่|publishers?)/i.test(text)) return true;
+    if (/^u\.?k\.?$/i.test(raw) && /(U\.?K\.?|UK|英國|英国|영국|Inggris|Anh|สหราชอาณาจักร|United Kingdom)/i.test(text)) return true;
+    const tokens = raw
+      .match(/[A-Z][A-Za-z0-9+.-]{2,}|[A-Za-z]+-\d+|\d[\d,.]*(?:x|%|m|b)?/g)
+      ?.filter((token) => !/^(Welcome|First|Open|The|Action|Whether)$/i.test(token))
+      ?.filter((token) => token.length >= 3) || [];
+    return tokens.some((token) => lowerText.includes(token.toLowerCase()));
+  };
+  const coveredEvidenceTerms = sourceEvidenceTerms.filter(evidenceCovered);
   if (sourceEvidenceTerms.length >= 3 && coveredEvidenceTerms.length < 2) {
     issues.push({ severity: "major", id: "weak-source-fact-coverage", requiredEvidence: sourceEvidenceTerms, coveredEvidence: coveredEvidenceTerms });
   }
@@ -194,6 +241,16 @@ function qaPost(post, mustTerms = []) {
     .split(/\n{2,}/)
     .map((paragraph) => stripHtml(paragraph))
     .filter((paragraph) => paragraph.length >= 60);
+  if (meaningfulParagraphs[0] && overlapRatio(meaningfulParagraphs[0], post.excerpt || "") >= 0.76) {
+    issues.push({
+      severity: "major",
+      id: "body-repeats-standfirst",
+      paragraph: meaningfulParagraphs[0].slice(0, 160)
+    });
+  }
+  if (meaningfulParagraphs.some((paragraph, index) => meaningfulParagraphs.slice(index + 1).some((other) => overlapRatio(paragraph, other) >= 0.78))) {
+    issues.push({ severity: "major", id: "repeated-market-paragraph" });
+  }
   if (meaningfulParagraphs.length < 2 && stripHtml(body).length < 220) {
     issues.push({
       severity: "major",

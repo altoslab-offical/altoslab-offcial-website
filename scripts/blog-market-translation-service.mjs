@@ -32,6 +32,8 @@ function cleanTranslatedText(value = "", language = "") {
     text = text
       .replace(/優步/g, "Uber")
       .replace(/亞馬遜/g, "Amazon")
+      .replace(/谷歌/g, "Google")
+      .replace(/擁抱臉部|擁抱臉|擁抱面孔|擁抱臉孔/g, "Hugging Face")
       .replace(/人工智慧/g, "AI")
       .replace(/AI\s*代理商/g, "AI agent")
       .replace(/Google雲端/g, "Google Cloud")
@@ -53,7 +55,17 @@ function cleanTranslatedText(value = "", language = "") {
       .replace(/消息來源包含以下具體數字[:：]/g, "文中提到的主要數字包括")
       .replace(/存取權限/g, "使用權")
       .replace(/資源佔用規模/g, "用量")
+      .replace(/資源佔用量/g, "用量")
       .replace(/規模擴大/g, "用量擴大")
+      .replace(/該協議涉及/g, "協議內容包括")
+      .replace(/氛圍編碼/g, "vibe coding")
+      .replace(/更能找到/g, "更容易找到")
+      .replace(/根據新協議，它將是一個規模更大的項目。?/g, "新協議會讓 Lovable 在 Google Cloud 上的使用規模明顯擴大。")
+      .replace(/報告指出[:：]\s*/g, "")
+      .replace(/剛剛對\s*Google\s*的\s*AI\s*搜尋攻勢施加了法律限制。?/g, "這讓出版商在 AI Search 內容使用上取得新的選擇權。")
+      .replace(/網站發布商/g, "網站出版商")
+      .replace(/部落格文章《Hugging Face》/g, "Hugging Face 部落格")
+      .replace(/程式碼庫/g, "Codex")
       .replace(/您的/g, "使用者的")
       .replace(/向您展示/g, "向使用者展示")
       .replace(/向使用者的展示/g, "向使用者展示")
@@ -70,6 +82,10 @@ function cleanTranslatedText(value = "", language = "") {
 
 function cleanTranslatedTitle(value = "", language = "") {
   return cleanTranslatedText(value, language).replace(/[.。]\s*$/, "").trim();
+}
+
+function genericSourceSummary(value = "") {
+  return /^A Blog post by .* on Hugging Face\b/i.test(String(value || "").trim());
 }
 
 async function gcloudAccessToken() {
@@ -130,8 +146,9 @@ export async function localizeSourcePack(pack, { projectId = "", required = true
   const article = pack.sourceArticle || {};
   const source = pack.sourceLinks?.[0] || {};
   const headline = article.headline || source.title || pack.topic || "";
-  const standfirst = article.standfirst || source.summary || "";
   const factBullets = Array.isArray(article.factBullets) ? article.factBullets.filter(Boolean).slice(0, 6) : [];
+  const rawStandfirst = article.standfirst || source.summary || "";
+  const standfirst = genericSourceSummary(rawStandfirst) ? factBullets[0] || headline : rawStandfirst;
   const texts = [headline, standfirst, ...factBullets].map((text) => String(text || "").trim());
   if (!headline || !standfirst || factBullets.length < 2) {
     throw new Error("sourceArticle must include headline, standfirst and at least two fact bullets before localization");

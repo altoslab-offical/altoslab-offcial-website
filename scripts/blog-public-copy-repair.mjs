@@ -4,7 +4,7 @@ import fs from "node:fs";
 import path from "node:path";
 import process from "node:process";
 import { buildMarketNewsroomPost } from "./blog-market-newsroom.mjs";
-import { extractSourceArticleFromHtml } from "./blog-market-source-article.mjs";
+import { extractSourceArticleFromHtml, sourceArticleFromPackOrPost } from "./blog-market-source-article.mjs";
 import { localizeSourcePack, packForLanguage } from "./blog-market-translation-service.mjs";
 
 const DEFAULT_BASE_URL = "https://altoslab-ai.cc";
@@ -28,7 +28,10 @@ const FORBIDDEN_MARKET_PATTERNS = [
   /quality gate/i,
   /rubric/i,
   /prompt card/i,
-  /AI-generated/i
+  /AI-generated/i,
+  /擁抱臉|擁抱面孔|擁抱臉部/i,
+  /產品 AI 雲端|資源 公司 客戶|Web Application Firewall/i,
+  /404\s*(?:-|–|not found)|That page does not exist/i
 ];
 
 function arg(name, fallback = "") {
@@ -151,13 +154,62 @@ function firstSource(post) {
   return Array.isArray(post.sourceLinks) ? post.sourceLinks[0] || null : null;
 }
 
+function canonicalSourceLink(source = {}, article = {}, post = {}) {
+  const canonicalUrl = article.canonicalUrl || source.url || "";
+  const summary = article.standfirst || article.factBullets?.[0] || "";
+  return {
+    title: article.headline || source.title || post.title || "",
+    url: canonicalUrl,
+    publisher: article.publisher || source.publisher || post.coverCredit || "",
+    publishedAt: article.publishedAt || source.publishedAt || post.publishedAt || "",
+    summary
+  };
+}
+
+function canonicalSourceLinks(source = {}, article = {}, post = {}) {
+  const primary = canonicalSourceLink(source, article, post);
+  return [primary, ...(post.sourceLinks || []).slice(1)]
+    .filter((link) => link?.title && link?.url);
+}
+
 async function sourcePackForPost(post, cache) {
   const source = firstSource(post);
   if (!source?.url) return { ok: false, reason: "missing source URL" };
   if (cache.has(source.url)) return cache.get(source.url);
+  const fallbackPack = () => {
+    const pack = {
+      sourceLinks: post.sourceLinks,
+      sourceArticle: {
+        headline: source.title || post.title || "",
+        publisher: source.publisher || post.coverCredit || "",
+        publishedAt: source.publishedAt || post.publishedAt || "",
+        canonicalUrl: source.url,
+        standfirst: source.summary || post.excerpt || "",
+        factBullets: [source.summary, post.excerpt].filter(Boolean),
+        image: {
+          url: post.cover || "",
+          credit: post.coverCredit || source.publisher || "",
+          creditUrl: post.coverCreditUrl || source.url
+        },
+        images: Array.isArray(post.contentImages) ? post.contentImages : []
+      },
+      primarySourceImageUrl: post.cover,
+      coverCredit: post.coverCredit || source.publisher || "",
+      coverCreditUrl: post.coverCreditUrl || source.url || "",
+      coverLicense: post.coverLicense || "source image",
+      coverLicenseUrl: post.coverLicenseUrl || post.coverCreditUrl || source.url || ""
+    };
+    const article = sourceArticleFromPackOrPost({ pack, post: {} });
+    const facts = Array.isArray(article.factBullets) ? article.factBullets.filter(Boolean) : [];
+    if (!article.canonicalUrl || !article.standfirst || facts.length < 2 || !pack.primarySourceImageUrl) return null;
+    return { ...pack, sourceLinks: canonicalSourceLinks(source, article, post), sourceArticle: article };
+  };
   const fetched = await fetchText(source.url);
   if (!fetched.ok) {
-    const result = { ok: false, reason: `source fetch failed ${fetched.status || fetched.error || ""}`.trim() };
+    const fallback = fallbackPack();
+    const result = fallback
+      ? { ok: true, pack: fallback, fallback: true, reason: `source fetch failed; used stored source summary ${fetched.status || fetched.error || ""}`.trim() }
+      : { ok: false, reason: `source fetch failed ${fetched.status || fetched.error || ""}`.trim() };
     cache.set(source.url, result);
     return result;
   }
@@ -175,7 +227,7 @@ async function sourcePackForPost(post, cache) {
   const result = {
     ok: true,
     pack: {
-      sourceLinks: post.sourceLinks,
+      sourceLinks: canonicalSourceLinks(source, article, post),
       sourceArticle: article,
       primarySourceImageUrl: post.cover,
       coverCredit: post.coverCredit || source.publisher || "",

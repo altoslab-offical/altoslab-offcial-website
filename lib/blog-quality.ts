@@ -883,18 +883,21 @@ export function reviewContentTypeFit(post: BlogPost): ReviewResult {
     }
   } else if (contentType === "column") {
     const hasTable = /\|.+\|/.test(post.body);
-    const hasNumberedFramework = /(^|\n)\d+\.\s+\S+/.test(post.body);
     const hasCallout = /^>\s+\S+/m.test(post.body);
-    const hasTimeline = /(時間線|timeline|next watchpoint|待觀察|下一步)/i.test(post.body);
-    const assetCount = [hasTable, hasNumberedFramework, hasCallout, hasTimeline].filter(Boolean).length;
+    const hasSpecificScene = /(凌晨|會議|客服|銷售|法務|營運|主管|product manager|operator|support|sales|legal|incident|customer|meeting|現場|案例|場景|scenario|case|事故|exception|edge case)/i.test(post.body);
+    const repeatedColumnTemplate =
+      /ALTOS LAB 判斷[:：]\s*ALTOS LAB|先守住這三個控制點|Tatlong Control Point|Three Control Points|導入實踐|決策法則與行動清單|核心挑戰|停止按鈕|不可控的黑箱|無法掌控的夢魘/i;
     if (!creativeSignals.some((signal) => body.includes(signal))) {
-      issues.push("column needs a clear angle, framework, tradeoff or decision lens");
+      issues.push("column needs a clear angle, tradeoff, operator tension or original decision lens");
     }
-    if (assetCount < 1) {
-      issues.push("column needs at least one non-paragraph editorial asset: framework, checklist, callout, timeline or compact comparison");
+    if (repeatedColumnTemplate.test(post.body)) {
+      issues.push("column uses repeated AI-template phrasing; rewrite with a topic-specific narrative structure");
+    }
+    if (!hasSpecificScene && !hasCallout && !hasTable) {
+      issues.push("column needs a concrete scene, case moment, source-backed example or distinctive editorial passage");
     }
     if ((post.body.match(/^\|.+\|$/gm) || []).length > 12) {
-      warnings.push("column uses too much table formatting; vary the rhythm with prose, callouts, lists or timeline sections");
+      warnings.push("column uses too much table formatting; vary the rhythm with narrative paragraphs, source examples and concise judgment");
     }
   } else if (contentType === "feature") {
     const hasTable = /\|.+\|/.test(post.body);
@@ -995,12 +998,12 @@ export function reviewCreativity(post: BlogPost): ReviewResult {
   const issues: string[] = [];
   const warnings: string[] = [];
 
-  if (hits.length < 2) issues.push("article needs a fresher angle: framework, risk lens, case breakdown or decision matrix");
+  if (hits.length < 2) issues.push("article needs a fresher angle: risk lens, case breakdown, source-backed tension or original POV");
   if (/最新|latest|trend|趨勢|トレンド|트렌드/i.test(post.title) && hits.length < 3) {
-    issues.push("trend headline should be anchored by a specific framework, source-backed claim or creative POV");
+    issues.push("trend headline should be anchored by a specific source-backed claim, tension or creative POV");
   }
   if (genericTitlePatterns.some((pattern) => pattern.test(post.title))) {
-    issues.push("title is too generic; anchor it to a specific question, framework or source-backed claim");
+    issues.push("title is too generic; anchor it to a specific question, source-backed claim or reader tension");
   }
 
   return reviewWeighted(10, issues, warnings);
@@ -1029,8 +1032,8 @@ export function reviewReaderEngagement(post: BlogPost): ReviewResult {
   ) {
     issues.push("opening and subtitle need a reader tension, named source/event or specific decision hook");
   }
-  if (contentType !== "breaking" && !readerActionPattern.test(text)) {
-    issues.push("article needs a visible reader action promise: checklist, next step, priority, audit or decision rule");
+  if (contentType !== "breaking" && !readerActionPattern.test(text) && !/(案例|場景|tradeoff|取捨|反直覺|失敗|事故|例外|operator|現場|source-backed|case)/i.test(text)) {
+    issues.push("article needs a visible reader payoff: concrete case, tension, tradeoff, audit cue or decision lens");
   }
   if (contentType !== "breaking" && !quotableJudgmentPattern.test(text)) {
     issues.push("column/feature needs a quotable ALTOS LAB judgment or pull-quote style paragraph");
@@ -1055,7 +1058,7 @@ export function reviewReaderEngagement(post: BlogPost): ReviewResult {
     /\|.+\|/,
     /(^|\n)(\d+\.|- )\s+\S+/,
     /^>\s+\S+/m,
-    /(清單|檢查項|框架|矩陣|scorecard|checklist|framework|matrix|優先級|priority|時間線|timeline|來源卡|source card|callout|編輯筆記|現場筆記|待觀察|next step)/i
+    /(清單|檢查項|框架|矩陣|scorecard|checklist|framework|matrix|優先級|priority|時間線|timeline|來源卡|source card|callout|編輯筆記|現場筆記|待觀察|next step|案例|場景|scene|case|example)/i
   ].filter((pattern) => pattern.test(post.body)).length;
   if (contentType !== "breaking" && usefulStructures === 0) {
     issues.push("article needs a scannable structure that helps the reader judge faster");
@@ -1195,7 +1198,7 @@ function reviewReadability(post: BlogPost): ReviewResult {
     else issues.push(message);
   }
   if (post.body.includes("**") && !/\*\*[^*\n]{4,80}\*\*/.test(post.body)) {
-    warnings.push("bold emphasis should highlight a short judgment or checklist phrase, not decorative formatting");
+    warnings.push("bold emphasis should highlight a short judgment, vivid phrase or reader tension, not decorative formatting");
   }
   if (unsupportedMarkdownHeadingPattern.test(post.body)) {
     issues.push("body must not use ### or deeper Markdown headings; use site H2 sections and the FAQ fields instead");
@@ -1206,7 +1209,7 @@ function reviewReadability(post: BlogPost): ReviewResult {
     issues.push(`article needs at least ${emphasisMinimum} concise bold emphasis marks for scanability`);
   }
   if (emphasisItems.some((item) => item.length > 80)) {
-    warnings.push("bold emphasis should mark short judgments or checklist phrases, not full sentences or paragraphs");
+    warnings.push("bold emphasis should mark short judgments, vivid phrases or reader tensions, not full sentences or paragraphs");
   }
   if (emphasisItems.some((item) => weakEmphasisPattern.test(item))) {
     warnings.push("bold/purple emphasis should not mark ordinary nouns, source names or SEO keywords");

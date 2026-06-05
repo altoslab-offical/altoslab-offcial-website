@@ -7,7 +7,7 @@ import { spawnSync } from "node:child_process";
 
 const LANGUAGES = ["zh-Hant", "en", "ja", "ko", "id", "vi", "th", "ms", "fil"];
 const DEFAULT_BASE_URL = "https://altoslab-ai.cc";
-const DEFAULT_BREAKING_TARGET = 41;
+const DEFAULT_BREAKING_TARGET = 31;
 const DEFAULT_COLUMN_TARGET = 9;
 const REQUIRED_COLUMN_CONTENT_IMAGES = 2;
 

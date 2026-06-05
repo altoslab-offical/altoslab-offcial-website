@@ -80,8 +80,12 @@ assert(!/pinterest\.(com|[a-z]+)/i.test(sourceRegistry), "source registry does n
 assert(generation.includes("BLOG_PROMPT_VERSION"), "generation records prompt version");
 assert(generation.includes("sourceRegistryEntryForUrl"), "generation ranks sources with registry metadata");
 assert(!generation.includes("deepseek-chat"), "generation does not use deprecated deepseek-chat alias");
-assert(generation.includes("Subtitle/standfirst craft rules"), "generation trains DeepSeek on compelling subtitle/standfirst rules");
-assert(generation.includes("Medium-style scene hook"), "generation includes creative narrative modes learned from market writing");
+assert(generation.includes("Subtitle/standfirst craft rules"), "generation keeps compelling subtitle/standfirst guidance");
+assert(
+  generation.includes("Read the sources first, notice the actual story shape") &&
+    generation.includes("They should not look like a filled-in framework"),
+  "generation absorbs article feel without forcing creative narrative templates"
+);
 assert(
   generation.includes("Foreign-source context must be plain-language news attribution"),
   "generation requires foreign news to become plain-language source translation"
