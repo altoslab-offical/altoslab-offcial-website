@@ -37,6 +37,7 @@ const localWorker = read("scripts/blog-local-worker.mjs");
 const orchestrator = read("scripts/blog-antigravity-orchestrator.mjs");
 const scheduledRunner = read("scripts/blog-scheduled-runner.mjs");
 const backfillPlanner = read("scripts/blog-backfill-planner.mjs");
+const subagentModelPolicy = read("scripts/blog-subagent-model-policy.mjs");
 const marketSourceScanner = read("scripts/blog-market-source-scanner.mjs");
 const sopDoctor = read("scripts/blog-sop-doctor.mjs");
 const releaseVerifier = read("scripts/verify-blog-release.mjs");
@@ -174,6 +175,11 @@ assert(
   "orchestrator documents source-translated market news without default Gemini requirements"
 );
 assert(orchestrator.includes("Column/feature cover images must be generated through ChatGPT/GPT"), "orchestrator documents GPT covers for columns/features");
+assert(subagentModelPolicy.includes("gpt-5.3-codex-spark"), "subagent policy keeps Spark as the primary bounded worker model");
+assert(subagentModelPolicy.includes("gpt-5.4-mini"), "subagent policy falls back to 5.4 mini when Spark usage is exhausted");
+assert(subagentModelPolicy.includes("isSubagentUsageExhausted") && subagentModelPolicy.includes("resource[_\\s-]*exhausted"), "subagent policy detects quota/rate/resource exhaustion");
+assert(scheduledRunner.includes("subagentModelPolicyText"), "scheduled runner includes subagent fallback policy in column prompt cards");
+assert(backfillPlanner.includes("subagentModelPolicyText"), "backfill planner includes subagent fallback policy in column prompt cards");
 assert(orchestrator.includes("--lane must be column or market"), "orchestrator separates column and market-news lanes");
 assert(orchestrator.includes("All ${LANGUAGES.length} languages must share the same cover URL"), "orchestrator requires one shared cover across translations");
 assert(orchestrator.includes("2-3 ChatGPT/GPT-generated in-article images"), "orchestrator requires GPT in-article images for columns/features");

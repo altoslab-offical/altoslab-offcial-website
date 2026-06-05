@@ -3,6 +3,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
+import { subagentModelPolicyText } from "./blog-subagent-model-policy.mjs";
 import { spawn } from "node:child_process";
 
 const SLOT_HOURS = { morning: "09:00", afternoon: "16:00" };
@@ -80,13 +81,15 @@ function buildPrompt({ slot, date, articleSetPath, topic, lane }) {
   const runIdHint = `${marketLane ? "source-translation" : "browser-gemini-gpt"}-${date}-${slot}-${marketLane ? "market-fast-lane" : "column"}`;
   const productionWorkspaceLine = marketLane
     ? "You are the source-translation production workspace for ALTOS LAB's official website blog. Market news uses verified source articles, source-faithful adaptation, and the credited source article or official announcement image. Create one high-quality market-news article set only after the source pack and source image pass QA, then write the final JSON to this exact path:"
-    : "You are the production workspace for ALTOS LAB's official website blog. Columns/features use a staged workflow: Gemini writes or revises one zh-Hant source-of-truth column first, main-brain QA approves it, then gpt-5.3-codex-spark subagents localize the approved source into the other languages. ChatGPT/GPT generates covers only for columns/features. Create one high-quality article set only after the source article has passed QA, then write the final JSON to this exact path:";
+    : "You are the production workspace for ALTOS LAB's official website blog. Columns/features use a staged workflow: Gemini writes or revises one zh-Hant source-of-truth column first, main-brain QA approves it, then bounded subagents localize the approved source into the other languages. ChatGPT/GPT generates covers only for columns/features. Create one high-quality article set only after the source article has passed QA, then write the final JSON to this exact path:";
   const productionControlLines = marketLane
     ? `- This run is market news: contentType must be breaking, facts must come from the source pack, copy is source-translated/adapted by Codex/source workers, and the cover must be the credited source article or official announcement image.
 - Do not use Gemini by default for market-news backfill. Use Gemini only if the main-brain explicitly requests an editorial rewrite after source-translation QA.
 - Market news/breaking posts must use the source article or official announcement image with visible attribution; do not use GPT art or stock/free images for market news.`
     : `- This run is an original ALTOS LAB column: contentType must be column, not breaking. Gemini must create the zh-Hant source-of-truth first. Do not localize or assemble all languages until that source article passes main-brain QA. The cover and in-article visuals must be generated through ChatGPT/GPT.
 - Column/feature cover images must be generated through ChatGPT/GPT in the ALTOS Blog QA Chrome group.
+- Subagent model fallback policy:
+${subagentModelPolicyText()}
 - Close or release Gemini/GPT tabs after the run so Chrome memory is not held.`;
   const sourceTruthLine = marketLane
     ? "Translate/adapt one verified source article package into zh-Hant first, then localize en, ja, ko, id, vi, th, ms, fil from the same source package."

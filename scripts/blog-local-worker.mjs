@@ -6,6 +6,7 @@ import os from "node:os";
 import path from "node:path";
 import process from "node:process";
 import zlib from "node:zlib";
+import { subagentModelPolicyText } from "./blog-subagent-model-policy.mjs";
 
 const LANGUAGES = ["zh-Hant", "en", "ja", "ko", "id", "vi", "th", "ms", "fil"];
 const SLOT_HOURS = { morning: "09:00", afternoon: "16:00" };
@@ -979,7 +980,7 @@ Create one article set in ${LANGUAGE_LABEL}.
 
 Hard requirements:
 - ${marketLane ? "Market news uses source-translation from verified source articles. Do not use Gemini by default. Use the source article or official announcement image with visible source credit; do not use GPT art or a previously used cover." : "Gemini writes/revises one zh-Hant source-of-truth column first. Main-brain QA must pass before any localization starts."}
-- ${marketLane ? "Translate/adapt the source facts into all configured languages with native local phrasing. Do not copy source paragraphs or article structure." : "After the zh-Hant source passes, gpt-5.3-codex-spark workers localize en, ja, ko, id, vi, th, ms and fil without inventing facts or changing sources/media."}
+- ${marketLane ? "Translate/adapt the source facts into all configured languages with native local phrasing. Do not copy source paragraphs or article structure." : `After the zh-Hant source passes, bounded subagents localize en, ja, ko, id, vi, th, ms and fil without inventing facts or changing sources/media.\nSubagent model fallback policy:\n${subagentModelPolicyText()}`}
 - ${marketLane ? "Do not open ChatGPT/GPT for market-news images." : "For column/feature posts, generate the cover image and 2-3 in-article images through ChatGPT/GPT in the ALTOS Blog QA Chrome group."}
 - Close or release any task-owned Gemini/GPT tabs after the run so Chrome memory is not held.
 - Do not repeat an existing published/draft topic, headline angle or source package.

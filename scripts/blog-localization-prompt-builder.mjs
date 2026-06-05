@@ -3,6 +3,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
+import { primarySubagentModel, subagentModelPolicyText } from "./blog-subagent-model-policy.mjs";
 
 const REQUIRED_LANGUAGES = ["zh-Hant", "en", "ja", "ko", "id", "vi", "th", "ms", "fil"];
 const DEFAULT_GROUPS = [
@@ -146,8 +147,11 @@ function promptForGroup({ sequence, group, sourcePost, sourcePack, promptDir, lo
   const sourceH2Count = (sourceBody.match(/^##\s+/gm) || []).length;
   const sourceParagraphCount = sourceBody.split(/\n{2,}/).map((item) => item.trim()).filter(Boolean).length;
   const sourceCharCount = [...sourceBody].length;
-  const prompt = `You are gpt-5.3-codex-spark.
+  const prompt = `You are ${primarySubagentModel()}.
 cwd: /Users/asdc163/Documents/官方網站
+
+Subagent model fallback policy:
+${subagentModelPolicyText()}
 
 Task: Localize one approved ALTOS LAB source-of-truth article into: ${group.join(", ")}.
 

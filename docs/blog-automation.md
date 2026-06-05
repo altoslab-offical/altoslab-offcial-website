@@ -15,7 +15,8 @@
 ## Subagent Orchestration v3
 
 - DeepSeek is no longer part of the formal publishing path.
-- The current production loop uses the main Codex thread as the release controller. Columns/features use Gemini to write the source-of-truth article first; after Codex approves it, `gpt-5.3-codex-spark` workers localize the approved article into the remaining languages.
+- The current production loop uses the main Codex thread as the release controller. Columns/features use Gemini to write the source-of-truth article first; after Codex approves it, subagent workers localize the approved article into the remaining languages.
+- Subagent model policy: start with `gpt-5.3-codex-spark`. If Spark usage is exhausted, quota/rate-limited, returns `429`, `resource_exhausted`, or otherwise reports capacity/budget exhaustion, continue the same bounded worker task with `gpt-5.4-mini`. The fallback worker inherits the same owned files, output cap, no-publish rule and no-final-quality-decision boundary.
 - Market-news fast lane uses source-translation: Codex/source workers translate and adapt a verified source article into ALTOS LAB's reader-first brief format, with source links and the credited source/official image shared by all languages. Ordinary market news does not need Gemini.
 - Gemini and ChatGPT/GPT are browser workbenches, not release authorities. They may help draft prose or images only inside the dedicated Chrome tabs documented in `docs/content/blog-subagent-production-loop.md`.
 - Localization is not literal translation. Subagents must rewrite naturally for local readers while preserving the same article identity, source facts, sources, cover/media set and editorial angle.

@@ -46,7 +46,7 @@
 
 ### 4.1 分工
 - Main brain：定義選題、來源包、讀者任務、品牌限制、品質門檻、發布判斷。
-- `gpt-5.3-codex-spark` worker：整理 source pack、產 prompt-card、抽取風格參考、
+- Subagent worker：優先用 `gpt-5.3-codex-spark`；若 Spark 用量用完、quota/rate limit、`429`、`resource_exhausted`、capacity 或 budget-limit，改用 `gpt-5.4-mini` 繼續同一個 bounded job。工作內容是整理 source pack、產 prompt-card、抽取風格參考、
   做草稿 QA、列出修正指令；不發布、不改帳號、不切模型。
 - Fixed tabs：Gemini tab 只負責文章對話；ChatGPT/GPT tab 只負責封面 prompt、
   圖像生成與圖像自評。固定分頁不存在就停，不用其他分頁替代。

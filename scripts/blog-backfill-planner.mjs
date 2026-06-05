@@ -4,6 +4,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
 import { spawn } from "node:child_process";
+import { subagentModelPolicyText } from "./blog-subagent-model-policy.mjs";
 
 const DEFAULT_BASE_URL = "https://altoslab-ai.cc";
 const LANGUAGES = ["zh-Hant", "en", "ja", "ko", "id", "vi", "th", "ms", "fil"];
@@ -185,7 +186,7 @@ function promptCard({ date, lane, slot, sequence, targetPosts, inventory, articl
   const laneLine =
     isMarket
       ? "Market news lane: source-translation from verified source articles; cover must be a credited source article or official announcement image shared across every language. No Gemini requirement, no GPT art and no stock/free/fallback image."
-      : "Column lane: Gemini writes/revises one zh-Hant source-of-truth article first. Main-brain QA must pass before gpt-5.3-codex-spark workers localize en, ja, ko, id, vi, th, ms and fil. ChatGPT/GPT creates one shared cover plus 2-3 shared in-article images for every language.";
+      : "Column lane: Gemini writes/revises one zh-Hant source-of-truth article first. Main-brain QA must pass before subagent workers localize en, ja, ko, id, vi, th, ms and fil. ChatGPT/GPT creates one shared cover plus 2-3 shared in-article images for every language.";
   const evidenceLine = isMarket
     ? "- Do not write a ready manifest until source-translation fidelity, source-image QA, local preflight, validate-only and design QA pass."
     : "- Do not write a ready manifest until Gemini/GPT browser evidence, local preflight, validate-only, image/source QA and design QA pass.";
@@ -220,6 +221,7 @@ Prepared manifest: ${manifestPath}
 Use only the ALTOS Blog QA Chrome tab group.
 ${laneLine}
 Required languages: ${LANGUAGE_LABEL}.
+${isMarket ? "" : `\nSubagent model fallback policy:\n${subagentModelPolicyText()}\n`}
 
 Hard release rule:
 - Do not publish from this prompt card.

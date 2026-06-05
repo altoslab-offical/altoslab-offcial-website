@@ -24,7 +24,8 @@ The localization job is not literal translation. Each language version must read
    - Never localize a source draft that has not passed the gate.
 
 3. `localization_subagents`
-   - Spark subagents localize from the approved source article.
+   - Subagents localize from the approved source article.
+   - Start with `gpt-5.3-codex-spark`; if usage/quota/rate limit is exhausted, continue the same bounded localization job with `gpt-5.4-mini`.
    - They may rewrite sentence order, examples, rhythm and headline shape for the target market.
    - They may not add unsupported facts, change the source angle, change the cover/media set, or create a separate article.
 
@@ -76,11 +77,16 @@ These may be localized:
 ## Subagent Task Template
 
 ```txt
-You are gpt-5.3-codex-spark.
+You are gpt-5.3-codex-spark, or gpt-5.4-mini when Spark usage is exhausted.
 cwd: /Users/asdc163/Documents/官方網站
 Task: Localize the approved ALTOS LAB source-of-truth article into [languages].
 Own only: [exact parsed output JSON path(s)].
 Read only: [source article JSON], [source pack JSON], [localization model doc].
+
+Model fallback:
+- Primary: gpt-5.3-codex-spark.
+- Fallback: gpt-5.4-mini when Spark returns usage exhausted, quota exceeded, rate limit, 429, resource_exhausted, capacity or budget-limit errors.
+- Fallback does not change scope: same files, same output cap, no publishing, no invented facts and no final quality decision.
 
 Rules:
 - This is localization, not literal translation and not a new article.

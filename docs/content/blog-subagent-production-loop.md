@@ -5,9 +5,9 @@ This is the current long-term production path for AI blog publishing.
 ## Roles
 
 - Main brain: the current Codex thread. It owns source judgment, production publish decisions, Cloudflare/API verification, admin readback, and final quality reporting.
-- Writing worker: a `gpt-5.3-codex-spark` subagent. It owns bounded localization and QA repair after the source-of-truth draft has passed main-brain review. It does not create the initial source article.
-- Localization workers: `gpt-5.3-codex-spark` subagents split by language group. They localize approved source-of-truth copy into natural local writing, not literal translation.
-- Prompt research worker: a `gpt-5.3-codex-spark` subagent. It owns market/media pattern research, source-pack compression, prompt-card drafting, and QA issue extraction. It does not operate fixed tabs unless the main brain explicitly delegates that exact tab task.
+- Writing worker: primary `gpt-5.3-codex-spark`, fallback `gpt-5.4-mini` when Spark usage is exhausted. It owns bounded localization and QA repair after the source-of-truth draft has passed main-brain review. It does not create the initial source article.
+- Localization workers: primary `gpt-5.3-codex-spark`, fallback `gpt-5.4-mini` when Spark usage is exhausted, split by language group. They localize approved source-of-truth copy into natural local writing, not literal translation.
+- Prompt research worker: primary `gpt-5.3-codex-spark`, fallback `gpt-5.4-mini` when Spark usage is exhausted. It owns market/media pattern research, source-pack compression, prompt-card drafting, and QA issue extraction. It does not operate fixed tabs unless the main brain explicitly delegates that exact tab task.
 - Browser workbench: dedicated Chrome tabs only.
   - Gemini tab: column/feature source-of-truth writing and rewrite assistance.
   - ChatGPT/GPT tab: generated cover prompts or image generation assistance for columns/features. Market-news covers come from credited source images.
@@ -90,7 +90,7 @@ The prompt-card contract lives in `docs/content/blog-prompt-card-template.md`.
 5. If the lane is `column` or `feature`, main brain uses the dedicated Gemini tab to produce one source-of-truth article first, usually `zh-Hant`.
 6. If the lane is market news, main brain or a source-translation worker builds the source-faithful zh-Hant brief directly from the original source article and official/source image. Do not run ordinary market news through Gemini unless an editorial rewrite is explicitly needed.
 7. Main brain runs the source quality gate. If the title, subtitle, lead, source fidelity, body rhythm, public wording, or image policy is weak, columns/features go back to Gemini; market news goes back to source-translation repair.
-8. After the source draft passes, main brain spawns bounded `gpt-5.3-codex-spark` localization workers:
+8. After the source draft passes, main brain spawns bounded localization workers. Use `gpt-5.3-codex-spark` first; if usage is exhausted, quota/rate-limited, `429`, `resource_exhausted`, or capacity/budget-limited, continue the same bounded task with `gpt-5.4-mini`:
    - `en-ja-ko`
    - `id-vi`
    - `th-ms-fil`
@@ -145,7 +145,7 @@ Use this shape when spawning the worker:
 
 ```txt
 You are the ALTOS LAB blog production worker. The main Codex thread is the main brain.
-Use model gpt-5.3-codex-spark.
+Use model gpt-5.3-codex-spark. If Spark usage is exhausted, retry the same bounded worker job with gpt-5.4-mini.
 You are not alone in the codebase; do not revert changes you did not make.
 Own only this run folder and article-set JSON.
 Do not publish.

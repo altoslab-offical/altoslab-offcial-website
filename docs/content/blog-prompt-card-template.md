@@ -90,7 +90,7 @@ Do not ask Gemini to produce all nine languages in one pass unless the main brai
 After the source article passes Codex review:
 
 1. `localization_pack`: approved source article, source pack, shared media metadata, target languages and local tone notes.
-2. `language_group_localization`: bounded Spark workers produce localized posts by group: `en-ja-ko`, `id-vi`, `th-ms-fil`.
+2. `language_group_localization`: bounded subagent workers produce localized posts by group: `en-ja-ko`, `id-vi`, `th-ms-fil`. Use `gpt-5.3-codex-spark` first; if usage is exhausted or quota/rate-limited, continue the same bounded job with `gpt-5.4-mini`.
 3. `native_tone_rewrite`: workers remove literal translation rhythm and adjust title/subtitle/body for target market norms.
 4. `parity_check`: main brain verifies thesis, facts, source links, media, `translationGroupId`, and content type are shared.
 5. `cms_json_merge`: main brain merges all languages into the final article set and runs validate-only.

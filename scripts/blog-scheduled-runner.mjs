@@ -4,6 +4,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
 import { spawn } from "node:child_process";
+import { subagentModelPolicyText } from "./blog-subagent-model-policy.mjs";
 
 const SLOT_HOURS = { morning: "09:00", afternoon: "16:00" };
 const LANGUAGES = ["zh-Hant", "en", "ja", "ko", "id", "vi", "th", "ms", "fil"];
@@ -546,7 +547,9 @@ Prepared manifest: ${manifestPath}
 
 Use only the ALTOS Blog QA Chrome tab group.
 This is a daily column slot. Gemini writes/revises one zh-Hant source-of-truth column first. Main-brain quality QA must pass before any localization starts.
-After the zh-Hant source article passes, gpt-5.3-codex-spark subagents localize the approved article into: en, ja, ko, id, vi, th, ms, fil. The localized articles must sound native to each market and must not collapse the column into a summary.
+After the zh-Hant source article passes, subagents localize the approved article into: en, ja, ko, id, vi, th, ms, fil. The localized articles must sound native to each market and must not collapse the column into a summary.
+Subagent model fallback policy:
+${subagentModelPolicyText()}
 ChatGPT/GPT creates one shared cover and 2-3 shared in-article images for the ${LANGUAGES.length} language versions.
 Required final languages: ${LANGUAGE_LABEL}.
 Column contentImages must serve editorial jobs: opening anchor, mechanism/evidence, and optional closing synthesis. Use the same image URLs across every language version.
