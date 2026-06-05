@@ -64,9 +64,10 @@ function baseUrl() {
 }
 
 async function fetchJson(url) {
+  const timeoutMs = Number.parseInt(arg("timeout-ms", process.env.BLOG_AI_FEELING_AUDIT_TIMEOUT_MS || "45000"), 10);
   const response = await fetch(url, {
     headers: { Accept: "application/json", "User-Agent": "ALTOS-LAB-ai-feeling-audit/1.0" },
-    signal: AbortSignal.timeout(20_000)
+    signal: AbortSignal.timeout(Number.isFinite(timeoutMs) && timeoutMs > 0 ? timeoutMs : 45_000)
   });
   const text = await response.text();
   if (!response.ok) throw new Error(`${response.status} ${text.slice(0, 300)}`);
