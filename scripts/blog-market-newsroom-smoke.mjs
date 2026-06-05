@@ -70,7 +70,27 @@ const fixtures = [
       ],
       primarySourceImageUrl: "https://techcrunch.com/wp-content/uploads/2026/06/aethexai.jpg",
       coverCredit: "Source image: TechCrunch AI",
-      coverCreditUrl: "https://techcrunch.com/2026/06/03/these-two-founders-left-goldman-and-meta-to-build-voice-ai-for-markets-everyone-else-overlooked/"
+      coverCreditUrl: "https://techcrunch.com/2026/06/03/these-two-founders-left-goldman-and-meta-to-build-voice-ai-for-markets-everyone-else-overlooked/",
+      sourceArticle: {
+        headline: "These two founders left Goldman and Meta to build voice AI for markets everyone else overlooked",
+        publisher: "TechCrunch AI",
+        publishedAt: "2026-06-03T12:00:00.000Z",
+        canonicalUrl: "https://techcrunch.com/2026/06/03/these-two-founders-left-goldman-and-meta-to-build-voice-ai-for-markets-everyone-else-overlooked/",
+        standfirst: "AethexAI raised $3 million in pre-seed funding to build voice AI systems for Africa and the Middle East.",
+        factBullets: [
+          "AethexAI was founded by Mariama Diallo and Ayooluwa Odemuyiwa.",
+          "The company says its system handles more than 17,000 calls per day.",
+          "Its early use cases include debt collection, customer activation, and KYC."
+        ],
+        entities: ["AethexAI", "Goldman Sachs", "Meta", "Africa", "Middle East"],
+        numbers: ["$3 million", "17,000 calls per day"],
+        extractionConfidence: 0.88,
+        image: {
+          url: "https://techcrunch.com/wp-content/uploads/2026/06/aethexai.jpg",
+          credit: "TechCrunch AI",
+          creditUrl: "https://techcrunch.com/2026/06/03/these-two-founders-left-goldman-and-meta-to-build-voice-ai-for-markets-everyone-else-overlooked/"
+        }
+      }
     }
   }
 ];

@@ -30,7 +30,7 @@ the per-language target. It never publishes and never fabricates production cont
 
 Examples:
   node scripts/blog-backfill-planner.mjs --target-posts 40 --write
-  node scripts/blog-backfill-planner.mjs --base-url https://altoslab-ai.cc --date 2026-06-03 --force --write
+  node scripts/blog-backfill-planner.mjs --base-url https://altoslab-ai.cc --date <date> --force --write
 `);
 }
 

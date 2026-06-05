@@ -28,11 +28,11 @@ function usage() {
 ALTOS LAB blog backfill accelerator
 
 Usage:
-  node scripts/blog-backfill-accelerator.mjs [--date 2026-06-03] [--max-groups 6] [--max-parallel 3] [--publish] [--allow-production]
+  node scripts/blog-backfill-accelerator.mjs [--date <date>] [--max-groups 6] [--max-parallel 3] [--publish] [--allow-production]
 
 What it does:
   1. Scans the backfill queue.
-  2. Merges any market/column item that already has complete browser-produced artifacts.
+  2. Produces market article sets from source packs, or merges approved column/GPT artifacts.
   3. Runs the fail-closed batch runner on ready article-set.json items.
   4. Writes an acceleration status board with exact missing artifacts.
 
@@ -229,24 +229,26 @@ async function scanQueue({ backfillDir, queueDir }) {
     }
 
     if (lane === "market") {
-      const languageStatus = await marketLanguages(backfillDir, sequence);
       const sourcePackStatus = await marketSourcePackStatus(backfillDir, sequence);
-      status.languages = languageStatus.languages;
-      status.artifactFiles = languageStatus.files;
-      status.missingLanguages = missingLanguages(languageStatus.languages);
-      if (!isCompleteLanguageSet(languageStatus.languages)) status.reasons.push(`missing source-translation market languages: ${status.missingLanguages.join(", ")}`);
+      status.languages = REQUIRED_LANGUAGES;
+      status.artifactFiles = [];
+      status.missingLanguages = [];
       if (!sourcePackStatus.ok) status.reasons.push(sourcePackStatus.reason);
-      status.readyToMerge = isCompleteLanguageSet(languageStatus.languages) && sourcePackStatus.ok;
+      status.readyToMerge = sourcePackStatus.ok;
       if (status.readyToMerge) {
         status.mergeCommand = [
           "node",
-          "scripts/merge-market-gemini-chunks.mjs",
+          "scripts/blog-market-source-worker.mjs",
           "--seq",
           String(sequence),
           "--backfill-dir",
           backfillDir,
-          "--out-dir",
-          path.dirname(articleSetPath)
+          "--source-packs",
+          path.join(backfillDir, "market-source-packs.generated.json"),
+          "--article-set",
+          articleSetPath,
+          "--write",
+          "--overwrite"
         ];
       }
     } else if (lane === "column") {

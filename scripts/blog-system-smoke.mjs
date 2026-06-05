@@ -61,11 +61,19 @@ const marketSeed = read("lib/market-blog-seed.ts");
 const seedMatch = marketSeed.match(/export const marketBlogPosts = ([\s\S]*?) satisfies BlogPost\[];/);
 const seedPosts = seedMatch ? JSON.parse(seedMatch[1]) : [];
 const targetLanguages = ["zh-Hant", "en", "ja", "ko", "id", "vi", "th", "ms", "fil"];
-const legacySeedLanguages = ["zh-Hant", "en", "ja", "ko"];
 
 assert(sourceRegistry.includes("BLOG_NEWS_MIX"), "source registry exposes content/news mix");
 assert((sourceRegistry.match(/tier: "official-rss"/g) || []).length >= 8, "source registry has at least 8 official RSS sources");
-assert(sourceRegistry.includes("GDELT DOC API") && sourceRegistry.includes("Hacker News API"), "source registry includes free market-news discovery APIs");
+assert(
+  sourceRegistry.includes("Hacker News Algolia API") &&
+    sourceRegistry.includes("hn.algolia.com/api/v1/search_by_date") &&
+    sourceRegistry.includes("TechCrunch AI") &&
+    sourceRegistry.includes("The Verge AI") &&
+    sourceRegistry.includes("VentureBeat AI") &&
+    sourceRegistry.includes("WIRED AI") &&
+    sourceRegistry.includes("MIT Technology Review AI"),
+  "source registry includes mainstream AI RSS feeds and a free market-news discovery API"
+);
 assert((sourceRegistry.match(/tier: "licensed-image"/g) || []).length >= 3, "source registry has licensed image providers");
 assert(!/pinterest\.(com|[a-z]+)/i.test(sourceRegistry), "source registry does not use Pinterest as an image source");
 
@@ -344,67 +352,7 @@ assert(operations.includes("Gmail web UI") && operations.includes("hold the send
 const gcpSmoke = read("scripts/gcp-production-smoke.mjs");
 assert(gcpSmoke.includes("publishedPosts === 0"), "GCP production smoke warns when the public blog inventory is empty");
 
-for (const language of legacySeedLanguages) {
-  const languagePosts = seedPosts.filter((post) => post.language === language);
-  const languageTypes = new Set(languagePosts.map((post) => post.contentType));
-  const languageCategories = new Set(languagePosts.map((post) => post.newsCategory));
-  assert(languagePosts.length === 3, `${language} has exactly 3 baseline seed articles`);
-  assert(languageTypes.size === 3, `${language} baseline covers breaking, column and feature`);
-  assert(languageCategories.size === 3, `${language} baseline covers three editorial categories`);
-}
-
-const typeCounts = seedPosts.reduce((counts, post) => {
-  counts[post.contentType] = (counts[post.contentType] || 0) + 1;
-  return counts;
-}, {});
-assert(seedPosts.length === 12, "seed archive is currently pruned to 12 baseline articles");
-assert(typeCounts.breaking === 4, "baseline has one breaking article per language");
-assert(typeCounts.column === 4, "baseline has one column article per language");
-assert(typeCounts.feature === 4, "baseline has one feature article per language");
-
-const languageSet = legacySeedLanguages.sort().join("|");
-const incompleteGroups = Object.values(
-  seedPosts.reduce((groups, post) => {
-    groups[post.translationGroupId] ||= new Set();
-    groups[post.translationGroupId].add(post.language);
-    return groups;
-  }, {})
-).filter((languages) => [...languages].sort().join("|") !== languageSet);
-assert(incompleteGroups.length === 0, "baseline seed translation groups keep the legacy four-language archive complete");
-
-const titlesWithTypeLabels = seedPosts.filter((post) =>
-  /市場快訊|Market brief|市場ブリーフ|시장 브리프|專欄[:：]|Column[:：]|Feature[:：]|專題[:：]|特集[:：]|기획[:：]/i.test(
-    post.title
-  )
-);
-assert(titlesWithTypeLabels.length === 0, "seed article titles do not contain UI taxonomy labels");
-
-const postsWithoutDatedSource = seedPosts.filter(
-  (post) => !post.sourceLinks?.some((source) => source.publishedAt)
-);
-assert(postsWithoutDatedSource.length === 0, "seed articles include at least one dated real news/source link");
-
-const zhAgentPilot = seedPosts.find((post) => post.slug === "agent-pilot-scorecard-zh-hant");
-const zhAgentPilotReadableText = zhAgentPilot
-  ? [
-      zhAgentPilot.title,
-      zhAgentPilot.excerpt,
-      zhAgentPilot.geoSummary,
-      zhAgentPilot.body,
-      ...(zhAgentPilot.keyTakeaways || []),
-      ...(zhAgentPilot.faqs || []).flatMap((faq) => [faq.question, faq.answer])
-    ].join("\n")
-  : "";
-assert(Boolean(zhAgentPilot), "zh-Hant agent pilot baseline exists");
-assert(
-  !/(來源轉譯成企業判斷|把海外新聞翻成企業能用的判斷|來源與轉譯備註|ALTOS LAB 的實驗室判斷|本文包含海外來源轉譯)/i.test(zhAgentPilotReadableText),
-  "agent pilot market-news article does not expose internal source-translation or lab-note headings"
-);
-assert(
-  !/\b(?:production traces?|eval(?:uation)? loops?|eval-driven|trace|evals?|rollback)\b/i.test(zhAgentPilotReadableText),
-  "zh-Hant agent pilot article translates trace/eval/rollback jargon into plain Chinese"
-);
-assert(/\*\*[^*\n]{4,80}\*\*/.test(zhAgentPilot?.body || ""), "zh-Hant agent pilot article uses concise bold emphasis for scanability");
+assert(seedPosts.length === 0, "blog seed archive stays empty so old template-written articles cannot rehydrate local or fallback CMS data");
 
 const breakingWithoutNewsAnchor = seedPosts.filter(
   (post) => {
@@ -414,7 +362,7 @@ const breakingWithoutNewsAnchor = seedPosts.filter(
       .map((source) => source.publisher || "")
       .filter(Boolean)
       .some((publisher) => readable.toLowerCase().includes(publisher.toLowerCase().split("/")[0].trim()));
-    const citesDatedContext = /\b20\d{2}[/-]\d{1,2}[/-]\d{1,2}\b|\b20\d{2}\b|事件重點|發生了什麼|接下來要看什麼|Latest context|What happened|What to watch|最新背景：|최신 배경/i.test(
+    const citesDatedContext = /\b20\d{2}[/-]\d{1,2}[/-]\d{1,2}\b|\b20\d{2}\b/i.test(
       readable
     );
     return !citesSourcePublisher || !citesDatedContext;

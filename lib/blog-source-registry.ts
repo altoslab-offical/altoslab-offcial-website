@@ -44,9 +44,9 @@ export const BLOG_CONTENT_PILLARS = [
 ] as const;
 
 export const BLOG_NEWS_MIX = {
-  breaking: 0.4,
-  column: 0.35,
-  feature: 0.25
+  breaking: 0.775,
+  column: 0.225,
+  feature: 0
 } satisfies Record<BlogContentType, number>;
 
 export const BLOG_SOURCE_REGISTRY: BlogSourceRegistryEntry[] = [
@@ -243,15 +243,15 @@ export const BLOG_SOURCE_REGISTRY: BlogSourceRegistryEntry[] = [
   },
   {
     id: "hacker-news-api",
-    name: "Hacker News API",
-    url: "https://hacker-news.firebaseio.com/v0/",
+    name: "Hacker News Algolia API",
+    url: "https://hn.algolia.com/api/v1/search_by_date?query=AI&tags=story",
     tier: "community-signal",
     market: "global",
     language: "en",
     category: "Build Notes",
     authority: 68,
     freshness: 92,
-    notes: "Free developer-community signal API. Use for surfacing discussed AI tools/releases, then verify with official sources before publishing."
+    notes: "Free developer-community signal API. Use for surfacing discussed AI tools/releases, then verify with official or trusted media sources before publishing."
   },
   {
     id: "semantic-scholar-api",
@@ -269,7 +269,7 @@ export const BLOG_SOURCE_REGISTRY: BlogSourceRegistryEntry[] = [
     id: "mit-technology-review-ai",
     name: "MIT Technology Review AI",
     url: "https://www.technologyreview.com/topic/artificial-intelligence/",
-    feedUrl: "https://www.technologyreview.com/feed/",
+    feedUrl: "https://www.technologyreview.com/topic/artificial-intelligence/feed/",
     tier: "trusted-media",
     market: "global",
     language: "en",
@@ -419,8 +419,8 @@ export const BLOG_SOURCE_REGISTRY: BlogSourceRegistryEntry[] = [
 ];
 
 const editorialCycle: Record<Extract<BlogGenerationSlot, "morning" | "afternoon">, BlogContentType[]> = {
-  morning: ["breaking", "column", "breaking", "feature", "breaking", "column", "breaking", "column", "feature", "breaking"],
-  afternoon: ["column", "feature", "breaking", "column", "feature", "column", "feature", "breaking", "column", "feature"]
+  morning: ["column", "column", "column", "column", "column", "column", "column", "column", "column", "column"],
+  afternoon: ["breaking", "breaking", "breaking", "breaking", "breaking", "breaking", "breaking", "breaking", "breaking", "breaking"]
 };
 
 export function registryFeedsFromEnv() {

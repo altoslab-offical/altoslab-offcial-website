@@ -700,7 +700,7 @@ export function publishValidationForBlogPost(post: BlogPost) {
   if (!post.language) errors.push("language is required");
   if (!post.translationGroupId) errors.push("translationGroupId is required");
   if (!post.readTimeMinutes) errors.push("readTimeMinutes is required");
-  if (!post.faqs.length) errors.push("at least one visible FAQ is required for GEO");
+  if (post.contentType !== "breaking" && !post.faqs.length) errors.push("at least one visible FAQ is required for GEO");
   if (post.generatedBy && !post.sourceLinks.length) errors.push("generated posts require at least one source link");
   const hasApprovedCoverSource =
     post.coverSource === "curated" ||

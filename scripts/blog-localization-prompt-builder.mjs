@@ -10,7 +10,13 @@ const DEFAULT_GROUPS = [
   ["id", "vi"],
   ["th", "ms", "fil"]
 ];
-const DEFAULT_LOCALIZED_OUTPUT_DIR = path.join(process.cwd(), "data", "blog-backfill", "2026-06-04", "column-production");
+const DEFAULT_BACKFILL_DATE = new Intl.DateTimeFormat("en-CA", {
+  timeZone: "Asia/Taipei",
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit"
+}).format(new Date());
+const DEFAULT_LOCALIZED_OUTPUT_DIR = path.join(process.cwd(), "data", "blog-backfill", DEFAULT_BACKFILL_DATE, "column-production");
 
 function arg(name, fallback = "") {
   const index = process.argv.indexOf(`--${name}`);
@@ -44,8 +50,8 @@ Usage:
   node scripts/blog-localization-prompt-builder.mjs \\
     --source-post <json> \\
     --sequence <n> \\
-    --out-dir data/blog-backfill/2026-06-04/column-production/prompts \\
-    --localized-output-dir data/blog-backfill/2026-06-04/column-production \\
+    --out-dir data/blog-backfill/<date>/column-production/prompts \\
+    --localized-output-dir data/blog-backfill/<date>/column-production \\
     [--source-pack <json>] \\
     [--translation-group-id <id>] \\
     [--languages en,ja,ko,id,vi,th,ms,fil]
@@ -60,7 +66,7 @@ Notes:
 function detectBackfillDate(filePath) {
   const normalized = path.resolve(filePath);
   const match = normalized.match(/blog-backfill[\\/](\d{4}-\d{2}-\d{2})[\\/]/);
-  return match?.[1] || "2026-06-04";
+  return match?.[1] || DEFAULT_BACKFILL_DATE;
 }
 
 function inferLocalizedOutputDir(sourcePostPath, fallback) {
@@ -235,7 +241,7 @@ async function main() {
 
   const sourcePostPath = arg("source-post", "");
   const sequence = Number.parseInt(arg("sequence", ""), 10);
-  const promptDir = path.resolve(arg("out-dir", "data/blog-backfill/2026-06-04/column-production/prompts"));
+  const promptDir = path.resolve(arg("out-dir", path.join("data/blog-backfill", DEFAULT_BACKFILL_DATE, "column-production", "prompts")));
   const localizedOutputDir = path.resolve(
     arg("localized-output-dir", inferLocalizedOutputDir(sourcePostPath, DEFAULT_LOCALIZED_OUTPUT_DIR))
   );

@@ -3,7 +3,7 @@
 ## Legal Source Strategy
 
 - The cron job reads a source registry of official RSS/API/docs, trusted media and licensed image sources as research signals.
-- The default publishing mix is `breaking` 40%, `column` 35%, `feature` 25% so the blog includes fresh market news instead of only evergreen self-written essays.
+- The current inventory target is `breaking` 31 posts + `column` 9 posts per configured language. Routine production is one Gemini-approved column per Taipei day plus source-verified market news whenever qualified items arrive.
 - It does not scrape or republish full articles.
 - The production path must write original ALTOS LAB synthesis in its own words.
 - Every generated article keeps visible `sourceLinks` for attribution and fact checking.
@@ -26,7 +26,7 @@
 
 - Market news is the fast lane: source selection, source-faithful localization, validation and release should stay terminal-first and should not open Gemini, ChatGPT, Gmail or extra Chrome tabs.
 - Columns/features are the expensive lane: only the approved zh-Hant source article and GPT visual production may use Chrome. Localization, duplicate checks, validate-only, release verification and SEO/GEO reporting should run outside Chrome.
-- Published-article repair is also terminal-first for discovery: run `npm run blog:audit-ai-feeling -- --base-url https://altoslab-ai.cc --language zh-Hant` to create `data/blog-repair/ai-feeling-audit-<date>.json` and `.md`, then route repair by lane. Columns/features go back through Gemini for the zh-Hant source rewrite; market-news repairs stay source-faithful and do not need Gemini by default.
+- Published market-news repair is terminal-first and source-only: run `npm run blog:repair-copy -- --base-url https://altoslab-ai.cc --content-type breaking --language all --bulk` only after the source article, canonical URL and credited source image are present. The repair tool must not touch columns/features; those return to the Gemini column lane.
 - Market-source discovery is terminal-first: run `npm run blog:market-sources -- --date <date> --queue-dir data/blog-backfill/<date>/queue --write --overwrite` to create `market-source-packs.generated.json` from current RSS/API signals, duplicate checks and source/official image extraction before any market-news copy worker starts.
 - `scripts/blog-scheduled-runner.mjs --scheduled` now fails closed outside the configured time windows instead of falling through to release mode.
 - The scheduled runner uses a single local lock so overlapping heartbeat/LaunchAgent wakes cannot stack production jobs.
@@ -58,12 +58,11 @@
 
 Auto-publishing requires:
 
-- A local/subagent-generated full multilingual article set: `zh-Hant`, `en`, `ja`, `ko`, `id`, `vi`, `th`, `ms`, `fil`.
+- A full multilingual article set: `zh-Hant`, `en`, `ja`, `ko`, `id`, `vi`, `th`, `ms`, `fil`.
 - Trusted visible source links.
 - Topic-matched legally sourced cover image with attribution.
-- Quality score at or above the content-type threshold.
-- Anti-slop writing score at or above the content-type threshold.
-- AI-feeling repair audit has no blocking repair items for the article group, or a main-brain-approved repair exception is recorded in the run folder.
+- Market-news copy is source-faithful, readable, non-template, and free of backend/process language.
+- Column/feature copy has a Gemini-approved zh-Hant source article before localization.
 - No unsupported claims or copied source content.
 - Public author is either `Tommy` or `Ken`; morning uses Tommy and afternoon uses Ken by default.
 - Body uses site-supported Markdown only: `##` sections, lists, tables, charts and short `**bold emphasis**`. FAQ items live in the `faqs` field, not as raw `###` headings in the body.
@@ -72,21 +71,15 @@ Auto-publishing requires:
 ## Column Cadence Guard
 
 - Market news and columns must stay separated. Market news can publish during market-scan windows when a source-verifiable item and source/official image pass QA.
-- Columns/features are capped at two translation groups per Taipei calendar day by default: one morning slot and one afternoon slot.
-- `scripts/blog-local-worker.mjs --publish` enforces `ALTOS_BLOG_COLUMN_DAILY_LIMIT=2` for non-breaking article sets. It blocks release when a payload contains more than one column/feature translation group or when the daily limit is already reached.
+- Columns/features are capped at one translation group per Taipei calendar day by default.
+- `scripts/blog-local-worker.mjs --publish` enforces `ALTOS_BLOG_COLUMN_DAILY_LIMIT=1` for non-breaking article sets. It blocks release when a payload contains more than one column/feature translation group or when the daily limit is already reached.
 - Backfill column drafts must be rewritten and released through the normal column lane instead of being bulk-published. A local batch of nine draft columns is a backlog, not a publish queue.
 - Emergency bursts require an explicit `--allow-column-burst` flag or `ALTOS_BLOG_ALLOW_COLUMN_BURST=true`; do not use that override for ordinary content catch-up.
 
-## Anti-Slop Writing Gate
+## Production Targets
 
-- The reviewer scores directness, rhythm, trust, authenticity and density on a 50-point scale.
-- The gate blocks AI drafts that use throat-clearing openers, "this article will" framing, generic hype, passive/actorless phrasing, repeated sentence rhythm, empty transitions or formulaic "not X but Y" contrasts.
-- Thresholds: `breaking` >= 35, `column` >= 38, `feature` >= 40.
-- The admin blog editor stores `antiSlopScore`, `antiSlopIssues` and `hasAntiSlopReview` with the normal quality review record.
-
-## AI-Feeling Repair Audit
-
-- Run `npm run blog:audit-ai-feeling -- --base-url https://altoslab-ai.cc --language zh-Hant` before large repair or backfill batches.
-- The audit checks public posts for generic AI openings, template contrast sentences, inflated claims, weak title shapes, fixed-template headings, missing reader action, source gaps and internal process-language leaks.
-- Repair thresholds: market news should clear 90, columns should clear 85 and features should clear 88. Scores below threshold are queued before new same-topic posts are added.
-- Public articles must not mention the audit, prompts, internal scoring, source-translation, SEO/GEO checks, model routing or quality gates.
+- Public production is GCP/Cloud Run with GCS-backed CMS storage.
+- Target inventory per configured language: 31 market-news posts and 9 column posts.
+- Routine cadence: one Gemini-produced column per Taipei calendar day; market news publishes opportunistically when a verified source item, source image and multilingual source-faithful copy pass release checks.
+- Bulk column backfills stay staged and are released over time; do not publish nine columns in one burst unless Tommy explicitly approves a burst.
+- Market news must preserve the source article's news style: natural headline, clear subtitle, source facts in readable paragraphs, no fixed H2 template, no generic adoption checklist, no internal QA or automation language.

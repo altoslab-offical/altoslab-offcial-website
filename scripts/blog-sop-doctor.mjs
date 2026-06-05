@@ -86,7 +86,12 @@ function taiwanDate(input = new Date()) {
   return `${parts.year}-${parts.month}-${parts.day}`;
 }
 
-function candidateIndexPath(date, slot) {
+function candidateIndexPath(date, slot, lane = "column") {
+  const normalizedLane = lane === "market" ? "market" : "column";
+  return path.join(process.cwd(), "data/blog-prepared-candidates", `${date}-${slot}-${normalizedLane}.json`);
+}
+
+function legacyCandidateIndexPath(date, slot) {
   return path.join(process.cwd(), "data/blog-prepared-candidates", `${date}-${slot}.json`);
 }
 
@@ -96,6 +101,29 @@ function scheduledFor(date, slot) {
 
 function readJson(filePath) {
   return JSON.parse(fs.readFileSync(filePath, "utf8"));
+}
+
+function isMarketArticleSet(articleSet) {
+  const posts = Array.isArray(articleSet?.posts) ? articleSet.posts : [];
+  return articleSet?.generation?.provider === "source-translation" && posts.length > 0 && posts.every((post) => post.contentType === "breaking");
+}
+
+function candidateLooksLikeLane(index, lane) {
+  const manifestPath = index?.manifestPath || "";
+  const manifest = manifestPath && fs.existsSync(manifestPath) ? readJson(manifestPath) : index;
+  const articleSetPath = manifest?.articleSetPath || index?.articleSetPath || "";
+  const articleSet = articleSetPath && fs.existsSync(articleSetPath) ? readJson(articleSetPath) : null;
+  const market = isMarketArticleSet(articleSet);
+  return lane === "market" ? market : !market;
+}
+
+function resolveCandidateIndexPath(date, slot, lane = "column") {
+  const lanePath = candidateIndexPath(date, slot, lane);
+  if (fs.existsSync(lanePath)) return lanePath;
+  const legacyPath = legacyCandidateIndexPath(date, slot);
+  if (!fs.existsSync(legacyPath)) return lanePath;
+  const legacyIndex = readJson(legacyPath);
+  return candidateLooksLikeLane(legacyIndex, lane) ? legacyPath : lanePath;
 }
 
 function parsedHost(value) {
@@ -280,8 +308,8 @@ function checkLaunchAgent(errors, warnings) {
   return { loaded: true };
 }
 
-function checkReleaseCandidate({ date, slot }, errors, warnings) {
-  const indexPath = candidateIndexPath(date, slot);
+function checkReleaseCandidate({ date, slot, lane }, errors, warnings) {
+  const indexPath = resolveCandidateIndexPath(date, slot, lane);
   if (!fs.existsSync(indexPath)) {
     addIssue(errors, "release candidate index is missing", { indexPath });
     return null;
@@ -322,6 +350,9 @@ function checkReleaseCandidate({ date, slot }, errors, warnings) {
   if (articleSetPath && fs.existsSync(articleSetPath)) {
     const articleSet = readJson(articleSetPath);
     const posts = Array.isArray(articleSet.posts) ? articleSet.posts : [];
+    const marketOnly = isMarketArticleSet(articleSet);
+    if (lane === "column" && marketOnly) addIssue(errors, "release candidate lane must be column, got market");
+    if (lane === "market" && !marketOnly) addIssue(errors, "release candidate lane must be market, got column");
     const requiresGptCover = posts.some((post) => post.contentType !== "breaking");
     const isSourceTranslationMarketOnly =
       articleSet.generation?.provider === "source-translation" && posts.length > 0 && posts.every((post) => post.contentType === "breaking");
@@ -407,8 +438,8 @@ function checkReleaseCandidate({ date, slot }, errors, warnings) {
   return { indexPath, manifestPath, articleSetPath };
 }
 
-function checkPrepCandidate({ date, slot }, warnings) {
-  const indexPath = candidateIndexPath(date, slot);
+function checkPrepCandidate({ date, slot, lane }, warnings) {
+  const indexPath = resolveCandidateIndexPath(date, slot, lane);
   if (!fs.existsSync(indexPath)) return { indexPath, exists: false };
   const index = readJson(indexPath);
   if (!["awaiting_browser_production", "ready", "released"].includes(index.status)) {
@@ -430,10 +461,12 @@ async function main() {
   const mode = arg("mode");
   const slot = arg("slot");
   const date = arg("date") || taiwanDate();
+  const lane = arg("lane", "column");
   const errors = [];
   const warnings = [];
   if (!["prep", "release"].includes(mode)) addIssue(errors, "--mode must be prep or release");
   if (!SLOTS[slot]) addIssue(errors, "--slot must be morning or afternoon");
+  if (!["column", "market"].includes(lane)) addIssue(errors, "--lane must be column or market");
 
   const env = loadEnvFile();
   if (!env.loaded) addWarning(warnings, "local worker env file was not loaded", { envFile: env.envFile });
@@ -441,15 +474,16 @@ async function main() {
   const launchAgent = checkLaunchAgent(errors, warnings);
   const production = await checkProductionHealth(errors, warnings);
   const candidate = mode === "release" && SLOTS[slot]
-    ? checkReleaseCandidate({ date, slot }, errors, warnings)
+    ? checkReleaseCandidate({ date, slot, lane }, errors, warnings)
     : SLOTS[slot]
-      ? checkPrepCandidate({ date, slot }, warnings)
+      ? checkPrepCandidate({ date, slot, lane }, warnings)
       : null;
 
   const result = {
     ok: errors.length === 0,
     phase: "blog-sop-doctor",
     mode,
+    lane,
     slot,
     date,
     checkedAt: new Date().toISOString(),

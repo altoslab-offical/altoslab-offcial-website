@@ -5,7 +5,12 @@ import path from "node:path";
 import process from "node:process";
 
 const REQUIRED_LANGUAGES = ["zh-Hant", "en", "ja", "ko", "id", "vi", "th", "ms", "fil"];
-const DEFAULT_DATE = "2026-06-03";
+const DEFAULT_DATE = new Intl.DateTimeFormat("en-CA", {
+  timeZone: "Asia/Taipei",
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit"
+}).format(new Date());
 
 function arg(name, fallback = "") {
   const index = process.argv.indexOf(`--${name}`);
@@ -33,17 +38,18 @@ async function writeText(filePath, text) {
 
 function usage() {
   console.log(`
-ALTOS LAB missing browser-production prompt generator
+ALTOS LAB missing production helper
 
 Usage:
-  node scripts/blog-backfill-missing-prompts.mjs --date 2026-06-03 --max-market 5 --max-column 3
+  node scripts/blog-backfill-missing-prompts.mjs --date <date> --max-market 5 --max-column 3
 
 Outputs:
-  data/blog-backfill/<date>/missing-prompts/gemini-market-missing.md
+  data/blog-backfill/<date>/missing-prompts/market-source-worker-missing.md
   data/blog-backfill/<date>/missing-prompts/gemini-column-missing.md
   data/blog-backfill/<date>/missing-prompts/chatgpt-column-visuals-missing.md
 
-This only creates task-scoped prompts. It does not generate public copy itself.
+Market items use terminal source-worker commands. Column items still create
+task-scoped Gemini/GPT prompts. This helper does not publish.
 `);
 }
 
@@ -110,58 +116,30 @@ function marketPrompt(items, sourcePacksBySequence) {
     const sourcePack = sourcePacksBySequence.get(Number(item.sequence));
     return `## Market sequence ${item.sequence}
 Topic: ${sourcePack?.topic || "market news"}
-Missing languages: ${languageBlock(item.missingLanguages || REQUIRED_LANGUAGES)}
 Source image URL: ${sourcePack?.primarySourceImageUrl || ""}
 Cover credit: ${sourcePack?.coverCredit || ""} / ${sourcePack?.coverCreditUrl || ""}
 
 Sources:
 ${sourceLinksToMarkdown(sourcePack?.sourceLinks || [])}
 
-Suggested angle:
-${sourcePack?.zhHantAngle || sourcePack?.whyNow || ""}
-
-Suggested title direction:
-${sourcePack?.suggestedTitleZh || ""}`;
+Command:
+\`\`\`bash
+node scripts/blog-market-source-worker.mjs \\
+  --date ${arg("date", DEFAULT_DATE)} \\
+  --backfill-dir data/blog-backfill/${arg("date", DEFAULT_DATE)} \\
+  --source-packs data/blog-backfill/${arg("date", DEFAULT_DATE)}/market-source-packs.generated.json \\
+  --seq ${item.sequence} \\
+  --article-set "${item.articleSetPath || ""}" \\
+  --write \\
+  --overwrite
+\`\`\``;
   }).join("\n\n");
 
-  return `你是 ALTOS LAB 的 market-news fast-lane 編輯。這條 lane 走 source-translation，不強制 Gemini；只有主腦明確要求改稿時才把草稿送進固定 Gemini 分頁。
+  return `# Market Source Worker Missing Items
 
-任務：依照下列 source packs，批次輸出「市場快訊」JSON。市場快訊是新聞搬磚式的快速整理與在地化，不是專欄，不要硬加管理學框架。
-
-共通規則：
-${publicCopyRules()}
-
-輸出固定 JSON：
-{
-  "status": "ok",
-  "articles": [
-    {
-      "sequence": <number>,
-      "posts": [
-        {
-          "language": "<one of requested languages>",
-          "slug": "<localized stable slug>",
-          "title": "<human title>",
-          "subtitle": "<one sentence, concrete source/event hook>",
-          "excerpt": "<reader-friendly summary>",
-          "seoTitle": "<same quality title, no backend jargon>",
-          "seoDescription": "<public meta description>",
-          "geoSummary": "<plain public summary for answer engines, no GEO wording>",
-          "bodyMarkdown": "<700-1100 words equivalent for zh/en; natural shorter/longer per locale. Include ## sections only.>",
-          "keyTakeaways": ["<3 bullets>"],
-          "faqs": [{"question":"<q>","answer":"<a>"}],
-          "tags": ["市場快訊", "AI", "<topic tag>"],
-          "newsCategory": "市場快訊",
-          "topic": "<topic>",
-          "author": "Tommy",
-          "readTimeMinutes": 3
-        }
-      ]
-    }
-  ]
-}
-
-只輸出 JSON，不要附解釋。
+Market news no longer uses Gemini missing-language prompts. Use the source
+worker below so every configured language is generated from the same source
+article, source links and credited source image.
 
 ${sections}
 `;
@@ -333,7 +311,7 @@ async function main() {
 
   const outputs = [];
   if (marketItems.length) {
-    const filePath = path.join(outputDir, `gemini-market-missing${languageSuffix}.md`);
+    const filePath = path.join(outputDir, `market-source-worker-missing${languageSuffix}.md`);
     await writeText(filePath, marketPrompt(marketItems, sourcePacksBySequence));
     outputs.push(filePath);
   }

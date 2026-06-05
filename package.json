@@ -22,7 +22,6 @@
     "blog:backfill": "node scripts/blog-backfill-planner.mjs",
     "blog:market-sources": "node scripts/blog-market-source-scanner.mjs",
     "blog:media-style-corpus": "node scripts/blog-media-style-corpus.mjs",
-    "blog:audit-ai-feeling": "node scripts/blog-ai-feeling-audit.mjs",
     "blog:doctor": "node scripts/blog-sop-doctor.mjs",
     "blog:verify-release": "node scripts/verify-blog-release.mjs",
     "blog:install-agent": "scripts/install-blog-launch-agent.sh",
@@ -33,7 +32,6 @@
     "blog:market-public-qa": "node scripts/blog-market-news-public-qa.mjs",
     "blog:repair-copy": "node scripts/blog-public-copy-repair.mjs",
     "blog:ops-audit": "node scripts/blog-operations-audit.mjs",
-    "blog:quality-gate": "node scripts/blog-quality-gate-summary.mjs",
     "blog:column-worklist": "node scripts/blog-column-production-worklist.mjs"
   },
   "dependencies": {

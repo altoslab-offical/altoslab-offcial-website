@@ -3663,7 +3663,7 @@ img {
 }
 
 .blog-site-shell .rich-text h2 {
-  margin: 1.08em 0 0.45em;
+  margin: 2em 0 0.65em;
   color: var(--al-blog-strong);
   font-family: var(--font-body);
   font-size: var(--fs-h2);

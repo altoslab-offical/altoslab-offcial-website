@@ -482,7 +482,9 @@ function localPreflight(payload) {
     if (!post.title || !post.body || !post.excerpt || !post.geoSummary) {
       issues.push(`${post.language || "unknown"} missing title, body, excerpt or geoSummary`);
     }
-    if (!Array.isArray(post.faqs) || post.faqs.length === 0) issues.push(`${post.language || "unknown"} missing FAQ`);
+    if (post.contentType !== "breaking" && (!Array.isArray(post.faqs) || post.faqs.length === 0)) {
+      issues.push(`${post.language || "unknown"} missing FAQ`);
+    }
     if (!Array.isArray(post.sourceLinks) || post.sourceLinks.length === 0) issues.push(`${post.language || "unknown"} missing sources`);
     if (JSON.stringify(sourceUrls(post)) !== JSON.stringify(referenceSources)) {
       issues.push(`${post.language || "unknown"} sourceLinks differ from the multilingual set`);

@@ -5,9 +5,16 @@ import path from "node:path";
 import process from "node:process";
 import { spawn } from "node:child_process";
 
-const DEFAULT_QUEUE_DIR = path.join(process.cwd(), "data/blog-backfill/2026-06-03/queue");
+const DEFAULT_BACKFILL_DATE = new Intl.DateTimeFormat("en-CA", {
+  timeZone: "Asia/Taipei",
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit"
+}).format(new Date());
+const DEFAULT_QUEUE_DIR = path.join(process.cwd(), "data/blog-backfill", DEFAULT_BACKFILL_DATE, "queue");
 const LOCAL_BASE_URL = "http://localhost:3000";
 const OFFICIAL_BASE_URL = "https://altoslab-ai.cc";
+const DEFAULT_CHILD_TIMEOUT_MS = Number.parseInt(process.env.ALTOS_BLOG_CHILD_TIMEOUT_MS || "120000", 10);
 
 function arg(name, fallback = "") {
   const index = process.argv.indexOf(`--${name}`);
@@ -45,7 +52,7 @@ Notes:
 `);
 }
 
-function runCommand(command, args, { cwd = process.cwd() }) {
+function runCommand(command, args, { cwd = process.cwd(), timeoutMs = DEFAULT_CHILD_TIMEOUT_MS } = {}) {
   return new Promise((resolve) => {
     const child = spawn(command, args, {
       cwd,
@@ -54,6 +61,20 @@ function runCommand(command, args, { cwd = process.cwd() }) {
 
     let stdout = "";
     let stderr = "";
+    let settled = false;
+    const finish = (result) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      resolve(result);
+    };
+    const timer = Number.isFinite(timeoutMs) && timeoutMs > 0
+      ? setTimeout(() => {
+          stderr += `\ncommand timed out after ${timeoutMs}ms: ${command} ${args.join(" ")}`;
+          child.kill("SIGTERM");
+          finish({ code: 124, stdout, stderr, timedOut: true });
+        }, timeoutMs)
+      : null;
 
     child.stdout.on("data", (chunk) => {
       stdout += chunk.toString();
@@ -62,10 +83,10 @@ function runCommand(command, args, { cwd = process.cwd() }) {
       stderr += chunk.toString();
     });
     child.on("error", (error) => {
-      resolve({ code: 1, stdout, stderr: `${stderr}${error.message}` });
+      finish({ code: 1, stdout, stderr: `${stderr}${error.message}` });
     });
     child.on("close", (code) => {
-      resolve({ code: code ?? 1, stdout, stderr });
+      finish({ code: code ?? 1, stdout, stderr });
     });
   });
 }

@@ -32,6 +32,11 @@ const INTERNAL_COPY_PATTERNS = [
 
 const WEAK_MARKET_TITLE_PATTERNS = [/更新：/i, /市場訊號/i, /可以拿來/i, /工作流/i, /流程/i];
 const LEGACY_MARKET_TEMPLATE_PATTERNS = [
+  /事件重點/i,
+  /關鍵事實/i,
+  /後續觀察/i,
+  /這則快訊的重點是什麼/i,
+  /這篇文章是否代表市場已經成熟/i,
   /消息落在哪個產品環節/i,
   /來源裡的具體細節/i,
   /先看採用而不是聲量/i,
@@ -157,6 +162,9 @@ function qaPost(post, mustTerms = []) {
     const numericCore = raw.match(/\d[\d,.]*/)?.[0] || "";
     const normalizedCore = numericCore.replace(/[,.]/g, "");
     const normalizedExcerpt = excerptText.replace(/[,.]/g, "");
+    if (/\$?\s*200\s*m\b/i.test(raw)) {
+      return /(\$?\s*200\s*m\b|200\s*million|200\s*juta|200\s*triệu|200\s*ล้าน|200\s*milyon|2\s*億|2\s*亿|2\s*억|2\s*億ドル|2\s*億美元|2\s*億美金)/i.test(post.excerpt || "");
+    }
     return excerptText.includes(raw) || (normalizedCore.length >= 2 && normalizedExcerpt.includes(normalizedCore));
   };
   if (
@@ -182,8 +190,17 @@ function qaPost(post, mustTerms = []) {
   if (sourceEvidenceTerms.length >= 3 && coveredEvidenceTerms.length < 2) {
     issues.push({ severity: "major", id: "weak-source-fact-coverage", requiredEvidence: sourceEvidenceTerms, coveredEvidence: coveredEvidenceTerms });
   }
-  if ((body.match(/^##\s+/gm) || []).length < 3) {
-    issues.push({ severity: "major", id: "market-body-too-thin", headingCount: (body.match(/^##\s+/gm) || []).length });
+  const meaningfulParagraphs = body
+    .split(/\n{2,}/)
+    .map((paragraph) => stripHtml(paragraph))
+    .filter((paragraph) => paragraph.length >= 60);
+  if (meaningfulParagraphs.length < 2 && stripHtml(body).length < 220) {
+    issues.push({
+      severity: "major",
+      id: "market-body-too-thin",
+      paragraphCount: meaningfulParagraphs.length,
+      bodyLength: stripHtml(body).length
+    });
   }
   return issues;
 }

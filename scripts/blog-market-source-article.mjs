@@ -98,6 +98,64 @@ function firstString(...values) {
   return "";
 }
 
+function absoluteSourceUrl(value = "", base = "") {
+  const raw = decodeEntities(String(value || "").trim());
+  if (!raw || /^data:|^blob:|^javascript:/i.test(raw)) return "";
+  try {
+    return new URL(raw, base || undefined).toString();
+  } catch {
+    return "";
+  }
+}
+
+function attrValue(tag = "", names = []) {
+  for (const name of names) {
+    const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const match = tag.match(new RegExp(`\\s${escaped}=["']([^"']+)["']`, "i"));
+    if (match?.[1]) return decodeEntities(match[1]).trim();
+  }
+  return "";
+}
+
+function bestSrcFromSrcset(value = "") {
+  const candidates = decodeEntities(value)
+    .split(",")
+    .map((part) => {
+      const [url, size = ""] = part.trim().split(/\s+/, 2);
+      const score = Number.parseInt(size.replace(/\D/g, ""), 10) || 0;
+      return { url, score };
+    })
+    .filter((item) => item.url);
+  candidates.sort((a, b) => b.score - a.score);
+  return candidates[0]?.url || "";
+}
+
+function extractArticleImages(html = "", baseUrl = "", fallbackCredit = "") {
+  const images = [];
+  const seen = new Set();
+  for (const match of html.matchAll(/<img\b[^>]*>/gi)) {
+    const tag = match[0] || "";
+    const rawSrc =
+      attrValue(tag, ["src", "data-src", "data-original", "data-lazy-src"]) ||
+      bestSrcFromSrcset(attrValue(tag, ["srcset", "data-srcset"]));
+    const url = absoluteSourceUrl(rawSrc, baseUrl);
+    if (!url || seen.has(url)) continue;
+    if (/\.(?:svg|gif)(?:[?#]|$)/i.test(url)) continue;
+    if (/(avatar|profile|logo|icon|sprite|tracking|pixel|placeholder|spacer)/i.test(url)) continue;
+    seen.add(url);
+    const alt = stripHtml(attrValue(tag, ["alt", "aria-label", "title"]));
+    images.push({
+      url,
+      alt,
+      caption: alt,
+      credit: fallbackCredit,
+      creditUrl: baseUrl
+    });
+    if (images.length >= 5) break;
+  }
+  return images;
+}
+
 function collectJsonLdNodes(value, nodes = []) {
   if (!value) return nodes;
   if (Array.isArray(value)) {
@@ -170,7 +228,7 @@ export function extractNumbers(...values) {
   return unique(
     values
       .join("\n")
-      .match(/(?:[$€£]\s*)?\d[\d,]*(?:\.\d+)?\s*(?:%|x|倍|萬|億|million|billion|trillion|calls?|parameters?|users?|organizations?|countries?|美元|美金|通電話|參數|家|國)?/gi) || []
+      .match(/(?:[$€£]\s*)?\d[\d,]*(?:\.\d+)?\s*(?:k|m|b|bn|tn|%|x|倍|萬|億|million|billion|trillion|calls?|parameters?|users?|organizations?|countries?|美元|美金|通電話|參數|家|國)?/gi) || []
   ).slice(0, 8);
 }
 
@@ -202,14 +260,17 @@ export function normalizeSourceArticle(sourceArticle = {}, fallbackSource = {}, 
   const canonicalUrl = sourceArticle.canonicalUrl || sourceArticle.url || source.url || "";
   const standfirst = normalizeNewsText(sourceArticle.standfirst || sourceArticle.description || source.summary || "");
   const body = normalizeNewsText(sourceArticle.body || sourceArticle.articleBody || "");
+  const localizedLanguage = sourceArticle.localizedLanguage || "";
   const factBullets = unique(
     [
       ...(Array.isArray(sourceArticle.factBullets) ? sourceArticle.factBullets : []),
-      ...factBulletsFromText({
-        title: headline,
-        summary: [standfirst, body.slice(0, 1600)].filter(Boolean).join(" "),
-        publisher
-      })
+      ...(localizedLanguage
+        ? []
+        : factBulletsFromText({
+            title: headline,
+            summary: [standfirst, body.slice(0, 1600)].filter(Boolean).join(" "),
+            publisher
+          }))
     ]
       .map((fact) => normalizeNewsText(fact))
       .filter(Boolean)
@@ -222,6 +283,25 @@ export function normalizeSourceArticle(sourceArticle = {}, fallbackSource = {}, 
     creditUrl: sourceArticle.image?.creditUrl || fallbackPack.coverCreditUrl || canonicalUrl,
     probe: sourceArticle.image?.probe || fallbackPack.scanner?.imageProbe || null
   };
+  const imageSeen = new Set([image.url].filter(Boolean));
+  const images = [
+    ...(Array.isArray(sourceArticle.images) ? sourceArticle.images : []),
+    ...(Array.isArray(sourceArticle.contentImages) ? sourceArticle.contentImages : [])
+  ]
+    .map((item) => {
+      const url = typeof item === "string" ? item : item?.url;
+      if (!url || imageSeen.has(url)) return null;
+      imageSeen.add(url);
+      return {
+        url,
+        alt: normalizeNewsText(item?.alt || item?.caption || headline || "source article image"),
+        caption: normalizeNewsText(item?.caption || item?.alt || ""),
+        credit: item?.credit || image.credit || publisher,
+        creditUrl: item?.creditUrl || image.creditUrl || canonicalUrl
+      };
+    })
+    .filter(Boolean)
+    .slice(0, 3);
   const minimumFacts = factBullets.length >= 3 || (standfirst && (entities.length >= 2 || numbers.length >= 1));
   const extractionConfidence =
     Number.isFinite(Number(sourceArticle.extractionConfidence))
@@ -236,11 +316,13 @@ export function normalizeSourceArticle(sourceArticle = {}, fallbackSource = {}, 
     publishedAt,
     canonicalUrl,
     standfirst,
+    localizedLanguage,
     factBullets,
     entities,
     numbers,
     body: body.slice(0, 2000),
     image,
+    images,
     extractionConfidence
   };
 }
@@ -282,7 +364,8 @@ export function extractSourceArticleFromHtml(candidate = {}, html = "", image = 
         credit: image.credit || publisher,
         creditUrl: image.creditUrl || canonicalUrl || candidate.url || "",
         probe: image.probe || candidate.imageProbe || null
-      }
+      },
+      images: extractArticleImages(html, canonicalUrl || candidate.url || "", image.credit || publisher)
     },
     {
       title: headline || candidate.title,

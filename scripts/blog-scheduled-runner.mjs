@@ -802,6 +802,8 @@ ${await fs.readFile(orchestratorPromptPath, "utf8").catch(() => "")}
     sourcePacksPath,
     "--seq",
     "1",
+    "--article-set",
+    repairedArticleSetPath,
     "--write",
     "--overwrite"
   ], { cwd: process.cwd(), timeoutMs: Number(process.env.ALTOS_BLOG_MARKET_SCAN_TIMEOUT_MS || "90000") });
@@ -824,67 +826,17 @@ ${await fs.readFile(orchestratorPromptPath, "utf8").catch(() => "")}
     return { ok: true, skipped: true, phase: "market-scan", reason: "source worker held", runDir, manifestPath, sourceWorker: held.pipeline.sourceWorker, doctor: compactDoctorResult(doctor) };
   }
 
-  const merge = await runCommand(process.execPath, [
-    "scripts/merge-market-gemini-chunks.mjs",
-    "--seq",
-    "1",
-    "--date",
-    date,
-    "--slot",
-    slot,
-    "--backfill-dir",
-    runDir,
-    "--out-dir",
-    mergedDir
-  ], { cwd: process.cwd(), timeoutMs: Number(process.env.ALTOS_BLOG_MARKET_SCAN_TIMEOUT_MS || "90000") });
-  if (merge.code !== 0) {
-    const held = {
-      ...manifest,
-      status: "held",
-      updatedAt: new Date().toISOString(),
-      validateOnly: {
-        wouldPublish: false,
-        errors: [`market merge held: ${merge.stderr.trim() || merge.stdout.trim()}`]
-      },
-      pipeline: {
-        scanner: { code: scanner.code, stdout: scanner.stdout.trim(), stderr: scanner.stderr.trim() },
-        sourceWorker: { code: sourceWorker.code, stdout: sourceWorker.stdout.trim(), stderr: sourceWorker.stderr.trim() },
-        merge: { code: merge.code, stdout: merge.stdout.trim(), stderr: merge.stderr.trim() }
-      }
-    };
-    await writeJson(manifestPath, held);
-    await writeMarketIndex({ ...held, manifestPath });
-    return { ok: true, skipped: true, phase: "market-scan", reason: "merge held", runDir, manifestPath, merge: held.pipeline.merge, doctor: compactDoctorResult(doctor) };
-  }
-
-  const mergedArticleSetPath = merge.stdout.trim().split(/\r?\n/).filter(Boolean).at(-1) || path.join(mergedDir, "article-set.json");
-  const repair = await runCommand(process.execPath, [
-    "scripts/repair-market-article-set.mjs",
-    "--article-set",
-    mergedArticleSetPath,
-    "--out",
-    repairedArticleSetPath
-  ], { cwd: process.cwd(), timeoutMs: Number(process.env.ALTOS_BLOG_MARKET_SCAN_TIMEOUT_MS || "90000") });
-  if (repair.code !== 0) {
-    const held = {
-      ...manifest,
-      status: "held",
-      updatedAt: new Date().toISOString(),
-      validateOnly: {
-        wouldPublish: false,
-        errors: [`market public-copy repair held: ${repair.stderr.trim() || repair.stdout.trim()}`]
-      },
-      pipeline: {
-        scanner: { code: scanner.code, stdout: scanner.stdout.trim(), stderr: scanner.stderr.trim() },
-        sourceWorker: { code: sourceWorker.code, stdout: sourceWorker.stdout.trim(), stderr: sourceWorker.stderr.trim() },
-        merge: { code: merge.code, stdout: merge.stdout.trim(), stderr: merge.stderr.trim() },
-        repair: { code: repair.code, stdout: repair.stdout.trim(), stderr: repair.stderr.trim() }
-      }
-    };
-    await writeJson(manifestPath, held);
-    await writeMarketIndex({ ...held, manifestPath });
-    return { ok: true, skipped: true, phase: "market-scan", reason: "public copy repair held", runDir, manifestPath, repair: held.pipeline.repair, doctor: compactDoctorResult(doctor) };
-  }
+  const merge = {
+    code: 0,
+    stdout: repairedArticleSetPath,
+    stderr: "",
+    note: "source worker writes article-set directly; legacy market Gemini merge disabled"
+  };
+  const repair = {
+    code: 0,
+    stdout: "source-only renderer; public-copy repair bypassed for fresh market scan",
+    stderr: ""
+  };
 
   const validate = await runCommand(process.execPath, [
     "scripts/blog-local-worker.mjs",

@@ -73,7 +73,7 @@ packs for the market-news fast lane. It does not publish and does not generate
 public copy.
 
 Examples:
-  npm run blog:market-sources -- --date 2026-06-04 --queue-dir data/blog-backfill/2026-06-04/queue --write
+  npm run blog:market-sources -- --date <date> --queue-dir data/blog-backfill/<date>/queue --write
   node scripts/blog-market-source-scanner.mjs --max-packs 6 --write --overwrite
 
 Options:
@@ -633,11 +633,6 @@ async function main() {
     }
     if (!enriched.sourceArticle?.canonicalUrl || enriched.sourceArticle.extractionConfidence < 0.6 || enriched.sourceArticle.factBullets.length < 3) {
       skipped.push({ title: candidate.title, url: candidate.url, reason: "source article facts below market-news threshold" });
-      continue;
-    }
-    const frameKey = marketFrameKeyForCandidate(enriched);
-    if (frameKey === "ai-market-update") {
-      skipped.push({ title: candidate.title, url: candidate.url, reason: "no deterministic newsroom frame for fast-lane localization" });
       continue;
     }
     packs.push(sourcePackFromCandidate(sequences[packs.length], enriched));

@@ -286,8 +286,8 @@ function buildCommands({ date, sequences, visualsFile }) {
     "node scripts/merge-column-gemini-gpt.mjs",
     `--date ${date}`,
     `--sequences ${seqList}`,
-    "--gemini-dir data/blog-backfill/2026-06-04/column-production",
-    "--column-pack data/blog-backfill/2026-06-04/column-production-queue/column-source-packs-9-reviewed.json",
+    `--gemini-dir data/blog-backfill/${date}/column-production`,
+    `--column-pack data/blog-backfill/${date}/column-production-queue/column-source-packs-9-reviewed.json`,
     `--visuals-file ${visualsFile}`,
     "--out-root data/blog-worker-runs"
   ]);

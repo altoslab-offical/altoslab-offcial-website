@@ -11,6 +11,12 @@ const LANGUAGE_GROUPS = [
   ["id", "vi"],
   ["th", "ms", "fil"]
 ];
+const DEFAULT_BACKFILL_DATE = new Intl.DateTimeFormat("en-CA", {
+  timeZone: "Asia/Taipei",
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit"
+}).format(new Date());
 
 function arg(name, fallback = "") {
   const index = process.argv.indexOf(`--${name}`);
@@ -43,12 +49,12 @@ Usage:
   node scripts/column-localization-workflow.mjs --check-only
   node scripts/column-localization-workflow.mjs --sequences 25,26
   node scripts/column-localization-workflow.mjs --sequences 25,26 --localization-languages en,ja,ko
-  node scripts/column-localization-workflow.mjs --source-dir data/blog-backfill/2026-06-04/column-production --localized-dir data/blog-backfill/2026-06-04/column-production
+  node scripts/column-localization-workflow.mjs --source-dir data/blog-backfill/<date>/column-production --localized-dir data/blog-backfill/<date>/column-production
 
 Options:
-  --source-pack path      default: data/blog-backfill/2026-06-04/column-production-queue/column-source-packs-9-reviewed.json
-  --source-dir path       default: data/blog-backfill/2026-06-04/column-production
-  --localized-dir path    default: data/blog-backfill/2026-06-04/column-production
+  --source-pack path      default: data/blog-backfill/<date>/column-production-queue/column-source-packs-9-reviewed.json
+  --source-dir path       default: data/blog-backfill/<date>/column-production
+  --localized-dir path    default: data/blog-backfill/<date>/column-production
   --prompt-dir path       default: <source-dir>/prompts
   --sequences n1,n2       optional sequence list; default: all in source-pack
   --localization-languages langs
@@ -71,7 +77,7 @@ function normalizeSourceForChecks(sourcePost, packEntry) {
 function detectBackfillDate(filePath) {
   const normalized = path.resolve(filePath);
   const matched = normalized.match(/blog-backfill[\\/](\d{4}-\d{2}-\d{2})[\\/]/);
-  return matched?.[1] || "2026-06-04";
+  return matched?.[1] || DEFAULT_BACKFILL_DATE;
 }
 
 function inferExpectedTranslationGroupId(sequence, sourcePost, packEntry, sourcePath) {
@@ -319,10 +325,13 @@ async function main() {
     return;
   }
 
-  const sourcePackPath = arg("source-pack", path.join(process.cwd(), "data/blog-backfill/2026-06-04/column-production-queue/column-source-packs-9-reviewed.json"));
-  const sourceDir = path.resolve(arg("source-dir", path.join(process.cwd(), "data/blog-backfill/2026-06-04/column-production")));
+  const sourcePackPath = arg(
+    "source-pack",
+    path.join(process.cwd(), "data", "blog-backfill", DEFAULT_BACKFILL_DATE, "column-production-queue", "column-source-packs-9-reviewed.json")
+  );
+  const sourceDir = path.resolve(arg("source-dir", path.join(process.cwd(), "data", "blog-backfill", DEFAULT_BACKFILL_DATE, "column-production")));
   const promptDir = path.resolve(arg("prompt-dir", path.join(sourceDir, "prompts")));
-  const localizedDir = path.resolve(arg("localized-dir", path.join(process.cwd(), "data/blog-backfill/2026-06-04/column-production")));
+  const localizedDir = path.resolve(arg("localized-dir", path.join(process.cwd(), "data", "blog-backfill", DEFAULT_BACKFILL_DATE, "column-production")));
   const selected = parseIntSet(arg("sequences", ""));
   const selectedLanguages = arg("localization-languages", "").trim()
     ? arg("localization-languages", "").split(",").map((item) => item.trim()).filter(Boolean)

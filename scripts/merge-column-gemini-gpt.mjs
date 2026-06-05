@@ -5,12 +5,17 @@ import path from "node:path";
 import process from "node:process";
 
 const LANGUAGES = ["zh-Hant", "en", "ja", "ko", "id", "vi", "th", "ms", "fil"];
-const DEFAULT_BACKFILL_DATE = "2026-06-03";
+const DEFAULT_BACKFILL_DATE = new Intl.DateTimeFormat("en-CA", {
+  timeZone: "Asia/Taipei",
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit"
+}).format(new Date());
 const DEFAULT_COLUMN_PACK = path.join(
   process.cwd(),
   "data",
   "blog-backfill",
-  "2026-06-04",
+  DEFAULT_BACKFILL_DATE,
   "column-production-queue",
   "column-source-packs-9-reviewed.json"
 );
@@ -41,8 +46,8 @@ ALTOS LAB column Gemini/GPT merger
 
 Usage:
   node scripts/merge-column-gemini-gpt.mjs --batch 1 --visuals-file ./column-batch-1-visuals.parsed.json
-  node scripts/merge-column-gemini-gpt.mjs --sequences 2,4,6 --gemini-dir data/blog-backfill/2026-06-03 --visuals-file ./visuals.json
-  node scripts/merge-column-gemini-gpt.mjs --date 2026-06-04 --sequences 25,26 --column-pack data/blog-backfill/2026-06-04/column-production-queue/column-source-packs-9-reviewed.json --gemini-dir data/blog-backfill/2026-06-04/column-production --visuals-file ./visuals.json
+  node scripts/merge-column-gemini-gpt.mjs --sequences 2,4,6 --gemini-dir data/blog-backfill/<date>/column-production --visuals-file ./visuals.json
+  node scripts/merge-column-gemini-gpt.mjs --date <date> --sequences 25,26 --column-pack data/blog-backfill/<date>/column-production-queue/column-source-packs-9-reviewed.json --gemini-dir data/blog-backfill/<date>/column-production --visuals-file ./visuals.json
 
 Gemini parsed files:
   column-batch-<n>-wave-*.parsed.json

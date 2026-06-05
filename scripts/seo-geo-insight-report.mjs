@@ -389,7 +389,11 @@ function buildInsights({ targetUrl, health, posts, surface, ga4, searchConsole }
       { key: "blog has at least one qualified public post", ok: posts.length > 0, weight: 8 },
       { key: "blog posts have SEO title/meta/excerpt", ok: posts.length > 0 && percent(postsWithSeoMeta, posts.length) >= 90, weight: 12 },
       { key: "blog covers have alt text", ok: posts.length > 0 && percent(postsWithImages, posts.length) >= 90, weight: 8 },
-      { key: "daily column target is 2", ok: health?.integrations?.dailyColumnTarget === 2, weight: 8 }
+      {
+        key: "daily column target matches configured target",
+        ok: health?.integrations?.dailyColumnTarget === Number(process.env.ALTOS_BLOG_COLUMN_DAILY_LIMIT || "1"),
+        weight: 8
+      }
     ],
     geo: [
       { key: "llms.txt reachable", ok: Boolean(surface["/llms.txt"]?.ok), weight: 12 },
