@@ -3659,11 +3659,11 @@ img {
 .blog-site-shell .rich-text p,
 .blog-site-shell .rich-text ul,
 .blog-site-shell .rich-text ol {
-  margin: 0.58em 0;
+  margin: 0.42em 0;
 }
 
 .blog-site-shell .rich-text h2 {
-  margin: 1.45em 0 0.55em;
+  margin: 1.08em 0 0.45em;
   color: var(--al-blog-strong);
   font-family: var(--font-body);
   font-size: var(--fs-h2);
@@ -3673,13 +3673,19 @@ img {
 }
 
 .blog-site-shell .rich-text h3 {
-  margin: 1.35em 0 0.45em;
+  margin: 1.05em 0 0.4em;
   color: var(--al-blog-strong);
   font-family: var(--font-body);
   font-size: clamp(20px, 2vw, 24px);
   line-height: var(--lh-heading);
   letter-spacing: 0;
   font-weight: 750;
+}
+
+.blog-site-shell .article-faq-section {
+  box-sizing: border-box;
+  width: min(var(--grid-prose), 100%);
+  margin: 30px auto 0;
 }
 
 .blog-site-shell .rich-text blockquote {
