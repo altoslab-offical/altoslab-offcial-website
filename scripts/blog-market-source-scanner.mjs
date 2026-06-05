@@ -3,6 +3,8 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
+import { extractSourceArticleFromHtml, cleanSourceTitle } from "./blog-market-source-article.mjs";
+import { inferMarketFrame } from "./blog-market-newsroom.mjs";
 
 const DEFAULT_BASE_URL = "https://altoslab-ai.cc";
 const DEFAULT_TARGET_DATE = new Intl.DateTimeFormat("en-CA", {
@@ -12,12 +14,21 @@ const DEFAULT_TARGET_DATE = new Intl.DateTimeFormat("en-CA", {
   day: "2-digit"
 }).format(new Date());
 const DEFAULT_MAX_PACKS = 10;
+const SOURCE_PROFILES = {
+  "mainstream-ai-us": new Set([
+    "techcrunch-ai",
+    "the-verge-ai",
+    "venturebeat-ai",
+    "mit-technology-review-ai",
+    "wired-ai"
+  ])
+};
 const FEED_TIMEOUT_MS = 8000;
 const PAGE_TIMEOUT_MS = 12000;
 const IMAGE_TIMEOUT_MS = 6500;
-const MIN_IMAGE_WIDTH = 1200;
-const MIN_IMAGE_HEIGHT = 630;
-const MIN_IMAGE_BYTES = 40_000;
+const MIN_IMAGE_WIDTH = Number(process.env.ALTOS_BLOG_MARKET_MIN_IMAGE_WIDTH || "768");
+const MIN_IMAGE_HEIGHT = Number(process.env.ALTOS_BLOG_MARKET_MIN_IMAGE_HEIGHT || "432");
+const MIN_IMAGE_BYTES = Number(process.env.ALTOS_BLOG_MARKET_MIN_IMAGE_BYTES || "25000");
 const GENERIC_STOCK_HOSTS = [
   "unsplash.com",
   "images.unsplash.com",
@@ -32,10 +43,16 @@ const GENERIC_STOCK_HOSTS = [
 ];
 const TOPIC_INCLUDE_PATTERN =
   /\b(AI|artificial intelligence|agent|agents|ChatGPT|Claude|Gemini|Codex|OpenAI|Anthropic|DeepMind|LLM|model|machine learning|inference|automation|robot|robotics|developer|software|cloud|data|governance|safety|security|compute|GPU|chip|search)\b/i;
+const DIRECT_AI_NEWS_PATTERN =
+  /\b(AI|artificial intelligence|agent|agents|ChatGPT|Claude|Gemini|Codex|OpenAI|Anthropic|DeepMind|LLM|model|machine learning|inference|automation|robot|robotics|GPU|chip|AI Search|search)\b/i;
 const ENTERPRISE_INCLUDE_PATTERN =
   /\b(AI|artificial intelligence|agent|agents|ChatGPT|Claude|Gemini|Codex|OpenAI|Anthropic|DeepMind|LLM|model|machine learning|inference|automation|robot|robotics|developer|software|cloud|data|governance|safety|security|compute|GPU|chip|enterprise|business|workflow|API|runtime|platform|infrastructure)\b/i;
 const CONSUMER_NOISE_PATTERN =
   /\b(thrift|vintage shopping|shopping|recipe|recipes|travel tips|fashion|movie|music|celebrity|sports|holiday|gift guide)\b/i;
+const EVENT_PROMO_PATTERN =
+  /\b(register now|tickets?|event|conference|summit|strictlyvc|agenda|speaker|fundraising take center stage)\b/i;
+const OPINION_NOISE_PATTERN =
+  /\b(you cowards|let us filter|podcast|uncanny valley|newsletter|the download|roundup|what we learned|opinion|editorial|shrugs off doubts|ahead of its ipo)\b/i;
 
 function arg(name, fallback = "") {
   const index = process.argv.indexOf(`--${name}`);
@@ -65,6 +82,7 @@ Options:
   --queue-dir <path>     Defaults to data/blog-backfill/<date>/queue
   --out <path>           Defaults to data/blog-backfill/<date>/market-source-packs.generated.json
   --max-packs <n>        Defaults to ${DEFAULT_MAX_PACKS}
+  --source-profile <id>  Use a bounded source pool. Current: mainstream-ai-us.
   --write                Write the source-pack file. Without it, prints dry-run output.
   --overwrite            Replace existing source-pack entries for selected sequences.
 `);
@@ -239,18 +257,37 @@ function recencyScore(value) {
 
 function candidateScore(candidate) {
   const officialBoost = candidate.tier === "official-rss" ? 18 : candidate.tier === "trusted-media" ? 8 : 0;
-  return candidate.authority * 0.36 + candidate.freshness * 0.24 + recencyScore(candidate.publishedAt) * 0.3 + officialBoost;
+  const title = candidate.title || "";
+  const summary = candidate.summary || "";
+  const directTitleBoost = DIRECT_AI_NEWS_PATTERN.test(title) ? 18 : -10;
+  const directSummaryBoost = DIRECT_AI_NEWS_PATTERN.test(summary) ? 6 : 0;
+  const opinionPenalty = OPINION_NOISE_PATTERN.test(`${title}\n${summary}`) ? -42 : 0;
+  return candidate.authority * 0.36 + candidate.freshness * 0.24 + recencyScore(candidate.publishedAt) * 0.3 + officialBoost + directTitleBoost + directSummaryBoost + opinionPenalty;
 }
 
 function isRelevantMarketCandidate(candidate) {
-  const haystack = `${candidate.title || ""}\n${candidate.summary || ""}\n${candidate.category || ""}`;
+  const titleAndSummary = `${candidate.title || ""}\n${candidate.summary || ""}`;
+  const haystack = `${titleAndSummary}\n${candidate.category || ""}\n${candidate.url || ""}`;
   if (/how we used gemini to build google i\/o 2026/i.test(candidate.title || "")) return false;
   if (/(braintrust|endava|rosalind biodefense|trustworthy third party evaluations|qwen 3\.7|minimax m3)/i.test(candidate.title || "")) return false;
+  if (EVENT_PROMO_PATTERN.test(haystack)) return false;
+  if (OPINION_NOISE_PATTERN.test(haystack)) return false;
   if (CONSUMER_NOISE_PATTERN.test(haystack) && !ENTERPRISE_INCLUDE_PATTERN.test(candidate.title || "")) return false;
   if (/vercel/i.test(candidate.publisher || "") && !/\b(AI|artificial intelligence|agent|LLM|model|Grok|Qwen|MiniMax|gateway|inference)\b/i.test(candidate.title || "")) {
     return false;
   }
-  return TOPIC_INCLUDE_PATTERN.test(haystack);
+  return TOPIC_INCLUDE_PATTERN.test(titleAndSummary);
+}
+
+function coarseTopicKey(candidate) {
+  const text = `${candidate.title || ""}\n${candidate.summary || ""}\n${candidate.url || ""}`.toLowerCase();
+  if (/bioweapon|biological weapon|biosecurity/.test(text)) return "ai-bioweapons";
+  if (/warehouse robot|proteus/.test(text)) return "amazon-warehouse-robot";
+  if (/tsmc|semiconductor|chipmaker/.test(text)) return "tsmc-ai-demand";
+  if (/ai search|publishers.*opt out|opt out.*ai search/.test(text)) return "ai-search-publisher-optout";
+  if (/anthropic.*ipo|ipo.*anthropic/.test(text)) return "anthropic-ipo";
+  if (/voice ai|aethex/.test(text)) return "voice-ai-aethex";
+  return normalizeTitle(candidate.title).split(" ").slice(0, 8).join(" ");
 }
 
 async function liveDuplicateState(baseUrl) {
@@ -289,13 +326,20 @@ async function enrichCandidate(candidate) {
     metaContent(page.text, "thumbnail");
   const imageUrl = imageRaw ? absoluteUrl(imageRaw, candidate.url) : "";
   const imageProbe = imageUrl ? await pickUsableImageUrl(imageUrl) : null;
+  const sourceArticle = extractSourceArticleFromHtml(candidate, page.text, {
+    url: imageProbe?.url || imageUrl,
+    credit: candidate.publisher,
+    creditUrl: candidate.url,
+    probe: imageProbe
+  });
   return {
     ...candidate,
     pageStatus: page.status,
     pageTitle: metaContent(page.text, "og:title") || candidate.title,
     pageDescription: metaContent(page.text, "og:description") || metaContent(page.text, "description") || candidate.summary,
     imageUrl: imageProbe?.url || imageUrl,
-    imageProbe
+    imageProbe,
+    sourceArticle
   };
 }
 
@@ -360,6 +404,22 @@ function imageUrlAlternates(url) {
   if (/assets\.vercel\.com\/image\/upload\/contentful\//.test(url)) {
     alternates.push(url.replace("/image/upload/contentful/", "/image/upload/w_1200,h_630,c_fill/contentful/"));
   }
+  if (/techcrunch\.com\/wp-content\/uploads\//.test(url) && /[?&]resize=1200,\d+/i.test(url)) {
+    alternates.push(url.replace(/([?&]resize=1200),\d+/i, "$1,675"));
+  }
+  if (/platform\.theverge\.com\/wp-content\/uploads\//.test(url) && /[?&]crop=/i.test(url)) {
+    try {
+      const parsed = new URL(url);
+      parsed.searchParams.delete("crop");
+      parsed.searchParams.set("w", "1200");
+      alternates.push(parsed.toString());
+    } catch {
+      // Keep the original URL if parsing fails.
+    }
+  }
+  if (/wired\.com\/photos\//.test(url) && /\/master\/w_\d+/.test(url)) {
+    alternates.push(url.replace(/\/master\/w_\d+/i, "/master/w_1200,c_limit"));
+  }
   return [...new Set(alternates)];
 }
 
@@ -415,45 +475,67 @@ async function pickUsableImageUrl(url) {
 }
 
 function sourceSummary(candidate) {
-  const text = String(candidate.pageDescription || candidate.summary || "").slice(0, 220);
-  return text || `${candidate.publisher} published an AI market update that should be checked against the original source.`;
+  const text = String(candidate.sourceArticle?.standfirst || candidate.pageDescription || candidate.summary || "").slice(0, 260);
+  return text || "";
+}
+
+function marketFrameKeyForCandidate(candidate) {
+  const title = candidate.pageTitle || candidate.title;
+  const frame = inferMarketFrame({
+    topic: title,
+    sourceLinks: [
+      {
+        title,
+        url: candidate.url,
+        publisher: candidate.publisher,
+        publishedAt: candidate.publishedAt,
+        summary: sourceSummary(candidate)
+      }
+    ]
+  });
+  return frame?.key || "ai-market-update";
 }
 
 function sourcePackFromCandidate(sequence, candidate) {
   const title = candidate.pageTitle || candidate.title;
   const primaryUrl = candidate.url;
   const publishedAt = candidate.publishedAt || new Date().toISOString();
+  const sourceLinks = [
+    {
+      title: cleanSourceTitle(title),
+      url: primaryUrl,
+      publisher: candidate.publisher,
+      publishedAt,
+      summary: sourceSummary(candidate)
+    }
+  ];
+  if (candidate.sourceUrl && candidate.sourceUrl !== primaryUrl) {
+    sourceLinks.push({
+      title: `${candidate.publisher} AI coverage`,
+      url: candidate.sourceUrl,
+      publisher: candidate.publisher,
+      publishedAt,
+      summary: `${candidate.publisher}'s current AI coverage page for related reporting and follow-up context.`
+    });
+  }
   return {
     sequence,
     topic: title,
-    sourceLinks: [
-      {
-        title,
-        url: primaryUrl,
-        publisher: candidate.publisher,
-        publishedAt,
-        summary: sourceSummary(candidate)
-      },
-      {
-        title: `${candidate.publisher} source index`,
-        url: candidate.sourceUrl,
-        publisher: candidate.publisher,
-        publishedAt,
-        summary: `Source index used to confirm this item came from ${candidate.publisher}'s current AI feed; article claims should remain anchored to the primary source.`
-      }
-    ],
+    sourceLinks,
+    sourceArticle: candidate.sourceArticle,
     primarySourceImageUrl: candidate.imageUrl,
     coverCredit: `Source image: ${candidate.publisher}`,
     coverCreditUrl: primaryUrl,
-    whyNow: "This item was selected from the latest verified AI source feeds and has a usable source/official image, so it can move through the fast market-news lane without opening Gemini.",
-    zhHantAngle: "把這則海外 AI 消息整理成台灣與亞洲企業能立刻判斷的採用訊號：它改變了哪個工作流、採購或風險檢查點。",
-    suggestedTitleZh: title,
-    suggestedSubtitleZh: "快速整理事件、來源與對企業下一步的影響，不延伸成長篇專欄。",
+    whyNow: "This item was selected from verified AI source feeds with a usable credited source image and enough source facts for a source-faithful market brief.",
+    zhHantAngle: "用市場快訊口吻整理來源事實，不延伸成專欄或導入方法論。",
+    suggestedTitleZh: cleanSourceTitle(title),
+    suggestedSubtitleZh: sourceSummary(candidate),
     duplicateRisk: "Scanner checked live source URLs, cover URLs and normalized titles. Main-brain still needs to compare final wording before publish.",
     scanner: {
       generatedAt: new Date().toISOString(),
       sourceId: candidate.sourceId,
       feedUrl: candidate.sourceFeedUrl,
+      sourceIndexUrl: candidate.sourceUrl,
       score: Math.round(candidateScore(candidate)),
       pageStatus: candidate.pageStatus
       ,
@@ -470,9 +552,18 @@ async function main() {
   const date = arg("date", DEFAULT_TARGET_DATE);
   const maxPacks = Number.parseInt(arg("max-packs", String(DEFAULT_MAX_PACKS)), 10) || DEFAULT_MAX_PACKS;
   const baseUrl = arg("base-url", DEFAULT_BASE_URL);
+  const sourceProfile = arg("source-profile", "");
   const queueDir = path.resolve(arg("queue-dir", path.join(process.cwd(), "data/blog-backfill", date, "queue")));
   const outPath = path.resolve(arg("out", path.join(process.cwd(), "data/blog-backfill", date, "market-source-packs.generated.json")));
-  const registry = parseRegistryEntries(await readText(path.join(process.cwd(), "lib/blog-source-registry.ts")));
+  const allRegistry = parseRegistryEntries(await readText(path.join(process.cwd(), "lib/blog-source-registry.ts")));
+  const profileIds = SOURCE_PROFILES[sourceProfile];
+  if (sourceProfile && !profileIds) throw new Error(`unknown source profile: ${sourceProfile}`);
+  const registry = profileIds ? allRegistry.filter((source) => profileIds.has(source.id)) : allRegistry;
+  if (profileIds && registry.length !== profileIds.size) {
+    const found = new Set(registry.map((source) => source.id));
+    const missing = [...profileIds].filter((id) => !found.has(id));
+    throw new Error(`source profile ${sourceProfile} is missing registry ids: ${missing.join(", ")}`);
+  }
   const live = await liveDuplicateState(baseUrl);
   const sequences = await queueMarketSequences(queueDir, maxPacks);
   if (!sequences.length) throw new Error(`no market queue sequences found in ${queueDir}`);
@@ -487,7 +578,7 @@ async function main() {
   );
 
   const feedResults = await Promise.all(
-    registry.slice(0, 18).map(async (source) => {
+    registry.slice(0, sourceProfile ? registry.length : 18).map(async (source) => {
       const fetched = await fetchText(source.feedUrl, FEED_TIMEOUT_MS);
       return fetched.ok ? parseFeed(fetched.text, source) : [];
     })
@@ -508,8 +599,21 @@ async function main() {
 
   const packs = [];
   const skipped = [];
-  for (const candidate of candidates.slice(0, maxPacks * 4)) {
+  const sourceCounts = new Map();
+  const topicKeys = new Set();
+  const candidateWindow = sourceProfile ? maxPacks * 12 : maxPacks * 4;
+  for (const candidate of candidates.slice(0, candidateWindow)) {
     if (packs.length >= sequences.length) break;
+    const sourceCount = sourceCounts.get(candidate.sourceId) || 0;
+    if (sourceProfile && sourceCount >= 2) {
+      skipped.push({ title: candidate.title, url: candidate.url, reason: "source diversity cap" });
+      continue;
+    }
+    const topicKey = coarseTopicKey(candidate);
+    if (sourceProfile && topicKeys.has(topicKey)) {
+      skipped.push({ title: candidate.title, url: candidate.url, reason: "same event already selected in batch" });
+      continue;
+    }
     const enriched = await enrichCandidate(candidate);
     if (!enriched.imageUrl) {
       skipped.push({ title: candidate.title, url: candidate.url, reason: "missing og/twitter/source image" });
@@ -527,7 +631,18 @@ async function main() {
       skipped.push({ title: candidate.title, url: candidate.url, reason: "cover image already used live" });
       continue;
     }
+    if (!enriched.sourceArticle?.canonicalUrl || enriched.sourceArticle.extractionConfidence < 0.6 || enriched.sourceArticle.factBullets.length < 3) {
+      skipped.push({ title: candidate.title, url: candidate.url, reason: "source article facts below market-news threshold" });
+      continue;
+    }
+    const frameKey = marketFrameKeyForCandidate(enriched);
+    if (frameKey === "ai-market-update") {
+      skipped.push({ title: candidate.title, url: candidate.url, reason: "no deterministic newsroom frame for fast-lane localization" });
+      continue;
+    }
     packs.push(sourcePackFromCandidate(sequences[packs.length], enriched));
+    sourceCounts.set(candidate.sourceId, sourceCount + 1);
+    topicKeys.add(topicKey);
   }
 
   const overwrite = hasFlag("overwrite");

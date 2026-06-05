@@ -356,6 +356,19 @@ export const BLOG_SOURCE_REGISTRY: BlogSourceRegistryEntry[] = [
     notes: "Consumer and platform AI news; use for market timing, not technical truth alone."
   },
   {
+    id: "wired-ai",
+    name: "WIRED AI",
+    url: "https://www.wired.com/tag/artificial-intelligence/",
+    feedUrl: "https://www.wired.com/feed/tag/ai/latest/rss",
+    tier: "trusted-media",
+    market: "us",
+    language: "en",
+    category: "AI Products",
+    authority: 78,
+    freshness: 88,
+    notes: "Mainstream US technology reporting on AI products, safety, policy and culture; use for market-facing source translation."
+  },
+  {
     id: "openverse-images",
     name: "Openverse",
     url: "https://openverse.org/",

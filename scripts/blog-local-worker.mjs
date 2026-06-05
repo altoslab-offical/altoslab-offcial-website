@@ -11,7 +11,7 @@ const LANGUAGES = ["zh-Hant", "en", "ja", "ko", "id", "vi", "th", "ms", "fil"];
 const SLOT_HOURS = { morning: "09:00", afternoon: "16:00" };
 const DEFAULT_BASE_URL = "https://altoslab-ai.cc";
 const LANGUAGE_LABEL = LANGUAGES.join(", ");
-const COLUMN_DAILY_LIMIT = Number(process.env.ALTOS_BLOG_COLUMN_DAILY_LIMIT || "2");
+const COLUMN_DAILY_LIMIT = Number(process.env.ALTOS_BLOG_COLUMN_DAILY_LIMIT || "1");
 
 function arg(name, fallback = "") {
   const index = process.argv.indexOf(`--${name}`);
@@ -621,9 +621,19 @@ async function writeJsonFile(filePath, payload) {
   await fs.writeFile(filePath, `${JSON.stringify(payload, null, 2)}\n`, "utf8");
 }
 
+function articleSetLane(payload) {
+  const posts = Array.isArray(payload?.posts) ? payload.posts : [];
+  const isMarketOnlySet =
+    payload?.generation?.provider === "source-translation" &&
+    posts.length > 0 &&
+    posts.every((post) => post.contentType === "breaking");
+  return isMarketOnlySet ? "market" : "column";
+}
+
 function preparedCandidateIndexPath(payload, slot) {
   const date = payload.generationDate || taiwanDate();
-  return path.join(process.cwd(), "data/blog-prepared-candidates", `${date}-${slot}.json`);
+  const lane = articleSetLane(payload);
+  return path.join(process.cwd(), "data/blog-prepared-candidates", `${date}-${slot}-${lane}.json`);
 }
 
 async function writePreparedCandidateManifest({ manifestPath, articleSetPath, releaseArticleSetPath, payload, slot, validate, publish }) {
@@ -703,7 +713,9 @@ async function writePreparedCandidateManifest({ manifestPath, articleSetPath, re
   };
   if (manifestPath) {
     await writeJsonFile(manifestPath, manifest);
-    await writeJsonFile(preparedCandidateIndexPath(payload, slot), manifest);
+    if (!hasFlag("no-index")) {
+      await writeJsonFile(preparedCandidateIndexPath(payload, slot), manifest);
+    }
   }
   return manifest;
 }
@@ -825,9 +837,10 @@ async function requestRelease(payload, qualityManifest) {
 
   const body = JSON.stringify({
     ...payload,
+    replaceExistingPublished: payload.replaceExistingPublished ?? true,
     generation: {
       ...payload.generation,
-      provider: "gemini-chatgpt"
+      provider: payload.generation?.provider || "gemini-chatgpt"
     },
     qualityManifest
   });

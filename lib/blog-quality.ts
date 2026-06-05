@@ -93,11 +93,18 @@ const allowedCoverPaths = new Set([
 
 const defaultTrustedHostFragments = [
   "openai.com",
+  "platform.openai.com",
   "deepmind.google",
   "blog.google",
   "developers.google.com",
+  "cloud.google.com",
   "ai.google.dev",
+  "nist.gov",
+  "www.nist.gov",
+  "schema.org",
+  "opensearch.org",
   "anthropic.com",
+  "docs.anthropic.com",
   "mistral.ai",
   "deepseek.com",
   "api-docs.deepseek.com",
@@ -107,7 +114,10 @@ const defaultTrustedHostFragments = [
   "notion.com",
   "stripe.com",
   "microsoft.com",
+  "www.microsoft.com",
+  "learn.microsoft.com",
   "ibm.com",
+  "www.ibm.com",
   "newsroom.ibm.com",
   "artificialanalysis.ai",
   "cisco.com",
@@ -134,7 +144,7 @@ const weakSubtitlePatterns = [
 ];
 
 const subtitleEvidencePattern =
-  /(OpenAI|Anthropic|Google|DeepMind|Hugging Face|IBM|Microsoft|NVIDIA|Vercel|TechCrunch|AI Magazine|Search Console|ChatGPT|Claude|Gemini|Perplexity|Codex|AI Mode|AI Factories|Gartner|Osmos|Fabric|Maia|Kubernetes|KubeCon|GPU|官方|報導|來源|案例|發布|launch|released|published|case|report|source|workflow|rollback|trace|eval|審核|回滾|來源|試點|採購|導入|ワークフロー|出典|検証|롤백|출처|검토)/i;
+  /(OpenAI|Anthropic|Google|DeepMind|Hugging Face|IBM|Microsoft|NVIDIA|Vercel|TechCrunch|The Verge|WIRED|VentureBeat|MIT Technology Review|Reuters|Bloomberg|AI Magazine|Search Console|ChatGPT|Claude|Gemini|Perplexity|Codex|AI Mode|AI Factories|Gartner|Osmos|Fabric|Maia|Kubernetes|KubeCon|GPU|官方|報導|來源|案例|發布|launch|released|published|case|report|source|workflow|rollback|trace|eval|審核|回滾|來源|試點|採購|導入|ワークフロー|出典|検証|롤백|출처|검토)/i;
 
 const rawZhEnglishJargonPattern = /\b(?:production traces?|eval(?:uation)? loops?|eval-driven|trace|evals?|rollback)\b/i;
 
@@ -148,7 +158,7 @@ const breakingTemplateLeakBodyPattern =
   /(本文包含海外來源轉譯|本文沒有逐字翻譯|不是把國外新聞翻成中文|我們不只是把國外新聞翻成中文|市場快訊時，會把海外新聞轉成|本週請列出三個流程|總分不到\s*\d+\s*分|先買工具再找場景|source\s*brief|source\s*index|reader\s*note|Decision\s*cue|Next\s*action|Event:\s|Evidence:\s|來源摘要|可引用事實|讀者怎麼看|這則消息可以拿來|卡在哪個流程|原因是企業決策問題|article claims should remain anchored)/i;
 
 const plainLanguageCuePattern =
-  /(意思是|也就是|換成(?:企業)?語言|白話|可以理解成|翻成|先問|要回答|操作紀錄|固定測試題|測試題|人工審核|退回舊流程|回滾|what this means|in plain terms|put simply|for an operator|operation logs|test questions|human review|rollback path|つまり|言い換えると|쉽게 말해|운영 언어로)/i;
+  /(意思是|也就是|換成(?:企業)?語言|白話|可以理解成|翻成|先問|要回答|操作紀錄|固定測試題|測試題|人工審核|退回舊流程|回滾|what this means|in plain terms|put simply|for an operator|operation logs|test questions|human review|rollback path|つまり|言い換えると|쉽게 말해|운영 언어로|dengan bahasa sederhana|secara sederhana|nói đơn giản|hiểu đơn giản|พูดให้ง่าย|อธิบายง่าย|dalam bahasa mudah|sa simpleng salita)/i;
 
 const readerTensionPattern =
   /(使用者|讀者|行銷主管|創辦人|老闆|團隊|企業|品牌|客戶|買家|operator|founder|team|buyer|customer|reader|marketing lead|executive|manager|読者|チーム|企業|고객|팀|독자|실무자).{0,120}(判斷|決策|取捨|風險|預算|排名|引用|轉換|導入|workflow|decision|tradeoff|risk|budget|rank|citation|conversion|implementation|判断|意思決定|引用|전환|판단|결정|위험|예산|인용)/i;
@@ -353,11 +363,22 @@ const labsSignals = [
   "pagpapatupad",
   "product studio",
   "product",
+  "verification",
+  "citation",
+  "search",
+  "model",
+  "monitoring",
   "lab",
   "實驗室",
   "導入",
   "產品化",
   "工作流",
+  "核驗",
+  "引用",
+  "搜尋",
+  "模型",
+  "評測",
+  "監控",
   "Agent",
   "automation",
   "operations",
@@ -386,8 +407,20 @@ const labsSignals = [
   "運用",
   "実装",
   "運用",
+  "検索",
+  "検証",
+  "引用",
+  "評価",
+  "監視",
   "도입",
+  "제품",
+  "검색",
+  "검증",
+  "인용",
   "운영",
+  "권한",
+  "검토",
+  "복구",
   "통제"
 ];
 
@@ -519,7 +552,7 @@ const genericCoverWords =
   /(dashboard|analytics dashboard|team meeting|server room|workspace|generic|seo analytics|儀表板|會議|伺服器機房|ワークスペース|회의|서버룸)/i;
 
 const rejectedCoverWords =
-  /(dead|corpse|prisoner|concentration camp|nazi|war crime|weapon|gun|blood|accident|disaster|protest|politician|minister|government|military|army|anti-aircraft|air defense|defense computer|radarno|usdagov|john lennon|austen|desire screenshot|unabridged|dead prisoners|robot arm picks up|shixart|malaria|microscopy training|nigeria)/i;
+  /\b(?:dead|corpse|prisoner|concentration camp|nazi|war crime|weapon|gun|blood|accident|disaster|protest|politician|minister|government|military|army|anti-aircraft|air defense|defense computer|radarno|usdagov|john lennon|austen|desire screenshot|unabridged|dead prisoners|robot arm picks up|shixart|malaria|microscopy training|nigeria)\b/i;
 
 const antiSlopRules: Array<{
   dimension: AntiSlopDimension;
@@ -698,6 +731,27 @@ function sentenceLengths(text: string) {
     .map((sentence) => plainText(sentence).length);
 }
 
+function proseForRhythm(markdown: string) {
+  return markdown
+    .split(/\r?\n/)
+    .filter((line) => {
+      const trimmed = line.trim();
+      if (!trimmed) return false;
+      if (/^(\||#{1,6}\s|>\s|\d+\.\s|- |\[IMAGE:)/.test(trimmed)) return false;
+      return true;
+    })
+    .join("\n");
+}
+
+function antiSlopReviewText(post: BlogPost) {
+  let text = `${post.title}\n${post.excerpt}\n${post.body}`;
+  text = text.replace(/\bMay\b/g, "MayMonth");
+  if (post.language === "fil") {
+    text = text.replace(/\b[Mm]ay\b/g, "meron");
+  }
+  return text;
+}
+
 function repeatedRhythmWindows(lengths: number[]) {
   let repeated = 0;
   for (let index = 0; index <= lengths.length - 3; index += 1) {
@@ -719,7 +773,7 @@ export function reviewAntiSlop(post: BlogPost): ReviewResult & {
   const contentType = post.contentType || "column";
   const threshold = ANTI_SLOP_THRESHOLDS[contentType];
   const isMarketNews = contentType === "breaking";
-  const text = `${post.title}\n${post.excerpt}\n${post.geoSummary}\n${post.body}`;
+  const text = antiSlopReviewText(post);
   const dimensions: Record<AntiSlopDimension, number> = {
     directness: 10,
     rhythm: 10,
@@ -733,8 +787,14 @@ export function reviewAntiSlop(post: BlogPost): ReviewResult & {
   for (const rule of antiSlopRules) {
     const hits = countMatches(text, rule.pattern);
     if (!hits) continue;
-    dimensions[rule.dimension] = Math.max(0, dimensions[rule.dimension] - Math.min(6, hits * rule.penalty));
-    warnings.push(`anti-slop pattern: ${rule.label} (${hits})`);
+    const penalty =
+      rule.label === "passive or actorless construction"
+        ? Math.min(4, Math.max(0, hits - 1) * rule.penalty)
+        : Math.min(6, hits * rule.penalty);
+    dimensions[rule.dimension] = Math.max(0, dimensions[rule.dimension] - penalty);
+    if (!(rule.label === "passive or actorless construction" && penalty < 5)) {
+      warnings.push(`anti-slop pattern: ${rule.label} (${hits})`);
+    }
   }
 
   const emDashCount = countMatches(text, /[—–]/g);
@@ -749,10 +809,11 @@ export function reviewAntiSlop(post: BlogPost): ReviewResult & {
     warnings.push(`anti-slop pattern: too many -ly adverbs (${adverbs})`);
   }
 
-  const rhythms = repeatedRhythmWindows(sentenceLengths(post.body));
-  if (rhythms > 1) {
-    dimensions.rhythm = Math.max(0, dimensions.rhythm - Math.min(5, rhythms * 2));
-    warnings.push("anti-slop pattern: repeated sentence rhythm");
+  const rhythms = repeatedRhythmWindows(sentenceLengths(proseForRhythm(post.body)));
+  if (rhythms > 3) {
+    const penalty = Math.min(4, Math.ceil((rhythms - 3) / 2));
+    dimensions.rhythm = Math.max(0, dimensions.rhythm - penalty);
+    if (dimensions.rhythm < 6) warnings.push("anti-slop pattern: repeated sentence rhythm");
   }
 
   const firstBlock = firstAnswerBlock(post.body);
@@ -913,7 +974,7 @@ export function reviewLabsPointOfView(post: BlogPost): ReviewResult {
   if (lower.includes("seo") && lower.includes("geo") && hitCount < 6) {
     warnings.push("article risks sounding like an SEO/GEO tool page instead of a broader AI lab note");
   }
-  if (!/(agent|automation|workflow|product|implementation|導入|產品|流程|自動化|実装|運用|도입|자동화)/i.test(text)) {
+  if (!/(agent|automation|workflow|product|implementation|導入|產品|流程|自動化|実装|運用|製品|ワークフロー|도입|자동화|제품|워크플로우|권한)/i.test(text)) {
     issues.push("article needs implementation, product, agent or workflow implications");
   }
 

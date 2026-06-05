@@ -40,8 +40,8 @@ export async function GET() {
       cronConfigured: Boolean(process.env.CRON_SECRET?.trim()),
       autoPublishBlog: process.env.AUTO_PUBLISH_BLOG !== "false",
       blogLanguages: BLOG_LANGUAGES,
-      dailyBlogSlots: ["morning", "afternoon"],
-      dailyColumnTarget: 2,
+      dailyBlogSlots: ["morning"],
+      dailyColumnTarget: Number(process.env.ALTOS_BLOG_COLUMN_DAILY_LIMIT || "1"),
       marketScanWindows: ["10:30", "12:30", "14:30", "18:30", "20:30"],
       blogNewsMix: BLOG_NEWS_MIX,
       searchVerificationConfigured: hasSearchVerificationConfigured()

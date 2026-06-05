@@ -25,6 +25,15 @@ const RULES = [
     message: "公開文案疑似出現內部流程或後台審核語彙。"
   },
   {
+    id: "market-template-slop",
+    severity: "critical",
+    score: -30,
+    fields: ["title", "seoTitle", "seoDescription", "excerpt", "body"],
+    pattern:
+      /(這則消息可以拿來|企業檢查|卡在哪個流程|原因是企業決策問題|Source:\s|Event:\s|Evidence:\s|Decision cue|Next action:|source brief|reader note|市場訊號而不是|AI\s*回答會怎麼引用)/i,
+    message: "市場快訊出現舊版企業流程模板，應改回來源忠實新聞寫法。"
+  },
+  {
     id: "grandiose-language",
     severity: "major",
     score: -4,
@@ -216,6 +225,10 @@ function reviewPost(post, baseUrl) {
         issues.push(rule.message);
         hits.push({ id: rule.id, severity: rule.severity, count: 1, score: rule.score });
       }
+      continue;
+    }
+
+    if (rule.id === "missing-reader-action" && isPrimarySourceMarketBrief(post)) {
       continue;
     }
 

@@ -15,7 +15,7 @@
     "cloudflare:types": "wrangler types --env-interface CloudflareEnv",
     "verify:gcp": "node scripts/gcp-production-smoke.mjs",
     "typecheck": "tsc --noEmit",
-    "test:blog": "node scripts/blog-system-smoke.mjs",
+    "test:blog": "node scripts/blog-system-smoke.mjs && node scripts/blog-market-newsroom-smoke.mjs",
     "blog:worker": "node scripts/blog-local-worker.mjs",
     "blog:orchestrate": "node scripts/blog-antigravity-orchestrator.mjs",
     "blog:scheduled": "node scripts/blog-scheduled-runner.mjs",
@@ -31,7 +31,9 @@
     "blog:market-scan": "node scripts/blog-scheduled-runner.mjs --market-scan",
     "blog:market-worker": "node scripts/blog-market-source-worker.mjs",
     "blog:market-public-qa": "node scripts/blog-market-news-public-qa.mjs",
-    "blog:repair-copy": "node scripts/blog-public-copy-repair.mjs"
+    "blog:repair-copy": "node scripts/blog-public-copy-repair.mjs",
+    "blog:ops-audit": "node scripts/blog-operations-audit.mjs",
+    "blog:column-worklist": "node scripts/blog-column-production-worklist.mjs"
   },
   "dependencies": {
     "@next/third-parties": "^16.2.6",

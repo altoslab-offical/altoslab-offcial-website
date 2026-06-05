@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import process from "node:process";
+import { cleanSourceTitle, extractEntities, extractNumbers } from "./blog-market-source-article.mjs";
 
 const DEFAULT_BASE_URL = "https://altoslab-ai.cc";
 const LANGUAGES = ["zh-Hant", "en", "ja", "ko", "id", "vi", "th", "ms", "fil"];
@@ -26,10 +27,22 @@ const INTERNAL_COPY_PATTERNS = [
   /SEO\s*\/\s*GEO/i,
   /quality gate/i,
   /pipeline/i,
-  /AI-generated/i
+  /AI-generated\s+(cover|visual|content|article)/i
 ];
 
 const WEAK_MARKET_TITLE_PATTERNS = [/更新：/i, /市場訊號/i, /可以拿來/i, /工作流/i, /流程/i];
+const LEGACY_MARKET_TEMPLATE_PATTERNS = [
+  /消息落在哪個產品環節/i,
+  /來源裡的具體細節/i,
+  /先看採用而不是聲量/i,
+  /下一步先看三個指標/i,
+  /實際使用量是否增加、付費或正式採用/i,
+  /客戶採用、服務穩定性與實際營收/i,
+  /具體使用者與可觀察的使用量/i,
+  /Adoption matters more than buzz/i,
+  /Next step: watch three signals/i,
+  /real usage, paid adoption, and service stability/i
+];
 
 function arg(name, fallback = "") {
   const index = process.argv.indexOf(`--${name}`);
@@ -109,8 +122,12 @@ function qaPost(post, mustTerms = []) {
   const source = post.sourceLinks?.[0] || {};
   const publisher = shortPublisher(source.publisher);
   const text = publicText(post);
+  const body = String(post.body || "");
   for (const pattern of INTERNAL_COPY_PATTERNS) {
     if (pattern.test(text)) issues.push({ severity: "critical", id: "internal-copy-leak", pattern: String(pattern) });
+  }
+  for (const pattern of LEGACY_MARKET_TEMPLATE_PATTERNS) {
+    if (pattern.test(text)) issues.push({ severity: "critical", id: "legacy-market-template", pattern: String(pattern) });
   }
   for (const pattern of WEAK_MARKET_TITLE_PATTERNS) {
     if (pattern.test(post.title || "")) issues.push({ severity: "major", id: "weak-market-title", pattern: String(pattern) });
@@ -119,16 +136,54 @@ function qaPost(post, mustTerms = []) {
   if (post.coverSource !== "source") issues.push({ severity: "major", id: "cover-not-source", value: post.coverSource });
   if (!post.coverCreditUrl) issues.push({ severity: "major", id: "missing-cover-credit-url" });
   if (!Array.isArray(post.sourceLinks) || post.sourceLinks.length < 1) issues.push({ severity: "major", id: "missing-source-links" });
+  const sourceTitle = cleanSourceTitle(source.title || "");
+  if (
+    post.language !== "en" &&
+    sourceTitle.length > 30 &&
+    /[a-z]{4,}\s+[a-z]{4,}/i.test(sourceTitle) &&
+    text.includes(sourceTitle)
+  ) {
+    issues.push({ severity: "major", id: "raw-source-title-leaked", sourceTitle });
+  }
   if (publisher && !String(post.excerpt || "").includes(publisher)) {
     issues.push({ severity: "major", id: "standfirst-missing-source", publisher, excerpt: post.excerpt || "" });
   }
-  if (!/[\d$%]|美元|萬|億|million|billion|juta|triệu|ล้าน|17,000|17000/i.test(post.excerpt || "")) {
-    issues.push({ severity: "major", id: "standfirst-missing-number", excerpt: post.excerpt || "" });
+  const sourceNumbers = extractNumbers(source.title || "", source.summary || "")
+    .filter((term) => !/^(?:19|20)\d{2}$/.test(String(term)))
+    .filter((term) => String(term).length >= 2);
+  const excerptText = String(post.excerpt || "").toLowerCase();
+  const numberCovered = (term) => {
+    const raw = String(term || "").toLowerCase();
+    const numericCore = raw.match(/\d[\d,.]*/)?.[0] || "";
+    const normalizedCore = numericCore.replace(/[,.]/g, "");
+    const normalizedExcerpt = excerptText.replace(/[,.]/g, "");
+    return excerptText.includes(raw) || (normalizedCore.length >= 2 && normalizedExcerpt.includes(normalizedCore));
+  };
+  if (
+    sourceNumbers.length > 0 &&
+    !sourceNumbers.some(numberCovered) &&
+    !(/5x/i.test(sourceNumbers.join(" ")) && /fivefold|5 倍|5배|gấp 5|5 เท่า|5x/i.test(post.excerpt || ""))
+  ) {
+    issues.push({ severity: "major", id: "standfirst-missing-number", excerpt: post.excerpt || "", sourceNumbers });
   }
   for (const term of mustTerms) {
     if (!text.toLowerCase().includes(term.toLowerCase())) {
       issues.push({ severity: "major", id: "missing-required-term", term });
     }
+  }
+  const sourceEvidenceTerms = [
+    ...extractEntities(source.title || "", source.summary || ""),
+    ...sourceNumbers
+  ]
+    .filter((term) => String(term).length >= 2)
+    .filter((term) => !/^(TechCrunch|OpenAI|Google|AI|LLM)$/i.test(term))
+    .slice(0, 6);
+  const coveredEvidenceTerms = sourceEvidenceTerms.filter((term) => text.toLowerCase().includes(String(term).toLowerCase()));
+  if (sourceEvidenceTerms.length >= 3 && coveredEvidenceTerms.length < 2) {
+    issues.push({ severity: "major", id: "weak-source-fact-coverage", requiredEvidence: sourceEvidenceTerms, coveredEvidence: coveredEvidenceTerms });
+  }
+  if ((body.match(/^##\s+/gm) || []).length < 3) {
+    issues.push({ severity: "major", id: "market-body-too-thin", headingCount: (body.match(/^##\s+/gm) || []).length });
   }
   return issues;
 }

@@ -56,6 +56,9 @@ const IMAGE_THRESHOLD = 82;
 const MIN_IMAGE_WIDTH = 1200;
 const MIN_IMAGE_HEIGHT = 630;
 const MIN_IMAGE_BYTES = 40_000;
+const MIN_SOURCE_IMAGE_WIDTH = 768;
+const MIN_SOURCE_IMAGE_HEIGHT = 432;
+const MIN_SOURCE_IMAGE_BYTES = 25_000;
 const MAX_IMAGE_BYTES = 8_000_000;
 const SAFE_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
 const GENERIC_STOCK_IMAGE_HOSTS = [
@@ -72,7 +75,7 @@ const GENERIC_STOCK_IMAGE_HOSTS = [
 ];
 
 const unsafeImageMetadataPattern =
-  /(dead|corpse|prisoner|concentration camp|nazi|war crime|weapon|gun|blood|accident|disaster|protest|politician|minister|government|military|army|logo|trademark|celebrity|real person|portrait of|screenshot|ui screenshot|fake dashboard|亂碼|錯字|商標|真人|肖像|政治人物|ロゴ|商標|実在人物|초상|상표|로고)/i;
+  /\b(?:dead|corpse|prisoner|concentration camp|nazi|war crime|weapon|gun|blood|accident|disaster|protest|politician|minister|government|military|army|logo|trademark|celebrity|real person|portrait of|screenshot|ui screenshot|fake dashboard)\b|(?:亂碼|錯字|商標|真人|肖像|政治人物|ロゴ|実在人物|초상|상표|로고)/i;
 
 const genericGeneratedImagePattern =
   /(generic|abstract background|glowing dashboard|futuristic dashboard|server room|business meeting|robot handshake|stock photo|科技感背景|抽象科技|會議室|儀表板|伺服器機房|汎用|会議|서버룸|회의실|추상 배경)/i;
@@ -300,11 +303,26 @@ async function fetchWithTimeout(url: string, init: RequestInit) {
   }
 }
 
-async function probeRemoteImage(url: string): Promise<ImageProbe> {
+type ImageProbeOptions = {
+  minWidth?: number;
+  minHeight?: number;
+  minBytes?: number;
+};
+
+function imageProbeMinimums(options: ImageProbeOptions = {}) {
+  return {
+    minWidth: options.minWidth || MIN_IMAGE_WIDTH,
+    minHeight: options.minHeight || MIN_IMAGE_HEIGHT,
+    minBytes: options.minBytes || MIN_IMAGE_BYTES
+  };
+}
+
+async function probeRemoteImage(url: string, options: ImageProbeOptions = {}): Promise<ImageProbe> {
   const issues: string[] = [];
   const warnings: string[] = [];
   let contentType = "";
   let contentLength = 0;
+  const minimums = imageProbeMinimums(options);
 
   try {
     const head = await fetchWithTimeout(url, { method: "HEAD" });
@@ -322,7 +340,7 @@ async function probeRemoteImage(url: string): Promise<ImageProbe> {
   if (contentType && !SAFE_IMAGE_TYPES.includes(contentType) && !genericBinaryContentType) {
     issues.push(`cover content-type must be jpeg, png or webp; received ${contentType}`);
   }
-  if (contentLength && contentLength < MIN_IMAGE_BYTES) issues.push("cover image file is too small for a blog hero image");
+  if (contentLength && contentLength < minimums.minBytes) issues.push("cover image file is too small for a blog hero image");
   if (contentLength && contentLength > MAX_IMAGE_BYTES) issues.push("cover image file is too large for blog delivery");
 
   try {
@@ -345,8 +363,8 @@ async function probeRemoteImage(url: string): Promise<ImageProbe> {
       issues.push("cover image dimensions could not be verified from the binary header");
       return { contentType, contentLength, issues, warnings };
     }
-    if (dimensions.width < MIN_IMAGE_WIDTH || dimensions.height < MIN_IMAGE_HEIGHT) {
-      issues.push(`cover image dimensions ${dimensions.width}x${dimensions.height} are below ${MIN_IMAGE_WIDTH}x${MIN_IMAGE_HEIGHT}`);
+    if (dimensions.width < minimums.minWidth || dimensions.height < minimums.minHeight) {
+      issues.push(`cover image dimensions ${dimensions.width}x${dimensions.height} are below ${minimums.minWidth}x${minimums.minHeight}`);
     }
     const ratio = dimensions.width / dimensions.height;
     if (ratio < 1.45 || ratio > 2.15) {
@@ -466,7 +484,11 @@ async function reviewPostImage(post: BlogPost, options: Required<BlogImageQualit
       issues.push("generated cover must be stored in managed generated media before ingest");
     }
     if (options.verifyRemoteImage && (/^https:\/\//.test(post.cover) || allowedLocalHttp)) {
-      probe = await probeRemoteImage(post.cover);
+      const probeOptions =
+        breakingNews && sourceCover
+          ? { minWidth: MIN_SOURCE_IMAGE_WIDTH, minHeight: MIN_SOURCE_IMAGE_HEIGHT, minBytes: MIN_SOURCE_IMAGE_BYTES }
+          : {};
+      probe = await probeRemoteImage(post.cover, probeOptions);
       issues.push(...probe.issues);
       warnings.push(...probe.warnings);
     }

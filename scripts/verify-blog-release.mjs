@@ -10,6 +10,9 @@ const DEFAULT_BASE_URL = "https://altoslab-ai.cc";
 const MIN_COVER_BYTES = 8_000;
 const MIN_COVER_WIDTH = 1200;
 const MIN_COVER_HEIGHT = 630;
+const MIN_SOURCE_COVER_BYTES = 25_000;
+const MIN_SOURCE_COVER_WIDTH = 768;
+const MIN_SOURCE_COVER_HEIGHT = 432;
 const GENERIC_STOCK_IMAGE_HOSTS = [
   "unsplash.com",
   "images.unsplash.com",
@@ -358,8 +361,24 @@ function imageDimensions(buffer) {
   return parsePngDimensions(buffer) || parseJpegDimensions(buffer) || parseWebpDimensions(buffer);
 }
 
+function imageMinimumsFor(context = {}) {
+  if (context.contentType === "breaking" && context.coverSource === "source") {
+    return {
+      minBytes: MIN_SOURCE_COVER_BYTES,
+      minWidth: MIN_SOURCE_COVER_WIDTH,
+      minHeight: MIN_SOURCE_COVER_HEIGHT
+    };
+  }
+  return {
+    minBytes: MIN_COVER_BYTES,
+    minWidth: MIN_COVER_WIDTH,
+    minHeight: MIN_COVER_HEIGHT
+  };
+}
+
 async function verifyImage(url, errors, warnings, context) {
   try {
+    const minimums = imageMinimumsFor(context);
     const response = await fetchWithTimeout(url, {
       headers: {
         Accept: "image/avif,image/webp,image/png,image/jpeg,*/*",
@@ -370,13 +389,13 @@ async function verifyImage(url, errors, warnings, context) {
     const bytes = Buffer.from(await response.arrayBuffer());
     if (!response.ok) pushIssue(errors, `image ${url} returned ${response.status}`, context);
     if (!contentType.startsWith("image/")) pushIssue(errors, `image ${url} has non-image content-type ${contentType || "missing"}`, context);
-    if (bytes.length < MIN_COVER_BYTES) pushIssue(errors, `image ${url} is too small (${bytes.length} bytes)`, context);
+    if (bytes.length < minimums.minBytes) pushIssue(errors, `image ${url} is too small (${bytes.length} bytes)`, context);
     const dimensions = imageDimensions(bytes);
     if (!dimensions) {
       pushIssue(errors, `image ${url} dimensions could not be parsed`, context);
       return null;
     }
-    if (dimensions.width < MIN_COVER_WIDTH || dimensions.height < MIN_COVER_HEIGHT) {
+    if (dimensions.width < minimums.minWidth || dimensions.height < minimums.minHeight) {
       pushIssue(errors, `image ${url} dimensions are too small (${dimensions.width}x${dimensions.height})`, context);
     }
     return { ...dimensions, bytes: bytes.length, contentType };
@@ -581,7 +600,13 @@ async function verifyPostLive(post, root, errors, warnings) {
   if (!publicPost.coverAlt || publicPost.coverAlt.length < 18) pushIssue(errors, "public API coverAlt is missing or too thin", context);
 
   const coverUrl = absoluteUrl(publicPost.cover || post.cover, root);
-  const image = coverUrl ? await verifyImage(coverUrl, errors, warnings, context) : null;
+  const image = coverUrl
+    ? await verifyImage(coverUrl, errors, warnings, {
+        ...context,
+        contentType: publicPost.contentType || post.contentType,
+        coverSource: publicPost.coverSource || post.coverSource
+      })
+    : null;
   if (!coverUrl) pushIssue(errors, "public API cover URL is missing", context);
 
   return { liveUrl, apiUrl, coverUrl, image };

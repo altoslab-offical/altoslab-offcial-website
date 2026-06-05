@@ -33,6 +33,7 @@ COPY --from=builder /app/public ./public
 COPY --from=builder /app/index.html ./index.html
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
+RUN chmod -R a+rX ./public
 USER nextjs
 EXPOSE 8080
 CMD ["node", "server.js"]

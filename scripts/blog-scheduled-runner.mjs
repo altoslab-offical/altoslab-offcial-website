@@ -8,14 +8,21 @@ import { spawn } from "node:child_process";
 const SLOT_HOURS = { morning: "09:00", afternoon: "16:00" };
 const LANGUAGES = ["zh-Hant", "en", "ja", "ko", "id", "vi", "th", "ms", "fil"];
 const LANGUAGE_LABEL = LANGUAGES.join(", ");
-const PREP_WINDOWS = {
+const COLUMN_SLOT_SETTING = (process.env.ALTOS_BLOG_COLUMN_SLOTS || "morning")
+  .split(",")
+  .map((slot) => slot.trim())
+  .filter(Boolean);
+const COLUMN_SLOTS = new Set(COLUMN_SLOT_SETTING.length ? COLUMN_SLOT_SETTING : ["morning"]);
+const ALL_PREP_WINDOWS = {
   morning: { hour: 8, minute: 10 },
   afternoon: { hour: 15, minute: 10 }
 };
-const RELEASE_WINDOWS = {
+const ALL_RELEASE_WINDOWS = {
   morning: { hour: 9, minute: 0 },
   afternoon: { hour: 16, minute: 0 }
 };
+const PREP_WINDOWS = Object.fromEntries(Object.entries(ALL_PREP_WINDOWS).filter(([slot]) => COLUMN_SLOTS.has(slot)));
+const RELEASE_WINDOWS = Object.fromEntries(Object.entries(ALL_RELEASE_WINDOWS).filter(([slot]) => COLUMN_SLOTS.has(slot)));
 const MARKET_SCAN_WINDOWS = [
   { hour: 10, minute: 30 },
   { hour: 12, minute: 30 },
@@ -27,6 +34,7 @@ const RELEASE_GRACE_MINUTES = 5;
 const PREP_GRACE_MINUTES = Number(process.env.ALTOS_BLOG_PREP_GRACE_MINUTES || "2");
 const MARKET_SCAN_GRACE_MINUTES = Number(process.env.ALTOS_BLOG_MARKET_SCAN_GRACE_MINUTES || "2");
 const RUNNER_LOCK_STALE_MINUTES = Number(process.env.ALTOS_BLOG_RUNNER_LOCK_STALE_MINUTES || "30");
+const DEFAULT_CHILD_TIMEOUT_MS = Number.parseInt(process.env.ALTOS_BLOG_CHILD_TIMEOUT_MS || "120000", 10);
 const CHROME_GUARD_TOTAL_RSS_MB = Number(process.env.ALTOS_BLOG_CHROME_TOTAL_RSS_MB || "5200");
 const CHROME_GUARD_RENDERER_RSS_MB = Number(process.env.ALTOS_BLOG_CHROME_RENDERER_RSS_MB || "1200");
 const CHROME_MEMORY_DOCTOR = path.join(
@@ -150,7 +158,12 @@ function runRoot() {
   return path.resolve(process.env.ALTOS_BLOG_WORKER_RUN_DIR || path.join(process.cwd(), "data/blog-worker-runs"));
 }
 
-function candidateIndexPath(date, slot) {
+function candidateIndexPath(date, slot, lane = "column") {
+  const normalizedLane = lane === "market" ? "market" : "column";
+  return path.join(process.cwd(), "data/blog-prepared-candidates", `${date}-${slot}-${normalizedLane}.json`);
+}
+
+function legacyCandidateIndexPath(date, slot) {
   return path.join(process.cwd(), "data/blog-prepared-candidates", `${date}-${slot}.json`);
 }
 
@@ -165,6 +178,48 @@ async function exists(filePath) {
 
 async function readJson(filePath) {
   return JSON.parse(await fs.readFile(filePath, "utf8"));
+}
+
+async function loadEnvFileIfPresent() {
+  const envFile = arg("env-file") || path.join(process.env.HOME || "", ".altoslab-blog-worker.env");
+  if (!envFile || !(await exists(envFile))) return { envFile, loaded: false };
+  const raw = await fs.readFile(envFile, "utf8");
+  for (const line of raw.split(/\r?\n/)) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith("#") || !trimmed.includes("=")) continue;
+    const index = trimmed.indexOf("=");
+    const key = trimmed.slice(0, index).trim();
+    let value = trimmed.slice(index + 1).trim();
+    if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) {
+      value = value.slice(1, -1);
+    }
+    if (key && process.env[key] === undefined) process.env[key] = value;
+  }
+  return { envFile, loaded: true };
+}
+
+function isMarketArticleSet(articleSet) {
+  const posts = Array.isArray(articleSet?.posts) ? articleSet.posts : [];
+  return articleSet?.generation?.provider === "source-translation" && posts.length > 0 && posts.every((post) => post.contentType === "breaking");
+}
+
+async function candidateLooksLikeLane(index, lane) {
+  const manifestPath = index?.manifestPath || "";
+  const manifest = manifestPath && (await exists(manifestPath)) ? await readJson(manifestPath).catch(() => null) : index;
+  const articleSetPath = manifest?.articleSetPath ? path.resolve(manifest.articleSetPath) : "";
+  const articleSet = articleSetPath && (await exists(articleSetPath)) ? await readJson(articleSetPath).catch(() => null) : null;
+  const market = isMarketArticleSet(articleSet);
+  return lane === "market" ? market : !market;
+}
+
+async function resolveCandidateIndexPath({ date, slot, lane = "column" }) {
+  const lanePath = candidateIndexPath(date, slot, lane);
+  if (await exists(lanePath)) return lanePath;
+  const legacyPath = legacyCandidateIndexPath(date, slot);
+  if (!(await exists(legacyPath))) return lanePath;
+  const legacyIndex = await readJson(legacyPath).catch(() => null);
+  if (await candidateLooksLikeLane(legacyIndex, lane)) return legacyPath;
+  return lanePath;
 }
 
 async function writeJson(filePath, payload) {
@@ -358,20 +413,64 @@ publishes or bypasses the same release gates.
 `);
 }
 
-function runCommand(command, args, { cwd, env = process.env }) {
+function runCommand(command, args, { cwd, env = process.env, timeoutMs = DEFAULT_CHILD_TIMEOUT_MS }) {
   return new Promise((resolve) => {
     const child = spawn(command, args, { cwd, env, stdio: ["ignore", "pipe", "pipe"] });
     let stdout = "";
     let stderr = "";
+    let settled = false;
+    const finish = (result) => {
+      if (settled) return;
+      settled = true;
+      if (timer) clearTimeout(timer);
+      resolve(result);
+    };
+    const timer = Number.isFinite(timeoutMs) && timeoutMs > 0
+      ? setTimeout(() => {
+          stderr += `\ncommand timed out after ${timeoutMs}ms: ${command} ${args.join(" ")}`;
+          child.kill("SIGTERM");
+          finish({ code: 124, stdout, stderr, timedOut: true });
+        }, timeoutMs)
+      : null;
     child.stdout.on("data", (chunk) => {
       stdout += chunk.toString();
     });
     child.stderr.on("data", (chunk) => {
       stderr += chunk.toString();
     });
-    child.on("error", (error) => resolve({ code: 1, stdout, stderr: `${stderr}${error.message}` }));
-    child.on("close", (code) => resolve({ code: code ?? 1, stdout, stderr }));
+    child.on("error", (error) => finish({ code: 1, stdout, stderr: `${stderr}${error.message}` }));
+    child.on("close", (code) => finish({ code: code ?? 1, stdout, stderr }));
   });
+}
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function runReleaseVerification(manifestPath, { timeoutMs = DEFAULT_CHILD_TIMEOUT_MS } = {}) {
+  const attempts = Math.max(1, Number(process.env.ALTOS_BLOG_VERIFY_RETRY_ATTEMPTS || "3"));
+  const retryDelayMs = Math.max(0, Number(process.env.ALTOS_BLOG_VERIFY_RETRY_DELAY_MS || "25000"));
+  let lastResult = null;
+  for (let attempt = 1; attempt <= attempts; attempt += 1) {
+    const result = await runCommand(process.execPath, [
+      "scripts/verify-blog-release.mjs",
+      "--manifest",
+      manifestPath
+    ], { cwd: process.cwd(), timeoutMs });
+    result.attempt = attempt;
+    result.attempts = attempts;
+    lastResult = result;
+    if (result.code === 0) return result;
+    await appendLog(globalScheduleLogPath(), JSON.stringify({
+      phase: "release-verification-retry",
+      manifestPath,
+      attempt,
+      attempts,
+      code: result.code
+    }));
+    if (attempt < attempts && retryDelayMs > 0) await sleep(retryDelayMs);
+  }
+  return lastResult;
 }
 
 async function createPrep({ date, slot }) {
@@ -511,10 +610,27 @@ async function createMarketScan({ date }) {
   const runDir = path.resolve(arg("run-dir") || path.join(runRoot(), `${date}-market-scan-${taiwanStamp(currentNow())}`));
   const promptPath = path.join(runDir, "market-fast-lane-prompt-card.md");
   const articleSetPath = path.join(runDir, "article-set.json");
+  const repairedArticleSetPath = path.join(runDir, "article-set.source-repaired.json");
   const manifestPath = path.join(runDir, "prepared-candidate.json");
   const orchestratorPromptPath = path.join(runDir, "browser-production-prompt.md");
+  const queueDir = path.join(runDir, "queue");
+  const sourcePacksPath = path.join(runDir, "market-source-packs.generated.json");
+  const mergedDir = path.join(runDir, "merged");
+  const writeMarketIndex = async (payload) => {
+    if (hasFlag("no-index")) return;
+    await writeJson(candidateIndexPath(date, slot, "market"), payload);
+  };
 
-  await fs.mkdir(runDir, { recursive: true });
+  await fs.mkdir(queueDir, { recursive: true });
+  await writeJson(path.join(queueDir, "01-market.json"), {
+    sequence: 1,
+    lane: "market",
+    status: "awaiting_source_translation_production",
+    slot,
+    runDir,
+    articleSetPath
+  });
+
   const orchestrator = await runCommand(process.execPath, [
     "scripts/blog-antigravity-orchestrator.mjs",
     "--dry-run",
@@ -605,7 +721,296 @@ ${await fs.readFile(orchestratorPromptPath, "utf8").catch(() => "")}
     humanDesignQa: { approved: false }
   };
   await writeJson(manifestPath, manifest);
-  return { ok: true, skipped: false, phase: "market-scan", runDir, promptPath, articleSetPath, manifestPath, doctor: compactDoctorResult(doctor) };
+
+  if (hasFlag("prompt-only") || process.env.ALTOS_BLOG_MARKET_SCAN_PROMPT_ONLY === "true") {
+    return { ok: true, skipped: false, phase: "market-scan", mode: "prompt-only", runDir, promptPath, articleSetPath, manifestPath, doctor: compactDoctorResult(doctor) };
+  }
+
+  const scanner = await runCommand(process.execPath, [
+    "scripts/blog-market-source-scanner.mjs",
+    "--date",
+    date,
+    "--queue-dir",
+    queueDir,
+    "--out",
+    sourcePacksPath,
+    "--max-packs",
+    "1",
+    "--source-profile",
+    arg("source-profile", process.env.ALTOS_BLOG_MARKET_SOURCE_PROFILE || "mainstream-ai-us"),
+    "--write",
+    "--overwrite"
+  ], { cwd: process.cwd(), timeoutMs: Number(process.env.ALTOS_BLOG_MARKET_SCAN_TIMEOUT_MS || "90000") });
+  if (scanner.code !== 0) {
+    const held = {
+      ...manifest,
+      status: "held",
+      updatedAt: new Date().toISOString(),
+      validateOnly: {
+        wouldPublish: false,
+        errors: [`market source scanner held: ${scanner.stderr.trim() || scanner.stdout.trim() || "no qualified source"}`]
+      },
+      pipeline: { scanner: { code: scanner.code, stdout: scanner.stdout.trim(), stderr: scanner.stderr.trim() } }
+    };
+    await writeJson(manifestPath, held);
+    await writeMarketIndex({ ...held, manifestPath });
+    return { ok: true, skipped: true, phase: "market-scan", reason: "no qualified source pack", runDir, manifestPath, scanner: held.pipeline.scanner, doctor: compactDoctorResult(doctor) };
+  }
+  const sourcePacks = await readJson(sourcePacksPath).catch(() => []);
+  if (!Array.isArray(sourcePacks) || !sourcePacks.some((pack) => Number(pack?.sequence) === 1)) {
+    const scannerParsed = parseJsonObject(scanner.stdout) || {};
+    const held = {
+      ...manifest,
+      status: "held",
+      updatedAt: new Date().toISOString(),
+      validateOnly: {
+        wouldPublish: false,
+        errors: ["no new, non-duplicate market source passed source-image and fact extraction gates"]
+      },
+      pipeline: {
+        scanner: {
+          code: scanner.code,
+          packsGenerated: scannerParsed.packsGenerated ?? 0,
+          candidates: scannerParsed.candidates ?? null,
+          skipped: scannerParsed.skipped || [],
+          stdout: scanner.stdout.trim(),
+          stderr: scanner.stderr.trim()
+        }
+      }
+    };
+    await writeJson(manifestPath, held);
+    await writeMarketIndex({ ...held, manifestPath });
+    return {
+      ok: true,
+      skipped: true,
+      phase: "market-scan",
+      reason: "no qualified source pack",
+      runDir,
+      manifestPath,
+      scanner: held.pipeline.scanner,
+      doctor: compactDoctorResult(doctor)
+    };
+  }
+
+  const sourceWorker = await runCommand(process.execPath, [
+    "scripts/blog-market-source-worker.mjs",
+    "--date",
+    date,
+    "--backfill-dir",
+    runDir,
+    "--source-packs",
+    sourcePacksPath,
+    "--seq",
+    "1",
+    "--write",
+    "--overwrite"
+  ], { cwd: process.cwd(), timeoutMs: Number(process.env.ALTOS_BLOG_MARKET_SCAN_TIMEOUT_MS || "90000") });
+  if (sourceWorker.code !== 0) {
+    const held = {
+      ...manifest,
+      status: "held",
+      updatedAt: new Date().toISOString(),
+      validateOnly: {
+        wouldPublish: false,
+        errors: [`market source worker held: ${sourceWorker.stderr.trim() || sourceWorker.stdout.trim()}`]
+      },
+      pipeline: {
+        scanner: { code: scanner.code, stdout: scanner.stdout.trim(), stderr: scanner.stderr.trim() },
+        sourceWorker: { code: sourceWorker.code, stdout: sourceWorker.stdout.trim(), stderr: sourceWorker.stderr.trim() }
+      }
+    };
+    await writeJson(manifestPath, held);
+    await writeMarketIndex({ ...held, manifestPath });
+    return { ok: true, skipped: true, phase: "market-scan", reason: "source worker held", runDir, manifestPath, sourceWorker: held.pipeline.sourceWorker, doctor: compactDoctorResult(doctor) };
+  }
+
+  const merge = await runCommand(process.execPath, [
+    "scripts/merge-market-gemini-chunks.mjs",
+    "--seq",
+    "1",
+    "--date",
+    date,
+    "--slot",
+    slot,
+    "--backfill-dir",
+    runDir,
+    "--out-dir",
+    mergedDir
+  ], { cwd: process.cwd(), timeoutMs: Number(process.env.ALTOS_BLOG_MARKET_SCAN_TIMEOUT_MS || "90000") });
+  if (merge.code !== 0) {
+    const held = {
+      ...manifest,
+      status: "held",
+      updatedAt: new Date().toISOString(),
+      validateOnly: {
+        wouldPublish: false,
+        errors: [`market merge held: ${merge.stderr.trim() || merge.stdout.trim()}`]
+      },
+      pipeline: {
+        scanner: { code: scanner.code, stdout: scanner.stdout.trim(), stderr: scanner.stderr.trim() },
+        sourceWorker: { code: sourceWorker.code, stdout: sourceWorker.stdout.trim(), stderr: sourceWorker.stderr.trim() },
+        merge: { code: merge.code, stdout: merge.stdout.trim(), stderr: merge.stderr.trim() }
+      }
+    };
+    await writeJson(manifestPath, held);
+    await writeMarketIndex({ ...held, manifestPath });
+    return { ok: true, skipped: true, phase: "market-scan", reason: "merge held", runDir, manifestPath, merge: held.pipeline.merge, doctor: compactDoctorResult(doctor) };
+  }
+
+  const mergedArticleSetPath = merge.stdout.trim().split(/\r?\n/).filter(Boolean).at(-1) || path.join(mergedDir, "article-set.json");
+  const repair = await runCommand(process.execPath, [
+    "scripts/repair-market-article-set.mjs",
+    "--article-set",
+    mergedArticleSetPath,
+    "--out",
+    repairedArticleSetPath
+  ], { cwd: process.cwd(), timeoutMs: Number(process.env.ALTOS_BLOG_MARKET_SCAN_TIMEOUT_MS || "90000") });
+  if (repair.code !== 0) {
+    const held = {
+      ...manifest,
+      status: "held",
+      updatedAt: new Date().toISOString(),
+      validateOnly: {
+        wouldPublish: false,
+        errors: [`market public-copy repair held: ${repair.stderr.trim() || repair.stdout.trim()}`]
+      },
+      pipeline: {
+        scanner: { code: scanner.code, stdout: scanner.stdout.trim(), stderr: scanner.stderr.trim() },
+        sourceWorker: { code: sourceWorker.code, stdout: sourceWorker.stdout.trim(), stderr: sourceWorker.stderr.trim() },
+        merge: { code: merge.code, stdout: merge.stdout.trim(), stderr: merge.stderr.trim() },
+        repair: { code: repair.code, stdout: repair.stdout.trim(), stderr: repair.stderr.trim() }
+      }
+    };
+    await writeJson(manifestPath, held);
+    await writeMarketIndex({ ...held, manifestPath });
+    return { ok: true, skipped: true, phase: "market-scan", reason: "public copy repair held", runDir, manifestPath, repair: held.pipeline.repair, doctor: compactDoctorResult(doctor) };
+  }
+
+  const validate = await runCommand(process.execPath, [
+    "scripts/blog-local-worker.mjs",
+    "--article-set",
+    repairedArticleSetPath,
+    "--slot",
+    slot,
+    "--validate-only",
+    "--manifest",
+    manifestPath,
+    "--approve-design-qa",
+    ...(hasFlag("no-index") ? ["--no-index"] : [])
+  ], { cwd: process.cwd(), timeoutMs: Number(process.env.ALTOS_BLOG_MARKET_SCAN_TIMEOUT_MS || "90000") });
+  if (validate.code !== 0) {
+    const nextManifest = await readJson(manifestPath).catch(() => manifest);
+    const held = {
+      ...nextManifest,
+      status: nextManifest.status || "held",
+      updatedAt: new Date().toISOString(),
+      pipeline: {
+        scanner: { code: scanner.code, stdout: scanner.stdout.trim(), stderr: scanner.stderr.trim() },
+        sourceWorker: { code: sourceWorker.code, stdout: sourceWorker.stdout.trim(), stderr: sourceWorker.stderr.trim() },
+        merge: { code: merge.code, stdout: merge.stdout.trim(), stderr: merge.stderr.trim() },
+        repair: { code: repair.code, stdout: repair.stdout.trim(), stderr: repair.stderr.trim() },
+        validate: { code: validate.code, stdout: validate.stdout.trim(), stderr: validate.stderr.trim() }
+      }
+    };
+    await writeJson(manifestPath, held);
+    await writeMarketIndex({ ...held, manifestPath });
+    return { ok: true, skipped: true, phase: "market-scan", reason: "validate held", runDir, manifestPath, validate: held.pipeline.validate, doctor: compactDoctorResult(doctor) };
+  }
+
+  if (hasFlag("validate-only") || process.env.ALTOS_BLOG_MARKET_SCAN_VALIDATE_ONLY === "true") {
+    const ready = await readJson(manifestPath).catch(() => manifest);
+    const readyWithPipeline = {
+      ...ready,
+      updatedAt: new Date().toISOString(),
+      pipeline: {
+        scanner: { code: scanner.code, stdout: scanner.stdout.trim(), stderr: scanner.stderr.trim() },
+        sourceWorker: { code: sourceWorker.code, stdout: sourceWorker.stdout.trim(), stderr: sourceWorker.stderr.trim() },
+        merge: { code: merge.code, stdout: merge.stdout.trim(), stderr: merge.stderr.trim() },
+        repair: { code: repair.code, stdout: repair.stdout.trim(), stderr: repair.stderr.trim() },
+        validate: { code: validate.code, stdout: validate.stdout.trim(), stderr: validate.stderr.trim() }
+      }
+    };
+    await writeJson(manifestPath, readyWithPipeline);
+    await writeMarketIndex({ ...readyWithPipeline, manifestPath });
+    return {
+      ok: true,
+      skipped: false,
+      phase: "market-scan",
+      status: readyWithPipeline.status,
+      mode: "validate-only",
+      runDir,
+      articleSetPath: repairedArticleSetPath,
+      manifestPath,
+      validate: readyWithPipeline.pipeline.validate,
+      doctor: compactDoctorResult(doctor)
+    };
+  }
+
+  const publish = await runCommand(process.execPath, [
+    "scripts/blog-local-worker.mjs",
+    "--article-set",
+    repairedArticleSetPath,
+    "--slot",
+    slot,
+    "--publish",
+    "--manifest",
+    manifestPath,
+    "--reuse-validated-manifest",
+    "--approve-design-qa"
+  ], { cwd: process.cwd(), timeoutMs: Number(process.env.ALTOS_BLOG_MARKET_SCAN_TIMEOUT_MS || "90000") });
+  if (publish.code !== 0) {
+    const nextManifest = await readJson(manifestPath).catch(() => manifest);
+    const held = {
+      ...nextManifest,
+      updatedAt: new Date().toISOString(),
+      pipeline: {
+        scanner: { code: scanner.code, stdout: scanner.stdout.trim(), stderr: scanner.stderr.trim() },
+        sourceWorker: { code: sourceWorker.code, stdout: sourceWorker.stdout.trim(), stderr: sourceWorker.stderr.trim() },
+        merge: { code: merge.code, stdout: merge.stdout.trim(), stderr: merge.stderr.trim() },
+        repair: { code: repair.code, stdout: repair.stdout.trim(), stderr: repair.stderr.trim() },
+        validate: { code: validate.code, stdout: validate.stdout.trim(), stderr: validate.stderr.trim() },
+        publish: { code: publish.code, stdout: publish.stdout.trim(), stderr: publish.stderr.trim() }
+      }
+    };
+    await writeJson(manifestPath, held);
+    await writeMarketIndex({ ...held, manifestPath });
+    return { ok: false, skipped: false, phase: "market-scan", reason: "publish failed", runDir, manifestPath, publish: held.pipeline.publish, doctor: compactDoctorResult(doctor) };
+  }
+
+  const verification = await runReleaseVerification(manifestPath, {
+    timeoutMs: Number(process.env.ALTOS_BLOG_MARKET_SCAN_TIMEOUT_MS || "90000")
+  });
+  const released = await readJson(manifestPath).catch(() => manifest);
+  const releasedWithPipeline = {
+    ...released,
+    updatedAt: new Date().toISOString(),
+    pipeline: {
+      scanner: { code: scanner.code, stdout: scanner.stdout.trim(), stderr: scanner.stderr.trim() },
+      sourceWorker: { code: sourceWorker.code, stdout: sourceWorker.stdout.trim(), stderr: sourceWorker.stderr.trim() },
+      merge: { code: merge.code, stdout: merge.stdout.trim(), stderr: merge.stderr.trim() },
+      repair: { code: repair.code, stdout: repair.stdout.trim(), stderr: repair.stderr.trim() },
+      validate: { code: validate.code, stdout: validate.stdout.trim(), stderr: validate.stderr.trim() },
+      publish: { code: publish.code, stdout: publish.stdout.trim(), stderr: publish.stderr.trim() },
+      verification: { code: verification.code, stdout: verification.stdout.trim(), stderr: verification.stderr.trim() }
+    }
+  };
+  await writeJson(manifestPath, releasedWithPipeline);
+  await writeMarketIndex({ ...releasedWithPipeline, manifestPath });
+  if (verification.code !== 0) {
+    return { ok: false, skipped: false, phase: "market-scan-verification", runDir, manifestPath, verification: releasedWithPipeline.pipeline.verification, doctor: compactDoctorResult(doctor) };
+  }
+  return {
+    ok: true,
+    skipped: false,
+    phase: "market-scan",
+    status: releasedWithPipeline.status,
+    runDir,
+    articleSetPath: repairedArticleSetPath,
+    manifestPath,
+    publishedIds: releasedWithPipeline.publish?.publishedIds || [],
+    verification: releasedWithPipeline.pipeline.verification,
+    doctor: compactDoctorResult(doctor)
+  };
 }
 
 async function runBackfillPlanner({ date }) {
@@ -716,7 +1121,7 @@ function releaseWindowIssue({ date, slot }) {
 }
 
 async function release({ date, slot }) {
-  const indexPath = candidateIndexPath(date, slot);
+  const indexPath = await resolveCandidateIndexPath({ date, slot, lane: "column" });
   if (!(await exists(indexPath))) {
     return { ok: true, skipped: true, phase: "release", reason: "missing prepared candidate", indexPath };
   }
@@ -729,11 +1134,7 @@ async function release({ date, slot }) {
   const articleSetPath = manifest.articleSetPath ? path.resolve(manifest.articleSetPath) : "";
   const articleSet = articleSetPath && (await exists(articleSetPath)) ? await readJson(articleSetPath) : null;
   if (manifest.status === "released") {
-    const verification = await runCommand(process.execPath, [
-      "scripts/verify-blog-release.mjs",
-      "--manifest",
-      manifestPath
-    ], { cwd: process.cwd() });
+    const verification = await runReleaseVerification(manifestPath);
     await appendLog(path.join(path.dirname(manifestPath), "scheduled-release.log"), verification.stdout.trim());
     if (verification.stderr.trim()) await appendLog(path.join(path.dirname(manifestPath), "scheduled-release.log"), verification.stderr.trim());
     if (verification.code !== 0) {
@@ -805,11 +1206,7 @@ async function release({ date, slot }) {
     return { ok: false, skipped: false, phase: "release", code: result.code, stdout: result.stdout, stderr: result.stderr, manifestPath };
   }
   const released = await readJson(manifestPath).catch(() => manifest);
-  const verification = await runCommand(process.execPath, [
-    "scripts/verify-blog-release.mjs",
-    "--manifest",
-    manifestPath
-  ], { cwd: process.cwd() });
+  const verification = await runReleaseVerification(manifestPath);
   await appendLog(path.join(path.dirname(manifestPath), "scheduled-release.log"), verification.stdout.trim());
   if (verification.stderr.trim()) await appendLog(path.join(path.dirname(manifestPath), "scheduled-release.log"), verification.stderr.trim());
   if (verification.code !== 0) {
@@ -856,6 +1253,7 @@ async function main() {
     usage();
     return;
   }
+  await loadEnvFileIfPresent();
   const now = currentNow();
   const date = arg("date") || taiwanDate(now);
   let mode = hasFlag("prep") ? "prep" : hasFlag("release") ? "release" : "";
