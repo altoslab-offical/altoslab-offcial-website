@@ -30,6 +30,7 @@
     "blog:market-scan": "node scripts/blog-scheduled-runner.mjs --market-scan",
     "blog:market-worker": "node scripts/blog-market-source-worker.mjs",
     "blog:market-public-qa": "node scripts/blog-market-news-public-qa.mjs",
+    "blog:audit-ai-feeling": "node scripts/blog-audit-ai-feeling.mjs",
     "blog:repair-copy": "node scripts/blog-public-copy-repair.mjs",
     "blog:ops-audit": "node scripts/blog-operations-audit.mjs",
     "blog:column-worklist": "node scripts/blog-column-production-worklist.mjs"

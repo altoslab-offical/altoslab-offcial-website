@@ -103,6 +103,19 @@ async function fetchText(url, options = {}) {
   }
 }
 
+async function fetchSurfaceText(url) {
+  const first = await fetchText(url, { timeoutMs: 15_000 });
+  if (first.ok) return first;
+  await new Promise((resolve) => setTimeout(resolve, 600));
+  const second = await fetchText(url, { timeoutMs: 22_000 });
+  return {
+    ...second,
+    retried: true,
+    firstStatus: first.status,
+    firstError: first.error || ""
+  };
+}
+
 async function fetchJson(url) {
   const result = await fetchText(url);
   if (!result.ok) return { ...result, json: null };
@@ -378,6 +391,7 @@ function buildInsights({ targetUrl, health, posts, surface, ga4, searchConsole }
   const blogHtml = surface["/blog"]?.text || "";
   const hreflangCount = (blogHtml.match(/hrefLang=|hreflang=/gi) || []).length;
   const liveLanguageIndexes = languages.filter((language) => surface[languagePaths[language]]?.ok).length;
+  const unreachableLanguages = languages.filter((language) => !surface[languagePaths[language]]?.ok);
   const checks = {
     seo: [
       { key: "GA configured", ok: Boolean(health?.integrations?.gaConfigured), weight: 10 },
@@ -430,6 +444,16 @@ function buildInsights({ targetUrl, health, posts, surface, ga4, searchConsole }
   if (posts.length > 0 && percent(postsWithSeoMeta, posts.length) < 90) warnings.push("Some public posts are missing SEO title/meta/excerpt.");
   if (posts.length > 0 && percent(postsWithGeo, posts.length) < 90) warnings.push("Some public posts are missing GEO summary or visible sources.");
   const actions = [];
+  if (unreachableLanguages.length) {
+    const labels = unreachableLanguages
+      .map((language) => ({ "zh-Hant": "繁中", en: "英文", ja: "日文", ko: "韓文", id: "印尼", vi: "越南", th: "泰國", ms: "馬來", fil: "菲律賓" }[language] || language))
+      .join("、");
+    actions.push({
+      area: "語言入口",
+      reason: `${labels} 的 blog 入口在本次檢查中沒有穩定回應，會拉低 Google 搜尋健康分數。`,
+      nextStep: `重新檢查 ${unreachableLanguages.map((language) => blogIndexPathForLanguage(language)).join("、")}；若仍失敗，優先檢查 GCP / Cloud Run 路由與多語頁面渲染。`
+    });
+  }
   if (!ga4.ok) {
     actions.push({
       area: "流量數據",
@@ -462,13 +486,14 @@ function buildInsights({ targetUrl, health, posts, surface, ga4, searchConsole }
     actions.push({
       area: "內容量",
       reason: "目前中文前台可見文章偏少，讀者和搜尋引擎都還看不到穩定更新節奏。",
-      nextStep: "維持每天兩篇專欄，並用市場快訊補足即時訊號。"
+      nextStep: "維持每天一篇專欄，並用市場快訊補足即時訊號。"
     });
   }
   const nextFocus = [];
   if (!ga4.ok || !searchConsole.ok) nextFocus.push("把 GA/Search Console 數據接完整");
+  if (unreachableLanguages.length) nextFocus.push("修復打不開的語言入口");
   if (incompleteGroups.length) nextFocus.push("補齊缺語言的文章");
-  if (posts.length < 6) nextFocus.push("維持每天兩篇專欄與市場快訊節奏");
+  if (posts.length < 6) nextFocus.push("維持每天一篇專欄與市場快訊節奏");
   if (!nextFocus.length) nextFocus.push("用每日專欄與市場快訊穩定放大內容成效");
   const insight =
     seoScore >= 85 && geoScore >= 80
@@ -657,7 +682,7 @@ async function main() {
   const languages = health?.integrations?.blogLanguages?.length ? health.integrations.blogLanguages : DEFAULT_LANGUAGES;
   const languagePaths = Object.fromEntries(languages.map((language) => [language, blogIndexPathForLanguage(language)]));
   const surfacePaths = ["/", "/blog", "/sitemap.xml", "/feed.xml", "/robots.txt", "/llms.txt", ...Object.values(languagePaths)];
-  const surfaceEntries = await Promise.all([...new Set(surfacePaths)].map(async (surfacePath) => [surfacePath, await fetchText(`${targetUrl}${surfacePath}`)]));
+  const surfaceEntries = await Promise.all([...new Set(surfacePaths)].map(async (surfacePath) => [surfacePath, await fetchSurfaceText(`${targetUrl}${surfacePath}`)]));
   const surface = Object.fromEntries(surfaceEntries);
   const posts = Array.isArray(postsResult.json?.posts) ? postsResult.json.posts : [];
   const [ga4, searchConsole] = await Promise.all([ga4Report(), searchConsoleReport(targetUrl)]);
