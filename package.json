@@ -33,6 +33,7 @@
     "blog:market-public-qa": "node scripts/blog-market-news-public-qa.mjs",
     "blog:repair-copy": "node scripts/blog-public-copy-repair.mjs",
     "blog:ops-audit": "node scripts/blog-operations-audit.mjs",
+    "blog:quality-gate": "node scripts/blog-quality-gate-summary.mjs",
     "blog:column-worklist": "node scripts/blog-column-production-worklist.mjs"
   },
   "dependencies": {
