@@ -29,6 +29,7 @@ export function normalizeNewsText(value = "") {
   return decodeEntities(value)
     .replace(/<img[^>]*>/gi, " ")
     .replace(/<[^>]*>/g, " ")
+    .replace(/[—–]/g, ",")
     .replace(/\r\n/g, "\n")
     .replace(/[ \t]+/g, " ")
     .replace(/\bAI-generated\b/gi, "generated")
@@ -44,6 +45,12 @@ export function cleanMarketPublicText(value = "", language = "") {
   if (language === "zh-Hant") {
     text = text
       .replace(/AI\s*代理/g, "AI agent")
+      .replace(/GoogleAI/g, "Google AI")
+      .replace(/根\s+(TechCrunch|NVIDIA|Google|OpenAI)\s*報導/g, "根據 $1 報導")
+      .replace(/雙子座\s*3\s*號「深度思考」/g, "Gemini 3 Deep Think")
+      .replace(/雙子座\s*3\s*Deep Think/g, "Gemini 3 Deep Think")
+      .replace(/特工/g, "AI agent")
+      .replace(/智能體 AI/g, "agentic AI")
       .replace(/押注需要有人監督 AI agent/g, "押注 AI agent 監控需求升溫")
       .replace(/您的/g, "使用者的")
       .replace(/向您展示/g, "向使用者展示")
@@ -51,22 +58,28 @@ export function cleanMarketPublicText(value = "", language = "") {
       .replace(/向使用者展示與使用者的搜尋查詢/g, "向使用者展示與搜尋查詢")
       .replace(/與使用者的搜尋查詢相符/g, "與搜尋查詢相符")
       .replace(/用戶/g, "使用者")
+      .replace(/AI agent的/g, "AI agent 的")
+      .replace(/AI 系統投入生產/g, "AI 系統進入正式環境")
+      .replace(/保持其可靠運行/g, "維持可靠運作")
+      .replace(/該公司堅稱/g, "Amazon 表示")
+      .replace(/公司堅稱/g, "Amazon 表示")
       .replace(/出於某種原因，?/g, "")
       .replace(/\.\s+(?=[A-Z\u4e00-\u9fff])/g, "。")
       .replace(/\s+([，。；：！？])/g, "$1")
-      .replace(/([（「])\s+/g, "$1")
-      .replace(/\s+([）」])/g, "$1");
+      .replace(/([。！？])[ \t]+/g, "$1")
+      .replace(/([（「])[ \t]+/g, "$1")
+      .replace(/[ \t]+([）」])/g, "$1");
   }
   if (language === "ja") {
     text = text
       .replace(/Coralogix社は/g, "Coralogix は")
       .replace(/AIエージェントを監視する人が必要だという賭けで2億ドルを調達した/g, "AI agent の監視需要を見込み 2 億ドルを調達した")
-      .replace(/\.\s+(?=[A-Z\u3040-\u30ff\u4e00-\u9fff])/g, "。");
+      .replace(/\.[ \t]+(?=[A-Z\u3040-\u30ff\u4e00-\u9fff])/g, "。");
   }
   if (language === "ko") {
     text = text
       .replace(/AI 에이전트를 감시할 사람이 필요하다는 데 투자하여 2억 달러를 모금했습니다/g, "AI agent 모니터링 수요에 베팅하며 2억 달러를 조달했습니다")
-      .replace(/\.\s+(?=[A-Z\uac00-\ud7af])/g, ". ");
+      .replace(/\.[ \t]+(?=[A-Z\uac00-\ud7af])/g, ". ");
   }
   return normalizeNewsText(text);
 }
@@ -1060,7 +1073,34 @@ function sourceTextForArticle(article = {}) {
   return `${article.headline || ""}\n${article.standfirst || ""}\n${(article.factBullets || []).join("\n")}`.toLowerCase();
 }
 
-function knownProfile() {
+function knownProfile(article = {}, frame = {}) {
+  const text = `${frame?.key || ""}\n${article.canonicalUrl || ""}\n${article.url || ""}\n${sourceTextForArticle(article)}`.toLowerCase();
+  if (/openai.*lockdown[-\s]mode|lockdown[-\s]mode.*openai|prompt[-\s]injection.*sensitive data|提示注入.*敏感資料|プロンプトインジェクション.*機密データ/.test(text)) {
+    return {
+      title: {
+        "zh-Hant": "OpenAI 推出 Lockdown Mode，降低 ChatGPT prompt injection 資料外洩風險",
+        en: "OpenAI introduces Lockdown Mode to reduce ChatGPT prompt-injection data risks",
+        ja: "OpenAI、ChatGPT の prompt injection 対策として Lockdown Mode を発表",
+        ko: "OpenAI, ChatGPT prompt injection 위험 줄이는 Lockdown Mode 공개",
+        id: "OpenAI merilis Lockdown Mode untuk menekan risiko data dari prompt injection ChatGPT",
+        vi: "OpenAI ra mắt Lockdown Mode để giảm rủi ro dữ liệu từ prompt injection trên ChatGPT",
+        th: "OpenAI เปิดตัว Lockdown Mode ลดความเสี่ยงข้อมูลจาก prompt injection ใน ChatGPT",
+        ms: "OpenAI memperkenalkan Lockdown Mode untuk kurangkan risiko data akibat prompt injection ChatGPT",
+        fil: "Inilabas ng OpenAI ang Lockdown Mode para bawasan ang data risk mula sa prompt injection sa ChatGPT"
+      },
+      standfirst: {
+        "zh-Hant": "TechCrunch AI 報導，OpenAI 新增 Lockdown Mode，會關閉即時瀏覽、網路圖片擷取、deep research 與 agent mode，用來降低敏感資料遭 prompt injection 帶出系統的風險。",
+        en: "TechCrunch AI reports that OpenAI's Lockdown Mode disables live browsing, web image retrieval, deep research, and agent mode to reduce prompt-injection data-exfiltration risk.",
+        ja: "TechCrunch AI は、OpenAI の Lockdown Mode がリアルタイム閲覧、ウェブ画像取得、deep research、agent mode を無効にし、prompt injection によるデータ流出リスクを下げると報じました。",
+        ko: "TechCrunch AI는 OpenAI의 Lockdown Mode가 실시간 웹 브라우징, 웹 이미지 검색, deep research, agent mode를 꺼 prompt injection에 따른 데이터 유출 위험을 낮춘다고 보도했습니다.",
+        id: "TechCrunch AI melaporkan Lockdown Mode OpenAI mematikan live browsing, pengambilan gambar web, deep research, dan agent mode untuk menekan risiko data exfiltration akibat prompt injection.",
+        vi: "TechCrunch AI đưa tin Lockdown Mode của OpenAI tắt duyệt web trực tiếp, truy xuất hình ảnh web, deep research và agent mode để giảm rủi ro dữ liệu bị đưa ra ngoài qua prompt injection.",
+        th: "TechCrunch AI รายงานว่า Lockdown Mode ของ OpenAI จะปิด live browsing, การดึงภาพจากเว็บ, deep research และ agent mode เพื่อลดความเสี่ยงข้อมูลรั่วจาก prompt injection",
+        ms: "TechCrunch AI melaporkan Lockdown Mode OpenAI mematikan live browsing, pengambilan imej web, deep research dan agent mode untuk mengurangkan risiko data exfiltration akibat prompt injection.",
+        fil: "Iniulat ng TechCrunch AI na idi-disable ng Lockdown Mode ng OpenAI ang live browsing, web image retrieval, deep research, at agent mode para bawasan ang data-exfiltration risk mula sa prompt injection."
+      }
+    };
+  }
   return null;
 }
 
@@ -1081,10 +1121,11 @@ function profileFacts(profile, language) {
 function articleTitle(language, frame, source, article, profile) {
   const profiled = profileText(profile, "title", language);
   if (profiled) return profiled;
+  const sourceHeadline = cleanArticleSourceTitle(article.headline || source.title || "");
+  if (sourceHeadline) return sourceHeadline;
   const focus = frame.focus?.[language] || frame.focus?.en;
   if (focus && !/generic|ai-market-update/i.test(frame.key || "") && !/source index|current ai feed|article claims should remain anchored/i.test(focus)) return focus;
-  if (language === "en") return cleanArticleSourceTitle(article.headline || source.title || "AI market update");
-  return cleanArticleSourceTitle(article.headline || source.title || "AI market update");
+  return "AI market update";
 }
 
 function cleanExistingMarketTitle(value = "", publisher = "") {
@@ -1167,6 +1208,76 @@ function sourceLeadWithPublisher(language, publisher, text = "") {
   return cleanMarketPublicText(byLanguage[language] || byLanguage.en, language);
 }
 
+function sentenceEnd(language = "") {
+  return language === "zh-Hant" || language === "ja" || language === "ko" ? "。" : ".";
+}
+
+function splitReadableSentences(value = "") {
+  const decimalDot = "__ALTOS_DECIMAL_DOT__";
+  const text = normalizeNewsText(value).replace(/(\d)\.(\d)/g, `$1${decimalDot}$2`);
+  const matches = text.match(/[^。！？.!?]+[。！？.!?]?/g) || [];
+  return matches.map((sentence) => sentence.replaceAll(decimalDot, ".").trim()).filter(Boolean);
+}
+
+function primaryTitleEntity(title = "") {
+  const match = normalizeNewsText(title).match(/\b(?:Amazon|Google|Microsoft|OpenAI|Anthropic|NVIDIA|Vercel|Lovable|Coralogix|AethexAI|IBM|Hugging Face|MUFG|Codex|Gemini|Claude|ChatGPT|Grok)\b/i);
+  return match?.[0] || "";
+}
+
+function publisherLeadPrefix(value = "") {
+  return normalizeNewsText(value).match(/^(.*?(?:報導|指出|reported|reports|says|によると|報じました|에 따르면|melaporkan|đưa tin|รายงานว่า|Iniulat ng)[,，:：]?\s*)/i)?.[1] || "";
+}
+
+function compactNewsDeck(language, title, standfirst) {
+  const text = cleanMarketPublicText(standfirst, language);
+  const sentences = splitReadableSentences(text);
+  let first = sentences[0] || text;
+  const entity = primaryTitleEntity(title);
+  if (entity && !first.toLowerCase().includes(entity.toLowerCase()) && /該公司|這家公司|這家|the company|the retailer|the startup|公司堅稱/i.test(first)) {
+    const prefix = publisherLeadPrefix(first);
+    const cleaned = first
+      .replace(prefix, "")
+      .replace(/^該公司/, "公司")
+      .replace(/^這家公司|^這家/, "公司")
+      .replace(/^the company/i, "the company")
+      .trim();
+    first = `${prefix}${title}${sentenceEnd(language)} ${cleaned}`;
+  }
+  return truncate(cleanMarketPublicText(first, language), 190);
+}
+
+function compactFact(value = "", language = "", limit = 180) {
+  const sentence = splitReadableSentences(value)[0] || value;
+  return truncate(cleanMarketPublicText(sentence, language), limit);
+}
+
+function isOrphanContinuationFact(value = "") {
+  return /^(然後|接著|随后|之後|Then|And then|After that|Kemudian|Selanjutnya|Sau đó|ต่อจากนั้น|Pagkatapos)/i.test(normalizeNewsText(value));
+}
+
+function continuationTail(value = "", language = "") {
+  const text = cleanMarketPublicText(value, language)
+    .replace(/^(然後|接著|随后|之後)\s*/i, "")
+    .replace(/^(Then|And then|After that)\s*/i, "")
+    .replace(/^(Kemudian|Selanjutnya|Sau đó|ต่อจากนั้น|Pagkatapos)\s*/i, "")
+    .trim();
+  return text.replace(/[。.!?！？]+$/, "");
+}
+
+function mergeContinuationFacts(facts = [], language = "") {
+  const merged = [];
+  for (const fact of facts) {
+    if (isOrphanContinuationFact(fact) && merged.length) {
+      const tail = continuationTail(fact, language);
+      const separator = language === "zh-Hant" || language === "ja" || language === "ko" ? "，" : ", ";
+      if (tail) merged[merged.length - 1] = `${merged[merged.length - 1].replace(/[。.!?！？]+$/, "")}${separator}${tail}${sentenceEnd(language)}`;
+      continue;
+    }
+    merged.push(fact);
+  }
+  return merged;
+}
+
 function hasImportantNewsNumber(value = "") {
   return /(?:[$€£]|US\$|AS\$)?\s*\d[\d,.]*(?:\s*(?:k|m|b|bn|tn|million|billion|trillion|億|亿|억|ドル|달러|juta|triệu|ล้าน|milyon|usd|美元|美金|倍|x|%|calls?|users?|parameters?|organizations?|countries?|通電話|參數|家|國))/i.test(
     normalizeNewsText(value)
@@ -1221,57 +1332,57 @@ function localizedFallbackFacts(language, frame, source, article, publisher, tit
   const byLanguage = {
     "zh-Hant": [
       localizedSummary,
-      entityText && numberText ? `${entityText} 是這則新聞裡的主要角色，${numberText} 是來源中可直接核對的數字。` : "",
-      !numberText && entityText ? `${entityText} 是這則新聞裡的主要角色。` : "",
-      numberText && !entityText ? `來源中可直接核對的數字包括 ${numberText}。` : ""
+      entityText && numberText ? `報導牽涉 ${entityText}；文中提到 ${numberText}。` : "",
+      !numberText && entityText ? `報導牽涉 ${entityText}。` : "",
+      numberText && !entityText ? `文中提到 ${numberText}。` : ""
     ],
     en: [
       localizedSummary,
-      entityText && numberText ? `The report mentions ${entityText}; key figures include ${numberText}.` : "",
-      !numberText && entityText ? `The report centers on ${entityText}.` : "",
-      numberText && !entityText ? `The main figures mentioned are ${numberText}.` : ""
+      entityText && numberText ? `The story involves ${entityText}; figures in the report include ${numberText}.` : "",
+      !numberText && entityText ? `The story involves ${entityText}.` : "",
+      numberText && !entityText ? `Figures in the report include ${numberText}.` : ""
     ],
     ja: [
       localizedSummary,
-      entityText && numberText ? `報道では ${entityText} が取り上げられ、主な数字として ${numberText} が確認できます。` : "",
-      !numberText && entityText ? `報道の中心は ${entityText} です。` : "",
-      numberText && !entityText ? `文中の主な数字は ${numberText} です。` : ""
+      entityText && numberText ? `報道では ${entityText} に触れ、数字として ${numberText} が示されています。` : "",
+      !numberText && entityText ? `報道では ${entityText} に触れています。` : "",
+      numberText && !entityText ? `文中では ${numberText} が示されています。` : ""
     ],
     ko: [
       localizedSummary,
-      entityText && numberText ? `보도에는 ${entityText}가 언급됐고, 주요 수치는 ${numberText}입니다.` : "",
-      !numberText && entityText ? `보도의 중심에는 ${entityText}가 있습니다.` : "",
-      numberText && !entityText ? `본문의 주요 수치는 ${numberText}입니다.` : ""
+      entityText && numberText ? `보도에는 ${entityText}가 언급됐고, 숫자로는 ${numberText}가 제시됐습니다.` : "",
+      !numberText && entityText ? `보도에는 ${entityText}가 언급됐습니다.` : "",
+      numberText && !entityText ? `본문에는 ${numberText}가 제시됐습니다.` : ""
     ],
     id: [
       localizedSummary,
-      entityText && numberText ? `Laporan ini menyebut ${entityText}; angka utamanya termasuk ${numberText}.` : "",
-      !numberText && entityText ? `Laporan ini berpusat pada ${entityText}.` : "",
-      numberText && !entityText ? `Angka utama yang disebut ialah ${numberText}.` : ""
+      entityText && numberText ? `Laporan ini menyebut ${entityText}; angkanya mencakup ${numberText}.` : "",
+      !numberText && entityText ? `Laporan ini menyebut ${entityText}.` : "",
+      numberText && !entityText ? `Angka yang disebut mencakup ${numberText}.` : ""
     ],
     vi: [
       localizedSummary,
-      entityText && numberText ? `Bài viết nhắc tới ${entityText}; các con số chính gồm ${numberText}.` : "",
-      !numberText && entityText ? `Bài viết xoay quanh ${entityText}.` : "",
-      numberText && !entityText ? `Các con số chính được nhắc tới là ${numberText}.` : ""
+      entityText && numberText ? `Bài viết nhắc tới ${entityText}; các con số được nêu gồm ${numberText}.` : "",
+      !numberText && entityText ? `Bài viết nhắc tới ${entityText}.` : "",
+      numberText && !entityText ? `Các con số được nêu gồm ${numberText}.` : ""
     ],
     th: [
       localizedSummary,
-      entityText && numberText ? `รายงานกล่าวถึง ${entityText} โดยมีตัวเลขสำคัญคือ ${numberText}` : "",
-      !numberText && entityText ? `รายงานนี้เกี่ยวข้องกับ ${entityText}` : "",
-      numberText && !entityText ? `ตัวเลขหลักที่ถูกกล่าวถึงคือ ${numberText}` : ""
+      entityText && numberText ? `รายงานกล่าวถึง ${entityText} และระบุตัวเลข ${numberText}` : "",
+      !numberText && entityText ? `รายงานกล่าวถึง ${entityText}` : "",
+      numberText && !entityText ? `ตัวเลขที่ถูกกล่าวถึงคือ ${numberText}` : ""
     ],
     ms: [
       localizedSummary,
-      entityText && numberText ? `Laporan ini menyebut ${entityText}; angka utamanya termasuk ${numberText}.` : "",
-      !numberText && entityText ? `Laporan ini tertumpu pada ${entityText}.` : "",
-      numberText && !entityText ? `Angka utama yang disebut ialah ${numberText}.` : ""
+      entityText && numberText ? `Laporan ini menyebut ${entityText}; angkanya termasuk ${numberText}.` : "",
+      !numberText && entityText ? `Laporan ini menyebut ${entityText}.` : "",
+      numberText && !entityText ? `Angka yang disebut termasuk ${numberText}.` : ""
     ],
     fil: [
       localizedSummary,
-      entityText && numberText ? `Binanggit sa ulat ang ${entityText}; kabilang sa pangunahing numero ang ${numberText}.` : "",
-      !numberText && entityText ? `Nakatuon ang ulat sa ${entityText}.` : "",
-      numberText && !entityText ? `Kabilang sa pangunahing numero ang ${numberText}.` : ""
+      entityText && numberText ? `Binanggit sa ulat ang ${entityText}; kasama sa mga numero ang ${numberText}.` : "",
+      !numberText && entityText ? `Binanggit sa ulat ang ${entityText}.` : "",
+      numberText && !entityText ? `Kasama sa mga numerong binanggit ang ${numberText}.` : ""
     ]
   };
   return (byLanguage[language] || byLanguage.en).filter(Boolean).slice(0, 4);
@@ -1294,11 +1405,36 @@ function factsForArticle(language, frame, source, article, profile) {
       if (/^techcrunch\s*(報導|reported)/i.test(normalizedFact) && normalizedTitle && normalizedFact.includes(normalizedTitle.slice(0, Math.min(24, normalizedTitle.length)))) return false;
       return true;
     })
-    .slice(0, 4);
+    .slice(0, 8);
   if (article.localizedLanguage === language) return sourceFacts;
   if (language === "en") return sourceFacts;
   if (!sourceFacts.some((fact) => /[a-z]{4,}\s+[a-z]{4,}/i.test(fact))) return sourceFacts;
   return [];
+}
+
+function localizedFactsForArticle(language, frame, source, article, profile, lead = "") {
+  const title = articleTitle(language, frame, source, article, profile);
+  const publisher = sourceArticlePublisher(article.publisher || source.publisher);
+  const explicitFacts = factsForArticle(language, frame, source, article, profile)
+    .map((fact) => cleanMarketPublicText(fact, language))
+    .filter(Boolean);
+  const fallbackFacts = localizedFallbackFacts(
+    language,
+    frame,
+    { ...source, summary: publicArticleStandfirst(article, source) || source.summary || title },
+    article,
+    publisher,
+    title,
+    article.numbers || [],
+    article.entities || []
+  )
+    .map((fact) => cleanMarketPublicText(fact, language))
+    .filter(Boolean);
+  const combined = explicitFacts.length ? explicitFacts : fallbackFacts;
+  return mergeContinuationFacts(combined, language)
+    .filter((fact) => !lead || factDiffersFromLead(fact, lead))
+    .filter((fact, index, list) => list.findIndex((candidate) => !factDiffersFromLead(fact, candidate)) === index)
+    .slice(0, 7);
 }
 
 function sourceDetailParagraph(language, publisher, date, title, article = {}, source = {}, localizedFact = "") {
@@ -1337,11 +1473,12 @@ function sourceDetailParagraph(language, publisher, date, title, article = {}, s
   return `${byLanguage[language] || byLanguage.en}${host ? ` (${host})` : ""}`;
 }
 
-function sentenceJoin(items = []) {
+function sentenceJoin(items = [], language = "") {
+  const end = sentenceEnd(language);
   return items
     .map((item) => normalizeNewsText(item))
     .filter(Boolean)
-    .map((item) => (/[.!?。！？]$/.test(item) ? item : `${item}。`))
+    .map((item) => (/[.!?。！？]$/.test(item) ? item : `${item}${end}`))
     .join(" ");
 }
 
@@ -1385,8 +1522,104 @@ function factDiffersFromLead(fact = "", lead = "") {
   return true;
 }
 
+function sourceBodyParagraphCandidates(article = {}, language = "", lead = "") {
+  const rawParagraphs = Array.isArray(article.bodyParagraphs) && article.bodyParagraphs.length
+    ? article.bodyParagraphs
+    : String(article.body || "").split(/\n{2,}/);
+  const seen = new Set();
+  return rawParagraphs
+    .map((paragraph) => cleanMarketPublicText(paragraph, language))
+    .map((paragraph) => paragraph.replace(/\s+/g, " ").trim())
+    .filter((paragraph) => {
+      if (paragraph.length < 42) return false;
+      if (/^(Image Credits|Tags?|Topics?|Read more|Sign up|Subscribe|Advertisement|Recommended|Related|Share this)/i.test(paragraph)) return false;
+      if (/newsletter|sign up|subscribe|advertisement|cookie|privacy policy|terms of service/i.test(paragraph)) return false;
+      if (lead && !factDiffersFromLead(paragraph, lead)) return false;
+      const key = comparableNewsText(paragraph);
+      if (!key || seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    })
+    .slice(0, 7);
+}
+
+function sourceBodyParagraphs(language, publisher, lead = "", article = {}) {
+  const candidates = sourceBodyParagraphCandidates(article, language, lead);
+  if (candidates.length < 2) return [];
+  const paragraphs = [];
+  for (const paragraph of candidates) {
+    if (paragraphs.some((existing) => !factDiffersFromLead(paragraph, existing))) continue;
+    paragraphs.push(paragraph);
+    if (paragraphs.length >= 7) break;
+  }
+  const totalLength = paragraphs.join("").length;
+  const floor = ["en", "id", "vi", "ms", "fil"].includes(language) ? 520 : 260;
+  return totalLength >= floor ? paragraphs : [];
+}
+
+function stripGenericNewsOpening(value = "", language = "") {
+  return cleanMarketPublicText(value, language)
+    .replace(/^(如今|現在|當前)[，,\s]*/i, "")
+    .replace(/^(Today|Nowadays|Now)[,，\s]*/i, "")
+    .replace(/^(現在|今日)[、，\s]*/i, "")
+    .replace(/^(오늘|현재)[,，\s]*/i, "")
+    .replace(/^(Hari ini|Sekarang)[,，\s]*/i, "")
+    .replace(/^(Hôm nay|Hiện nay)[,，\s]*/i, "")
+    .replace(/^(วันนี้|ขณะนี้)\s*/i, "")
+    .replace(/^(Ngayon|Sa ngayon)[,，\s]*/i, "")
+    .trim();
+}
+
+function sourceEventOpeningParagraph(language, publisher, date, paragraph = "", title = "") {
+  const detail = stripGenericNewsOpening(paragraph, language);
+  if (!detail) return "";
+  const cleanPublisher = sourceArticlePublisher(publisher);
+  const cleanTitle = cleanMarketPublicText(title, language);
+  const titlePrefix =
+    cleanTitle &&
+    !detail.toLowerCase().includes(cleanTitle.toLowerCase()) &&
+    /AI|OpenAI|Gemini|Claude|ChatGPT|agent|automation|search|model|Google|Microsoft|NVIDIA/i.test(cleanTitle)
+      ? cleanTitle
+      : "";
+  const byLanguage = {
+    "zh-Hant": titlePrefix ? `${cleanPublisher} 在${date}報導「${titlePrefix}」，${detail}` : `${cleanPublisher} 在${date}報導，${detail}`,
+    en: titlePrefix ? `${cleanPublisher}'s ${date} report on ${titlePrefix} says: ${detail}` : `${cleanPublisher}'s ${date} report says: ${detail}`,
+    ja: titlePrefix ? `${cleanPublisher} は${date}の記事で「${titlePrefix}」について、${detail}` : `${cleanPublisher} は${date}の記事で、${detail}`,
+    ko: titlePrefix ? `${cleanPublisher}는 ${date} 보도에서 ${titlePrefix}에 대해 다음과 같이 설명했습니다. ${detail}` : `${cleanPublisher}는 ${date} 보도에서 다음과 같이 설명했습니다. ${detail}`,
+    id: titlePrefix ? `Dalam laporan pada ${date} tentang ${titlePrefix}, ${cleanPublisher} menyebut: ${detail}` : `Dalam laporan pada ${date}, ${cleanPublisher} menyebut: ${detail}`,
+    vi: titlePrefix ? `Trong bài viết ngày ${date} về ${titlePrefix}, ${cleanPublisher} cho biết: ${detail}` : `Trong bài viết ngày ${date}, ${cleanPublisher} cho biết: ${detail}`,
+    th: titlePrefix ? `ในรายงานเมื่อ ${date} เกี่ยวกับ ${titlePrefix} ${cleanPublisher} ระบุว่า ${detail}` : `ในรายงานเมื่อ ${date} ${cleanPublisher} ระบุว่า ${detail}`,
+    ms: titlePrefix ? `Dalam laporan pada ${date} tentang ${titlePrefix}, ${cleanPublisher} menyatakan: ${detail}` : `Dalam laporan pada ${date}, ${cleanPublisher} menyatakan: ${detail}`,
+    fil: titlePrefix ? `Sa ulat noong ${date} tungkol sa ${titlePrefix}, sinabi ng ${cleanPublisher}: ${detail}` : `Sa ulat noong ${date}, sinabi ng ${cleanPublisher}: ${detail}`
+  };
+  return cleanMarketPublicText(byLanguage[language] || byLanguage.en, language);
+}
+
+function sourceOpeningParagraphIndex(paragraphs = []) {
+  const index = paragraphs.findIndex((paragraph) => {
+    const text = normalizeNewsText(paragraph);
+    if (text.length < 170) return false;
+    if (/^(Helping|Membantu|Hỗ trợ|Pagtulong|ช่วย|企業が|고객은|Pelanggan|Maaaring)/i.test(text)) return false;
+    return true;
+  });
+  return index >= 0 ? index : 0;
+}
+
 function sourceSpecificBody(language, frame, source, article) {
   const text = `${frame?.key || ""} ${article.headline || ""} ${source.title || ""}`.toLowerCase();
+  if (/openai.*lockdown[-\s]mode|lockdown[-\s]mode.*openai|prompt[-\s]injection.*sensitive data|提示注入.*敏感資料|プロンプトインジェクション.*機密データ/.test(text)) {
+    return {
+      "zh-Hant": "TechCrunch AI 報導，OpenAI 推出 Lockdown Mode，目標是降低 ChatGPT 在處理敏感資料時遭遇 prompt injection 後外洩資料的風險。Prompt injection 指的是惡意指令被藏在網頁、文件或其他內容來源中，讓模型在讀取資料時被帶往攻擊者想要的行為。\n\n這個模式會限制 ChatGPT 能接觸的外部內容。報導提到，Lockdown Mode 會關閉即時網頁瀏覽、網路圖片擷取與顯示、deep research，以及 agent mode；使用者仍可讀取快取內容，也仍可生成圖片。\n\nOpenAI 同時提醒，Lockdown Mode 不是完整防線。prompt injection 仍會出現在快取網頁內容或上傳檔案中，並影響回覆的行為或準確度；因此這項功能的重點不是消除所有攻擊，而是降低敏感資料被帶出系統的機率。\n\n報導指出，OpenAI 把 Lockdown Mode 定位給處理敏感資料的個人與組織，而不是一般使用者都必須開啟的模式。公司目前正把這項功能推向自助式 ChatGPT Business 帳戶與符合資格的個人帳戶。",
+        en: "TechCrunch AI reports that OpenAI has introduced Lockdown Mode to reduce the risk that sensitive data is exposed when ChatGPT encounters prompt injection. Prompt injection is the attack pattern in which malicious instructions are hidden inside webpages, files, or other content sources that a model reads.\n\nThe mode narrows what ChatGPT can reach outside the conversation. According to the report, Lockdown Mode disables live web browsing, web image retrieval and display, deep research, and agent mode; users can still access cached content and generate images. In plain terms, it limits external browsing and tool-like actions before sensitive work leaves the chat.\n\nOpenAI also says the mode is not a complete defense. Prompt injection can still appear in cached web content or uploaded files and affect the behavior or accuracy of a response, so the feature is meant to reduce data-exfiltration risk rather than remove every attack path.\n\nThe report says OpenAI is positioning Lockdown Mode for people and organizations that handle sensitive data, not as a setting every user needs to turn on. The company is rolling it out to self-service ChatGPT Business accounts and eligible individual accounts.",
+      ja: "TechCrunch AI は、OpenAI が ChatGPT の Lockdown Mode を発表したと報じました。狙いは、機密データを扱う場面で prompt injection によるデータ流出リスクを下げることです。Prompt injection は、モデルが読むウェブページ、ファイル、その他のコンテンツに悪意ある指示を隠す攻撃手法です。\n\nこのモードでは、ChatGPT が会話外でアクセスできる範囲が狭くなります。報道によると、Lockdown Mode はリアルタイムのウェブ閲覧、ウェブ画像の取得と表示、deep research、agent mode を無効にします。キャッシュされた内容の参照と画像生成は引き続き使えます。\n\nOpenAI は、このモードが完全な防御策ではないとも説明しています。Prompt injection はキャッシュされたウェブ内容やアップロード済みファイルにも残り、回答の挙動や正確性に影響します。そのため、目的は攻撃経路をすべて消すことではなく、データ流出リスクを下げることです。\n\n報道では、OpenAI が Lockdown Mode を機密データを扱う個人と組織向けの機能として位置づけているとされています。一般利用者全員が常時オンにする設定ではなく、現在はセルフサービス型の ChatGPT Business アカウントと対象となる個人アカウントへ展開されています。",
+      ko: "TechCrunch AI는 OpenAI가 ChatGPT용 Lockdown Mode를 공개했다고 보도했습니다. 목적은 민감한 데이터를 다룰 때 prompt injection으로 데이터가 노출되는 위험을 낮추는 것입니다. Prompt injection은 모델이 읽는 웹페이지, 파일, 기타 콘텐츠 안에 악성 지시를 숨기는 공격 방식입니다.\n\n이 모드는 ChatGPT가 대화 밖에서 접근할 수 있는 범위를 줄입니다. 보도에 따르면 Lockdown Mode는 실시간 웹 브라우징, 웹 이미지 검색과 표시, deep research, agent mode를 비활성화합니다. 캐시된 콘텐츠 접근과 이미지 생성은 계속 가능합니다.\n\nOpenAI는 이 모드가 완전한 방어책은 아니라고 설명합니다. Prompt injection은 캐시된 웹 콘텐츠나 업로드된 파일에도 남아 응답의 동작과 정확도에 영향을 줄 수 있습니다. 따라서 핵심은 모든 공격 경로를 제거하는 것이 아니라 데이터 유출 위험을 낮추는 데 있습니다.\n\n보도에 따르면 OpenAI는 Lockdown Mode를 민감한 데이터를 다루는 개인과 조직을 위한 기능으로 보고 있습니다. 모든 사용자가 항상 켜야 하는 설정이 아니라, 현재 셀프서비스 ChatGPT Business 계정과 자격을 갖춘 개인 계정에 배포되고 있습니다.",
+      id: "TechCrunch AI melaporkan OpenAI merilis Lockdown Mode untuk menurunkan risiko kebocoran data sensitif saat ChatGPT berhadapan dengan prompt injection. Prompt injection adalah pola serangan ketika instruksi berbahaya disembunyikan di halaman web, file, atau sumber konten lain yang dibaca model.\n\nMode ini mempersempit akses ChatGPT ke konten di luar percakapan. Menurut laporan tersebut, Lockdown Mode menonaktifkan live web browsing, pengambilan dan tampilan gambar dari web, deep research, serta agent mode; pengguna tetap bisa membuka konten cache dan membuat gambar.\n\nOpenAI juga menyatakan mode ini bukan pertahanan penuh. Prompt injection tetap bisa muncul di konten web yang tersimpan di cache atau file yang diunggah, lalu memengaruhi perilaku atau akurasi jawaban. Jadi, fokusnya adalah mengurangi risiko data exfiltration, bukan menghapus semua jalur serangan.\n\nLaporan itu menyebut OpenAI menempatkan Lockdown Mode untuk orang dan organisasi yang menangani data sensitif, bukan sebagai pengaturan yang wajib dinyalakan semua pengguna. Fitur ini sedang diluncurkan untuk akun ChatGPT Business self-service dan akun individual yang memenuhi syarat.",
+      vi: "TechCrunch AI đưa tin OpenAI ra mắt Lockdown Mode nhằm giảm rủi ro lộ dữ liệu nhạy cảm khi ChatGPT gặp prompt injection. Prompt injection là kiểu tấn công trong đó hướng dẫn độc hại được giấu trong trang web, tệp hoặc nguồn nội dung khác mà mô hình đọc vào.\n\nChế độ này thu hẹp những gì ChatGPT có thể truy cập ngoài cuộc trò chuyện. Theo bài viết, Lockdown Mode tắt duyệt web trực tiếp, truy xuất và hiển thị hình ảnh từ web, deep research và agent mode; người dùng vẫn có thể mở nội dung đã lưu trong cache và tạo hình ảnh.\n\nOpenAI cũng nói rõ đây không phải lớp phòng thủ tuyệt đối. Prompt injection vẫn có thể nằm trong nội dung web được cache hoặc tệp đã tải lên, rồi ảnh hưởng đến hành vi hoặc độ chính xác của câu trả lời. Vì vậy, mục tiêu là giảm rủi ro dữ liệu bị đưa ra ngoài, không phải loại bỏ mọi đường tấn công.\n\nBài viết cho biết OpenAI định vị Lockdown Mode cho cá nhân và tổ chức xử lý dữ liệu nhạy cảm, không phải cài đặt mà mọi người dùng đều cần bật. Tính năng đang được triển khai cho tài khoản ChatGPT Business self-service và một số tài khoản cá nhân đủ điều kiện.",
+      th: "TechCrunch AI รายงานว่า OpenAI เปิดตัว Lockdown Mode เพื่อลดความเสี่ยงที่ข้อมูลอ่อนไหวจะรั่วไหลเมื่อ ChatGPT เจอกับ prompt injection โดย prompt injection คือรูปแบบโจมตีที่ซ่อนคำสั่งไม่พึงประสงค์ไว้ในหน้าเว็บ ไฟล์ หรือแหล่งคอนเทนต์อื่นที่โมเดลอ่านเข้าไป\n\nโหมดนี้จำกัดสิ่งที่ ChatGPT เข้าถึงได้นอกบทสนทนา รายงานระบุว่า Lockdown Mode จะปิด live web browsing การดึงและแสดงภาพจากเว็บ deep research และ agent mode แต่ผู้ใช้ยังเปิดคอนเทนต์ที่ถูก cache ไว้และยังสร้างภาพได้\n\nOpenAI ระบุด้วยว่าโหมดนี้ไม่ใช่เกราะป้องกันทั้งหมด Prompt injection ยังอยู่ในคอนเทนต์เว็บที่ cache ไว้หรือไฟล์ที่อัปโหลด และยังส่งผลต่อพฤติกรรมหรือความแม่นยำของคำตอบได้ ดังนั้นเป้าหมายคือการลดความเสี่ยง data exfiltration ไม่ใช่ลบทุกเส้นทางโจมตี\n\nรายงานบอกว่า OpenAI วาง Lockdown Mode ไว้สำหรับบุคคลและองค์กรที่จัดการข้อมูลอ่อนไหว ไม่ใช่การตั้งค่าที่ผู้ใช้ทุกคนต้องเปิดตลอดเวลา ฟีเจอร์นี้กำลังทยอยไปยังบัญชี ChatGPT Business แบบ self-service และบัญชีบุคคลที่เข้าเกณฑ์",
+      ms: "TechCrunch AI melaporkan OpenAI memperkenalkan Lockdown Mode untuk mengurangkan risiko data sensitif terdedah apabila ChatGPT berdepan prompt injection. Prompt injection ialah corak serangan yang menyembunyikan arahan berniat jahat dalam halaman web, fail atau sumber kandungan lain yang dibaca oleh model.\n\nMod ini mengecilkan akses ChatGPT kepada kandungan di luar perbualan. Menurut laporan itu, Lockdown Mode mematikan live web browsing, pengambilan dan paparan imej daripada web, deep research serta agent mode; pengguna masih boleh membuka kandungan cache dan menjana imej.\n\nOpenAI turut menjelaskan bahawa mod ini bukan pertahanan penuh. Prompt injection masih boleh wujud dalam kandungan web yang disimpan cache atau fail yang dimuat naik, lalu menjejaskan tingkah laku atau ketepatan jawapan. Jadi, matlamatnya ialah mengurangkan risiko data exfiltration, bukan menghapuskan semua laluan serangan.\n\nLaporan itu menyebut OpenAI meletakkan Lockdown Mode untuk individu dan organisasi yang mengendalikan data sensitif, bukan tetapan yang perlu dihidupkan oleh semua pengguna. Ciri ini sedang dilancarkan kepada akaun ChatGPT Business self-service dan akaun individu yang layak.",
+      fil: "Iniulat ng TechCrunch AI na inilabas ng OpenAI ang Lockdown Mode para bawasan ang panganib na mailabas ang sensitibong data kapag may prompt injection na nabasa ang ChatGPT. Ang prompt injection ay pag-atake kung saan itinatago ang masamang instructions sa webpages, files, o iba pang content na binabasa ng model.\n\nNililimitahan ng mode na ito ang naaabot ng ChatGPT sa labas ng usapan. Ayon sa ulat, idi-disable ng Lockdown Mode ang live web browsing, pagkuha at pagpapakita ng web images, deep research, at agent mode; puwede pa ring buksan ang cached content at gumawa ng images.\n\nNilinaw din ng OpenAI na hindi ito kumpletong depensa. Maaari pa ring lumitaw ang prompt injection sa cached web content o uploaded files at makaapekto sa kilos o accuracy ng sagot. Kaya ang layunin ay bawasan ang data-exfiltration risk, hindi burahin ang lahat ng attack paths.\n\nSabi ng ulat, inilalagay ng OpenAI ang Lockdown Mode para sa mga tao at organisasyong humahawak ng sensitibong data, hindi bilang setting na kailangang buksan ng lahat ng user. Iro-roll out ito sa self-service ChatGPT Business accounts at eligible individual accounts."
+    }[language];
+  }
   if (/publishers.*opt.*out|opt.*out.*ai search|ai search.*publishers|ai-generated search results|google.*ai search.*publisher/.test(text)) {
     return {
       "zh-Hant": "TechCrunch 報導，英國監管機構要求 Google 提供新的選項，讓出版商可以選擇不讓內容被用在 AI 生成式搜尋結果中。這項安排先從英國開始，Google 也表示會把相關選項推向其他市場。\n\n這篇新聞的重點在於搜尋產品和內容授權之間的拉扯。出版商並不是單純反對搜尋曝光，而是希望在 AI 摘要、引用和流量分配變得更複雜時，能保留選擇權與可被辨識的內容邊界。",
@@ -1469,33 +1702,124 @@ function sourceMatterParagraph(language, article = {}, source = {}) {
 }
 
 function sourceBackedBody(language, frame, source, article, profile) {
-  const specificBody = sourceSpecificBody(language, frame, source, article);
-  if (specificBody) return cleanMarketPublicText(specificBody, language);
+  const specific = sourceSpecificBody(language, frame, source, article);
+  if (specific) return cleanMarketPublicText(specific, language);
   const publisher = sourceArticlePublisher(article.publisher || source.publisher);
-  const lead = articleStandfirst(language, frame, source, article, profile);
-  const facts = factsForArticle(language, frame, source, article, profile);
-  const firstParagraph = lead && lead.toLowerCase().includes(publisher.toLowerCase())
-    ? lead
-    : sourceLeadWithPublisher(language, publisher, lead);
-  const detailFacts = facts
-    .map((fact) => cleanMarketPublicText(fact, language))
+  const title = articleTitle(language, frame, source, article, profile);
+  const lead = compactNewsDeck(language, title, articleStandfirst(language, frame, source, article, profile));
+  const bodyParagraphs = sourceBodyParagraphs(language, publisher, lead, article);
+  if (bodyParagraphs.length) {
+    const date = formatDate(article.publishedAt || source.publishedAt, language);
+    const openingIndex = sourceOpeningParagraphIndex(bodyParagraphs);
+    const opening = sourceEventOpeningParagraph(language, publisher, date, bodyParagraphs[openingIndex], title);
+    const remaining = bodyParagraphs.filter((_, index) => index !== openingIndex);
+    return cleanMarketPublicText([opening || bodyParagraphs[openingIndex], ...remaining].join("\n\n"), language);
+  }
+  const detailFacts = localizedFactsForArticle(language, frame, source, article, profile, lead)
     .filter((fact) => !/報導主要提到|文中提到的主要數字|The report centers on|Figures mentioned in the source|出典で確認できる数字|보도는 .*중심|Angka yang disebut sumber|Các con số trong nguồn|ตัวเลขที่แหล่งข่าวระบุ|Kasama sa mga numerong/i.test(fact))
-    .filter((fact) => factDiffersFromLead(fact, firstParagraph))
-    .filter((fact, index, list) => list.findIndex((candidate) => !factDiffersFromLead(fact, candidate)) === index)
-    .slice(0, 5);
-  const detailParagraph = sentenceJoin(detailFacts.slice(0, 2));
-  const secondDetailParagraph = sentenceJoin(detailFacts.slice(2, 4));
-  const sourceContext =
-    profileText(profile, "context", language, "") ||
-    marketNewsContextParagraph(language, frame, source, article, firstParagraph, [detailParagraph, secondDetailParagraph].filter(Boolean).join(" "));
-  const sourceWatch = profileText(profile, "watch", language, "");
+    .map((fact) => compactFact(fact, language, 210))
+    .slice(0, 6);
+  const detailParagraphs = [];
+  for (let index = 0; index < detailFacts.length; index += 2) {
+    const paragraph = sentenceJoin(detailFacts.slice(index, index + 2), language);
+    if (!paragraph) continue;
+    detailParagraphs.push(index === 0 ? sourceLeadWithPublisher(language, publisher, paragraph) : paragraph);
+  }
+  const fallbackParagraph = lead && !detailParagraphs.length ? sourceLeadWithPublisher(language, publisher, lead) : "";
 
   return cleanMarketPublicText([
-    detailParagraph || firstParagraph,
-    secondDetailParagraph,
-    sourceContext,
-    sourceWatch
+    ...detailParagraphs.slice(0, 3),
+    fallbackParagraph
   ].filter(Boolean).join("\n\n"), language);
+}
+
+function marketBodyUnits(value = "", language = "") {
+  const text = stripHtml(value);
+  if (["en", "id", "vi", "ms", "fil"].includes(language)) return text.split(/\s+/).filter(Boolean).length;
+  if (language === "th") return Math.round(text.length / 4.5);
+  return (text.match(/[\u4e00-\u9fff\u3040-\u30ff\uac00-\ud7af]/g) || []).length;
+}
+
+function marketBodyFloor(language = "") {
+  return ["en", "id", "vi", "ms", "fil"].includes(language) ? 115 : 170;
+}
+
+function marketJargonNeedsCue(value = "") {
+  return /\b(?:prompt injection|retrieval|orchestration|agentic workflow|workflow orchestration|observability|context window|tool calls?|RAG)\b/i.test(value);
+}
+
+function marketPlainLanguageCue(language = "", title = "") {
+  const promptInjection = /prompt injection|提示注入|プロンプトインジェクション|프롬프트 인젝션/i.test(title);
+  const byLanguage = promptInjection
+    ? {
+        "zh-Hant": "也就是說，這項功能會在處理敏感資料時，限制 ChatGPT 能讀取、顯示或執行的外部內容。",
+        en: "Put simply, the feature limits what ChatGPT can fetch, display, or do when sensitive data is involved.",
+        ja: "つまり、機密データを扱う場面で、ChatGPT が取得、表示、実行できる外部内容を制限する機能です。",
+        ko: "쉽게 말해 민감한 데이터를 다룰 때 ChatGPT가 가져오거나 표시하거나 실행할 수 있는 외부 내용을 제한하는 기능입니다.",
+        id: "Secara sederhana, fitur ini membatasi apa yang bisa diambil, ditampilkan, atau dijalankan ChatGPT saat data sensitif terlibat.",
+        vi: "Nói đơn giản, tính năng này giới hạn những gì ChatGPT có thể lấy, hiển thị hoặc thực hiện khi xử lý dữ liệu nhạy cảm.",
+        th: "พูดให้ง่ายคือ ฟีเจอร์นี้จำกัดสิ่งที่ ChatGPT ดึงมา แสดง หรือดำเนินการได้เมื่อมีข้อมูลอ่อนไหวเกี่ยวข้อง",
+        ms: "Dalam bahasa mudah, ciri ini mengehadkan perkara yang boleh diambil, dipaparkan atau dijalankan oleh ChatGPT apabila data sensitif terlibat.",
+        fil: "Sa simpleng salita, nililimitahan nito ang puwedeng kunin, ipakita, o gawin ng ChatGPT kapag may sensitibong data."
+      }
+    : {
+        "zh-Hant": "也就是說，讀者可以把它理解成一個更可控的 AI 工作流程限制。",
+        en: "Put simply, it is a more controlled way to limit what the AI workflow can use or do.",
+        ja: "つまり、AI ワークフローが使える情報や実行できる動作をより制御する考え方です。",
+        ko: "쉽게 말해 AI 워크플로가 사용할 정보와 할 수 있는 동작을 더 통제하는 방식입니다.",
+        id: "Secara sederhana, ini adalah cara yang lebih terkendali untuk membatasi apa yang bisa dipakai atau dilakukan workflow AI.",
+        vi: "Nói đơn giản, đây là cách kiểm soát rõ hơn những gì workflow AI có thể dùng hoặc thực hiện.",
+        th: "พูดให้ง่ายคือ เป็นวิธีควบคุมให้ชัดขึ้นว่า workflow AI ใช้หรือทำอะไรได้บ้าง",
+        ms: "Dalam bahasa mudah, ini cara yang lebih terkawal untuk mengehadkan perkara yang boleh digunakan atau dilakukan oleh workflow AI.",
+        fil: "Sa simpleng salita, mas kontroladong paraan ito para limitahan kung ano ang puwedeng gamitin o gawin ng AI workflow."
+      };
+  return byLanguage[language] || byLanguage.en;
+}
+
+function reinforceJargonParagraph(paragraph = "", language = "", title = "") {
+  const text = cleanMarketPublicText(paragraph, language);
+  if (!marketJargonNeedsCue(text)) return text;
+  if (/(意思是|也就是|白話|Put simply|In plain terms|つまり|쉽게 말해|Secara sederhana|Nói đơn giản|พูดให้ง่าย|Dalam bahasa mudah|Sa simpleng salita)/i.test(text)) {
+    return text;
+  }
+  return cleanMarketPublicText(`${text} ${marketPlainLanguageCue(language, title)}`, language);
+}
+
+function strengthenMarketNewsBody(language, frame, source, article, profile, body = "", title = "") {
+  const publisher = sourceArticlePublisher(article.publisher || source.publisher);
+  const lead = compactNewsDeck(language, title, articleStandfirst(language, frame, source, article, profile));
+  const rawParagraphs = cleanMarketPublicText(body, language)
+    .split(/\n{2,}/)
+    .filter(Boolean);
+  let jargonCueCovered = /(指的是|attack pattern|攻擊手法|攻撃手法|공격 방식|pola serangan|kiểu tấn công|รูปแบบโจมตี|corak serangan|pag-atake|意思是|也就是|白話|Put simply|In plain terms|つまり|쉽게 말해|Secara sederhana|Nói đơn giản|พูดให้ง่าย|Dalam bahasa mudah|Sa simpleng salita)/i.test(
+    rawParagraphs.join("\n\n")
+  );
+  const paragraphs = rawParagraphs.map((paragraph) => {
+    if (jargonCueCovered) return cleanMarketPublicText(paragraph, language);
+    const reinforced = reinforceJargonParagraph(paragraph, language, title);
+    if (reinforced !== paragraph) jargonCueCovered = true;
+    return reinforced;
+  });
+  if (!paragraphs.length && lead) paragraphs.push(sourceLeadWithPublisher(language, publisher, lead));
+
+  const entityPattern = /(ALTOS LAB|GEO|SEO|AI|Agent|agent|automation|workflow|導入|產品|流程|自動化|実装|運用|도입|자동화)/i;
+  if (paragraphs[0] && !entityPattern.test(paragraphs[0]) && entityPattern.test(title)) {
+    paragraphs[0] = sourceLeadWithPublisher(language, publisher, `${title}${sentenceEnd(language)} ${paragraphs[0]}`);
+  }
+
+  const facts = localizedFactsForArticle(language, frame, source, article, profile, lead)
+    .map((fact) => compactFact(fact, language, 240))
+    .filter(Boolean);
+  const matter = sourceMatterParagraph(language, article, source);
+  for (const candidate of [...facts, matter]) {
+    if (marketBodyUnits(paragraphs.join("\n\n"), language) >= marketBodyFloor(language)) break;
+    const paragraph = cleanMarketPublicText(candidate, language);
+    if (!paragraph) continue;
+    if (paragraphs.some((existing) => !factDiffersFromLead(paragraph, existing))) continue;
+    paragraphs.push(paragraph);
+  }
+
+  return cleanMarketPublicText(paragraphs.slice(0, 6).join("\n\n"), language);
 }
 
 function marketNewsContextParagraph(language, frame, source, article, firstParagraph = "", factParagraph = "") {
@@ -1556,15 +1880,52 @@ function marketNewsContextParagraph(language, frame, source, article, firstParag
 }
 
 function sourceGeoSummary(language, frame, source, article, profile) {
-  const standfirst = articleStandfirst(language, frame, source, article, profile);
-  const context = profileText(profile, "context", language, "");
-  return truncate(cleanMarketPublicText(`${standfirst} ${context}`.trim(), language), 220);
+  const publisher = sourceArticlePublisher(article.publisher || source.publisher);
+  const title = articleTitle(language, frame, source, article, profile);
+  const standfirst = compactNewsDeck(language, title, articleStandfirst(language, frame, source, article, profile));
+  const facts = localizedFactsForArticle(language, frame, source, article, profile, standfirst)
+    .filter((fact) => factDiffersFromLead(fact, standfirst))
+    .map((fact) => compactFact(fact, language, 150))
+    .slice(0, 3);
+  const bodyCandidates = sourceBodyParagraphCandidates(article, language, standfirst)
+    .map((paragraph) => compactFact(paragraph, language, 170))
+    .filter((paragraph) => factDiffersFromLead(paragraph, standfirst))
+    .slice(0, 2);
+  const details = facts.length >= 2 ? facts : [...facts, ...bodyCandidates].slice(0, 3);
+  const body = sentenceJoin(details, language);
+  if (!body || overlapRatio(body, standfirst) >= 0.72) return "";
+  const byLanguage = {
+    "zh-Hant": `${publisher} 報導，${body}`,
+    en: `${publisher} reports: ${body}`,
+    ja: `${publisher} は次のように報じています。${body}`,
+    ko: `${publisher} 보도에 따르면 ${body}`,
+    id: `${publisher} melaporkan: ${body}`,
+    vi: `${publisher} đưa tin: ${body}`,
+    th: `${publisher} รายงานว่า ${body}`,
+    ms: `${publisher} melaporkan: ${body}`,
+    fil: `Ayon sa ${publisher}, ${body}`
+  };
+  const summary = byLanguage[language] || byLanguage.en;
+  return truncate(cleanMarketPublicText(summary, language), 240);
+}
+
+function marketSeoDescription(language, excerpt = "", geoSummary = "", keyTakeaways = [], body = "", title = "") {
+  const candidates = [
+    geoSummary,
+    ...(Array.isArray(keyTakeaways) ? keyTakeaways : []),
+    ...String(body || "").split(/\n{2,}/)
+  ]
+    .map((candidate) => cleanMarketPublicText(candidate, language))
+    .filter((candidate) => candidate && candidate.length >= 50)
+    .filter((candidate) => overlapRatio(candidate, excerpt) < 0.82);
+  const selected = candidates[0] || title || excerpt;
+  return truncate(selected, 176);
 }
 
 function sourceKeyTakeaways(language, frame, source, article, profile) {
-  return factsForArticle(language, frame, source, article, profile)
-    .map((fact) => cleanMarketPublicText(fact, language))
-    .filter(Boolean)
+  const standfirst = compactNewsDeck(language, articleTitle(language, frame, source, article, profile), articleStandfirst(language, frame, source, article, profile));
+  return localizedFactsForArticle(language, frame, source, article, profile, standfirst)
+    .map((fact) => compactFact(fact, language, 180))
     .slice(0, 4);
 }
 
@@ -1578,10 +1939,25 @@ function sourceContentImages(language, title, article = {}, post = {}, pack = {}
   const imageIdentity = (url = "") => {
     try {
       const parsed = new URL(url);
-      return `${parsed.origin}${parsed.pathname}`.toLowerCase();
+      return `${parsed.origin}${parsed.pathname}`
+        .replace(/(width|w)[-_]\d+/gi, "$1-*")
+        .replace(/\.width-\d+\./gi, ".width-*.")
+        .toLowerCase();
     } catch {
-      return String(url || "").split("?")[0].toLowerCase();
+      return String(url || "")
+        .split("?")[0]
+        .replace(/(width|w)[-_]\d+/gi, "$1-*")
+        .replace(/\.width-\d+\./gi, ".width-*.")
+        .toLowerCase();
     }
+  };
+  const declaredWidth = (url = "") => {
+    const text = String(url || "");
+    const match =
+      text.match(/[?&](?:w|width|resize)=(\d{2,4})(?:[,&]|$)/i) ||
+      text.match(/(?:width|w)[-_](\d{2,4})/i) ||
+      text.match(/\.width-(\d{2,4})\./i);
+    return match ? Number(match[1]) : null;
   };
   const seen = new Set([cover, pack.primarySourceImageUrl, article.image?.url].filter(Boolean).map(imageIdentity));
   const credit = cleanSourceCredit(post.coverCredit || pack.coverCredit || article.image?.credit || article.publisher || "");
@@ -1593,6 +1969,8 @@ function sourceContentImages(language, title, article = {}, post = {}, pack = {}
       const identity = imageIdentity(url);
       if (!url || seen.has(identity)) return null;
       if (/google-analytics\.com\/g\/collect/i.test(url)) return null;
+      const width = declaredWidth(url);
+      if (width && width < 640) return null;
       if (/[?&](?:w|width|resize)=(?:48|64|80|96|128|150)(?:&|$|,)/i.test(url) || /(?:avatar|profile|author|headshot|disrupt)/i.test(url)) return null;
       if (/(?:w_|,w_|\/w_)(?:48|64|80|96|128)|(?:h_|,h_)(?:48|64|80|96|128)|[-_](?:48|64|80|96|128)\.(?:jpg|jpeg|png|webp)(?:[?#]|$)/i.test(url)) return null;
       seen.add(identity);
@@ -1628,13 +2006,14 @@ export function buildMarketNewsroomPost({ language, pack = {}, post = {}, frame,
       : generatedTitle,
     language
   );
-  const body = cleanMarketPublicText(sourceBackedBody(language, inferredFrame, source, article, profile), language);
+  const rawBody = cleanMarketPublicText(sourceBackedBody(language, inferredFrame, source, article, profile), language);
+  const body = strengthenMarketNewsBody(language, inferredFrame, source, article, profile, rawBody, title);
   const excerptPublisher = sourceArticlePublisher(article.publisher || source.publisher);
-  const excerpt = cleanMarketPublicText(
-    sourceLeadWithPublisher(language, excerptPublisher, articleStandfirst(language, inferredFrame, source, article, profile)),
-    language
-  );
-  const seoDescription = truncate(excerpt, 176);
+  const rawStandfirst = sourceLeadWithPublisher(language, excerptPublisher, articleStandfirst(language, inferredFrame, source, article, profile));
+  const excerpt = cleanMarketPublicText(compactNewsDeck(language, title, rawStandfirst), language);
+  const geoSummary = sourceGeoSummary(language, inferredFrame, source, article, profile);
+  const keyTakeaways = sourceKeyTakeaways(language, inferredFrame, source, article, profile);
+  const seoDescription = marketSeoDescription(language, excerpt, geoSummary, keyTakeaways, body, title);
   const coverCredit = cleanSourceCredit(post.coverCredit || pack.coverCredit || source.publisher || "");
   const coverCreditUrl = post.coverCreditUrl || pack.coverCreditUrl || source.url || "";
 
@@ -1649,9 +2028,9 @@ export function buildMarketNewsroomPost({ language, pack = {}, post = {}, frame,
     newsCategory: labels.category,
     topic: cleanSourceTitle(source.title || post.topic),
     audience: post.audience || "",
-    geoSummary: sourceGeoSummary(language, inferredFrame, source, article, profile),
+    geoSummary,
     body,
-    keyTakeaways: sourceKeyTakeaways(language, inferredFrame, source, article, profile),
+    keyTakeaways,
     faqs: sourceFaqs(language, title, inferredFrame, source, article, profile),
     sourceLinks: publicSourceLinks(pack.sourceLinks || post.sourceLinks || [], source, profile),
     tags: [labels.category, "AI", inferredFrame.entity, inferredFrame.key].filter(Boolean).slice(0, 5),

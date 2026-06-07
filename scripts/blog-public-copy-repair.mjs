@@ -206,7 +206,8 @@ async function sourcePackForPost(post, cache) {
   };
   const fetched = await fetchText(source.url);
   if (!fetched.ok) {
-    const fallback = fallbackPack();
+    const allowStoredFallback = hasFlag("allow-stored-fallback");
+    const fallback = allowStoredFallback ? fallbackPack() : null;
     const result = fallback
       ? { ok: true, pack: fallback, fallback: true, reason: `source fetch failed; used stored source summary ${fetched.status || fetched.error || ""}`.trim() }
       : { ok: false, reason: `source fetch failed ${fetched.status || fetched.error || ""}`.trim() };
@@ -219,7 +220,7 @@ async function sourcePackForPost(post, cache) {
     creditUrl: post.coverCreditUrl || source.url
   });
   const facts = Array.isArray(article.factBullets) ? article.factBullets.filter(Boolean) : [];
-  if (!article.canonicalUrl || (facts.length < 3 && !article.standfirst)) {
+  if (!article.canonicalUrl || facts.length < 3) {
     const result = { ok: false, reason: "source article extraction below repair threshold" };
     cache.set(source.url, result);
     return result;
@@ -393,7 +394,11 @@ async function main() {
     language: post.language,
     slug: post.slug,
     titleBefore: post.title,
-    titleAfter: patch.title
+    titleAfter: patch.title,
+    excerptAfter: String(patch.excerpt || "").slice(0, 180),
+    geoSummaryAfter: String(patch.geoSummary || "").slice(0, 180),
+    bodyAfter: String(patch.body || "").slice(0, 320),
+    keyTakeawaysAfter: (patch.keyTakeaways || []).slice(0, 3)
   }));
 
   if (dryRun) {

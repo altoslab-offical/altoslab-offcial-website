@@ -4,6 +4,17 @@ import type { FormEvent } from "react";
 import { useState } from "react";
 import { BrandText } from "@/components/BrandText";
 
+function safeAdminRedirect(value: string | null) {
+  if (!value || !value.startsWith("/") || value.startsWith("//")) return "/admin";
+  try {
+    const parsed = new URL(value, window.location.origin);
+    if (parsed.origin !== window.location.origin) return "/admin";
+    return `${parsed.pathname}${parsed.search}${parsed.hash}`;
+  } catch {
+    return "/admin";
+  }
+}
+
 export default function AdminLoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -25,7 +36,7 @@ export default function AdminLoginPage() {
       return;
     }
     const next = new URLSearchParams(window.location.search).get("next");
-    window.location.href = next || "/admin";
+    window.location.href = safeAdminRedirect(next);
   }
 
   return (

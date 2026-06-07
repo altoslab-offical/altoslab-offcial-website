@@ -35,6 +35,19 @@ const MARKET_FORBIDDEN_PATTERNS = [
   /quality\s+pipeline|backend\s+pipeline|pipeline\s+gate|publishing\s+pipeline|automation\s+pipeline/i,
   /AI-generated\s+(cover|visual|content|article)/i
 ];
+const MARKET_GENERIC_ADVICE_PATTERNS = [
+  /這則新聞的重點不是抽象評論/i,
+  /不是同類工具會不會更多，而是/i,
+  /接下來要看(?:的是)?/i,
+  /後續要看/i,
+  /兩週內先跑/i,
+  /選一個高頻但風險可控/i,
+  /採購、產品、工程與營運/i,
+  /進入下一輪預算與部署討論/i,
+  /choose one workflow/i,
+  /one owner/i,
+  /stop condition/i
+];
 
 const COLUMN_FORBIDDEN_PATTERNS = [
   /###/i,
@@ -106,16 +119,54 @@ function patternHits(text, patterns) {
   return patterns.filter((pattern) => pattern.test(text)).map((pattern) => String(pattern));
 }
 
+function comparableText(value = "") {
+  return stripHtml(value)
+    .toLowerCase()
+    .replace(/^(根據\s*)?(techcrunch|the verge|wired|venturebeat|mit technology review)\s*(報導|reported|reports|指出|稱)[,，:：]?\s*/i, "")
+    .replace(/[，。,.!?！？；;:\s]/g, "");
+}
+
+function overlapRatio(a = "", b = "") {
+  const left = comparableText(a);
+  const right = comparableText(b);
+  if (!left || !right) return 0;
+  const n = left.length >= 18 || right.length >= 18 ? 3 : 2;
+  const grams = (text) => {
+    if (text.length <= n) return new Set([text]);
+    const set = new Set();
+    for (let index = 0; index <= text.length - n; index += 1) set.add(text.slice(index, index + n));
+    return set;
+  };
+  const leftGrams = grams(left);
+  const rightGrams = grams(right);
+  let shared = 0;
+  for (const gram of leftGrams) {
+    if (rightGrams.has(gram)) shared += 1;
+  }
+  return shared / Math.min(leftGrams.size, rightGrams.size);
+}
+
 function auditPost(post) {
   const text = publicText(post);
   const isMarket = post.contentType === "breaking";
   const criticalPatterns = patternHits(text, isMarket ? MARKET_FORBIDDEN_PATTERNS : COLUMN_FORBIDDEN_PATTERNS);
+  const genericAdvicePatterns = isMarket ? patternHits(text, MARKET_GENERIC_ADVICE_PATTERNS) : [];
   const weakTitlePatterns = patternHits(post.title || "", isMarket ? WEAK_MARKET_TITLE_PATTERNS : WEAK_COLUMN_TITLE_PATTERNS);
   const issues = [];
   for (const pattern of criticalPatterns) issues.push({ severity: "critical", id: "public-copy-pattern", pattern });
+  for (const pattern of genericAdvicePatterns) issues.push({ severity: "critical", id: "generic-market-advice-filler", pattern });
   for (const pattern of weakTitlePatterns) issues.push({ severity: "warning", id: "weak-title-pattern", pattern });
   if (isMarket && (post.sourceLinks || []).length < 1) issues.push({ severity: "critical", id: "market-source-missing" });
   if (isMarket && !post.cover) issues.push({ severity: "critical", id: "market-cover-missing" });
+  if (isMarket && post.geoSummary && post.excerpt && overlapRatio(post.geoSummary, post.excerpt) >= 0.72) {
+    issues.push({ severity: "critical", id: "summary-repeats-standfirst" });
+  }
+  if (isMarket && post.seoDescription && post.excerpt && overlapRatio(post.seoDescription, post.excerpt) >= 0.86) {
+    issues.push({ severity: "warning", id: "seo-description-repeats-standfirst" });
+  }
+  if (isMarket && (!Array.isArray(post.keyTakeaways) || post.keyTakeaways.length < 2)) {
+    issues.push({ severity: "critical", id: "market-takeaways-too-thin" });
+  }
   if (!post.excerpt && !post.seoDescription) issues.push({ severity: "warning", id: "subtitle-missing" });
   return {
     id: post.id,

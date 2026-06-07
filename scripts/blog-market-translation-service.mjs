@@ -27,7 +27,10 @@ function decodeHtmlEntities(value = "") {
 }
 
 function cleanTranslatedText(value = "", language = "") {
-  let text = decodeHtmlEntities(value).replace(/\s+/g, " ").trim();
+  let text = decodeHtmlEntities(value)
+    .replace(/[—–]/g, ",")
+    .replace(/\s+/g, " ")
+    .trim();
   if (language === "zh-Hant") {
     text = text
       .replace(/優步/g, "Uber")
@@ -36,6 +39,8 @@ function cleanTranslatedText(value = "", language = "") {
       .replace(/擁抱臉部|擁抱臉|擁抱面孔|擁抱臉孔/g, "Hugging Face")
       .replace(/人工智慧/g, "AI")
       .replace(/AI\s*代理商/g, "AI agent")
+      .replace(/代理程式/g, "AI agent")
+      .replace(/調試/g, "除錯")
       .replace(/Google雲端/g, "Google Cloud")
       .replace(/Google Cloud/g, "Google Cloud")
       .replace(/Anthropic克勞德/g, "Anthropic Claude")
@@ -54,6 +59,8 @@ function cleanTranslatedText(value = "", language = "") {
       .replace(/資料來源包含以下具體數字[:：]/g, "文中提到的主要數字包括")
       .replace(/消息來源包含以下具體數字[:：]/g, "文中提到的主要數字包括")
       .replace(/存取權限/g, "使用權")
+      .replace(/（在新視窗中開啟）/g, "")
+      .replace(/\(在新視窗中開啟\)/g, "")
       .replace(/資源佔用規模/g, "用量")
       .replace(/資源佔用量/g, "用量")
       .replace(/規模擴大/g, "用量擴大")
@@ -64,6 +71,13 @@ function cleanTranslatedText(value = "", language = "") {
       .replace(/報告指出[:：]\s*/g, "")
       .replace(/剛剛對\s*Google\s*的\s*AI\s*搜尋攻勢施加了法律限制。?/g, "這讓出版商在 AI Search 內容使用上取得新的選擇權。")
       .replace(/網站發布商/g, "網站出版商")
+      .replace(/網站發布者/g, "網站出版商")
+      .replace(/Google\s+和/g, "Google 與")
+      .replace(/Lovable\s+和/g, "Lovable 與")
+      .replace(/AI agent的/g, "AI agent 的")
+      .replace(/AI 系統投入生產/g, "AI 系統進入正式環境")
+      .replace(/保持其可靠運行/g, "維持可靠運作")
+      .replace(/排除故障/g, "除錯")
       .replace(/部落格文章《Hugging Face》/g, "Hugging Face 部落格")
       .replace(/程式碼庫/g, "Codex")
       .replace(/您的/g, "使用者的")
@@ -74,6 +88,7 @@ function cleanTranslatedText(value = "", language = "") {
       .replace(/([A-Za-z0-9])(?=[\u4e00-\u9fff])/g, "$1 ")
       .replace(/([\u4e00-\u9fff])(?=[A-Za-z0-9])/g, "$1 ")
       .replace(/\s+([，。；：！？])/g, "$1")
+      .replace(/。\s+/g, "。")
       .replace(/([（「])\s+/g, "$1")
       .replace(/\s+([）」])/g, "$1");
   }
@@ -86,6 +101,37 @@ function cleanTranslatedTitle(value = "", language = "") {
 
 function genericSourceSummary(value = "") {
   return /^A Blog post by .* on Hugging Face\b/i.test(String(value || "").trim());
+}
+
+function splitSourceBodyParagraphs(value = "") {
+  const normalized = decodeHtmlEntities(value)
+    .replace(/\r\n/g, "\n")
+    .replace(/[ \t]+/g, " ")
+    .replace(/[ \t]+\n/g, "\n")
+    .replace(/\n[ \t]+/g, "\n")
+    .replace(/\n{4,}/g, "\n\n\n")
+    .trim();
+  const paragraphSplits = normalized
+    .split(/\n{2,}/)
+    .map((paragraph) => paragraph.trim())
+    .filter((paragraph) => paragraph.length >= 60);
+  const candidates = paragraphSplits.length
+    ? paragraphSplits
+    : normalized
+        .match(/[^.!?]+[.!?]+(?:\s+|$)/g)
+        ?.map((sentence) => sentence.trim())
+        .filter((sentence) => sentence.length >= 60) || [];
+  const seen = new Set();
+  return candidates
+    .map((paragraph) => paragraph.replace(/\s+/g, " ").trim())
+    .filter((paragraph) => !/browser does not support the audio element|your browser does not support audio|audio element/i.test(paragraph))
+    .filter((paragraph) => {
+      const key = paragraph.toLowerCase();
+      if (!key || seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    })
+    .slice(0, 8);
 }
 
 async function gcloudAccessToken() {
@@ -147,18 +193,21 @@ export async function localizeSourcePack(pack, { projectId = "", required = true
   const source = pack.sourceLinks?.[0] || {};
   const headline = article.headline || source.title || pack.topic || "";
   const factBullets = Array.isArray(article.factBullets) ? article.factBullets.filter(Boolean).slice(0, 6) : [];
+  const bodyParagraphs = splitSourceBodyParagraphs(article.body || "");
   const rawStandfirst = article.standfirst || source.summary || "";
   const standfirst = genericSourceSummary(rawStandfirst) ? factBullets[0] || headline : rawStandfirst;
-  const texts = [headline, standfirst, ...factBullets].map((text) => String(text || "").trim());
+  const texts = [headline, standfirst, ...factBullets, ...bodyParagraphs].map((text) => String(text || "").trim());
   if (!headline || !standfirst || factBullets.length < 2) {
     throw new Error("sourceArticle must include headline, standfirst and at least two fact bullets before localization");
   }
+  const bodyOffset = 2 + factBullets.length;
 
   const localized = {
     en: {
       headline: cleanTranslatedTitle(headline, "en"),
       standfirst: cleanTranslatedText(standfirst, "en"),
-      factBullets: factBullets.map((fact) => cleanTranslatedText(fact, "en"))
+      factBullets: factBullets.map((fact) => cleanTranslatedText(fact, "en")),
+      bodyParagraphs: bodyParagraphs.map((paragraph) => cleanTranslatedText(paragraph, "en"))
     }
   };
 
@@ -167,7 +216,8 @@ export async function localizeSourcePack(pack, { projectId = "", required = true
     localized[language] = {
       headline: cleanTranslatedTitle(result[0], language),
       standfirst: cleanTranslatedText(result[1], language),
-      factBullets: result.slice(2).map((fact) => cleanTranslatedText(fact, language)).filter(Boolean)
+      factBullets: result.slice(2, bodyOffset).map((fact) => cleanTranslatedText(fact, language)).filter(Boolean),
+      bodyParagraphs: result.slice(bodyOffset).map((paragraph) => cleanTranslatedText(paragraph, language)).filter(Boolean)
     };
   }
 
@@ -182,6 +232,8 @@ export function packForLanguage(pack, language, localized = {}) {
     headline: translation.headline || pack.sourceArticle?.headline,
     standfirst: translation.standfirst || pack.sourceArticle?.standfirst,
     factBullets: translation.factBullets?.length ? translation.factBullets : pack.sourceArticle?.factBullets,
+    body: translation.bodyParagraphs?.length ? translation.bodyParagraphs.join("\n\n") : pack.sourceArticle?.body,
+    bodyParagraphs: translation.bodyParagraphs?.length ? translation.bodyParagraphs : pack.sourceArticle?.bodyParagraphs,
     localizedLanguage: language
   };
   return {

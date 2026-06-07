@@ -9,7 +9,11 @@ npm-debug.log
 !.env.example
 data/blog-worker-runs
 data/blog-prepared-candidates
+data/blog-backfill
+data/blog-repair
 data/generated-blog-media
 logs
+output
+.playwright-cli
 playwright-report
 test-results

@@ -8,6 +8,10 @@ import { localizeSourcePack, packForLanguage } from "./blog-market-translation-s
 import { cleanSourceTitle } from "./blog-market-source-article.mjs";
 
 const REQUIRED_LANGUAGES = ["zh-Hant", "en", "ja", "ko", "id", "vi", "th", "ms", "fil"];
+const MIN_LONGFORM_FACTS = Number(process.env.ALTOS_BLOG_MARKET_LONGFORM_MIN_FACTS || "5");
+const MIN_LONGFORM_BODY_CHARS = Number(process.env.ALTOS_BLOG_MARKET_LONGFORM_MIN_BODY_CHARS || "700");
+const FUNDING_QUICK_PATTERN =
+  /\b(raises?|raised|funding|fundraise|pre-seed|seed round|series [a-f]|valuation|valued at|venture round|venture funding|capital raise|led by|participated in the round)\b/i;
 const DEFAULT_DATE = new Intl.DateTimeFormat("en-CA", {
   timeZone: "Asia/Taipei",
   year: "numeric",
@@ -55,13 +59,22 @@ function validatePack(pack = {}) {
   const source = firstSource(pack);
   const article = pack.sourceArticle || {};
   const facts = Array.isArray(article.factBullets) ? article.factBullets.filter(Boolean) : [];
+  const bodyChars = String(article.body || "").trim().length;
+  const longformMode = pack.scanner?.newsDepth === "longform";
+  const fundingQuickText = `${pack.topic || ""}\n${source.title || ""}\n${source.summary || ""}\n${article.headline || ""}\n${article.standfirst || ""}`;
   const issues = [];
   if (!source.url) issues.push("missing canonical source URL");
   if (!source.publisher) issues.push("missing source publisher");
   if (!pack.primarySourceImageUrl) issues.push("missing credited source image");
   if (!pack.coverCreditUrl) issues.push("missing source image credit URL");
   if (!article.canonicalUrl && !source.url) issues.push("missing sourceArticle canonical URL");
-  if (facts.length < 3 && !article.standfirst) issues.push("source extraction has fewer than 3 facts and no standfirst");
+  if (facts.length < 3) issues.push("source extraction has fewer than 3 usable facts");
+  if (longformMode) {
+    if (facts.length < MIN_LONGFORM_FACTS) issues.push(`longform market news requires at least ${MIN_LONGFORM_FACTS} usable facts`);
+    if (bodyChars < MIN_LONGFORM_BODY_CHARS) issues.push(`longform market news requires source body of at least ${MIN_LONGFORM_BODY_CHARS} chars`);
+    if (Number(article.extractionConfidence || 0) < 0.7) issues.push("longform market news requires source extraction confidence >= 0.7");
+    if (FUNDING_QUICK_PATTERN.test(fundingQuickText)) issues.push("longform market news rejects funding/financing quick items");
+  }
   return issues;
 }
 
@@ -92,13 +105,15 @@ function buildPost(language, pack, date, localizedPack = pack) {
     updatedAt: new Date().toISOString(),
     publishedAt: source.publishedAt || new Date().toISOString(),
     generatedBy: "market-source-worker",
-    generationTrace: {
-      lane: "market-news",
-      worker: "scripts/blog-market-source-worker.mjs",
-      sourcePackSequence: pack.sequence,
-      sourceUrl: source.url,
-      renderer: "blog-market-newsroom.source-faithful"
-    }
+    generationTrace: [
+      {
+        lane: "market-news",
+        worker: "scripts/blog-market-source-worker.mjs",
+        sourcePackSequence: pack.sequence,
+        sourceUrl: source.url,
+        renderer: "blog-market-newsroom.source-faithful"
+      }
+    ]
   };
 }
 

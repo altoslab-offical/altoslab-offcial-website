@@ -8,10 +8,12 @@ npm-debug.log
 .env.*
 !.env.example
 data/blog-backfill
+data/blog-repair
 data/blog-worker-runs
 data/blog-prepared-candidates
 data/generated-blog-media
 logs
 output
+.playwright-cli
 playwright-report
 test-results

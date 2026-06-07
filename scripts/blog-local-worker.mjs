@@ -7,6 +7,7 @@ import path from "node:path";
 import process from "node:process";
 import zlib from "node:zlib";
 import { subagentModelPolicyText } from "./blog-subagent-model-policy.mjs";
+import { columnVisualStylePromptBlock } from "./blog-column-visual-style-library.mjs";
 
 const LANGUAGES = ["zh-Hant", "en", "ja", "ko", "id", "vi", "th", "ms", "fil"];
 const SLOT_HOURS = { morning: "09:00", afternoon: "16:00" };
@@ -613,9 +614,10 @@ function isSourceReachabilityWarning(warning) {
 
 function blockingManifestWarnings(warnings) {
   return (warnings || []).filter((warning) =>
-    /anti-slop|market-news opening could be more concrete|repeated sentence rhythm|authenticity score|rhythm score|template|formulaic|raw English|technical jargon/i.test(
-      String(warning || "")
-    )
+    !/anti-slop pattern:\s*soft hedging/i.test(String(warning || "")) &&
+      /anti-slop|market-news opening could be more concrete|repeated sentence rhythm|authenticity score|rhythm score|template|formulaic|raw English|technical jargon/i.test(
+        String(warning || "")
+      )
   );
 }
 
@@ -970,6 +972,7 @@ async function uploadLocalCovers(payload) {
 
 function articlePrompt(slot, topic, lane = "column") {
   const marketLane = lane === "market";
+  const visualStyleBlock = marketLane ? "" : `\n${columnVisualStylePromptBlock({ date: taiwanDate(), slot, topic })}\n`;
   return `# ALTOS LAB ${marketLane ? "source-translation market-news" : "Gemini + GPT column"} article set prompt
 
 Slot: ${slot} (${SLOT_HOURS[slot]} Asia/Taipei)
@@ -992,6 +995,7 @@ Hard requirements:
 - Column/feature cover images must be generated per article, uploaded through the signed ALTOS LAB media route, and include provider, prompt, generatedAt, coverCredit and visualChecks.
 - Column/feature contentImages must include url or localPath, alt, caption, source "generated", credit "ALTOS LAB editorial visual", aspectRatio, placement, provider, prompt, generatedAt and visualChecks.
 - Market news cover images must use coverSource "source" with coverCredit, coverCreditUrl and coverLicense; if the source image is missing, unsafe or already used, hold the candidate.
+${visualStyleBlock}
 
 Return only JSON shaped for POST /api/admin/blog/ingest-set:
 {

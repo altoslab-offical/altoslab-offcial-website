@@ -4,6 +4,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
 import { subagentModelPolicyText } from "./blog-subagent-model-policy.mjs";
+import { columnVisualStylePromptBlock } from "./blog-column-visual-style-library.mjs";
 import { spawn } from "node:child_process";
 
 const SLOT_HOURS = { morning: "09:00", afternoon: "16:00" };
@@ -78,6 +79,7 @@ function runRoot() {
 
 function buildPrompt({ slot, date, articleSetPath, topic, lane }) {
   const marketLane = lane === "market";
+  const visualStyleBlock = marketLane ? "" : `\n${columnVisualStylePromptBlock({ date, slot, topic })}\n`;
   const runIdHint = `${marketLane ? "source-translation" : "browser-gemini-gpt"}-${date}-${slot}-${marketLane ? "market-fast-lane" : "column"}`;
   const productionWorkspaceLine = marketLane
     ? "You are the source-translation production workspace for ALTOS LAB's official website blog. Market news uses verified source articles, source-faithful adaptation, and the credited source article or official announcement image. Create one high-quality market-news article set only after the source pack and source image pass QA, then write the final JSON to this exact path:"
@@ -134,6 +136,7 @@ Image bar:
 - For generated covers, coverGeneration.provider must say ChatGPT, GPT or OpenAI image generation.
 - For generated contentImages, each image must include source "generated", provider, prompt, generatedAt, alt, caption, credit, aspectRatio and visualChecks.
 - Never use local fallback art, generic stock photo URLs, repeated covers, real people, misleading logos, fake UI, or text-heavy graphics.
+${visualStyleBlock}
 
 Required JSON shape:
 {

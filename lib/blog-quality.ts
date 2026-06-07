@@ -155,7 +155,7 @@ const breakingTemplateLeakHeadingPattern =
   /^(來源轉譯成企業判斷|把海外新聞翻成企業能用的判斷|海外新聞要轉譯成判斷|來源與轉譯備註|ALTOS LAB 的實驗室判斷|ALTOS LAB 實驗室判斷|ALTOS LAB 的判斷|ALTOS LAB 觀點|Source and translation note|Source translation note|Editorial read|Lab note|Lab POV|Operator note|ALTOS LAB's take)$/i;
 
 const breakingTemplateLeakBodyPattern =
-  /(本文包含海外來源轉譯|本文沒有逐字翻譯|不是把國外新聞翻成中文|我們不只是把國外新聞翻成中文|市場快訊時，會把海外新聞轉成|本週請列出三個流程|總分不到\s*\d+\s*分|先買工具再找場景|source\s*brief|source\s*index|reader\s*note|Decision\s*cue|Next\s*action|Event:\s|Evidence:\s|來源摘要|可引用事實|讀者怎麼看|這則消息可以拿來|卡在哪個流程|原因是企業決策問題|事件重點|關鍵事實|後續觀察|這則快訊的重點是什麼|這篇文章是否代表市場已經成熟|article claims should remain anchored)/i;
+  /(本文包含海外來源轉譯|本文沒有逐字翻譯|不是把國外新聞翻成中文|我們不只是把國外新聞翻成中文|市場快訊時，會把海外新聞轉成|本週請列出三個流程|總分不到\s*\d+\s*分|先買工具再找場景|source\s*brief|source\s*index|reader\s*note|Decision\s*cue|Next\s*action|Event:\s|Evidence:\s|來源摘要|可引用事實|讀者怎麼看|這則消息可以拿來|卡在哪個流程|原因是企業決策問題|事件重點|關鍵事實|後續觀察|這則快訊的重點是什麼|這篇文章是否代表市場已經成熟|這則新聞的重點不是抽象評論|不是同類工具會不會更多，而是|兩週內先跑|選一個高頻但風險可控|進入下一輪預算與部署討論|choose one workflow|one owner|stop condition|article claims should remain anchored)/i;
 
 const plainLanguageCuePattern =
   /(意思是|也就是|換成(?:企業)?語言|白話|可以理解成|翻成|先問|要回答|操作紀錄|固定測試題|測試題|人工審核|退回舊流程|回滾|what this means|in plain terms|put simply|for an operator|operation logs|test questions|human review|rollback path|つまり|言い換えると|쉽게 말해|운영 언어로|dengan bahasa sederhana|secara sederhana|nói đơn giản|hiểu đơn giản|พูดให้ง่าย|อธิบายง่าย|dalam bahasa mudah|sa simpleng salita)/i;
@@ -712,6 +712,7 @@ function isSourceReachabilityWarning(warning: string) {
 function blockingAutoPublishWarnings(warnings: string[]) {
   return warnings.filter((warning) => {
     if (isSourceReachabilityWarning(warning)) return false;
+    if (/anti-slop pattern:\s*soft hedging/i.test(warning)) return false;
     return /anti-slop|market-news opening could be more concrete|repeated sentence rhythm|authenticity score|rhythm score|template|formulaic|raw English|technical jargon/i.test(
       warning
     );
@@ -1182,7 +1183,11 @@ function reviewReadability(post: BlogPost): ReviewResult {
     (paragraph) => technicalJargonPattern.test(paragraph) && !plainLanguageCuePattern.test(paragraph)
   );
 
-  if (paragraphs.length < 4) issues.push("body needs more scannable paragraphs");
+  if (isMarketNews) {
+    if (paragraphs.length < 2 && body.length < 120) issues.push("market-news body needs enough source-backed detail beyond the subtitle");
+  } else if (paragraphs.length < 4) {
+    issues.push("body needs more scannable paragraphs");
+  }
   if (paragraphs.some((paragraph) => paragraph.length > 700)) warnings.push("some paragraphs are too long for mobile reading");
   if (body.length && post.excerpt && body.includes(post.excerpt) && post.excerpt.length > 180) {
     warnings.push("excerpt may be copied too directly into the article body");

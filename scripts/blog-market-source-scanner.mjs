@@ -20,7 +20,25 @@ const SOURCE_PROFILES = {
     "the-verge-ai",
     "venturebeat-ai",
     "mit-technology-review-ai",
-    "wired-ai"
+    "wired-ai",
+    "ars-technica-ai"
+  ]),
+  "longform-ai-news": new Set([
+    "the-verge-ai",
+    "mit-technology-review-ai",
+    "wired-ai",
+    "venturebeat-ai",
+    "zdnet-ai",
+    "the-decoder-ai",
+    "ars-technica-ai",
+    "ieee-spectrum-ai",
+    "the-new-stack-ai",
+    "openai-news",
+    "google-ai-blog",
+    "google-deepmind",
+    "microsoft-ai",
+    "nvidia-blog-ai",
+    "techcrunch-ai"
   ])
 };
 const FEED_TIMEOUT_MS = 8000;
@@ -29,6 +47,8 @@ const IMAGE_TIMEOUT_MS = 6500;
 const MIN_IMAGE_WIDTH = Number(process.env.ALTOS_BLOG_MARKET_MIN_IMAGE_WIDTH || "768");
 const MIN_IMAGE_HEIGHT = Number(process.env.ALTOS_BLOG_MARKET_MIN_IMAGE_HEIGHT || "432");
 const MIN_IMAGE_BYTES = Number(process.env.ALTOS_BLOG_MARKET_MIN_IMAGE_BYTES || "25000");
+const MIN_LONGFORM_FACTS = Number(process.env.ALTOS_BLOG_MARKET_LONGFORM_MIN_FACTS || "5");
+const MIN_LONGFORM_BODY_CHARS = Number(process.env.ALTOS_BLOG_MARKET_LONGFORM_MIN_BODY_CHARS || "700");
 const GENERIC_STOCK_HOSTS = [
   "unsplash.com",
   "images.unsplash.com",
@@ -53,6 +73,8 @@ const EVENT_PROMO_PATTERN =
   /\b(register now|tickets?|event|conference|summit|strictlyvc|agenda|speaker|fundraising take center stage)\b/i;
 const OPINION_NOISE_PATTERN =
   /\b(you cowards|let us filter|podcast|uncanny valley|newsletter|the download|roundup|what we learned|opinion|editorial|shrugs off doubts|ahead of its ipo)\b/i;
+const FUNDING_QUICK_PATTERN =
+  /\b(raises?|raised|funding|fundraise|pre-seed|seed round|series [a-f]|valuation|valued at|venture round|venture funding|capital raise|led by|participated in the round)\b/i;
 
 function arg(name, fallback = "") {
   const index = process.argv.indexOf(`--${name}`);
@@ -82,7 +104,8 @@ Options:
   --queue-dir <path>     Defaults to data/blog-backfill/<date>/queue
   --out <path>           Defaults to data/blog-backfill/<date>/market-source-packs.generated.json
   --max-packs <n>        Defaults to ${DEFAULT_MAX_PACKS}
-  --source-profile <id>  Use a bounded source pool. Current: mainstream-ai-us.
+  --source-profile <id>  Use a bounded source pool. Current: mainstream-ai-us, longform-ai-news.
+  --news-depth <mode>    standard or longform. Longform rejects thin/funding-quick items. Defaults to ALTOS_BLOG_MARKET_NEWS_DEPTH or standard.
   --write                Write the source-pack file. Without it, prints dry-run output.
   --overwrite            Replace existing source-pack entries for selected sequences.
 `);
@@ -244,6 +267,42 @@ function normalizeTitle(value) {
     .trim();
 }
 
+function normalizeUrlForDuplicate(value = "") {
+  try {
+    const parsed = new URL(value);
+    parsed.hash = "";
+    for (const key of [...parsed.searchParams.keys()]) {
+      if (/^(utm_|fbclid$|gclid$|mc_|cmpid$|ito$|outputType$|ref$|ref_src$|guccounter$)/i.test(key)) {
+        parsed.searchParams.delete(key);
+      }
+    }
+    parsed.hostname = parsed.hostname.toLowerCase().replace(/^www\./, "");
+    parsed.pathname = parsed.pathname.replace(/\/+$/, "") || "/";
+    return parsed.toString();
+  } catch {
+    return String(value || "").trim().toLowerCase();
+  }
+}
+
+function normalizeCoverKey(value = "") {
+  try {
+    const parsed = new URL(value);
+    parsed.hash = "";
+    parsed.hostname = parsed.hostname.toLowerCase().replace(/^www\./, "");
+    for (const key of [...parsed.searchParams.keys()]) {
+      if (!/^(id|asset|uuid)$/i.test(key)) parsed.searchParams.delete(key);
+    }
+    parsed.pathname = parsed.pathname
+      .replace(/\/w_\d+(?:,[^/]+)?\//i, "/")
+      .replace(/([?&])resize=\d+,\d+/i, "")
+      .replace(/\.max-\d+x\d+\.format-webp\.webp$/i, "")
+      .replace(/\/+$/, "");
+    return `${parsed.hostname}${parsed.pathname}${parsed.search ? `?${parsed.searchParams.toString()}` : ""}`;
+  } catch {
+    return String(value || "").trim().toLowerCase();
+  }
+}
+
 function recencyScore(value) {
   const parsed = Date.parse(value || "");
   if (!Number.isFinite(parsed)) return 35;
@@ -263,6 +322,29 @@ function candidateScore(candidate) {
   const directSummaryBoost = DIRECT_AI_NEWS_PATTERN.test(summary) ? 6 : 0;
   const opinionPenalty = OPINION_NOISE_PATTERN.test(`${title}\n${summary}`) ? -42 : 0;
   return candidate.authority * 0.36 + candidate.freshness * 0.24 + recencyScore(candidate.publishedAt) * 0.3 + officialBoost + directTitleBoost + directSummaryBoost + opinionPenalty;
+}
+
+function newsDepthMode() {
+  const mode = (arg("news-depth", process.env.ALTOS_BLOG_MARKET_NEWS_DEPTH || "standard") || "standard").toLowerCase();
+  if (mode !== "standard" && mode !== "longform") throw new Error(`unknown news depth: ${mode}`);
+  return mode;
+}
+
+function isFundingQuickCandidate(candidate = {}) {
+  const haystack = `${candidate.title || ""}\n${candidate.pageTitle || ""}\n${candidate.summary || ""}\n${candidate.pageDescription || ""}\n${candidate.sourceArticle?.standfirst || ""}`;
+  return FUNDING_QUICK_PATTERN.test(haystack);
+}
+
+function longformIssues(candidate = {}) {
+  const article = candidate.sourceArticle || {};
+  const facts = Array.isArray(article.factBullets) ? article.factBullets.filter(Boolean) : [];
+  const bodyChars = String(article.body || "").trim().length;
+  const issues = [];
+  if (isFundingQuickCandidate(candidate)) issues.push("funding/financing quick item");
+  if (facts.length < MIN_LONGFORM_FACTS) issues.push(`source article facts ${facts.length} below longform threshold ${MIN_LONGFORM_FACTS}`);
+  if (bodyChars < MIN_LONGFORM_BODY_CHARS) issues.push(`source article body ${bodyChars} chars below longform threshold ${MIN_LONGFORM_BODY_CHARS}`);
+  if (Number(article.extractionConfidence || 0) < 0.7) issues.push("source extraction confidence below longform threshold");
+  return issues;
 }
 
 function isRelevantMarketCandidate(candidate) {
@@ -287,20 +369,25 @@ function coarseTopicKey(candidate) {
   if (/ai search|publishers.*opt out|opt out.*ai search/.test(text)) return "ai-search-publisher-optout";
   if (/anthropic.*ipo|ipo.*anthropic/.test(text)) return "anthropic-ipo";
   if (/voice ai|aethex/.test(text)) return "voice-ai-aethex";
+  if (/boston children|children.s hospital|rare disease|new diagnoses|new diagnosis/.test(text)) return "boston-childrens-ai-diagnoses";
   return normalizeTitle(candidate.title).split(" ").slice(0, 8).join(" ");
 }
 
 async function liveDuplicateState(baseUrl) {
-  const response = await fetch(`${normalizeBaseUrl(baseUrl)}/api/blog`, {
+  const response = await fetch(`${normalizeBaseUrl(baseUrl)}/api/blog?language=zh-Hant&limit=600`, {
     headers: { "User-Agent": "ALTOS-LAB-market-source-scanner/1.0" }
   });
-  if (!response.ok) return { sourceUrls: new Set(), coverUrls: new Set(), titleKeys: new Set() };
+  if (!response.ok) return { sourceUrls: new Set(), coverUrls: new Set(), coverKeys: new Set(), titleKeys: new Set(), topicKeys: new Set() };
   const payload = await response.json();
   const posts = Array.isArray(payload.posts) ? payload.posts : [];
+  const sourceUrls = posts.flatMap((post) => (post.sourceLinks || []).map((source) => source.url).filter(Boolean));
+  const coverUrls = posts.map((post) => post.cover).filter(Boolean);
   return {
-    sourceUrls: new Set(posts.flatMap((post) => (post.sourceLinks || []).map((source) => source.url).filter(Boolean))),
-    coverUrls: new Set(posts.map((post) => post.cover).filter(Boolean)),
-    titleKeys: new Set(posts.map((post) => normalizeTitle(post.title)).filter(Boolean))
+    sourceUrls: new Set([...sourceUrls, ...sourceUrls.map(normalizeUrlForDuplicate)]),
+    coverUrls: new Set(coverUrls),
+    coverKeys: new Set(coverUrls.map(normalizeCoverKey).filter(Boolean)),
+    titleKeys: new Set(posts.flatMap((post) => [normalizeTitle(post.title), normalizeTitle(post.topic), normalizeTitle(post.slug)]).filter(Boolean)),
+    topicKeys: new Set(posts.map((post) => coarseTopicKey({ title: post.title, summary: post.excerpt || post.topic || "", url: post.slug })).filter(Boolean))
   };
 }
 
@@ -508,7 +595,7 @@ function marketFrameKeyForCandidate(candidate) {
   return frame?.key || "ai-market-update";
 }
 
-function sourcePackFromCandidate(sequence, candidate) {
+function sourcePackFromCandidate(sequence, candidate, { newsDepth } = {}) {
   const title = candidate.pageTitle || candidate.title;
   const primaryUrl = candidate.url;
   const publishedAt = candidate.publishedAt || new Date().toISOString();
@@ -548,9 +635,11 @@ function sourcePackFromCandidate(sequence, candidate) {
       sourceId: candidate.sourceId,
       feedUrl: candidate.sourceFeedUrl,
       sourceIndexUrl: candidate.sourceUrl,
+      newsDepth,
+      sourceArticleFactCount: candidate.sourceArticle?.factBullets?.length || 0,
+      sourceArticleBodyChars: String(candidate.sourceArticle?.body || "").length,
       score: Math.round(candidateScore(candidate)),
-      pageStatus: candidate.pageStatus
-      ,
+      pageStatus: candidate.pageStatus,
       imageProbe: candidate.imageProbe
     }
   };
@@ -565,6 +654,7 @@ async function main() {
   const maxPacks = Number.parseInt(arg("max-packs", String(DEFAULT_MAX_PACKS)), 10) || DEFAULT_MAX_PACKS;
   const baseUrl = arg("base-url", DEFAULT_BASE_URL);
   const sourceProfile = arg("source-profile", "");
+  const newsDepth = newsDepthMode();
   const queueDir = path.resolve(arg("queue-dir", path.join(process.cwd(), "data/blog-backfill", date, "queue")));
   const outPath = path.resolve(arg("out", path.join(process.cwd(), "data/blog-backfill", date, "market-source-packs.generated.json")));
   const allRegistry = parseRegistryEntries(await readText(path.join(process.cwd(), "lib/blog-source-registry.ts")));
@@ -601,10 +691,12 @@ async function main() {
     .filter((candidate) => {
       if (seenCandidateUrls.has(candidate.url)) return false;
       seenCandidateUrls.add(candidate.url);
-      if (reservedSourceUrls.has(candidate.url)) return false;
-      if (live.sourceUrls.has(candidate.url)) return false;
+      if (reservedSourceUrls.has(candidate.url) || reservedSourceUrls.has(normalizeUrlForDuplicate(candidate.url))) return false;
+      if (live.sourceUrls.has(candidate.url) || live.sourceUrls.has(normalizeUrlForDuplicate(candidate.url))) return false;
       if (live.titleKeys.has(normalizeTitle(candidate.title))) return false;
+      if (live.topicKeys.has(coarseTopicKey(candidate))) return false;
       if (!isRelevantMarketCandidate(candidate)) return false;
+      if (newsDepth === "longform" && isFundingQuickCandidate(candidate)) return false;
       return true;
     })
     .sort((a, b) => candidateScore(b) - candidateScore(a));
@@ -643,7 +735,7 @@ async function main() {
       skipped.push({ title: candidate.title, url: candidate.url, reason: "generic stock image host" });
       continue;
     }
-    if (live.coverUrls.has(enriched.imageUrl)) {
+    if (live.coverUrls.has(enriched.imageUrl) || live.coverKeys.has(normalizeCoverKey(enriched.imageUrl))) {
       skipped.push({ title: candidate.title, url: candidate.url, reason: "cover image already used live" });
       continue;
     }
@@ -651,7 +743,14 @@ async function main() {
       skipped.push({ title: candidate.title, url: candidate.url, reason: "source article facts below market-news threshold" });
       continue;
     }
-    packs.push(sourcePackFromCandidate(sequences[packs.length], enriched));
+    if (newsDepth === "longform") {
+      const issues = longformIssues(enriched);
+      if (issues.length) {
+        skipped.push({ title: candidate.title, url: candidate.url, reason: `longform gate: ${issues.join("; ")}` });
+        continue;
+      }
+    }
+    packs.push(sourcePackFromCandidate(sequences[packs.length], enriched, { newsDepth }));
     sourceCounts.set(candidate.sourceId, sourceCount + 1);
     topicKeys.add(topicKey);
   }
@@ -673,6 +772,7 @@ async function main() {
         dryRun: !hasFlag("write"),
         registryFeeds: registry.length,
         queueSequences: sequences,
+        newsDepth,
         candidates: candidates.length,
         packsGenerated: packs.length,
         outPath,

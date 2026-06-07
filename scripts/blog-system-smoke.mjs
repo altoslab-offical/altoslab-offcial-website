@@ -323,6 +323,8 @@ assert(blogTypes.includes("BlogInlineImage"), "blog schema supports structured i
 assert(cms.includes("normalizeContentImages"), "CMS normalizes structured in-article images");
 assert(cms.includes("column and feature posts require at least two in-article images"), "CMS publish validation blocks columns/features without content images");
 assert(blogArticle.includes("ArticleBodyWithImages"), "article renderer interleaves structured content images into the article body");
+assert(blogArticle.includes("[IMAGE:") && blogArticle.includes("imageMatchesMarker"), "article renderer supports explicit in-body content image markers");
+assert(richText.includes("<blockquote") && richText.includes("/^>\\s+/"), "RichText renders markdown blockquotes instead of leaking raw > characters");
 assert(globals.includes(".article-inline-figure"), "Blog article CSS styles structured in-article images");
 assert(blogIndex.includes("市場專欄"), "Blog navigation restores the Traditional Chinese market-column lane");
 assert(!blogArticle.includes("blog-cta-panel"), "article footer no longer renders the old content-system CTA panel");

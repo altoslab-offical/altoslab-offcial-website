@@ -18,7 +18,11 @@ data/blog-worker-runs/
 data/blog-prepared-candidates/
 data/backups/
 data/reports/
+data/blog-backfill/
+data/blog-repair/
 data/blog-research/*.json
 data/gcp/
 public/blog-generated/
 public/altoslab-homepage.html
+output/
+.playwright-cli/

@@ -164,6 +164,15 @@ export function RichText({ text }: { text: string }) {
       elements.push(<h2 key={index}>{inlineMarkdown(line.replace(/^## /, ""))}</h2>);
       return;
     }
+    if (/^>\s+/.test(line)) {
+      flushLists();
+      elements.push(
+        <blockquote key={index}>
+          <p>{inlineMarkdown(line.replace(/^>\s+/, ""))}</p>
+        </blockquote>
+      );
+      return;
+    }
     if (/^(?:-|\*)\s+/.test(line)) {
       flushOrderedItems();
       bullets.push(line.replace(/^(?:-|\*)\s+/, ""));

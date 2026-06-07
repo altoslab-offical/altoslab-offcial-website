@@ -3,7 +3,7 @@
 ## Legal Source Strategy
 
 - The cron job reads a source registry of official RSS/API/docs, trusted media and licensed image sources as research signals.
-- The current inventory target is `breaking` 31 posts + `column` 9 posts per configured language. Routine production is one Gemini-approved column per Taipei day plus source-verified market news whenever qualified items arrive.
+- The old 40-post recovery number is only a backfill milestone, not a production cap. Routine production is at least one Gemini-approved column per Taipei day, with the remaining capacity going to source-verified longform market news whenever qualified items arrive.
 - It does not scrape or republish full articles.
 - The production path must write original ALTOS LAB synthesis in its own words.
 - Every generated article keeps visible `sourceLinks` for attribution and fact checking.
@@ -80,7 +80,8 @@ Auto-publishing requires:
 ## Production Targets
 
 - Public production is GCP/Cloud Run with GCS-backed CMS storage.
-- Target inventory per configured language: 31 market-news posts and 9 column posts.
-- Routine cadence: one Gemini-produced column per Taipei calendar day; market news publishes opportunistically when a verified source item, source image and multilingual source-faithful copy pass release checks.
+- Market-news inventory has no hard upper cap; each configured language grows together through complete 9-language translation groups.
+- Column inventory grows at the daily cadence guard: at least one Gemini-produced column per Taipei calendar day, with additional columns allowed only when the same Gemini/GPT visual and release gates pass.
+- Routine cadence: at least one Gemini-produced column per Taipei calendar day; market news publishes opportunistically during scheduled scan windows when a verified source item, source image and multilingual source-faithful copy pass release checks.
 - Bulk column backfills stay staged and are released over time; do not publish nine columns in one burst unless Tommy explicitly approves a burst.
 - Market news must preserve the source article's news style: natural headline, clear subtitle, source facts in readable paragraphs, no fixed H2 template, no generic adoption checklist, no internal QA or automation language.

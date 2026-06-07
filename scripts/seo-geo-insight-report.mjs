@@ -404,7 +404,7 @@ function buildInsights({ targetUrl, health, posts, surface, ga4, searchConsole }
       { key: "blog posts have SEO title/meta/excerpt", ok: posts.length > 0 && percent(postsWithSeoMeta, posts.length) >= 90, weight: 12 },
       { key: "blog covers have alt text", ok: posts.length > 0 && percent(postsWithImages, posts.length) >= 90, weight: 8 },
       {
-        key: "daily column target matches configured target",
+        key: "daily column minimum matches configured target",
         ok: health?.integrations?.dailyColumnTarget === Number(process.env.ALTOS_BLOG_COLUMN_DAILY_LIMIT || "1"),
         weight: 8
       }
@@ -641,7 +641,7 @@ ${contentTypeLines || "- 尚未取得文章類型資料。"}
 - 市場快訊完整多語組：${report.content.marketNewsCompleteGroups}/${report.content.marketNewsGroups} 組
 - 每篇平均來源數：${report.content.averageSources} 個
 - 每篇平均 FAQ：${report.content.averageFaqs} 個
-- 每日專欄目標：${report.technical.dailyColumnTarget || "尚未設定"} 篇
+- 每日專欄最低量：${report.technical.dailyColumnTarget || "尚未設定"} 篇
 - 市場快訊掃描時間：${(report.technical.marketScanWindows || []).join("、") || "尚未設定"}
 
 目前缺語言的文章組：

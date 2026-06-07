@@ -271,7 +271,14 @@ function splitArticleSections(body: string) {
   }
 
   if (current.join("\n").trim()) sections.push(current.join("\n").trim());
-  return sections.length ? sections : [body];
+  if (sections.length > 1) return sections;
+
+  const paragraphSections = body
+    .split(/\n{2,}/)
+    .map((section) => section.trim())
+    .filter(Boolean);
+
+  return paragraphSections.length > 1 ? paragraphSections : sections.length ? sections : [body];
 }
 
 function contentImageIndex(image: BlogInlineImage, imageIndex: number, sectionCount: number) {
@@ -314,9 +321,80 @@ function ArticleInlineImage({ image }: { image: BlogInlineImage }) {
   );
 }
 
+function normalizeImageMarker(value: string | undefined) {
+  return String(value || "")
+    .trim()
+    .toLowerCase()
+    .replace(/_/g, "-");
+}
+
+const markerPlacementAliases: Record<string, string[]> = {
+  opening: ["opening", "after-lead", "lead", "intro"],
+  mechanism: ["mechanism", "mid-article", "middle", "evidence"],
+  synthesis: ["synthesis", "before-faq", "closing", "close"]
+};
+
+function stripImageMarkers(text: string) {
+  return text.replace(/\[IMAGE:[^\]]+\]/gi, "").replace(/\n{3,}/g, "\n\n").trim();
+}
+
+function imageMatchesMarker(image: BlogInlineImage, imageIndex: number, marker: string) {
+  const normalizedMarker = normalizeImageMarker(marker);
+  const placement = normalizeImageMarker(image.placement);
+  const candidates = new Set([normalizedMarker, ...(markerPlacementAliases[normalizedMarker] || [])]);
+  if (placement && candidates.has(placement)) return true;
+  if (normalizedMarker === "opening" && imageIndex === 0) return true;
+  if (normalizedMarker === "mechanism" && imageIndex === 1) return true;
+  if (normalizedMarker === "synthesis" && imageIndex === 2) return true;
+  return false;
+}
+
 function ArticleBodyWithImages({ text, images }: { text: string; images: BlogInlineImage[] }) {
   const validImages = images.filter((image) => image.url && image.alt).slice(0, 3);
-  if (!validImages.length) return <RichText text={text} />;
+  if (!validImages.length) return <RichText text={stripImageMarkers(text)} />;
+
+  const markerRegex = /\[IMAGE:([a-z0-9_-]+)\]/gi;
+  const hasExplicitMarkers = markerRegex.test(text);
+  markerRegex.lastIndex = 0;
+
+  if (hasExplicitMarkers) {
+    const usedImageIndexes = new Set<number>();
+    const parts: Array<{ kind: "text"; text: string } | { kind: "image"; image: BlogInlineImage }> = [];
+    let cursor = 0;
+    let match: RegExpExecArray | null;
+
+    while ((match = markerRegex.exec(text))) {
+      const before = text.slice(cursor, match.index).replace(/\n{3,}/g, "\n\n").trim();
+      if (before) parts.push({ kind: "text", text: before });
+
+      const marker = match[1];
+      const matchedIndex = validImages.findIndex((image, index) => !usedImageIndexes.has(index) && imageMatchesMarker(image, index, marker));
+      if (matchedIndex >= 0) {
+        usedImageIndexes.add(matchedIndex);
+        parts.push({ kind: "image", image: validImages[matchedIndex] });
+      }
+      cursor = markerRegex.lastIndex;
+    }
+
+    const after = text.slice(cursor).replace(/\n{3,}/g, "\n\n").trim();
+    if (after) parts.push({ kind: "text", text: after });
+
+    validImages.forEach((image, index) => {
+      if (!usedImageIndexes.has(index)) parts.push({ kind: "image", image });
+    });
+
+    return (
+      <div className="article-body-with-images">
+        {parts.map((part, index) =>
+          part.kind === "image" ? (
+            <ArticleInlineImage image={part.image} key={`${part.image.url}-${index}`} />
+          ) : (
+            <RichText text={part.text} key={`${index}-${part.text.slice(0, 24)}`} />
+          )
+        )}
+      </div>
+    );
+  }
 
   const sections = splitArticleSections(text);
   const buckets = new Map<number, BlogInlineImage[]>();

@@ -96,15 +96,7 @@ export function publicCoverCreditForPost(post: Pick<BlogPost, "coverCredit" | "c
     return credit.replace(/^Source image:\s*/i, "").replace(/^來源圖片：\s*/i, "").trim() || credit;
   }
   if (post.coverSource === "generated" || /AI[-\s]?generated|AI 生成|AI-assisted|AI 協助/i.test(credit)) {
-    if (post.language === "en") return "ALTOS LAB editorial visual";
-    if (post.language === "ja") return "ALTOS LAB 編集ビジュアル";
-    if (post.language === "ko") return "ALTOS LAB 편집 비주얼";
-    if (post.language === "id") return "Visual editorial ALTOS LAB";
-    if (post.language === "vi") return "Hình ảnh biên tập ALTOS LAB";
-    if (post.language === "th") return "ภาพประกอบเชิงบรรณาธิการของ ALTOS LAB";
-    if (post.language === "ms") return "Visual editorial ALTOS LAB";
-    if (post.language === "fil") return "ALTOS LAB editorial visual";
-    return "ALTOS LAB 編輯視覺";
+    return "ALTOS LAB editorial visual";
   }
   return credit;
 }

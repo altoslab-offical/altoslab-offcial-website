@@ -178,6 +178,42 @@ export const BLOG_SOURCE_REGISTRY: BlogSourceRegistryEntry[] = [
     notes: "Enterprise AI, Copilot and workflow adoption signal."
   },
   {
+    id: "microsoft-worklab",
+    name: "Microsoft WorkLab",
+    url: "https://www.microsoft.com/en-us/worklab/",
+    tier: "official-docs",
+    market: "global",
+    language: "en",
+    category: "Industry Workflow",
+    authority: 88,
+    freshness: 80,
+    notes: "Microsoft's official workplace research channel for AI, agents, productivity and organization-design signals."
+  },
+  {
+    id: "stanford-hai",
+    name: "Stanford HAI",
+    url: "https://hai.stanford.edu/",
+    tier: "trusted-media",
+    market: "us",
+    language: "en",
+    category: "AI Ops & Governance",
+    authority: 92,
+    freshness: 76,
+    notes: "Academic AI adoption, governance and AI Index research used for source-backed columns."
+  },
+  {
+    id: "harvard-business-review",
+    name: "Harvard Business Review",
+    url: "https://hbr.org/",
+    tier: "trusted-media",
+    market: "us",
+    language: "en",
+    category: "Industry Workflow",
+    authority: 90,
+    freshness: 74,
+    notes: "Management and organization-design source for workplace, leadership and AI adoption analysis."
+  },
+  {
     id: "nvidia-blog-ai",
     name: "NVIDIA AI Blog",
     url: "https://blogs.nvidia.com/blog/category/deep-learning/",
@@ -316,6 +352,45 @@ export const BLOG_SOURCE_REGISTRY: BlogSourceRegistryEntry[] = [
     authority: 72,
     freshness: 88,
     notes: "AI product and research news signal with a European editorial lens; validate product claims with official sources."
+  },
+  {
+    id: "ars-technica-ai",
+    name: "Ars Technica AI",
+    url: "https://arstechnica.com/ai/",
+    feedUrl: "https://arstechnica.com/ai/feed/",
+    tier: "trusted-media",
+    market: "us",
+    language: "en",
+    category: "AI Ops & Governance",
+    authority: 78,
+    freshness: 86,
+    notes: "Technical longform AI reporting and policy/product analysis; prefer substantial articles with clear source images."
+  },
+  {
+    id: "ieee-spectrum-ai",
+    name: "IEEE Spectrum AI",
+    url: "https://spectrum.ieee.org/topic/artificial-intelligence/",
+    feedUrl: "https://spectrum.ieee.org/feeds/topic/artificial-intelligence.rss",
+    tier: "trusted-media",
+    market: "global",
+    language: "en",
+    category: "Industry Workflow",
+    authority: 80,
+    freshness: 78,
+    notes: "Engineering-oriented AI, robotics and automation reporting; useful for longform technical market news."
+  },
+  {
+    id: "the-new-stack-ai",
+    name: "The New Stack AI",
+    url: "https://thenewstack.io/ai/",
+    feedUrl: "https://thenewstack.io/category/ai/feed/",
+    tier: "trusted-media",
+    market: "us",
+    language: "en",
+    category: "Infrastructure",
+    authority: 72,
+    freshness: 84,
+    notes: "Developer and infrastructure AI coverage; use for source-faithful longform items with usable article images."
   },
   {
     id: "zdnet-ai",

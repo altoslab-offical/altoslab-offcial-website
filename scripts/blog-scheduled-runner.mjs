@@ -9,6 +9,7 @@ import { subagentModelPolicyText } from "./blog-subagent-model-policy.mjs";
 const SLOT_HOURS = { morning: "09:00", afternoon: "16:00" };
 const LANGUAGES = ["zh-Hant", "en", "ja", "ko", "id", "vi", "th", "ms", "fil"];
 const LANGUAGE_LABEL = LANGUAGES.join(", ");
+const DEFAULT_BASE_URL = "https://altoslab-ai.cc";
 const COLUMN_SLOT_SETTING = (process.env.ALTOS_BLOG_COLUMN_SLOTS || "morning")
   .split(",")
   .map((slot) => slot.trim())
@@ -34,6 +35,7 @@ const MARKET_SCAN_WINDOWS = [
 const RELEASE_GRACE_MINUTES = 5;
 const PREP_GRACE_MINUTES = Number(process.env.ALTOS_BLOG_PREP_GRACE_MINUTES || "2");
 const MARKET_SCAN_GRACE_MINUTES = Number(process.env.ALTOS_BLOG_MARKET_SCAN_GRACE_MINUTES || "2");
+const MARKET_AUTO_REPAIR_ATTEMPTS = Math.max(0, Number(process.env.ALTOS_BLOG_MARKET_AUTO_REPAIR_ATTEMPTS || "2"));
 const RUNNER_LOCK_STALE_MINUTES = Number(process.env.ALTOS_BLOG_RUNNER_LOCK_STALE_MINUTES || "30");
 const DEFAULT_CHILD_TIMEOUT_MS = Number.parseInt(process.env.ALTOS_BLOG_CHILD_TIMEOUT_MS || "120000", 10);
 const CHROME_GUARD_TOTAL_RSS_MB = Number(process.env.ALTOS_BLOG_CHROME_TOTAL_RSS_MB || "5200");
@@ -50,6 +52,10 @@ function arg(name, fallback = "") {
 
 function hasFlag(name) {
   return process.argv.includes(`--${name}`);
+}
+
+function normalizeBaseUrl(value = DEFAULT_BASE_URL) {
+  return String(value || DEFAULT_BASE_URL).replace(/\/+$/, "");
 }
 
 function shouldRunBackfillWithScheduled(mode) {
@@ -181,6 +187,45 @@ async function readJson(filePath) {
   return JSON.parse(await fs.readFile(filePath, "utf8"));
 }
 
+async function fetchPublicPostsForLanguage({ baseUrl, language }) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), Number(process.env.ALTOS_BLOG_INVENTORY_TIMEOUT_MS || "15000"));
+  try {
+    const response = await fetch(`${normalizeBaseUrl(baseUrl)}/api/blog?language=${encodeURIComponent(language)}&limit=200`, {
+      cache: "no-store",
+      signal: controller.signal,
+      headers: { "User-Agent": "ALTOS-LAB-blog-scheduled-runner/1.0" }
+    });
+    const text = await response.text();
+    if (!response.ok) throw new Error(`inventory fetch failed for ${language}: ${response.status} ${text.slice(0, 160)}`);
+    const parsed = JSON.parse(text || "{}");
+    return Array.isArray(parsed.posts) ? parsed.posts : [];
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+async function marketInventoryStatus() {
+  if (hasFlag("skip-inventory-gate") || process.env.ALTOS_BLOG_SKIP_INVENTORY_GATE === "true") {
+    return { checked: false, skipped: true, reason: "inventory gate disabled" };
+  }
+  const baseUrl = normalizeBaseUrl(arg("base-url", process.env.ALTOS_BLOG_BASE_URL || DEFAULT_BASE_URL));
+  const rows = await Promise.all(
+    LANGUAGES.map(async (language) => {
+      const posts = await fetchPublicPostsForLanguage({ baseUrl, language });
+      const breaking = posts.filter((post) => post.contentType === "breaking").length;
+      const column = posts.filter((post) => post.contentType === "column").length;
+      return { language, total: posts.length, breaking, column };
+    })
+  );
+  return {
+    checked: true,
+    baseUrl,
+    minBreaking: Math.min(...rows.map((row) => row.breaking)),
+    rows
+  };
+}
+
 async function loadEnvFileIfPresent() {
   const envFile = arg("env-file") || path.join(process.env.HOME || "", ".altoslab-blog-worker.env");
   if (!envFile || !(await exists(envFile))) return { envFile, loaded: false };
@@ -285,6 +330,30 @@ function parseJsonObject(raw) {
   } catch {
     return null;
   }
+}
+
+function validateIssues(manifest = {}) {
+  return [
+    ...(manifest.validateOnly?.errors || []),
+    ...(manifest.validateOnly?.warnings || []),
+    ...(manifest.qualityManifest?.qualitySummary?.issues || []),
+    ...(manifest.qualityManifest?.qualitySummary?.warnings || []),
+    ...(manifest.qualityManifest?.imageQualitySummary?.issues || []),
+    ...(manifest.qualityManifest?.imageQualitySummary?.warnings || [])
+  ].map((item) => String(item || "")).filter(Boolean);
+}
+
+function marketValidateHasHardBlocker(manifest = {}) {
+  const issues = validateIssues(manifest).join("\n");
+  if (manifest.validateOnly?.imageApproved === false) return true;
+  return /(?:duplicate|already published|same source|same cover|repeated cover|previously used cover|cover.*(?:missing|required|duplicate|changed|unsafe)|image.*(?:missing|unavailable|unsafe|duplicate|not approved|must use|requires)|source image|canonical url|source.*(?:unreachable|404|410|cannot|missing)|source link validation warning)/i.test(issues);
+}
+
+function marketValidateLooksRepairable(manifest = {}) {
+  if (marketValidateHasHardBlocker(manifest)) return false;
+  const issues = validateIssues(manifest).join("\n");
+  if (manifest.validateOnly?.qualityApproved === false) return true;
+  return /(?:subtitle|excerpt|standfirst|opening|body|geoSummary|seoDescription|source\/publisher|publisher|entity|takeaway|FAQ|H2|anti-slop|technical jargon|raw English|template|formulaic|generic|rhythm|throat-clearing)/i.test(issues);
 }
 
 function globalScheduleLogPath() {
@@ -407,6 +476,9 @@ Manual checks:
 This runner never creates production content by itself. Column prep creates a
 prompt and manifest skeleton. Market scan creates a separate fast-lane source
 prompt for source-translation plus a credited source or official image.
+Market scan checks live public inventory for duplicate/source context only; it
+does not treat any post count as a hard stop. Qualified longform source-news
+items can keep publishing beyond the old recovery milestone.
 Release publishes only a ready prepared-candidate manifest produced after
 lane-specific evidence + validate-only + main-brain QA.
 Backfill creates an alternating market/column prompt queue only; it never
@@ -610,6 +682,19 @@ async function createMarketScan({ date }) {
     return { ok: false, phase: "market-scan-doctor", stdout: doctor.stdout, stderr: doctor.stderr };
   }
 
+  const inventory = await marketInventoryStatus().catch((error) => ({ checked: true, ok: false, error: error instanceof Error ? error.message : String(error) }));
+  await appendLog(globalScheduleLogPath(), JSON.stringify({ phase: "market-scan-inventory", date, slot, inventory }));
+  if (inventory.ok === false) {
+    return {
+      ok: false,
+      skipped: true,
+      phase: "market-scan-inventory",
+      reason: "public blog inventory could not be verified",
+      inventory,
+      doctor: compactDoctorResult(doctor)
+    };
+  }
+
   const runDir = path.resolve(arg("run-dir") || path.join(runRoot(), `${date}-market-scan-${taiwanStamp(currentNow())}`));
   const promptPath = path.join(runDir, "market-fast-lane-prompt-card.md");
   const articleSetPath = path.join(runDir, "article-set.json");
@@ -619,20 +704,26 @@ async function createMarketScan({ date }) {
   const queueDir = path.join(runDir, "queue");
   const sourcePacksPath = path.join(runDir, "market-source-packs.generated.json");
   const mergedDir = path.join(runDir, "merged");
+  const candidatePackLimit = Math.max(
+    1,
+    Math.min(8, Number.parseInt(arg("candidate-packs", process.env.ALTOS_BLOG_MARKET_SCAN_CANDIDATE_PACKS || "5"), 10) || 5)
+  );
   const writeMarketIndex = async (payload) => {
     if (hasFlag("no-index")) return;
     await writeJson(candidateIndexPath(date, slot, "market"), payload);
   };
 
   await fs.mkdir(queueDir, { recursive: true });
-  await writeJson(path.join(queueDir, "01-market.json"), {
-    sequence: 1,
-    lane: "market",
-    status: "awaiting_source_translation_production",
-    slot,
-    runDir,
-    articleSetPath
-  });
+  for (let sequence = 1; sequence <= candidatePackLimit; sequence += 1) {
+    await writeJson(path.join(queueDir, `${String(sequence).padStart(2, "0")}-market.json`), {
+      sequence,
+      lane: "market",
+      status: "awaiting_source_translation_production",
+      slot,
+      runDir,
+      articleSetPath
+    });
+  }
 
   const orchestrator = await runCommand(process.execPath, [
     "scripts/blog-antigravity-orchestrator.mjs",
@@ -738,9 +829,11 @@ ${await fs.readFile(orchestratorPromptPath, "utf8").catch(() => "")}
     "--out",
     sourcePacksPath,
     "--max-packs",
-    "1",
+    String(candidatePackLimit),
     "--source-profile",
-    arg("source-profile", process.env.ALTOS_BLOG_MARKET_SOURCE_PROFILE || "mainstream-ai-us"),
+    arg("source-profile", process.env.ALTOS_BLOG_MARKET_SOURCE_PROFILE || "longform-ai-news"),
+    "--news-depth",
+    arg("news-depth", process.env.ALTOS_BLOG_MARKET_NEWS_DEPTH || "longform"),
     "--write",
     "--overwrite"
   ], { cwd: process.cwd(), timeoutMs: Number(process.env.ALTOS_BLOG_MARKET_SCAN_TIMEOUT_MS || "90000") });
@@ -760,7 +853,10 @@ ${await fs.readFile(orchestratorPromptPath, "utf8").catch(() => "")}
     return { ok: true, skipped: true, phase: "market-scan", reason: "no qualified source pack", runDir, manifestPath, scanner: held.pipeline.scanner, doctor: compactDoctorResult(doctor) };
   }
   const sourcePacks = await readJson(sourcePacksPath).catch(() => []);
-  if (!Array.isArray(sourcePacks) || !sourcePacks.some((pack) => Number(pack?.sequence) === 1)) {
+  const availableSequences = Array.isArray(sourcePacks)
+    ? sourcePacks.map((pack) => Number(pack?.sequence)).filter((sequence) => Number.isInteger(sequence) && sequence > 0).sort((a, b) => a - b)
+    : [];
+  if (!availableSequences.length) {
     const scannerParsed = parseJsonObject(scanner.stdout) || {};
     const held = {
       ...manifest,
@@ -795,177 +891,261 @@ ${await fs.readFile(orchestratorPromptPath, "utf8").catch(() => "")}
     };
   }
 
-  const sourceWorker = await runCommand(process.execPath, [
-    "scripts/blog-market-source-worker.mjs",
-    "--date",
-    date,
-    "--backfill-dir",
-    runDir,
-    "--source-packs",
-    sourcePacksPath,
-    "--seq",
-    "1",
-    "--article-set",
-    repairedArticleSetPath,
-    "--write",
-    "--overwrite"
-  ], { cwd: process.cwd(), timeoutMs: Number(process.env.ALTOS_BLOG_MARKET_SCAN_TIMEOUT_MS || "90000") });
-  if (sourceWorker.code !== 0) {
-    const held = {
-      ...manifest,
-      status: "held",
+  const attempts = [];
+  const scannerPipeline = { code: scanner.code, stdout: scanner.stdout.trim(), stderr: scanner.stderr.trim() };
+  let lastManifest = manifest;
+
+  for (const sequence of availableSequences) {
+    const pack = sourcePacks.find((item) => Number(item?.sequence) === sequence) || {};
+    const attemptArticleSetPath =
+      sequence === 1 ? repairedArticleSetPath : path.join(runDir, `article-set.seq-${sequence}.source-repaired.json`);
+    const attempt = {
+      sequence,
+      topic: pack.topic || "",
+      sourceUrl: pack.sourceLinks?.[0]?.url || "",
+      articleSetPath: attemptArticleSetPath
+    };
+
+    const sourceWorker = await runCommand(process.execPath, [
+      "scripts/blog-market-source-worker.mjs",
+      "--date",
+      date,
+      "--backfill-dir",
+      runDir,
+      "--source-packs",
+      sourcePacksPath,
+      "--seq",
+      String(sequence),
+      "--article-set",
+      attemptArticleSetPath,
+      "--write",
+      "--overwrite"
+    ], { cwd: process.cwd(), timeoutMs: Number(process.env.ALTOS_BLOG_MARKET_SCAN_TIMEOUT_MS || "90000") });
+    attempt.sourceWorker = { code: sourceWorker.code, stdout: sourceWorker.stdout.trim(), stderr: sourceWorker.stderr.trim() };
+    if (sourceWorker.code !== 0) {
+      attempt.result = "source-worker-held";
+      attempts.push(attempt);
+      continue;
+    }
+
+    const merge = {
+      code: 0,
+      stdout: attemptArticleSetPath,
+      stderr: "",
+      note: "source worker writes article-set directly; legacy market Gemini merge disabled"
+    };
+    const repair = {
+      code: 0,
+      stdout: "source-only renderer; public-copy repair bypassed for fresh market scan",
+      stderr: ""
+    };
+
+    let selectedArticleSetPath = attemptArticleSetPath;
+    const validate = await runCommand(process.execPath, [
+      "scripts/blog-local-worker.mjs",
+      "--article-set",
+      selectedArticleSetPath,
+      "--slot",
+      slot,
+      "--validate-only",
+      "--manifest",
+      manifestPath,
+      "--approve-design-qa",
+      ...(hasFlag("no-index") ? ["--no-index"] : [])
+    ], { cwd: process.cwd(), timeoutMs: Number(process.env.ALTOS_BLOG_MARKET_SCAN_TIMEOUT_MS || "90000") });
+    attempt.merge = { code: merge.code, stdout: merge.stdout.trim(), stderr: merge.stderr.trim() };
+    attempt.repair = { code: repair.code, stdout: repair.stdout.trim(), stderr: repair.stderr.trim() };
+    attempt.validate = { code: validate.code, stdout: validate.stdout.trim(), stderr: validate.stderr.trim() };
+    attempt.autoRepairs = [];
+    lastManifest = await readJson(manifestPath).catch(() => lastManifest);
+    if (validate.code !== 0) {
+      for (let repairAttempt = 1; repairAttempt <= MARKET_AUTO_REPAIR_ATTEMPTS; repairAttempt += 1) {
+        if (!marketValidateLooksRepairable(lastManifest)) break;
+        const repairedArticleSetPath = path.join(
+          runDir,
+          sequence === 1
+            ? `article-set.auto-repair-${repairAttempt}.json`
+            : `article-set.seq-${sequence}.auto-repair-${repairAttempt}.json`
+        );
+        const autoRepair = await runCommand(process.execPath, [
+          "scripts/blog-market-auto-repair.mjs",
+          "--article-set",
+          selectedArticleSetPath,
+          "--manifest",
+          manifestPath,
+          "--out",
+          repairedArticleSetPath,
+          "--attempt",
+          String(repairAttempt)
+        ], { cwd: process.cwd(), timeoutMs: Number(process.env.ALTOS_BLOG_MARKET_SCAN_TIMEOUT_MS || "90000") });
+        const repairRecord = {
+          attempt: repairAttempt,
+          code: autoRepair.code,
+          stdout: autoRepair.stdout.trim(),
+          stderr: autoRepair.stderr.trim(),
+          articleSetPath: repairedArticleSetPath
+        };
+        attempt.autoRepairs.push(repairRecord);
+        if (autoRepair.code !== 0) break;
+        selectedArticleSetPath = repairedArticleSetPath;
+        const repairedValidate = await runCommand(process.execPath, [
+          "scripts/blog-local-worker.mjs",
+          "--article-set",
+          selectedArticleSetPath,
+          "--slot",
+          slot,
+          "--validate-only",
+          "--manifest",
+          manifestPath,
+          "--approve-design-qa",
+          ...(hasFlag("no-index") ? ["--no-index"] : [])
+        ], { cwd: process.cwd(), timeoutMs: Number(process.env.ALTOS_BLOG_MARKET_SCAN_TIMEOUT_MS || "90000") });
+        repairRecord.validate = {
+          code: repairedValidate.code,
+          stdout: repairedValidate.stdout.trim(),
+          stderr: repairedValidate.stderr.trim()
+        };
+        attempt.validate = repairRecord.validate;
+        attempt.articleSetPath = selectedArticleSetPath;
+        attempt.repair = {
+          code: autoRepair.code,
+          stdout: `market auto-repair attempt ${repairAttempt}: ${repairedArticleSetPath}`,
+          stderr: autoRepair.stderr.trim()
+        };
+        lastManifest = await readJson(manifestPath).catch(() => lastManifest);
+        if (repairedValidate.code === 0) break;
+      }
+      if (attempt.validate?.code !== 0) {
+        attempt.result = marketValidateHasHardBlocker(lastManifest) ? "validate-hard-held" : "validate-held-after-repair";
+        attempt.errors = lastManifest?.validateOnly?.errors || lastManifest?.response?.errors || [];
+        attempts.push(attempt);
+        continue;
+      }
+    }
+
+    if (hasFlag("validate-only") || process.env.ALTOS_BLOG_MARKET_SCAN_VALIDATE_ONLY === "true") {
+      const ready = await readJson(manifestPath).catch(() => manifest);
+      const readyWithPipeline = {
+        ...ready,
+        updatedAt: new Date().toISOString(),
+        pipeline: {
+          scanner: scannerPipeline,
+          attempts: [...attempts, { ...attempt, result: "validated" }],
+          selectedSequence: sequence,
+          sourceWorker: attempt.sourceWorker,
+          merge: attempt.merge,
+          repair: attempt.repair,
+          validate: attempt.validate
+        }
+      };
+      await writeJson(manifestPath, readyWithPipeline);
+      await writeMarketIndex({ ...readyWithPipeline, manifestPath });
+      return {
+        ok: true,
+        skipped: false,
+        phase: "market-scan",
+        status: readyWithPipeline.status,
+        mode: "validate-only",
+        runDir,
+        articleSetPath: selectedArticleSetPath,
+        manifestPath,
+        validate: readyWithPipeline.pipeline.validate,
+        doctor: compactDoctorResult(doctor)
+      };
+    }
+
+    const publish = await runCommand(process.execPath, [
+      "scripts/blog-local-worker.mjs",
+      "--article-set",
+      selectedArticleSetPath,
+      "--slot",
+      slot,
+      "--publish",
+      "--manifest",
+      manifestPath,
+      "--reuse-validated-manifest",
+      "--approve-design-qa"
+    ], { cwd: process.cwd(), timeoutMs: Number(process.env.ALTOS_BLOG_MARKET_SCAN_TIMEOUT_MS || "90000") });
+    attempt.publish = { code: publish.code, stdout: publish.stdout.trim(), stderr: publish.stderr.trim() };
+    if (publish.code !== 0) {
+      const nextManifest = await readJson(manifestPath).catch(() => lastManifest);
+      const held = {
+        ...nextManifest,
+        updatedAt: new Date().toISOString(),
+        pipeline: {
+          scanner: scannerPipeline,
+          attempts: [...attempts, { ...attempt, result: "publish-failed" }],
+          selectedSequence: sequence,
+          sourceWorker: attempt.sourceWorker,
+          merge: attempt.merge,
+          repair: attempt.repair,
+          validate: attempt.validate,
+          publish: attempt.publish
+        }
+      };
+      await writeJson(manifestPath, held);
+      await writeMarketIndex({ ...held, manifestPath });
+      return { ok: false, skipped: false, phase: "market-scan", reason: "publish failed", runDir, manifestPath, publish: held.pipeline.publish, doctor: compactDoctorResult(doctor) };
+    }
+
+    const verification = await runReleaseVerification(manifestPath, {
+      timeoutMs: Number(process.env.ALTOS_BLOG_MARKET_SCAN_TIMEOUT_MS || "90000")
+    });
+    const released = await readJson(manifestPath).catch(() => manifest);
+    const releasedWithPipeline = {
+      ...released,
       updatedAt: new Date().toISOString(),
-      validateOnly: {
-        wouldPublish: false,
-        errors: [`market source worker held: ${sourceWorker.stderr.trim() || sourceWorker.stdout.trim()}`]
-      },
       pipeline: {
-        scanner: { code: scanner.code, stdout: scanner.stdout.trim(), stderr: scanner.stderr.trim() },
-        sourceWorker: { code: sourceWorker.code, stdout: sourceWorker.stdout.trim(), stderr: sourceWorker.stderr.trim() }
+        scanner: scannerPipeline,
+        attempts: [...attempts, { ...attempt, result: verification.code === 0 ? "published" : "verification-failed" }],
+        selectedSequence: sequence,
+        sourceWorker: attempt.sourceWorker,
+        merge: attempt.merge,
+        repair: attempt.repair,
+        validate: attempt.validate,
+        publish: attempt.publish,
+        verification: { code: verification.code, stdout: verification.stdout.trim(), stderr: verification.stderr.trim() }
       }
     };
-    await writeJson(manifestPath, held);
-    await writeMarketIndex({ ...held, manifestPath });
-    return { ok: true, skipped: true, phase: "market-scan", reason: "source worker held", runDir, manifestPath, sourceWorker: held.pipeline.sourceWorker, doctor: compactDoctorResult(doctor) };
-  }
-
-  const merge = {
-    code: 0,
-    stdout: repairedArticleSetPath,
-    stderr: "",
-    note: "source worker writes article-set directly; legacy market Gemini merge disabled"
-  };
-  const repair = {
-    code: 0,
-    stdout: "source-only renderer; public-copy repair bypassed for fresh market scan",
-    stderr: ""
-  };
-
-  const validate = await runCommand(process.execPath, [
-    "scripts/blog-local-worker.mjs",
-    "--article-set",
-    repairedArticleSetPath,
-    "--slot",
-    slot,
-    "--validate-only",
-    "--manifest",
-    manifestPath,
-    "--approve-design-qa",
-    ...(hasFlag("no-index") ? ["--no-index"] : [])
-  ], { cwd: process.cwd(), timeoutMs: Number(process.env.ALTOS_BLOG_MARKET_SCAN_TIMEOUT_MS || "90000") });
-  if (validate.code !== 0) {
-    const nextManifest = await readJson(manifestPath).catch(() => manifest);
-    const held = {
-      ...nextManifest,
-      status: nextManifest.status || "held",
-      updatedAt: new Date().toISOString(),
-      pipeline: {
-        scanner: { code: scanner.code, stdout: scanner.stdout.trim(), stderr: scanner.stderr.trim() },
-        sourceWorker: { code: sourceWorker.code, stdout: sourceWorker.stdout.trim(), stderr: sourceWorker.stderr.trim() },
-        merge: { code: merge.code, stdout: merge.stdout.trim(), stderr: merge.stderr.trim() },
-        repair: { code: repair.code, stdout: repair.stdout.trim(), stderr: repair.stderr.trim() },
-        validate: { code: validate.code, stdout: validate.stdout.trim(), stderr: validate.stderr.trim() }
-      }
-    };
-    await writeJson(manifestPath, held);
-    await writeMarketIndex({ ...held, manifestPath });
-    return { ok: true, skipped: true, phase: "market-scan", reason: "validate held", runDir, manifestPath, validate: held.pipeline.validate, doctor: compactDoctorResult(doctor) };
-  }
-
-  if (hasFlag("validate-only") || process.env.ALTOS_BLOG_MARKET_SCAN_VALIDATE_ONLY === "true") {
-    const ready = await readJson(manifestPath).catch(() => manifest);
-    const readyWithPipeline = {
-      ...ready,
-      updatedAt: new Date().toISOString(),
-      pipeline: {
-        scanner: { code: scanner.code, stdout: scanner.stdout.trim(), stderr: scanner.stderr.trim() },
-        sourceWorker: { code: sourceWorker.code, stdout: sourceWorker.stdout.trim(), stderr: sourceWorker.stderr.trim() },
-        merge: { code: merge.code, stdout: merge.stdout.trim(), stderr: merge.stderr.trim() },
-        repair: { code: repair.code, stdout: repair.stdout.trim(), stderr: repair.stderr.trim() },
-        validate: { code: validate.code, stdout: validate.stdout.trim(), stderr: validate.stderr.trim() }
-      }
-    };
-    await writeJson(manifestPath, readyWithPipeline);
-    await writeMarketIndex({ ...readyWithPipeline, manifestPath });
+    await writeJson(manifestPath, releasedWithPipeline);
+    await writeMarketIndex({ ...releasedWithPipeline, manifestPath });
+    if (verification.code !== 0) {
+      return { ok: false, skipped: false, phase: "market-scan-verification", runDir, manifestPath, verification: releasedWithPipeline.pipeline.verification, doctor: compactDoctorResult(doctor) };
+    }
     return {
       ok: true,
       skipped: false,
       phase: "market-scan",
-      status: readyWithPipeline.status,
-      mode: "validate-only",
+      status: releasedWithPipeline.status,
       runDir,
-      articleSetPath: repairedArticleSetPath,
+      articleSetPath: selectedArticleSetPath,
       manifestPath,
-      validate: readyWithPipeline.pipeline.validate,
+      publishedIds: releasedWithPipeline.publish?.publishedIds || [],
+      verification: releasedWithPipeline.pipeline.verification,
       doctor: compactDoctorResult(doctor)
     };
   }
 
-  const publish = await runCommand(process.execPath, [
-    "scripts/blog-local-worker.mjs",
-    "--article-set",
-    repairedArticleSetPath,
-    "--slot",
-    slot,
-    "--publish",
-    "--manifest",
-    manifestPath,
-    "--reuse-validated-manifest",
-    "--approve-design-qa"
-  ], { cwd: process.cwd(), timeoutMs: Number(process.env.ALTOS_BLOG_MARKET_SCAN_TIMEOUT_MS || "90000") });
-  if (publish.code !== 0) {
-    const nextManifest = await readJson(manifestPath).catch(() => manifest);
-    const held = {
-      ...nextManifest,
-      updatedAt: new Date().toISOString(),
-      pipeline: {
-        scanner: { code: scanner.code, stdout: scanner.stdout.trim(), stderr: scanner.stderr.trim() },
-        sourceWorker: { code: sourceWorker.code, stdout: sourceWorker.stdout.trim(), stderr: sourceWorker.stderr.trim() },
-        merge: { code: merge.code, stdout: merge.stdout.trim(), stderr: merge.stderr.trim() },
-        repair: { code: repair.code, stdout: repair.stdout.trim(), stderr: repair.stderr.trim() },
-        validate: { code: validate.code, stdout: validate.stdout.trim(), stderr: validate.stderr.trim() },
-        publish: { code: publish.code, stdout: publish.stdout.trim(), stderr: publish.stderr.trim() }
-      }
-    };
-    await writeJson(manifestPath, held);
-    await writeMarketIndex({ ...held, manifestPath });
-    return { ok: false, skipped: false, phase: "market-scan", reason: "publish failed", runDir, manifestPath, publish: held.pipeline.publish, doctor: compactDoctorResult(doctor) };
-  }
-
-  const verification = await runReleaseVerification(manifestPath, {
-    timeoutMs: Number(process.env.ALTOS_BLOG_MARKET_SCAN_TIMEOUT_MS || "90000")
-  });
-  const released = await readJson(manifestPath).catch(() => manifest);
-  const releasedWithPipeline = {
-    ...released,
+  const held = {
+    ...lastManifest,
+    status: "held",
     updatedAt: new Date().toISOString(),
+    validateOnly: {
+      ...(lastManifest.validateOnly || {}),
+      wouldPublish: false,
+      errors: [
+        ...((lastManifest.validateOnly?.errors || []).length ? lastManifest.validateOnly.errors : []),
+        "all generated market-source candidates were held; see pipeline.attempts"
+      ]
+    },
     pipeline: {
-      scanner: { code: scanner.code, stdout: scanner.stdout.trim(), stderr: scanner.stderr.trim() },
-      sourceWorker: { code: sourceWorker.code, stdout: sourceWorker.stdout.trim(), stderr: sourceWorker.stderr.trim() },
-      merge: { code: merge.code, stdout: merge.stdout.trim(), stderr: merge.stderr.trim() },
-      repair: { code: repair.code, stdout: repair.stdout.trim(), stderr: repair.stderr.trim() },
-      validate: { code: validate.code, stdout: validate.stdout.trim(), stderr: validate.stderr.trim() },
-      publish: { code: publish.code, stdout: publish.stdout.trim(), stderr: publish.stderr.trim() },
-      verification: { code: verification.code, stdout: verification.stdout.trim(), stderr: verification.stderr.trim() }
+      scanner: scannerPipeline,
+      attempts
     }
   };
-  await writeJson(manifestPath, releasedWithPipeline);
-  await writeMarketIndex({ ...releasedWithPipeline, manifestPath });
-  if (verification.code !== 0) {
-    return { ok: false, skipped: false, phase: "market-scan-verification", runDir, manifestPath, verification: releasedWithPipeline.pipeline.verification, doctor: compactDoctorResult(doctor) };
-  }
-  return {
-    ok: true,
-    skipped: false,
-    phase: "market-scan",
-    status: releasedWithPipeline.status,
-    runDir,
-    articleSetPath: repairedArticleSetPath,
-    manifestPath,
-    publishedIds: releasedWithPipeline.publish?.publishedIds || [],
-    verification: releasedWithPipeline.pipeline.verification,
-    doctor: compactDoctorResult(doctor)
-  };
+  await writeJson(manifestPath, held);
+  await writeMarketIndex({ ...held, manifestPath });
+  return { ok: true, skipped: true, phase: "market-scan", reason: "all candidates held", runDir, manifestPath, attempts, doctor: compactDoctorResult(doctor) };
 }
 
 async function runBackfillPlanner({ date }) {

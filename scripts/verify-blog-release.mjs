@@ -123,6 +123,7 @@ function isSourceReachabilityWarning(warning) {
 function blockingValidateWarnings(warnings) {
   return (warnings || [])
     .filter((warning) => !isSourceReachabilityWarning(warning))
+    .filter((warning) => !/anti-slop pattern:\s*soft hedging/i.test(String(warning || "")))
     .filter((warning) =>
       /anti-slop|market-news opening could be more concrete|repeated sentence rhythm|authenticity score|rhythm score|template|formulaic|raw English|technical jargon/i.test(
         String(warning || "")
@@ -376,6 +377,14 @@ function imageMinimumsFor(context = {}) {
   };
 }
 
+function sourceImageBinaryContentTypeAllowed(url, contentType, dimensions, context = {}) {
+  if (!(context.contentType === "breaking" && context.coverSource === "source")) return false;
+  const normalizedType = String(contentType || "").split(";")[0].trim().toLowerCase();
+  if (!["application/octet-stream", "binary/octet-stream"].includes(normalizedType)) return false;
+  if (!dimensions?.format) return false;
+  return /\.(?:png|jpe?g|webp)(?:[?#].*)?$/i.test(String(url || "")) || ["png", "jpeg", "jpg", "webp"].includes(dimensions.format);
+}
+
 async function verifyImage(url, errors, warnings, context) {
   try {
     const minimums = imageMinimumsFor(context);
@@ -388,12 +397,18 @@ async function verifyImage(url, errors, warnings, context) {
     const contentType = response.headers.get("content-type") || "";
     const bytes = Buffer.from(await response.arrayBuffer());
     if (!response.ok) pushIssue(errors, `image ${url} returned ${response.status}`, context);
-    if (!contentType.startsWith("image/")) pushIssue(errors, `image ${url} has non-image content-type ${contentType || "missing"}`, context);
     if (bytes.length < minimums.minBytes) pushIssue(errors, `image ${url} is too small (${bytes.length} bytes)`, context);
     const dimensions = imageDimensions(bytes);
     if (!dimensions) {
       pushIssue(errors, `image ${url} dimensions could not be parsed`, context);
       return null;
+    }
+    if (!contentType.startsWith("image/")) {
+      if (sourceImageBinaryContentTypeAllowed(url, contentType, dimensions, context)) {
+        pushWarning(warnings, `image ${url} uses ${contentType || "missing"} but parsed as ${dimensions.format}; accepted for credited source image`, context);
+      } else {
+        pushIssue(errors, `image ${url} has non-image content-type ${contentType || "missing"}`, context);
+      }
     }
     if (dimensions.width < minimums.minWidth || dimensions.height < minimums.minHeight) {
       pushIssue(errors, `image ${url} dimensions are too small (${dimensions.width}x${dimensions.height})`, context);

@@ -7,8 +7,8 @@ import { spawnSync } from "node:child_process";
 
 const LANGUAGES = ["zh-Hant", "en", "ja", "ko", "id", "vi", "th", "ms", "fil"];
 const DEFAULT_BASE_URL = "https://altoslab-ai.cc";
-const DEFAULT_BREAKING_TARGET = 31;
 const DEFAULT_COLUMN_TARGET = 9;
+const DAILY_COLUMN_MINIMUM = 1;
 const REQUIRED_COLUMN_CONTENT_IMAGES = 2;
 
 function arg(name, fallback = "") {
@@ -96,7 +96,15 @@ function legacyCandidatePath(date, slot) {
   return path.join(process.cwd(), "data/blog-prepared-candidates", `${date}-${slot}.json`);
 }
 
-async function liveCounts(baseUrl) {
+function postTaiwanDate(post) {
+  const timestamp = post?.publishedAt || post?.date || "";
+  if (!timestamp) return "";
+  const parsed = new Date(timestamp);
+  if (Number.isNaN(parsed.getTime())) return "";
+  return taiwanDate(parsed);
+}
+
+async function liveCounts(baseUrl, date) {
   const rows = [];
   for (const language of LANGUAGES) {
     const response = await fetch(`${normalizeBaseUrl(baseUrl)}/api/blog?language=${encodeURIComponent(language)}&limit=200`, {
@@ -106,10 +114,87 @@ async function liveCounts(baseUrl) {
     const json = await response.json().catch(() => ({}));
     const posts = Array.isArray(json.posts) ? json.posts : [];
     const breaking = posts.filter((post) => post.contentType === "breaking" || post.category === "市場快訊" || (post.tags || []).includes("市場快訊")).length;
-    const column = posts.filter((post) => post.contentType === "column" || post.category === "專欄" || (post.tags || []).includes("市場專欄")).length;
-    rows.push({ language, total: posts.length, breaking, column });
+    const columnPosts = posts.filter((post) => post.contentType === "column" || post.category === "專欄" || (post.tags || []).includes("市場專欄"));
+    const column = columnPosts.length;
+    const todayColumn = columnPosts.filter((post) => postTaiwanDate(post) === date).length;
+    rows.push({ language, total: posts.length, breaking, column, todayColumn });
   }
   return rows;
+}
+
+async function fetchText(url) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), Number(process.env.ALTOS_BLOG_OPS_FETCH_TIMEOUT_MS || "15000"));
+  try {
+    const response = await fetch(url, {
+      cache: "no-store",
+      signal: controller.signal,
+      headers: { "User-Agent": "ALTOS-LAB-blog-ops-audit/1.0" }
+    });
+    const text = await response.text();
+    return { ok: response.ok, status: response.status, text };
+  } catch (error) {
+    return { ok: false, status: 0, text: "", error: error instanceof Error ? error.message : String(error) };
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+async function analyticsProbe(baseUrl) {
+  const root = normalizeBaseUrl(baseUrl);
+  const expectedGtmId = process.env.ALTOS_BLOG_EXPECTED_GTM_ID || "GTM-WJ96VR7V";
+  const expectedGaId = process.env.ALTOS_BLOG_EXPECTED_GA_ID || "G-5VSLFNVD28";
+  const pages = await Promise.all(
+    [
+      { key: "home", url: root },
+      { key: "blog", url: `${root}/blog` }
+    ].map(async (page) => {
+      const result = await fetchText(page.url);
+      const text = result.text || "";
+      const hasGtm =
+        text.includes(expectedGtmId) ||
+        /googletagmanager\.com\/gtm\.js|googletagmanager\.com\/ns\.html/i.test(text);
+      const hasGa =
+        text.includes(expectedGaId) ||
+        /gtag\s*\(|google-analytics\.com|analytics\.google\.com|googletagmanager\.com\/gtag\/js/i.test(text);
+      return {
+        ...page,
+        ok: result.ok,
+        status: result.status,
+        hasGtm,
+        hasGa,
+        error: result.error || ""
+      };
+    })
+  );
+  const healthResult = await fetchText(`${root}/api/health`);
+  let health = {};
+  try {
+    health = healthResult.text ? JSON.parse(healthResult.text) : {};
+  } catch {
+    health = {};
+  }
+  const integrations = health.integrations || {};
+  const healthGtmConfigured = integrations.gtmConfigured === true || health.gtmConfigured === true;
+  const healthGaConfigured = integrations.gaConfigured === true || health.gaConfigured === true;
+  const ga4PropertyConfigured = integrations.ga4PropertyConfigured === true || health.ga4PropertyConfigured === true;
+  const pagesHaveGtm = pages.every((page) => page.ok && page.hasGtm);
+  const analyticsConfigured = healthGtmConfigured && (healthGaConfigured || ga4PropertyConfigured);
+  const pagesHaveGaOrGtmBackedGa = pages.every((page) => page.ok && (page.hasGa || healthGaConfigured || ga4PropertyConfigured));
+  return {
+    checked: true,
+    expectedGtmId,
+    expectedGaId,
+    ok: pagesHaveGtm && pagesHaveGaOrGtmBackedGa && analyticsConfigured,
+    pages,
+    health: {
+      ok: healthResult.ok,
+      status: healthResult.status,
+      gtmConfigured: healthGtmConfigured,
+      gaConfigured: healthGaConfigured,
+      ga4PropertyConfigured
+    }
+  };
 }
 
 function launchAgentStatus() {
@@ -288,24 +373,33 @@ async function columnVisualGap(date) {
   return { checked: true, date: checkedDate, rows };
 }
 
-function targetGaps(counts, breakingTarget, columnTarget) {
+function targetGaps(counts, columnTarget) {
   return counts.map((row) => ({
     language: row.language,
-    breakingGap: Math.max(0, breakingTarget - row.breaking),
+    breakingGap: 0,
     columnGap: Math.max(0, columnTarget - row.column)
   }));
 }
 
-function summarizeIssues({ counts, gaps, candidates, launchAgent, visualGap, targets }) {
+function summarizeIssues({ counts, gaps, candidates, launchAgent, visualGap, targets, analytics }) {
   const issues = [];
-  const minBreaking = Math.min(...counts.map((row) => row.breaking));
   const minColumn = Math.min(...counts.map((row) => row.column));
+  const minTodayColumn = Math.min(...counts.map((row) => row.todayColumn || 0));
   const columnTarget = targets?.column || DEFAULT_COLUMN_TARGET;
-  if (gaps.some((gap) => gap.breakingGap > 0)) issues.push(`market news below target: min breaking=${minBreaking}`);
   if (gaps.some((gap) => gap.columnGap > 0)) issues.push(`columns below target: min column=${minColumn}`);
+  if (minTodayColumn < DAILY_COLUMN_MINIMUM) {
+    issues.push(`daily column minimum not met for ${targets?.date || "today"}: min todayColumn=${minTodayColumn}`);
+  }
   const legacyMarket = candidates.find((candidate) => candidate.lane === "legacy" && /market/i.test(candidate.translationGroupId || ""));
   if (legacyMarket) issues.push(`legacy candidate index still contains market release: ${legacyMarket.path}`);
   if (launchAgent.checked && !launchAgent.loaded) issues.push("LaunchAgent is not loaded");
+  if (analytics?.checked && !analytics.ok) {
+    const missing = analytics.pages
+      .filter((page) => !page.ok || !page.hasGtm || (!page.hasGa && !analytics.health.gaConfigured && !analytics.health.ga4PropertyConfigured))
+      .map((page) => `${page.key}:status=${page.status},gtm=${page.hasGtm},ga=${page.hasGa}`)
+      .join("; ");
+    issues.push(`GA/GTM monitoring needs attention: ${missing || "health integrations not configured"}`);
+  }
   const blockedVisuals = visualGap.checked ? visualGap.rows.filter((row) => row.sourceReady && !row.publishableVisuals) : [];
   if (minColumn < columnTarget && blockedVisuals.length) {
     issues.push(`column candidates blocked by visuals: ${blockedVisuals.map((row) => `seq${row.sequence}`).join(", ")}`);
@@ -313,10 +407,10 @@ function summarizeIssues({ counts, gaps, candidates, launchAgent, visualGap, tar
   return issues;
 }
 
-function summarizeBottlenecks({ counts, gaps, candidates, launchAgent, visualGap, targets, headlessProviders }) {
+function summarizeBottlenecks({ counts, gaps, candidates, launchAgent, visualGap, targets, headlessProviders, analytics }) {
   const minBreaking = Math.min(...counts.map((row) => row.breaking));
   const minColumn = Math.min(...counts.map((row) => row.column));
-  const breakingTarget = targets?.breaking || DEFAULT_BREAKING_TARGET;
+  const minTodayColumn = Math.min(...counts.map((row) => row.todayColumn || 0));
   const columnTarget = targets?.column || DEFAULT_COLUMN_TARGET;
   const blockedVisuals = visualGap.checked ? visualGap.rows.filter((row) => row.sourceReady && !row.publishableVisuals) : [];
   const readyMarketCandidates = candidates.filter((candidate) => candidate.exists && candidate.lane === "market" && candidate.status === "ready");
@@ -324,17 +418,19 @@ function summarizeBottlenecks({ counts, gaps, candidates, launchAgent, visualGap
   return [
     {
       lane: "market",
-      status: minBreaking >= breakingTarget && !readyMarketCandidates.length ? "stable" : "attention",
+      status: readyMarketCandidates.length ? "attention" : "stable",
       summary:
-        minBreaking >= breakingTarget
-          ? `market news target met at ${minBreaking}/language; no Chrome needed for scanner/worker validation`
-          : `market news below target at ${minBreaking}/language`
+        readyMarketCandidates.length
+          ? `market news has ${readyMarketCandidates.length} ready candidate(s) waiting for release`
+          : `market news count is ${minBreaking}/language; scheduled longform scans continue without a hard inventory cap`
     },
     {
       lane: "column",
-      status: minColumn >= columnTarget ? "stable" : "blocked",
+      status: minTodayColumn < DAILY_COLUMN_MINIMUM ? "blocked" : minColumn >= columnTarget ? "stable" : "blocked",
       summary:
-        minColumn >= columnTarget
+        minTodayColumn < DAILY_COLUMN_MINIMUM
+          ? `daily column missing for ${targets?.date || "today"}; todayColumn=${minTodayColumn}/language`
+          : minColumn >= columnTarget
           ? blockedVisuals.length > 0
             ? `column target met at ${minColumn}/language; next queued candidates need visuals: ${blockedVisuals.map((row) => `seq${row.sequence}`).join(", ")}`
             : `column target met at ${minColumn}/language`
@@ -352,6 +448,13 @@ function summarizeBottlenecks({ counts, gaps, candidates, launchAgent, visualGap
         : `LaunchAgent not checked: ${launchAgent.reason || "n/a"}`
     },
     {
+      lane: "analytics",
+      status: analytics?.ok ? "stable" : "attention",
+      summary: analytics?.checked
+        ? `homeGtm=${analytics.pages.find((page) => page.key === "home")?.hasGtm ? "yes" : "no"}; blogGtm=${analytics.pages.find((page) => page.key === "blog")?.hasGtm ? "yes" : "no"}; homeGa=${analytics.pages.find((page) => page.key === "home")?.hasGa ? "yes" : "no"}; blogGa=${analytics.pages.find((page) => page.key === "blog")?.hasGa ? "yes" : "no"}; healthGtm=${analytics.health.gtmConfigured ? "yes" : "no"}; healthGa=${analytics.health.gaConfigured ? "yes" : "no"}; ga4Property=${analytics.health.ga4PropertyConfigured ? "yes" : "no"}`
+        : "GA/GTM not checked"
+    },
+    {
       lane: "headless-ai",
       status:
         headlessProviders?.geminiCliInstalled &&
@@ -365,18 +468,19 @@ function summarizeBottlenecks({ counts, gaps, candidates, launchAgent, visualGap
   ];
 }
 
-function nextActions({ gaps, visualGap, candidates, headlessProviders }) {
+function nextActions({ counts, gaps, visualGap, candidates, headlessProviders, analytics }) {
   const actions = [];
-  const marketGap = Math.max(...gaps.map((gap) => gap.breakingGap));
   const columnGap = Math.max(...gaps.map((gap) => gap.columnGap));
+  const minTodayColumn = Math.min(...counts.map((row) => row.todayColumn || 0));
   const blockedVisuals = visualGap.checked ? visualGap.rows.filter((row) => row.sourceReady && !row.publishableVisuals) : [];
   const readyMarketCandidates = candidates.filter((candidate) => candidate.exists && candidate.lane === "market" && candidate.status === "ready");
-  if (marketGap > 0) {
-    actions.push("Run no-Chrome market scan with mainstream-ai-us source profile until breaking count reaches target; publish only source-image candidates that pass validate-only.");
-  } else if (readyMarketCandidates.length) {
+  if (readyMarketCandidates.length) {
     actions.push("Release or clear ready market candidates; do not leave /tmp-backed validate-only candidates in the production queue.");
   } else {
-    actions.push("Keep market lane on scheduled no-Chrome scans; use --validate-only --no-index for tests so production candidates stay clean.");
+    actions.push("Keep market lane on scheduled no-Chrome longform scans; use --validate-only --no-index for tests so production candidates stay clean.");
+  }
+  if (analytics?.checked && !analytics.ok) {
+    actions.push("Repair GA/GTM installation or /api/health analytics configuration before treating the daily operations report as clean.");
   }
   if (columnGap > 0 && blockedVisuals.length) {
     actions.push(`Produce GPT cover plus 2-3 content images for ${blockedVisuals.map((row) => `seq${row.sequence}`).join(", ")} before column release.`);
@@ -385,12 +489,14 @@ function nextActions({ gaps, visualGap, candidates, headlessProviders }) {
     }
   } else if (columnGap > 0) {
     actions.push("Prepare/release enough Gemini-approved column sets to close the column target gap.");
+  } else if (minTodayColumn < DAILY_COLUMN_MINIMUM) {
+    actions.push("Produce and release today's Gemini-approved daily column set; do not treat the baseline column count as satisfying the daily requirement.");
   } else {
     const queued = blockedVisuals.map((row) => `seq${row.sequence}`).join(", ");
     actions.push(
       queued
-        ? `Keep daily column cadence at one approved column set; next queued columns (${queued}) must wait for GPT visual evidence before release.`
-        : "Keep daily column cadence at one approved column set; never release column candidates without visual evidence."
+        ? `Keep daily column minimum at one approved column set; next queued columns (${queued}) must wait for GPT visual evidence before release.`
+        : "Keep daily column minimum at one approved column set; additional columns still require Gemini approval plus GPT visual evidence."
     );
   }
   return actions;
@@ -401,11 +507,13 @@ function textReport(report) {
   lines.push(`# ALTOS LAB Blog Operations Audit`);
   lines.push(`Checked: ${report.checkedAt}`);
   lines.push("");
-  lines.push(`Targets: breaking ${report.targets.breaking} / language, column ${report.targets.column} / language`);
+  lines.push(
+    `Targets: market news has no hard cap, published column baseline ${report.targets.column}/language, daily column minimum ${report.targets.dailyColumnMinimum} approved set(s)`
+  );
   lines.push("");
   lines.push("Live counts:");
   for (const row of report.counts) {
-    lines.push(`- ${row.language}: total ${row.total}, breaking ${row.breaking}, column ${row.column}`);
+    lines.push(`- ${row.language}: total ${row.total}, breaking ${row.breaking}, column ${row.column}, todayColumn ${row.todayColumn || 0}`);
   }
   lines.push("");
   lines.push("Candidate indexes:");
@@ -414,6 +522,14 @@ function textReport(report) {
   }
   lines.push("");
   lines.push(`LaunchAgent: ${report.launchAgent.loaded ? "loaded" : "not loaded"}; state=${report.launchAgent.state || "n/a"}; lastExit=${report.launchAgent.lastExitCode || "n/a"}; runs=${report.launchAgent.runs ?? "n/a"}`);
+  lines.push("");
+  if (report.analytics?.checked) {
+    const home = report.analytics.pages.find((page) => page.key === "home") || {};
+    const blog = report.analytics.pages.find((page) => page.key === "blog") || {};
+    lines.push(
+      `Analytics monitoring: homeGtm=${home.hasGtm ? "true" : "false"}, blogGtm=${blog.hasGtm ? "true" : "false"}, homeGa=${home.hasGa ? "true" : "false"}, blogGa=${blog.hasGa ? "true" : "false"}, healthGtm=${report.analytics.health.gtmConfigured ? "true" : "false"}, healthGa=${report.analytics.health.gaConfigured ? "true" : "false"}, ga4PropertyConfigured=${report.analytics.health.ga4PropertyConfigured ? "true" : "false"}`
+    );
+  }
   lines.push("");
   lines.push("Bottleneck summary:");
   for (const bottleneck of report.bottlenecks) {
@@ -442,26 +558,30 @@ async function main() {
   }
   const date = arg("date", taiwanDate());
   const baseUrl = arg("base-url", process.env.ALTOS_BLOG_BASE_URL || DEFAULT_BASE_URL);
-  const breakingTarget = Number(arg("breaking-target", String(DEFAULT_BREAKING_TARGET))) || DEFAULT_BREAKING_TARGET;
   const columnTarget = Number(arg("column-target", String(DEFAULT_COLUMN_TARGET))) || DEFAULT_COLUMN_TARGET;
-  const counts = await liveCounts(baseUrl);
-  const gaps = targetGaps(counts, breakingTarget, columnTarget);
+  const counts = await liveCounts(baseUrl, date);
+  const gaps = targetGaps(counts, columnTarget);
   const candidates = await candidateSummary(date);
   const launchAgent = launchAgentStatus();
   const headlessProviders = await headlessProviderStatus();
   const visualGap = await columnVisualGap(date);
+  const analytics = await analyticsProbe(baseUrl);
   const report = {
-    ok: gaps.every((gap) => gap.breakingGap === 0 && gap.columnGap === 0),
+    ok:
+      gaps.every((gap) => gap.breakingGap === 0 && gap.columnGap === 0) &&
+      counts.every((row) => (row.todayColumn || 0) >= DAILY_COLUMN_MINIMUM) &&
+      analytics.ok === true,
     checkedAt: new Date().toISOString(),
     date,
     baseUrl,
-    targets: { breaking: breakingTarget, column: columnTarget },
+    targets: { marketCap: null, column: columnTarget, dailyColumnMinimum: DAILY_COLUMN_MINIMUM, date },
     counts,
     gaps,
     candidates,
     launchAgent,
     headlessProviders,
     visualGap,
+    analytics,
     issues: [],
     bottlenecks: [],
     nextActions: []

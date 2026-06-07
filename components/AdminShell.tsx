@@ -5,6 +5,7 @@ import Link from "next/link";
 import { sendAnalyticsEvent } from "@/components/AnalyticsEvents";
 import { BrandText } from "@/components/BrandText";
 import {
+  BarChart3,
   CheckCircle2,
   Clock3,
   Eye,
@@ -25,6 +26,7 @@ import {
   Upload,
   Users
 } from "lucide-react";
+import { AdminAnalyticsDashboard } from "@/components/AdminAnalyticsDashboard";
 import { BLOG_LANGUAGES, blogCoverForLanguage, blogPostPath, languageLabel, languageShortLabel } from "@/lib/blog-utils";
 import { PUBLIC_BLOG_AUTHORS } from "@/lib/blog-authors";
 import type {
@@ -39,7 +41,7 @@ import type {
   SitePage
 } from "@/lib/types";
 
-type Tab = "dashboard" | "pages" | "projects" | "blog" | "leads";
+type Tab = "dashboard" | "analytics" | "pages" | "projects" | "blog" | "leads";
 type BlogEditorTab = "content" | "seo" | "sources" | "publish";
 type BlogFilterLanguage = "all" | BlogLanguage;
 type BlogFilterStatus = "all" | PublishStatus;
@@ -923,6 +925,7 @@ export function AdminShell({ initialTab = "dashboard" }: AdminShellProps) {
         <div className="admin-tabs">
           {[
             ["dashboard", "總覽", LayoutDashboard],
+            ["analytics", "GA 監控", BarChart3],
             ["pages", "頁面", FileText],
             ["projects", "專案", Gauge],
             ["blog", "部落格", Newspaper],
@@ -967,6 +970,8 @@ export function AdminShell({ initialTab = "dashboard" }: AdminShellProps) {
             </div>
           </section>
         ) : null}
+
+        {tab === "analytics" ? <AdminAnalyticsDashboard /> : null}
 
         {tab === "pages" && selectedPage ? (
           <section className="admin-grid">

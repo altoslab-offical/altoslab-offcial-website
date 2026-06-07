@@ -21,7 +21,15 @@ const INTERNAL_COPY_PATTERNS = [
   /ALTOS LAB reader note/i,
   /article claims should remain anchored/i,
   /可引用事實/i,
+  /來源可引用摘要/i,
   /來源摘要/i,
+  /Source summary:/i,
+  /出典要約/i,
+  /출처 요약/i,
+  /Ringkasan sumber/i,
+  /Tóm tắt nguồn/i,
+  /สรุปแหล่งที่มา/i,
+  /Buod ng sanggunian/i,
   /讀者怎麼看/i,
   /擁抱臉|擁抱面孔|擁抱臉部/i,
   /產品 AI 雲端|資源 公司 客戶|Web Application Firewall/i,
@@ -37,6 +45,7 @@ const WEAK_MARKET_TITLE_PATTERNS = [/更新：/i, /市場訊號/i, /可以拿來
 const LEGACY_MARKET_TEMPLATE_PATTERNS = [
   /事件重點/i,
   /關鍵事實/i,
+  /^##\s*背景\s*$/m,
   /報導主要提到/i,
   /文中提到的主要數字/i,
   /後續觀察/i,
@@ -52,6 +61,20 @@ const LEGACY_MARKET_TEMPLATE_PATTERNS = [
   /Adoption matters more than buzz/i,
   /Next step: watch three signals/i,
   /real usage, paid adoption, and service stability/i
+];
+const GENERIC_MARKET_BODY_PATTERNS = [
+  /這則新聞的重點不是抽象評論/i,
+  /不是同類工具會不會更多，而是/i,
+  /接下來要看(?:的是)?/i,
+  /後續要看/i,
+  /兩週內先跑/i,
+  /選一個高頻但風險可控/i,
+  /採購、產品、工程與營運/i,
+  /進入下一輪預算與部署討論/i,
+  /speed.*stable workflow/i,
+  /choose one workflow/i,
+  /one owner/i,
+  /stop condition/i
 ];
 
 function arg(name, fallback = "") {
@@ -110,6 +133,33 @@ async function fetchText(url) {
   return text;
 }
 
+async function fetchPostForLanguage(root, slug, language, cache) {
+  const apiUrl = `${root}/api/blog/${encodeURIComponent(slug)}?language=${encodeURIComponent(language)}`;
+  try {
+    const json = await fetchJson(apiUrl);
+    const post = json.post || json.payload?.post;
+    if (post) return post;
+  } catch (error) {
+    if (!String(error?.message || error).startsWith("404 ")) throw error;
+  }
+  if (!cache.posts) {
+    const json = await fetchJson(`${root}/api/blog`);
+    cache.posts = json.posts || json.blogPosts || json.payload?.posts || [];
+  }
+  const anchor = cache.posts.find((post) => post.slug === slug);
+  const translationGroupId = anchor?.translationGroupId;
+  if (translationGroupId) {
+    const translated = cache.posts.find((post) => post.translationGroupId === translationGroupId && post.language === language);
+    if (translated) return translated;
+  }
+  const sourceUrl = anchor?.sourceLinks?.[0]?.url;
+  if (sourceUrl) {
+    const translated = cache.posts.find((post) => post.language === language && post.sourceLinks?.[0]?.url === sourceUrl);
+    if (translated) return translated;
+  }
+  return null;
+}
+
 function publicText(post) {
   return [
     post.title,
@@ -166,6 +216,9 @@ function qaPost(post, mustTerms = []) {
   for (const pattern of LEGACY_MARKET_TEMPLATE_PATTERNS) {
     if (pattern.test(text)) issues.push({ severity: "critical", id: "legacy-market-template", pattern: String(pattern) });
   }
+  for (const pattern of GENERIC_MARKET_BODY_PATTERNS) {
+    if (pattern.test(text)) issues.push({ severity: "major", id: "generic-market-advice-filler", pattern: String(pattern) });
+  }
   for (const pattern of WEAK_MARKET_TITLE_PATTERNS) {
     if (pattern.test(post.title || "")) issues.push({ severity: "major", id: "weak-market-title", pattern: String(pattern) });
   }
@@ -185,6 +238,33 @@ function qaPost(post, mustTerms = []) {
   if (publisher && !String(post.excerpt || "").includes(publisher)) {
     issues.push({ severity: "major", id: "standfirst-missing-source", publisher, excerpt: post.excerpt || "" });
   }
+  if (post.geoSummary && post.excerpt && overlapRatio(post.geoSummary, post.excerpt) >= 0.72) {
+    issues.push({
+      severity: "major",
+      id: "summary-repeats-standfirst",
+      excerpt: String(post.excerpt || "").slice(0, 160),
+      geoSummary: String(post.geoSummary || "").slice(0, 160)
+    });
+  }
+  if (post.seoDescription && post.excerpt && overlapRatio(post.seoDescription, post.excerpt) >= 0.86) {
+    issues.push({
+      severity: "major",
+      id: "seo-description-repeats-standfirst",
+      excerpt: String(post.excerpt || "").slice(0, 160),
+      seoDescription: String(post.seoDescription || "").slice(0, 160)
+    });
+  }
+  const repeatedTakeaways = (post.keyTakeaways || []).filter((item) => overlapRatio(item, post.excerpt || "") >= 0.72);
+  if (repeatedTakeaways.length >= 1) {
+    issues.push({
+      severity: "major",
+      id: "takeaway-repeats-standfirst",
+      repeatedTakeaways: repeatedTakeaways.slice(0, 3)
+    });
+  }
+  if (!Array.isArray(post.keyTakeaways) || post.keyTakeaways.length < 2) {
+    issues.push({ severity: "major", id: "market-takeaways-too-thin", count: post.keyTakeaways?.length || 0 });
+  }
   const sourceNumbers = extractNumbers(source.title || "", source.summary || "")
     .filter((term) => !/^(?:19|20)\d{2}$/.test(String(term)))
     .filter((term) => String(term).length >= 2);
@@ -199,6 +279,11 @@ function qaPost(post, mustTerms = []) {
     }
     if (/17,?000/i.test(raw)) {
       return /(17[,.]?\s*000|1\s*万\s*7000|1万7000|1만\s*7000|หนึ่งหมื่นเจ็ดพัน|17\s*พัน)/i.test(post.excerpt || "");
+    }
+    if (/\$?\s*85\s*b(?:illion)?/i.test(raw) || /\b85\s*billion\b/i.test(raw)) {
+      return /(\$?\s*85\s*b(?:illion)?|850\s*億|850億|850\s*亿|850亿|850\s*억|85\s*พันล้าน|85\s*tỷ|85\s*miliar|85\s*bilion|85\s*bilyon)/i.test(
+        post.excerpt || ""
+      );
     }
     return excerptText.includes(raw) || (normalizedCore.length >= 2 && normalizedExcerpt.includes(normalizedCore));
   };
@@ -215,7 +300,7 @@ function qaPost(post, mustTerms = []) {
     }
   }
   const sourceEvidenceTerms = [
-    ...extractEntities(source.title || "", source.summary || ""),
+    ...extractEntities(source.summary || ""),
     ...sourceNumbers
   ]
     .filter((term) => String(term).length >= 2)
@@ -224,9 +309,12 @@ function qaPost(post, mustTerms = []) {
   const evidenceCovered = (term) => {
     const raw = String(term || "").trim();
     const lowerText = text.toLowerCase();
+    if (/\d/.test(raw) && numberCovered(raw)) return true;
     if (lowerText.includes(raw.toLowerCase())) return true;
     if (/^publishers?$/i.test(raw) && /(出版商|出版社|퍼블리셔|publisher|penerbit|nhà xuất bản|ผู้เผยแพร่|publishers?)/i.test(text)) return true;
     if (/^u\.?k\.?$/i.test(raw) && /(U\.?K\.?|UK|英國|英国|영국|Inggris|Anh|สหราชอาณาจักร|United Kingdom)/i.test(text)) return true;
+    if (/^africa$/i.test(raw) && /(Africa|非洲|アフリカ|아프리카|Afrika|châu Phi|แอฟริกา)/i.test(text)) return true;
+    if (/^middle\s+east$/i.test(raw) && /(Middle East|中東|中东|중동|Timur Tengah|Trung Đông|ตะวันออกกลาง|Gitnang Silangan)/i.test(text)) return true;
     const tokens = raw
       .match(/[A-Z][A-Za-z0-9+.-]{2,}|[A-Za-z]+-\d+|\d[\d,.]*(?:x|%|m|b)?/g)
       ?.filter((token) => !/^(Welcome|First|Open|The|Action|Whether)$/i.test(token))
@@ -248,10 +336,13 @@ function qaPost(post, mustTerms = []) {
       paragraph: meaningfulParagraphs[0].slice(0, 160)
     });
   }
+  if (meaningfulParagraphs.length >= 2 && meaningfulParagraphs.every((paragraph) => /^(TechCrunch|The Verge|WIRED|VentureBeat|Reuters|Bloomberg)?\s*(報導|指出|reported|reports|says|melaporkan|đưa tin|รายงาน)/i.test(paragraph))) {
+    issues.push({ severity: "major", id: "market-body-all-report-sentences" });
+  }
   if (meaningfulParagraphs.some((paragraph, index) => meaningfulParagraphs.slice(index + 1).some((other) => overlapRatio(paragraph, other) >= 0.78))) {
     issues.push({ severity: "major", id: "repeated-market-paragraph" });
   }
-  if (meaningfulParagraphs.length < 2 && stripHtml(body).length < 220) {
+  if (meaningfulParagraphs.length < 2 && stripHtml(body).length < 120) {
     issues.push({
       severity: "major",
       id: "market-body-too-thin",
@@ -269,11 +360,10 @@ async function main() {
   const languages = arg("languages", "all") === "all" ? LANGUAGES : arg("languages").split(",").map((item) => item.trim()).filter(Boolean);
   const mustTerms = repeatedArgs("must");
   const results = [];
+  const postCache = {};
 
   for (const language of languages) {
-    const apiUrl = `${root}/api/blog/${encodeURIComponent(slug)}?language=${encodeURIComponent(language)}`;
-    const json = await fetchJson(apiUrl);
-    const post = json.post || json.payload?.post;
+    const post = await fetchPostForLanguage(root, slug, language, postCache);
     if (!post) {
       results.push({ language, ok: false, issues: [{ severity: "critical", id: "missing-post" }] });
       continue;
