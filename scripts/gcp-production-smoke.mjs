@@ -153,6 +153,13 @@ async function main() {
 
   if (!health?.ok) pushIssue(errors, "/api/health did not return ok", { surface: "health" });
   if (health?.cmsStorage?.provider !== "gcs") pushIssue(errors, "cmsStorage.provider must be gcs", { surface: "health" });
+  const expectedGcsBucket = process.env.GCS_BUCKET || "altoslab-official-cms-934551798702";
+  if (health?.cmsStorage?.bucket && health.cmsStorage.bucket !== expectedGcsBucket) {
+    pushIssue(errors, `cmsStorage.bucket must be ${expectedGcsBucket}`, {
+      surface: "health",
+      actual: health.cmsStorage.bucket
+    });
+  }
   for (const field of ["durable", "writable", "configured"]) {
     if (health?.cmsStorage?.[field] !== true) pushIssue(errors, `cmsStorage.${field} must be true`, { surface: "health" });
   }
@@ -188,9 +195,13 @@ async function main() {
     publishedPosts
   };
   if (publishedPosts === 0) {
+    pushIssue(errors,
+      "Public blog API returned zero posts; production CMS read or public projection is not healthy.",
+      { surface: "blog-api" }
+    );
     warnings.push({
       message:
-        "No qualified public blog posts are currently published. This is acceptable after fail-closed archival, but SEO/GEO content readiness will stay low until a complete Gemini/GPT-approved multilingual set is released.",
+        "No qualified public blog posts are currently published. Treat this as fail-closed unless Tommy explicitly approved empty public inventory.",
       surface: "blog-api"
     });
   }

@@ -205,6 +205,16 @@ async function main() {
   const posts = Array.isArray(payload.posts) ? payload.posts : [];
   const audited = posts.map(auditPost);
   const problemPosts = audited.filter((post) => post.issues.length);
+  if (posts.length === 0) {
+    problemPosts.push({
+      id: "public-blog-inventory",
+      slug: "api-blog",
+      language: "all",
+      contentType: "public-inventory",
+      title: "Public blog inventory is empty",
+      issues: [{ severity: "critical", id: "public-blog-posts-empty" }]
+    });
+  }
   const criticalCount = problemPosts.reduce((sum, post) => sum + post.issues.filter((issue) => issue.severity === "critical").length, 0);
   const warningCount = problemPosts.reduce((sum, post) => sum + post.issues.filter((issue) => issue.severity === "warning").length, 0);
   const report = {

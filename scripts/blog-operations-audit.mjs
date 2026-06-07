@@ -594,6 +594,7 @@ async function main() {
   } else {
     console.log(JSON.stringify(report, null, 2));
   }
+  if (!report.ok || report.issues.length > 0) process.exitCode = 1;
 }
 
 main().catch((error) => {

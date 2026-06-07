@@ -238,6 +238,10 @@ async function checkProductionHealth(errors, warnings) {
     for (const field of ["durable", "writable", "configured"]) {
       if (json.cmsStorage?.[field] !== true) addIssue(errors, `production cmsStorage.${field} must be true`);
     }
+    const expectedGcsBucket = process.env.GCS_BUCKET || "altoslab-official-cms-934551798702";
+    if (json.cmsStorage?.provider === "gcs" && json.cmsStorage?.bucket !== expectedGcsBucket) {
+      addIssue(errors, `production GCS bucket must be ${expectedGcsBucket}; got ${json.cmsStorage?.bucket || "missing"}`);
+    }
     if (integrations.externalBlogIngestConfigured !== true) addIssue(errors, "production externalBlogIngestConfigured must be true");
     if (integrations.legacyDeepSeekCronDisabled !== true) addIssue(errors, "production legacyDeepSeekCronDisabled must be true");
     if (integrations.autoPublishBlog !== true) addIssue(errors, "production autoPublishBlog must be true");
