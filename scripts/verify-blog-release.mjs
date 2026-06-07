@@ -132,7 +132,17 @@ function blockingValidateWarnings(warnings) {
 }
 
 function normalizeText(value = "") {
-  return String(value).replace(/\s+/g, " ").trim();
+  return String(value)
+    .replace(/&quot;/g, '"')
+    .replace(/&#34;/g, '"')
+    .replace(/&#x22;/gi, '"')
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&#39;/g, "'")
+    .replace(/&apos;/g, "'")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 function parsedHost(value) {
@@ -517,7 +527,7 @@ async function verifyPostLive(post, root, errors, warnings) {
   const publicPost = apiResult.json?.post || null;
 
   if (htmlResult.response?.ok) {
-    if (!html.includes(normalizeText(post.title).slice(0, 24))) {
+    if (!normalizeText(html).includes(normalizeText(post.title).slice(0, 24))) {
       pushIssue(errors, "live article page does not contain the expected title", context);
     }
     if (/###/.test(html)) pushIssue(errors, "live article page exposes raw markdown ###", context);
