@@ -239,6 +239,7 @@ async function checkProductionHealth(errors, warnings) {
     const response = await fetch(`${root}/api/health`, {
       headers: { "User-Agent": "altos-blog-sop-doctor/1.0" }
     });
+    const serverHeader = response.headers.get("server") || "";
     const json = await response.json().catch(() => null);
     if (!response.ok || !json?.ok) {
       addIssue(errors, `production health failed with HTTP ${response.status}`);
@@ -255,6 +256,13 @@ async function checkProductionHealth(errors, warnings) {
     if (json.cmsStorage?.provider === "gcs" && json.cmsStorage?.bucket !== expectedGcsBucket) {
       addIssue(errors, `production GCS bucket must be ${expectedGcsBucket}; got ${json.cmsStorage?.bucket || "missing"}`);
     }
+    const host = new URL(root).hostname.replace(/^www\./, "");
+    if (host === "altoslab-ai.cc" && /google frontend/i.test(serverHeader)) {
+      addIssue(
+        errors,
+        "custom domain is still served by Google Frontend; Cloudflare Worker route is not cut over"
+      );
+    }
     if (integrations.externalBlogIngestConfigured !== true) addIssue(errors, "production externalBlogIngestConfigured must be true");
     if (integrations.legacyDeepSeekCronDisabled !== true) addIssue(errors, "production legacyDeepSeekCronDisabled must be true");
     if (integrations.autoPublishBlog !== true) addIssue(errors, "production autoPublishBlog must be true");
@@ -265,6 +273,7 @@ async function checkProductionHealth(errors, warnings) {
       root,
       health: {
         cmsStorage: json.cmsStorage,
+        server: serverHeader,
         externalBlogIngestConfigured: integrations.externalBlogIngestConfigured,
         legacyDeepSeekCronDisabled: integrations.legacyDeepSeekCronDisabled,
         autoPublishBlog: integrations.autoPublishBlog,

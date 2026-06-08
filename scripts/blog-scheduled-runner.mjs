@@ -451,13 +451,15 @@ function compactProductionRepairResult(repair) {
       }
     : {
         ok: repair?.ok === true,
+        skipped: repair?.skipped === true,
+        reason: repair?.reason || "",
         code: repair?.code ?? null
       };
 }
 
 async function runDoctor({ mode, date, slot }) {
   if (hasFlag("skip-doctor")) return { ok: true, skipped: true };
-  const result = await runCommand(process.execPath, [
+  const args = [
     "scripts/blog-sop-doctor.mjs",
     "--mode",
     mode,
@@ -465,7 +467,10 @@ async function runDoctor({ mode, date, slot }) {
     date,
     "--slot",
     slot
-  ], { cwd: process.cwd() });
+  ];
+  const baseUrl = arg("base-url") || process.env.ALTOS_BLOG_BASE_URL || "";
+  if (baseUrl) args.push("--base-url", baseUrl);
+  const result = await runCommand(process.execPath, args, { cwd: process.cwd() });
   if (result.code !== 0) {
     return {
       ok: false,
@@ -483,6 +488,23 @@ async function runDoctor({ mode, date, slot }) {
     stderr: result.stderr,
     json: parseJsonObject(result.stdout)
   };
+}
+
+function doctorErrors(doctor = {}) {
+  const parsed = doctor.json || parseJsonObject(doctor.stdout);
+  return Array.isArray(parsed?.errors) ? parsed.errors.map((item) => String(item?.message || item || "")) : [];
+}
+
+function doctorHasCustomDomainDnsBlocker(doctor = {}) {
+  return doctorErrors(doctor).some((message) => /custom domain.*Google Frontend|Cloudflare Worker route is not cut over/i.test(message));
+}
+
+function doctorLooksGcsRepairable(doctor = {}) {
+  if (doctorHasCustomDomainDnsBlocker(doctor)) return false;
+  const parsed = doctor.json || parseJsonObject(doctor.stdout);
+  const provider = parsed?.summary?.production?.health?.cmsStorage?.provider || "";
+  const errors = doctorErrors(doctor).join("\n");
+  return provider === "gcs" && /production (?:GCS bucket|cmsStorage|health|externalBlogIngestConfigured|legacyDeepSeekCronDisabled|autoPublishBlog)/i.test(errors);
 }
 
 async function runProductionRepair({ date, slot, mode }) {
@@ -521,6 +543,21 @@ async function runDoctorWithProductionRepair({ mode, date, slot, phase }) {
   let doctor = await runDoctor({ mode, date, slot });
   await appendLog(globalScheduleLogPath(), JSON.stringify({ phase, date, slot, doctor: compactDoctorResult(doctor) }));
   if (doctor.ok || hasFlag("skip-doctor")) return { doctor, repair: null };
+
+  if (!doctorLooksGcsRepairable(doctor)) {
+    const repair = {
+      ok: false,
+      skipped: true,
+      reason: doctorHasCustomDomainDnsBlocker(doctor)
+        ? "custom-domain-dns-blocked; skip GCP repair and verify Cloudflare Worker rescue URL"
+        : "doctor failure is not a GCS production-repair target"
+    };
+    await appendLog(
+      globalScheduleLogPath(),
+      JSON.stringify({ phase: `${phase}-production-repair-skipped`, date, slot, repair })
+    );
+    return { doctor, repair };
+  }
 
   const repair = await runProductionRepair({ mode, date, slot });
   await appendLog(

@@ -388,7 +388,7 @@ function summarizeIssues({ counts, gaps, candidates, launchAgent, visualGap, tar
   const minTodayColumn = Math.min(...counts.map((row) => row.todayColumn || 0));
   const columnTarget = targets?.column || DEFAULT_COLUMN_TARGET;
   if (minTotal === 0) {
-    issues.push("public blog inventory is empty; repair production CMS/GCS read path before content generation or release");
+    issues.push("one or more configured languages have zero public posts; verify active CMS provider, public projection and DNS route before content generation or release");
   }
   if (gaps.some((gap) => gap.columnGap > 0)) issues.push(`columns below target: min column=${minColumn}`);
   if (minTodayColumn < DAILY_COLUMN_MINIMUM) {
@@ -426,7 +426,7 @@ function summarizeBottlenecks({ counts, gaps, candidates, launchAgent, visualGap
       status: minTotal === 0 ? "blocked" : readyMarketCandidates.length ? "attention" : "stable",
       summary:
         minTotal === 0
-          ? "public blog inventory is empty; hold market scans until production CMS/GCS read path is repaired"
+          ? "at least one configured language has zero public posts; hold market scans until the active CMS projection is multilingual-complete"
           : readyMarketCandidates.length
           ? `market news has ${readyMarketCandidates.length} ready candidate(s) waiting for release`
           : `market news count is ${minBreaking}/language; scheduled longform scans continue without a hard inventory cap`
@@ -483,7 +483,7 @@ function nextActions({ counts, gaps, visualGap, candidates, headlessProviders, a
   const blockedVisuals = visualGap.checked ? visualGap.rows.filter((row) => row.sourceReady && !row.publishableVisuals) : [];
   const readyMarketCandidates = candidates.filter((candidate) => candidate.exists && candidate.lane === "market" && candidate.status === "ready");
   if (minTotal === 0) {
-    actions.push("Repair production CMS/GCS storage before generating, backfilling or releasing content; do not treat empty public inventory as a content gap.");
+    actions.push("Repair the active CMS projection or DNS route before generating, backfilling or releasing content; do not treat a zero-language inventory as a content gap.");
     return actions;
   }
   if (readyMarketCandidates.length) {
