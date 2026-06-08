@@ -60,7 +60,7 @@ function normalizeBaseUrl(value = DEFAULT_BASE_URL) {
 
 function shouldRunBackfillWithScheduled(mode) {
   if (hasFlag("skip-backfill") || process.env.ALTOS_BLOG_SKIP_BACKFILL === "true") return false;
-  if (mode === "prep") return true;
+  if (hasFlag("with-backfill") || process.env.ALTOS_BLOG_AUTO_BACKFILL === "true") return true;
   return mode === "market-scan" && process.env.ALTOS_BLOG_BACKFILL_ON_MARKET_SCAN === "true";
 }
 
@@ -466,6 +466,7 @@ ALTOS LAB scheduled blog runner
 
 Daily flow:
   node scripts/blog-scheduled-runner.mjs --scheduled
+  node scripts/blog-scheduled-runner.mjs --scheduled --with-backfill --target-posts 40
 
 Manual checks:
   node scripts/blog-scheduled-runner.mjs --prep --slot morning
@@ -1149,7 +1150,7 @@ ${await fs.readFile(orchestratorPromptPath, "utf8").catch(() => "")}
 }
 
 async function runBackfillPlanner({ date }) {
-  const targetPosts = arg("target-posts", String(process.env.ALTOS_BLOG_BACKFILL_TARGET_POSTS || "40"));
+  const targetPosts = arg("target-posts", process.env.ALTOS_BLOG_BACKFILL_TARGET_POSTS || "");
   const baseUrl = arg("base-url", process.env.ALTOS_BLOG_BASE_URL || "https://altoslab-ai.cc");
   const args = [
     "scripts/blog-backfill-planner.mjs",

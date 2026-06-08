@@ -383,9 +383,13 @@ function targetGaps(counts, columnTarget) {
 
 function summarizeIssues({ counts, gaps, candidates, launchAgent, visualGap, targets, analytics }) {
   const issues = [];
+  const minTotal = Math.min(...counts.map((row) => row.total));
   const minColumn = Math.min(...counts.map((row) => row.column));
   const minTodayColumn = Math.min(...counts.map((row) => row.todayColumn || 0));
   const columnTarget = targets?.column || DEFAULT_COLUMN_TARGET;
+  if (minTotal === 0) {
+    issues.push("public blog inventory is empty; repair production CMS/GCS read path before content generation or release");
+  }
   if (gaps.some((gap) => gap.columnGap > 0)) issues.push(`columns below target: min column=${minColumn}`);
   if (minTodayColumn < DAILY_COLUMN_MINIMUM) {
     issues.push(`daily column minimum not met for ${targets?.date || "today"}: min todayColumn=${minTodayColumn}`);
@@ -409,6 +413,7 @@ function summarizeIssues({ counts, gaps, candidates, launchAgent, visualGap, tar
 
 function summarizeBottlenecks({ counts, gaps, candidates, launchAgent, visualGap, targets, headlessProviders, analytics }) {
   const minBreaking = Math.min(...counts.map((row) => row.breaking));
+  const minTotal = Math.min(...counts.map((row) => row.total));
   const minColumn = Math.min(...counts.map((row) => row.column));
   const minTodayColumn = Math.min(...counts.map((row) => row.todayColumn || 0));
   const columnTarget = targets?.column || DEFAULT_COLUMN_TARGET;
@@ -418,9 +423,11 @@ function summarizeBottlenecks({ counts, gaps, candidates, launchAgent, visualGap
   return [
     {
       lane: "market",
-      status: readyMarketCandidates.length ? "attention" : "stable",
+      status: minTotal === 0 ? "blocked" : readyMarketCandidates.length ? "attention" : "stable",
       summary:
-        readyMarketCandidates.length
+        minTotal === 0
+          ? "public blog inventory is empty; hold market scans until production CMS/GCS read path is repaired"
+          : readyMarketCandidates.length
           ? `market news has ${readyMarketCandidates.length} ready candidate(s) waiting for release`
           : `market news count is ${minBreaking}/language; scheduled longform scans continue without a hard inventory cap`
     },
@@ -470,10 +477,15 @@ function summarizeBottlenecks({ counts, gaps, candidates, launchAgent, visualGap
 
 function nextActions({ counts, gaps, visualGap, candidates, headlessProviders, analytics }) {
   const actions = [];
+  const minTotal = Math.min(...counts.map((row) => row.total));
   const columnGap = Math.max(...gaps.map((gap) => gap.columnGap));
   const minTodayColumn = Math.min(...counts.map((row) => row.todayColumn || 0));
   const blockedVisuals = visualGap.checked ? visualGap.rows.filter((row) => row.sourceReady && !row.publishableVisuals) : [];
   const readyMarketCandidates = candidates.filter((candidate) => candidate.exists && candidate.lane === "market" && candidate.status === "ready");
+  if (minTotal === 0) {
+    actions.push("Repair production CMS/GCS storage before generating, backfilling or releasing content; do not treat empty public inventory as a content gap.");
+    return actions;
+  }
   if (readyMarketCandidates.length) {
     actions.push("Release or clear ready market candidates; do not leave /tmp-backed validate-only candidates in the production queue.");
   } else {

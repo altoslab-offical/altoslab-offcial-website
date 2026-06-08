@@ -10,7 +10,7 @@ const DEFAULT_BASE_URL = "https://altoslab-ai.cc";
 const LANGUAGES = ["zh-Hant", "en", "ja", "ko", "id", "vi", "th", "ms", "fil"];
 const LANGUAGE_LABEL = LANGUAGES.join(", ");
 const POSTS_PER_SET = LANGUAGES.length;
-const DEFAULT_TARGET_POSTS = 40;
+const DEFAULT_TARGET_POSTS = 0;
 const DEFAULT_LANES = ["market", "column"];
 
 function arg(name, fallback = "") {
@@ -26,8 +26,9 @@ function usage() {
   console.log(`
 ALTOS LAB blog backfill planner
 
-Creates a fail-closed backfill queue when the public blog has fewer posts than
-the per-language target. It never publishes and never fabricates production content.
+Creates a fail-closed backfill queue only when Tommy explicitly sets a
+per-language target. The production blog no longer has a hard 40-post cap.
+It never publishes and never fabricates production content.
 
 Examples:
   node scripts/blog-backfill-planner.mjs --target-posts 40 --write
@@ -355,13 +356,92 @@ async function main() {
 
   const date = arg("date") || taiwanDate();
   const targetPosts = Number(arg("target-posts", String(process.env.ALTOS_BLOG_BACKFILL_TARGET_POSTS || DEFAULT_TARGET_POSTS)));
-  if (!Number.isFinite(targetPosts) || targetPosts < 1) throw new Error("--target-posts must be a positive number");
+  if (!Number.isFinite(targetPosts)) throw new Error("--target-posts must be a number");
   const baseUrl = normalizeBaseUrl(arg("base-url", process.env.ALTOS_BLOG_BASE_URL || DEFAULT_BASE_URL));
   const planPath = path.join(backfillRoot(date), "plan.json");
   const write = hasFlag("write");
   const force = hasFlag("force");
 
   const inventory = await fetchPublicInventory(baseUrl);
+  if (targetPosts < 1) {
+    const plan = {
+      ok: true,
+      status: "disabled_no_hard_cap",
+      createdAt: new Date().toISOString(),
+      date,
+      baseUrl,
+      targetPostsPerLanguage: null,
+      publishedPosts: inventory.publishedPosts,
+      currentMinPostsPerLanguage: Math.min(...inventory.languageCoverage.map((item) => item.count)),
+      currentMaxPostsPerLanguage: Math.max(...inventory.languageCoverage.map((item) => item.count)),
+      missingPosts: 0,
+      missingByLanguage: [],
+      postsPerSet: POSTS_PER_SET,
+      setsNeeded: 0,
+      plannedSets: 0,
+      plannedPublishedPosts: inventory.publishedPosts,
+      plannedPostsPerLanguage: inventory.languageCoverage.map((item) => ({
+        language: item.language,
+        currentPosts: item.count,
+        plannedPosts: item.count,
+        targetPosts: null
+      })),
+      requiredLanguages: LANGUAGES,
+      alternatingLanes: [],
+      inventory,
+      queue: [],
+      failClosedRules: [
+        "There is no hard public post cap. Backfill requires an explicit --target-posts override.",
+        "Daily column production and timed market-news scans are the normal growth mechanism."
+      ]
+    };
+    if (write) {
+      await fs.rm(path.join(backfillRoot(date), "queue"), { recursive: true, force: true });
+      await writeJson(planPath, plan);
+    }
+    console.log(JSON.stringify({ ok: true, planPath: write ? planPath : undefined, plan }, null, 2));
+    return;
+  }
+  if (inventory.publishedPosts === 0 && !hasFlag("allow-empty-inventory")) {
+    const plan = {
+      ok: false,
+      status: "held_public_inventory_empty",
+      createdAt: new Date().toISOString(),
+      date,
+      baseUrl,
+      targetPostsPerLanguage: targetPosts,
+      publishedPosts: inventory.publishedPosts,
+      currentMinPostsPerLanguage: 0,
+      currentMaxPostsPerLanguage: 0,
+      missingPosts: 0,
+      missingByLanguage: [],
+      postsPerSet: POSTS_PER_SET,
+      setsNeeded: 0,
+      plannedSets: 0,
+      plannedPublishedPosts: inventory.publishedPosts,
+      plannedPostsPerLanguage: inventory.languageCoverage.map((item) => ({
+        language: item.language,
+        currentPosts: item.count,
+        plannedPosts: item.count,
+        targetPosts
+      })),
+      requiredLanguages: LANGUAGES,
+      alternatingLanes: [],
+      inventory,
+      queue: [],
+      failClosedRules: [
+        "Public inventory is empty. Treat this as a CMS/storage outage unless Tommy explicitly approved an empty blog.",
+        "Do not create target-based backfill queues from an outage snapshot."
+      ]
+    };
+    if (write) {
+      await fs.rm(path.join(backfillRoot(date), "queue"), { recursive: true, force: true });
+      await writeJson(planPath, plan);
+    }
+    console.log(JSON.stringify({ ok: false, planPath: write ? planPath : undefined, plan }, null, 2));
+    process.exitCode = 1;
+    return;
+  }
   const missingByLanguage = inventory.languageCoverage.map((item) => ({
     language: item.language,
     currentPosts: item.count,
