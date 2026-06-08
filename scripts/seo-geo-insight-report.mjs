@@ -8,7 +8,7 @@ import process from "node:process";
 import { promisify } from "node:util";
 
 const DEFAULT_BASE_URL = "https://altoslab-ai.cc";
-const DEFAULT_FROM = "Altoslab447@gmail.com";
+const DEFAULT_FROM = "altoslab768@gmail.com";
 const DEFAULT_TO = "Altoslab.offical@gmail.com";
 const DEFAULT_LANGUAGES = ["zh-Hant", "en", "ja", "ko", "id", "vi", "th", "ms", "fil"];
 const execFileAsync = promisify(execFile);

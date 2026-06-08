@@ -12,6 +12,7 @@ dist/
 .gcloud*/
 .wrangler/
 .open-next/
+.open-next.*
 data/cms.json
 data/generated-blog-media/
 data/blog-worker-runs/

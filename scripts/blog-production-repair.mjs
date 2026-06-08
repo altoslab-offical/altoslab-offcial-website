@@ -10,7 +10,7 @@ const DEFAULT_PROJECT_ID = "project-e688c018-aec3-4815-891";
 const DEFAULT_REGION = "us-central1";
 const DEFAULT_SERVICE = "altoslab-official-website";
 const DEFAULT_EXPECTED_BUCKET = "altoslab-official-cms-934551798702";
-const DEFAULT_GCLOUD_ACCOUNT = "altoslab2@gmail.com";
+const DEFAULT_GCLOUD_ACCOUNT = "altoslab768@gmail.com";
 const DEFAULT_CMS_PATH = "cms/altoslab-cms-v1.json";
 const DEFAULT_MEDIA_PREFIX = "blog-generated";
 const DEFAULT_TIMEOUT_MS = 90_000;
@@ -173,7 +173,11 @@ function summarizeRuntimeEnv(service) {
 }
 
 async function listGcloudAccounts() {
-  const configured = arg("gcloud-account") || process.env.ALTOS_PRODUCTION_GCLOUD_ACCOUNT || DEFAULT_GCLOUD_ACCOUNT;
+  const configured =
+    arg("gcloud-account") ||
+    process.env.ALTOS_PRODUCTION_GCLOUD_ACCOUNT ||
+    process.env.ALTOS_GOOGLE_OPERATOR_ACCOUNT ||
+    DEFAULT_GCLOUD_ACCOUNT;
   const accounts = [configured].filter(Boolean);
   const result = await runCommand("gcloud", ["auth", "list", "--format=json"], { timeoutMs: 12_000 });
   const parsed = parseJson(result.stdout);

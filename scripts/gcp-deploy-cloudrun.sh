@@ -14,6 +14,7 @@ REGION="${GCP_REGION:-us-central1}"
 SERVICE="${GCP_CLOUD_RUN_SERVICE:-altoslab-official-website}"
 REPOSITORY="${GCP_ARTIFACT_REPOSITORY:-altoslab-web}"
 BUCKET="${GCS_BUCKET:-altoslab-official-cms-934551798702}"
+GCLOUD_ACCOUNT="${ALTOS_PRODUCTION_GCLOUD_ACCOUNT:-${ALTOS_GOOGLE_OPERATOR_ACCOUNT:-altoslab768@gmail.com}}"
 SERVICE_ACCOUNT_NAME="${GCP_CLOUD_RUN_SERVICE_ACCOUNT:-altoslab-runner}"
 SERVICE_ACCOUNT="${SERVICE_ACCOUNT_NAME}@${PROJECT_ID}.iam.gserviceaccount.com"
 SITE_URL="${NEXT_PUBLIC_SITE_URL:-https://altoslab-ai.cc}"
@@ -37,7 +38,9 @@ if (( ${#missing[@]} > 0 )); then
   exit 1
 fi
 
-echo "Using project ${PROJECT_ID}, region ${REGION}, service ${SERVICE}."
+export CLOUDSDK_CORE_ACCOUNT="${GCLOUD_ACCOUNT}"
+
+echo "Using project ${PROJECT_ID}, region ${REGION}, service ${SERVICE}, gcloud account ${GCLOUD_ACCOUNT}."
 gcloud config set project "$PROJECT_ID" >/dev/null
 
 if ! gcloud projects describe "$PROJECT_ID" >/dev/null 2>&1; then

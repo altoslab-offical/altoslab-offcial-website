@@ -1,6 +1,6 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "altoslab-official-website",
+  "name": "altoslab-official-website-staging",
   "main": ".open-next/worker.js",
   "compatibility_date": "2026-05-31",
   "compatibility_flags": [
@@ -8,16 +8,6 @@
     "global_fetch_strictly_public"
   ],
   "workers_dev": true,
-  "routes": [
-    {
-      "pattern": "altoslab-ai.cc/*",
-      "zone_name": "altoslab-ai.cc"
-    },
-    {
-      "pattern": "www.altoslab-ai.cc/*",
-      "zone_name": "altoslab-ai.cc"
-    }
-  ],
   "assets": {
     "directory": ".open-next/assets",
     "binding": "ASSETS"
@@ -25,17 +15,17 @@
   "services": [
     {
       "binding": "WORKER_SELF_REFERENCE",
-      "service": "altoslab-official-website"
+      "service": "altoslab-official-website-staging"
     }
   ],
   "kv_namespaces": [
     {
       "binding": "ALTOS_BLOG_KV",
-      "id": "f22f8737839449dd9a2557a8e5d1bc78"
+      "id": "246977568bf14ed0916a21eedbdbdbc1"
     }
   ],
   "vars": {
-    "NEXT_PUBLIC_SITE_URL": "https://altoslab-ai.cc",
+    "NEXT_PUBLIC_SITE_URL": "https://altoslab-official-website-staging.altoslab-ai.workers.dev",
     "NEXT_PUBLIC_GTM_ID": "GTM-WJ96VR7V",
     "NEXT_PUBLIC_GA_MEASUREMENT_ID": "G-5VSLFNVD28",
     "CANONICAL_REDIRECT_HOSTS": "www.altoslab-ai.cc,altoslab.com,www.altoslab.com,altoslab-offcial-website.vercel.app,altoslab-offcial-website-altoslaboffical-3015s-projects.vercel.app",

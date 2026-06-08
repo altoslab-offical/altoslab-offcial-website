@@ -7,6 +7,7 @@ import { spawnSync } from "node:child_process";
 
 const DEFAULT_BASE_URL = "https://altoslab-ai.cc";
 const LANGUAGES = ["zh-Hant", "en", "ja", "ko", "id", "vi", "th", "ms", "fil"];
+const REQUIRED_CHROME_PROFILE_EMAIL = "john.wu0120@gmail.com";
 const PRODUCTION_CMS_PROVIDERS = new Set(["cloudflare-kv", "gcs"]);
 const GENERIC_STOCK_IMAGE_HOSTS = [
   "unsplash.com",
@@ -181,6 +182,18 @@ function addIssue(errors, message, context = {}) {
 
 function addWarning(warnings, message, context = {}) {
   warnings.push({ message, ...context });
+}
+
+function chromeProfileEmail(evidence) {
+  return String(evidence?.profileEmail || evidence?.chromeProfileEmail || evidence?.accountEmail || evidence?.email || "")
+    .trim()
+    .toLowerCase();
+}
+
+function checkChromeProfile(errors, evidence, label) {
+  if (chromeProfileEmail(evidence) !== REQUIRED_CHROME_PROFILE_EMAIL) {
+    addIssue(errors, `${label} Chrome profile must be ${REQUIRED_CHROME_PROFILE_EMAIL}`);
+  }
 }
 
 function requireEnv(errors, key) {
@@ -363,9 +376,11 @@ function checkReleaseCandidate({ date, slot, lane }, errors, warnings) {
     if (!isSourceTranslationMarketOnly && manifest.chromeEvidence?.gemini?.usedExistingTab !== true) {
       addIssue(errors, "Gemini browser evidence is missing");
     }
+    if (!isSourceTranslationMarketOnly) checkChromeProfile(errors, manifest.chromeEvidence?.gemini, "Gemini");
     if (requiresGptCover && manifest.chromeEvidence?.chatgpt?.usedExistingTab !== true) {
       addIssue(errors, "ChatGPT/GPT browser evidence is missing for generated covers");
     }
+    if (requiresGptCover) checkChromeProfile(errors, manifest.chromeEvidence?.chatgpt, "ChatGPT/GPT");
     if (posts.length !== LANGUAGES.length) addIssue(errors, `article set must contain ${LANGUAGES.length} posts, got ${posts.length}`);
     for (const language of LANGUAGES) {
       if (posts.filter((post) => post.language === language).length !== 1) addIssue(errors, `article set must contain exactly one ${language} post`);

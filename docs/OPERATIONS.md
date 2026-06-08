@@ -11,28 +11,45 @@
 - Blog: `/blog`
 - Health check: `/api/health`
 
-## Legacy Cloudflare Fallback
+## Cloudflare Rescue Lane
 
-Cloudflare Workers remains a fallback path, but it is no longer the primary production architecture:
+Cloudflare Workers is the free-first rescue path when Google/GCP access, cost, or account health blocks normal production work. It is staging-first and fail-closed: do not run the production Cloudflare deploy against `wrangler.jsonc` until the staging worker has passed the Cloudflare smoke gate.
 
 - Next.js runs on Cloudflare Workers via OpenNext (`@opennextjs/cloudflare`).
 - CMS JSON and generated blog covers are stored in Cloudflare KV namespace `ALTOS_BLOG_KV` on the free plan.
+- Staging uses a separate Worker (`altoslab-official-website-staging`) and separate KV namespace (`ALTOS_BLOG_KV_STAGING`) through `wrangler.staging.jsonc`; that config has no custom-domain routes.
 - R2 support remains in the codebase as a future object-storage upgrade, but it is not required for the free-first path.
 - Generated covers are served through same-origin `/api/blog/generated-media/:filename`, so the production image QA gate can verify content type, size and dimensions without requiring a public bucket domain.
-- Gemini writes the article set in the dedicated Blog QA browser workflow. Market-news covers use credited source images, while ChatGPT/GPT produces column/feature covers and in-article visuals. The local Codex worker only validates, signs, schedules and releases. GCP Cloud Run + GCS is the primary production release, storage and public serving layer.
+- Gemini writes the article set in the dedicated Blog QA browser workflow. Market-news covers use credited source images, while ChatGPT/GPT produces column/feature covers and in-article visuals. The local Codex worker only validates, signs, schedules and releases. GCP Cloud Run + GCS remains the preferred production release layer when Google account health is normal; Cloudflare KV is the rescue production layer when that path is blocked.
 - DeepSeek remains disabled for the formal daily blog workflow.
 
-Run before Cloudflare deploy:
+Run before any Cloudflare production cutover:
 
 ```bash
 npm run cloudflare:whoami
-scripts/cloudflare-free-deploy-setup.sh
-npm run deploy:cloudflare
+npm run cloudflare:setup:staging
+npm run cloudflare:seed-staging-kv
+npm run deploy:cloudflare:staging
+npm run verify:cloudflare -- --base-url https://altoslab-official-website-staging.altoslab-ai.workers.dev
+npm run typecheck
+npm run test:blog
+npm run build:cloudflare
 ```
 
-`npm run deploy:cloudflare` runs the Cloudflare build first, syncs the homepage static asset into Workers Assets, then deploys the current `.open-next` worker bundle.
+Only after that gate passes may the operator intentionally run the production Cloudflare path:
 
-The setup script reads `~/.altoslab-blog-worker.env` when present and syncs required Cloudflare secrets without printing values.
+```bash
+npm run deploy:cloudflare
+npm run verify:cloudflare -- --base-url https://altoslab-ai.cc
+```
+
+`npm run deploy:cloudflare:staging` uses `wrangler.staging.jsonc`, which intentionally has no `routes` entry. `npm run deploy:cloudflare` uses `wrangler.jsonc`, which does include `altoslab-ai.cc/*` and `www.altoslab-ai.cc/*` zone routes. Treat the production command as a cutover action, not a normal smoke test.
+
+The setup script reads `~/.altoslab-blog-worker.env` when present and syncs required Cloudflare secrets without printing values. Use `npm run cloudflare:setup:staging` for staging. Do not run production `npm run cloudflare:setup` against an existing encrypted production KV namespace unless the CMS encryption key is known to match that namespace; otherwise the Worker can lose the ability to read existing CMS data. Production deploys should use `--keep-vars` and preserve existing Cloudflare secrets.
+
+`npm run cloudflare:seed-staging-kv` copies local `data/cms.json` into the staging KV key only; it does not touch the production KV namespace.
+
+DNS blocker: `altoslab-ai.cc` is currently delegated to Google nameservers (`ns-cloud-e*.googledomains.com`) and its apex/www DNS records point to Google Frontend. Cloudflare Worker routes will not receive live custom-domain traffic until the domain is delegated to Cloudflare nameservers or the authoritative DNS is otherwise changed to a Cloudflare-compatible proxied setup. Until that DNS step is done, verify the Cloudflare rescue Worker directly at `https://altoslab-official-website.altoslab-ai.workers.dev`.
 
 ## GCP Cloud Run Architecture
 
@@ -45,7 +62,9 @@ The preferred GCP path is Cloud Run + Cloud Storage, kept free/low-cost first:
 - Cloudflare KV/R2, Vercel Blob and Upstash remain fallback providers, but GCP production should report `cmsStorage.provider = gcs`.
 - Current `altoslab-ai.cc` and `www.altoslab-ai.cc` Cloud Run domain mappings live in GCP project `project-e688c018-aec3-4815-891`, region `us-central1`, service `altoslab-official-website`. Until the custom domain mapping is consolidated into `altoslab-official-website-447`, deploys that must affect the public custom domain should update `project-e688c018-aec3-4815-891`.
 - GA/GTM stay on `GTM-WJ96VR7V` and `G-5VSLFNVD28` unless the analytics owner intentionally replaces them.
-- SEO/GEO daily insight is generated by `npm run seo:geo-report -- --base-url https://altoslab-ai.cc`. It reports SEO readiness, GEO readiness, language-index coverage, article source/FAQ structure, AI referral tracking readiness, and optional GA4/Search Console live metrics when credentials are available. The daily email must be sent through the Gmail web UI from `Altoslab447@gmail.com` to `Altoslab.offical@gmail.com`; if the Gmail web session is not the official sender, hold the send instead of using a connector or another mailbox.
+- Google operations now use `altoslab768@gmail.com` as the active operator account. Do not store this account's password in this repo or in Codex memory; use Google's sign-in session, MFA and `gcloud auth` on Tommy's machine.
+- SEO/GEO daily insight is generated by `npm run seo:geo-report -- --base-url https://altoslab-ai.cc`. It reports SEO readiness, GEO readiness, language-index coverage, article source/FAQ structure, AI referral tracking readiness, and optional GA4/Search Console live metrics when credentials are available. The daily email must be sent through the Gmail web UI from `altoslab768@gmail.com` to `Altoslab.offical@gmail.com`; if the Gmail web session is not the official sender, hold the send instead of using a connector or another mailbox.
+- Chrome browser work for Gemini, ChatGPT/GPT and Gmail must use the Chrome profile signed in as `john.wu0120@gmail.com`. Do not use or switch into `tm.studio`; if the required profile is not visible, hold browser work and report the blocker.
 
 Run before GCP deploy:
 
@@ -76,13 +95,13 @@ npm run blog:repair-production -- --base-url https://altoslab-ai.cc --apply
 - `CLOUDFLARE_KV_ENABLED=0`
 - `CLOUDFLARE_R2_ENABLED=0`
 
-The script uses the production GCP account `altoslab2@gmail.com` by default without printing tokens or secret values, updates Cloud Run only when that account has permission, then polls `/api/health` and `/api/blog`. Use `--gcloud-account <account>` only for an explicit one-off operator override, and `--try-all-gcloud-accounts` only during a supervised credentials audit. Reports are written under `data/blog-repair/production-cms-gcs-repair-*.json`.
+The script uses the production GCP account `altoslab768@gmail.com` by default without printing tokens or secret values, updates Cloud Run only when that account has permission, then polls `/api/health` and `/api/blog`. Use `--gcloud-account <account>` only for an explicit one-off operator override, and `--try-all-gcloud-accounts` only during a supervised credentials audit. Reports are written under `data/blog-repair/production-cms-gcs-repair-*.json`.
 
 If repair is blocked by expired credentials or missing Cloud Run permission, run:
 
 ```bash
-gcloud auth login altoslab2@gmail.com --force --brief
-gcloud auth application-default login altoslab2@gmail.com
+gcloud auth login altoslab768@gmail.com --force --brief
+gcloud auth application-default login altoslab768@gmail.com
 npm run blog:repair-production -- --base-url https://altoslab-ai.cc --apply
 npm run verify:gcp -- --base-url https://altoslab-ai.cc
 ```
@@ -92,6 +111,8 @@ Set `ALTOS_BLOG_PRODUCTION_AUTO_REPAIR=0` only when intentionally disabling auto
 ## Domain Cutover
 
 目前 `altoslab-ai.cc` 是 canonical production domain。GCP migration must be preview-first: deploy and verify the Cloud Run URL with `npm run verify:gcp -- --base-url <cloud-run-url>`, then map/cut over the custom domain only after `/`, `/blog`, `/admin`, `/api/health`, feed, sitemap, `llms.txt`, GA/GTM and image URLs pass.
+
+Cloudflare rescue migration also remains DNS-first: `wrangler deploy --config wrangler.jsonc --keep-vars` can update the Worker and zone-route definitions, but it cannot override Google authoritative nameservers. If `curl -I https://altoslab-ai.cc/api/health` still shows `server: Google Frontend`, the custom domain has not cut over; keep reporting the Worker URL as ready and the production custom domain as DNS-blocked.
 
 Before cutover, keep `~/.altoslab-blog-worker.env` pointing to the current live URL. After GCP cutover, update `ALTOS_BLOG_BASE_URL=https://altoslab-ai.cc` only after `/api/health` reports `cmsStorage.provider = gcs` and the release verifier passes against the new service.
 
@@ -194,9 +215,16 @@ npm run typecheck
 npm run test:blog
 npm run build
 npm run build:cloudflare
+npm run cloudflare:seed-staging-kv
 ```
 
-After Vercel deploys:
+After Cloudflare staging deploys:
+
+```bash
+npm run verify:cloudflare -- --base-url https://altoslab-official-website-staging.altoslab-ai.workers.dev
+```
+
+After Vercel or Cloud Run deploys:
 
 ```bash
 curl -I https://altoslab-offcial-website.vercel.app
@@ -215,6 +243,7 @@ Expected results:
 - `/` returns 200 and preserves the original UI from `index.html`.
 - `/admin` redirects to `/admin/login` when not signed in.
 - `/api/health` reports `adminConfigured: true`, `integrations.externalBlogIngestConfigured: true`, `integrations.legacyDeepSeekCronDisabled: true`, `integrations.imageGcsStorageConfigured: true`, and `cmsStorage.provider` as `gcs` on GCP production.
+- Cloudflare staging/production smoke expects `/api/health` to report `cmsStorage.provider = cloudflare-kv`, `adminConfigured: true`, `integrations.externalBlogIngestConfigured: true`, `integrations.legacyDeepSeekCronDisabled: true`, `integrations.imageCloudflareKvConfigured: true`, `GTM-WJ96VR7V`, `G-5VSLFNVD28`, all nine blog languages, at least five market-scan windows, and non-empty public `/api/blog`.
 - `/blog` returns 200 and remains indexable.
 - `/feed.xml` returns RSS XML for published blog posts.
 - `/llms.txt` returns a concise LLM-readable site map.

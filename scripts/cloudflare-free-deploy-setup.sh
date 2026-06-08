@@ -4,6 +4,7 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 ENV_FILE="${ALTOS_CLOUDFLARE_ENV_FILE:-$HOME/.altoslab-blog-worker.env}"
 KV_NAMESPACE_NAME="${ALTOS_CLOUDFLARE_KV_NAMESPACE:-ALTOS_BLOG_KV}"
+WRANGLER_CONFIG="${ALTOS_CLOUDFLARE_WRANGLER_CONFIG:-wrangler.jsonc}"
 
 cd "$ROOT_DIR"
 
@@ -15,10 +16,10 @@ if [[ -f "$ENV_FILE" ]]; then
 fi
 
 echo "Checking Cloudflare account..."
-npx wrangler whoami
+npx wrangler whoami --config "$WRANGLER_CONFIG"
 
 echo "Checking Workers KV namespace: $KV_NAMESPACE_NAME"
-if ! npx wrangler kv namespace list | grep -q "\"title\": \"$KV_NAMESPACE_NAME\""; then
+if ! npx wrangler kv namespace list --config "$WRANGLER_CONFIG" | grep -q "\"title\": \"$KV_NAMESPACE_NAME\""; then
   echo "KV namespace $KV_NAMESPACE_NAME was not found. Create it with: npx wrangler kv namespace create $KV_NAMESPACE_NAME"
   exit 1
 fi
@@ -33,7 +34,7 @@ put_secret() {
   fi
 
   echo "Syncing secret: $name"
-  printf "%s" "$value" | npx wrangler secret put "$name"
+  printf "%s" "$value" | npx wrangler secret put "$name" --config "$WRANGLER_CONFIG"
 }
 
 put_secret BLOG_INGEST_HMAC_SECRET
@@ -44,4 +45,4 @@ put_secret CRON_SECRET
 put_secret NEXT_PUBLIC_GTM_ID
 put_secret NEXT_PUBLIC_GA_MEASUREMENT_ID
 
-echo "Cloudflare free-first setup finished. Deploy with: npm run deploy:cloudflare"
+echo "Cloudflare free-first setup finished for config: $WRANGLER_CONFIG"

@@ -24,6 +24,7 @@ Browser work must stay inside the dedicated tabs:
 - `https://chatgpt.com/`
 
 Do not claim, inspect, or operate unrelated user tabs.
+All task-owned Gemini, ChatGPT and Gmail browser work must use the Chrome profile signed in as `john.wu0120@gmail.com`. Do not switch into or continue from `tm.studio`. If the visible Chrome profile is not `john.wu0120@gmail.com`, stop and report the blocker before entering prompts, generating images, or sending mail.
 
 Hard tab rule:
 
@@ -32,6 +33,7 @@ Hard tab rule:
 - Do not start new conversations.
 - Do not reload or navigate away from those existing tabs unless the main brain explicitly approves a recovery step.
 - Do not change the user's selected model or account.
+- Record `profileEmail: "john.wu0120@gmail.com"` in `chromeEvidence.gemini` and `chromeEvidence.chatgpt` for any used browser workbench; release gates hold candidates that omit it or show another profile.
 - Close task-scoped Gemini/ChatGPT tabs after evidence capture so Chrome memory does not accumulate.
 - If either fixed tab is blocked after a recovery attempt, stop and report the exact blocker.
 

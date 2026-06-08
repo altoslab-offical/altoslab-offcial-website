@@ -14,6 +14,7 @@ const SLOT_HOURS = { morning: "09:00", afternoon: "16:00" };
 const DEFAULT_BASE_URL = "https://altoslab-ai.cc";
 const LANGUAGE_LABEL = LANGUAGES.join(", ");
 const COLUMN_DAILY_LIMIT = Number(process.env.ALTOS_BLOG_COLUMN_DAILY_LIMIT || "1");
+const REQUIRED_CHROME_PROFILE_EMAIL = "john.wu0120@gmail.com";
 
 function arg(name, fallback = "") {
   const index = process.argv.indexOf(`--${name}`);
@@ -442,6 +443,18 @@ function generatedContentImageIssues(image, label) {
   return issues;
 }
 
+function chromeProfileEmail(evidence) {
+  return String(evidence?.profileEmail || evidence?.chromeProfileEmail || evidence?.accountEmail || evidence?.email || "")
+    .trim()
+    .toLowerCase();
+}
+
+function requireChromeProfileEvidence(issues, evidence, label) {
+  if (chromeProfileEmail(evidence) !== REQUIRED_CHROME_PROFILE_EMAIL) {
+    issues.push(`chromeEvidence.${label}.profileEmail must be ${REQUIRED_CHROME_PROFILE_EMAIL}`);
+  }
+}
+
 function localPreflight(payload) {
   const issues = [];
   const posts = Array.isArray(payload.posts) ? payload.posts : [];
@@ -457,9 +470,11 @@ function localPreflight(payload) {
   if (!isMarketOnlySet || !isSourceTranslationLane) {
     if (geminiEvidence.usedExistingTab !== true) issues.push("chromeEvidence.gemini.usedExistingTab must be true");
     if (geminiEvidence.changedModel === true) issues.push("chromeEvidence.gemini.changedModel must not be true");
+    requireChromeProfileEvidence(issues, geminiEvidence, "gemini");
   }
   if (requiresGptCover && chatgptEvidence.usedExistingTab !== true) issues.push("chromeEvidence.chatgpt.usedExistingTab must be true for generated covers");
   if (chatgptEvidence.changedModel === true) issues.push("chromeEvidence.chatgpt.changedModel must not be true");
+  if (requiresGptCover) requireChromeProfileEvidence(issues, chatgptEvidence, "chatgpt");
   if (humanDesignQa.approved !== true) issues.push("humanDesignQa.approved must be true before validate-only can mark a candidate ready");
 
   const languages = posts.map((post) => post.language);

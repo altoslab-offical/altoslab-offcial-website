@@ -66,7 +66,7 @@ legacy language groups.
 
 Daily status email should be sent:
 
-- From: `Altoslab447@gmail.com`
+- From: `altoslab768@gmail.com`
 - To: `Altoslab.offical@gmail.com`
 
-The production send path is Gmail web UI in Chrome, not the Gmail connector. The connector may be used only for read/search diagnostics when explicitly needed. Before pressing send, the operator must verify the active Gmail account is exactly `Altoslab447@gmail.com`; if the account cannot be verified, hold the send and report the mismatch instead of sending from a personal or wrong account.
+The production send path is Gmail web UI in Chrome, not the Gmail connector. The connector may be used only for read/search diagnostics when explicitly needed. Before pressing send, the operator must verify the active Gmail account is exactly `altoslab768@gmail.com`; if the account cannot be verified, hold the send and report the mismatch instead of sending from a personal or wrong account.

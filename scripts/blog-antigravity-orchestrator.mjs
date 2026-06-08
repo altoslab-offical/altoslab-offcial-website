@@ -155,6 +155,7 @@ Required JSON shape:
       "usedExistingTab": ${marketLane ? "false" : "true"},
       "continuedExistingConversation": ${marketLane ? "false" : "true"},
       "changedModel": false,
+      "profileEmail": "${marketLane ? "" : "john.wu0120@gmail.com"}",
       "title": "",
       "url": "https://gemini.google.com/app"
     },
@@ -162,6 +163,7 @@ Required JSON shape:
       "usedExistingTab": ${marketLane ? "false" : "true"},
       "continuedExistingConversation": ${marketLane ? "false" : "true"},
       "changedModel": false,
+      "profileEmail": "${marketLane ? "" : "john.wu0120@gmail.com"}",
       "title": "",
       "url": "https://chatgpt.com/"
     }

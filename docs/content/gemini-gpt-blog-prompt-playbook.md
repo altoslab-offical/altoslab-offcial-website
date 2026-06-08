@@ -30,6 +30,7 @@
 
 ### 3.2 實際瀏覽器操作硬規則（新增）
 - 實際操作只能鎖定既有的 Gemini / ChatGPT 分頁；不得新開分頁。  
+- Chrome profile 必須是 `john.wu0120@gmail.com`；不得使用或切換到 `tm.studio`。  
 - 不得切換到其他使用者分頁，也不得改變其他人會見到的畫面。  
 - 不得重載頁面，不得更改模型設定（model/model版本）或清除對話。  
 - 若「固定分頁不存在」或狀態不明，**回報 blocker**，停止執行後續 prompt chain。
@@ -54,6 +55,7 @@
 ### 4.2 User-selected model policy
 - Model 由使用者在分頁內預先設定；prompt 不要求切換 model、不要求改帳號、
   不要求重載頁面。
+- Browser evidence 必須記錄 `profileEmail: "john.wu0120@gmail.com"`；若不是這個 profile，就停在 blocker，不進 prompt chain。
 - Persona 由第一則任務 prompt 承載，不靠 UI model selection 來解決。
 - 若模型看不懂，先縮短 prompt、拆成下一步或要求重述 schema；不得用「切模型」
   當第一個修復手段。

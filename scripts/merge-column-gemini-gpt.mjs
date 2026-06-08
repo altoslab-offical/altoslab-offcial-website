@@ -408,11 +408,13 @@ async function main() {
         gemini: {
           usedExistingTab: true,
           changedModel: false,
+          profileEmail: "john.wu0120@gmail.com",
           evidence: "column batch parsed files"
         },
         chatgpt: {
           usedExistingTab: true,
           changedModel: false,
+          profileEmail: "john.wu0120@gmail.com",
           evidence: "column visuals parsed file"
         }
       },

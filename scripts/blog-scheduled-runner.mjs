@@ -8,6 +8,7 @@ import { subagentModelPolicyText } from "./blog-subagent-model-policy.mjs";
 
 const SLOT_HOURS = { morning: "09:00", afternoon: "16:00" };
 const LANGUAGES = ["zh-Hant", "en", "ja", "ko", "id", "vi", "th", "ms", "fil"];
+const REQUIRED_CHROME_PROFILE_EMAIL = "john.wu0120@gmail.com";
 const LANGUAGE_LABEL = LANGUAGES.join(", ");
 const DEFAULT_BASE_URL = "https://altoslab-ai.cc";
 const COLUMN_SLOT_SETTING = (process.env.ALTOS_BLOG_COLUMN_SLOTS || "morning")
@@ -1312,6 +1313,12 @@ async function runBackfillPlanner({ date }) {
   return { ok: true, phase: "backfill", ...payload };
 }
 
+function chromeProfileEmail(evidence) {
+  return String(evidence?.profileEmail || evidence?.chromeProfileEmail || evidence?.accountEmail || evidence?.email || "")
+    .trim()
+    .toLowerCase();
+}
+
 function releaseGateIssues(manifest, { date, slot, articleSet }) {
   const issues = [];
   const posts = Array.isArray(articleSet?.posts) ? articleSet.posts : [];
@@ -1339,10 +1346,16 @@ function releaseGateIssues(manifest, { date, slot, articleSet }) {
     issues.push("Gemini existing-tab evidence is missing");
   }
   if (!isSourceTranslationMarketOnly && manifest.chromeEvidence?.gemini?.changedModel === true) issues.push("Gemini model was changed");
+  if (!isSourceTranslationMarketOnly && chromeProfileEmail(manifest.chromeEvidence?.gemini) !== REQUIRED_CHROME_PROFILE_EMAIL) {
+    issues.push(`Gemini Chrome profile must be ${REQUIRED_CHROME_PROFILE_EMAIL}`);
+  }
   if (requiresGptCover && manifest.chromeEvidence?.chatgpt?.usedExistingTab !== true) {
     issues.push("ChatGPT/GPT existing-tab evidence is missing for generated covers");
   }
   if (manifest.chromeEvidence?.chatgpt?.changedModel === true) issues.push("ChatGPT/GPT model was changed");
+  if (requiresGptCover && chromeProfileEmail(manifest.chromeEvidence?.chatgpt) !== REQUIRED_CHROME_PROFILE_EMAIL) {
+    issues.push(`ChatGPT/GPT Chrome profile must be ${REQUIRED_CHROME_PROFILE_EMAIL}`);
+  }
   if (manifest.validateOnly?.wouldPublish !== true) issues.push("validateOnly.wouldPublish is not true");
   if (manifest.validateOnly?.qualityApproved !== true) issues.push("quality gate is not approved");
   if (manifest.validateOnly?.imageApproved !== true) issues.push("image gate is not approved");

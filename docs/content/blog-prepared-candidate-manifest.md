@@ -24,6 +24,7 @@ data/blog-worker-runs/<date>-<slot>-<topic>/prepared-candidate.json
       "usedExistingTab": true,
       "continuedExistingConversation": true,
       "changedModel": false,
+      "profileEmail": "john.wu0120@gmail.com",
       "title": "",
       "url": ""
     },
@@ -31,6 +32,7 @@ data/blog-worker-runs/<date>-<slot>-<topic>/prepared-candidate.json
       "usedExistingTab": true,
       "continuedExistingConversation": true,
       "changedModel": false,
+      "profileEmail": "john.wu0120@gmail.com",
       "title": "",
       "url": ""
     }
@@ -61,6 +63,7 @@ Publish only when all are true:
 - `expectedReleaseAt` is the current release window.
 - For columns/features, `chromeEvidence.gemini.usedExistingTab` is true because Gemini produced the approved source article.
 - For columns/features with generated covers or content images, `chromeEvidence.chatgpt.usedExistingTab` is true.
+- For any browser workbench used in the candidate, `profileEmail` is `john.wu0120@gmail.com`; candidates from `tm.studio` or an unknown Chrome profile are held.
 - For market-news sets where every post is `breaking` and `generation.provider` is `source-translation`, Gemini and ChatGPT evidence are not required; the hard gate is source fidelity, all-language localization, and credited source/official image metadata.
 - `changedModel` is false for any browser workbench used in that lane.
 - `validateOnly.wouldPublish` is true.
