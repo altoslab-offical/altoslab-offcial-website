@@ -59,6 +59,36 @@ npm run verify:gcp -- --base-url <cloud-run-or-production-url>
 
 `scripts/gcp-deploy-cloudrun.sh` reads `~/.altoslab-blog-worker.env` when present, creates/updates the Cloud Run service, GCS bucket, Artifact Registry repository, service account and Secret Manager entries, seeds `data/cms.json` into GCS only when the remote CMS object does not exist, syncs `data/generated-blog-media`, then runs `scripts/gcp-production-smoke.mjs` against the Cloud Run URL. It does not print secret values.
 
+## Production CMS/GCS Drift Repair
+
+The scheduled blog runner fails closed when production `/api/health` reports the wrong CMS/GCS runtime contract or when `/api/blog` returns an empty public inventory. Before holding the lane, it now runs a bounded repair step:
+
+```bash
+npm run blog:repair-production -- --base-url https://altoslab-ai.cc --apply
+```
+
+`scripts/blog-production-repair.mjs` only updates Cloud Run runtime environment variables for the existing production service. It never generates, backfills, rewrites, or publishes articles. The repair scope is intentionally narrow:
+
+- `GCS_STORAGE_ENABLED=1`
+- `GCS_BUCKET=altoslab-official-cms-934551798702`
+- `GCS_CMS_PATH=cms/altoslab-cms-v1.json`
+- `GCS_MEDIA_PREFIX=blog-generated`
+- `CLOUDFLARE_KV_ENABLED=0`
+- `CLOUDFLARE_R2_ENABLED=0`
+
+The script uses the production GCP account `altoslab2@gmail.com` by default without printing tokens or secret values, updates Cloud Run only when that account has permission, then polls `/api/health` and `/api/blog`. Use `--gcloud-account <account>` only for an explicit one-off operator override, and `--try-all-gcloud-accounts` only during a supervised credentials audit. Reports are written under `data/blog-repair/production-cms-gcs-repair-*.json`.
+
+If repair is blocked by expired credentials or missing Cloud Run permission, run:
+
+```bash
+gcloud auth login altoslab2@gmail.com --force --brief
+gcloud auth application-default login altoslab2@gmail.com
+npm run blog:repair-production -- --base-url https://altoslab-ai.cc --apply
+npm run verify:gcp -- --base-url https://altoslab-ai.cc
+```
+
+Set `ALTOS_BLOG_PRODUCTION_AUTO_REPAIR=0` only when intentionally disabling automatic Cloud Run env repair during maintenance.
+
 ## Domain Cutover
 
 目前 `altoslab-ai.cc` 是 canonical production domain。GCP migration must be preview-first: deploy and verify the Cloud Run URL with `npm run verify:gcp -- --base-url <cloud-run-url>`, then map/cut over the custom domain only after `/`, `/blog`, `/admin`, `/api/health`, feed, sitemap, `llms.txt`, GA/GTM and image URLs pass.

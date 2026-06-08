@@ -40,6 +40,12 @@ function pushIssue(errors, message, context = {}) {
   errors.push({ message, ...context });
 }
 
+async function printJson(payload) {
+  await new Promise((resolve) => {
+    process.stdout.write(`${JSON.stringify(payload, null, 2)}\n`, resolve);
+  });
+}
+
 async function fetchWithTimeout(url, options = {}) {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), options.timeoutMs || 18_000);
@@ -216,7 +222,7 @@ async function main() {
     surfaces
   };
 
-  console.log(JSON.stringify(result, null, 2));
+  await printJson(result);
   if (!result.ok) process.exit(1);
 }
 

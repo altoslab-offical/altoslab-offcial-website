@@ -36,6 +36,7 @@ const proxy = readFirst(["middleware.ts", "proxy.ts"]);
 const localWorker = read("scripts/blog-local-worker.mjs");
 const orchestrator = read("scripts/blog-antigravity-orchestrator.mjs");
 const scheduledRunner = read("scripts/blog-scheduled-runner.mjs");
+const productionRepair = read("scripts/blog-production-repair.mjs");
 const backfillPlanner = read("scripts/blog-backfill-planner.mjs");
 const subagentModelPolicy = read("scripts/blog-subagent-model-policy.mjs");
 const marketSourceScanner = read("scripts/blog-market-source-scanner.mjs");
@@ -209,6 +210,9 @@ assert(scheduledRunner.includes("missing prepared candidate"), "scheduled releas
 assert(scheduledRunner.includes("articleSetPath file is missing"), "scheduled release checks that the ready article set still exists");
 assert(scheduledRunner.includes("scripts/blog-sop-doctor.mjs"), "scheduled prep/release runs the SOP doctor before continuing");
 assert(scheduledRunner.includes("compactDoctorResult") && scheduledRunner.includes("scheduled-runner.log"), "scheduled runner records compact doctor evidence in output and logs");
+assert(scheduledRunner.includes("scripts/blog-production-repair.mjs"), "scheduled runner attempts bounded production CMS/GCS repair before holding on doctor failure");
+assert(scheduledRunner.includes("ALTOS_BLOG_PRODUCTION_AUTO_REPAIR"), "scheduled runner can disable production repair explicitly during maintenance");
+assert(scheduledRunner.includes("production-repair"), "scheduled runner records production repair evidence in the schedule log");
 assert(scheduledRunner.includes("scripts/verify-blog-release.mjs"), "scheduled release runs post-release verification before reporting success");
 assert(scheduledRunner.includes("reuse-validated-manifest"), "scheduled release reuses the already approved signed manifest instead of running duplicate QA");
 assert(scheduledRunner.includes("retryableHeldManifest"), "scheduled release can retry a transient release failure without bypassing gates");
@@ -240,6 +244,14 @@ assert(sopDoctor.includes("[10, 30]") && sopDoctor.includes("[12, 30]") && sopDo
 assert(sopDoctor.includes("[15, 10]") && sopDoctor.includes("[16, 0]") && sopDoctor.includes("[16, 4]"), "SOP doctor enforces late-day prep/release launch windows");
 assert(sopDoctor.includes("[18, 30]") && sopDoctor.includes("[20, 30]"), "SOP doctor enforces late market-scan launch windows");
 assert(sopDoctor.includes("production cmsStorage.provider must be cloudflare-kv or gcs"), "SOP doctor verifies a durable production CMS store");
+assert(productionRepair.includes("altoslab-official-cms-934551798702"), "production repair targets the canonical GCS CMS bucket");
+assert(productionRepair.includes("gcloud") && productionRepair.includes("run") && productionRepair.includes("services") && productionRepair.includes("update"), "production repair can update the existing Cloud Run service env");
+assert(productionRepair.includes("--update-env-vars"), "production repair updates only runtime env vars instead of rebuilding or publishing content");
+assert(productionRepair.includes("CLOUDSDK_CORE_ACCOUNT"), "production repair tests available gcloud accounts without changing global account state");
+assert(productionRepair.includes("DEFAULT_GCLOUD_ACCOUNT = \"altoslab2@gmail.com\""), "production repair defaults to the official production GCP account");
+assert(!productionRepair.includes("process.env.CLOUDSDK_CORE_ACCOUNT || DEFAULT_GCLOUD_ACCOUNT"), "production repair is not redirected by ambient CLOUDSDK_CORE_ACCOUNT");
+assert(productionRepair.includes("It never generates") && productionRepair.includes("publishes blog content"), "production repair documents its no-content-generation boundary");
+assert(productionRepair.includes("data/blog-repair"), "production repair writes a durable repair report");
 assert(sopDoctor.includes("release verification requires ALTOS_ADMIN_PASSWORD"), "SOP doctor requires admin readback credentials for release");
 assert(sopDoctor.includes("\"ready\", \"released\""), "SOP doctor accepts already released candidates for post-release audit");
 assert(sopDoctor.includes("releaseVerification.ok"), "SOP doctor verifies released candidates have successful post-release verification");
@@ -350,6 +362,8 @@ assert(envExample.includes("BLOG_IMAGE_ALLOW_NON_BLOB"), "env example documents 
 assert(envExample.includes("BLOG_MEDIA_ALLOW_LOCAL_STORAGE"), "env example documents local-only media upload mode");
 assert(envExample.includes("BLOG_ALLOW_LOCAL_FALLBACK_COVERS=0"), "env example keeps local fallback covers disabled");
 assert(envExample.includes("GCS_STORAGE_ENABLED=1"), "env example documents GCP/GCS storage configuration");
+assert(envExample.includes("GCS_BUCKET=altoslab-official-cms-934551798702"), "env example documents the canonical production GCS bucket");
+assert(envExample.includes("ALTOS_BLOG_PRODUCTION_AUTO_REPAIR=1"), "env example documents scheduled production repair default");
 assert(envExample.includes("GA4_PROPERTY_ID="), "env example documents GA4 Data API property configuration");
 assert(envExample.includes("SEARCH_CONSOLE_SITE_URL="), "env example documents Search Console reporting configuration");
 assert(envExample.includes("ALTOS_REPORT_FROM_EMAIL=Altoslab447@gmail.com"), "env example documents the official daily report sender");
@@ -366,6 +380,8 @@ assert(seoGeoReport.includes("Altoslab447@gmail.com") && seoGeoReport.includes("
 assert(operations.includes("Gmail web UI") && operations.includes("hold the send instead of using a connector"), "operations require SEO/GEO daily email to be sent through Gmail web, not a connector");
 const gcpSmoke = read("scripts/gcp-production-smoke.mjs");
 assert(gcpSmoke.includes("publishedPosts === 0"), "GCP production smoke warns when the public blog inventory is empty");
+assert(gcpSmoke.includes("function printJson") && gcpSmoke.includes("process.stdout.write"), "GCP production smoke flushes JSON before exiting on failures");
+assert(operations.includes("Production CMS/GCS Drift Repair"), "operations runbook documents bounded Cloud Run CMS/GCS repair");
 
 assert(seedPosts.length === 0, "blog seed archive stays empty so old template-written articles cannot rehydrate local or fallback CMS data");
 

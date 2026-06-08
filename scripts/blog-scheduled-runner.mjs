@@ -38,6 +38,7 @@ const MARKET_SCAN_GRACE_MINUTES = Number(process.env.ALTOS_BLOG_MARKET_SCAN_GRAC
 const MARKET_AUTO_REPAIR_ATTEMPTS = Math.max(0, Number(process.env.ALTOS_BLOG_MARKET_AUTO_REPAIR_ATTEMPTS || "2"));
 const RUNNER_LOCK_STALE_MINUTES = Number(process.env.ALTOS_BLOG_RUNNER_LOCK_STALE_MINUTES || "30");
 const DEFAULT_CHILD_TIMEOUT_MS = Number.parseInt(process.env.ALTOS_BLOG_CHILD_TIMEOUT_MS || "120000", 10);
+const PRODUCTION_REPAIR_TIMEOUT_MS = Number.parseInt(process.env.ALTOS_BLOG_PRODUCTION_REPAIR_TIMEOUT_MS || "180000", 10);
 const CHROME_GUARD_TOTAL_RSS_MB = Number(process.env.ALTOS_BLOG_CHROME_TOTAL_RSS_MB || "5200");
 const CHROME_GUARD_RENDERER_RSS_MB = Number(process.env.ALTOS_BLOG_CHROME_RENDERER_RSS_MB || "1200");
 const CHROME_MEMORY_DOCTOR = path.join(
@@ -278,6 +279,12 @@ async function appendLog(filePath, message) {
   await fs.appendFile(filePath, `${new Date().toISOString()} ${message}\n`, "utf8");
 }
 
+async function printJson(payload) {
+  await new Promise((resolve) => {
+    process.stdout.write(`${JSON.stringify(payload, null, 2)}\n`, resolve);
+  });
+}
+
 async function acquireRunLock({ mode, date, slot }) {
   if (hasFlag("no-lock")) return { ok: true, skipped: true, release: async () => {} };
   const filePath = scheduleLockPath();
@@ -394,6 +401,59 @@ function compactDoctorResult(doctor) {
       };
 }
 
+function compactProductionRepairResult(repair) {
+  const parsed = repair?.json || parseJsonObject(repair?.stdout);
+  return parsed
+    ? {
+        ok: parsed.ok === true,
+        phase: parsed.phase || "blog-production-repair",
+        apply: parsed.apply === true,
+        action: parsed.action
+          ? {
+              needed: parsed.action.needed === true,
+              applied: parsed.action.applied === true,
+              reason: parsed.action.reason || ""
+            }
+          : undefined,
+        target: parsed.target
+          ? {
+              projectId: parsed.target.projectId,
+              region: parsed.target.region,
+              service: parsed.target.service,
+              expectedBucket: parsed.target.expectedBucket
+            }
+          : undefined,
+        before: parsed.before
+          ? {
+              cmsProvider: parsed.before.cmsProvider,
+              bucket: parsed.before.bucket,
+              publicPostCount: parsed.before.publicPostCount,
+              serviceBucket: parsed.before.serviceEnv?.GCS_BUCKET || ""
+            }
+          : undefined,
+        after: parsed.after?.latest
+          ? {
+              provider: parsed.after.latest.provider,
+              bucket: parsed.after.latest.bucket,
+              postCount: parsed.after.latest.postCount
+            }
+          : undefined,
+        gcloud: parsed.gcloud
+          ? {
+              selectedAccount: parsed.gcloud.selectedAccount || "",
+              attemptCount: parsed.gcloud.attempts?.length || 0
+            }
+          : undefined,
+        errorCount: parsed.errors?.length || 0,
+        warningCount: parsed.warnings?.length || 0,
+        reportPath: parsed.reportPath || ""
+      }
+    : {
+        ok: repair?.ok === true,
+        code: repair?.code ?? null
+      };
+}
+
 async function runDoctor({ mode, date, slot }) {
   if (hasFlag("skip-doctor")) return { ok: true, skipped: true };
   const result = await runCommand(process.execPath, [
@@ -422,6 +482,59 @@ async function runDoctor({ mode, date, slot }) {
     stderr: result.stderr,
     json: parseJsonObject(result.stdout)
   };
+}
+
+async function runProductionRepair({ date, slot, mode }) {
+  if (hasFlag("skip-production-repair") || process.env.ALTOS_BLOG_PRODUCTION_AUTO_REPAIR === "0") {
+    return { ok: false, skipped: true, reason: "production repair disabled" };
+  }
+  const args = [
+    "scripts/blog-production-repair.mjs",
+    "--date",
+    date,
+    "--slot",
+    slot,
+    "--mode",
+    mode,
+    "--base-url",
+    normalizeBaseUrl(process.env.ALTOS_BLOG_BASE_URL || DEFAULT_BASE_URL)
+  ];
+  if (!hasFlag("production-repair-dry-run") && process.env.ALTOS_BLOG_PRODUCTION_REPAIR_DRY_RUN !== "true") {
+    args.push("--apply");
+  }
+  const result = await runCommand(process.execPath, args, {
+    cwd: process.cwd(),
+    timeoutMs: PRODUCTION_REPAIR_TIMEOUT_MS
+  });
+  return {
+    ok: result.code === 0,
+    skipped: false,
+    code: result.code,
+    stdout: result.stdout,
+    stderr: result.stderr,
+    json: parseJsonObject(result.stdout)
+  };
+}
+
+async function runDoctorWithProductionRepair({ mode, date, slot, phase }) {
+  let doctor = await runDoctor({ mode, date, slot });
+  await appendLog(globalScheduleLogPath(), JSON.stringify({ phase, date, slot, doctor: compactDoctorResult(doctor) }));
+  if (doctor.ok || hasFlag("skip-doctor")) return { doctor, repair: null };
+
+  const repair = await runProductionRepair({ mode, date, slot });
+  await appendLog(
+    globalScheduleLogPath(),
+    JSON.stringify({ phase: `${phase}-production-repair`, date, slot, repair: compactProductionRepairResult(repair) })
+  );
+
+  if (!repair.ok) return { doctor, repair };
+
+  doctor = await runDoctor({ mode, date, slot });
+  await appendLog(
+    globalScheduleLogPath(),
+    JSON.stringify({ phase: `${phase}-after-production-repair`, date, slot, doctor: compactDoctorResult(doctor) })
+  );
+  return { doctor, repair };
 }
 
 async function checkChromeMemoryGuard({ date, slot }) {
@@ -548,10 +661,9 @@ async function runReleaseVerification(manifestPath, { timeoutMs = DEFAULT_CHILD_
 }
 
 async function createPrep({ date, slot }) {
-  const doctor = await runDoctor({ mode: "prep", date, slot });
-  await appendLog(globalScheduleLogPath(), JSON.stringify({ phase: "prep-doctor", date, slot, doctor: compactDoctorResult(doctor) }));
+  const { doctor, repair } = await runDoctorWithProductionRepair({ mode: "prep", date, slot, phase: "prep-doctor" });
   if (!doctor.ok) {
-    return { ok: false, phase: "prep-doctor", stdout: doctor.stdout, stderr: doctor.stderr };
+    return { ok: false, phase: "prep-doctor", stdout: doctor.stdout, stderr: doctor.stderr, repair: compactProductionRepairResult(repair) };
   }
 
   const indexPath = candidateIndexPath(date, slot);
@@ -677,10 +789,9 @@ ${await fs.readFile(orchestratorPromptPath, "utf8").catch(() => "")}
 
 async function createMarketScan({ date }) {
   const slot = Number(taiwanParts(currentNow()).hour) < 12 ? "morning" : "afternoon";
-  const doctor = await runDoctor({ mode: "prep", date, slot });
-  await appendLog(globalScheduleLogPath(), JSON.stringify({ phase: "market-scan-doctor", date, slot, doctor: compactDoctorResult(doctor) }));
+  const { doctor, repair } = await runDoctorWithProductionRepair({ mode: "prep", date, slot, phase: "market-scan-doctor" });
   if (!doctor.ok) {
-    return { ok: false, phase: "market-scan-doctor", stdout: doctor.stdout, stderr: doctor.stderr };
+    return { ok: false, phase: "market-scan-doctor", stdout: doctor.stdout, stderr: doctor.stderr, repair: compactProductionRepairResult(repair) };
   }
 
   const inventory = await marketInventoryStatus().catch((error) => ({ checked: true, ok: false, error: error instanceof Error ? error.message : String(error) }));
@@ -1319,10 +1430,9 @@ async function release({ date, slot }) {
     return { ok: true, skipped: true, phase: "release", reason: "release gate held", issues, manifestPath };
   }
 
-  const doctor = await runDoctor({ mode: "release", date, slot });
-  await appendLog(globalScheduleLogPath(), JSON.stringify({ phase: "release-doctor", date, slot, doctor: compactDoctorResult(doctor) }));
+  const { doctor, repair } = await runDoctorWithProductionRepair({ mode: "release", date, slot, phase: "release-doctor" });
   if (!doctor.ok) {
-    return { ok: false, skipped: false, phase: "release-doctor", stdout: doctor.stdout, stderr: doctor.stderr };
+    return { ok: false, skipped: false, phase: "release-doctor", stdout: doctor.stdout, stderr: doctor.stderr, repair: compactProductionRepairResult(repair) };
   }
 
   const result = await runCommand(process.execPath, [
@@ -1402,7 +1512,7 @@ async function main() {
     if (scheduled.mode === "idle") {
       const result = { ok: true, skipped: true, phase: "scheduled", reason: scheduled.reason, checkedAtTaipei: scheduled.checkedAtTaipei };
       await appendLog(globalScheduleLogPath(), JSON.stringify(result));
-      console.log(JSON.stringify(result, null, 2));
+      await printJson(result);
       return;
     }
     mode = scheduled.mode;
@@ -1428,7 +1538,7 @@ async function main() {
       }
     };
     await appendLog(globalScheduleLogPath(), JSON.stringify(result));
-    console.log(JSON.stringify(result, null, 2));
+    await printJson(result);
     return;
   }
 
@@ -1449,7 +1559,7 @@ async function main() {
   } finally {
     await lock.release();
   }
-  console.log(JSON.stringify(result, null, 2));
+  await printJson(result);
   if (result.ok === false) process.exit(1);
 }
 
