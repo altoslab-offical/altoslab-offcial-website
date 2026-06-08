@@ -80,6 +80,10 @@ The chosen pattern must shape section order and headings.
 3. `outline`: 4-6 H2s, each with a job, evidence, and reader payoff.
 4. `source_draft`: write one approved source-of-truth article first, usually `zh-Hant`.
 5. `anti_slop_rewrite`: remove generic phrasing, sharpen judgment, preserve facts.
+   Cut announcement openings, binary "not X but Y" pivots, vague high-stakes
+   claims, narrator-from-a-distance voice, repeated sentence rhythm and
+   unnecessary adverbs. Keep only the specific actor, action, consequence and
+   ALTOS LAB judgment.
 6. `qa_repair`: fix only failed article QA items.
 7. `source_json`: final structured source post for local review.
 
@@ -159,6 +163,9 @@ say approved=false and explain the concrete fix.
 請沿用前文，只做 anti-slop rewrite。
 刪掉空泛 AI 套話，保留來源事實，補上一句 ALTOS LAB judgment、
 一個讀者決策點，以及一個下一步觀察指標。
+同時移除「這就是為什麼」、「不是 X 而是 Y」、「真正的問題是」、
+「影響很深遠」這類宣布式、反轉式或空泛強調；請直接寫出誰做了什麼、
+改變了哪個流程、讀者接下來要觀察哪個具體變數。
 ```
 
 ### Image is generic or weak

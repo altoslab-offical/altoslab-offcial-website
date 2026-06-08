@@ -46,6 +46,8 @@ const launchAgentPlist = read("scripts/com.altoslab.blog-local-worker.plist.exam
 const launchAgentInstaller = read("scripts/install-blog-launch-agent.sh");
 const seoGeoReport = read("scripts/seo-geo-insight-report.mjs");
 const operations = read("docs/OPERATIONS.md");
+const imageStyleGuide = read("docs/content/ai-blog-image-style-guide.md");
+const columnVisualStyleLibrary = read("scripts/blog-column-visual-style-library.mjs");
 const adminShell = read("components/AdminShell.tsx");
 const blogAuthors = read("lib/blog-authors.ts");
 const blogTypes = read("lib/types.ts");
@@ -378,6 +380,11 @@ assert(seoGeoReport.includes("No qualified public blog posts are currently publi
 assert(seoGeoReport.includes("incompleteMarketNewsGroups"), "SEO/GEO report calls out market-news language gaps");
 assert(seoGeoReport.includes("Altoslab447@gmail.com") && seoGeoReport.includes("Altoslab.offical@gmail.com"), "SEO/GEO report documents the official sender and recipient");
 assert(operations.includes("Gmail web UI") && operations.includes("hold the send instead of using a connector"), "operations require SEO/GEO daily email to be sent through Gmail web, not a connector");
+assert(imageStyleGuide.includes("GPT Image 2 / 生成案例庫的採納規則"), "image style guide documents safe use of external GPT Image 2 prompt galleries");
+assert(imageStyleGuide.includes("不照抄完整 prompt") && imageStyleGuide.includes("OpenAI 官方 docs"), "image style guide keeps prompt-gallery inspiration bounded and official-doc grounded");
+assert(columnVisualStyleLibrary.includes("editorial-poster-signal-map"), "column visual style library includes an editorial poster case family");
+assert(columnVisualStyleLibrary.includes("interface-less-product-mockup"), "column visual style library includes a UI-mockup-inspired non-UI family");
+assert(columnVisualStyleLibrary.includes("comparison-diptych-audit"), "column visual style library includes a comparison/audit family");
 const gcpSmoke = read("scripts/gcp-production-smoke.mjs");
 assert(gcpSmoke.includes("publishedPosts === 0"), "GCP production smoke warns when the public blog inventory is empty");
 assert(gcpSmoke.includes("function printJson") && gcpSmoke.includes("process.stdout.write"), "GCP production smoke flushes JSON before exiting on failures");

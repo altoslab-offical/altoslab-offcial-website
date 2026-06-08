@@ -72,6 +72,33 @@ export const COLUMN_VISUAL_STYLES = [
     palette: "matte clay, moss green, ink black, off-white, coral accent",
     avoid:
       "No plastic toy look, no childish mascot, no brand marks, no generic AI brain icon."
+  },
+  {
+    id: "editorial-poster-signal-map",
+    label: "editorial poster signal map",
+    prompt:
+      "A bold editorial poster system for an AI business argument: one oversized symbolic object, layered signal paths, restrained graphic blocks, and magazine-quality negative space. It should feel like a commissioned technology poster, not a prompt demo.",
+    palette: "bone white, black ink, signal green, muted cobalt, one red alert accent",
+    avoid:
+      "No readable headline text inside the image, no copied poster franchise style, no generic neural-network mesh, no fake event branding."
+  },
+  {
+    id: "interface-less-product-mockup",
+    label: "interface-less product mockup",
+    prompt:
+      "A product-mockup-inspired editorial scene without real UI: translucent workflow cards, empty safe panels, versioned decision tokens, and device-like surfaces that imply software behavior while staying abstract.",
+    palette: "graphite, porcelain white, soft lime, cool silver, small violet accent",
+    avoid:
+      "No fake dashboards, no readable labels, no app screenshots, no brand logos, no busy icon grids."
+  },
+  {
+    id: "comparison-diptych-audit",
+    label: "comparison diptych audit",
+    prompt:
+      "A high-end comparison diptych visual: left side shows a messy AI workflow artifact, right side shows the repaired operating system, both built from physical objects and clean editorial lighting.",
+    palette: "left side muted rust and gray, right side clean teal and ivory, shared charcoal linework",
+    avoid:
+      "No before/after text, no obvious checklist graphic, no cheap split-screen template, no stock office scene."
   }
 ];
 

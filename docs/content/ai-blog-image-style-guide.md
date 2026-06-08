@@ -79,6 +79,37 @@
 
 ---
 
+## 3.5) GPT Image 2 / 生成案例庫的採納規則（2026-06）
+
+2026 年公開出現多個 GPT Image 2 prompt/case gallery。這類資源對我們有幫助，但只能當
+**風格研究資料**，不能直接變成 production prompt truth。
+
+採納方式：
+
+- 只抽取「案例類型」與「構圖策略」：poster/illustration、UI mockup、comparison、editorial still life、ad-like product scene。
+- 不照抄完整 prompt。每篇文章仍要先回到文章的核心判斷、讀者決策點、圖片在文中的工作。
+- 不引用第三方案例圖當素材；column/feature 仍由固定 ChatGPT/GPT 圖像工作台生成，market news 仍只用 source/official image。
+- 不把第三方 repo 的模型名稱當官方事實。OpenAI 官方 docs 目前仍以 GPT Image model family（如 `gpt-image-1.5`, `gpt-image-1`, `gpt-image-1-mini`）與 Responses API image_generation tool 為準。
+- 不使用受保護風格：不要要求「辛普森原風格」、「某動畫工作室風格」、「某攝影師/藝術家風格」。只能用 broad descriptor，例如 satirical prime-time cartoon、anime-inspired editorial still、cyberpunk operations desk。
+
+可轉成 ALTOS LAB style rotation 的 case families：
+
+1. **Editorial poster**：適合觀點專欄主圖。要求一個巨大符號、乾淨留白、少量圖形層。
+2. **Interface-less mockup**：適合產品/流程文章。像 UI，但不能有真 UI、亂字或假品牌。
+3. **Comparison diptych**：適合「修復前後」、「舊流程/新流程」、「風險/治理」文章。
+4. **Documentary still life**：適合可信度、治理、組織改造題。用紙張、工具、物件建立現場感。
+5. **Stylized editorial illustration**：適合動漫感、賽博龐克、riso、manga 等輪替，但必須避開已知 IP。
+
+品質判斷不看「像不像案例庫」，而看：
+
+- 文章的核心問題是否被視覺化；
+- 手機縮圖是否仍有一個清楚主體；
+- 同一週是否避免重複風格家族；
+- 圖片是否降低 AI 感，而不是更像 prompt demo；
+- alt/caption/placement 是否說得出這張圖為文章做了什麼。
+
+---
+
 ## 4) 6 套可直接丟 GPT image / ChatGPT 圖像生成的 prompt 模板
 
 以下每組都含 **Positive / Negative / Composition / Lighting & material / Palette / Post-process QA checklist**。  
