@@ -32,6 +32,12 @@ const PUBLIC_BLOG_CACHE_LIMIT_PER_LANGUAGE = Number(process.env.PUBLIC_BLOG_CACH
 let publicRawCmsCache: { data: CmsData; expiresAt: number } | null = null;
 let publicBlogPostsCache: { posts: BlogPost[]; expiresAt: number } | null = null;
 
+function canUseInMemoryPublicCache() {
+  // Cloudflare Worker isolates can outlive a single request. Keep request-bound
+  // KV I/O results out of module-scope memory and rely on KV for public caching.
+  return !getCloudflareKvConfig();
+}
+
 export function nowIso() {
   return new Date().toISOString();
 }
@@ -69,13 +75,14 @@ async function readPublicCmsData(): Promise<CmsData> {
 
 async function readPublicRawCmsData(): Promise<CmsData> {
   noStore();
-  if (publicRawCmsCache && publicRawCmsCache.expiresAt > Date.now()) {
+  const useMemoryCache = canUseInMemoryPublicCache();
+  if (useMemoryCache && publicRawCmsCache && publicRawCmsCache.expiresAt > Date.now()) {
     return publicRawCmsCache.data;
   }
 
   try {
     const data = await readCmsDataFromStorage();
-    publicRawCmsCache = { data, expiresAt: Date.now() + PUBLIC_CMS_CACHE_TTL_MS };
+    if (useMemoryCache) publicRawCmsCache = { data, expiresAt: Date.now() + PUBLIC_CMS_CACHE_TTL_MS };
     return data;
   } catch (error) {
     console.warn(
@@ -83,7 +90,7 @@ async function readPublicRawCmsData(): Promise<CmsData> {
       error instanceof Error ? error.message : error
     );
     const data = cloneSeedData();
-    publicRawCmsCache = { data, expiresAt: Date.now() + PUBLIC_CMS_CACHE_TTL_MS };
+    if (useMemoryCache) publicRawCmsCache = { data, expiresAt: Date.now() + PUBLIC_CMS_CACHE_TTL_MS };
     return data;
   }
 }
@@ -345,7 +352,8 @@ function publicBlogPostsFromData(data: CmsData) {
 }
 
 async function readPublicBlogCache() {
-  if (publicBlogPostsCache && publicBlogPostsCache.expiresAt > Date.now()) return publicBlogPostsCache.posts;
+  const useMemoryCache = canUseInMemoryPublicCache();
+  if (useMemoryCache && publicBlogPostsCache && publicBlogPostsCache.expiresAt > Date.now()) return publicBlogPostsCache.posts;
 
   const namespace = getCloudflareKvNamespace();
   const key = publicBlogCacheKey();
@@ -362,7 +370,7 @@ async function readPublicBlogCache() {
       console.warn("[cms] Public blog cache contains replacement characters; rebuilding from CMS data.");
       return null;
     }
-    publicBlogPostsCache = { posts: parsed.posts, expiresAt: Date.now() + PUBLIC_BLOG_CACHE_TTL_MS };
+    if (useMemoryCache) publicBlogPostsCache = { posts: parsed.posts, expiresAt: Date.now() + PUBLIC_BLOG_CACHE_TTL_MS };
     return parsed.posts;
   } catch (error) {
     console.warn("[cms] Public blog cache is unreadable:", error instanceof Error ? error.message : error);
@@ -392,7 +400,9 @@ async function writePublicBlogCacheFromData(data: CmsData) {
       }
     }
   );
-  publicBlogPostsCache = { posts, expiresAt: Date.now() + PUBLIC_BLOG_CACHE_TTL_MS };
+  if (canUseInMemoryPublicCache()) {
+    publicBlogPostsCache = { posts, expiresAt: Date.now() + PUBLIC_BLOG_CACHE_TTL_MS };
+  }
 }
 
 async function readPublishedBlogPostsForPublic() {
