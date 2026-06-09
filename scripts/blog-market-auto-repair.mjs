@@ -427,7 +427,14 @@ function buildSeoDescription(post) {
   const facts = bestMetadataFacts(post, 4);
   const publisher = sourcePublisher(post);
   const primary = combineMetadataFacts(facts, { avoid: [post.excerpt], start: 2, count: 1, max: 145 }) || facts[1] || facts[0] || post.excerpt || sourceTitle(post);
-  return ensureMinimum(sourceReportSentence(language, publisher, primary), facts.slice(3), MIN_SEO_DESCRIPTION_LENGTH, MAX_SEO_DESCRIPTION_LENGTH);
+  const repaired = ensureMinimum(sourceReportSentence(language, publisher, primary), facts.slice(3), MIN_SEO_DESCRIPTION_LENGTH, MAX_SEO_DESCRIPTION_LENGTH);
+  if (repaired.length >= 70) return repaired;
+  return ensureMinimum(
+    repaired,
+    [post.geoSummary, post.excerpt, sourceTitle(post)].filter(Boolean),
+    70,
+    MAX_SEO_DESCRIPTION_LENGTH
+  );
 }
 
 function buildGeoSummary(post) {

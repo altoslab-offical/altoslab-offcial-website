@@ -72,7 +72,7 @@ node scripts/blog-sop-doctor.mjs \
   --slot morning|afternoon
 ```
 
-The doctor checks the local worker env, LaunchAgent registration, production `/api/health`, durable CMS status (`gcs` or `cloudflare-kv`), disabled legacy DeepSeek cron, and release candidate readiness. Release mode also requires admin readback credentials so the post-release verifier can inspect protected blog metadata.
+The doctor checks the local worker env, LaunchAgent registration, production `/api/health`, durable CMS status (`cloudflare-kv` for the active Cloudflare path), disabled legacy DeepSeek cron, and release candidate readiness. Release mode also requires admin readback credentials so the post-release verifier can inspect protected blog metadata.
 
 It does not pretend to operate Gemini or ChatGPT. Column/feature Gemini/GPT production remains owned by the Codex heartbeat/main-brain workflow because it has Chrome extension access and can enforce tab-group rules. Market-news source-translation can be prepared without Gemini when the source article, source image and attribution are verifiable.
 

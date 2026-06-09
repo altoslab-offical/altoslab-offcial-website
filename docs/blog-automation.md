@@ -28,7 +28,7 @@
 - Market news is the fast lane: source selection, source-faithful localization, validation and release should stay terminal-first and should not open Gemini, ChatGPT, Gmail or extra Chrome tabs.
 - Columns/features are the expensive lane: only the approved zh-Hant source article and GPT visual production may use Chrome. Localization, duplicate checks, validate-only, release verification and SEO/GEO reporting should run outside Chrome.
 - All column/Gemini/ChatGPT/Gmail browser work must use Tommy's Chrome profile signed in as `john.wu0120@gmail.com`. Do not use, claim, or switch into a `tm.studio` profile. Browser evidence for publishable column/feature candidates must record `profileEmail: "john.wu0120@gmail.com"` for every used Gemini or ChatGPT tab.
-- Published market-news repair is terminal-first and source-only: run `npm run blog:repair-copy -- --base-url https://altoslab-ai.cc --content-type breaking --language all --bulk` only after the source article, canonical URL and credited source image are present. The repair tool must not touch columns/features; those return to the Gemini column lane.
+- Published market-news repair is terminal-first and source-only: run `npm run blog:repair-copy -- --base-url https://altoslab-official-website.altoslab-ai.workers.dev --content-type breaking --language all --bulk` only after the source article, canonical URL and credited source image are present. The repair tool must not touch columns/features; those return to the Gemini column lane.
 - Market-source discovery is terminal-first: run `npm run blog:market-sources -- --date <date> --queue-dir data/blog-backfill/<date>/queue --write --overwrite` to create `market-source-packs.generated.json` from current RSS/API signals, duplicate checks and source/official image extraction before any market-news copy worker starts.
 - `scripts/blog-scheduled-runner.mjs --scheduled` now fails closed outside the configured time windows instead of falling through to release mode.
 - The scheduled runner uses a single local lock so overlapping heartbeat/LaunchAgent wakes cannot stack production jobs.
@@ -39,20 +39,16 @@
 
 - Preferred production path: market news uses credited, non-reused source or official announcement images; columns/features use topic-matched ALTOS LAB editorial visuals generated in the dedicated GPT/ChatGPT image tab, uploaded through the signed media route with internal provider/prompt/QA metadata.
 - Public generated-cover credit should read `ALTOS LAB editorial visual`; provider and prompt remain internal quality metadata.
-- Licensed third-party images are allowed only when the license, credit URL and landing page are stored and checked.
-- Optional expanded sources: Pexels API, Pixabay API, Openverse, Wikimedia/Openverse results, NASA and museum/public-domain registries through the source registry.
+- Licensed third-party images are allowed only for explicit, reviewed non-market editorial use when the license, credit URL and landing page are stored and checked.
+- Do not use Pexels, Pixabay, Openverse, Unsplash, local fallback art or generic stock imagery for formal market-news publishing.
 - Market-news discovery can use free official/community signals such as official RSS feeds, arXiv RSS, GDELT DOC API, Hacker News API and Semantic Scholar API, but these are discovery sources only. The published item must still link to the original article/announcement and pass source-image checks.
 - The source scanner rejects missing article images, generic stock-image hosts, duplicate source URLs, duplicate live cover URLs, duplicate normalized live titles and obvious consumer-news noise that is not an enterprise AI/workflow story.
 - Pinterest can be used as style inspiration, but the automation must not copy Pinterest images because Pinterest does not grant commercial rights to the pinned image.
-- Required env:
-  - optional `BLOG_IMAGE_PROVIDER=openverse`
-  - optional `AUTO_GENERATE_BLOG_COVERS=true`
-  - optional `OPENVERSE_API_BASE_URL=https://api.openverse.engineering/v1`
-  - optional `PEXELS_API_KEY=<pexels-key>`
-  - optional `PIXABAY_API_KEY=<pixabay-key>`
-  - optional `BLOG_IMAGE_STORE_BLOB=true`
-  - optional `BLOB_READ_WRITE_TOKEN=<vercel-blob-token>`
-- The preferred path for columns/features is generated imagery, saved through the signed media upload route and served from GCS-backed same-origin generated media. Market-news posts use credited source or official announcement images instead of GPT art.
+- Required env for the formal workflow:
+  - `BLOG_IMAGE_PROVIDER=none`
+  - `AUTO_GENERATE_BLOG_COVERS=false`
+  - `BLOG_IMAGE_STORE_BLOB=false`
+- The preferred path for columns/features is generated imagery, saved through the signed media upload route and served from same-origin generated media. Market-news posts use credited source or official announcement images instead of GPT art.
 - If GPT image generation is used, it must happen only in the dedicated ChatGPT/GPT image tab and the final image still has to pass production image QA.
 - If GPT image generation is unavailable, the candidate is held; local fallback art is disabled for production publishing.
 
@@ -80,7 +76,7 @@ Auto-publishing requires:
 
 ## Production Targets
 
-- Public production is GCP/Cloud Run with GCS-backed CMS storage.
+- Public production is the Cloudflare Worker URL with Cloudflare KV-backed CMS storage until `altoslab-ai.cc` DNS no longer serves Google Frontend and Cloudflare verification passes on the custom domain.
 - Market-news inventory has no hard upper cap; each configured language grows together through complete 9-language translation groups.
 - Column inventory grows at the daily cadence guard: at least one Gemini-produced column per Taipei calendar day, with additional columns allowed only when the same Gemini/GPT visual and release gates pass.
 - Routine cadence: at least one Gemini-produced column per Taipei calendar day; market news publishes opportunistically during scheduled scan windows when a verified source item, source image and multilingual source-faithful copy pass release checks.

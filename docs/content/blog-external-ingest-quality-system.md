@@ -7,7 +7,7 @@ Production blog publishing is now fail-closed:
 3. Local worker runs preflight checks before contacting production.
 4. Local worker keeps market-news source images as credited external source URLs and uploads only generated column/feature covers through signed `POST /api/admin/blog/media`.
 5. Production accepts signed `POST /api/admin/blog/ingest-set` requests for full validation diagnostics.
-6. The formal GCP Cloud Run release path is signed `POST /api/admin/blog/release-set`; Cloudflare remains fallback only.
+6. The active Cloudflare Worker release path is signed `POST /api/admin/blog/release-set`; GCP Cloud Run is legacy recovery only until credentials and DNS are freshly revalidated.
 7. `release-set` requires an approved `qualityManifest`, matching content/body hashes, configured-language completeness, valid publish metadata and a fresh image QA pass.
 8. Posts publish only when every release gate passes; otherwise the whole article set is held or rejected.
 
@@ -35,7 +35,7 @@ HMAC_SHA256(BLOG_INGEST_HMAC_SECRET, X-Altos-Timestamp + "." + X-Altos-Nonce + "
 
 Production rejects missing, stale, replayed or invalid signatures.
 
-The media upload route uses the same signature contract. GCP production stores generated images in private Cloud Storage and serves them through same-origin `/api/blog/generated-media/:filename`. Cloudflare KV/R2 and Vercel Blob remain fallback providers. `BLOG_MEDIA_ALLOW_LOCAL_STORAGE=1` and `BLOG_IMAGE_ALLOW_LOCAL_HTTP=1` are for local end-to-end tests only.
+The media upload route uses the same signature contract. Active Cloudflare production stores CMS state in Cloudflare KV and serves generated media through same-origin `/api/blog/generated-media/:filename`. R2 remains a future object-storage upgrade. GCP Cloud Storage is legacy recovery only. `BLOG_MEDIA_ALLOW_LOCAL_STORAGE=1` and `BLOG_IMAGE_ALLOW_LOCAL_HTTP=1` are for local end-to-end tests only.
 
 ## Runbook
 

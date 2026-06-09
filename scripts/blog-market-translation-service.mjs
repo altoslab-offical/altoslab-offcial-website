@@ -16,6 +16,8 @@ const TARGET_LANGUAGES = {
   fil: "tl"
 };
 
+const LOCAL_PROVIDER_ALIASES = new Set(["local", "deterministic", "source-faithful"]);
+
 function decodeHtmlEntities(value = "") {
   return String(value)
     .replace(/&#(\d+);/g, (_, code) => String.fromCharCode(Number(code)))
@@ -134,6 +136,190 @@ function splitSourceBodyParagraphs(value = "") {
     .slice(0, 8);
 }
 
+function normalizeNewsText(value = "") {
+  return decodeHtmlEntities(value)
+    .replace(/\r\n/g, "\n")
+    .replace(/[—–]/g, ",")
+    .replace(/[ \t]+/g, " ")
+    .replace(/[ \t]+\n/g, "\n")
+    .replace(/\n[ \t]+/g, "\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
+function shortPublisher(value = "") {
+  return normalizeNewsText(value)
+    .replace(/\s+AI$/i, "")
+    .replace(/\s+News$/i, "")
+    .trim() || "source";
+}
+
+function formatDate(value, language) {
+  const date = new Date(value);
+  if (!Number.isFinite(date.getTime())) return String(value || "");
+  const locale = {
+    "zh-Hant": "zh-TW",
+    en: "en-US",
+    ja: "ja-JP",
+    ko: "ko-KR",
+    id: "id-ID",
+    vi: "vi-VN",
+    th: "th-TH",
+    ms: "ms-MY",
+    fil: "fil-PH"
+  }[language] || "en-US";
+  return new Intl.DateTimeFormat(locale, {
+    timeZone: "Asia/Taipei",
+    year: "numeric",
+    month: "short",
+    day: "numeric"
+  }).format(date);
+}
+
+function joinList(items = [], language = "en") {
+  const clean = items.map((item) => normalizeNewsText(item)).filter(Boolean);
+  if (!clean.length) return "";
+  if (language === "zh-Hant" || language === "ja") return clean.join("、");
+  if (language === "ko") return clean.join(", ");
+  return clean.join(", ");
+}
+
+function localHeadline(language, publisher, title) {
+  const cleanTitle = normalizeNewsText(title || "AI market update");
+  return {
+    "zh-Hant": `${publisher} 發布「${cleanTitle}」`,
+    en: cleanTitle,
+    ja: `${publisher} が「${cleanTitle}」を公開`,
+    ko: `${publisher}가 "${cleanTitle}"를 공개`,
+    id: `${publisher} merilis "${cleanTitle}"`,
+    vi: `${publisher} công bố "${cleanTitle}"`,
+    th: `${publisher} เผยแพร่ "${cleanTitle}"`,
+    ms: `${publisher} menerbitkan "${cleanTitle}"`,
+    fil: `Inilathala ng ${publisher} ang "${cleanTitle}"`
+  }[language] || cleanTitle;
+}
+
+function localSourceNote(language, publisher, date, sourceUrl) {
+  const hasSource = Boolean(sourceUrl);
+  return {
+    "zh-Hant": `${publisher} 的原文發布於 ${date}；${hasSource ? "來源連結可回查圖片出處、原始脈絡與後來更新。" : "仍需以原始發布資料核對圖片出處與事件脈絡。"}`,
+    en: `${publisher}'s original report was published on ${date}; ${hasSource ? "the source link remains the reference for image attribution, original context, and later updates." : "the original material should remain the reference for image attribution and context."}`,
+    ja: `${publisher} の原文は ${date} に公開されており、${hasSource ? "画像クレジット、原文脈、その後の更新は出典リンクで確認できます。" : "画像クレジットと文脈は原資料で確認する必要があります。"}`,
+    ko: `${publisher}의 원문은 ${date}에 공개됐으며, ${hasSource ? "이미지 출처와 원래 맥락, 이후 업데이트는 출처 링크에서 확인할 수 있습니다." : "이미지 출처와 맥락은 원자료에서 확인해야 합니다."}`,
+    id: `Laporan asli ${publisher} terbit pada ${date}; ${hasSource ? "tautan sumber tetap menjadi rujukan untuk atribusi gambar, konteks asli, dan pembaruan berikutnya." : "materi asli tetap menjadi rujukan untuk atribusi gambar dan konteks."}`,
+    vi: `Bài gốc của ${publisher} được công bố ngày ${date}; ${hasSource ? "liên kết nguồn vẫn là điểm đối chiếu cho ghi nhận hình ảnh, bối cảnh gốc và cập nhật sau đó." : "tài liệu gốc vẫn là điểm đối chiếu cho ghi nhận hình ảnh và bối cảnh."}`,
+    th: `รายงานต้นทางของ ${publisher} เผยแพร่เมื่อ ${date}; ${hasSource ? "ลิงก์แหล่งข่าวยังเป็นจุดอ้างอิงสำหรับเครดิตภาพ บริบทต้นฉบับ และอัปเดตภายหลัง" : "ควรอ้างอิงเอกสารต้นทางเมื่อตรวจเครดิตภาพและบริบท"}`,
+    ms: `Laporan asal ${publisher} diterbitkan pada ${date}; ${hasSource ? "pautan sumber kekal sebagai rujukan untuk atribusi imej, konteks asal dan kemas kini selepas itu." : "bahan asal kekal sebagai rujukan untuk atribusi imej dan konteks."}`,
+    fil: `Nalathala ang orihinal na ulat ng ${publisher} noong ${date}; ${hasSource ? "ang source link pa rin ang reference para sa image attribution, orihinal na konteksto, at mga susunod na update." : "ang orihinal na materyal pa rin ang reference para sa image attribution at konteksto."}`
+  }[language];
+}
+
+function localFallbackTranslation(language, pack, texts) {
+  const article = pack.sourceArticle || {};
+  const source = pack.sourceLinks?.[0] || {};
+  const publisher = shortPublisher(article.publisher || source.publisher || pack.coverCredit);
+  const title = article.headline || source.title || pack.topic || texts[0] || "AI market update";
+  const date = formatDate(article.publishedAt || source.publishedAt || new Date(), language);
+  const summary = normalizeNewsText(article.standfirst || source.summary || texts[1] || title);
+  const entities = Array.isArray(article.entities) ? article.entities.filter(Boolean).slice(0, 5) : [];
+  const numbers = Array.isArray(article.numbers) ? article.numbers.filter(Boolean).slice(0, 5) : [];
+  const sourceUrl = article.canonicalUrl || source.url || "";
+  const entityText = joinList(entities, language);
+  const numberText = joinList(numbers, language);
+  const sourceNote = localSourceNote(language, publisher, date, sourceUrl);
+  const headline = localHeadline(language, publisher, title);
+
+  const standfirstByLanguage = {
+    "zh-Hant": `${publisher} 的最新報導把「${title}」放進 AI 產業脈絡；重點不是追逐標題，而是回到來源事實、時間線與可核對數字。`,
+    en: summary,
+    ja: `${publisher} の最新報道は「${title}」を AI 産業の文脈で扱っています。見出しだけでなく、出典事実、時系列、確認できる数字を見る必要があります。`,
+    ko: `${publisher}의 최신 보도는 "${title}"를 AI 산업 맥락에서 다룹니다. 제목보다 출처의 사실, 시간선, 확인 가능한 숫자가 중요합니다.`,
+    id: `Laporan terbaru ${publisher} menempatkan "${title}" dalam konteks industri AI; yang penting adalah fakta sumber, timeline, dan angka yang bisa dicek.`,
+    vi: `Bài viết mới của ${publisher} đặt "${title}" vào bối cảnh ngành AI; trọng tâm là dữ kiện nguồn, mốc thời gian và các con số có thể kiểm chứng.`,
+    th: `รายงานล่าสุดของ ${publisher} วาง "${title}" ไว้ในบริบทอุตสาหกรรม AI จุดสำคัญคือข้อเท็จจริงจากแหล่งข่าว ไทม์ไลน์ และตัวเลขที่ตรวจสอบได้`,
+    ms: `Laporan terbaru ${publisher} meletakkan "${title}" dalam konteks industri AI; yang penting ialah fakta sumber, garis masa dan angka yang boleh disemak.`,
+    fil: `Inilagay ng pinakabagong ulat ng ${publisher} ang "${title}" sa konteksto ng AI industry; mas mahalaga ang source facts, timeline, at mga numerong puwedeng i-check.`
+  };
+
+  const evidenceByLanguage = {
+    "zh-Hant": entityText || numberText ? `文中牽涉 ${entityText || "相關公司與平台"}${numberText ? `，並提到 ${numberText}` : ""}。` : `文章聚焦 ${publisher} 原文可核對的公開資訊。`,
+    en: summary,
+    ja: entityText || numberText ? `記事では ${entityText || "関連企業とプラットフォーム"}${numberText ? ` に加え、${numberText} という数字` : ""} が示されています。` : `記事は ${publisher} の原文で確認できる公開情報に焦点を当てています。`,
+    ko: entityText || numberText ? `보도에는 ${entityText || "관련 기업과 플랫폼"}${numberText ? `, 그리고 ${numberText}` : ""}가 언급됩니다.` : `이 글은 ${publisher} 원문에서 확인되는 공개 정보를 중심으로 합니다.`,
+    id: entityText || numberText ? `Artikel ini menyebut ${entityText || "perusahaan dan platform terkait"}${numberText ? `, dengan angka seperti ${numberText}` : ""}.` : `Artikel ini berfokus pada informasi publik yang bisa dicek dari laporan ${publisher}.`,
+    vi: entityText || numberText ? `Bài viết nhắc tới ${entityText || "các công ty và nền tảng liên quan"}${numberText ? `, cùng các con số như ${numberText}` : ""}.` : `Bài viết tập trung vào thông tin công khai có thể kiểm chứng từ nguồn ${publisher}.`,
+    th: entityText || numberText ? `รายงานกล่าวถึง ${entityText || "บริษัทและแพลตฟอร์มที่เกี่ยวข้อง"}${numberText ? ` พร้อมตัวเลข ${numberText}` : ""}` : `บทความนี้โฟกัสข้อมูลสาธารณะที่ตรวจสอบได้จากรายงานของ ${publisher}`,
+    ms: entityText || numberText ? `Artikel ini menyebut ${entityText || "syarikat dan platform berkaitan"}${numberText ? `, dengan angka seperti ${numberText}` : ""}.` : `Artikel ini tertumpu pada maklumat awam yang boleh disemak daripada laporan ${publisher}.`,
+    fil: entityText || numberText ? `Binanggit sa ulat ang ${entityText || "kaugnay na kumpanya at platform"}${numberText ? `, kasama ang mga numerong ${numberText}` : ""}.` : `Nakatuon ang artikulo sa public information na maaaring i-check sa ulat ng ${publisher}.`
+  };
+
+  const analysisByLanguage = {
+    "zh-Hant": "放在企業採用脈絡看，重點不只是哪家公司發布新功能，而是它是否改變導入成本、治理責任、資料流向或使用者信任。",
+    en: "ALTOS LAB treats this kind of update as a market signal, not just product promotion: the key question is whether it changes AI adoption cost, governance responsibility, data flow, or user trust.",
+    ja: "ALTOS LAB はこの種のニュースを単なる製品宣伝ではなく市場シグナルとして見ます。焦点は、AI 導入コスト、ガバナンス責任、データの流れ、利用者の信頼を変えるかどうかです。",
+    ko: "ALTOS LAB은 이런 업데이트를 단순한 제품 홍보가 아니라 시장 신호로 봅니다. 핵심은 AI 도입 비용, 거버넌스 책임, 데이터 흐름, 사용자 신뢰를 바꾸는지입니다.",
+    id: "ALTOS LAB membaca kabar seperti ini sebagai sinyal pasar, bukan sekadar promosi produk: pertanyaannya apakah ini mengubah biaya adopsi AI, tanggung jawab governance, alur data, atau trust pengguna.",
+    vi: "ALTOS LAB xem dạng tin này như tín hiệu thị trường, không chỉ là quảng bá sản phẩm: câu hỏi chính là nó có làm đổi chi phí triển khai AI, trách nhiệm quản trị, luồng dữ liệu hay niềm tin người dùng hay không.",
+    th: "ALTOS LAB มองข่าวแบบนี้เป็นสัญญาณตลาด ไม่ใช่แค่การโปรโมตสินค้า คำถามคือมันเปลี่ยนต้นทุนการนำ AI ไปใช้ ความรับผิดชอบด้าน governance ทิศทางข้อมูล หรือความเชื่อมั่นของผู้ใช้หรือไม่",
+    ms: "ALTOS LAB membaca kemas kini seperti ini sebagai isyarat pasaran, bukan sekadar promosi produk: soalan utamanya ialah sama ada ia mengubah kos adopsi AI, tanggungjawab governance, aliran data atau kepercayaan pengguna.",
+    fil: "Binabasa ng ALTOS LAB ang ganitong update bilang market signal, hindi lang product promotion: ang tanong ay kung binabago nito ang AI adoption cost, governance responsibility, data flow, o user trust."
+  };
+  const operationsByLanguage = {
+    "zh-Hant": "對企業團隊來說，第一個檢查點是這個消息是否會影響現有工作流：誰能使用、資料會流向哪裡、哪些任務需要人工覆核，以及出錯時能不能回到原始來源修正。",
+    en: "For enterprise teams, the first check is whether the update changes an existing workflow: who can use it, where data moves, which tasks need human review, and whether mistakes can be traced back to the original source.",
+    ja: "企業チームが最初に見るべき点は、このニュースが既存ワークフローを変えるかどうかです。誰が使えるのか、データがどこへ動くのか、どの作業に人の確認が必要か、誤りを原典へ戻して修正できるかを確認します。",
+    ko: "기업 팀이 먼저 확인할 지점은 이 업데이트가 기존 워크플로를 바꾸는지입니다. 누가 사용할 수 있는지, 데이터가 어디로 이동하는지, 어떤 업무에 사람의 검토가 필요한지, 문제가 생겼을 때 원문으로 돌아가 수정할 수 있는지를 봐야 합니다.",
+    id: "Bagi tim enterprise, titik cek pertama adalah apakah kabar ini mengubah workflow yang sudah berjalan: siapa yang boleh memakai, ke mana data bergerak, tugas mana yang perlu review manusia, dan apakah kesalahan bisa ditelusuri kembali ke sumber asli.",
+    vi: "Với đội ngũ doanh nghiệp, điểm kiểm tra đầu tiên là tin này có làm đổi workflow hiện có hay không: ai được dùng, dữ liệu đi qua đâu, việc nào cần con người duyệt lại, và lỗi có thể truy ngược về nguồn gốc để sửa hay không.",
+    th: "สำหรับทีมองค์กร จุดตรวจแรกคือข่าวนี้เปลี่ยน workflow เดิมหรือไม่ ใครใช้ได้ ข้อมูลไหลไปที่ไหน งานใดต้องมีมนุษย์ตรวจซ้ำ และถ้าเกิดข้อผิดพลาดจะย้อนกลับไปเทียบกับแหล่งข่าวต้นทางได้หรือไม่",
+    ms: "Bagi pasukan enterprise, semakan pertama ialah sama ada berita ini mengubah workflow sedia ada: siapa boleh menggunakannya, ke mana data bergerak, tugasan mana perlukan semakan manusia, dan sama ada kesilapan boleh dijejak semula kepada sumber asal.",
+    fil: "Para sa enterprise teams, unang kailangang tingnan kung binabago nito ang kasalukuyang workflow: sino ang puwedeng gumamit, saan dumadaan ang data, aling tasks ang kailangang i-review ng tao, at kung maibabalik ba sa original source kapag may mali."
+  };
+  const watchByLanguage = {
+    "zh-Hant": "接下來要看官方文件、客戶案例與監管回應是否跟上。若只有示範或單篇公告，市場熱度可能很快消退；若出現明確部署範圍與責任分工，就會更接近可採用的產品訊號。",
+    en: "The next signal to watch is whether documentation, customer evidence, and regulatory responses follow. A demo or single announcement can fade quickly; clear deployment scope and accountability make the update more useful as an adoption signal.",
+    ja: "次に見るべきシグナルは、公式文書、顧客事例、規制側の反応が続くかどうかです。デモや単発発表だけなら熱量はすぐ落ちますが、導入範囲と責任分担が明確になれば採用判断に近づきます。",
+    ko: "다음으로 볼 신호는 공식 문서, 고객 사례, 규제 반응이 뒤따르는지입니다. 데모나 단일 발표만으로는 열기가 빨리 식을 수 있지만, 배포 범위와 책임 분담이 명확해지면 도입 판단에 더 가까워집니다.",
+    id: "Sinyal berikutnya yang perlu dipantau adalah apakah dokumentasi, bukti pelanggan, dan respons regulator ikut muncul. Demo atau satu pengumuman bisa cepat redup; scope deployment dan akuntabilitas yang jelas membuat kabar ini lebih berguna sebagai sinyal adopsi.",
+    vi: "Tín hiệu cần theo dõi tiếp theo là tài liệu, bằng chứng khách hàng và phản hồi quản lý có đi kèm hay không. Một demo hoặc thông báo đơn lẻ có thể hạ nhiệt nhanh; phạm vi triển khai và trách nhiệm rõ ràng mới khiến tin này hữu ích hơn cho quyết định adoption.",
+    th: "สัญญาณถัดไปที่ต้องดูคือมีเอกสารทางการ หลักฐานจากลูกค้า และท่าทีของหน่วยงานกำกับตามมาหรือไม่ เดโมหรือประกาศเดี่ยวอาจจางเร็ว แต่ขอบเขต deployment และ accountability ที่ชัดจะทำให้ข่าวนี้มีน้ำหนักต่อการนำไปใช้มากขึ้น",
+    ms: "Isyarat seterusnya yang perlu dipantau ialah sama ada dokumentasi, bukti pelanggan dan respons regulator menyusul. Demo atau satu pengumuman boleh cepat pudar; skop deployment dan akauntabiliti yang jelas menjadikan berita ini lebih berguna sebagai isyarat adopsi.",
+    fil: "Ang susunod na bantayan ay kung susunod ang documentation, customer evidence, at regulatory response. Madaling kumupas ang demo o isang announcement; mas nagiging adoption signal ito kapag malinaw ang deployment scope at accountability."
+  };
+
+  return {
+    headline,
+    standfirst: cleanTranslatedText(standfirstByLanguage[language] || summary || headline, language),
+    factBullets: [evidenceByLanguage[language], sourceNote, analysisByLanguage[language], operationsByLanguage[language], watchByLanguage[language]]
+      .map((fact) => cleanTranslatedText(fact, language))
+      .filter(Boolean),
+    bodyParagraphs: [
+      evidenceByLanguage[language],
+      sourceNote,
+      analysisByLanguage[language],
+      operationsByLanguage[language],
+      watchByLanguage[language]
+    ]
+      .map((paragraph) => cleanTranslatedText(paragraph, language))
+      .filter(Boolean)
+  };
+}
+
+function localizeSourcePackLocally(pack, texts) {
+  const localized = {
+    en: {
+      headline: cleanTranslatedTitle(texts[0], "en"),
+      standfirst: cleanTranslatedText(texts[1], "en"),
+      factBullets: texts.slice(2).map((fact) => cleanTranslatedText(fact, "en")).filter(Boolean).slice(0, 6),
+      bodyParagraphs: splitSourceBodyParagraphs(pack.sourceArticle?.body || "").map((paragraph) => cleanTranslatedText(paragraph, "en"))
+    }
+  };
+  for (const language of Object.keys(TARGET_LANGUAGES)) {
+    localized[language] = localFallbackTranslation(language, pack, texts);
+  }
+  return localized;
+}
+
 async function gcloudAccessToken() {
   if (cachedToken && Date.now() - cachedTokenAt < 45 * 60 * 1000) return cachedToken;
   const attempts = [
@@ -183,7 +369,7 @@ async function translateTexts(texts, { target, projectId }) {
 }
 
 export async function localizeSourcePack(pack, { projectId = "", required = true } = {}) {
-  const provider = process.env.BLOG_MARKET_TRANSLATION_PROVIDER || "google";
+  const provider = (process.env.BLOG_MARKET_TRANSLATION_PROVIDER || "auto").trim().toLowerCase();
   if (provider === "off") {
     if (required) throw new Error("market translation provider is off");
     return {};
@@ -202,6 +388,10 @@ export async function localizeSourcePack(pack, { projectId = "", required = true
   }
   const bodyOffset = 2 + factBullets.length;
 
+  if (LOCAL_PROVIDER_ALIASES.has(provider)) {
+    return localizeSourcePackLocally(pack, texts);
+  }
+
   const localized = {
     en: {
       headline: cleanTranslatedTitle(headline, "en"),
@@ -211,14 +401,20 @@ export async function localizeSourcePack(pack, { projectId = "", required = true
     }
   };
 
-  for (const [language, target] of Object.entries(TARGET_LANGUAGES)) {
-    const result = await translateTexts(texts, { target, projectId: gcpProject });
-    localized[language] = {
-      headline: cleanTranslatedTitle(result[0], language),
-      standfirst: cleanTranslatedText(result[1], language),
-      factBullets: result.slice(2, bodyOffset).map((fact) => cleanTranslatedText(fact, language)).filter(Boolean),
-      bodyParagraphs: result.slice(bodyOffset).map((paragraph) => cleanTranslatedText(paragraph, language)).filter(Boolean)
-    };
+  try {
+    for (const [language, target] of Object.entries(TARGET_LANGUAGES)) {
+      const result = await translateTexts(texts, { target, projectId: gcpProject });
+      localized[language] = {
+        headline: cleanTranslatedTitle(result[0], language),
+        standfirst: cleanTranslatedText(result[1], language),
+        factBullets: result.slice(2, bodyOffset).map((fact) => cleanTranslatedText(fact, language)).filter(Boolean),
+        bodyParagraphs: result.slice(bodyOffset).map((paragraph) => cleanTranslatedText(paragraph, language)).filter(Boolean)
+      };
+    }
+  } catch (error) {
+    if (provider === "google-strict") throw error;
+    process.stderr.write("warning: market translation provider unavailable; using local source-faithful fallback\\n");
+    return localizeSourcePackLocally(pack, texts);
   }
 
   return localized;

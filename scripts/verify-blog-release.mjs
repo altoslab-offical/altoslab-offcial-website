@@ -6,7 +6,7 @@ import path from "node:path";
 import process from "node:process";
 
 const LANGUAGES = ["zh-Hant", "en", "ja", "ko", "id", "vi", "th", "ms", "fil"];
-const DEFAULT_BASE_URL = "https://altoslab-ai.cc";
+const DEFAULT_BASE_URL = "https://altoslab-official-website.altoslab-ai.workers.dev";
 const MIN_COVER_BYTES = 8_000;
 const MIN_COVER_WIDTH = 1200;
 const MIN_COVER_HEIGHT = 630;
@@ -725,37 +725,34 @@ async function verifyAdminReadback(posts, root, errors, warnings) {
 }
 
 async function adminCookie(root, warnings) {
+  const password = arg("admin-password") || process.env.ALTOS_ADMIN_PASSWORD || process.env.ADMIN_PASSWORD || "";
+  if (password) {
+    try {
+      const response = await fetchWithTimeout(`${root}/api/admin/auth/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+          "User-Agent": "altos-blog-release-verifier/1.0"
+        },
+        body: JSON.stringify({ password })
+      });
+      if (!response.ok) {
+        pushWarning(warnings, `admin login readback failed with HTTP ${response.status}`);
+      } else {
+        const setCookie = response.headers.get("set-cookie") || "";
+        const match = setCookie.match(/(?:^|,\s*)(altos_admin=[^;]+)/);
+        if (match?.[1]) return match[1];
+        pushWarning(warnings, "admin login succeeded but did not return an altos_admin cookie");
+      }
+    } catch (error) {
+      pushWarning(warnings, `admin login readback failed: ${error instanceof Error ? error.message : "unknown error"}`);
+    }
+  }
+
   const token = arg("admin-token") || process.env.ALTOS_ADMIN_SESSION_TOKEN || process.env.ADMIN_SESSION_TOKEN || "";
   if (token) return `altos_admin=${encodeURIComponent(token)}`;
-
-  const password = arg("admin-password") || process.env.ALTOS_ADMIN_PASSWORD || process.env.ADMIN_PASSWORD || "";
-  if (!password) return "";
-
-  try {
-    const response = await fetchWithTimeout(`${root}/api/admin/auth/login`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-        "User-Agent": "altos-blog-release-verifier/1.0"
-      },
-      body: JSON.stringify({ password })
-    });
-    if (!response.ok) {
-      pushWarning(warnings, `admin login readback failed with HTTP ${response.status}`);
-      return "";
-    }
-    const setCookie = response.headers.get("set-cookie") || "";
-    const match = setCookie.match(/(?:^|,\s*)(altos_admin=[^;]+)/);
-    if (!match?.[1]) {
-      pushWarning(warnings, "admin login succeeded but did not return an altos_admin cookie");
-      return "";
-    }
-    return match[1];
-  } catch (error) {
-    pushWarning(warnings, `admin login readback failed: ${error instanceof Error ? error.message : "unknown error"}`);
-    return "";
-  }
+  return "";
 }
 
 async function main() {

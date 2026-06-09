@@ -387,9 +387,12 @@ assert(envExample.includes("ALTOS_BLOG_WORKER_WAIT_MINUTES"), "env example docum
 assert(envExample.includes("BLOG_IMAGE_ALLOW_NON_BLOB"), "env example documents generated image Blob enforcement");
 assert(envExample.includes("BLOG_MEDIA_ALLOW_LOCAL_STORAGE"), "env example documents local-only media upload mode");
 assert(envExample.includes("BLOG_ALLOW_LOCAL_FALLBACK_COVERS=0"), "env example keeps local fallback covers disabled");
-assert(envExample.includes("GCS_STORAGE_ENABLED=1"), "env example documents GCP/GCS storage configuration");
-assert(envExample.includes("GCS_BUCKET=altoslab-official-cms-934551798702"), "env example documents the canonical production GCS bucket");
-assert(envExample.includes("ALTOS_BLOG_PRODUCTION_AUTO_REPAIR=1"), "env example documents scheduled production repair default");
+assert(envExample.includes("ALTOS_BLOG_BASE_URL=https://altoslab-official-website.altoslab-ai.workers.dev"), "env example defaults local workers to the active Cloudflare Worker URL");
+assert(envExample.includes("CLOUDFLARE_KV_ENABLED=1"), "env example documents active Cloudflare KV storage");
+assert(envExample.includes("GCS_STORAGE_ENABLED=0"), "env example keeps legacy GCP/GCS storage disabled by default");
+assert(envExample.includes("ALTOS_BLOG_PRODUCTION_AUTO_REPAIR=0"), "env example keeps blind GCP repair disabled by default");
+assert(envExample.includes("BLOG_MARKET_TRANSLATION_PROVIDER=local"), "env example avoids gcloud-dependent market-news translation by default");
+assert(envExample.includes("BLOG_IMAGE_PROVIDER=none") && envExample.includes("AUTO_GENERATE_BLOG_COVERS=false"), "env example disables stock/fallback cover generation for the formal workflow");
 assert(envExample.includes("GA4_PROPERTY_ID="), "env example documents GA4 Data API property configuration");
 assert(envExample.includes("SEARCH_CONSOLE_SITE_URL="), "env example documents Search Console reporting configuration");
 assert(envExample.includes("ALTOS_GOOGLE_OPERATOR_ACCOUNT=altoslab768@gmail.com"), "env example documents the unified Google operator account");
@@ -413,8 +416,8 @@ assert(columnVisualStyleLibrary.includes("comparison-diptych-audit"), "column vi
 const gcpSmoke = read("scripts/gcp-production-smoke.mjs");
 assert(gcpSmoke.includes("publishedPosts === 0"), "GCP production smoke warns when the public blog inventory is empty");
 assert(gcpSmoke.includes("function printJson") && gcpSmoke.includes("process.stdout.write"), "GCP production smoke flushes JSON before exiting on failures");
-assert(operations.includes("Production CMS/GCS Drift Repair"), "operations runbook documents bounded Cloud Run CMS/GCS repair");
-assert(operations.includes("Cloudflare Rescue Lane"), "operations runbook documents the Cloudflare rescue lane");
+assert(operations.includes("Legacy Production CMS/GCS Drift Repair"), "operations runbook documents the legacy Cloud Run CMS/GCS repair path");
+assert(operations.includes("Cloudflare Active Lane"), "operations runbook documents the active Cloudflare lane");
 assert(operations.includes("wrangler.staging.jsonc") && operations.includes("has no custom-domain routes"), "operations runbook makes Cloudflare staging-first deployment explicit");
 assert(operations.includes("npm run verify:cloudflare"), "operations runbook requires Cloudflare smoke before cutover");
 
