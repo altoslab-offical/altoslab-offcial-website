@@ -17,6 +17,12 @@ type BlogIndexProps = {
   query?: string;
 };
 
+const BLOG_INDEX_POST_LIMIT = Number(process.env.BLOG_INDEX_POST_LIMIT || 8);
+
+function articleTimestamp(post: Awaited<ReturnType<typeof getPublishedBlogPostsByLanguage>>[number]) {
+  return new Date(post.publishedAt || post.updatedAt || post.createdAt).getTime() || 0;
+}
+
 const copy = {
   "zh-Hant": {
     eyebrow: "ALTOS LAB Journal · Research / Build / Growth",
@@ -423,9 +429,12 @@ function matchesTopic(post: Awaited<ReturnType<typeof getPublishedBlogPostsByLan
 export async function BlogIndex({ language, tag, query }: BlogIndexProps) {
   const dictionary = copy[language];
   const posts = await getPublishedBlogPostsByLanguage(language);
+  const orderedPosts = [...posts].sort(
+    (a, b) => articleTimestamp(b) - articleTimestamp(a) || Number(a.sortOrder || 0) - Number(b.sortOrder || 0)
+  );
   const normalizedTag = tag?.trim().toLowerCase();
   const normalizedQuery = query?.trim().toLowerCase();
-  const filtered = posts.filter((post) => {
+  const filtered = orderedPosts.filter((post) => {
     const matchesTag = normalizedTag ? matchesTopic(post, tag || "") : true;
     const matchesQuery = normalizedQuery
       ? [post.title, post.excerpt, post.topic, post.geoSummary, post.tags.join(" ")]
@@ -435,6 +444,7 @@ export async function BlogIndex({ language, tag, query }: BlogIndexProps) {
       : true;
     return matchesTag && matchesQuery;
   });
+  const visiblePosts = filtered.slice(0, BLOG_INDEX_POST_LIMIT);
 
   return (
     <div className="site-home blog-site-shell">
@@ -446,7 +456,7 @@ export async function BlogIndex({ language, tag, query }: BlogIndexProps) {
             { name: "Blog", url: blogIndexPath(language) }
           ])}
         />
-        <JsonLd data={blogIndexItemListJsonLd(filtered, blogIndexPath(language), dictionary.title)} />
+        <JsonLd data={blogIndexItemListJsonLd(visiblePosts, blogIndexPath(language), dictionary.title)} />
         <div className="blog-craft-layout">
           <aside className="blog-craft-sidebar" aria-label="Blog navigation">
             <div className="blog-craft-brand">
@@ -519,7 +529,7 @@ export async function BlogIndex({ language, tag, query }: BlogIndexProps) {
             </div>
 
             <div className="blog-craft-grid">
-              {filtered.map((post) => {
+              {visiblePosts.map((post) => {
                 const visualPost = toBlogVisualPost(post);
                 return (
                   <article className="blog-craft-card" key={post.id}>

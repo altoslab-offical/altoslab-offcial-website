@@ -1,4 +1,4 @@
-import { getPublishedBlogPosts, getPublishedProjects } from "@/lib/cms";
+import { getPublishedBlogPost, getPublishedBlogPosts, getPublishedProjects } from "@/lib/cms";
 import { BLOG_LANGUAGES, blogPostPath, languageLabel } from "@/lib/blog-utils";
 import { publicTaxonomyLabel } from "@/lib/public-taxonomy";
 import { siteName, siteUrl } from "@/lib/seo";
@@ -6,7 +6,7 @@ import type { BlogPost } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
-const LLMS_FULL_ARTICLE_GROUP_LIMIT = Number(process.env.LLMS_FULL_ARTICLE_GROUP_LIMIT || 3);
+const LLMS_FULL_ARTICLE_GROUP_LIMIT = Number(process.env.LLMS_FULL_ARTICLE_GROUP_LIMIT || 2);
 
 function normalizePlainText(value: string) {
   return value.replace(/\r/g, "").replace(/\n{3,}/g, "\n\n").trim();
@@ -37,7 +37,10 @@ function latestArticleGroups(posts: BlogPost[]) {
 
 export async function GET() {
   const [posts, projects] = await Promise.all([getPublishedBlogPosts(), getPublishedProjects()]);
-  const recentPosts = latestArticleGroups(posts);
+  const recentPostSummaries = latestArticleGroups(posts);
+  const recentPosts = (
+    await Promise.all(recentPostSummaries.map((post) => getPublishedBlogPost(post.slug, post.language)))
+  ).filter(Boolean) as BlogPost[];
   const lines = [
     `# ${siteName} full LLM context`,
     "",

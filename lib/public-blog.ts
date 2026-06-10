@@ -84,3 +84,47 @@ export function toPublicBlogPost(post: BlogPost): PublicBlogPost {
     publishedAt: post.publishedAt
   };
 }
+
+export function toPublicBlogListPost(post: BlogPost) {
+  return {
+    id: post.id,
+    slug: post.slug,
+    status: post.status,
+    sortOrder: post.sortOrder,
+    language: post.language,
+    translationGroupId: post.translationGroupId,
+    title: post.title,
+    seoTitle: post.seoTitle,
+    seoDescription: post.seoDescription,
+    excerpt: post.excerpt,
+    contentType: post.contentType,
+    newsCategory: publicTaxonomyLabel(post.newsCategory, post.language),
+    topic: post.topic,
+    audience: post.audience,
+    geoSummary: post.geoSummary,
+    keyTakeaways: post.keyTakeaways,
+    faqs: post.faqs,
+    sourceLinks: post.sourceLinks,
+    tags: publicTaxonomyLabels(post.tags, post.language),
+    cover: post.cover,
+    coverAlt: post.coverAlt,
+    coverSource: post.coverSource,
+    readTimeMinutes: post.readTimeMinutes,
+    featured: post.featured,
+    createdAt: post.createdAt,
+    updatedAt: post.updatedAt,
+    publishedAt: post.publishedAt
+  };
+}
+
+export function toPublicBlogInventoryPost(post: BlogPost) {
+  return {
+    id: post.id,
+    slug: post.slug,
+    language: post.language,
+    translationGroupId: post.translationGroupId,
+    contentType: post.contentType,
+    publishedAt: post.publishedAt,
+    updatedAt: post.updatedAt
+  };
+}

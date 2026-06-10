@@ -16,6 +16,7 @@
     "cloudflare:setup": "scripts/cloudflare-free-deploy-setup.sh",
     "cloudflare:setup:staging": "ALTOS_CLOUDFLARE_WRANGLER_CONFIG=wrangler.staging.jsonc ALTOS_CLOUDFLARE_KV_NAMESPACE=ALTOS_BLOG_KV_STAGING scripts/cloudflare-free-deploy-setup.sh",
     "cloudflare:seed-staging-kv": "node scripts/cloudflare-seed-kv.mjs --config wrangler.staging.jsonc --data data/cms.json",
+    "cloudflare:migrate-public-blog-cache": "node scripts/cloudflare-migrate-public-blog-cache.mjs",
     "cloudflare:types": "wrangler types --env-interface CloudflareEnv",
     "verify:gcp": "node scripts/gcp-production-smoke.mjs",
     "verify:cloudflare": "node scripts/cloudflare-smoke.mjs",

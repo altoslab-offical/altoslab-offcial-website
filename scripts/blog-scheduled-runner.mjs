@@ -193,7 +193,7 @@ async function fetchPublicPostsForLanguage({ baseUrl, language }) {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), Number(process.env.ALTOS_BLOG_INVENTORY_TIMEOUT_MS || "15000"));
   try {
-    const response = await fetch(`${normalizeBaseUrl(baseUrl)}/api/blog?language=${encodeURIComponent(language)}&limit=200`, {
+    const response = await fetch(`${normalizeBaseUrl(baseUrl)}/api/blog?language=${encodeURIComponent(language)}&limit=200&fields=inventory`, {
       cache: "no-store",
       signal: controller.signal,
       headers: { "User-Agent": "ALTOS-LAB-blog-scheduled-runner/1.0" }

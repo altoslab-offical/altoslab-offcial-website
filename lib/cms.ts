@@ -28,6 +28,9 @@ const PUBLIC_STATUSES = new Set(["published"]);
 const PUBLIC_CMS_CACHE_TTL_MS = 15_000;
 const PUBLIC_BLOG_CACHE_TTL_MS = 60_000;
 const PUBLIC_BLOG_CACHE_LIMIT_PER_LANGUAGE = Number(process.env.PUBLIC_BLOG_CACHE_LIMIT_PER_LANGUAGE || 80);
+const PUBLIC_BLOG_DETAIL_REFRESH_LIMIT_PER_LANGUAGE = Number(process.env.PUBLIC_BLOG_DETAIL_REFRESH_LIMIT_PER_LANGUAGE || 4);
+const PUBLIC_BLOG_LIST_CACHE_VERSION = "v1";
+const PUBLIC_BLOG_DETAIL_CACHE_VERSION = "v1";
 
 let publicRawCmsCache: { data: CmsData; expiresAt: number } | null = null;
 let publicBlogPostsCache: { posts: BlogPost[]; expiresAt: number } | null = null;
@@ -293,7 +296,18 @@ function hydrateCmsData(data: CmsData): CmsData {
 
 function publicBlogCacheKey() {
   const config = getCloudflareKvConfig();
-  return config ? `${config.cmsPathname}:public-blog:v1` : "";
+  return config ? `${config.cmsPathname}:public-blog-list:${PUBLIC_BLOG_LIST_CACHE_VERSION}` : "";
+}
+
+function safePublicBlogDetailCachePart(value: string) {
+  return value.replace(/[^a-z0-9._:-]+/gi, "-").replace(/^-+|-+$/g, "") || "post";
+}
+
+function publicBlogDetailCacheKey(language: BlogLanguage, slug: string) {
+  const config = getCloudflareKvConfig();
+  return config
+    ? `${config.cmsPathname}:public-blog-detail:${PUBLIC_BLOG_DETAIL_CACHE_VERSION}:${safePublicBlogDetailCachePart(language)}:${safePublicBlogDetailCachePart(slug)}`
+    : "";
 }
 
 function containsUnicodeReplacement(value: unknown): boolean {
@@ -337,18 +351,47 @@ function compactPublicBlogPost(post: BlogPost): BlogPost {
   };
 }
 
-function publicBlogPostsFromData(data: CmsData) {
-  const published = data.blogPosts
+function compactPublicBlogListPost(post: BlogPost): BlogPost {
+  return {
+    ...post,
+    body: "",
+    faqs: [],
+    contentImages: [],
+    generationTrace: undefined
+  };
+}
+
+function allPublicBlogPostsFromData(data: CmsData) {
+  return data.blogPosts
     .filter((post) => post.status === "published")
     .map(hydrateBlogPost)
     .map(compactPublicBlogPost);
+}
 
+function publicBlogListPostsFromPosts(posts: BlogPost[]) {
   return BLOG_LANGUAGES.flatMap((language) =>
-    sortedByOrder(published.filter((post) => normalizeBlogLanguage(post.language) === language)).slice(
-      0,
-      PUBLIC_BLOG_CACHE_LIMIT_PER_LANGUAGE
-    )
+    sortedByOrder(posts.filter((post) => normalizeBlogLanguage(post.language) === language))
+      .slice(0, PUBLIC_BLOG_CACHE_LIMIT_PER_LANGUAGE)
+      .map(compactPublicBlogListPost)
   );
+}
+
+function publicBlogDetailRefreshPostsFromPosts(posts: BlogPost[]) {
+  return BLOG_LANGUAGES.flatMap((language) =>
+    [...posts]
+      .filter((post) => normalizeBlogLanguage(post.language) === language)
+      .sort(
+        (a, b) =>
+          (new Date(b.publishedAt || b.updatedAt || b.createdAt).getTime() || 0) -
+            (new Date(a.publishedAt || a.updatedAt || a.createdAt).getTime() || 0) ||
+          Number(a.sortOrder || 0) - Number(b.sortOrder || 0)
+      )
+      .slice(0, PUBLIC_BLOG_DETAIL_REFRESH_LIMIT_PER_LANGUAGE)
+  );
+}
+
+function publicBlogListPostsFromData(data: CmsData) {
+  return publicBlogListPostsFromPosts(allPublicBlogPostsFromData(data));
 }
 
 async function readPublicBlogCache() {
@@ -378,12 +421,43 @@ async function readPublicBlogCache() {
   }
 }
 
+async function readPublicBlogDetailCache(slug: string, language?: BlogLanguage) {
+  const namespace = getCloudflareKvNamespace();
+  if (!namespace) return null;
+
+  const decodedSlug = decodeSlugCandidate(slug);
+  const languages = language ? [normalizeBlogLanguage(language)] : BLOG_LANGUAGES;
+  for (const candidateLanguage of languages) {
+    const key = publicBlogDetailCacheKey(candidateLanguage, decodedSlug);
+    if (!key) continue;
+    const raw = await namespace.get(key).catch(() => null);
+    if (!raw) continue;
+    try {
+      const parsed = JSON.parse(raw) as { post?: BlogPost };
+      const post = parsed.post;
+      if (
+        post?.status === "published" &&
+        normalizeBlogLanguage(post.language) === candidateLanguage &&
+        matchesBlogSlug(post.slug, slug)
+      ) {
+        return post;
+      }
+    } catch (error) {
+      console.warn("[cms] Public blog detail cache is unreadable:", error instanceof Error ? error.message : error);
+    }
+  }
+
+  return null;
+}
+
 async function writePublicBlogCacheFromData(data: CmsData) {
   const namespace = getCloudflareKvNamespace();
   const key = publicBlogCacheKey();
   if (!namespace || !key) return;
 
-  const posts = publicBlogPostsFromData(data);
+  const allPosts = allPublicBlogPostsFromData(data);
+  const posts = publicBlogListPostsFromPosts(allPosts);
+  const detailPosts = publicBlogDetailRefreshPostsFromPosts(allPosts);
   await namespace.put(
     key,
     JSON.stringify({
@@ -400,6 +474,28 @@ async function writePublicBlogCacheFromData(data: CmsData) {
       }
     }
   );
+  await Promise.all(
+    detailPosts.map((post) =>
+      namespace.put(
+        publicBlogDetailCacheKey(normalizeBlogLanguage(post.language), post.slug),
+        JSON.stringify({
+          version: 1,
+          updatedAt: nowIso(),
+          post
+        }),
+        {
+          metadata: {
+            contentType: "application/json",
+            updatedAt: nowIso(),
+            source: "cms-public-blog-detail-cache",
+            language: post.language,
+            slug: post.slug,
+            translationGroupId: post.translationGroupId
+          }
+        }
+      )
+    )
+  );
   if (canUseInMemoryPublicCache()) {
     publicBlogPostsCache = { posts, expiresAt: Date.now() + PUBLIC_BLOG_CACHE_TTL_MS };
   }
@@ -409,8 +505,13 @@ async function readPublishedBlogPostsForPublic() {
   const cached = await readPublicBlogCache();
   if (cached) return cached;
 
+  if (getCloudflareKvConfig()) {
+    console.warn("[cms] Public blog list cache is missing on Cloudflare; returning empty list instead of rebuilding during a public request.");
+    return [];
+  }
+
   const data = await readPublicRawCmsData();
-  const posts = publicBlogPostsFromData(data);
+  const posts = publicBlogListPostsFromData(data);
   await writePublicBlogCacheFromData(data).catch((error) => {
     console.warn("[cms] Unable to rebuild public blog cache:", error instanceof Error ? error.message : error);
   });
@@ -458,8 +559,7 @@ export async function getPublishedBlogPosts() {
 }
 
 export async function getPublishedBlogPostsForMetadata() {
-  const data = await readPublicRawCmsData();
-  return sortedByOrder(publicBlogPostsFromData(data));
+  return sortedByOrder(await readPublishedBlogPostsForPublic());
 }
 
 export async function getPublishedBlogPostsByLanguage(language?: BlogLanguage) {
@@ -486,6 +586,9 @@ function matchesBlogSlug(postSlug: string, requestedSlug: string) {
 }
 
 export async function getPublishedBlogPost(slug: string, language?: BlogLanguage) {
+  const cachedPost = await readPublicBlogDetailCache(slug, language);
+  if (cachedPost) return cachedPost;
+
   const posts = await readPublishedBlogPostsForPublic();
   const post = posts.find(
     (item) =>
@@ -493,6 +596,13 @@ export async function getPublishedBlogPost(slug: string, language?: BlogLanguage
       item.status === "published" &&
       (!language || normalizeBlogLanguage(item.language) === language)
   );
+  if (post?.body) return post;
+
+  if (getCloudflareKvConfig()) {
+    console.warn("[cms] Public blog detail cache is missing on Cloudflare; returning null instead of rebuilding during a public request.");
+    return null;
+  }
+
   return post || null;
 }
 
