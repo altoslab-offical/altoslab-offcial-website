@@ -78,6 +78,10 @@ function pushIssue(errors, message, context = {}) {
   errors.push({ message, ...context });
 }
 
+function hasCloudflareWorkerErrorBody(text = "") {
+  return /\berror code:\s*1102\b/i.test(text) || /Worker exceeded resource limits/i.test(text);
+}
+
 async function printJson(payload) {
   await new Promise((resolve) => {
     process.stdout.write(`${JSON.stringify(payload, null, 2)}\n`, resolve);
@@ -107,6 +111,9 @@ async function fetchText(root, path, errors, context) {
     });
     const text = await response.text();
     if (!response.ok) pushIssue(errors, `GET ${url} returned ${response.status}`, context);
+    if (hasCloudflareWorkerErrorBody(text)) {
+      pushIssue(errors, `GET ${url} returned a Cloudflare Worker error body`, { ...context, status: response.status });
+    }
     return { response, text };
   } catch (error) {
     pushIssue(errors, `GET ${url} failed: ${error instanceof Error ? error.message : "unknown error"}`, context);

@@ -17,6 +17,7 @@ import {
 } from "@/lib/blog-authors";
 import { blogContentTypeLabel, blogIndexPath, blogPostPath, languageLabel } from "@/lib/blog-utils";
 import { toBlogVisualPost } from "@/lib/blog-visual";
+import { isCloudflareKvConfigured } from "@/lib/cloudflare-kv";
 import { getRelatedPublishedBlogPosts } from "@/lib/cms";
 import { publicTaxonomyLabel, publicTaxonomyLabels } from "@/lib/public-taxonomy";
 import { articleJsonLd, breadcrumbJsonLd, faqJsonLd } from "@/lib/seo";
@@ -418,12 +419,12 @@ function ArticleBodyWithImages({ text, images }: { text: string; images: BlogInl
 }
 
 export async function BlogArticle({ post }: { post: BlogPost }) {
-  const lightweightCloudflareRender = process.env.CLOUDFLARE_KV_ENABLED === "1";
+  const lightweightCloudflareRender = isCloudflareKvConfigured();
   const dictionary = copy[post.language];
   const taxonomy = articleTaxonomy(post);
   const sourceTranslationNote = extractSourceTranslationNote(post.body);
   const articleBody = post.faqs.length ? removeInlineFaqSection(sourceTranslationNote.body) : sourceTranslationNote.body;
-  const relatedPosts = await getRelatedPublishedBlogPosts(post, 3);
+  const relatedPosts = lightweightCloudflareRender ? [] : await getRelatedPublishedBlogPosts(post, 3);
   const locale = post.language === "en" ? "en" : "zh-TW";
   const author = blogAuthorForPost(post);
   const authorProfile = blogAuthorProfile(author, post.language);

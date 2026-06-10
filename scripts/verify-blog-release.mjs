@@ -116,6 +116,10 @@ function pushWarning(warnings, message, context = {}) {
   warnings.push({ message, ...context });
 }
 
+function hasCloudflareWorkerErrorBody(text = "") {
+  return /\berror code:\s*1102\b/i.test(text) || /Worker exceeded resource limits/i.test(text);
+}
+
 function isSourceReachabilityWarning(warning) {
   return /^source link validation warning:/i.test(String(warning || ""));
 }
@@ -289,6 +293,9 @@ async function fetchText(url, errors, context) {
     const response = await fetchWithTimeout(url, { headers: { "User-Agent": "altos-blog-release-verifier/1.0" } });
     const text = await response.text();
     if (!response.ok) pushIssue(errors, `GET ${url} returned ${response.status}`, context);
+    if (hasCloudflareWorkerErrorBody(text)) {
+      pushIssue(errors, `GET ${url} returned a Cloudflare Worker error body`, { ...context, status: response.status });
+    }
     return { response, text };
   } catch (error) {
     pushIssue(errors, `GET ${url} failed: ${error instanceof Error ? error.message : "unknown error"}`, context);
