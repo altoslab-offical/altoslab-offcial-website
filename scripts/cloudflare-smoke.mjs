@@ -105,7 +105,7 @@ async function fetchWithTimeout(url, options = {}) {
 
 async function fetchText(root, path, errors, context) {
   const url = `${root}${path}`;
-  const attempts = Number(process.env.CLOUDFLARE_SMOKE_ATTEMPTS || "3");
+  const attempts = Number(process.env.CLOUDFLARE_SMOKE_ATTEMPTS || "6");
   let last = { response: null, text: "" };
   try {
     for (let attempt = 1; attempt <= attempts; attempt += 1) {
@@ -116,7 +116,7 @@ async function fetchText(root, path, errors, context) {
       last = { response, text };
       if (response.ok && !hasCloudflareWorkerErrorBody(text)) break;
       if (attempt < attempts && (response.status === 503 || hasCloudflareWorkerErrorBody(text))) {
-        await new Promise((resolve) => setTimeout(resolve, 1200 * attempt));
+        await new Promise((resolve) => setTimeout(resolve, 1500 * attempt));
         continue;
       }
     }
