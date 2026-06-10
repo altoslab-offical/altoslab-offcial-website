@@ -1,4 +1,9 @@
-import { getPublishedBlogPost, getPublishedBlogPosts, getPublishedProjects } from "@/lib/cms";
+import {
+  getPublishedBlogInventoryPosts,
+  getPublishedBlogPost,
+  getPublishedBlogPosts,
+  getPublishedProjects
+} from "@/lib/cms";
 import { BLOG_LANGUAGES, blogPostPath, languageLabel } from "@/lib/blog-utils";
 import { publicTaxonomyLabel } from "@/lib/public-taxonomy";
 import { siteName, siteUrl } from "@/lib/seo";
@@ -37,11 +42,16 @@ function latestArticleGroups(posts: BlogPost[]) {
 
 export async function GET() {
   const lightweightCloudflareRender = process.env.CLOUDFLARE_KV_ENABLED === "1";
-  const [posts, projects] = await Promise.all([getPublishedBlogPosts(), lightweightCloudflareRender ? Promise.resolve([]) : getPublishedProjects()]);
+  const [posts, projects] = await Promise.all([
+    lightweightCloudflareRender ? getPublishedBlogInventoryPosts() : getPublishedBlogPosts(),
+    lightweightCloudflareRender ? Promise.resolve([]) : getPublishedProjects()
+  ]);
   const recentPostSummaries = latestArticleGroups(posts);
-  const recentPosts = (
-    await Promise.all(recentPostSummaries.map((post) => getPublishedBlogPost(post.slug, post.language)))
-  ).filter(Boolean) as BlogPost[];
+  const recentPosts = lightweightCloudflareRender
+    ? recentPostSummaries
+    : ((await Promise.all(recentPostSummaries.map((post) => getPublishedBlogPost(post.slug, post.language)))).filter(
+        Boolean
+      ) as BlogPost[]);
   const lines = [
     `# ${siteName} full LLM context`,
     "",
@@ -86,7 +96,9 @@ export async function GET() {
         "Sources:",
         sources,
         "Body:",
-        publicTaxonomyLabel(normalizePlainText(post.body), post.language)
+        lightweightCloudflareRender
+          ? publicTaxonomyLabel(post.geoSummary || post.excerpt, post.language)
+          : publicTaxonomyLabel(normalizePlainText(post.body), post.language)
       ].join("\n");
     })
   ];

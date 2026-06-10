@@ -20,6 +20,7 @@ const REQUIRED_PATHS = [
     surface: `blog-${language}`
   })),
   { path: "/feed.xml", surface: "rss" },
+  { path: "/rss.xml", surface: "rss-alias" },
   { path: "/sitemap.xml", surface: "sitemap" },
   { path: "/llms.txt", surface: "llms" }
 ];

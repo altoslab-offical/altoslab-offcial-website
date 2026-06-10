@@ -1,4 +1,4 @@
-import { getPublishedBlogPosts } from "@/lib/cms";
+import { getPublishedBlogInventoryPosts, getPublishedBlogPosts } from "@/lib/cms";
 import { blogPostPath } from "@/lib/blog-utils";
 import { publicTaxonomyLabel } from "@/lib/public-taxonomy";
 import { absoluteUrl, siteName, siteUrl } from "@/lib/seo";
@@ -28,7 +28,10 @@ function escapeXml(value: string) {
 }
 
 export async function GET() {
-  const posts = latestFeedPosts(await getPublishedBlogPosts());
+  const lightweightCloudflareRender = process.env.CLOUDFLARE_KV_ENABLED === "1";
+  const posts = latestFeedPosts(
+    lightweightCloudflareRender ? await getPublishedBlogInventoryPosts() : await getPublishedBlogPosts()
+  );
   const items = posts
     .map((post) => {
       const url = absoluteUrl(blogPostPath(post));

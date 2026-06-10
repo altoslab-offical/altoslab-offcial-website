@@ -5,7 +5,7 @@
 - Legacy Vercel alias: https://altoslab-offcial-website.vercel.app
 - Active Cloudflare Workers target: `altoslab-official-website`
 - Active Cloudflare Workers URL: https://altoslab-official-website.altoslab-ai.workers.dev
-- Target custom domain after DNS cutover: https://altoslab-ai.cc
+- Active custom domain: https://altoslab-ai.cc
 - Future brand domain: https://altoslab.com
 - Admin: `/admin`
 - Blog: `/blog`
@@ -13,7 +13,7 @@
 
 ## Cloudflare Active Lane
 
-Cloudflare Workers is the active production path while Google/GCP access, cost, or account-health issues block reliable GCP operation. The verified Worker URL is `https://altoslab-official-website.altoslab-ai.workers.dev`. The custom domain `https://altoslab-ai.cc` remains DNS-blocked until authoritative DNS no longer points at Google Frontend.
+Cloudflare Workers is the active production path while Google/GCP access, cost, or account-health issues block reliable GCP operation. The custom production domain is routed to the Worker in Cloudflare DNS, but local automation should keep using the stable Worker URL `https://altoslab-official-website.altoslab-ai.workers.dev` until the unpinned custom-domain smoke test passes consistently.
 
 - Next.js runs on Cloudflare Workers via OpenNext (`@opennextjs/cloudflare`).
 - CMS JSON and generated blog covers are stored in Cloudflare KV namespace `ALTOS_BLOG_KV` on the free plan.
@@ -41,6 +41,8 @@ Only after that gate passes may the operator intentionally run the production Cl
 ```bash
 npm run deploy:cloudflare
 npm run verify:cloudflare -- --base-url https://altoslab-official-website.altoslab-ai.workers.dev
+npm run verify:cloudflare -- --base-url https://altoslab-ai.cc --resolve-ip <cloudflare-edge-ip>
+npm run verify:cloudflare -- --base-url https://altoslab-ai.cc
 ```
 
 `npm run deploy:cloudflare:staging` uses `wrangler.staging.jsonc`, which intentionally has no `routes` entry. `npm run deploy:cloudflare` uses `wrangler.jsonc`, which does include `altoslab-ai.cc/*` and `www.altoslab-ai.cc/*` zone routes. Treat the production command as a cutover action, not a normal smoke test.
@@ -49,21 +51,29 @@ The setup script reads `~/.altoslab-blog-worker.env` when present and syncs requ
 
 `npm run cloudflare:seed-staging-kv` copies local `data/cms.json` into the staging KV key only; it does not touch the production KV namespace.
 
-DNS blocker: `altoslab-ai.cc` is currently delegated to Google nameservers (`ns-cloud-e*.googledomains.com`) and its apex/www DNS records point to Google Frontend. Cloudflare Worker routes will not receive live custom-domain traffic until the domain is delegated to Cloudflare nameservers or the authoritative DNS is otherwise changed to a Cloudflare-compatible proxied setup. Until that DNS step is done, keep `ALTOS_BLOG_BASE_URL=https://altoslab-official-website.altoslab-ai.workers.dev` and verify the Worker URL directly.
+DNS state after the 2026-06-10 cutover: `altoslab-ai.cc` is delegated to Cloudflare nameservers `cecelia.ns.cloudflare.com` and `trey.ns.cloudflare.com`. Cloudflare DNS keeps the apex on a proxied placeholder A record (`192.0.2.1`) and `www` on a proxied CNAME to `altoslab-ai.cc`; zone routes in `wrangler.jsonc` send both hosts to the production Worker. Keep `ALTOS_BLOG_BASE_URL=https://altoslab-official-website.altoslab-ai.workers.dev` while any unpinned `curl -I https://altoslab-ai.cc/api/health` still reports `server: Google Frontend`.
+
+During registrar or nameserver cutover, recursive DNS caches can briefly disagree even after Cloudflare authoritative DNS is correct. If local `curl` still resolves to an old Google IP, verify the Worker route without changing production by pinning the smoke test to a current Cloudflare edge IP from `dig @cecelia.ns.cloudflare.com A altoslab-ai.cc`:
+
+```bash
+npm run verify:cloudflare -- --base-url https://altoslab-ai.cc --resolve-ip <cloudflare-edge-ip>
+```
+
+Treat pinned smoke as transition evidence only. The normal custom-domain gate is still the unpinned `npm run verify:cloudflare -- --base-url https://altoslab-ai.cc` once recursive DNS caches converge.
 
 ## Legacy GCP Cloud Run Architecture
 
-This path is retained as legacy recovery documentation only. Do not run blind GCP repair or deploy commands while `gcloud`/ADC credentials are invalid or while the custom domain still serves Google Frontend. If GCP is intentionally restored later, treat it as a new migration: preview first, verify the Cloud Run URL, then cut over DNS only after all public and admin checks pass.
+This path is retained as legacy recovery documentation only. Do not run blind GCP repair or deploy commands while `gcloud`/ADC credentials are invalid. If GCP is intentionally restored later, treat it as a new migration: preview first, verify the Cloud Run URL, then cut over DNS only after all public and admin checks pass.
 
 - Next.js builds as a standalone Node server in `Dockerfile` and runs on Cloud Run port `8080`.
 - Cloud Run is configured with request-based billing, `min-instances=0`, `max-instances=3`, 512Mi memory and 80 concurrency.
 - CMS JSON and generated blog covers are stored in a private Cloud Storage bucket in `us-central1` so the workload stays inside the Cloud Storage Always Free eligible regions.
 - Generated covers remain same-origin through `/api/blog/generated-media/:filename`; the GCS bucket is not public.
 - Active Cloudflare production should report `cmsStorage.provider = cloudflare-kv`. A GCP recovery service should report `cmsStorage.provider = gcs` only after a fresh GCP migration has been explicitly verified.
-- Current `altoslab-ai.cc` and `www.altoslab-ai.cc` Cloud Run domain mappings live in GCP project `project-e688c018-aec3-4815-891`, region `us-central1`, service `altoslab-official-website`. Until the custom domain mapping is consolidated into `altoslab-official-website-447`, deploys that must affect the public custom domain should update `project-e688c018-aec3-4815-891`.
+- Legacy `altoslab-ai.cc` and `www.altoslab-ai.cc` Cloud Run domain mappings in GCP project `project-e688c018-aec3-4815-891` no longer receive production custom-domain traffic after the Cloudflare DNS cutover. Do not use them for normal publishing or repair.
 - GA/GTM stay on `GTM-WJ96VR7V` and `G-5VSLFNVD28` unless the analytics owner intentionally replaces them.
 - Google operations now use `altoslab768@gmail.com` as the active operator account. Do not store this account's password in this repo or in Codex memory; use Google's sign-in session, MFA and `gcloud auth` on Tommy's machine.
-- SEO/GEO daily insight is generated against the active Worker until DNS cutover: `npm run seo:geo-report -- --base-url https://altoslab-official-website.altoslab-ai.workers.dev --format text`. After `altoslab-ai.cc` no longer shows Google Frontend and Cloudflare verification passes, switch the report base URL back to `https://altoslab-ai.cc`. The daily email must be sent through the Gmail web UI from `altoslab768@gmail.com` to `Altoslab.offical@gmail.com`; if the Gmail web session is not the official sender, hold the send instead of using a connector or another mailbox.
+- SEO/GEO daily insight should use the stable Cloudflare Worker URL while unpinned custom-domain smoke is still affected by recursive DNS cache: `npm run seo:geo-report -- --base-url https://altoslab-official-website.altoslab-ai.workers.dev --format text`. Switch back to `https://altoslab-ai.cc` only after unpinned Cloudflare verification passes. The daily email must be sent through the Gmail web UI from `altoslab768@gmail.com` to `Altoslab.offical@gmail.com`; if the Gmail web session is not the official sender, hold the send instead of using a connector or another mailbox.
 - Chrome browser work for Gemini, ChatGPT/GPT and Gmail must use the Chrome profile signed in as `john.wu0120@gmail.com`. Do not use or switch into `tm.studio`; if the required profile is not visible, hold browser work and report the blocker.
 
 Run before any future GCP recovery deploy:
@@ -112,9 +122,9 @@ Set `ALTOS_BLOG_PRODUCTION_AUTO_REPAIR=0` only when intentionally disabling auto
 
 目前 `altoslab-ai.cc` 是 canonical production domain。GCP migration must be preview-first: deploy and verify the Cloud Run URL with `npm run verify:gcp -- --base-url <cloud-run-url>`, then map/cut over the custom domain only after `/`, `/blog`, `/admin`, `/api/health`, feed, sitemap, `llms.txt`, GA/GTM and image URLs pass.
 
-Cloudflare rescue migration also remains DNS-first: `wrangler deploy --config wrangler.jsonc --keep-vars` can update the Worker and zone-route definitions, but it cannot override Google authoritative nameservers. If `curl -I https://altoslab-ai.cc/api/health` still shows `server: Google Frontend`, the custom domain has not cut over; keep reporting the Worker URL as ready and the production custom domain as DNS-blocked.
+Cloudflare production is DNS-first: `wrangler deploy --config wrangler.jsonc --keep-vars` updates the Worker and zone-route definitions, while GoDaddy nameservers must remain pointed at Cloudflare. If `curl -I https://altoslab-ai.cc/api/health` ever stops reporting `server: cloudflare`, treat that as a DNS regression and verify the Worker URL separately.
 
-Before custom-domain cutover, keep `~/.altoslab-blog-worker.env` pointing to the Worker URL. After DNS cutover, update `ALTOS_BLOG_BASE_URL=https://altoslab-ai.cc` only after `curl -I https://altoslab-ai.cc/api/health` no longer shows `server: Google Frontend` and `npm run verify:cloudflare -- --base-url https://altoslab-ai.cc` passes.
+After the 2026-06-10 nameserver cutover, keep `~/.altoslab-blog-worker.env` on `ALTOS_BLOG_BASE_URL=https://altoslab-official-website.altoslab-ai.workers.dev` until unpinned `npm run verify:cloudflare -- --base-url https://altoslab-ai.cc` passes. Then switch the local worker base URL to `https://altoslab-ai.cc`.
 
 ## Required Production Environment Variables
 
@@ -229,9 +239,11 @@ curl -I https://altoslab-official-website.altoslab-ai.workers.dev/admin
 curl -I https://altoslab-official-website.altoslab-ai.workers.dev/blog
 curl -I https://altoslab-official-website.altoslab-ai.workers.dev/en/blog
 curl -I https://altoslab-official-website.altoslab-ai.workers.dev/feed.xml
+curl -I https://altoslab-official-website.altoslab-ai.workers.dev/rss.xml
 curl -I https://altoslab-official-website.altoslab-ai.workers.dev/llms.txt
 curl -I https://altoslab-official-website.altoslab-ai.workers.dev/llms-full.txt
 curl -I https://altoslab-ai.cc/api/health
+curl -I https://altoslab-ai.cc/rss.xml
 ```
 
 Expected results:
@@ -242,6 +254,7 @@ Expected results:
 - Cloudflare staging/production smoke expects `/api/health` to report `cmsStorage.provider = cloudflare-kv`, `adminConfigured: true`, `integrations.externalBlogIngestConfigured: true`, `integrations.legacyDeepSeekCronDisabled: true`, `integrations.imageCloudflareKvConfigured: true`, `GTM-WJ96VR7V`, `G-5VSLFNVD28`, all nine blog languages, at least five market-scan windows, and non-empty public `/api/blog`.
 - `/blog` returns 200 and remains indexable.
 - `/feed.xml` returns RSS XML for published blog posts.
+- `/rss.xml` aliases the canonical RSS feed and returns the same RSS XML shape.
 - `/llms.txt` returns a concise LLM-readable site map.
 - `/llms-full.txt` returns expanded answer-engine context for services, projects and published articles.
 - `/api/*` and `/admin/*` return `X-Robots-Tag: noindex, nofollow, noarchive`.

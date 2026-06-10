@@ -7,7 +7,7 @@ import { SiteFooter } from "@/components/site/SiteFooter";
 import { SiteHeader } from "@/components/site/SiteHeader";
 import { blogContentTypeLabel, blogIndexPath, blogPostPath } from "@/lib/blog-utils";
 import { toBlogVisualPost } from "@/lib/blog-visual";
-import { getPublishedBlogPostsByLanguage } from "@/lib/cms";
+import { getPublishedBlogInventoryPostsByLanguage, getPublishedBlogPostsByLanguage } from "@/lib/cms";
 import { blogIndexItemListJsonLd, breadcrumbJsonLd } from "@/lib/seo";
 import type { BlogLanguage } from "@/lib/types";
 
@@ -431,7 +431,9 @@ function matchesTopic(post: Awaited<ReturnType<typeof getPublishedBlogPostsByLan
 export async function BlogIndex({ language, tag, query }: BlogIndexProps) {
   const lightweightCloudflareRender = process.env.CLOUDFLARE_KV_ENABLED === "1";
   const dictionary = copy[language];
-  const posts = await getPublishedBlogPostsByLanguage(language);
+  const posts = lightweightCloudflareRender
+    ? await getPublishedBlogInventoryPostsByLanguage(language)
+    : await getPublishedBlogPostsByLanguage(language);
   const orderedPosts = [...posts].sort(
     (a, b) => articleTimestamp(b) - articleTimestamp(a) || Number(a.sortOrder || 0) - Number(b.sortOrder || 0)
   );

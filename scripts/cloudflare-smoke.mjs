@@ -1,5 +1,9 @@
 #!/usr/bin/env node
 
+import dns from "node:dns";
+import net from "node:net";
+import { Agent } from "undici";
+
 const DEFAULT_BASE_URL = "https://altoslab-official-website-staging.altoslab-ai.workers.dev";
 const BLOG_LANGUAGES = ["zh-Hant", "en", "ja", "ko", "id", "vi", "th", "ms", "fil"];
 const LANGUAGE_PATH_PREFIX = {
@@ -20,6 +24,7 @@ const REQUIRED_PATHS = [
     surface: `blog-${language}`
   })),
   { path: "/feed.xml", surface: "rss" },
+  { path: "/rss.xml", surface: "rss-alias" },
   { path: "/sitemap.xml", surface: "sitemap" },
   { path: "/llms.txt", surface: "llms" }
 ];
@@ -40,6 +45,35 @@ function expectedProvider() {
   return arg("expected-provider", process.env.CLOUDFLARE_SMOKE_EXPECTED_PROVIDER || "cloudflare-kv");
 }
 
+function resolveIp() {
+  return arg("resolve-ip", process.env.CLOUDFLARE_SMOKE_RESOLVE_IP || "");
+}
+
+let activeDispatcher;
+let activeResolveOverride = null;
+
+function configureResolveOverride(root) {
+  const ip = resolveIp();
+  if (!ip) return null;
+  const family = net.isIP(ip);
+  if (!family) throw new Error(`--resolve-ip must be an IPv4 or IPv6 address, received ${ip}`);
+  const host = new URL(root).hostname;
+  activeDispatcher = new Agent({
+    connect: {
+      lookup(name, options, callback) {
+        if (name === host) {
+          if (options?.all) callback(null, [{ address: ip, family }]);
+          else callback(null, ip, family);
+          return;
+        }
+        dns.lookup(name, options, callback);
+      }
+    }
+  });
+  activeResolveOverride = { host, ip, family };
+  return activeResolveOverride;
+}
+
 function pushIssue(errors, message, context = {}) {
   errors.push({ message, ...context });
 }
@@ -57,6 +91,7 @@ async function fetchWithTimeout(url, options = {}) {
     return await fetch(url, {
       redirect: "follow",
       ...options,
+      dispatcher: options.dispatcher || activeDispatcher,
       signal: controller.signal
     });
   } finally {
@@ -100,6 +135,7 @@ async function fetchJson(root, path, errors, context) {
 async function main() {
   const root = baseUrl();
   const provider = expectedProvider();
+  const resolveOverride = configureResolveOverride(root);
   const expectedGtmId = process.env.NEXT_PUBLIC_GTM_ID || "GTM-WJ96VR7V";
   const expectedGaId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || "G-5VSLFNVD28";
   const errors = [];
@@ -220,6 +256,7 @@ async function main() {
     phase: "cloudflare-smoke",
     root,
     expectedProvider: provider,
+    resolveOverride,
     checkedAt: new Date().toISOString(),
     errors,
     warnings,

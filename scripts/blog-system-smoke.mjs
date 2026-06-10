@@ -60,6 +60,11 @@ const blogTypes = read("lib/types.ts");
 const cms = read("lib/cms.ts");
 const blogArticle = read("components/BlogArticle.tsx");
 const blogIndex = read("components/BlogIndex.tsx");
+const feedRoute = read("app/feed.xml/route.ts");
+const rssAliasRoute = read("app/rss.xml/route.ts");
+const llmsRoute = read("app/llms.txt/route.ts");
+const llmsFullRoute = read("app/llms-full.txt/route.ts");
+const sitemapRoute = read("app/sitemap.ts");
 const richText = read("components/RichText.tsx");
 const siteHeader = read("components/site/SiteHeader.tsx");
 const globals = read("app/globals.css");
@@ -274,6 +279,15 @@ assert(cloudflareSeed.includes("cms:${safeStorageKey") && cloudflareSeed.include
 assert(cloudflareSeed.includes("\"--remote\""), "Cloudflare seed writes staging CMS data to remote KV, not local Wrangler storage");
 assert(cms.includes("public-blog-list") && cms.includes("public-blog-detail"), "public blog cache is split into list and detail keys for Cloudflare CPU safety");
 assert(cms.includes("public-blog-inventory") && cloudflareSmoke.includes("fields=inventory&limit=600"), "Cloudflare public blog inventory uses a lightweight all-post cache");
+assert(blogIndex.includes("getPublishedBlogInventoryPostsByLanguage"), "Cloudflare blog index renders from inventory cache instead of full blog bodies");
+assert(feedRoute.includes("getPublishedBlogInventoryPosts()"), "Cloudflare feed renders from inventory cache instead of full blog bodies");
+assert(
+  rssAliasRoute.includes("export const dynamic = \"force-dynamic\"") && rssAliasRoute.includes("export { GET } from \"../feed.xml/route\""),
+  "rss.xml aliases the canonical feed.xml endpoint with a local route config"
+);
+assert(llmsRoute.includes("getPublishedBlogInventoryPosts()"), "Cloudflare llms.txt renders from inventory cache instead of full blog bodies");
+assert(llmsFullRoute.includes("getPublishedBlogInventoryPosts()") && llmsFullRoute.includes("recentPostSummaries"), "Cloudflare llms-full avoids detail cache fan-out during Worker requests");
+assert(sitemapRoute.includes("lightweightCloudflareRender") && sitemapRoute.includes("Promise.resolve([])"), "Cloudflare sitemap avoids full project CMS reads during Worker requests");
 assert(cms.includes("public-blog-duplicates") && cms.includes("getPublishedBlogDuplicatePosts"), "Cloudflare validate has a lightweight duplicate-check cache");
 assert(cms.includes("sortedByPublicRecency") && cms.includes("updatedAt || post.publishedAt || post.createdAt"), "Cloudflare public blog lists are selected by release recency, not sortOrder");
 assert(cms.includes("PUBLIC_BLOG_DETAIL_REFRESH_LIMIT_PER_LANGUAGE") && cms.includes("publicBlogDetailRefreshPostsFromPosts"), "publish-time detail cache refresh is bounded per language for Cloudflare subrequest safety");
@@ -286,6 +300,7 @@ assert(cloudflareMigratePublicBlogCache.includes("sortByPublicRecency"), "Cloudf
 assert(cloudflareMigratePublicBlogCache.includes("public-blog-duplicates:v1") && cloudflareMigratePublicBlogCache.includes("duplicatePosts"), "Cloudflare public blog cache migration writes the duplicate-check cache");
 assert(cloudflareMigratePublicBlogCache.includes("detailPosts") && cloudflareMigratePublicBlogCache.includes("\"--remote\""), "Cloudflare public blog cache migration writes remote detail keys without printing article bodies");
 assert(cloudflareSmoke.includes("expected-provider") && cloudflareSmoke.includes("imageCloudflareKvConfigured"), "Cloudflare smoke verifies KV storage and generated-media configuration");
+assert(cloudflareSmoke.includes("resolve-ip") && cloudflareSmoke.includes("activeResolveOverride"), "Cloudflare smoke can pin DNS during resolver-cache cutover diagnostics");
 assert(cloudflareSmoke.includes("publishedPosts === 0"), "Cloudflare smoke fails closed when public blog inventory is empty");
 assert(cloudflareStagingConfig.includes("\"name\": \"altoslab-official-website-staging\""), "Cloudflare staging config uses a separate Worker");
 assert(cloudflareStagingConfig.includes("\"id\": \"246977568bf14ed0916a21eedbdbdbc1\""), "Cloudflare staging config binds the staging KV namespace");
@@ -413,7 +428,7 @@ assert(envExample.includes("ALTOS_BLOG_WORKER_WAIT_MINUTES"), "env example docum
 assert(envExample.includes("BLOG_IMAGE_ALLOW_NON_BLOB"), "env example documents generated image Blob enforcement");
 assert(envExample.includes("BLOG_MEDIA_ALLOW_LOCAL_STORAGE"), "env example documents local-only media upload mode");
 assert(envExample.includes("BLOG_ALLOW_LOCAL_FALLBACK_COVERS=0"), "env example keeps local fallback covers disabled");
-assert(envExample.includes("ALTOS_BLOG_BASE_URL=https://altoslab-official-website.altoslab-ai.workers.dev"), "env example defaults local workers to the active Cloudflare Worker URL");
+assert(envExample.includes("ALTOS_BLOG_BASE_URL=https://altoslab-official-website.altoslab-ai.workers.dev"), "env example defaults local workers to the stable Cloudflare Worker URL during DNS propagation");
 assert(envExample.includes("CLOUDFLARE_KV_ENABLED=1"), "env example documents active Cloudflare KV storage");
 assert(envExample.includes("GCS_STORAGE_ENABLED=0"), "env example keeps legacy GCP/GCS storage disabled by default");
 assert(envExample.includes("ALTOS_BLOG_PRODUCTION_AUTO_REPAIR=0"), "env example keeps blind GCP repair disabled by default");

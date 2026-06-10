@@ -4,7 +4,11 @@ import { BLOG_LANGUAGES, blogIndexPath, blogPostPath, metadataLanguageKey } from
 import { siteUrl } from "@/lib/seo";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [posts, projects] = await Promise.all([getPublishedBlogPostsForMetadata(), getPublishedProjects()]);
+  const lightweightCloudflareRender = process.env.CLOUDFLARE_KV_ENABLED === "1";
+  const [posts, projects] = await Promise.all([
+    getPublishedBlogPostsForMetadata(),
+    lightweightCloudflareRender ? Promise.resolve([]) : getPublishedProjects()
+  ]);
   const now = new Date();
   const uniquePosts = Array.from(
     new Map(posts.map((post) => [`${siteUrl}${blogPostPath(post)}`, post])).values()

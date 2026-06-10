@@ -1,4 +1,4 @@
-import { getPublishedBlogPosts, getPublishedProjects } from "@/lib/cms";
+import { getPublishedBlogInventoryPosts, getPublishedBlogPosts, getPublishedProjects } from "@/lib/cms";
 import { BLOG_LANGUAGES, blogPostPath } from "@/lib/blog-utils";
 import { publicTaxonomyLabel } from "@/lib/public-taxonomy";
 import { siteName, siteUrl } from "@/lib/seo";
@@ -29,7 +29,10 @@ function orderedLlmsArticles(posts: BlogPost[]) {
 
 export async function GET() {
   const lightweightCloudflareRender = process.env.CLOUDFLARE_KV_ENABLED === "1";
-  const [posts, projects] = await Promise.all([getPublishedBlogPosts(), lightweightCloudflareRender ? Promise.resolve([]) : getPublishedProjects()]);
+  const [posts, projects] = await Promise.all([
+    lightweightCloudflareRender ? getPublishedBlogInventoryPosts() : getPublishedBlogPosts(),
+    lightweightCloudflareRender ? Promise.resolve([]) : getPublishedProjects()
+  ]);
   const articles = orderedLlmsArticles(posts);
   const lines = [
     `# ${siteName}`,
