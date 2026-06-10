@@ -1,0 +1,49 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      TZ: ${TZ:-Asia/Taipei}
+    volumes:
+      - altos_n8n_postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  n8n:
+    image: n8nio/n8n:latest
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:${N8N_LOCAL_PORT:-5679}:5678"
+    environment:
+      DB_TYPE: postgresdb
+      DB_POSTGRESDB_HOST: postgres
+      DB_POSTGRESDB_PORT: 5432
+      DB_POSTGRESDB_DATABASE: ${POSTGRES_DB}
+      DB_POSTGRESDB_USER: ${POSTGRES_USER}
+      DB_POSTGRESDB_PASSWORD: ${POSTGRES_PASSWORD}
+      N8N_ENCRYPTION_KEY: ${N8N_ENCRYPTION_KEY}
+      N8N_HOST: 127.0.0.1
+      N8N_PORT: 5678
+      N8N_PROTOCOL: http
+      N8N_SECURE_COOKIE: "false"
+      GENERIC_TIMEZONE: ${GENERIC_TIMEZONE:-Asia/Taipei}
+      TZ: ${TZ:-Asia/Taipei}
+      ALTOS_N8N_BRIDGE_TOKEN: ${ALTOS_N8N_BRIDGE_TOKEN}
+    volumes:
+      - altos_n8n_data:/home/node/.n8n
+      - ./workflows:/files/workflows:ro
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+volumes:
+  altos_n8n_data:
+  altos_n8n_postgres:

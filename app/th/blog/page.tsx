@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { BlogIndex } from "@/components/BlogIndex";
+import { BlogIndexLite } from "@/components/BlogIndexLite";
 import { BLOG_LANGUAGES, blogCoverForLanguage, blogIndexPath, metadataLanguageKey } from "@/lib/blog-utils";
 import { siteUrl } from "@/lib/seo";
 
@@ -43,5 +43,5 @@ type PageProps = {
 
 export default async function ThaiBlogIndexPage({ searchParams }: PageProps) {
   const params = searchParams ? await searchParams : {};
-  return <BlogIndex language={language} tag={params.tag} query={params.query} />;
+  return <BlogIndexLite language={language} tag={params.tag} query={params.query} />;
 }

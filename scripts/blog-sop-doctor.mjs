@@ -35,6 +35,8 @@ const LAUNCH_AGENT_TRIGGERS = [
   [20, 30]
 ];
 const LAUNCH_AGENT_PLIST = path.join(process.env.HOME || "", "Library/LaunchAgents/com.altoslab.blog-local-worker.plist");
+const N8N_BRIDGE_PLIST = path.join(process.env.HOME || "", "Library/LaunchAgents/com.altoslab.n8n-bridge.plist");
+const N8N_BRIDGE_HEALTH_URL = "http://127.0.0.1:8797/health";
 const SLOTS = {
   morning: "09:00",
   afternoon: "16:00"
@@ -287,20 +289,64 @@ async function checkProductionHealth(errors, warnings) {
   }
 }
 
-function checkLaunchAgent(errors, warnings) {
-  if (process.platform !== "darwin") {
-    addWarning(warnings, "LaunchAgent check skipped because this is not macOS");
-    return null;
-  }
+function launchctlPrint(label) {
   const uid = typeof process.getuid === "function" ? process.getuid() : "";
-  const result = spawnSync("launchctl", ["print", `gui/${uid}/com.altoslab.blog-local-worker`], {
+  const result = spawnSync("launchctl", ["print", `gui/${uid}/${label}`], {
     encoding: "utf8"
   });
-  const output = `${result.stdout || ""}${result.stderr || ""}`;
-  if (result.status !== 0) {
-    addIssue(errors, "com.altoslab.blog-local-worker LaunchAgent is not loaded");
-    return { loaded: false };
+  return {
+    loaded: result.status === 0,
+    output: `${result.stdout || ""}${result.stderr || ""}`
+  };
+}
+
+function checkN8nBridge(errors, warnings) {
+  const launchAgent = launchctlPrint("com.altoslab.n8n-bridge");
+  if (!launchAgent.loaded) return null;
+  if (!launchAgent.output.includes("/Users/asdc163/Documents/官方網站")) {
+    addIssue(errors, "n8n bridge LaunchAgent must run from /Users/asdc163/Documents/官方網站");
   }
+  if (!fs.existsSync(N8N_BRIDGE_PLIST)) {
+    addIssue(errors, "n8n bridge LaunchAgent plist is missing", { plistPath: N8N_BRIDGE_PLIST });
+  }
+  if (!launchAgent.output.includes("last exit code = 0") && !launchAgent.output.includes("last exit code = (never exited)")) {
+    addWarning(warnings, "n8n bridge LaunchAgent last exit code was not observed as 0");
+  }
+
+  const health = spawnSync("curl", ["-fsS", N8N_BRIDGE_HEALTH_URL], {
+    encoding: "utf8",
+    timeout: 5_000
+  });
+  if (health.status !== 0) {
+    addIssue(errors, "n8n bridge health endpoint is not reachable", { url: N8N_BRIDGE_HEALTH_URL });
+    return { mode: "n8n-local", loaded: true, health: null };
+  }
+  let parsed = null;
+  try {
+    parsed = JSON.parse(health.stdout || "{}");
+  } catch {
+    addIssue(errors, "n8n bridge health endpoint did not return valid JSON", { url: N8N_BRIDGE_HEALTH_URL });
+  }
+  const jobs = Array.isArray(parsed?.jobs) ? parsed.jobs : [];
+  for (const job of ["health", "scheduled", "market-scan", "seo-geo-report"]) {
+    if (!jobs.includes(job)) addIssue(errors, `n8n bridge is missing ${job} job`);
+  }
+  if (parsed?.tokenConfigured !== true) {
+    addIssue(errors, "n8n bridge token is not configured");
+  }
+  if (parsed?.baseUrl && parsed.baseUrl !== DEFAULT_BASE_URL) {
+    addWarning(warnings, "n8n bridge automation base URL is not the custom production domain", { baseUrl: parsed.baseUrl });
+  }
+  return {
+    mode: "n8n-local",
+    loaded: true,
+    baseUrl: parsed?.baseUrl || "",
+    jobs
+  };
+}
+
+function checkLegacyLaunchAgent(errors, warnings, launchAgent) {
+  const output = launchAgent.output;
   if (!output.includes("/Users/asdc163/Documents/官方網站")) {
     addIssue(errors, "LaunchAgent must run from /Users/asdc163/Documents/官方網站");
   }
@@ -331,7 +377,22 @@ function checkLaunchAgent(errors, warnings) {
   if (!output.includes("last exit code = 0") && !output.includes("last exit code = (never exited)")) {
     addWarning(warnings, "LaunchAgent last exit code was not observed as 0");
   }
-  return { loaded: true };
+  return { mode: "legacy-launchagent", loaded: true };
+}
+
+function checkLaunchAgent(errors, warnings) {
+  if (process.platform !== "darwin") {
+    addWarning(warnings, "LaunchAgent check skipped because this is not macOS");
+    return null;
+  }
+  const n8nBridge = checkN8nBridge(errors, warnings);
+  if (n8nBridge?.loaded) return n8nBridge;
+
+  const legacy = launchctlPrint("com.altoslab.blog-local-worker");
+  if (legacy.loaded) return checkLegacyLaunchAgent(errors, warnings, legacy);
+
+  addIssue(errors, "neither com.altoslab.n8n-bridge nor com.altoslab.blog-local-worker LaunchAgent is loaded");
+  return { mode: "missing", loaded: false };
 }
 
 function checkReleaseCandidate({ date, slot, lane }, errors, warnings) {

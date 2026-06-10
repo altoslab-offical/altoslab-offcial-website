@@ -1,0 +1,306 @@
+[
+  {
+    "name": "ALTOS Blog - Cloudflare Health Watch",
+    "active": true,
+    "nodes": [
+      {
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "field": "minutes",
+                "minutesInterval": 30
+              }
+            ]
+          }
+        },
+        "id": "health-schedule",
+        "name": "Every 30 minutes",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.2,
+        "position": [
+          0,
+          0
+        ]
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "http://host.docker.internal:8797/run/health",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "x-altos-n8n-token",
+                "value": "={{ $env.ALTOS_N8N_BRIDGE_TOKEN }}"
+              }
+            ]
+          },
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={\"source\":\"n8n\",\"workflow\":\"cloudflare-health\"}",
+          "options": {
+            "timeout": 120000
+          }
+        },
+        "id": "health-run",
+        "name": "Run Cloudflare health",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          260,
+          0
+        ]
+      }
+    ],
+    "connections": {
+      "Every 30 minutes": {
+        "main": [
+          [
+            {
+              "node": "Run Cloudflare health",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "settings": {
+      "timezone": "Asia/Taipei",
+      "executionOrder": "v1"
+    },
+    "id": "altos-health-watch"
+  },
+  {
+    "name": "ALTOS Blog - Market Scan Windows",
+    "active": true,
+    "nodes": [
+      {
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "field": "cronExpression",
+                "expression": "30 10,12,14,18,20 * * *"
+              }
+            ]
+          }
+        },
+        "id": "market-schedule",
+        "name": "Market scan windows",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.2,
+        "position": [
+          0,
+          0
+        ]
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "http://host.docker.internal:8797/run/market-scan",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "x-altos-n8n-token",
+                "value": "={{ $env.ALTOS_N8N_BRIDGE_TOKEN }}"
+              }
+            ]
+          },
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={\"source\":\"n8n\",\"workflow\":\"market-scan\"}",
+          "options": {
+            "timeout": 600000
+          }
+        },
+        "id": "market-run",
+        "name": "Run market scan",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          260,
+          0
+        ]
+      }
+    ],
+    "connections": {
+      "Market scan windows": {
+        "main": [
+          [
+            {
+              "node": "Run market scan",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "settings": {
+      "timezone": "Asia/Taipei",
+      "executionOrder": "v1"
+    },
+    "id": "altos-market-scan"
+  },
+  {
+    "name": "ALTOS Blog - Scheduled Prep Release Gate",
+    "active": true,
+    "nodes": [
+      {
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "field": "cronExpression",
+                "expression": "10 8 * * *"
+              },
+              {
+                "field": "cronExpression",
+                "expression": "0,4 9 * * *"
+              },
+              {
+                "field": "cronExpression",
+                "expression": "10 15 * * *"
+              },
+              {
+                "field": "cronExpression",
+                "expression": "0,4 16 * * *"
+              }
+            ]
+          }
+        },
+        "id": "scheduled-gate",
+        "name": "Prep release windows",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.2,
+        "position": [
+          0,
+          0
+        ]
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "http://host.docker.internal:8797/run/scheduled",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "x-altos-n8n-token",
+                "value": "={{ $env.ALTOS_N8N_BRIDGE_TOKEN }}"
+              }
+            ]
+          },
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={\"source\":\"n8n\",\"workflow\":\"scheduled-prep-release\"}",
+          "options": {
+            "timeout": 600000
+          }
+        },
+        "id": "scheduled-run",
+        "name": "Run scheduled gate",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          260,
+          0
+        ]
+      }
+    ],
+    "connections": {
+      "Prep release windows": {
+        "main": [
+          [
+            {
+              "node": "Run scheduled gate",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "settings": {
+      "timezone": "Asia/Taipei",
+      "executionOrder": "v1"
+    },
+    "id": "altos-scheduled-gate"
+  },
+  {
+    "name": "ALTOS Blog - Daily SEO GEO Report",
+    "active": true,
+    "nodes": [
+      {
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "field": "cronExpression",
+                "expression": "20 8 * * *"
+              }
+            ]
+          }
+        },
+        "id": "seo-schedule",
+        "name": "Daily report window",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.2,
+        "position": [
+          0,
+          0
+        ]
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "http://host.docker.internal:8797/run/seo-geo-report",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "x-altos-n8n-token",
+                "value": "={{ $env.ALTOS_N8N_BRIDGE_TOKEN }}"
+              }
+            ]
+          },
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={\"source\":\"n8n\",\"workflow\":\"seo-geo-report\"}",
+          "options": {
+            "timeout": 300000
+          }
+        },
+        "id": "seo-run",
+        "name": "Run SEO GEO report",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          260,
+          0
+        ]
+      }
+    ],
+    "connections": {
+      "Daily report window": {
+        "main": [
+          [
+            {
+              "node": "Run SEO GEO report",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "settings": {
+      "timezone": "Asia/Taipei",
+      "executionOrder": "v1"
+    },
+    "id": "altos-seo-geo"
+  }
+]

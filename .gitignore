@@ -21,6 +21,7 @@ data/backups/
 data/reports/
 data/blog-backfill/
 data/blog-repair/
+data/n8n-local-runs/
 data/blog-research/*.json
 data/gcp/
 public/blog-generated/
