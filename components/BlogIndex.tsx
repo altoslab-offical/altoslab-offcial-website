@@ -449,6 +449,82 @@ export async function BlogIndex({ language, tag, query }: BlogIndexProps) {
   });
   const visiblePosts = filtered.slice(0, BLOG_INDEX_POST_LIMIT);
 
+  if (lightweightCloudflareRender) {
+    return (
+      <main className="blog-lite-shell" aria-label={dictionary.title}>
+        <section className="blog-lite-hero">
+          <div>
+            <p className="eyebrow">{dictionary.eyebrow}</p>
+            <h1>{dictionary.title}</h1>
+            <p>{dictionary.description}</p>
+          </div>
+          <form className="blog-lite-search" action={blogIndexPath(language)} role="search">
+            {normalizedTag ? <input type="hidden" name="tag" value={tag} /> : null}
+            <label className="sr-only" htmlFor={`blog-lite-search-${language}`}>
+              {dictionary.searchLabel}
+            </label>
+            <input
+              id={`blog-lite-search-${language}`}
+              name="query"
+              type="search"
+              defaultValue={query || ""}
+              placeholder={dictionary.searchPlaceholder}
+              autoComplete="off"
+            />
+            <button type="submit">{dictionary.searchSubmit}</button>
+          </form>
+        </section>
+
+        <nav className="blog-lite-topics" aria-label="Blog topics">
+          {dictionary.sidebarTopics.slice(0, 7).map((item) => (
+            <Link
+              className={normalizedTag === item.toLowerCase() || (!normalizedTag && item === "Latest") ? "active" : ""}
+              href={item === "Latest" ? blogIndexPath(language) : `${blogIndexPath(language)}?tag=${encodeURIComponent(item)}`}
+              key={item}
+            >
+              {item}
+            </Link>
+          ))}
+        </nav>
+
+        <section className="blog-lite-list" aria-label={dictionary.latest}>
+          <div className="blog-lite-list-head">
+            <p className="eyebrow">{normalizedTag ? dictionary.categories : dictionary.latest}</p>
+            <span>
+              {posts.length} {dictionary.postsLabel}
+            </span>
+          </div>
+          {visiblePosts.map((post) => (
+            <article className="blog-lite-card" key={post.id}>
+              {post.cover ? (
+                <Link className="blog-lite-image" href={blogPostPath(post)} aria-label={post.title}>
+                  <img src={post.cover} alt={post.coverAlt || post.title} loading="lazy" decoding="async" />
+                </Link>
+              ) : null}
+              <div className="blog-lite-card-body">
+                <div className="blog-lite-meta">
+                  <span className={`blog-craft-type-badge is-${post.contentType}`}>
+                    {blogContentTypeLabel(post.contentType, post.language)}
+                  </span>
+                  <small>{new Date(post.updatedAt || post.publishedAt || post.createdAt).toISOString().slice(0, 10)}</small>
+                  <small>{dictionary.readTime(post.readTimeMinutes)}</small>
+                </div>
+                <h2>
+                  <Link href={blogPostPath(post)}>{post.title}</Link>
+                </h2>
+                <p>{post.excerpt}</p>
+                <Link className="blog-lite-read" href={blogPostPath(post)}>
+                  {dictionary.read}
+                </Link>
+              </div>
+            </article>
+          ))}
+          {!filtered.length ? <p className="muted">{dictionary.empty}</p> : null}
+        </section>
+      </main>
+    );
+  }
+
   return (
     <div className="site-home blog-site-shell">
       <SiteHeader />
