@@ -1,5 +1,10 @@
 import { NextResponse } from "next/server";
-import { getPublishedBlogPosts, getPublishedBlogPostsByLanguage } from "@/lib/cms";
+import {
+  getPublishedBlogInventoryPosts,
+  getPublishedBlogInventoryPostsByLanguage,
+  getPublishedBlogPosts,
+  getPublishedBlogPostsByLanguage
+} from "@/lib/cms";
 import { toPublicBlogInventoryPost, toPublicBlogListPost } from "@/lib/public-blog";
 import type { BlogLanguage } from "@/lib/types";
 
@@ -8,9 +13,18 @@ export async function GET(request: Request) {
   const language = params.get("language") as BlogLanguage | null;
   const fields = params.get("fields") || "";
   const rawLimit = Number(params.get("limit") || 0);
-  const limit = Number.isFinite(rawLimit) && rawLimit > 0 ? Math.min(rawLimit, 120) : 120;
-  const posts = (language ? await getPublishedBlogPostsByLanguage(language) : await getPublishedBlogPosts()).slice(0, limit);
-  const serializer = fields === "inventory" ? toPublicBlogInventoryPost : toPublicBlogListPost;
+  const isInventory = fields === "inventory";
+  const limit = Number.isFinite(rawLimit) && rawLimit > 0 ? Math.min(rawLimit, isInventory ? 600 : 60) : isInventory ? 600 : 60;
+  const posts = (
+    isInventory
+      ? language
+        ? await getPublishedBlogInventoryPostsByLanguage(language)
+        : await getPublishedBlogInventoryPosts()
+      : language
+        ? await getPublishedBlogPostsByLanguage(language)
+        : await getPublishedBlogPosts()
+  ).slice(0, limit);
+  const serializer = isInventory ? toPublicBlogInventoryPost : toPublicBlogListPost;
   return NextResponse.json(
     { posts: posts.map(serializer) },
     {

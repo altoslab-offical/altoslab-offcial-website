@@ -418,6 +418,7 @@ function ArticleBodyWithImages({ text, images }: { text: string; images: BlogInl
 }
 
 export async function BlogArticle({ post }: { post: BlogPost }) {
+  const lightweightCloudflareRender = process.env.CLOUDFLARE_KV_ENABLED === "1";
   const dictionary = copy[post.language];
   const taxonomy = articleTaxonomy(post);
   const sourceTranslationNote = extractSourceTranslationNote(post.body);
@@ -442,15 +443,19 @@ export async function BlogArticle({ post }: { post: BlogPost }) {
             translation_group_id: post.translationGroupId
           }}
         />
-        <JsonLd data={articleJsonLd(post)} />
-        <JsonLd data={faqJsonLd(post)} />
-        <JsonLd
-          data={breadcrumbJsonLd([
-            { name: "Home", url: "/" },
-            { name: "Blog", url: blogIndexPath(post.language) },
-            { name: post.title, url: blogPostPath(post) }
-          ])}
-        />
+        {lightweightCloudflareRender ? null : (
+          <>
+            <JsonLd data={articleJsonLd(post)} />
+            <JsonLd data={faqJsonLd(post)} />
+            <JsonLd
+              data={breadcrumbJsonLd([
+                { name: "Home", url: "/" },
+                { name: "Blog", url: blogIndexPath(post.language) },
+                { name: post.title, url: blogPostPath(post) }
+              ])}
+            />
+          </>
+        )}
         <article>
           <header className="article-hero">
             <div className="article-nav-row">

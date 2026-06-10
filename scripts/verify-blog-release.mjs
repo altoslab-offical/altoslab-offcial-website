@@ -676,15 +676,41 @@ async function verifyMetadataSurfaces(posts, root, errors, warnings) {
   }
 }
 
-async function verifyAdminReadback(posts, root, errors, warnings) {
-  const cookie = await adminCookie(root, warnings);
+async function refreshPublicBlogCache(root, cookie, warnings) {
+  if (!cookie) {
+    pushWarning(warnings, "public blog cache refresh skipped because no admin token or password was provided");
+    return null;
+  }
+
+  try {
+    const response = await fetchWithTimeout(`${root}/api/admin/blog/refresh-public-cache`, {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        Cookie: cookie,
+        "User-Agent": "altos-blog-release-verifier/1.0"
+      }
+    });
+    const json = await response.json().catch(() => null);
+    if (!response.ok || json?.ok !== true) {
+      pushWarning(warnings, `public blog cache refresh failed with HTTP ${response.status}`);
+      return null;
+    }
+    return json;
+  } catch (error) {
+    pushWarning(warnings, `public blog cache refresh failed: ${error instanceof Error ? error.message : "unknown error"}`);
+    return null;
+  }
+}
+
+async function verifyAdminReadback(posts, root, errors, warnings, cookie) {
   if (!cookie) {
     pushWarning(warnings, "admin readback skipped because no admin token or password was provided");
     return null;
   }
 
   const { json, response } = await fetchJson(
-    `${root}/api/admin/blog`,
+    `${root}/api/admin/blog?fields=release-readback`,
     errors,
     { surface: "admin-blog" },
     { Cookie: cookie }
@@ -781,8 +807,10 @@ async function main() {
     const post = posts.find((item) => item.language === language);
     if (post) livePosts.push(await verifyPostLive(post, root, errors, warnings));
   }
+  const adminCookieValue = await adminCookie(root, warnings);
+  const publicCacheRefresh = await refreshPublicBlogCache(root, adminCookieValue, warnings);
   await verifyMetadataSurfaces(posts, root, errors, warnings);
-  const adminReadback = await verifyAdminReadback(posts, root, errors, warnings);
+  const adminReadback = await verifyAdminReadback(posts, root, errors, warnings, adminCookieValue);
 
   const result = {
     ok: errors.length === 0,
@@ -812,7 +840,8 @@ async function main() {
             }
           ])
       ),
-      adminReadback
+      adminReadback,
+      publicCacheRefresh
     }
   };
 

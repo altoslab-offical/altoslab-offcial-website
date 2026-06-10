@@ -17,7 +17,9 @@ type BlogIndexProps = {
   query?: string;
 };
 
-const BLOG_INDEX_POST_LIMIT = Number(process.env.BLOG_INDEX_POST_LIMIT || 8);
+const BLOG_INDEX_POST_LIMIT = Number(
+  process.env.BLOG_INDEX_POST_LIMIT || (process.env.CLOUDFLARE_KV_ENABLED === "1" ? 6 : 8)
+);
 
 function articleTimestamp(post: Awaited<ReturnType<typeof getPublishedBlogPostsByLanguage>>[number]) {
   return new Date(post.publishedAt || post.updatedAt || post.createdAt).getTime() || 0;
@@ -427,6 +429,7 @@ function matchesTopic(post: Awaited<ReturnType<typeof getPublishedBlogPostsByLan
 }
 
 export async function BlogIndex({ language, tag, query }: BlogIndexProps) {
+  const lightweightCloudflareRender = process.env.CLOUDFLARE_KV_ENABLED === "1";
   const dictionary = copy[language];
   const posts = await getPublishedBlogPostsByLanguage(language);
   const orderedPosts = [...posts].sort(
@@ -450,13 +453,17 @@ export async function BlogIndex({ language, tag, query }: BlogIndexProps) {
     <div className="site-home blog-site-shell">
       <SiteHeader />
       <main className="blog-page blog-index-page blog-craft-index">
-        <JsonLd
-          data={breadcrumbJsonLd([
-            { name: "Home", url: "/" },
-            { name: "Blog", url: blogIndexPath(language) }
-          ])}
-        />
-        <JsonLd data={blogIndexItemListJsonLd(visiblePosts, blogIndexPath(language), dictionary.title)} />
+        {lightweightCloudflareRender ? null : (
+          <>
+            <JsonLd
+              data={breadcrumbJsonLd([
+                { name: "Home", url: "/" },
+                { name: "Blog", url: blogIndexPath(language) }
+              ])}
+            />
+            <JsonLd data={blogIndexItemListJsonLd(visiblePosts, blogIndexPath(language), dictionary.title)} />
+          </>
+        )}
         <div className="blog-craft-layout">
           <aside className="blog-craft-sidebar" aria-label="Blog navigation">
             <div className="blog-craft-brand">

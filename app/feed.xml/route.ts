@@ -9,7 +9,7 @@ export const dynamic = "force-dynamic";
 const RSS_ITEM_LIMIT = Number(process.env.RSS_ITEM_LIMIT || 27);
 
 function articleTimestamp(post: BlogPost) {
-  return new Date(post.publishedAt || post.updatedAt || post.createdAt).getTime() || 0;
+  return new Date(post.updatedAt || post.publishedAt || post.createdAt).getTime() || 0;
 }
 
 function latestFeedPosts(posts: BlogPost[]) {

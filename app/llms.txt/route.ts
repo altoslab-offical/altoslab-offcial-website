@@ -9,7 +9,7 @@ export const dynamic = "force-dynamic";
 const LLMS_ARTICLE_GROUP_LIMIT = Number(process.env.LLMS_ARTICLE_GROUP_LIMIT || 3);
 
 function articleTimestamp(post: BlogPost) {
-  return new Date(post.publishedAt || post.updatedAt || post.createdAt).getTime() || 0;
+  return new Date(post.updatedAt || post.publishedAt || post.createdAt).getTime() || 0;
 }
 
 function orderedLlmsArticles(posts: BlogPost[]) {
@@ -28,7 +28,8 @@ function orderedLlmsArticles(posts: BlogPost[]) {
 }
 
 export async function GET() {
-  const [posts, projects] = await Promise.all([getPublishedBlogPosts(), getPublishedProjects()]);
+  const lightweightCloudflareRender = process.env.CLOUDFLARE_KV_ENABLED === "1";
+  const [posts, projects] = await Promise.all([getPublishedBlogPosts(), lightweightCloudflareRender ? Promise.resolve([]) : getPublishedProjects()]);
   const articles = orderedLlmsArticles(posts);
   const lines = [
     `# ${siteName}`,

@@ -3,7 +3,15 @@ import { applyImageQualityReview, reviewBlogImagesForRelease } from "@/lib/blog-
 import { applyQualityReview, reviewBlogPairForAutoPublish } from "@/lib/blog-quality";
 import { verifyBlogIngestRequest } from "@/lib/blog-ingest-auth";
 import { BLOG_LANGUAGES, taiwanDate } from "@/lib/blog-utils";
-import { createId, mutateCmsData, normalizeBlogPostInput, nowIso, publishValidationForBlogPost, readCmsData } from "@/lib/cms";
+import {
+  createId,
+  getPublishedBlogDuplicatePosts,
+  mutateCmsData,
+  normalizeBlogPostInput,
+  nowIso,
+  publishValidationForBlogPost,
+  readCmsData
+} from "@/lib/cms";
 import { CmsLockError, withCmsStorageLock } from "@/lib/cms-storage";
 import type { BlogGenerationSlot, BlogPost } from "@/lib/types";
 
@@ -319,6 +327,20 @@ function responseSummary(posts: BlogPost[]) {
   }));
 }
 
+function isCloudflareBoundedValidate() {
+  return process.env.CLOUDFLARE_KV_ENABLED === "1" || process.env.ALTOS_BLOG_BOUNDED_WORKER_VALIDATE === "1";
+}
+
+async function existingPostsForDuplicateCheck() {
+  if (!isCloudflareBoundedValidate()) return (await readCmsData()).blogPosts;
+
+  const posts = await getPublishedBlogDuplicatePosts();
+  if (!posts.length) {
+    throw new Error("Cloudflare duplicate cache is empty; refusing validate-only duplicate check");
+  }
+  return posts;
+}
+
 export async function POST(request: Request) {
   const body = await request.text();
   const auth = verifyBlogIngestRequest(request, body);
@@ -353,7 +375,7 @@ export async function POST(request: Request) {
   let existingPosts: BlogPost[] = [];
   const duplicateReadIssues: string[] = [];
   try {
-    existingPosts = (await readCmsData()).blogPosts;
+    existingPosts = await existingPostsForDuplicateCheck();
   } catch (error) {
     duplicateReadIssues.push(`duplicate check could not read existing blog posts: ${error instanceof Error ? error.message : "CMS read failed"}`);
   }
@@ -364,12 +386,15 @@ export async function POST(request: Request) {
     return json(400, { ok: false, ingestRunId, errors: [...languageIssues, ...contractIssues, ...duplicateIssues] });
   }
 
-  const qualityReview = await reviewBlogPairForAutoPublish(normalizedPosts);
+  const boundedValidate = isCloudflareBoundedValidate();
+  const qualityReview = await reviewBlogPairForAutoPublish(normalizedPosts, {
+    verifySourceLinks: !boundedValidate
+  });
   const imageReview = await reviewBlogImagesForRelease(normalizedPosts, {
     requireGeneratedCoverForNonBreaking: true,
     requireSourceCoverForBreaking: true,
     requireBlobCover: process.env.BLOG_IMAGE_ALLOW_NON_BLOB !== "1",
-    verifyRemoteImage: process.env.BLOG_IMAGE_VERIFY_REMOTE !== "false",
+    verifyRemoteImage: !boundedValidate && process.env.BLOG_IMAGE_VERIFY_REMOTE !== "false",
     allowLocalHttp: process.env.BLOG_IMAGE_ALLOW_LOCAL_HTTP === "1"
   });
 

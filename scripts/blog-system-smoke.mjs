@@ -29,6 +29,7 @@ const imageQuality = read("lib/blog-image-quality.ts");
 const ingestAuth = read("lib/blog-ingest-auth.ts");
 const ingestRoute = read("app/api/admin/blog/ingest-set/route.ts");
 const releaseRoute = read("app/api/admin/blog/release-set/route.ts");
+const adminBlogRefreshRoute = read("app/api/admin/blog/refresh-public-cache/route.ts");
 const mediaRoute = read("app/api/admin/blog/media/route.ts");
 const generatedMediaRoute = read("app/api/blog/generated-media/[filename]/route.ts");
 const healthRoute = read("app/api/health/route.ts");
@@ -131,6 +132,9 @@ assert(ingestAuth.includes("createHmac") && ingestAuth.includes("timingSafeEqual
 assert(ingestRoute.includes("verifyBlogIngestRequest"), "ingest route verifies HMAC before parsing release payloads");
 assert(ingestRoute.includes("validateOnly"), "ingest route supports validateOnly dry runs");
 assert(ingestRoute.includes("reviewBlogImagesForRelease"), "ingest route runs production image QA before release");
+assert(ingestRoute.includes("getPublishedBlogDuplicatePosts"), "Cloudflare ingest validate uses a lightweight duplicate cache instead of reading full CMS data");
+assert(ingestRoute.includes("verifySourceLinks: !boundedValidate"), "Cloudflare ingest validate skips remote source probes in bounded Worker path");
+assert(ingestRoute.includes("verifyRemoteImage: !boundedValidate"), "Cloudflare ingest validate skips remote image probes in bounded Worker path");
 assert(ingestRoute.includes("publish-if-valid"), "ingest route supports publish-if-valid fail-closed mode");
 assert(ingestRoute.includes("generation.provider must be gemini-chatgpt or source-translation"), "ingest route accepts Gemini/GPT columns and source-translation market news");
 assert(ingestRoute.includes("duplicateTopicIssues"), "ingest route blocks repeated topics/source angles");
@@ -208,6 +212,10 @@ assert(
     scheduledRunner.includes("{ hour: 20, minute: 30 }"),
   "scheduled runner includes all late market-scan window times"
 );
+assert(
+  scheduledRunner.includes("skipped remote source reachability probe in bounded Worker validate path"),
+  "scheduled runner does not treat bounded Worker source-probe skip warnings as hard market-news blockers"
+);
 assert(scheduledRunner.includes("awaiting_browser_production"), "scheduled prep creates a manifest skeleton instead of pretending to publish");
 assert(scheduledRunner.includes("releaseGateIssues"), "scheduled release checks the prepared candidate manifest before publishing");
 assert(scheduledRunner.includes("releaseWindowIssue"), "scheduled release refuses to publish outside the configured release window");
@@ -265,9 +273,17 @@ assert(cloudflareSetup.includes("secret put \"$name\" --config \"$WRANGLER_CONFI
 assert(cloudflareSeed.includes("cms:${safeStorageKey") && cloudflareSeed.includes("\"kv\"") && cloudflareSeed.includes("\"key\"") && cloudflareSeed.includes("\"put\""), "Cloudflare seed writes the CMS snapshot into the configured KV namespace");
 assert(cloudflareSeed.includes("\"--remote\""), "Cloudflare seed writes staging CMS data to remote KV, not local Wrangler storage");
 assert(cms.includes("public-blog-list") && cms.includes("public-blog-detail"), "public blog cache is split into list and detail keys for Cloudflare CPU safety");
+assert(cms.includes("public-blog-inventory") && cloudflareSmoke.includes("fields=inventory&limit=600"), "Cloudflare public blog inventory uses a lightweight all-post cache");
+assert(cms.includes("public-blog-duplicates") && cms.includes("getPublishedBlogDuplicatePosts"), "Cloudflare validate has a lightweight duplicate-check cache");
+assert(cms.includes("sortedByPublicRecency") && cms.includes("updatedAt || post.publishedAt || post.createdAt"), "Cloudflare public blog lists are selected by release recency, not sortOrder");
 assert(cms.includes("PUBLIC_BLOG_DETAIL_REFRESH_LIMIT_PER_LANGUAGE") && cms.includes("publicBlogDetailRefreshPostsFromPosts"), "publish-time detail cache refresh is bounded per language for Cloudflare subrequest safety");
+assert(cms.includes("refreshPublicBlogCacheFromStorage") && adminBlogRefreshRoute.includes("refreshPublicBlogCacheFromStorage"), "admin can refresh derived public blog caches inside the Worker runtime");
 assert(cms.includes("return []") && cms.includes("instead of rebuilding during a public request"), "public Cloudflare blog reads fail closed instead of rebuilding large CMS data on request");
-assert(cloudflareMigratePublicBlogCache.includes("public-blog:v1") && cloudflareMigratePublicBlogCache.includes("public-blog-list:v1"), "Cloudflare public blog cache migration can split the legacy large cache");
+assert(cloudflareMigratePublicBlogCache.includes("public-blog:v1") && cloudflareMigratePublicBlogCache.includes("public-blog-list:v2"), "Cloudflare public blog cache migration can split the legacy large cache");
+assert(cloudflareMigratePublicBlogCache.includes("canonicalCmsKey") && cloudflareMigratePublicBlogCache.includes("parseCmsPayload"), "Cloudflare public blog cache migration rebuilds from canonical CMS before falling back to legacy public cache");
+assert(cloudflareMigratePublicBlogCache.includes("--legacy-source") && cloudflareMigratePublicBlogCache.includes("Refusing to rebuild public cache from legacy"), "Cloudflare public blog cache migration fails closed before using legacy public cache");
+assert(cloudflareMigratePublicBlogCache.includes("sortByPublicRecency"), "Cloudflare public blog cache migration selects latest public posts by recency");
+assert(cloudflareMigratePublicBlogCache.includes("public-blog-duplicates:v1") && cloudflareMigratePublicBlogCache.includes("duplicatePosts"), "Cloudflare public blog cache migration writes the duplicate-check cache");
 assert(cloudflareMigratePublicBlogCache.includes("detailPosts") && cloudflareMigratePublicBlogCache.includes("\"--remote\""), "Cloudflare public blog cache migration writes remote detail keys without printing article bodies");
 assert(cloudflareSmoke.includes("expected-provider") && cloudflareSmoke.includes("imageCloudflareKvConfigured"), "Cloudflare smoke verifies KV storage and generated-media configuration");
 assert(cloudflareSmoke.includes("publishedPosts === 0"), "Cloudflare smoke fails closed when public blog inventory is empty");
@@ -304,6 +320,8 @@ assert(releaseVerifier.includes("not stock/free image providers"), "release veri
 assert(releaseVerifier.includes("public API column/feature contentImages must include at least two images"), "release verifier checks live column/feature in-article images");
 assert(releaseVerifier.includes("qualityManifest content image URLs do not match article set"), "release verifier checks content image URLs against the signed manifest");
 assert(releaseVerifier.includes("ALTOS_ADMIN_PASSWORD") && releaseVerifier.includes("/api/admin/auth/login"), "release verifier can log in for protected admin readback");
+assert(releaseVerifier.includes("/api/admin/blog?fields=release-readback"), "release verifier uses compact admin readback on Cloudflare");
+assert(releaseVerifier.includes("/api/admin/blog/refresh-public-cache"), "release verifier refreshes derived public blog caches before metadata checks");
 assert(releaseVerifier.includes("og:image") && releaseVerifier.includes("twitter:image"), "release verifier checks social preview images");
 assert(releaseVerifier.includes("/feed.xml") && releaseVerifier.includes("/sitemap.xml") && releaseVerifier.includes("/llms.txt"), "release verifier checks public metadata surfaces");
 assert(releaseVerifier.includes("AI-generated") && releaseVerifier.includes("SEO\\s*\\/\\s*GEO"), "release verifier blocks public leakage of internal production copy");

@@ -18,7 +18,24 @@ const FAVICON_LINKS = `<link rel="icon" href="/icon.svg" type="image/svg+xml" />
     <link rel="mask-icon" href="/icon.svg" color="#A4FF00" />
     <link rel="manifest" href="/manifest.webmanifest" />`;
 
-function withLaunchMetadata(html: string) {
+type HtmlRewriteElement = {
+  append(content: string, options?: { html?: boolean }): void;
+  prepend(content: string, options?: { html?: boolean }): void;
+  replace(content: string, options?: { html?: boolean }): void;
+};
+
+type HtmlRewriterLike = {
+  on(selector: string, handlers: { element(element: HtmlRewriteElement): void }): HtmlRewriterLike;
+  transform(response: Response): Response;
+};
+
+declare const HTMLRewriter:
+  | undefined
+  | {
+      new (): HtmlRewriterLike;
+    };
+
+function homepageInjectionParts() {
   const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || "https://altoslab.com").replace(/\/$/, "");
   const title = "ALTOS LAB｜AI Studio 人工智慧工作室";
   const description =
@@ -369,6 +386,16 @@ function withLaunchMetadata(html: string) {
       })();
     </script>`;
 
+  return {
+    metadata,
+    seoNoScriptFallback,
+    homepageHeader
+  };
+}
+
+function withLaunchMetadata(html: string) {
+  const { metadata, seoNoScriptFallback, homepageHeader } = homepageInjectionParts();
+
   return html
     .replace('<html lang="en">', '<html lang="zh-Hant-TW">')
     .replace(/<link\s+rel=["'](?:shortcut\s+icon|icon|mask-icon)["'][^>]*>\s*/gi, "")
@@ -378,37 +405,70 @@ function withLaunchMetadata(html: string) {
     .replace("</body>", `${homepageHeader}${homepageAnalyticsSnippet()}</body>`);
 }
 
-async function readHomepageHtml(request: Request) {
-  if (process.env.CLOUDFLARE_KV_ENABLED === "1") {
-    const assetUrl = new URL(CLOUDFLARE_HOMEPAGE_ASSET, request.url);
+async function readCloudflareHomepageResponse(request: Request) {
+  const assetUrl = new URL(CLOUDFLARE_HOMEPAGE_ASSET, request.url);
 
-    try {
-      const { getCloudflareContext } = await import("@opennextjs/cloudflare");
-      const context = getCloudflareContext();
-      const assets = (context.env as { ASSETS?: { fetch(input: Request): Promise<Response> } }).ASSETS;
-      if (assets?.fetch) {
-        const response = await assets.fetch(new Request(assetUrl));
-        if (response.ok) return response.text();
-      }
-    } catch {
-      // Try the same static asset through the Worker fetch path before failing closed.
+  try {
+    const { getCloudflareContext } = await import("@opennextjs/cloudflare");
+    const context = getCloudflareContext();
+    const assets = (context.env as { ASSETS?: { fetch(input: Request): Promise<Response> } }).ASSETS;
+    if (assets?.fetch) {
+      const response = await assets.fetch(new Request(assetUrl));
+      if (response.ok) return response;
     }
-
-    try {
-      const response = await fetch(assetUrl, { redirect: "follow" });
-      if (response.ok) return response.text();
-    } catch {
-      // Cloudflare runtimes cannot read the project filesystem; do not fall through there.
-    }
-
-    throw new Error(`Homepage asset unavailable at ${CLOUDFLARE_HOMEPAGE_ASSET}`);
+  } catch {
+    // Try the same static asset through the Worker fetch path before failing closed.
   }
 
+  try {
+    const response = await fetch(assetUrl, { redirect: "follow" });
+    if (response.ok) return response;
+  } catch {
+    // Cloudflare runtimes cannot read the project filesystem; do not fall through there.
+  }
+
+  throw new Error(`Homepage asset unavailable at ${CLOUDFLARE_HOMEPAGE_ASSET}`);
+}
+
+function withLaunchMetadataStream(response: Response) {
+  const { metadata, seoNoScriptFallback, homepageHeader } = homepageInjectionParts();
+  const Rewriter = HTMLRewriter;
+  if (!Rewriter) return response;
+  const rewriter = new Rewriter()
+    .on("title", {
+      element(element) {
+        element.replace(metadata, { html: true });
+      }
+    })
+    .on("body", {
+      element(element) {
+        element.prepend(`${gtmNoScriptSnippet()}${seoNoScriptFallback}`, { html: true });
+        element.append(`${homepageHeader}${homepageAnalyticsSnippet()}`, { html: true });
+      }
+    });
+
+  const rewritten = rewriter.transform(response);
+  const headers = new Headers(rewritten.headers);
+  headers.set("Cache-Control", "public, max-age=300, stale-while-revalidate=1800");
+  headers.set("Content-Language", "zh-Hant-TW");
+  headers.set("Content-Type", "text/html; charset=utf-8");
+  return new Response(rewritten.body, {
+    status: rewritten.status,
+    statusText: rewritten.statusText,
+    headers
+  });
+}
+
+async function readHomepageHtml() {
   return readFile(path.join(process.cwd(), "index.html"), "utf8");
 }
 
 export async function GET(request: Request) {
-  const html = await readHomepageHtml(request);
+  if (process.env.CLOUDFLARE_KV_ENABLED === "1") {
+    return withLaunchMetadataStream(await readCloudflareHomepageResponse(request));
+  }
+
+  const html = await readHomepageHtml();
 
   return new Response(withLaunchMetadata(html), {
     headers: {

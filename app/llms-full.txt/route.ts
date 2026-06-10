@@ -17,7 +17,7 @@ function publicProjectText(value: string) {
 }
 
 function articleTimestamp(post: BlogPost) {
-  return new Date(post.publishedAt || post.updatedAt || post.createdAt).getTime() || 0;
+  return new Date(post.updatedAt || post.publishedAt || post.createdAt).getTime() || 0;
 }
 
 function latestArticleGroups(posts: BlogPost[]) {
@@ -36,7 +36,8 @@ function latestArticleGroups(posts: BlogPost[]) {
 }
 
 export async function GET() {
-  const [posts, projects] = await Promise.all([getPublishedBlogPosts(), getPublishedProjects()]);
+  const lightweightCloudflareRender = process.env.CLOUDFLARE_KV_ENABLED === "1";
+  const [posts, projects] = await Promise.all([getPublishedBlogPosts(), lightweightCloudflareRender ? Promise.resolve([]) : getPublishedProjects()]);
   const recentPostSummaries = latestArticleGroups(posts);
   const recentPosts = (
     await Promise.all(recentPostSummaries.map((post) => getPublishedBlogPost(post.slug, post.language)))

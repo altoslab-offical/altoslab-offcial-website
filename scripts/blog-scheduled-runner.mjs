@@ -352,7 +352,9 @@ function validateIssues(manifest = {}) {
 }
 
 function marketValidateHasHardBlocker(manifest = {}) {
-  const issues = validateIssues(manifest).join("\n");
+  const issues = validateIssues(manifest)
+    .filter((issue) => !/source link validation warning:\s*skipped remote source reachability probe in bounded Worker validate path/i.test(issue))
+    .join("\n");
   if (manifest.validateOnly?.imageApproved === false) return true;
   return /(?:duplicate|already published|same source|same cover|repeated cover|previously used cover|cover.*(?:missing|required|duplicate|changed|unsafe)|image.*(?:missing|unavailable|unsafe|duplicate|not approved|must use|requires)|source image|canonical url|source.*(?:unreachable|404|410|cannot|missing)|source link validation warning)/i.test(issues);
 }

@@ -27,18 +27,26 @@ import type {
 const PUBLIC_STATUSES = new Set(["published"]);
 const PUBLIC_CMS_CACHE_TTL_MS = 15_000;
 const PUBLIC_BLOG_CACHE_TTL_MS = 60_000;
-const PUBLIC_BLOG_CACHE_LIMIT_PER_LANGUAGE = Number(process.env.PUBLIC_BLOG_CACHE_LIMIT_PER_LANGUAGE || 80);
+const PUBLIC_BLOG_CACHE_LIMIT_PER_LANGUAGE = Number(process.env.PUBLIC_BLOG_CACHE_LIMIT_PER_LANGUAGE || 8);
 const PUBLIC_BLOG_DETAIL_REFRESH_LIMIT_PER_LANGUAGE = Number(process.env.PUBLIC_BLOG_DETAIL_REFRESH_LIMIT_PER_LANGUAGE || 4);
-const PUBLIC_BLOG_LIST_CACHE_VERSION = "v1";
+const PUBLIC_BLOG_LIST_CACHE_VERSION = "v2";
 const PUBLIC_BLOG_DETAIL_CACHE_VERSION = "v1";
+const PUBLIC_BLOG_INVENTORY_CACHE_VERSION = "v1";
+const PUBLIC_BLOG_DUPLICATE_CACHE_VERSION = "v1";
 
 let publicRawCmsCache: { data: CmsData; expiresAt: number } | null = null;
 let publicBlogPostsCache: { posts: BlogPost[]; expiresAt: number } | null = null;
+let publicBlogInventoryCache: { posts: BlogPost[]; expiresAt: number } | null = null;
+let publicBlogDuplicateCache: { posts: BlogPost[]; expiresAt: number } | null = null;
 
 function canUseInMemoryPublicCache() {
   // Cloudflare Worker isolates can outlive a single request. Keep request-bound
   // KV I/O results out of module-scope memory and rely on KV for public caching.
   return !getCloudflareKvConfig();
+}
+
+function isCloudflarePublicRuntime() {
+  return Boolean(getCloudflareKvConfig());
 }
 
 export function nowIso() {
@@ -101,6 +109,8 @@ async function readPublicRawCmsData(): Promise<CmsData> {
 export async function writeCmsData(data: CmsData) {
   publicRawCmsCache = null;
   publicBlogPostsCache = null;
+  publicBlogInventoryCache = null;
+  publicBlogDuplicateCache = null;
   await writeCmsDataToStorage(data);
   await writePublicBlogCacheFromData(data).catch((error) => {
     console.warn("[cms] Unable to refresh public blog cache:", error instanceof Error ? error.message : error);
@@ -123,6 +133,14 @@ export async function mutateRawCmsData<T>(mutator: (data: CmsData) => T | Promis
 
 export function sortedByOrder<T extends { sortOrder: number }>(items: T[]) {
   return [...items].sort((a, b) => a.sortOrder - b.sortOrder);
+}
+
+function publicArticleTimestamp(post: Pick<BlogPost, "updatedAt" | "publishedAt" | "createdAt">) {
+  return new Date(post.updatedAt || post.publishedAt || post.createdAt).getTime() || 0;
+}
+
+function sortedByPublicRecency<T extends Pick<BlogPost, "updatedAt" | "publishedAt" | "createdAt" | "sortOrder">>(items: T[]) {
+  return [...items].sort((a, b) => publicArticleTimestamp(b) - publicArticleTimestamp(a) || Number(a.sortOrder || 0) - Number(b.sortOrder || 0));
 }
 
 function visibleStatus(status: PublishStatus | Project["status"]) {
@@ -299,6 +317,16 @@ function publicBlogCacheKey() {
   return config ? `${config.cmsPathname}:public-blog-list:${PUBLIC_BLOG_LIST_CACHE_VERSION}` : "";
 }
 
+function publicBlogInventoryCacheKey() {
+  const config = getCloudflareKvConfig();
+  return config ? `${config.cmsPathname}:public-blog-inventory:${PUBLIC_BLOG_INVENTORY_CACHE_VERSION}` : "";
+}
+
+function publicBlogDuplicateCacheKey() {
+  const config = getCloudflareKvConfig();
+  return config ? `${config.cmsPathname}:public-blog-duplicates:${PUBLIC_BLOG_DUPLICATE_CACHE_VERSION}` : "";
+}
+
 function safePublicBlogDetailCachePart(value: string) {
   return value.replace(/[^a-z0-9._:-]+/gi, "-").replace(/^-+|-+$/g, "") || "post";
 }
@@ -355,9 +383,63 @@ function compactPublicBlogListPost(post: BlogPost): BlogPost {
   return {
     ...post,
     body: "",
+    audience: "",
+    sourceLinks: [],
+    keyTakeaways: [],
     faqs: [],
     contentImages: [],
+    qualityIssues: [],
     generationTrace: undefined
+  };
+}
+
+function compactPublicBlogInventoryPost(post: BlogPost): BlogPost {
+  return {
+    ...compactPublicBlogListPost(post),
+    title: "",
+    seoTitle: "",
+    seoDescription: "",
+    excerpt: "",
+    topic: "",
+    geoSummary: "",
+    tags: [],
+    cover: "",
+    coverAlt: "",
+    coverSource: undefined,
+    coverCredit: undefined,
+    coverCreditUrl: undefined,
+    coverLicense: undefined,
+    coverLicenseUrl: undefined,
+    readTimeMinutes: 0,
+    featured: false,
+    qualityChecks: defaultQualityChecks()
+  };
+}
+
+function compactPublicBlogDuplicatePost(post: BlogPost): BlogPost {
+  return {
+    ...post,
+    body: "",
+    audience: "",
+    keyTakeaways: [],
+    faqs: [],
+    contentImages: [],
+    qualityIssues: [],
+    generationTrace: undefined,
+    seoTitle: "",
+    seoDescription: "",
+    excerpt: "",
+    geoSummary: "",
+    tags: [],
+    coverAlt: "",
+    coverSource: undefined,
+    coverCredit: undefined,
+    coverCreditUrl: undefined,
+    coverLicense: undefined,
+    coverLicenseUrl: undefined,
+    readTimeMinutes: 0,
+    featured: false,
+    qualityChecks: defaultQualityChecks()
   };
 }
 
@@ -370,7 +452,7 @@ function allPublicBlogPostsFromData(data: CmsData) {
 
 function publicBlogListPostsFromPosts(posts: BlogPost[]) {
   return BLOG_LANGUAGES.flatMap((language) =>
-    sortedByOrder(posts.filter((post) => normalizeBlogLanguage(post.language) === language))
+    sortedByPublicRecency(posts.filter((post) => normalizeBlogLanguage(post.language) === language))
       .slice(0, PUBLIC_BLOG_CACHE_LIMIT_PER_LANGUAGE)
       .map(compactPublicBlogListPost)
   );
@@ -380,12 +462,7 @@ function publicBlogDetailRefreshPostsFromPosts(posts: BlogPost[]) {
   return BLOG_LANGUAGES.flatMap((language) =>
     [...posts]
       .filter((post) => normalizeBlogLanguage(post.language) === language)
-      .sort(
-        (a, b) =>
-          (new Date(b.publishedAt || b.updatedAt || b.createdAt).getTime() || 0) -
-            (new Date(a.publishedAt || a.updatedAt || a.createdAt).getTime() || 0) ||
-          Number(a.sortOrder || 0) - Number(b.sortOrder || 0)
-      )
+      .sort((a, b) => publicArticleTimestamp(b) - publicArticleTimestamp(a) || Number(a.sortOrder || 0) - Number(b.sortOrder || 0))
       .slice(0, PUBLIC_BLOG_DETAIL_REFRESH_LIMIT_PER_LANGUAGE)
   );
 }
@@ -417,6 +494,58 @@ async function readPublicBlogCache() {
     return parsed.posts;
   } catch (error) {
     console.warn("[cms] Public blog cache is unreadable:", error instanceof Error ? error.message : error);
+    return null;
+  }
+}
+
+async function readPublicBlogInventoryCache() {
+  const useMemoryCache = canUseInMemoryPublicCache();
+  if (useMemoryCache && publicBlogInventoryCache && publicBlogInventoryCache.expiresAt > Date.now()) {
+    return publicBlogInventoryCache.posts;
+  }
+
+  const namespace = getCloudflareKvNamespace();
+  const key = publicBlogInventoryCacheKey();
+  if (!namespace || !key) return null;
+
+  const raw = await namespace.get(key).catch(() => null);
+  if (!raw) return null;
+
+  try {
+    const parsed = JSON.parse(raw) as { posts?: BlogPost[] };
+    if (!Array.isArray(parsed.posts)) return null;
+    if (useMemoryCache) {
+      publicBlogInventoryCache = { posts: parsed.posts, expiresAt: Date.now() + PUBLIC_BLOG_CACHE_TTL_MS };
+    }
+    return parsed.posts;
+  } catch (error) {
+    console.warn("[cms] Public blog inventory cache is unreadable:", error instanceof Error ? error.message : error);
+    return null;
+  }
+}
+
+async function readPublicBlogDuplicateCache() {
+  const useMemoryCache = canUseInMemoryPublicCache();
+  if (useMemoryCache && publicBlogDuplicateCache && publicBlogDuplicateCache.expiresAt > Date.now()) {
+    return publicBlogDuplicateCache.posts;
+  }
+
+  const namespace = getCloudflareKvNamespace();
+  const key = publicBlogDuplicateCacheKey();
+  if (!namespace || !key) return null;
+
+  const raw = await namespace.get(key).catch(() => null);
+  if (!raw) return null;
+
+  try {
+    const parsed = JSON.parse(raw) as { posts?: BlogPost[] };
+    if (!Array.isArray(parsed.posts)) return null;
+    if (useMemoryCache) {
+      publicBlogDuplicateCache = { posts: parsed.posts, expiresAt: Date.now() + PUBLIC_BLOG_CACHE_TTL_MS };
+    }
+    return parsed.posts;
+  } catch (error) {
+    console.warn("[cms] Public blog duplicate cache is unreadable:", error instanceof Error ? error.message : error);
     return null;
   }
 }
@@ -453,10 +582,22 @@ async function readPublicBlogDetailCache(slug: string, language?: BlogLanguage) 
 async function writePublicBlogCacheFromData(data: CmsData) {
   const namespace = getCloudflareKvNamespace();
   const key = publicBlogCacheKey();
-  if (!namespace || !key) return;
+  if (!namespace || !key) {
+    return {
+      refreshed: false,
+      publishedPosts: 0,
+      listPosts: 0,
+      inventoryPosts: 0,
+      duplicatePosts: 0,
+      detailPosts: 0,
+      languages: Object.fromEntries(BLOG_LANGUAGES.map((language) => [language, 0]))
+    };
+  }
 
   const allPosts = allPublicBlogPostsFromData(data);
   const posts = publicBlogListPostsFromPosts(allPosts);
+  const inventoryPosts = allPosts.map(compactPublicBlogInventoryPost);
+  const duplicatePosts = allPosts.map(compactPublicBlogDuplicatePost);
   const detailPosts = publicBlogDetailRefreshPostsFromPosts(allPosts);
   await namespace.put(
     key,
@@ -471,6 +612,36 @@ async function writePublicBlogCacheFromData(data: CmsData) {
         contentType: "application/json",
         updatedAt: nowIso(),
         source: "cms-public-blog-cache"
+      }
+    }
+  );
+  await namespace.put(
+    publicBlogInventoryCacheKey(),
+    JSON.stringify({
+      version: 1,
+      updatedAt: nowIso(),
+      posts: inventoryPosts
+    }),
+    {
+      metadata: {
+        contentType: "application/json",
+        updatedAt: nowIso(),
+        source: "cms-public-blog-inventory-cache"
+      }
+    }
+  );
+  await namespace.put(
+    publicBlogDuplicateCacheKey(),
+    JSON.stringify({
+      version: 1,
+      updatedAt: nowIso(),
+      posts: duplicatePosts
+    }),
+    {
+      metadata: {
+        contentType: "application/json",
+        updatedAt: nowIso(),
+        source: "cms-public-blog-duplicate-cache"
       }
     }
   );
@@ -498,7 +669,26 @@ async function writePublicBlogCacheFromData(data: CmsData) {
   );
   if (canUseInMemoryPublicCache()) {
     publicBlogPostsCache = { posts, expiresAt: Date.now() + PUBLIC_BLOG_CACHE_TTL_MS };
+    publicBlogInventoryCache = { posts: inventoryPosts, expiresAt: Date.now() + PUBLIC_BLOG_CACHE_TTL_MS };
+    publicBlogDuplicateCache = { posts: duplicatePosts, expiresAt: Date.now() + PUBLIC_BLOG_CACHE_TTL_MS };
   }
+
+  return {
+    refreshed: true,
+    publishedPosts: allPosts.length,
+    listPosts: posts.length,
+    inventoryPosts: inventoryPosts.length,
+    duplicatePosts: duplicatePosts.length,
+    detailPosts: detailPosts.length,
+    languages: Object.fromEntries(
+      BLOG_LANGUAGES.map((language) => [language, allPosts.filter((post) => normalizeBlogLanguage(post.language) === language).length])
+    )
+  };
+}
+
+export async function refreshPublicBlogCacheFromStorage() {
+  const data = await readCmsData();
+  return writePublicBlogCacheFromData(data);
 }
 
 async function readPublishedBlogPostsForPublic() {
@@ -555,18 +745,51 @@ export async function getPublishedProject(slug: string) {
 }
 
 export async function getPublishedBlogPosts() {
-  return sortedByOrder(await readPublishedBlogPostsForPublic());
+  return sortedByPublicRecency(await readPublishedBlogPostsForPublic());
 }
 
 export async function getPublishedBlogPostsForMetadata() {
-  return sortedByOrder(await readPublishedBlogPostsForPublic());
+  return sortedByPublicRecency(await getPublishedBlogInventoryPosts());
 }
 
 export async function getPublishedBlogPostsByLanguage(language?: BlogLanguage) {
   const posts = await readPublishedBlogPostsForPublic();
-  return sortedByOrder(
+  return sortedByPublicRecency(
     posts.filter((post) => post.status === "published" && (!language || normalizeBlogLanguage(post.language) === language))
   );
+}
+
+export async function getPublishedBlogInventoryPosts() {
+  const cached = await readPublicBlogInventoryCache();
+  if (cached) return sortedByPublicRecency(cached);
+
+  if (getCloudflareKvConfig()) {
+    console.warn("[cms] Public blog inventory cache is missing on Cloudflare; returning empty list instead of rebuilding during a public request.");
+    return [];
+  }
+
+  const data = await readPublicRawCmsData();
+  return sortedByPublicRecency(allPublicBlogPostsFromData(data).map(compactPublicBlogInventoryPost));
+}
+
+export async function getPublishedBlogInventoryPostsByLanguage(language?: BlogLanguage) {
+  const posts = await getPublishedBlogInventoryPosts();
+  return sortedByPublicRecency(
+    posts.filter((post) => post.status === "published" && (!language || normalizeBlogLanguage(post.language) === language))
+  );
+}
+
+export async function getPublishedBlogDuplicatePosts() {
+  const cached = await readPublicBlogDuplicateCache();
+  if (cached) return sortedByOrder(cached);
+
+  if (getCloudflareKvConfig()) {
+    console.warn("[cms] Public blog duplicate cache is missing on Cloudflare; returning empty list instead of rebuilding during validate.");
+    return [];
+  }
+
+  const data = await readPublicRawCmsData();
+  return sortedByOrder(allPublicBlogPostsFromData(data).map(compactPublicBlogDuplicatePost));
 }
 
 function decodeSlugCandidate(slug: string) {
@@ -607,6 +830,8 @@ export async function getPublishedBlogPost(slug: string, language?: BlogLanguage
 }
 
 export async function getPublishedBlogAlternates(post: BlogPost) {
+  if (isCloudflarePublicRuntime()) return [];
+
   const posts = await readPublishedBlogPostsForPublic();
   return posts.filter(
     (item) =>
@@ -629,6 +854,8 @@ function blogSourceHosts(post: BlogPost) {
 }
 
 export async function getRelatedPublishedBlogPosts(post: BlogPost, limit = 4) {
+  if (isCloudflarePublicRuntime()) return [];
+
   const posts = await readPublishedBlogPostsForPublic();
   const tagSet = new Set(post.tags.map((tag) => tag.toLowerCase()));
   const sourceHosts = new Set(blogSourceHosts(post));

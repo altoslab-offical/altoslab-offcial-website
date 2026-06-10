@@ -169,6 +169,19 @@ function average(values) {
   return Math.round((finite.reduce((sum, value) => sum + value, 0) / finite.length) * 10) / 10;
 }
 
+async function fetchRecentBlogDetails(targetUrl, posts, limit = 36) {
+  const candidates = posts
+    .filter((post) => post?.slug && post?.language)
+    .slice(0, limit);
+  const results = await Promise.all(
+    candidates.map(async (post) => {
+      const detail = await fetchJson(`${targetUrl}/api/blog/${encodeURIComponent(post.slug)}?language=${encodeURIComponent(post.language)}`);
+      return detail.ok && detail.json?.post ? detail.json.post : null;
+    })
+  );
+  return results.filter(Boolean);
+}
+
 function base64Url(input) {
   return Buffer.from(input).toString("base64").replace(/=/g, "").replace(/\+/g, "-").replace(/\//g, "_");
 }
@@ -360,7 +373,8 @@ async function searchConsoleReport(targetUrl) {
   };
 }
 
-function buildInsights({ targetUrl, health, posts, surface, ga4, searchConsole }) {
+function buildInsights({ targetUrl, health, posts, qualityPosts, surface, ga4, searchConsole }) {
+  const scoredPosts = qualityPosts?.length ? qualityPosts : posts;
   const languages = health?.integrations?.blogLanguages?.length ? health.integrations.blogLanguages : DEFAULT_LANGUAGES;
   const languagePaths = Object.fromEntries(languages.map((language) => [language, blogIndexPathForLanguage(language)]));
   const byLanguage = countBy(posts, (post) => post.language);
@@ -377,16 +391,16 @@ function buildInsights({ targetUrl, health, posts, surface, ga4, searchConsole }
     }));
   const marketNewsGroups = [...groups.values()].filter((group) => group.some((post) => post.contentType === "breaking"));
   const incompleteMarketNewsGroups = incompleteGroups.filter((group) => group.contentType === "breaking");
-  const sourceCounts = posts.map((post) => post.sourceLinks?.length || 0);
-  const faqCounts = posts.map((post) => post.faqs?.length || 0);
-  const takeawayCounts = posts.map((post) => post.keyTakeaways?.length || 0);
+  const sourceCounts = scoredPosts.map((post) => post.sourceLinks?.length || 0);
+  const faqCounts = scoredPosts.map((post) => post.faqs?.length || 0);
+  const takeawayCounts = scoredPosts.map((post) => post.keyTakeaways?.length || 0);
   const sourceDomains = [
-    ...new Set(posts.flatMap((post) => post.sourceLinks || []).map((source) => domainFromUrl(source.url)).filter(Boolean))
+    ...new Set(scoredPosts.flatMap((post) => post.sourceLinks || []).map((source) => domainFromUrl(source.url)).filter(Boolean))
   ].sort();
-  const sourceSummaryCoverage = posts.filter((post) => (post.sourceLinks || []).some((source) => source.summary)).length;
-  const postsWithSeoMeta = posts.filter((post) => post.seoTitle && post.seoDescription && post.excerpt).length;
-  const postsWithGeo = posts.filter((post) => post.geoSummary && post.sourceLinks?.length).length;
-  const postsWithImages = posts.filter((post) => post.cover && post.coverAlt).length;
+  const sourceSummaryCoverage = scoredPosts.filter((post) => (post.sourceLinks || []).some((source) => source.summary)).length;
+  const postsWithSeoMeta = scoredPosts.filter((post) => post.seoTitle && post.seoDescription && post.excerpt).length;
+  const postsWithGeo = scoredPosts.filter((post) => post.geoSummary && post.sourceLinks?.length).length;
+  const postsWithImages = scoredPosts.filter((post) => post.cover && post.coverAlt).length;
   const homepage = surface["/"]?.text || "";
   const blogHtml = surface["/blog"]?.text || "";
   const hreflangCount = (blogHtml.match(/hrefLang=|hreflang=/gi) || []).length;
@@ -401,8 +415,8 @@ function buildInsights({ targetUrl, health, posts, surface, ga4, searchConsole }
       { key: "all language blog indexes reachable", ok: liveLanguageIndexes === languages.length, weight: 16 },
       { key: "hreflang alternates visible", ok: hreflangCount >= languages.length, weight: 10 },
       { key: "blog has at least one qualified public post", ok: posts.length > 0, weight: 8 },
-      { key: "blog posts have SEO title/meta/excerpt", ok: posts.length > 0 && percent(postsWithSeoMeta, posts.length) >= 90, weight: 12 },
-      { key: "blog covers have alt text", ok: posts.length > 0 && percent(postsWithImages, posts.length) >= 90, weight: 8 },
+      { key: "blog posts have SEO title/meta/excerpt", ok: scoredPosts.length > 0 && percent(postsWithSeoMeta, scoredPosts.length) >= 90, weight: 12 },
+      { key: "blog covers have alt text", ok: scoredPosts.length > 0 && percent(postsWithImages, scoredPosts.length) >= 90, weight: 8 },
       {
         key: "daily column minimum matches configured target",
         ok: health?.integrations?.dailyColumnTarget === Number(process.env.ALTOS_BLOG_COLUMN_DAILY_LIMIT || "1"),
@@ -414,10 +428,10 @@ function buildInsights({ targetUrl, health, posts, surface, ga4, searchConsole }
       { key: "AI referral landing event present", ok: /ai_referral_landing/.test(homepage), weight: 12 },
       { key: "GTM/GA can receive events", ok: Boolean(health?.integrations?.gaConfigured && health?.integrations?.gtmConfigured), weight: 10 },
       { key: "blog has at least one qualified public post", ok: posts.length > 0, weight: 8 },
-      { key: "posts include GEO summaries and sources", ok: posts.length > 0 && percent(postsWithGeo, posts.length) >= 90, weight: 14 },
-      { key: "source summaries support citable context", ok: posts.length > 0 && percent(sourceSummaryCoverage, posts.length) >= 80, weight: 12 },
-      { key: "average source count is healthy", ok: posts.length > 0 && average(sourceCounts) >= 2.5, weight: 12 },
-      { key: "FAQ and key takeaways exist", ok: posts.length > 0 && average(faqCounts) >= 1 && average(takeawayCounts) >= 2, weight: 10 },
+      { key: "posts include GEO summaries and sources", ok: scoredPosts.length > 0 && percent(postsWithGeo, scoredPosts.length) >= 90, weight: 14 },
+      { key: "source summaries support citable context", ok: scoredPosts.length > 0 && percent(sourceSummaryCoverage, scoredPosts.length) >= 80, weight: 12 },
+      { key: "average source count is healthy", ok: scoredPosts.length > 0 && average(sourceCounts) >= 2.5, weight: 12 },
+      { key: "FAQ and key takeaways exist", ok: scoredPosts.length > 0 && average(faqCounts) >= 1 && average(takeawayCounts) >= 2, weight: 10 },
       { key: "full language groups are ready", ok: completeGroups > 0, weight: 8 },
       { key: "market news translated to every language", ok: incompleteMarketNewsGroups.length === 0, weight: 4 }
     ]
@@ -441,8 +455,8 @@ function buildInsights({ targetUrl, health, posts, surface, ga4, searchConsole }
         .join("; ")}`
     );
   }
-  if (posts.length > 0 && percent(postsWithSeoMeta, posts.length) < 90) warnings.push("Some public posts are missing SEO title/meta/excerpt.");
-  if (posts.length > 0 && percent(postsWithGeo, posts.length) < 90) warnings.push("Some public posts are missing GEO summary or visible sources.");
+  if (scoredPosts.length > 0 && percent(postsWithSeoMeta, scoredPosts.length) < 90) warnings.push("Some sampled public posts are missing SEO title/meta/excerpt.");
+  if (scoredPosts.length > 0 && percent(postsWithGeo, scoredPosts.length) < 90) warnings.push("Some sampled public posts are missing GEO summary or visible sources.");
   const actions = [];
   if (unreachableLanguages.length) {
     const labels = unreachableLanguages
@@ -520,6 +534,7 @@ function buildInsights({ targetUrl, health, posts, surface, ga4, searchConsole }
       marketNewsGroups: marketNewsGroups.length,
       marketNewsCompleteGroups: marketNewsGroups.length - incompleteMarketNewsGroups.length,
       incompleteMarketNewsGroups: incompleteMarketNewsGroups.slice(0, 10),
+      qualitySamplePosts: scoredPosts.length,
       averageSources: average(sourceCounts),
       averageFaqs: average(faqCounts),
       averageKeyTakeaways: average(takeawayCounts),
@@ -627,20 +642,21 @@ function renderTextReport(report) {
 今天結論：
 ${report.insight}
 
-先看這 3 件事：
+先看這 4 件事：
 - Google 搜尋健康分數：${report.scores.seo}/100（${explainScore(report.scores.seo)}）
 - AI 搜尋可引用分數：${report.scores.geo}/100（${explainScore(report.scores.geo)}）
 - 正式站公開文章：${report.content.publishedPosts} 篇；完整多語文章組：${report.content.completeGroups}/${report.content.translationGroups} 組
+- 最新品質抽樣：${report.content.qualitySamplePosts} 篇
 
 白話說：
 第一個分數是在看 Google 會不會順利看懂我們網站；第二個分數是在看 AI 搜尋工具能不能放心引用我們文章。
-分數不是目的。真正要看的是：有沒有流量資料、文章語言有沒有齊、讀者會不會看到穩定更新。
+分數不是目的。真正要看的是：有沒有流量資料、文章語言有沒有齊、最新文章是否有來源與摘要、讀者會不會看到穩定更新。
 
 1. 內容狀況
 ${contentTypeLines || "- 尚未取得文章類型資料。"}
 - 市場快訊完整多語組：${report.content.marketNewsCompleteGroups}/${report.content.marketNewsGroups} 組
-- 每篇平均來源數：${report.content.averageSources} 個
-- 每篇平均 FAQ：${report.content.averageFaqs} 個
+- 最新抽樣平均來源數：${report.content.averageSources} 個
+- 最新抽樣平均 FAQ：${report.content.averageFaqs} 個
 - 每日專欄最低量：${report.technical.dailyColumnTarget || "尚未設定"} 篇
 - 市場快訊掃描時間：${(report.technical.marketScanWindows || []).join("、") || "尚未設定"}
 
@@ -677,16 +693,23 @@ async function main() {
   await loadEnvFiles();
   const targetUrl = baseUrl();
   const healthResult = await fetchJson(`${targetUrl}/api/health`);
-  const postsResult = await fetchJson(`${targetUrl}/api/blog`);
+  const inventoryResult = await fetchJson(`${targetUrl}/api/blog?fields=inventory&limit=600`);
+  const listResult = await fetchJson(`${targetUrl}/api/blog?limit=72`);
   const health = healthResult.json || {};
   const languages = health?.integrations?.blogLanguages?.length ? health.integrations.blogLanguages : DEFAULT_LANGUAGES;
   const languagePaths = Object.fromEntries(languages.map((language) => [language, blogIndexPathForLanguage(language)]));
   const surfacePaths = ["/", "/blog", "/sitemap.xml", "/feed.xml", "/robots.txt", "/llms.txt", ...Object.values(languagePaths)];
   const surfaceEntries = await Promise.all([...new Set(surfacePaths)].map(async (surfacePath) => [surfacePath, await fetchSurfaceText(`${targetUrl}${surfacePath}`)]));
   const surface = Object.fromEntries(surfaceEntries);
-  const posts = Array.isArray(postsResult.json?.posts) ? postsResult.json.posts : [];
+  const inventoryPosts = Array.isArray(inventoryResult.json?.posts) ? inventoryResult.json.posts : [];
+  const listPosts = Array.isArray(listResult.json?.posts) ? listResult.json.posts : [];
+  const listByKey = new Map(listPosts.map((post) => [`${post.language}:${post.slug}`, post]));
+  const posts = inventoryPosts.length
+    ? inventoryPosts.map((post) => ({ ...(listByKey.get(`${post.language}:${post.slug}`) || {}), ...post }))
+    : listPosts;
+  const qualityPosts = await fetchRecentBlogDetails(targetUrl, posts, 36);
   const [ga4, searchConsole] = await Promise.all([ga4Report(), searchConsoleReport(targetUrl)]);
-  const report = buildInsights({ targetUrl, health, posts, surface, ga4, searchConsole });
+  const report = buildInsights({ targetUrl, health, posts, qualityPosts, surface, ga4, searchConsole });
   const format = arg("format", hasFlag("json") ? "json" : "text");
   const output = arg("output");
   const rendered = format === "json" ? JSON.stringify(report, null, 2) : renderTextReport(report);

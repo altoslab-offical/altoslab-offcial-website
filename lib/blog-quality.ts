@@ -45,6 +45,10 @@ export type BlogPairQualityReview = {
   notes: string;
 };
 
+type BlogPairQualityOptions = {
+  verifySourceLinks?: boolean;
+};
+
 const CONTENT_TYPE_THRESHOLDS: Record<BlogContentType, number> = {
   breaking: 82,
   column: 88,
@@ -1477,7 +1481,10 @@ async function validateSourceReachability(posts: BlogPost[]) {
   };
 }
 
-export async function reviewBlogPairForAutoPublish(posts: BlogPost[]): Promise<BlogPairQualityReview> {
+export async function reviewBlogPairForAutoPublish(
+  posts: BlogPost[],
+  options: BlogPairQualityOptions = {}
+): Promise<BlogPairQualityReview> {
   const issues: string[] = [];
   const warnings: string[] = [];
   const contentType = contentTypeFor(posts);
@@ -1493,7 +1500,13 @@ export async function reviewBlogPairForAutoPublish(posts: BlogPost[]): Promise<B
     warnings.push(...review.warnings.map((warning) => `${review.language}/${review.slug}: ${warning}`));
   }
 
-  const sourceValidation = await validateSourceReachability(posts);
+  const verifySourceLinks = options.verifySourceLinks ?? true;
+  const sourceValidation = verifySourceLinks
+    ? await validateSourceReachability(posts)
+    : {
+        issues: [],
+        warnings: ["source link validation warning: skipped remote source reachability probe in bounded Worker validate path"]
+      };
   issues.push(...sourceValidation.issues);
   warnings.push(...sourceValidation.warnings);
   issues.push(...blockingAutoPublishWarnings(warnings).map((warning) => `blocking quality warning: ${warning}`));

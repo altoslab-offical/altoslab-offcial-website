@@ -9,6 +9,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const uniquePosts = Array.from(
     new Map(posts.map((post) => [`${siteUrl}${blogPostPath(post)}`, post])).values()
   );
+  const alternatesByGroup = new Map<string, typeof posts>();
+  for (const post of posts) {
+    const key = post.translationGroupId || post.id;
+    alternatesByGroup.set(key, [...(alternatesByGroup.get(key) || []), post]);
+  }
 
   return [
     {
@@ -48,7 +53,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.4
     },
     ...uniquePosts.map((post) => {
-      const alternates = posts.filter((alternate) => alternate.translationGroupId === post.translationGroupId);
+      const alternates = alternatesByGroup.get(post.translationGroupId || post.id) || [post];
       const defaultPost = alternates.find((alternate) => alternate.language === "zh-Hant") || post;
 
       return {
