@@ -1,10 +1,12 @@
-import { getPublishedBlogPostsForMetadata, getPublishedProjects } from "@/lib/cms";
+import { getPublishedBlogPosts, getPublishedProjects } from "@/lib/cms";
 import { BLOG_LANGUAGES, blogPostPath } from "@/lib/blog-utils";
 import { publicTaxonomyLabel } from "@/lib/public-taxonomy";
 import { siteName, siteUrl } from "@/lib/seo";
 import type { BlogPost } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
+
+const LLMS_ARTICLE_GROUP_LIMIT = Number(process.env.LLMS_ARTICLE_GROUP_LIMIT || 6);
 
 function articleTimestamp(post: BlogPost) {
   return new Date(post.publishedAt || post.updatedAt || post.createdAt).getTime() || 0;
@@ -19,13 +21,14 @@ function orderedLlmsArticles(posts: BlogPost[]) {
 
   return [...grouped.values()]
     .sort((a, b) => Math.max(...b.map(articleTimestamp)) - Math.max(...a.map(articleTimestamp)))
+    .slice(0, LLMS_ARTICLE_GROUP_LIMIT)
     .flatMap((group) =>
       [...group].sort((a, b) => BLOG_LANGUAGES.indexOf(a.language) - BLOG_LANGUAGES.indexOf(b.language))
     );
 }
 
 export async function GET() {
-  const [posts, projects] = await Promise.all([getPublishedBlogPostsForMetadata(), getPublishedProjects()]);
+  const [posts, projects] = await Promise.all([getPublishedBlogPosts(), getPublishedProjects()]);
   const articles = orderedLlmsArticles(posts);
   const lines = [
     `# ${siteName}`,

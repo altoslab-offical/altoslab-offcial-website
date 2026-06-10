@@ -1,9 +1,22 @@
-import { getPublishedBlogPostsForMetadata } from "@/lib/cms";
+import { getPublishedBlogPosts } from "@/lib/cms";
 import { blogPostPath } from "@/lib/blog-utils";
 import { publicTaxonomyLabel } from "@/lib/public-taxonomy";
 import { absoluteUrl, siteName, siteUrl } from "@/lib/seo";
+import type { BlogPost } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
+
+const RSS_ITEM_LIMIT = Number(process.env.RSS_ITEM_LIMIT || 45);
+
+function articleTimestamp(post: BlogPost) {
+  return new Date(post.publishedAt || post.updatedAt || post.createdAt).getTime() || 0;
+}
+
+function latestFeedPosts(posts: BlogPost[]) {
+  return [...posts]
+    .sort((a, b) => articleTimestamp(b) - articleTimestamp(a))
+    .slice(0, RSS_ITEM_LIMIT);
+}
 
 function escapeXml(value: string) {
   return value
@@ -15,7 +28,7 @@ function escapeXml(value: string) {
 }
 
 export async function GET() {
-  const posts = await getPublishedBlogPostsForMetadata();
+  const posts = latestFeedPosts(await getPublishedBlogPosts());
   const items = posts
     .map((post) => {
       const url = absoluteUrl(blogPostPath(post));
