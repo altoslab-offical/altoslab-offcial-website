@@ -92,12 +92,6 @@ assert(html.includes("<strong>粗體摘要</strong>"), "excerpt bold markers ren
 assert(html.includes("<code>inline code</code>"), "inline code markers render as code");
 
 const indexResponse = await maybeHandleDirectBlogHtml(new Request("https://altoslab-ai.cc/blog"), env);
-const indexHtml = await indexResponse.text();
-
-assert(indexResponse.status === 200, "blog index direct renderer returns 200");
-assert(indexResponse.headers.get("x-altos-direct-blog-render") === "cloudflare-d1-index", "blog index direct renderer header is present");
-assert(!indexHtml.includes("**"), "blog index renderer does not leak raw Markdown bold markers");
-assert(indexHtml.includes("Markdown inline rendering smoke"), "blog index includes article card title");
-assert(indexHtml.includes("<strong>粗體摘要</strong>"), "blog index excerpt bold markers render as strong");
+assert(indexResponse === null, "blog index falls through to the original Next UI renderer");
 
 if (!process.exitCode) console.log("PASS blog direct renderer smoke checks");

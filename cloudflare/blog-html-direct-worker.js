@@ -89,10 +89,10 @@ function contentTypeLabel(post) {
 
 function routeRequest(pathname) {
   const parts = pathname.split("/").filter(Boolean);
-  if (parts[0] === "blog" && !parts[1]) return { kind: "index", language: "zh-Hant" };
+  if (parts[0] === "blog" && !parts[1]) return null;
   if (parts[0] === "blog" && parts[1]) return { kind: "post", language: "zh-Hant", slug: decodeURIComponent(parts[1]) };
   if (LANGUAGE_PREFIXES.has(parts[0]) && parts[1] === "blog" && !parts[2]) {
-    return { kind: "index", language: parts[0] };
+    return null;
   }
   if (LANGUAGE_PREFIXES.has(parts[0]) && parts[1] === "blog" && parts[2]) {
     return { kind: "post", language: parts[0], slug: decodeURIComponent(parts[2]) };
@@ -438,17 +438,6 @@ export async function maybeHandleDirectBlogHtml(request, env) {
   const url = new URL(request.url);
   const parsed = routeRequest(url.pathname);
   if (!parsed) return null;
-  if (parsed.kind === "index") {
-    const posts = await readIndexPosts(env, parsed.language);
-    const html = renderIndex(posts, parsed.language, env, request.url);
-    return new Response(request.method === "HEAD" ? null : html, {
-      headers: {
-        "content-type": "text/html; charset=utf-8",
-        "cache-control": "public, max-age=120, stale-while-revalidate=1800",
-        "x-altos-direct-blog-render": "cloudflare-d1-index"
-      }
-    });
-  }
   const post = await readPost(env, parsed.slug, parsed.language);
   if (!post) return null;
   const alternates = await readAlternates(env, post.translationGroupId);
