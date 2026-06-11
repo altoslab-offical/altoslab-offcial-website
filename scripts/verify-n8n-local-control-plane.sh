@@ -47,7 +47,19 @@ json_smoke() {
   local label="$1"
   local url="$2"
   local out
-  out="$(curl -fsS -X POST -H "content-type: application/json" --data "{\"source\":\"${label}\"}" "$url")"
+  local attempt
+  local last_error=""
+  for attempt in 1 2 3; do
+    if out="$(curl -fsS -X POST -H "content-type: application/json" --data "{\"source\":\"${label}\"}" "$url" 2>&1)"; then
+      break
+    fi
+    last_error="$out"
+    if [[ "$attempt" == "3" ]]; then
+      echo "$label failed after $attempt attempts: $last_error" >&2
+      exit 1
+    fi
+    sleep "$attempt"
+  done
   printf '%s' "$out" | expect_json_true ok >/dev/null
   local job
   job="$(printf '%s' "$out" | extract_json_field job)"
@@ -55,6 +67,41 @@ json_smoke() {
   code="$(printf '%s' "$out" | extract_json_field code)"
   echo "$label ok: job=$job code=$code"
 }
+
+COLUMN_INDEX_PATH=""
+COLUMN_INDEX_BACKUP=""
+COLUMN_INDEX_HAD_FILE=false
+
+preserve_column_index() {
+  local taipei_date
+  taipei_date="$(TZ=Asia/Taipei date +%Y-%m-%d)"
+  COLUMN_INDEX_PATH="$ROOT_DIR/data/blog-prepared-candidates/${taipei_date}-morning-column.json"
+  COLUMN_INDEX_BACKUP="$(mktemp -t altos-n8n-column-index.XXXXXX)"
+  if [[ -f "$COLUMN_INDEX_PATH" ]]; then
+    cp "$COLUMN_INDEX_PATH" "$COLUMN_INDEX_BACKUP"
+    COLUMN_INDEX_HAD_FILE=true
+  else
+    COLUMN_INDEX_HAD_FILE=false
+  fi
+}
+
+restore_column_index() {
+  if [[ -z "$COLUMN_INDEX_PATH" || -z "$COLUMN_INDEX_BACKUP" ]]; then
+    return 0
+  fi
+  if [[ "$COLUMN_INDEX_HAD_FILE" == true ]]; then
+    mkdir -p "$(dirname "$COLUMN_INDEX_PATH")"
+    cp "$COLUMN_INDEX_BACKUP" "$COLUMN_INDEX_PATH"
+  else
+    rm -f "$COLUMN_INDEX_PATH"
+  fi
+  rm -f "$COLUMN_INDEX_BACKUP"
+  COLUMN_INDEX_PATH=""
+  COLUMN_INDEX_BACKUP=""
+  COLUMN_INDEX_HAD_FILE=false
+}
+
+trap restore_column_index EXIT
 
 N8N_PORT="$(awk -F= '$1=="N8N_LOCAL_PORT"{print substr($0,index($0,"=")+1)}' "$ENV_FILE" | tail -1)"
 N8N_PORT="${N8N_PORT:-5679}"
@@ -87,7 +134,7 @@ echo "unauthorized bridge request returned 401"
 
 echo "Checking workflow inventory"
 workflow_list="$(docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" exec -T n8n n8n list:workflow)"
-for workflow_id in altos-health-watch altos-market-scan altos-scheduled-gate altos-seo-geo altos-manual-control; do
+for workflow_id in altos-health-watch altos-market-scan altos-scheduled-gate altos-column-release-poll altos-seo-geo altos-manual-control; do
   if ! grep -q "$workflow_id" <<<"$workflow_list"; then
     echo "missing workflow: $workflow_id" >&2
     exit 1
@@ -95,12 +142,32 @@ for workflow_id in altos-health-watch altos-market-scan altos-scheduled-gate alt
 done
 echo "workflow inventory ok"
 
+echo "Checking bridge job inventory"
+for job_name in health worker-smoke custom-domain-smoke doctor ops-audit seo-geo-report column-prep column-status column-validate column-release scheduled market-scan-validate market-scan; do
+  if ! grep -q "\"${job_name}\"" <<<"$bridge_health"; then
+    echo "bridge job missing: $job_name" >&2
+    exit 1
+  fi
+done
+echo "bridge job inventory ok"
+
 echo "Checking n8n manual health webhook"
 json_smoke "manual-health" "http://127.0.0.1:${N8N_PORT}/webhook/altos-blog/manual/health"
 
 if [[ "$FULL" == true ]]; then
   echo "Checking n8n manual column prep webhook"
+  preserve_column_index
   json_smoke "manual-column-prep" "http://127.0.0.1:${N8N_PORT}/webhook/altos-blog/manual/column-prep"
+  restore_column_index
+
+  echo "Checking n8n manual column status webhook"
+  json_smoke "manual-column-status" "http://127.0.0.1:${N8N_PORT}/webhook/altos-blog/manual/column-status"
+
+  echo "Checking n8n manual column validate webhook"
+  json_smoke "manual-column-validate" "http://127.0.0.1:${N8N_PORT}/webhook/altos-blog/manual/column-validate"
+
+  echo "Checking n8n manual column release webhook"
+  json_smoke "manual-column-release" "http://127.0.0.1:${N8N_PORT}/webhook/altos-blog/manual/column-release"
 
   echo "Checking n8n manual market validate webhook"
   json_smoke "manual-market-validate" "http://127.0.0.1:${N8N_PORT}/webhook/altos-blog/manual/market-validate"

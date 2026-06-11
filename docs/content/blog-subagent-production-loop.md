@@ -41,7 +41,7 @@ Do not include secrets, HMAC keys, admin passwords, cookies, or private customer
 
 ## Daily Schedule
 
-The Codex app heartbeat automation is the primary scheduler for this workflow:
+Local n8n is the primary scheduler for this workflow. The Codex app heartbeat remains a supervision/recovery channel, not the only timed runner:
 
 - Automation id: `altos-blog-subagent-production-loop`
 - Target: current main-brain thread
@@ -51,11 +51,12 @@ The Codex app heartbeat automation is the primary scheduler for this workflow:
 - Market-scan windows: `10:30`, `12:30`, `14:30`, `18:30`, and `20:30`
 - Post-release follow-up windows: `09:04` and `16:04`
 
-The macOS LaunchAgent is the deterministic safety runner. It wakes at all above windows and does only three things:
+The local n8n control plane is the deterministic safety runner. It wakes at the same windows and calls the allowlisted local bridge. It does four things:
 
 - prep windows: create a run folder, prompt card, and `awaiting_browser_production` manifest skeleton;
 - release windows: publish only an already `ready` manifest.
 - market-scan windows: refresh source-fast-lane prompts/manifests for source-translation production;
+- daytime poll windows: recheck the morning column release gate every 15 minutes so a browser-produced candidate can publish after late validate-only completion.
 
 The runner is intentionally narrow:
 
@@ -72,12 +73,12 @@ node scripts/blog-sop-doctor.mjs \
   --slot morning|afternoon
 ```
 
-The doctor checks the local worker env, LaunchAgent registration, production `/api/health`, durable CMS status (`cloudflare-kv` for the active Cloudflare path), disabled legacy DeepSeek cron, and release candidate readiness. Release mode also requires admin readback credentials so the post-release verifier can inspect protected blog metadata.
+The doctor checks the local worker env, LaunchAgent registration, production `/api/health`, durable CMS status (`cloudflare-d1` for the active Cloudflare path), disabled legacy DeepSeek cron, and release candidate readiness. Release mode also requires admin readback credentials so the post-release verifier can inspect protected blog metadata.
 
-It does not pretend to operate Gemini or ChatGPT. Column/feature Gemini/GPT production remains owned by the Codex heartbeat/main-brain workflow because it has Chrome extension access and can enforce tab-group rules. Market-news source-translation can be prepared without Gemini when the source article, source image and attribution are verifiable.
+It does not pretend to operate Gemini or ChatGPT. Column/feature Gemini/GPT production remains owned by Codex/main-brain because it has to enforce fixed-tab, account, model and evidence rules. n8n owns the repeated prep/status/validate/release execution around that browser work. Market-news source-translation can be prepared without Gemini when the source article, source image and attribution are verifiable.
 
 At prep time, the main brain must prepare a publishable candidate manifest before the release window.
-At release time, the main brain must not start fresh generation. If no prepared, validate-only-passed, design-approved candidate exists, skip publishing.
+At release time, the main brain must not start fresh generation. If no prepared, validate-only-passed, design-approved candidate exists, skip publishing. n8n keeps polling `column-release`; it must remain a no-op until the manifest is `ready`.
 At market-scan windows, the runner never publishes. It only creates/updates `awaiting_source_translation_production` manifests and keeps fail-closed gate coverage unchanged for the same-day 09:00 / 16:00 publish windows.
 At post-release follow-up time, the main brain must not start fresh generation. It verifies a released manifest or reruns the release gate once if the manifest is still ready and the five-minute release grace window is still open.
 The manifest contract lives in `docs/content/blog-prepared-candidate-manifest.md`.

@@ -34,12 +34,27 @@
       "id": "f22f8737839449dd9a2557a8e5d1bc78"
     }
   ],
+  "d1_databases": [
+    {
+      "binding": "ALTOS_BLOG_D1",
+      "database_name": "altos-blog-cms",
+      "database_id": "95609a32-f7c6-48e8-8a52-d63092404bc5"
+    }
+  ],
   "vars": {
     "NEXT_PUBLIC_SITE_URL": "https://altoslab-ai.cc",
     "NEXT_PUBLIC_GTM_ID": "GTM-WJ96VR7V",
     "NEXT_PUBLIC_GA_MEASUREMENT_ID": "G-5VSLFNVD28",
+    "GA4_ACCOUNT_ID": "396239716",
+    "GA4_PROPERTY_ID": "539513224",
+    "GOOGLE_ANALYTICS_PROPERTY_ID": "539513224",
+    "SEARCH_CONSOLE_SITE_URL": "https://altoslab-ai.cc/",
+    "GOOGLE_SEARCH_CONSOLE_SITE_URL": "https://altoslab-ai.cc/",
+    "GOOGLE_SITE_VERIFICATION": "DyTF-cJ7TE_Ktw4QHNGe9gaetLdrPn4i4gyT4JqpzUQ",
     "CANONICAL_REDIRECT_HOSTS": "www.altoslab-ai.cc,altoslab.com,www.altoslab.com,altoslab-offcial-website.vercel.app,altoslab-offcial-website-altoslaboffical-3015s-projects.vercel.app",
     "CMS_STORAGE_KEY": "altoslab:cms:v1",
+    "CLOUDFLARE_D1_ENABLED": "1",
+    "CLOUDFLARE_D1_BINDING": "ALTOS_BLOG_D1",
     "CLOUDFLARE_KV_ENABLED": "1",
     "CLOUDFLARE_KV_BINDING": "ALTOS_BLOG_KV",
     "CLOUDFLARE_R2_ENABLED": "0",

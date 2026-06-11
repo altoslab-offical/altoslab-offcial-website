@@ -6,7 +6,7 @@ import type { BlogPost } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
-const RSS_ITEM_LIMIT = Number(process.env.RSS_ITEM_LIMIT || 27);
+const RSS_ITEM_LIMIT = Number(process.env.RSS_ITEM_LIMIT || 108);
 
 function articleTimestamp(post: BlogPost) {
   return new Date(post.updatedAt || post.publishedAt || post.createdAt).getTime() || 0;

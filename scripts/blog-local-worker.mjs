@@ -1070,7 +1070,9 @@ async function main() {
 
   let releaseArticleSetPath = "";
   if (manifestPath) {
-    releaseArticleSetPath = path.join(path.dirname(path.resolve(manifestPath)), "article-set.release.json");
+    const resolvedManifestPath = path.resolve(manifestPath);
+    const manifestBaseName = path.basename(resolvedManifestPath, path.extname(resolvedManifestPath));
+    releaseArticleSetPath = path.join(path.dirname(resolvedManifestPath), `${manifestBaseName}.article-set.release.json`);
     await writeJsonFile(releaseArticleSetPath, payload);
   }
 

@@ -189,22 +189,45 @@ async function readJson(filePath) {
   return JSON.parse(await fs.readFile(filePath, "utf8"));
 }
 
+function hasCloudflareWorkerErrorBody(text = "") {
+  return /\berror code:\s*1102\b/i.test(text) || /Worker exceeded resource limits/i.test(text);
+}
+
+function retryableHttpStatus(status) {
+  return status === 429 || status === 503 || status === 504 || status === 520 || status === 521 || status === 522 || status === 524;
+}
+
 async function fetchPublicPostsForLanguage({ baseUrl, language }) {
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), Number(process.env.ALTOS_BLOG_INVENTORY_TIMEOUT_MS || "15000"));
-  try {
-    const response = await fetch(`${normalizeBaseUrl(baseUrl)}/api/blog?language=${encodeURIComponent(language)}&limit=200&fields=inventory`, {
-      cache: "no-store",
-      signal: controller.signal,
-      headers: { "User-Agent": "ALTOS-LAB-blog-scheduled-runner/1.0" }
-    });
-    const text = await response.text();
-    if (!response.ok) throw new Error(`inventory fetch failed for ${language}: ${response.status} ${text.slice(0, 160)}`);
-    const parsed = JSON.parse(text || "{}");
-    return Array.isArray(parsed.posts) ? parsed.posts : [];
-  } finally {
-    clearTimeout(timeout);
+  const attempts = Number(process.env.ALTOS_BLOG_INVENTORY_ATTEMPTS || "5");
+  let lastError = "";
+  for (let attempt = 1; attempt <= attempts; attempt += 1) {
+    if (attempt > 1) await sleep(Math.min(1500 * attempt, 8000));
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), Number(process.env.ALTOS_BLOG_INVENTORY_TIMEOUT_MS || "15000"));
+    try {
+      const inventoryLimit = Number(process.env.ALTOS_BLOG_INVENTORY_LIMIT_PER_LANGUAGE || "40");
+      const response = await fetch(`${normalizeBaseUrl(baseUrl)}/api/blog?language=${encodeURIComponent(language)}&limit=${inventoryLimit}&fields=inventory`, {
+        cache: "no-store",
+        signal: controller.signal,
+        headers: { "User-Agent": "ALTOS-LAB-blog-scheduled-runner/1.0" }
+      });
+      const text = await response.text();
+      const workerError = hasCloudflareWorkerErrorBody(text);
+      if ((!response.ok && retryableHttpStatus(response.status)) || workerError) {
+        lastError = `inventory fetch failed for ${language}: ${response.status} ${text.slice(0, 160)}`;
+        if (attempt < attempts) continue;
+      }
+      if (!response.ok) throw new Error(`inventory fetch failed for ${language}: ${response.status} ${text.slice(0, 160)}`);
+      const parsed = JSON.parse(text || "{}");
+      return Array.isArray(parsed.posts) ? parsed.posts : [];
+    } catch (error) {
+      lastError = error instanceof Error ? error.message : String(error);
+      if (attempt >= attempts) throw error;
+    } finally {
+      clearTimeout(timeout);
+    }
   }
+  throw new Error(lastError || `inventory fetch failed for ${language}`);
 }
 
 async function marketInventoryStatus() {
@@ -212,14 +235,13 @@ async function marketInventoryStatus() {
     return { checked: false, skipped: true, reason: "inventory gate disabled" };
   }
   const baseUrl = normalizeBaseUrl(arg("base-url", process.env.ALTOS_BLOG_BASE_URL || DEFAULT_BASE_URL));
-  const rows = await Promise.all(
-    LANGUAGES.map(async (language) => {
-      const posts = await fetchPublicPostsForLanguage({ baseUrl, language });
-      const breaking = posts.filter((post) => post.contentType === "breaking").length;
-      const column = posts.filter((post) => post.contentType === "column").length;
-      return { language, total: posts.length, breaking, column };
-    })
-  );
+  const rows = [];
+  for (const language of LANGUAGES) {
+    const posts = await fetchPublicPostsForLanguage({ baseUrl, language });
+    const breaking = posts.filter((post) => post.contentType === "breaking").length;
+    const column = posts.filter((post) => post.contentType === "column").length;
+    rows.push({ language, total: posts.length, breaking, column });
+  }
   return {
     checked: true,
     baseUrl,
@@ -623,6 +645,8 @@ Daily flow:
 
 Manual checks:
   node scripts/blog-scheduled-runner.mjs --prep --slot morning
+  node scripts/blog-scheduled-runner.mjs --column-status --slot morning
+  node scripts/blog-scheduled-runner.mjs --column-validate --slot morning
   node scripts/blog-scheduled-runner.mjs --release --slot afternoon
   node scripts/blog-scheduled-runner.mjs --market-scan
   node scripts/blog-scheduled-runner.mjs --backfill --target-posts 40
@@ -709,7 +733,7 @@ async function createPrep({ date, slot }) {
   const indexPath = candidateIndexPath(date, slot);
   if ((await exists(indexPath)) && !hasFlag("force")) {
     const existing = await readJson(indexPath);
-    if (existing.status === "ready" || existing.status === "awaiting_browser_production") {
+    if (existing.status === "ready" || existing.status === "awaiting_browser_production" || existing.status === "released") {
       return {
         ok: true,
         skipped: true,
@@ -1546,6 +1570,105 @@ async function release({ date, slot }) {
   };
 }
 
+async function columnStatus({ date, slot }) {
+  const indexPath = await resolveCandidateIndexPath({ date, slot, lane: "column" });
+  if (!(await exists(indexPath))) {
+    return { ok: true, skipped: true, phase: "column-status", status: "missing", reason: "missing prepared candidate", indexPath };
+  }
+  const index = await readJson(indexPath);
+  const manifestPath = index.manifestPath || indexPath;
+  const manifest = (await exists(manifestPath)) ? await readJson(manifestPath) : index;
+  const articleSetPath = manifest.articleSetPath ? path.resolve(manifest.articleSetPath) : "";
+  const articleSetExists = Boolean(articleSetPath && (await exists(articleSetPath)));
+  const articleSet = articleSetExists ? await readJson(articleSetPath).catch(() => null) : null;
+  if (manifest.status === "released") {
+    return {
+      ok: true,
+      skipped: false,
+      phase: "column-status",
+      status: "released",
+      ready: true,
+      articleSetExists,
+      articleSetPath: articleSetPath || "",
+      manifestPath,
+      indexPath,
+      issues: articleSetExists ? [] : ["released manifest articleSetPath file is missing"]
+    };
+  }
+  const gateIssues = articleSet ? releaseGateIssues(manifest, { date, slot, articleSet }) : [];
+  if (manifest.articleSetPath && !articleSetExists) gateIssues.push("articleSetPath file is missing");
+  return {
+    ok: true,
+    skipped: false,
+    phase: "column-status",
+    status: manifest.status || "unknown",
+    ready: gateIssues.length === 0 && manifest.status === "ready",
+    articleSetExists,
+    articleSetPath: articleSetPath || "",
+    manifestPath,
+    indexPath,
+    issues: gateIssues
+  };
+}
+
+async function validateColumn({ date, slot }) {
+  const status = await columnStatus({ date, slot });
+  if (status.skipped || !status.manifestPath) {
+    return { ok: false, skipped: true, phase: "column-validate", reason: status.reason || "missing prepared candidate", status };
+  }
+  if (status.status === "released") {
+    return {
+      ok: true,
+      skipped: false,
+      phase: "column-validate",
+      status: "released",
+      reason: "column already released",
+      manifestPath: status.manifestPath,
+      articleSetPath: status.articleSetPath
+    };
+  }
+  if (!status.articleSetExists) {
+    return {
+      ok: false,
+      skipped: true,
+      phase: "column-validate",
+      reason: "article-set is missing; Gemini/GPT browser production has not written the candidate output",
+      status
+    };
+  }
+  const result = await runCommand(process.execPath, [
+    "scripts/blog-local-worker.mjs",
+    "--article-set",
+    status.articleSetPath,
+    "--slot",
+    slot,
+    "--validate-only",
+    "--manifest",
+    status.manifestPath,
+    "--approve-design-qa"
+  ], { cwd: process.cwd() });
+  const manifest = await readJson(status.manifestPath).catch(() => null);
+  await appendLog(globalScheduleLogPath(), JSON.stringify({
+    phase: "column-validate",
+    date,
+    slot,
+    manifestPath: status.manifestPath,
+    code: result.code,
+    status: manifest?.status || "unknown"
+  }));
+  return {
+    ok: result.code === 0,
+    skipped: false,
+    phase: "column-validate",
+    code: result.code,
+    status: manifest?.status || "unknown",
+    manifestPath: status.manifestPath,
+    articleSetPath: status.articleSetPath,
+    stdout: result.stdout,
+    stderr: result.stderr
+  };
+}
+
 async function main() {
   if (hasFlag("help") || hasFlag("h")) {
     usage();
@@ -1558,6 +1681,8 @@ async function main() {
   let scheduledSlot = "";
   let scheduledMatch = null;
   if (hasFlag("market-scan")) mode = "market-scan";
+  if (hasFlag("column-status")) mode = "column-status";
+  if (hasFlag("column-validate")) mode = "column-validate";
   if (hasFlag("backfill")) mode = "backfill";
   if (hasFlag("scheduled")) {
     const scheduled = scheduledModeFromClock(now);
@@ -1571,7 +1696,7 @@ async function main() {
     scheduledSlot = scheduled.slot || "";
     scheduledMatch = scheduled.match || null;
   }
-  if (!mode) throw new Error("Use --scheduled, --prep, --release, --market-scan or --backfill");
+  if (!mode) throw new Error("Use --scheduled, --prep, --column-status, --column-validate, --release, --market-scan or --backfill");
   const slot = arg("slot") || scheduledSlot || slotFromClock(mode, now);
   if (mode !== "market-scan" && !SLOT_HOURS[slot]) throw new Error("--slot must be morning or afternoon");
 
@@ -1599,6 +1724,10 @@ async function main() {
     result =
       mode === "prep"
         ? await createPrep({ date, slot })
+        : mode === "column-status"
+          ? await columnStatus({ date, slot })
+          : mode === "column-validate"
+            ? await validateColumn({ date, slot })
         : mode === "market-scan"
           ? await createMarketScan({ date })
           : mode === "backfill"

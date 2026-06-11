@@ -6,7 +6,7 @@ import type { BlogPost } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
-const LLMS_ARTICLE_GROUP_LIMIT = Number(process.env.LLMS_ARTICLE_GROUP_LIMIT || 3);
+const LLMS_ARTICLE_GROUP_LIMIT = Number(process.env.LLMS_ARTICLE_GROUP_LIMIT || 12);
 
 function articleTimestamp(post: BlogPost) {
   return new Date(post.updatedAt || post.publishedAt || post.createdAt).getTime() || 0;

@@ -21,7 +21,7 @@
 - Gemini and ChatGPT/GPT are browser workbenches, not release authorities. They may help draft prose or images only inside the dedicated Chrome tabs documented in `docs/content/blog-subagent-production-loop.md`.
 - Localization is not literal translation. Subagents must rewrite naturally for local readers while preserving the same article identity, source facts, sources, cover/media set and editorial angle.
 - The main brain is the only role allowed to call `--release`.
-- Local n8n is the active deterministic safety runner for prep/release timing. The old blog LaunchAgent is now a rollback path only. Gemini/GPT browser production is still handled by the Codex heartbeat/main-brain workflow.
+- Local n8n is the active deterministic safety runner for prep, status, validate-only, ready-release polling, market scans and daily diagnostics. The old blog LaunchAgent is now a rollback path only. Gemini/GPT browser production is still handled by Codex/main-brain inside the fixed Chrome tabs, but n8n owns the repeated wakeups and gate execution around it.
 
 ## Speed And Chrome Memory Guard
 
@@ -31,6 +31,9 @@
 - Published market-news repair is terminal-first and source-only: run `npm run blog:repair-copy -- --base-url https://altoslab-official-website.altoslab-ai.workers.dev --content-type breaking --language all --bulk` only after the source article, canonical URL and credited source image are present. The repair tool must not touch columns/features; those return to the Gemini column lane.
 - Market-source discovery is terminal-first: run `npm run blog:market-sources -- --date <date> --queue-dir data/blog-backfill/<date>/queue --write --overwrite` to create `market-source-packs.generated.json` from current RSS/API signals, duplicate checks and source/official image extraction before any market-news copy worker starts.
 - `scripts/blog-scheduled-runner.mjs --scheduled` now fails closed outside the configured time windows instead of falling through to release mode.
+- `scripts/blog-scheduled-runner.mjs --column-status` exposes whether the daily column has an `article-set.json`, ready manifest and release-gate issues.
+- `scripts/blog-scheduled-runner.mjs --column-validate` runs validate-only for a browser-produced article set and fails closed when Gemini/GPT evidence, language parity, image metadata or main-brain QA is missing.
+- The n8n column release poll calls the release gate every 15 minutes during the day. It publishes only a `ready` manifest and otherwise records `skipped`/held execution history.
 - The scheduled runner uses a single local lock so overlapping heartbeat/LaunchAgent wakes cannot stack production jobs.
 - Column prep checks Chrome Memory Kit before creating a new browser-production candidate. Default guardrails are `ALTOS_BLOG_CHROME_TOTAL_RSS_MB=5200` and `ALTOS_BLOG_CHROME_RENDERER_RSS_MB=1200`; if either is exceeded, the column is held and the reason is logged.
 - Backfill planning is tied to prep windows by default. Market-scan windows focus on current news; set `ALTOS_BLOG_BACKFILL_ON_MARKET_SCAN=true` only for a deliberate catch-up burst.
@@ -76,7 +79,7 @@ Auto-publishing requires:
 
 ## Production Targets
 
-- Public production is the Cloudflare Worker URL with Cloudflare KV-backed CMS storage until `altoslab-ai.cc` DNS no longer serves Google Frontend and Cloudflare verification passes on the custom domain.
+- Public production is `https://altoslab-ai.cc` on Cloudflare Worker with Cloudflare KV-backed CMS storage. The `workers.dev` URL is a fallback diagnostic endpoint, not the normal automation base.
 - Market-news inventory has no hard upper cap; each configured language grows together through complete 9-language translation groups.
 - Column inventory grows at the daily cadence guard: at least one Gemini-produced column per Taipei calendar day, with additional columns allowed only when the same Gemini/GPT visual and release gates pass.
 - Routine cadence: at least one Gemini-produced column per Taipei calendar day; market news publishes opportunistically during scheduled scan windows when a verified source item, source image and multilingual source-faithful copy pass release checks.

@@ -37,14 +37,35 @@ npm run seo:geo-report -- --base-url https://altoslab-ai.cc --format json --outp
 ## Credentials
 
 The script loads `~/.altoslab-blog-worker.env`, `.env.local`, and `.env` without printing secrets.
-When no service-account JSON is configured, it tries the local `gcloud auth application-default print-access-token`
-and `gcloud auth print-access-token` fallbacks. Those fallbacks are useful for diagnostics, but they may still be
-rejected by GA4 or Search Console when the active Google login lacks the required Analytics/Webmaster scopes.
+For the local Cloudflare+n8n runner, use the project-owned service-account JSON when Google products accept it:
+
+```txt
+GOOGLE_AUTH_MODE=service_account
+GOOGLE_AUTH_ACCOUNT=altoslab.offical@gmail.com
+GOOGLE_APPLICATION_CREDENTIALS=/absolute/path/to/service-account.json
+GA4_SERVICE_ACCOUNT_JSON=/absolute/path/to/service-account.json
+```
+
+Current production state:
+
+- Search Console URL-prefix `https://altoslab-ai.cc/` is verified and readable through the service account.
+- GA/GTM tags are installed on the live homepage through `GTM-WJ96VR7V` and `G-5VSLFNVD28`.
+- GA4 Data API is configured but still returns insufficient property permission until the GA4 property grants a usable reader to either the service account or an approved OAuth client. Do not report fake GA4 traffic while this remains blocked.
+
+When no service-account JSON is configured, the report can try the local `gcloud auth application-default print-access-token`
+and `gcloud auth print-access-token --account "$GOOGLE_AUTH_ACCOUNT"` fallbacks. Those fallbacks are useful for diagnostics,
+but they may still be rejected by GA4 or Search Console when the local Google login lacks Analytics/Webmaster scopes.
+Do not keep retrying Cloud SDK's default OAuth client for those scopes if Google returns `系統已封鎖這個應用程式`
+or `Request had insufficient authentication scopes`; the active operator account is already
+`altoslab.offical@gmail.com`, and the remaining fix is to use a project-owned OAuth desktop client or a
+service account that GA4 and Search Console both accept as a verified reader/owner.
 
 Optional GA4 fields:
 
 ```txt
 GA4_PROPERTY_ID=<numeric-ga4-property-id>
+GOOGLE_AUTH_MODE=service_account
+GOOGLE_AUTH_ACCOUNT=altoslab.offical@gmail.com
 GOOGLE_APPLICATION_CREDENTIALS=/absolute/path/to/service-account.json
 ```
 
@@ -52,11 +73,14 @@ Optional Search Console fields:
 
 ```txt
 SEARCH_CONSOLE_SITE_URL=https://altoslab-ai.cc/
+GOOGLE_SEARCH_CONSOLE_SITE_URL=https://altoslab-ai.cc/
+GOOGLE_AUTH_MODE=service_account
+GOOGLE_AUTH_ACCOUNT=altoslab.offical@gmail.com
 GOOGLE_APPLICATION_CREDENTIALS=/absolute/path/to/service-account.json
 ```
 
 If `SEARCH_CONSOLE_SITE_URL` is omitted, the report uses the current `--base-url` as the Search Console site URL.
-The service account must be granted access to the GA4 property or Search Console property. If access is missing, the report remains valid but marks the live metrics as unavailable.
+For durable server-to-server auth, use `GOOGLE_APPLICATION_CREDENTIALS` or `GA4_SERVICE_ACCOUNT_JSON` and grant that service account access to the GA4 property and Search Console URL-prefix property. If access is missing, the report remains valid but marks the live metrics as unavailable. The domain-property form (`sc-domain:altoslab-ai.cc`) requires DNS-token ownership and is not the default local runner path.
 
 If no qualified public posts are published, the report calls that out as a content-inventory gap instead of pretending
 individual posts are missing SEO or GEO fields. This is expected immediately after fail-closed removal of incomplete

@@ -7,6 +7,7 @@ import {
   normalizeSourceLinks
 } from "./blog-utils";
 import { normalizeBlogAuthor, publicCoverCreditForPost, publicEditorialReviewNote } from "./blog-authors";
+import { getCloudflareD1Config, getCloudflareD1Database, type D1DatabaseLike } from "./cloudflare-d1";
 import { getCloudflareKvConfig, getCloudflareKvNamespace } from "./cloudflare-kv";
 import { readCmsDataFromStorage, writeCmsDataToStorage } from "./cms-storage";
 import { seedData } from "./seed";
@@ -29,25 +30,36 @@ const PUBLIC_STATUSES = new Set(["published"]);
 const PUBLIC_CMS_CACHE_TTL_MS = 15_000;
 const PUBLIC_BLOG_CACHE_TTL_MS = 60_000;
 const PUBLIC_BLOG_CACHE_LIMIT_PER_LANGUAGE = Number(process.env.PUBLIC_BLOG_CACHE_LIMIT_PER_LANGUAGE || 8);
-const PUBLIC_BLOG_DETAIL_REFRESH_LIMIT_PER_LANGUAGE = Number(process.env.PUBLIC_BLOG_DETAIL_REFRESH_LIMIT_PER_LANGUAGE || 4);
 const PUBLIC_BLOG_LIST_CACHE_VERSION = "v2";
 const PUBLIC_BLOG_DETAIL_CACHE_VERSION = "v1";
-const PUBLIC_BLOG_INVENTORY_CACHE_VERSION = "v1";
+const PUBLIC_BLOG_INVENTORY_CACHE_VERSION = "v2";
 const PUBLIC_BLOG_DUPLICATE_CACHE_VERSION = "v1";
 
 let publicRawCmsCache: { data: CmsData; expiresAt: number } | null = null;
 let publicBlogPostsCache: { posts: BlogPost[]; expiresAt: number } | null = null;
 let publicBlogInventoryCache: { posts: BlogPost[]; expiresAt: number } | null = null;
 let publicBlogDuplicateCache: { posts: BlogPost[]; expiresAt: number } | null = null;
+let publicBlogD1SchemaReady = false;
 
 function canUseInMemoryPublicCache() {
   // Cloudflare Worker isolates can outlive a single request. Keep request-bound
-  // KV I/O results out of module-scope memory and rely on KV for public caching.
-  return !getCloudflareKvConfig();
+  // Cloudflare I/O results out of module-scope memory and rely on durable storage.
+  return !isCloudflarePublicRuntime();
 }
 
 function isCloudflarePublicRuntime() {
-  return Boolean(getCloudflareKvConfig());
+  return Boolean(getCloudflareD1Config() || getCloudflareKvConfig());
+}
+
+function shouldReadPublicBlogDirectlyFromCms() {
+  return Boolean(getCloudflareD1Config()) && process.env.PUBLIC_BLOG_D1_DIRECT_READ !== "0";
+}
+
+function publicBlogDetailRefreshLimitPerLanguage() {
+  if (process.env.PUBLIC_BLOG_DETAIL_REFRESH_LIMIT_PER_LANGUAGE) {
+    return Number(process.env.PUBLIC_BLOG_DETAIL_REFRESH_LIMIT_PER_LANGUAGE);
+  }
+  return isCloudflarePublicRuntime() ? 0 : 4;
 }
 
 export function nowIso() {
@@ -339,6 +351,168 @@ function publicBlogDetailCacheKey(language: BlogLanguage, slug: string) {
     : "";
 }
 
+async function runPublicBlogD1(database: D1DatabaseLike, query: string, ...values: unknown[]) {
+  return values.length > 0 ? database.prepare(query).bind(...values).run() : database.prepare(query).run();
+}
+
+async function ensurePublicBlogD1Schema(database: D1DatabaseLike) {
+  if (publicBlogD1SchemaReady) return;
+
+  const statements = [
+    `CREATE TABLE IF NOT EXISTS public_blog_posts (
+      merge_key TEXT PRIMARY KEY,
+      language TEXT NOT NULL,
+      slug TEXT NOT NULL,
+      translation_group_id TEXT NOT NULL,
+      status TEXT NOT NULL,
+      published_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL,
+      sort_order INTEGER NOT NULL DEFAULT 0,
+      projection_updated_at TEXT NOT NULL,
+      list_json TEXT NOT NULL,
+      inventory_json TEXT NOT NULL,
+      duplicate_json TEXT NOT NULL,
+      detail_json TEXT NOT NULL
+    )`,
+    "CREATE INDEX IF NOT EXISTS idx_public_blog_posts_language_updated ON public_blog_posts (language, updated_at DESC)",
+    "CREATE INDEX IF NOT EXISTS idx_public_blog_posts_slug_language ON public_blog_posts (slug, language)"
+  ];
+
+  for (const statement of statements) await runPublicBlogD1(database, statement);
+  publicBlogD1SchemaReady = true;
+}
+
+async function writePublicBlogD1Projection(allPosts: BlogPost[]) {
+  const database = getCloudflareD1Database();
+  if (!getCloudflareD1Config() || !database) {
+    return { refreshed: false, publishedPosts: allPosts.length };
+  }
+
+  await ensurePublicBlogD1Schema(database);
+  const projectionUpdatedAt = nowIso();
+  for (const post of allPosts) {
+    const language = normalizeBlogLanguage(post.language);
+    await runPublicBlogD1(
+      database,
+      `INSERT INTO public_blog_posts (
+        merge_key,
+        language,
+        slug,
+        translation_group_id,
+        status,
+        published_at,
+        updated_at,
+        sort_order,
+        projection_updated_at,
+        list_json,
+        inventory_json,
+        duplicate_json,
+        detail_json
+      ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13)
+      ON CONFLICT(merge_key) DO UPDATE SET
+        language = excluded.language,
+        slug = excluded.slug,
+        translation_group_id = excluded.translation_group_id,
+        status = excluded.status,
+        published_at = excluded.published_at,
+        updated_at = excluded.updated_at,
+        sort_order = excluded.sort_order,
+        projection_updated_at = excluded.projection_updated_at,
+        list_json = excluded.list_json,
+        inventory_json = excluded.inventory_json,
+        duplicate_json = excluded.duplicate_json,
+        detail_json = excluded.detail_json`,
+      publicBlogMergeKey(post),
+      language,
+      post.slug,
+      post.translationGroupId || "",
+      post.status,
+      post.publishedAt || post.createdAt || "",
+      post.updatedAt || post.publishedAt || post.createdAt || "",
+      Number(post.sortOrder || 0),
+      projectionUpdatedAt,
+      JSON.stringify(compactPublicBlogListPost(post)),
+      JSON.stringify(compactPublicBlogInventoryPost(post)),
+      JSON.stringify(compactPublicBlogDuplicatePost(post)),
+      JSON.stringify(post)
+    );
+  }
+  await runPublicBlogD1(database, "DELETE FROM public_blog_posts WHERE projection_updated_at <> ?1", projectionUpdatedAt);
+
+  return {
+    refreshed: true,
+    publishedPosts: allPosts.length,
+    updatedAt: projectionUpdatedAt
+  };
+}
+
+async function readPublicBlogD1ProjectionPosts(
+  kind: "list" | "inventory" | "duplicate",
+  options: { language?: BlogLanguage; limit?: number } = {}
+) {
+  const database = getCloudflareD1Database();
+  if (!getCloudflareD1Config() || !database) return null;
+
+  await ensurePublicBlogD1Schema(database);
+  const column = kind === "list" ? "list_json" : kind === "inventory" ? "inventory_json" : "duplicate_json";
+  const normalizedLanguage = options.language ? normalizeBlogLanguage(options.language) : null;
+  const limit = Number.isFinite(options.limit) && Number(options.limit) > 0 ? Math.min(Number(options.limit), 600) : null;
+  const where = normalizedLanguage ? "WHERE status = 'published' AND language = ?1" : "WHERE status = 'published'";
+  const limitClause = limit ? ` LIMIT ${limit}` : "";
+  const rows = normalizedLanguage
+    ? await database
+        .prepare(`SELECT ${column} AS payload FROM public_blog_posts ${where} ORDER BY updated_at DESC, sort_order ASC${limitClause}`)
+        .bind(normalizedLanguage)
+        .all<{ payload?: string }>()
+    : await database
+        .prepare(`SELECT ${column} AS payload FROM public_blog_posts ${where} ORDER BY updated_at DESC, sort_order ASC${limitClause}`)
+        .all<{ payload?: string }>();
+  const posts = (rows.results || [])
+    .map((row) => {
+      if (typeof row.payload !== "string") return null;
+      try {
+        return JSON.parse(row.payload) as BlogPost;
+      } catch {
+        return null;
+      }
+    })
+    .filter(Boolean) as BlogPost[];
+
+  if (!posts.length) return null;
+  return kind === "list" ? publicBlogListPostsFromPosts(posts) : posts;
+}
+
+async function readPublicBlogD1ProjectionDetail(slug: string, language?: BlogLanguage) {
+  const database = getCloudflareD1Database();
+  if (!getCloudflareD1Config() || !database) return null;
+
+  await ensurePublicBlogD1Schema(database);
+  const decodedSlug = decodeSlugCandidate(slug);
+  const normalizedLanguage = language ? normalizeBlogLanguage(language) : null;
+  const query = normalizedLanguage
+    ? "SELECT detail_json AS payload FROM public_blog_posts WHERE status = 'published' AND language = ?1 AND slug = ?2 LIMIT 1"
+    : "SELECT detail_json AS payload FROM public_blog_posts WHERE status = 'published' AND slug = ?1 LIMIT 1";
+  const row = normalizedLanguage
+    ? await database.prepare(query).bind(normalizedLanguage, decodedSlug).first<{ payload?: string }>()
+    : await database.prepare(query).bind(decodedSlug).first<{ payload?: string }>();
+
+  if (typeof row?.payload !== "string") return null;
+  try {
+    const post = JSON.parse(row.payload) as BlogPost;
+    if (
+      post.status === "published" &&
+      matchesBlogSlug(post.slug, slug) &&
+      (!language || normalizeBlogLanguage(post.language) === normalizeBlogLanguage(language))
+    ) {
+      return post;
+    }
+  } catch (error) {
+    console.warn("[cms] Public blog D1 detail projection is unreadable:", error instanceof Error ? error.message : error);
+  }
+
+  return null;
+}
+
 function containsUnicodeReplacement(value: unknown): boolean {
   return typeof value === "string" ? value.includes("\uFFFD") : JSON.stringify(value).includes("\uFFFD");
 }
@@ -397,23 +571,32 @@ function compactPublicBlogListPost(post: BlogPost): BlogPost {
 function compactPublicBlogInventoryPost(post: BlogPost): BlogPost {
   return {
     ...compactPublicBlogListPost(post),
-    title: "",
-    seoTitle: "",
-    seoDescription: "",
-    excerpt: "",
-    topic: "",
-    geoSummary: "",
-    tags: [],
-    cover: "",
-    coverAlt: "",
-    coverSource: undefined,
-    coverCredit: undefined,
-    coverCreditUrl: undefined,
-    coverLicense: undefined,
-    coverLicenseUrl: undefined,
-    readTimeMinutes: 0,
-    featured: false,
-    qualityChecks: defaultQualityChecks()
+    body: "",
+    audience: "",
+    sourceLinks: [],
+    keyTakeaways: [],
+    faqs: [],
+    contentImages: [],
+    qualityIssues: [],
+    generationTrace: undefined,
+    qualityChecks: defaultQualityChecks({
+      hasHumanReview: post.qualityChecks.hasHumanReview,
+      hasQualityReviewerApproval: post.qualityChecks.hasQualityReviewerApproval,
+      hasVisibleSources: post.qualityChecks.hasVisibleSources,
+      hasNoFabricatedClaims: post.qualityChecks.hasNoFabricatedClaims,
+      hasSearchIntentAnswer: post.qualityChecks.hasSearchIntentAnswer,
+      hasBilingualParity: post.qualityChecks.hasBilingualParity,
+      hasSourceTrust: post.qualityChecks.hasSourceTrust,
+      hasLabsPointOfView: post.qualityChecks.hasLabsPointOfView,
+      hasCreativeAngle: post.qualityChecks.hasCreativeAngle,
+      hasReaderEngagement: post.qualityChecks.hasReaderEngagement,
+      hasImageFit: post.qualityChecks.hasImageFit,
+      hasAntiSlopReview: post.qualityChecks.hasAntiSlopReview,
+      hasSeoGeoReview: post.qualityChecks.hasSeoGeoReview,
+      qualityScore: post.qualityChecks.qualityScore,
+      seoGeoScore: post.qualityChecks.seoGeoScore,
+      antiSlopScore: post.qualityChecks.antiSlopScore
+    })
   };
 }
 
@@ -479,11 +662,13 @@ function publicBlogListPostsFromPosts(posts: BlogPost[]) {
 }
 
 function publicBlogDetailRefreshPostsFromPosts(posts: BlogPost[]) {
+  const limit = publicBlogDetailRefreshLimitPerLanguage();
+  if (limit <= 0) return [];
   return BLOG_LANGUAGES.flatMap((language) =>
     [...posts]
       .filter((post) => normalizeBlogLanguage(post.language) === language)
       .sort((a, b) => publicArticleTimestamp(b) - publicArticleTimestamp(a) || Number(a.sortOrder || 0) - Number(b.sortOrder || 0))
-      .slice(0, PUBLIC_BLOG_DETAIL_REFRESH_LIMIT_PER_LANGUAGE)
+      .slice(0, limit)
   );
 }
 
@@ -602,91 +787,113 @@ async function readPublicBlogDetailCache(slug: string, language?: BlogLanguage) 
 async function writePublicBlogCacheFromData(data: CmsData) {
   const namespace = getCloudflareKvNamespace();
   const key = publicBlogCacheKey();
-  if (!namespace || !key) {
+  const allPosts = allPublicBlogPostsFromData(data);
+  const d1Projection = await writePublicBlogD1Projection(allPosts).catch((error) => {
+    console.warn("[cms] Unable to refresh D1 public blog projection:", error instanceof Error ? error.message : error);
     return {
       refreshed: false,
-      publishedPosts: 0,
+      publishedPosts: allPosts.length,
+      error: error instanceof Error ? error.message : "D1 public blog projection refresh failed"
+    };
+  });
+
+  if (!namespace || !key) {
+    return {
+      refreshed: Boolean(d1Projection.refreshed),
+      publishedPosts: allPosts.length,
       listPosts: 0,
       inventoryPosts: 0,
       duplicatePosts: 0,
       detailPosts: 0,
-      languages: Object.fromEntries(BLOG_LANGUAGES.map((language) => [language, 0]))
+      d1Projection,
+      languages: Object.fromEntries(
+        BLOG_LANGUAGES.map((language) => [language, allPosts.filter((post) => normalizeBlogLanguage(post.language) === language).length])
+      )
     };
   }
 
-  const allPosts = allPublicBlogPostsFromData(data);
   const posts = publicBlogListPostsFromPosts(allPosts);
   const inventoryPosts = allPosts.map(compactPublicBlogInventoryPost);
   const duplicatePosts = allPosts.map(compactPublicBlogDuplicatePost);
   const detailPosts = publicBlogDetailRefreshPostsFromPosts(allPosts);
-  await namespace.put(
-    key,
-    JSON.stringify({
-      version: 1,
-      updatedAt: nowIso(),
-      limitPerLanguage: PUBLIC_BLOG_CACHE_LIMIT_PER_LANGUAGE,
-      posts
-    }),
-    {
-      metadata: {
-        contentType: "application/json",
+  let kvCacheRefreshed = false;
+  let kvCacheError: string | undefined;
+
+  try {
+    await namespace.put(
+      key,
+      JSON.stringify({
+        version: 1,
         updatedAt: nowIso(),
-        source: "cms-public-blog-cache"
-      }
-    }
-  );
-  await namespace.put(
-    publicBlogInventoryCacheKey(),
-    JSON.stringify({
-      version: 1,
-      updatedAt: nowIso(),
-      posts: inventoryPosts
-    }),
-    {
-      metadata: {
-        contentType: "application/json",
-        updatedAt: nowIso(),
-        source: "cms-public-blog-inventory-cache"
-      }
-    }
-  );
-  await namespace.put(
-    publicBlogDuplicateCacheKey(),
-    JSON.stringify({
-      version: 1,
-      updatedAt: nowIso(),
-      posts: duplicatePosts
-    }),
-    {
-      metadata: {
-        contentType: "application/json",
-        updatedAt: nowIso(),
-        source: "cms-public-blog-duplicate-cache"
-      }
-    }
-  );
-  await Promise.all(
-    detailPosts.map((post) =>
-      namespace.put(
-        publicBlogDetailCacheKey(normalizeBlogLanguage(post.language), post.slug),
-        JSON.stringify({
-          version: 1,
+        limitPerLanguage: PUBLIC_BLOG_CACHE_LIMIT_PER_LANGUAGE,
+        posts
+      }),
+      {
+        metadata: {
+          contentType: "application/json",
           updatedAt: nowIso(),
-          post
-        }),
-        {
-          metadata: {
-            contentType: "application/json",
-            updatedAt: nowIso(),
-            source: "cms-public-blog-detail-cache",
-            language: post.language,
-            slug: post.slug,
-            translationGroupId: post.translationGroupId
-          }
+          source: "cms-public-blog-cache"
         }
+      }
+    );
+    await namespace.put(
+      publicBlogInventoryCacheKey(),
+      JSON.stringify({
+        version: 1,
+        updatedAt: nowIso(),
+        posts: inventoryPosts
+      }),
+      {
+        metadata: {
+          contentType: "application/json",
+          updatedAt: nowIso(),
+          source: "cms-public-blog-inventory-cache"
+        }
+      }
+    );
+    await namespace.put(
+      publicBlogDuplicateCacheKey(),
+      JSON.stringify({
+        version: 1,
+        updatedAt: nowIso(),
+        posts: duplicatePosts
+      }),
+      {
+        metadata: {
+          contentType: "application/json",
+          updatedAt: nowIso(),
+          source: "cms-public-blog-duplicate-cache"
+        }
+      }
+    );
+    await Promise.all(
+      detailPosts.map((post) =>
+        namespace.put(
+          publicBlogDetailCacheKey(normalizeBlogLanguage(post.language), post.slug),
+          JSON.stringify({
+            version: 1,
+            updatedAt: nowIso(),
+            post
+          }),
+          {
+            metadata: {
+              contentType: "application/json",
+              updatedAt: nowIso(),
+              source: "cms-public-blog-detail-cache",
+              language: post.language,
+              slug: post.slug,
+              translationGroupId: post.translationGroupId
+            }
+          }
+        )
       )
-    )
-  );
+    );
+    kvCacheRefreshed = true;
+  } catch (error) {
+    kvCacheError = error instanceof Error ? error.message : "KV public blog cache refresh failed";
+    console.warn("[cms] Unable to refresh KV public blog cache:", kvCacheError);
+  }
+
   if (canUseInMemoryPublicCache()) {
     publicBlogPostsCache = { posts, expiresAt: Date.now() + PUBLIC_BLOG_CACHE_TTL_MS };
     publicBlogInventoryCache = { posts: inventoryPosts, expiresAt: Date.now() + PUBLIC_BLOG_CACHE_TTL_MS };
@@ -694,12 +901,15 @@ async function writePublicBlogCacheFromData(data: CmsData) {
   }
 
   return {
-    refreshed: true,
+    refreshed: kvCacheRefreshed || Boolean(d1Projection.refreshed),
     publishedPosts: allPosts.length,
     listPosts: posts.length,
     inventoryPosts: inventoryPosts.length,
     duplicatePosts: duplicatePosts.length,
     detailPosts: detailPosts.length,
+    d1Projection,
+    kvCacheRefreshed,
+    kvCacheError,
     languages: Object.fromEntries(
       BLOG_LANGUAGES.map((language) => [language, allPosts.filter((post) => normalizeBlogLanguage(post.language) === language).length])
     )
@@ -712,6 +922,14 @@ export async function refreshPublicBlogCacheFromStorage() {
 }
 
 async function readPublishedBlogPostsForPublic() {
+  if (shouldReadPublicBlogDirectlyFromCms()) {
+    const projected = await readPublicBlogD1ProjectionPosts("list");
+    if (projected) return isCloudflarePublicRuntime() ? projected : mergeStaticBlogOverrides(projected);
+
+    const data = await readPublicRawCmsData();
+    return mergeStaticBlogOverrides(publicBlogListPostsFromData(data));
+  }
+
   const cached = await readPublicBlogCache();
   if (cached) return mergeStaticBlogOverrides(cached);
 
@@ -780,6 +998,14 @@ export async function getPublishedBlogPostsByLanguage(language?: BlogLanguage) {
 }
 
 export async function getPublishedBlogInventoryPosts() {
+  if (shouldReadPublicBlogDirectlyFromCms()) {
+    const projected = await readPublicBlogD1ProjectionPosts("inventory");
+    if (projected) return sortedByPublicRecency(isCloudflarePublicRuntime() ? projected : mergeStaticBlogOverrides(projected));
+
+    const data = await readPublicRawCmsData();
+    return sortedByPublicRecency(mergeStaticBlogOverrides(allPublicBlogPostsFromData(data)).map(compactPublicBlogInventoryPost));
+  }
+
   const cached = await readPublicBlogInventoryCache();
   if (cached) return sortedByPublicRecency(mergeStaticBlogOverrides(cached));
 
@@ -793,13 +1019,44 @@ export async function getPublishedBlogInventoryPosts() {
 }
 
 export async function getPublishedBlogInventoryPostsByLanguage(language?: BlogLanguage) {
+  if (shouldReadPublicBlogDirectlyFromCms() && language) {
+    const projected = await readPublicBlogD1ProjectionPosts("inventory", { language });
+    if (projected) {
+      const merged = isCloudflarePublicRuntime() ? projected : mergeStaticBlogOverrides(projected);
+      return sortedByPublicRecency(merged.filter((post) => normalizeBlogLanguage(post.language) === language));
+    }
+  }
+
   const posts = await getPublishedBlogInventoryPosts();
   return sortedByPublicRecency(
     posts.filter((post) => post.status === "published" && (!language || normalizeBlogLanguage(post.language) === language))
   );
 }
 
+export async function getPublishedBlogInventoryPostsForApi(language?: BlogLanguage, limit?: number) {
+  if (shouldReadPublicBlogDirectlyFromCms()) {
+    const projected = await readPublicBlogD1ProjectionPosts("inventory", { language, limit });
+    if (projected) {
+      const merged = (isCloudflarePublicRuntime() ? projected : mergeStaticBlogOverrides(projected)).filter(
+        (post) => post.status === "published" && (!language || normalizeBlogLanguage(post.language) === normalizeBlogLanguage(language))
+      );
+      return sortedByPublicRecency(limit ? merged.slice(0, limit) : merged);
+    }
+  }
+
+  const posts = language ? await getPublishedBlogInventoryPostsByLanguage(language) : await getPublishedBlogInventoryPosts();
+  return limit ? posts.slice(0, limit) : posts;
+}
+
 export async function getPublishedBlogDuplicatePosts() {
+  if (shouldReadPublicBlogDirectlyFromCms()) {
+    const projected = await readPublicBlogD1ProjectionPosts("duplicate");
+    if (projected) return sortedByOrder(isCloudflarePublicRuntime() ? projected : mergeStaticBlogOverrides(projected));
+
+    const data = await readPublicRawCmsData();
+    return sortedByOrder(mergeStaticBlogOverrides(allPublicBlogPostsFromData(data)).map(compactPublicBlogDuplicatePost));
+  }
+
   const cached = await readPublicBlogDuplicateCache();
   if (cached) return sortedByOrder(mergeStaticBlogOverrides(cached));
 
@@ -829,6 +1086,9 @@ function matchesBlogSlug(postSlug: string, requestedSlug: string) {
 }
 
 export async function getPublishedBlogPost(slug: string, language?: BlogLanguage) {
+  const projectedPost = await readPublicBlogD1ProjectionDetail(slug, language);
+  if (projectedPost) return projectedPost;
+
   const cachedPost = await readPublicBlogDetailCache(slug, language);
   if (cachedPost) return cachedPost;
 
@@ -841,9 +1101,15 @@ export async function getPublishedBlogPost(slug: string, language?: BlogLanguage
   );
   if (post?.body) return post;
 
-  if (getCloudflareKvConfig()) {
-    console.warn("[cms] Public blog detail cache is missing on Cloudflare; returning null instead of rebuilding during a public request.");
-    return null;
+  if (isCloudflarePublicRuntime()) {
+    const data = await readPublicRawCmsData();
+    const cmsPost = mergeStaticBlogOverrides(allPublicBlogPostsFromData(data)).find(
+      (item) =>
+        matchesBlogSlug(item.slug, slug) &&
+        item.status === "published" &&
+        (!language || normalizeBlogLanguage(item.language) === language)
+    );
+    return cmsPost || null;
   }
 
   return post || null;

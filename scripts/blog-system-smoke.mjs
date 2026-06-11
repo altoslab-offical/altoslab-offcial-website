@@ -48,6 +48,7 @@ const cloudflareSeed = read("scripts/cloudflare-seed-kv.mjs");
 const cloudflareMigratePublicBlogCache = read("scripts/cloudflare-migrate-public-blog-cache.mjs");
 const cloudflareSmoke = read("scripts/cloudflare-smoke.mjs");
 const cloudflareStagingConfig = read("wrangler.staging.jsonc");
+const cmsStorage = read("lib/cms-storage.ts");
 const launchAgentPlist = read("scripts/com.altoslab.blog-local-worker.plist.example");
 const launchAgentInstaller = read("scripts/install-blog-launch-agent.sh");
 const seoGeoReport = read("scripts/seo-geo-insight-report.mjs");
@@ -263,7 +264,8 @@ assert(sopDoctor.includes("[8, 10]") && sopDoctor.includes("[9, 0]") && sopDocto
 assert(sopDoctor.includes("[10, 30]") && sopDoctor.includes("[12, 30]") && sopDoctor.includes("[14, 30]"), "SOP doctor enforces all market-scan launch windows");
 assert(sopDoctor.includes("[15, 10]") && sopDoctor.includes("[16, 0]") && sopDoctor.includes("[16, 4]"), "SOP doctor enforces late-day prep/release launch windows");
 assert(sopDoctor.includes("[18, 30]") && sopDoctor.includes("[20, 30]"), "SOP doctor enforces late market-scan launch windows");
-assert(sopDoctor.includes("production cmsStorage.provider must be cloudflare-kv or gcs"), "SOP doctor verifies a durable production CMS store");
+assert(sopDoctor.includes("production cmsStorage.provider must be cloudflare-d1, cloudflare-kv or gcs"), "SOP doctor verifies a durable production CMS store");
+assert(cmsStorage.includes('provider: "cloudflare-d1"') || cmsStorage.includes("provider: \"cloudflare-d1\""), "CMS storage can use Cloudflare D1 as the primary durable store");
 assert(productionRepair.includes("altoslab-official-cms-934551798702"), "production repair targets the canonical GCS CMS bucket");
 assert(productionRepair.includes("gcloud") && productionRepair.includes("run") && productionRepair.includes("services") && productionRepair.includes("update"), "production repair can update the existing Cloud Run service env");
 assert(productionRepair.includes("--update-env-vars"), "production repair updates only runtime env vars instead of rebuilding or publishing content");
@@ -278,6 +280,9 @@ assert(cloudflareSetup.includes("secret put \"$name\" --config \"$WRANGLER_CONFI
 assert(cloudflareSeed.includes("cms:${safeStorageKey") && cloudflareSeed.includes("\"kv\"") && cloudflareSeed.includes("\"key\"") && cloudflareSeed.includes("\"put\""), "Cloudflare seed writes the CMS snapshot into the configured KV namespace");
 assert(cloudflareSeed.includes("\"--remote\""), "Cloudflare seed writes staging CMS data to remote KV, not local Wrangler storage");
 assert(cms.includes("public-blog-list") && cms.includes("public-blog-detail"), "public blog cache is split into list and detail keys for Cloudflare CPU safety");
+assert(cms.includes("public_blog_posts") && cms.includes("readPublicBlogD1ProjectionDetail"), "public blog reads can use compact D1 projection instead of reconstructing the full CMS blob");
+assert(cms.includes("publicBlogDetailRefreshLimitPerLanguage") && cms.includes("isCloudflarePublicRuntime() ? 0 : 4"), "Cloudflare KV publish avoids per-post detail cache write fan-out by default");
+assert(cms.includes("const data = await readPublicRawCmsData()") && cms.includes("matchesBlogSlug(item.slug, slug)"), "Cloudflare detail pages fall back to primary CMS reads when detail cache is absent");
 assert(cms.includes("public-blog-inventory") && cloudflareSmoke.includes("fields=inventory&limit=600"), "Cloudflare public blog inventory uses a lightweight all-post cache");
 assert(blogIndex.includes("getPublishedBlogInventoryPostsByLanguage"), "Cloudflare blog index renders from inventory cache instead of full blog bodies");
 assert(feedRoute.includes("getPublishedBlogInventoryPosts()"), "Cloudflare feed renders from inventory cache instead of full blog bodies");
@@ -428,7 +433,7 @@ assert(envExample.includes("ALTOS_BLOG_WORKER_WAIT_MINUTES"), "env example docum
 assert(envExample.includes("BLOG_IMAGE_ALLOW_NON_BLOB"), "env example documents generated image Blob enforcement");
 assert(envExample.includes("BLOG_MEDIA_ALLOW_LOCAL_STORAGE"), "env example documents local-only media upload mode");
 assert(envExample.includes("BLOG_ALLOW_LOCAL_FALLBACK_COVERS=0"), "env example keeps local fallback covers disabled");
-assert(envExample.includes("ALTOS_BLOG_BASE_URL=https://altoslab-official-website.altoslab-ai.workers.dev"), "env example defaults local workers to the stable Cloudflare Worker URL during DNS propagation");
+assert(envExample.includes("ALTOS_BLOG_BASE_URL=https://altoslab-ai.cc"), "env example defaults local workers to the Cloudflare-live production domain");
 assert(envExample.includes("CLOUDFLARE_KV_ENABLED=1"), "env example documents active Cloudflare KV storage");
 assert(envExample.includes("GCS_STORAGE_ENABLED=0"), "env example keeps legacy GCP/GCS storage disabled by default");
 assert(envExample.includes("ALTOS_BLOG_PRODUCTION_AUTO_REPAIR=0"), "env example keeps blind GCP repair disabled by default");
@@ -447,7 +452,12 @@ assert(seoGeoReport.includes("SEARCH_CONSOLE_SITE_URL"), "SEO/GEO report support
 assert(seoGeoReport.includes("gcloud token fallback"), "SEO/GEO report can use local gcloud token fallback for diagnostics");
 assert(seoGeoReport.includes("No qualified public blog posts are currently published"), "SEO/GEO report explains empty fail-closed blog inventory");
 assert(seoGeoReport.includes("incompleteMarketNewsGroups"), "SEO/GEO report calls out market-news language gaps");
-assert(seoGeoReport.includes("altoslab.offical@gmail.com") && !seoGeoReport.includes("altoslab768@gmail.com"), "SEO/GEO report documents the official sender and blocks the retired account");
+const seoGeoReportEmails = [...seoGeoReport.matchAll(/[A-Za-z0-9._%+-]+@gmail\.com/g)].map((match) => match[0]);
+assert(
+  seoGeoReport.includes("altoslab.offical@gmail.com") &&
+    seoGeoReportEmails.every((email) => email === "altoslab.offical@gmail.com"),
+  "SEO/GEO report documents only the official Gmail sender/recipient"
+);
 assert(operations.includes("Gmail web UI") && operations.includes("hold the send instead of using a connector"), "operations require SEO/GEO daily email to be sent through Gmail web, not a connector");
 assert(imageStyleGuide.includes("GPT Image 2 / 生成案例庫的採納規則"), "image style guide documents safe use of external GPT Image 2 prompt galleries");
 assert(imageStyleGuide.includes("不照抄完整 prompt") && imageStyleGuide.includes("OpenAI 官方 docs"), "image style guide keeps prompt-gallery inspiration bounded and official-doc grounded");

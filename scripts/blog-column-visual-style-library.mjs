@@ -115,14 +115,31 @@ export function selectColumnVisualStyle({ date = "", slot = "", topic = "" } = {
   return COLUMN_VISUAL_STYLES[seed % COLUMN_VISUAL_STYLES.length];
 }
 
+export function selectColumnVisualStyleSet({ date = "", slot = "", topic = "" } = {}) {
+  const seed = hashText(`${date}|${slot}|${topic}`);
+  const cover = COLUMN_VISUAL_STYLES[seed % COLUMN_VISUAL_STYLES.length];
+  const opening = COLUMN_VISUAL_STYLES[(seed + 3) % COLUMN_VISUAL_STYLES.length];
+  const mechanism = COLUMN_VISUAL_STYLES[(seed + 7) % COLUMN_VISUAL_STYLES.length];
+  return { cover, opening, mechanism };
+}
+
 export function columnVisualStylePromptBlock({ date = "", slot = "", topic = "" } = {}) {
-  const style = selectColumnVisualStyle({ date, slot, topic });
+  const { cover, opening, mechanism } = selectColumnVisualStyleSet({ date, slot, topic });
   return `Column visual style rotation:
-- Selected style id: ${style.id}
-- Direction: ${style.prompt}
-- Palette: ${style.palette}
-- Negative constraints: ${style.avoid}
-- Use this style for the generated cover and all generated in-article images in this column set.
+- Cover style id: ${cover.id}
+  Direction: ${cover.prompt}
+  Palette: ${cover.palette}
+  Negative constraints: ${cover.avoid}
+- Opening image style id: ${opening.id}
+  Direction: ${opening.prompt}
+  Palette: ${opening.palette}
+  Negative constraints: ${opening.avoid}
+- Mechanism/evidence image style id: ${mechanism.id}
+  Direction: ${mechanism.prompt}
+  Palette: ${mechanism.palette}
+  Negative constraints: ${mechanism.avoid}
+- The three generated images must not reuse the same camera angle, material palette, central object, paper-card metaphor, checkmark/arrow language, or beige workflow-board composition. Keep article identity coherent through topic and palette accents, not by repeating the same layout.
+- Every prompt must include subject, composition, camera/layout, material-lighting, color, crop-safe zone, and negative prompt.
 - Market-news/breaking posts must never use this generated style library; they keep source/official images only.`;
 }
 

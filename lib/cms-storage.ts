@@ -16,6 +16,13 @@ import {
   type KvNamespaceLike
 } from "./cloudflare-kv";
 import {
+  getCloudflareD1Config,
+  getCloudflareD1Database,
+  requireCloudflareD1Database,
+  type CloudflareD1Config,
+  type D1DatabaseLike
+} from "./cloudflare-d1";
+import {
   deleteGcsObject,
   GcsPreconditionError,
   getGcsStorageConfig,
@@ -30,6 +37,7 @@ import type { CmsData } from "./types";
 
 const DATA_PATH = path.join(process.cwd(), "data", "cms.json");
 const DEFAULT_STORAGE_KEY = "altoslab:cms:v1";
+const DEFAULT_D1_CHUNK_SIZE = 180_000;
 
 type UpstashResponse<T> = {
   result?: T;
@@ -55,6 +63,15 @@ type EncryptedCmsBlob = {
   iv: string;
   tag: string;
   data: string;
+};
+
+type D1ChunkedBlobMarker = {
+  cloudflareD1Chunked: true;
+  chunks: number;
+  byteLength: number;
+  updatedAt: string;
+  chunkTable?: "cms_blob_chunks" | "cms_version_chunks";
+  chunkId?: string;
 };
 
 async function vercelBlobClient() {
@@ -113,11 +130,24 @@ function canWriteLocalFile() {
 }
 
 export function getCmsStorageStatus() {
+  const cloudflareD1 = getCloudflareD1Config();
   const cloudflareKv = getCloudflareKvConfig();
   const cloudflareR2 = getCloudflareR2Config();
   const gcs = getGcsStorageConfig();
   const upstash = getUpstashConfig();
   const blob = getBlobConfig();
+  if (cloudflareD1) {
+    return {
+      provider: "cloudflare-d1",
+      durable: true,
+      writable: true,
+      configured: true,
+      key: cloudflareD1.cmsKey,
+      binding: cloudflareD1.binding,
+      encrypted: Boolean(process.env.CMS_ENCRYPTION_KEY)
+    };
+  }
+
   if (cloudflareKv) {
     return {
       provider: "cloudflare-kv",
@@ -277,6 +307,258 @@ function parseCmsBlobText(text: string): CmsData {
   }
 
   return payload as CmsData;
+}
+
+let d1SchemaReady = false;
+
+function cmsD1VersionId(key: string) {
+  const stamp = new Date().toISOString().replace(/[:.]/g, "-");
+  const safeKey = key.replace(/[^a-z0-9._:-]+/gi, "-").replace(/^-+|-+$/g, "") || "altoslab-cms-v1";
+  return `${safeKey}:${stamp}:${randomBytes(4).toString("hex")}`;
+}
+
+async function runD1(database: D1DatabaseLike, query: string, ...values: unknown[]) {
+  return values.length > 0 ? database.prepare(query).bind(...values).run() : database.prepare(query).run();
+}
+
+async function ensureD1Schema(database: D1DatabaseLike) {
+  if (d1SchemaReady) return;
+
+  const schema = `
+CREATE TABLE IF NOT EXISTS cms_blobs (
+  cms_key TEXT PRIMARY KEY,
+  value TEXT NOT NULL,
+  updated_at TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS cms_versions (
+  id TEXT PRIMARY KEY,
+  cms_key TEXT NOT NULL,
+  value TEXT NOT NULL,
+  created_at TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_cms_versions_key_created_at ON cms_versions (cms_key, created_at DESC);
+CREATE TABLE IF NOT EXISTS cms_blob_chunks (
+  cms_key TEXT NOT NULL,
+  chunk_index INTEGER NOT NULL,
+  value TEXT NOT NULL,
+  PRIMARY KEY (cms_key, chunk_index)
+);
+CREATE TABLE IF NOT EXISTS cms_version_chunks (
+  version_id TEXT NOT NULL,
+  chunk_index INTEGER NOT NULL,
+  value TEXT NOT NULL,
+  PRIMARY KEY (version_id, chunk_index)
+);
+CREATE TABLE IF NOT EXISTS cms_locks (
+  lock_key TEXT PRIMARY KEY,
+  token TEXT NOT NULL,
+  expires_at INTEGER NOT NULL,
+  created_at INTEGER NOT NULL
+);
+`;
+
+  for (const statement of schema
+    .split(";")
+    .map((item) => item.trim())
+    .filter(Boolean)) {
+    await runD1(database, statement);
+  }
+
+  d1SchemaReady = true;
+}
+
+function d1ChunkSize() {
+  const configured = Number(process.env.CLOUDFLARE_D1_CMS_CHUNK_SIZE || DEFAULT_D1_CHUNK_SIZE);
+  return Number.isFinite(configured) && configured > 10_000 ? configured : DEFAULT_D1_CHUNK_SIZE;
+}
+
+function splitTextIntoChunks(text: string, size = d1ChunkSize()) {
+  const chunks: string[] = [];
+  for (let index = 0; index < text.length; index += size) chunks.push(text.slice(index, index + size));
+  return chunks;
+}
+
+function d1ChunkedMarker(
+  chunks: number,
+  byteLength: number,
+  updatedAt: string,
+  chunkTable?: "cms_blob_chunks" | "cms_version_chunks",
+  chunkId?: string
+): D1ChunkedBlobMarker {
+  return {
+    cloudflareD1Chunked: true,
+    chunks,
+    byteLength,
+    updatedAt,
+    chunkTable,
+    chunkId
+  };
+}
+
+function parseD1ChunkedMarker(text: string): D1ChunkedBlobMarker | null {
+  try {
+    const payload = JSON.parse(text) as Partial<D1ChunkedBlobMarker>;
+    if (payload?.cloudflareD1Chunked === true && Number.isInteger(payload.chunks) && Number(payload.chunks) >= 0) {
+      return payload as D1ChunkedBlobMarker;
+    }
+  } catch {
+    return null;
+  }
+  return null;
+}
+
+async function readD1ChunkedText(database: D1DatabaseLike, table: "cms_blob_chunks" | "cms_version_chunks", id: string) {
+  const idColumn = table === "cms_blob_chunks" ? "cms_key" : "version_id";
+  const chunks = await database
+    .prepare(`SELECT chunk_index, value FROM ${table} WHERE ${idColumn} = ?1 ORDER BY chunk_index ASC`)
+    .bind(id)
+    .all<{ chunk_index?: number; value?: string }>();
+  return (chunks.results || [])
+    .filter((chunk) => typeof chunk.value === "string")
+    .sort((a, b) => Number(a.chunk_index || 0) - Number(b.chunk_index || 0))
+    .map((chunk) => chunk.value)
+    .join("");
+}
+
+async function resolveD1CmsBlobText(
+  database: D1DatabaseLike,
+  text: string,
+  options: { cmsKey?: string; versionId?: string }
+) {
+  const marker = parseD1ChunkedMarker(text);
+  if (!marker) return text;
+
+  if (marker.chunkTable && marker.chunkId) return readD1ChunkedText(database, marker.chunkTable, marker.chunkId);
+  if (options.cmsKey) return readD1ChunkedText(database, "cms_blob_chunks", options.cmsKey);
+  if (options.versionId) return readD1ChunkedText(database, "cms_version_chunks", options.versionId);
+  return text;
+}
+
+async function writeD1Chunks(
+  database: D1DatabaseLike,
+  table: "cms_blob_chunks" | "cms_version_chunks",
+  id: string,
+  content: string
+) {
+  const idColumn = table === "cms_blob_chunks" ? "cms_key" : "version_id";
+  await runD1(database, `DELETE FROM ${table} WHERE ${idColumn} = ?1`, id);
+  const chunks = splitTextIntoChunks(content);
+  for (const [index, chunk] of chunks.entries()) {
+    await runD1(
+      database,
+      `INSERT INTO ${table} (${idColumn}, chunk_index, value) VALUES (?1, ?2, ?3)`,
+      id,
+      index,
+      chunk
+    );
+  }
+  return chunks.length;
+}
+
+async function readVersionedD1CmsData(database: D1DatabaseLike, config: CloudflareD1Config) {
+  await ensureD1Schema(database);
+
+  const primary = await database
+    .prepare("SELECT value FROM cms_blobs WHERE cms_key = ?1")
+    .bind(config.cmsKey)
+    .first<{ value?: string }>()
+    .catch(() => null);
+  if (typeof primary?.value === "string") {
+    try {
+      const text = await resolveD1CmsBlobText(database, primary.value, { cmsKey: config.cmsKey });
+      return parseCmsBlobText(text);
+    } catch (error) {
+      console.warn(
+        "[cms] Primary Cloudflare D1 CMS payload is unreadable; trying version history:",
+        error instanceof Error ? error.message : error
+      );
+    }
+  }
+
+  const versions = await database
+    .prepare("SELECT id, value FROM cms_versions WHERE cms_key = ?1 ORDER BY created_at DESC LIMIT 20")
+    .bind(config.cmsKey)
+    .all<{ id?: string; value?: string }>()
+    .catch(() => ({ results: [] }));
+
+  for (const version of versions.results || []) {
+    if (typeof version.value !== "string") continue;
+    try {
+      const text = await resolveD1CmsBlobText(database, version.value, { versionId: version.id });
+      return parseCmsBlobText(text);
+    } catch (error) {
+      console.warn(
+        "[cms] Skipping unreadable Cloudflare D1 CMS version:",
+        version.id || "unknown",
+        error instanceof Error ? error.message : error
+      );
+    }
+  }
+
+  return null;
+}
+
+async function writeVersionedD1Json(database: D1DatabaseLike, config: CloudflareD1Config, value: unknown) {
+  await ensureD1Schema(database);
+
+  const content = JSON.stringify(value, null, 2);
+  const updatedAt = new Date().toISOString();
+  const versionId = cmsD1VersionId(config.cmsKey);
+  const versionChunks = await writeD1Chunks(database, "cms_version_chunks", versionId, content);
+  const marker = d1ChunkedMarker(versionChunks, Buffer.byteLength(content), updatedAt, "cms_version_chunks", versionId);
+  const versionValue = JSON.stringify(marker);
+  const primaryValue = JSON.stringify(marker);
+
+  await runD1(
+    database,
+    "INSERT INTO cms_versions (id, cms_key, value, created_at) VALUES (?1, ?2, ?3, ?4)",
+    versionId,
+    config.cmsKey,
+    versionValue,
+    updatedAt
+  );
+  await runD1(
+    database,
+    `INSERT INTO cms_blobs (cms_key, value, updated_at)
+     VALUES (?1, ?2, ?3)
+     ON CONFLICT(cms_key) DO UPDATE SET value = excluded.value, updated_at = excluded.updated_at`,
+    config.cmsKey,
+    primaryValue,
+    updatedAt
+  );
+}
+
+async function withD1Lock<T>(
+  database: D1DatabaseLike,
+  config: CloudflareD1Config,
+  name: string,
+  task: () => Promise<T>,
+  ttlMs: number
+) {
+  await ensureD1Schema(database);
+
+  const safeName = name.replace(/[^a-z0-9_-]+/gi, "-") || "default";
+  const lockKey = `${config.cmsKey}:lock:${safeName}`;
+  const token = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+  const now = Date.now();
+  const expiresAt = now + ttlMs;
+
+  await runD1(database, "DELETE FROM cms_locks WHERE lock_key = ?1 AND expires_at <= ?2", lockKey, now);
+  const acquired = await runD1(
+    database,
+    "INSERT OR IGNORE INTO cms_locks (lock_key, token, expires_at, created_at) VALUES (?1, ?2, ?3, ?4)",
+    lockKey,
+    token,
+    expiresAt,
+    now
+  );
+  if (acquired.meta?.changes !== 1) throw new CmsLockError();
+
+  try {
+    return await task();
+  } finally {
+    await runD1(database, "DELETE FROM cms_locks WHERE lock_key = ?1 AND token = ?2", lockKey, token).catch(() => undefined);
+  }
 }
 
 async function readPublicListedBlob(blob: { url: string; etag?: string }) {
@@ -746,6 +1028,13 @@ export async function withCmsStorageLock<T>(
   task: () => Promise<T>,
   ttlMs = 120_000
 ): Promise<T> {
+  const cloudflareD1Config = getCloudflareD1Config();
+  const cloudflareD1Database = getCloudflareD1Database();
+  if (cloudflareD1Config) {
+    if (!cloudflareD1Database) throw new Error("Cloudflare D1 is enabled but the database binding is unavailable.");
+    return withD1Lock(cloudflareD1Database, cloudflareD1Config, name, task, ttlMs);
+  }
+
   const cloudflareKvConfig = getCloudflareKvConfig();
   const cloudflareKvNamespace = getCloudflareKvNamespace();
   if (cloudflareKvConfig) {
@@ -788,6 +1077,18 @@ export async function withCmsStorageLock<T>(
 }
 
 export async function readCmsDataFromStorage(): Promise<CmsData> {
+  const cloudflareD1Config = getCloudflareD1Config();
+  const cloudflareD1Database = getCloudflareD1Database();
+  if (cloudflareD1Config) {
+    if (!cloudflareD1Database) {
+      console.warn("[cms] Cloudflare D1 is configured but unavailable in this runtime; using seed data fallback.");
+      return cloneSeedData();
+    }
+
+    const data = await readVersionedD1CmsData(cloudflareD1Database, cloudflareD1Config);
+    return data || cloneSeedData();
+  }
+
   const cloudflareKvConfig = getCloudflareKvConfig();
   const cloudflareKvNamespace = getCloudflareKvNamespace();
   if (cloudflareKvConfig) {
@@ -842,6 +1143,13 @@ export async function readCmsDataFromStorage(): Promise<CmsData> {
 }
 
 export async function writeCmsDataToStorage(data: CmsData) {
+  const cloudflareD1Config = getCloudflareD1Config();
+  if (cloudflareD1Config) {
+    const { config, database } = requireCloudflareD1Database();
+    await writeVersionedD1Json(database, config, encryptCmsData(data));
+    return;
+  }
+
   const cloudflareKvConfig = getCloudflareKvConfig();
   if (cloudflareKvConfig) {
     const { config, namespace } = requireCloudflareKvNamespace();

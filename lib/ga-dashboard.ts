@@ -48,11 +48,25 @@ function base64Url(input: string) {
   return Buffer.from(input).toString("base64").replace(/=/g, "").replace(/\+/g, "-").replace(/\//g, "_");
 }
 
+function googleAuthMode() {
+  return String(process.env.GOOGLE_AUTH_MODE || "").trim().toLowerCase();
+}
+
+function shouldUseGoogleImpersonation() {
+  const mode = googleAuthMode();
+  return Boolean(process.env.GOOGLE_IMPERSONATE_SERVICE_ACCOUNT) && !["user", "gcloud-user", "adc", "application-default"].includes(mode);
+}
+
+function gcloudAccountArgs() {
+  const account = String(process.env.GOOGLE_AUTH_ACCOUNT || "").trim();
+  return account ? ["--account", account] : [];
+}
+
 async function googleAccessToken(scope: string) {
   const impersonatedServiceAccount = process.env.GOOGLE_IMPERSONATE_SERVICE_ACCOUNT;
-  if (impersonatedServiceAccount) {
+  if (impersonatedServiceAccount && shouldUseGoogleImpersonation()) {
     try {
-      const { stdout } = await execFileAsync("gcloud", ["auth", "print-access-token"], { timeout: 12_000 });
+      const { stdout } = await execFileAsync("gcloud", ["auth", "print-access-token", ...gcloudAccountArgs()], { timeout: 12_000 });
       const callerToken = stdout.trim();
       if (!callerToken) return { ok: false, reason: "gcloud returned an empty caller token" };
       const response = await fetch(
@@ -136,7 +150,7 @@ async function googleAccessToken(scope: string) {
 
   const gcloudCommands = [
     ["auth", "application-default", "print-access-token"],
-    ["auth", "print-access-token"]
+    ["auth", "print-access-token", ...gcloudAccountArgs()]
   ];
   const failures: string[] = [];
   for (const args of gcloudCommands) {

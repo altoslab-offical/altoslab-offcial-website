@@ -11,7 +11,7 @@ import type { BlogPost } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
-const LLMS_FULL_ARTICLE_GROUP_LIMIT = Number(process.env.LLMS_FULL_ARTICLE_GROUP_LIMIT || 2);
+const LLMS_FULL_ARTICLE_GROUP_LIMIT = Number(process.env.LLMS_FULL_ARTICLE_GROUP_LIMIT || 6);
 
 function normalizePlainText(value: string) {
   return value.replace(/\r/g, "").replace(/\n{3,}/g, "\n\n").trim();

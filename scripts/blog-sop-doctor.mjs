@@ -8,7 +8,7 @@ import { spawnSync } from "node:child_process";
 const DEFAULT_BASE_URL = "https://altoslab-ai.cc";
 const LANGUAGES = ["zh-Hant", "en", "ja", "ko", "id", "vi", "th", "ms", "fil"];
 const REQUIRED_CHROME_PROFILE_EMAIL = "john.wu0120@gmail.com";
-const PRODUCTION_CMS_PROVIDERS = new Set(["cloudflare-kv", "gcs"]);
+const PRODUCTION_CMS_PROVIDERS = new Set(["cloudflare-d1", "cloudflare-kv", "gcs"]);
 const GENERIC_STOCK_IMAGE_HOSTS = [
   "unsplash.com",
   "images.unsplash.com",
@@ -249,7 +249,7 @@ async function checkProductionHealth(errors, warnings) {
     }
     const integrations = json.integrations || {};
     if (!PRODUCTION_CMS_PROVIDERS.has(json.cmsStorage?.provider)) {
-      addIssue(errors, "production cmsStorage.provider must be cloudflare-kv or gcs");
+      addIssue(errors, "production cmsStorage.provider must be cloudflare-d1, cloudflare-kv or gcs");
     }
     for (const field of ["durable", "writable", "configured"]) {
       if (json.cmsStorage?.[field] !== true) addIssue(errors, `production cmsStorage.${field} must be true`);

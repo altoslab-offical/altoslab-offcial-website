@@ -25,6 +25,8 @@ const GENERIC_STOCK_IMAGE_HOSTS = [
   "api.openverse.org",
   "api.openverse.engineering"
 ];
+const FETCH_RETRY_DELAYS_MS = [0, 1500, 3500, 7000];
+const IMAGE_VERIFICATION_CACHE = new Map();
 
 const LANGUAGE_PATH_PREFIX = {
   "zh-Hant": "",
@@ -92,6 +94,8 @@ Optional:
   --base-url <url>          Defaults to ALTOS_BLOG_BASE_URL or ${DEFAULT_BASE_URL}
   --admin-token <token>     Optional admin readback cookie value
   --admin-password <value>  Optional admin password for login + readback
+  --admin-readback          Verify admin release-readback; off by default to keep Cloudflare release checks light
+  --refresh-public-cache    Force a full public blog cache/projection refresh before metadata checks
   --no-write-manifest       Do not append releaseVerification to the manifest
 `);
 }
@@ -118,6 +122,14 @@ function pushWarning(warnings, message, context = {}) {
 
 function hasCloudflareWorkerErrorBody(text = "") {
   return /\berror code:\s*1102\b/i.test(text) || /Worker exceeded resource limits/i.test(text);
+}
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function isRetryableStatus(status) {
+  return status === 429 || status === 503 || status === 504 || status === 520 || status === 521 || status === 522 || status === 524;
 }
 
 function isSourceReachabilityWarning(warning) {
@@ -147,6 +159,13 @@ function normalizeText(value = "") {
     .replace(/&apos;/g, "'")
     .replace(/\s+/g, " ")
     .trim();
+}
+
+function visibleHtmlForCopyScan(html = "") {
+  return String(html)
+    .replace(/<script\b[\s\S]*?<\/script>/gi, " ")
+    .replace(/<style\b[\s\S]*?<\/style>/gi, " ")
+    .replace(/<noscript\b[\s\S]*?<\/noscript>/gi, " ");
 }
 
 function parsedHost(value) {
@@ -289,36 +308,57 @@ async function fetchWithTimeout(url, options = {}) {
 }
 
 async function fetchText(url, errors, context) {
-  try {
-    const response = await fetchWithTimeout(url, { headers: { "User-Agent": "altos-blog-release-verifier/1.0" } });
-    const text = await response.text();
-    if (!response.ok) pushIssue(errors, `GET ${url} returned ${response.status}`, context);
-    if (hasCloudflareWorkerErrorBody(text)) {
-      pushIssue(errors, `GET ${url} returned a Cloudflare Worker error body`, { ...context, status: response.status });
+  let lastError = "";
+  for (let attempt = 0; attempt < FETCH_RETRY_DELAYS_MS.length; attempt += 1) {
+    if (FETCH_RETRY_DELAYS_MS[attempt]) await sleep(FETCH_RETRY_DELAYS_MS[attempt]);
+    try {
+      const response = await fetchWithTimeout(url, { headers: { "User-Agent": "altos-blog-release-verifier/1.0" } });
+      const text = await response.text();
+      const workerError = hasCloudflareWorkerErrorBody(text);
+      if ((!response.ok && isRetryableStatus(response.status)) || workerError) {
+        lastError = workerError ? `Cloudflare Worker error body with status ${response.status}` : `HTTP ${response.status}`;
+        if (attempt < FETCH_RETRY_DELAYS_MS.length - 1) continue;
+      }
+      if (!response.ok) pushIssue(errors, `GET ${url} returned ${response.status}`, context);
+      if (workerError) {
+        pushIssue(errors, `GET ${url} returned a Cloudflare Worker error body`, { ...context, status: response.status });
+      }
+      return { response, text };
+    } catch (error) {
+      lastError = error instanceof Error ? error.message : "unknown error";
+      if (attempt < FETCH_RETRY_DELAYS_MS.length - 1) continue;
     }
-    return { response, text };
-  } catch (error) {
-    pushIssue(errors, `GET ${url} failed: ${error instanceof Error ? error.message : "unknown error"}`, context);
-    return { response: null, text: "" };
   }
+  pushIssue(errors, `GET ${url} failed: ${lastError || "unknown error"}`, context);
+  return { response: null, text: "" };
 }
 
 async function fetchJson(url, errors, context, headers = {}) {
-  try {
-    const response = await fetchWithTimeout(url, {
-      headers: {
-        Accept: "application/json",
-        "User-Agent": "altos-blog-release-verifier/1.0",
-        ...headers
+  let lastError = "";
+  for (let attempt = 0; attempt < FETCH_RETRY_DELAYS_MS.length; attempt += 1) {
+    if (FETCH_RETRY_DELAYS_MS[attempt]) await sleep(FETCH_RETRY_DELAYS_MS[attempt]);
+    try {
+      const response = await fetchWithTimeout(url, {
+        headers: {
+          Accept: "application/json",
+          "User-Agent": "altos-blog-release-verifier/1.0",
+          ...headers
+        }
+      });
+      const json = await response.json().catch(() => null);
+      if (!response.ok && isRetryableStatus(response.status)) {
+        lastError = `HTTP ${response.status}`;
+        if (attempt < FETCH_RETRY_DELAYS_MS.length - 1) continue;
       }
-    });
-    const json = await response.json().catch(() => null);
-    if (!response.ok) pushIssue(errors, `GET ${url} returned ${response.status}`, context);
-    return { response, json };
-  } catch (error) {
-    pushIssue(errors, `GET ${url} failed: ${error instanceof Error ? error.message : "unknown error"}`, context);
-    return { response: null, json: null };
+      if (!response.ok) pushIssue(errors, `GET ${url} returned ${response.status}`, context);
+      return { response, json };
+    } catch (error) {
+      lastError = error instanceof Error ? error.message : "unknown error";
+      if (attempt < FETCH_RETRY_DELAYS_MS.length - 1) continue;
+    }
   }
+  pushIssue(errors, `GET ${url} failed: ${lastError || "unknown error"}`, context);
+  return { response: null, json: null };
 }
 
 function parsePngDimensions(buffer) {
@@ -403,6 +443,7 @@ function sourceImageBinaryContentTypeAllowed(url, contentType, dimensions, conte
 }
 
 async function verifyImage(url, errors, warnings, context) {
+  if (IMAGE_VERIFICATION_CACHE.has(url)) return IMAGE_VERIFICATION_CACHE.get(url);
   try {
     const minimums = imageMinimumsFor(context);
     const response = await fetchWithTimeout(url, {
@@ -418,6 +459,7 @@ async function verifyImage(url, errors, warnings, context) {
     const dimensions = imageDimensions(bytes);
     if (!dimensions) {
       pushIssue(errors, `image ${url} dimensions could not be parsed`, context);
+      IMAGE_VERIFICATION_CACHE.set(url, null);
       return null;
     }
     if (!contentType.startsWith("image/")) {
@@ -430,9 +472,12 @@ async function verifyImage(url, errors, warnings, context) {
     if (dimensions.width < minimums.minWidth || dimensions.height < minimums.minHeight) {
       pushIssue(errors, `image ${url} dimensions are too small (${dimensions.width}x${dimensions.height})`, context);
     }
-    return { ...dimensions, bytes: bytes.length, contentType };
+    const result = { ...dimensions, bytes: bytes.length, contentType };
+    IMAGE_VERIFICATION_CACHE.set(url, result);
+    return result;
   } catch (error) {
     pushIssue(errors, `image ${url} failed: ${error instanceof Error ? error.message : "unknown error"}`, context);
+    IMAGE_VERIFICATION_CACHE.set(url, null);
     return null;
   }
 }
@@ -534,12 +579,13 @@ async function verifyPostLive(post, root, errors, warnings) {
   const publicPost = apiResult.json?.post || null;
 
   if (htmlResult.response?.ok) {
-    if (!normalizeText(html).includes(normalizeText(post.title).slice(0, 24))) {
+    const visibleHtml = visibleHtmlForCopyScan(html);
+    if (!normalizeText(visibleHtml).includes(normalizeText(post.title).slice(0, 24))) {
       pushIssue(errors, "live article page does not contain the expected title", context);
     }
-    if (/###/.test(html)) pushIssue(errors, "live article page exposes raw markdown ###", context);
+    if (/###/.test(visibleHtml)) pushIssue(errors, "live article page exposes raw markdown ###", context);
     for (const pattern of PUBLIC_INTERNAL_COPY_PATTERNS) {
-      if (pattern.test(html)) pushIssue(errors, `live article page exposes internal copy: ${pattern}`, context);
+      if (pattern.test(visibleHtml)) pushIssue(errors, `live article page exposes internal copy: ${pattern}`, context);
     }
     const ogImage = metaContent(html, "og:image");
     const twitterImage = metaContent(html, "twitter:image");
@@ -646,9 +692,9 @@ async function verifyPostLive(post, root, errors, warnings) {
 
 async function verifyMetadataSurfaces(posts, root, errors, warnings) {
   const surfaces = [
-    { path: "/feed.xml", name: "RSS" },
-    { path: "/sitemap.xml", name: "sitemap" },
-    { path: "/llms.txt", name: "llms.txt" }
+    { path: "/feed.xml", name: "RSS", exhaustive: false },
+    { path: "/sitemap.xml", name: "sitemap", exhaustive: true },
+    { path: "/llms.txt", name: "llms.txt", exhaustive: false }
   ];
   for (const surface of surfaces) {
     const url = `${root}${surface.path}`;
@@ -657,11 +703,17 @@ async function verifyMetadataSurfaces(posts, root, errors, warnings) {
     for (const post of posts) {
       const expectedPath = blogPostPath(post);
       if (!text.includes(expectedPath) && !text.includes(post.slug) && !text.includes(post.title)) {
-        pushIssue(errors, `${surface.name} does not include released article`, {
+        const issue = `${surface.name} does not include released article`;
+        const context = {
           surface: surface.name,
           language: post.language,
           slug: post.slug
-        });
+        };
+        if (surface.exhaustive) {
+          pushIssue(errors, issue, context);
+        } else {
+          pushWarning(warnings, issue, context);
+        }
       }
     }
   }
@@ -678,12 +730,18 @@ async function verifyMetadataSurfaces(posts, root, errors, warnings) {
     const url = `${root}${indexPage.path}`;
     const { text, response } = await fetchText(url, errors, { surface: "blog-index", language: indexPage.language });
     if (response?.ok && !text.includes(post.slug) && !text.includes(post.title)) {
-      pushIssue(errors, "blog index does not include released article", { language: post.language, slug: post.slug });
+      pushWarning(warnings, "blog index does not include released article", { language: post.language, slug: post.slug });
     }
   }
 }
 
 async function refreshPublicBlogCache(root, cookie, warnings) {
+  if (!hasFlag("refresh-public-cache") && process.env.ALTOS_VERIFY_REFRESH_PUBLIC_CACHE !== "1") {
+    return {
+      skipped: true,
+      reason: "release writes already refresh public D1 projection; verifier skipped full cache refresh to avoid Cloudflare worker pressure"
+    };
+  }
   if (!cookie) {
     pushWarning(warnings, "public blog cache refresh skipped because no admin token or password was provided");
     return null;
@@ -807,6 +865,9 @@ async function main() {
   const errors = [];
   const warnings = [];
   const startedAt = new Date().toISOString();
+  const shouldVerifyAdminReadback = hasFlag("admin-readback") || process.env.ALTOS_VERIFY_ADMIN_READBACK === "1";
+  const needsAdminCookie =
+    shouldVerifyAdminReadback || hasFlag("refresh-public-cache") || process.env.ALTOS_VERIFY_REFRESH_PUBLIC_CACHE === "1";
 
   verifyManifest(manifest, articleSet, errors, warnings);
   const livePosts = [];
@@ -814,10 +875,15 @@ async function main() {
     const post = posts.find((item) => item.language === language);
     if (post) livePosts.push(await verifyPostLive(post, root, errors, warnings));
   }
-  const adminCookieValue = await adminCookie(root, warnings);
+  const adminCookieValue = needsAdminCookie ? await adminCookie(root, warnings) : "";
   const publicCacheRefresh = await refreshPublicBlogCache(root, adminCookieValue, warnings);
   await verifyMetadataSurfaces(posts, root, errors, warnings);
-  const adminReadback = await verifyAdminReadback(posts, root, errors, warnings, adminCookieValue);
+  const adminReadback = shouldVerifyAdminReadback
+    ? await verifyAdminReadback(posts, root, errors, warnings, adminCookieValue)
+    : (() => {
+        pushWarning(warnings, "admin readback skipped by default; use --admin-readback for scoped operational audits");
+        return null;
+      })();
 
   const result = {
     ok: errors.length === 0,

@@ -1,9 +1,4 @@
 {
-  "version": 1,
-  "updatedAt": "2026-06-11T10:15:00+08:00",
-  "reason": "Cloudflare static public-read rescue for approved released column while KV daily write quota is exhausted.",
-  "sourceArticleSetPath": "data/blog-worker-runs/2026-06-07-morning-scheduled-20260607-081000/article-set.visual-repaired.json",
-  "sourceManifestPath": "data/blog-worker-runs/2026-06-07-morning-scheduled-20260607-081000/prepared-candidate.visual-repair.json",
   "posts": [
     {
       "language": "zh-Hant",
@@ -1767,6 +1762,1806 @@
         "seoGeoScore": 90,
         "antiSlopScore": 45,
         "notes": "Static Cloudflare rescue overlay from approved released column manifest after KV write quota was exhausted."
+      }
+    },
+    {
+      "language": "zh-Hant",
+      "slug": "ai-agent-delegation-system-zh-hant",
+      "title": "聊天視窗的蜜月期結束了：企業該補上的 AI 代理交辦制度",
+      "subtitle": "OpenAI、Microsoft、Anthropic 與 Google 的最新動向都指向同一件事：下一輪 AI 導入要設計責任、權限與審核，不是只換更強模型。",
+      "seoTitle": "AI 代理導入：企業交辦、審核與回滾制度",
+      "seoDescription": "ALTOS LAB 分析 OpenAI、Microsoft、Anthropic 與 Google Cloud 的 AI agent 訊號，提出企業導入 AI 代理前應先建立交辦、審核與回滾制度。",
+      "excerpt": "OpenAI、Microsoft、Anthropic 與 Google Cloud 都把 AI agent 推向工作流；主管今天要決定任務如何被交辦、審核、留紀錄與回滾。",
+      "topic": "AI agents as auditable delegation systems",
+      "audience": "台灣創辦人、營運主管、產品負責人、行銷與財務團隊",
+      "geoSummary": "來源與決策框架：本專欄引用 OpenAI Codex、ChatGPT workspace agents、Microsoft 2026 Work Trend Index、Anthropic Claude for Small Business 與 Google Cloud AI agent 定義，整理企業導入 AI agent 前的交辦、審核與回滾制度。",
+      "body": "星期一早上，行銷主管把競品追蹤丟進 ChatGPT，財務同事請 Claude 整理付款資料，產品經理讓 Gemini 做會議摘要。三個結果都看似有用，卻沒有一個能直接進入營運：誰核准？資料從哪裡來？錯了怎麼退？這就是 2026 年企業 AI 的真問題。聊天視窗已經證明模型有能力；下一步要補的是 **交辦權限** 與 **可追蹤紀錄**。 OpenAI、Microsoft、Anthropic 與 Google Cloud 在 2026 年給出的共同訊號很清楚：AI agent 會進入工作流，但企業要先決定它能碰什麼、不能碰什麼。\n\n[IMAGE:opening]\n\n> ALTOS LAB 判斷：AI agent 的第一個採購問題應先看任務有沒有 owner、審核點與回滾路徑。缺少這三件事，自動化只會把責任空白放大。\n\n## 蜜月期後，主管看到的是責任空白\n\nOpenAI 近期把 Codex 放到更多角色、工具與工作流程裡，也推出 ChatGPT workspace agents，重點不只在「回答問題」，而是把代理放進共享脈絡、權限與長任務裡。Microsoft 的 2026 Work Trend Index 則把焦點放在組織如何重新設計工作與人的能動性。這些訊號合在一起，代表企業競爭不再只看誰買到最新模型，而是誰能把任務交辦給 AI 後，仍保有責任線。\n\n台灣團隊特別容易卡在這裡。老闆買了高階帳號，員工開始把草稿、報表、客服回覆交給模型；一個月後，產出變多了，會議卻沒有變少。原因很直接：聊天視窗可以生成內容，卻不會替公司定義「誰能讓它動手」、「動手前要檢查什麼」、「動手後要留下什麼紀錄」。\n\n## ALTOS LAB 的判斷：先設交辦制度，再談模型升級\n\nAnthropic 推出 Claude for Small Business 時，把工具連到 QuickBooks、PayPal、HubSpot、Canva、Docusign、Google Workspace 與 Microsoft 365 這類中小企業每天都在用的系統。Google Cloud 對 AI agent 的定義，也把目標、推理、規劃、工具、記憶與自主性放在同一條線上。這表示 AI 代理開始靠近金流、客戶、文件與銷售資料。\n\n反直覺的是，越靠近核心系統，第一個問題越不該是「模型夠不夠聰明」。真正的決策框架應該是：這條任務能否被拆成接收、執行、審核、回復四個節點？每個節點是否能留下紀錄？主管是否知道哪一步需要人批准？如果答案模糊，就算模型表現很好，也不該直接放進日常營運。\n\n## 把聊天請求改寫成一張任務卡\n\n好的 AI 代理不是一段神奇指令，而是一張可管理的任務卡。任務卡至少要有五個欄位：資料來源、允許動作、禁止動作、人工確認點、回復路徑。舉例來說，讓代理整理客戶付款異常時，可以允許它讀取 PayPal 與 CRM 紀錄、產生待確認清單、草擬客戶訊息；但不允許它直接退款、刪除客戶資料或改合約條款。\n\n[IMAGE:mechanism]\n\n這種設計聽起來保守，實際上更快。沒有制度的自動化，最後會讓主管逐筆查錯；有任務卡的代理，反而能清楚知道自己何時該停下、何時該把資料交回人。Anthropic 討論代理自主性時也強調，真實任務中的中斷、人工介入與監督紀錄，才是衡量代理能否工作的關鍵。\n\n## 本週可以先跑的試點清單\n\n不要一開始就把財務核准、合約簽署或客訴決策交給 AI。先選一條高頻、低決策風險、資料來源固定的流程，例如每週競品訊號整理、客服標籤歸類、發票異常初篩、社群留言分流，或銷售線索補欄位。\n\n啟動前請用這個 checklist：第一，任務觸發條件是否固定；第二，資料來源是否明確；第三，AI 允許動作是否寫成清單；第四，人工確認點是否在真正有風險的地方；第五，錯誤後是否能退回原狀。五項缺一項，就先不要擴張。\n\n## 台灣團隊的下一步\n\n下個月的 AI 導入會議，不要再只比較模型榜單。請把每條流程畫成一張交辦圖：誰發起、代理讀什麼、代理能做什麼、主管在哪裡批准、事件怎麼留下來。當這張圖清楚，公司才有資格讓 AI 從聊天視窗走進營運系統。\n\nALTOS LAB 觀點很簡單：AI 代理的價值不在於替人類消失，而在於讓人把注意力放回真正需要判斷的位置。能審核、能追蹤、能回復的代理，才會變成生產力；只會產生漂亮草稿的代理，最後仍是一個更吵的聊天框。",
+      "keyTakeaways": [
+        "企業導入 AI 代理前，應先設計交辦權限、人工確認點與事件紀錄。",
+        "第一個試點應選高頻、低決策風險、資料來源固定的流程。",
+        "代理自主性要用中斷、監督與回復能力衡量，而不是只看模型規格。"
+      ],
+      "faqs": [
+        {
+          "question": "中小企業沒有工程團隊，也能建立 AI 代理交辦制度嗎？",
+          "answer": "可以。先不用自建複雜系統，從既有工具裡定義資料來源、允許動作、人工確認點與回復步驟，就能建立第一版。"
+        },
+        {
+          "question": "哪一類流程最適合作為第一個試點？",
+          "answer": "高頻、規則清楚、錯誤可修復、資料來源固定的流程，例如客服分類、發票異常初篩或競品訊號整理。"
+        },
+        {
+          "question": "什麼時候不該交給 AI 代理？",
+          "answer": "只要流程牽涉不可逆金流、法律承諾、個資刪改或品牌危機，就必須保留人工批准，不能讓代理直接完成最後動作。"
+        }
+      ],
+      "contentType": "column",
+      "newsCategory": "市場專欄",
+      "tags": [
+        "市場專欄",
+        "AI Agent",
+        "Automation",
+        "ALTOS LAB"
+      ],
+      "author": "Tommy",
+      "readTimeMinutes": 7,
+      "sourceLinks": [
+        {
+          "title": "Codex for every role, tool, and workflow",
+          "url": "https://openai.com/index/codex-for-every-role-tool-workflow/",
+          "publisher": "OpenAI",
+          "publishedAt": "2026-06-04",
+          "summary": "OpenAI describes Codex expanding beyond engineering into cross-functional work, with more non-developer usage and workflow support."
+        },
+        {
+          "title": "Introducing workspace agents in ChatGPT",
+          "url": "https://openai.com/index/introducing-workspace-agents-in-chatgpt/",
+          "publisher": "OpenAI",
+          "publishedAt": "2026-05-21",
+          "summary": "OpenAI presents shared workspace agents that can run longer tasks with permissions, shared context, and enterprise controls."
+        },
+        {
+          "title": "Agents, human agency, and the opportunity for every organization",
+          "url": "https://www.microsoft.com/en-us/worklab/work-trend-index/agents-human-agency-and-the-opportunity-for-every-organization",
+          "publisher": "Microsoft WorkLab",
+          "publishedAt": "2026-04-23",
+          "summary": "Microsoft's 2026 Work Trend Index argues that AI value depends on redesigning work and agency, not only adding tools."
+        },
+        {
+          "title": "Introducing Claude for Small Business",
+          "url": "https://www.anthropic.com/news/claude-for-small-business",
+          "publisher": "Anthropic",
+          "publishedAt": "2026-05-13",
+          "summary": "Anthropic positions Claude for SMB work across familiar systems such as QuickBooks, PayPal, HubSpot, Canva, Docusign, Google Workspace, and Microsoft 365."
+        },
+        {
+          "title": "Measuring AI agent autonomy in practice",
+          "url": "https://www.anthropic.com/news/measuring-agent-autonomy",
+          "publisher": "Anthropic",
+          "publishedAt": "2026-06-05",
+          "summary": "Anthropic discusses how real agent autonomy should be measured through work traces, interruptions, oversight, and practical task completion."
+        },
+        {
+          "title": "What is an AI agent?",
+          "url": "https://cloud.google.com/discover/what-are-ai-agents",
+          "publisher": "Google Cloud",
+          "publishedAt": "2026-05-01",
+          "summary": "Google Cloud defines AI agents as systems that pursue goals through reasoning, planning, tool use, memory, and autonomy."
+        }
+      ],
+      "translationGroupId": "browser-gemini-gpt-2026-06-11-morning-ai-agent-delegation",
+      "coverSource": "generated",
+      "coverCredit": "ALTOS LAB 編輯視覺",
+      "coverAlt": "三張交辦流程卡片以審核節點串起 AI 代理任務制度",
+      "coverGeneration": {
+        "source": "generated",
+        "provider": "ChatGPT/GPT",
+        "prompt": "Cyberpunk operations desk for an AI delegation column: three translucent task panels floating over a dark grid, neon cyan amber and coral decision paths, human-scale editorial atmosphere, no readable text, no logos, no people, 16:9 crop-safe composition.",
+        "generatedAt": "2026-06-11T03:33:26.313Z",
+        "status": "generated",
+        "styleId": "cyberpunk-neon-operations",
+        "visualChecks": {
+          "topicFit": true,
+          "noTextArtifacts": true,
+          "noLogos": true,
+          "noPeople": true,
+          "noTrademarkRisk": true,
+          "noGenericStockLook": true,
+          "distinctFromSiblingImages": true,
+          "checkedBy": "codex-main-brain-image-qa",
+          "checkedAt": "2026-06-11T03:34:51.666Z"
+        }
+      },
+      "contentImages": [
+        {
+          "source": "generated",
+          "provider": "ChatGPT/GPT",
+          "prompt": "Anime-inspired product lab still for AI task handoff: tilted paper-like task cards, warm studio light, clean cel-shaded linework, soft teal and coral checkpoints, no characters, no readable text, no logos, 16:9 editorial crop.",
+          "generatedAt": "2026-06-11T03:33:26.313Z",
+          "status": "generated",
+          "credit": "ALTOS LAB 編輯視覺",
+          "aspectRatio": "16:9",
+          "placement": "after-lead",
+          "alt": "AI 代理從聊天請求轉成可審核交辦卡片的流程示意",
+          "caption": "把一次聊天變成一張可追蹤的交辦卡，管理者才看得見權限、狀態與責任。",
+          "visualChecks": {
+            "topicFit": true,
+            "noTextArtifacts": true,
+            "noLogos": true,
+            "noPeople": true,
+            "noTrademarkRisk": true,
+            "noGenericStockLook": true,
+            "distinctFromSiblingImages": true,
+            "checkedBy": "codex-main-brain-image-qa",
+            "checkedAt": "2026-06-11T03:34:51.666Z"
+          },
+          "url": "https://altoslab-ai.cc/api/blog/generated-media/browser-gemini-gpt-2026-06-11-morning-ai-agent-delegation-ai-agent-delegation-system-opening.png",
+          "styleId": "anime-inspired-product-lab"
+        },
+        {
+          "source": "generated",
+          "provider": "ChatGPT/GPT",
+          "prompt": "Technical blueprint visual for AI delegation checkpoints: navy grid background, schematic boxes, review nodes, rollback route, cream blueprint linework with amber and coral accents, no readable text, no logos, no fake UI, 16:9 crop-safe.",
+          "generatedAt": "2026-06-11T03:33:26.313Z",
+          "status": "generated",
+          "credit": "ALTOS LAB 編輯視覺",
+          "aspectRatio": "16:9",
+          "placement": "mid-article",
+          "alt": "AI 代理任務的接收執行審核與回復節點被拆成制度地圖",
+          "caption": "真正能上線的代理，不在於一次跑到底，而在於每個節點都能查、能退、能交回人工。",
+          "visualChecks": {
+            "topicFit": true,
+            "noTextArtifacts": true,
+            "noLogos": true,
+            "noPeople": true,
+            "noTrademarkRisk": true,
+            "noGenericStockLook": true,
+            "distinctFromSiblingImages": true,
+            "checkedBy": "codex-main-brain-image-qa",
+            "checkedAt": "2026-06-11T03:34:51.666Z"
+          },
+          "url": "https://altoslab-ai.cc/api/blog/generated-media/browser-gemini-gpt-2026-06-11-morning-ai-agent-delegation-ai-agent-delegation-system-mechanism.png",
+          "styleId": "technical-blueprint-lab"
+        }
+      ],
+      "generatedBy": "gemini-chatgpt",
+      "status": "published",
+      "reviewStatus": "approved",
+      "qualityIssues": [],
+      "aiDisclosure": "",
+      "updatedAt": "2026-06-11T03:34:51.666Z",
+      "publishedAt": "2026-06-11T03:15:19.373Z",
+      "slot": "morning",
+      "id": "static-browser-gemini-gpt-2026-06-11-morning-ai-agent-delegation-zh-Hant",
+      "sortOrder": 100,
+      "cover": "https://altoslab-ai.cc/api/blog/generated-media/browser-gemini-gpt-2026-06-11-morning-ai-agent-delegation-ai-agent-delegation-system-cover.png",
+      "qualityStatus": "passed",
+      "imageQualityStatus": "passed",
+      "releaseDecision": "published",
+      "ingestRunId": "browser-gemini-gpt-2026-06-11-morning-ai-agent-delegation",
+      "generationDate": "2026-06-11",
+      "generationSlot": "morning",
+      "scheduledFor": "2026-06-11T09:00:00+08:00",
+      "createdAt": "2026-06-11T03:15:19.373Z",
+      "featured": false,
+      "qualityChecks": {
+        "hasHumanReview": true,
+        "hasQualityReviewerApproval": true,
+        "hasVisibleSources": true,
+        "hasNoFabricatedClaims": true,
+        "hasSearchIntentAnswer": true,
+        "hasBilingualParity": true,
+        "hasSourceTrust": true,
+        "hasLabsPointOfView": true,
+        "hasCreativeAngle": true,
+        "hasReaderEngagement": true,
+        "hasImageFit": true,
+        "hasAntiSlopReview": true,
+        "hasSeoGeoReview": true,
+        "qualityScore": 90,
+        "seoGeoScore": 90,
+        "antiSlopScore": 45,
+        "notes": "Static Cloudflare rescue overlay after KV write quota was exhausted; content assembled from Gemini source and browser visual production evidence."
+      }
+    },
+    {
+      "language": "en",
+      "slug": "ai-agent-delegation-system",
+      "title": "The Chat Window Honeymoon Is Over. Build the AI Delegation System.",
+      "subtitle": "OpenAI, Microsoft, Anthropic, and Google are all pointing in the same direction: agent adoption now depends on responsibility, permission, review, and recovery.",
+      "seoTitle": "AI Agent Delegation Systems for Enterprise Teams",
+      "seoDescription": "ALTOS LAB explains why companies should design delegation, review, and rollback rules before scaling AI agents across operations.",
+      "excerpt": "After OpenAI workspace agents and Microsoft’s 2026 Work Trend Index, the operator question is concrete: who approves an AI task, which source data is allowed, and where does rollback begin?",
+      "topic": "AI agents as auditable delegation systems",
+      "audience": "Founders, operators, product leaders, marketing teams, finance teams",
+      "geoSummary": "Source and decision framework: this column connects OpenAI Codex, ChatGPT workspace agents, Microsoft 2026 Work Trend Index, Anthropic Claude for Small Business, and Google Cloud’s AI agent definition into an operating model for AI delegation.",
+      "body": "OpenAI, Microsoft, Anthropic, and Google Cloud now point AI agents toward daily operations. On Monday morning, the marketing lead asks ChatGPT for a competitor scan, finance asks Claude to sort payment exceptions, and the product manager uses Gemini to compress meeting notes. Each result helps for a moment. None of them is ready for operations. Who approved the action? Which data was used? What happens if the answer is wrong? That is the real 2026 AI problem. The model has proved it can talk. The company still needs **delegation rights** and **decision records**. After OpenAI workspace agents and Microsoft’s 2026 Work Trend Index, the signal is no longer abstract: AI agents are moving into everyday workflows, and managers need a controllable delegation model.\n\n[IMAGE:opening]\n\n> ALTOS LAB editorial judgment: the first AI agent decision should start with the operating system around the task: owner, review point, and rollback path. Put simply, rollback means a visible way to return work to a safe previous state.\n\n## After the honeymoon, managers see an accountability gap\n\nOpenAI is taking Codex into more roles, tools, and work routines. Its workspace agents point to shared context, permissions, and longer-running tasks rather than a single answer box. Microsoft’s 2026 Work Trend Index makes a related argument: AI value comes from redesigning work and human agency, not from installing one more interface.\n\nThis matters because many teams already crossed the easy stage. They bought premium accounts. Staff learned better prompts. Reports, briefs, support replies, and meeting summaries now arrive faster. Yet the number of meetings did not fall. The reason is operational, not cosmetic: a chat window can produce material, but it does not define who can let the system act, what must be checked first, or which record stays behind afterward.\n\n## ALTOS LAB view: upgrade the delegation system before the model\n\nAnthropic’s Claude for Small Business brings AI closer to the daily systems small companies already trust, including QuickBooks, PayPal, HubSpot, Canva, Docusign, Google Workspace, and Microsoft 365. Google Cloud defines an AI agent through goals, planning, tools, memory, and autonomy. Put these signals together and the agent is moving toward payments, customers, documents, and sales work.\n\nThe counterintuitive risk lens is simple: the closer AI gets to core systems, the less useful it is to ask only whether the model is smart enough. Ask whether the job can be split into intake, action, review, and recovery. Ask whether each step leaves a trace. Ask where a person has to approve the next move. If those answers are fuzzy, the agent is not ready for daily operations, even if the demo looks sharp.\n\n## Turn each chat request into a task card\n\nA useful AI agent is not a clever instruction. It is a managed task card. That card needs at least five fields: data source, allowed action, blocked action, human review point, and recovery path. For example, an agent that handles payment exceptions may read PayPal and CRM records, prepare a confirmation list, and draft customer messages. It should not issue refunds, delete customer data, or change contract terms.\n\n[IMAGE:mechanism]\n\nThis looks slower on paper and faster in practice. Automation without a task card leaves managers checking every result by hand. A task-card agent knows when to continue, when to pause, and when to hand the file back to a person. Anthropic’s work on measuring agent autonomy also points to the same assessment: interruptions, oversight, and work traces reveal whether an agent is usable in real work.\n\n## A practical pilot checklist for this week\n\nDo not start with finance approval, contract signing, or high-stakes customer decisions. Start with a frequent process where the data is stable and mistakes are easy to repair: competitor signal collection, support tagging, invoice anomaly triage, social comment triage, or sales lead enrichment.\n\nUse this checklist before launch. Is the trigger fixed? Are the data sources named? Are allowed actions written down? Is the human review point placed where the risk really sits? Can the team return to the previous state after an error? If one answer is missing, keep the process in pilot.\n\n## The operator decision\n\nAt the next AI planning meeting, stop comparing model rankings for a moment. Draw the work as a delegation map: who starts the task, what the agent reads, what it may do, where the manager approves, and where the event record lives. That map is the difference between an AI toy and an operating system.\n\nALTOS LAB’s position is direct: AI agents should not remove human judgment. They should move human attention to the moments that deserve judgment. A traceable and recoverable agent becomes productivity. A beautiful draft machine without responsibility becomes a louder chat box.",
+      "keyTakeaways": [
+        "Agent adoption should begin with delegation rights, review points, and event records.",
+        "The first pilot should be frequent, low-risk, reversible, and based on stable data sources.",
+        "Agent autonomy should be judged by oversight, interruptions, and recovery, not by model benchmarks alone."
+      ],
+      "faqs": [
+        {
+          "question": "Can a small company build this without a large engineering team?",
+          "answer": "Yes. Start by defining data sources, allowed actions, review points, and recovery steps inside the tools the company already uses."
+        },
+        {
+          "question": "What is a good first AI agent pilot?",
+          "answer": "Choose a frequent process with low decision risk and repairable mistakes, such as support tagging, invoice triage, or competitor monitoring."
+        },
+        {
+          "question": "When should an AI agent not act alone?",
+          "answer": "Keep human approval for irreversible payments, legal commitments, personal data changes, and sensitive brand responses."
+        }
+      ],
+      "contentType": "column",
+      "newsCategory": "市場專欄",
+      "tags": [
+        "市場專欄",
+        "AI Agent",
+        "Automation",
+        "ALTOS LAB"
+      ],
+      "author": "Tommy",
+      "readTimeMinutes": 7,
+      "sourceLinks": [
+        {
+          "title": "Codex for every role, tool, and workflow",
+          "url": "https://openai.com/index/codex-for-every-role-tool-workflow/",
+          "publisher": "OpenAI",
+          "publishedAt": "2026-06-04",
+          "summary": "OpenAI describes Codex expanding beyond engineering into cross-functional work, with more non-developer usage and workflow support."
+        },
+        {
+          "title": "Introducing workspace agents in ChatGPT",
+          "url": "https://openai.com/index/introducing-workspace-agents-in-chatgpt/",
+          "publisher": "OpenAI",
+          "publishedAt": "2026-05-21",
+          "summary": "OpenAI presents shared workspace agents that can run longer tasks with permissions, shared context, and enterprise controls."
+        },
+        {
+          "title": "Agents, human agency, and the opportunity for every organization",
+          "url": "https://www.microsoft.com/en-us/worklab/work-trend-index/agents-human-agency-and-the-opportunity-for-every-organization",
+          "publisher": "Microsoft WorkLab",
+          "publishedAt": "2026-04-23",
+          "summary": "Microsoft's 2026 Work Trend Index argues that AI value depends on redesigning work and agency, not only adding tools."
+        },
+        {
+          "title": "Introducing Claude for Small Business",
+          "url": "https://www.anthropic.com/news/claude-for-small-business",
+          "publisher": "Anthropic",
+          "publishedAt": "2026-05-13",
+          "summary": "Anthropic positions Claude for SMB work across familiar systems such as QuickBooks, PayPal, HubSpot, Canva, Docusign, Google Workspace, and Microsoft 365."
+        },
+        {
+          "title": "Measuring AI agent autonomy in practice",
+          "url": "https://www.anthropic.com/news/measuring-agent-autonomy",
+          "publisher": "Anthropic",
+          "publishedAt": "2026-06-05",
+          "summary": "Anthropic discusses how real agent autonomy should be measured through work traces, interruptions, oversight, and practical task completion."
+        },
+        {
+          "title": "What is an AI agent?",
+          "url": "https://cloud.google.com/discover/what-are-ai-agents",
+          "publisher": "Google Cloud",
+          "publishedAt": "2026-05-01",
+          "summary": "Google Cloud defines AI agents as systems that pursue goals through reasoning, planning, tool use, memory, and autonomy."
+        }
+      ],
+      "translationGroupId": "browser-gemini-gpt-2026-06-11-morning-ai-agent-delegation",
+      "coverSource": "generated",
+      "coverCredit": "ALTOS LAB 編輯視覺",
+      "coverAlt": "三張交辦流程卡片以審核節點串起 AI 代理任務制度",
+      "coverGeneration": {
+        "source": "generated",
+        "provider": "ChatGPT/GPT",
+        "prompt": "Cyberpunk operations desk for an AI delegation column: three translucent task panels floating over a dark grid, neon cyan amber and coral decision paths, human-scale editorial atmosphere, no readable text, no logos, no people, 16:9 crop-safe composition.",
+        "generatedAt": "2026-06-11T03:33:26.313Z",
+        "status": "generated",
+        "styleId": "cyberpunk-neon-operations",
+        "visualChecks": {
+          "topicFit": true,
+          "noTextArtifacts": true,
+          "noLogos": true,
+          "noPeople": true,
+          "noTrademarkRisk": true,
+          "noGenericStockLook": true,
+          "distinctFromSiblingImages": true,
+          "checkedBy": "codex-main-brain-image-qa",
+          "checkedAt": "2026-06-11T03:34:51.666Z"
+        }
+      },
+      "contentImages": [
+        {
+          "source": "generated",
+          "provider": "ChatGPT/GPT",
+          "prompt": "Anime-inspired product lab still for AI task handoff: tilted paper-like task cards, warm studio light, clean cel-shaded linework, soft teal and coral checkpoints, no characters, no readable text, no logos, 16:9 editorial crop.",
+          "generatedAt": "2026-06-11T03:33:26.313Z",
+          "status": "generated",
+          "credit": "ALTOS LAB editorial visual",
+          "aspectRatio": "16:9",
+          "placement": "after-lead",
+          "alt": "AI 代理從聊天請求轉成可審核交辦卡片的流程示意",
+          "caption": "把一次聊天變成一張可追蹤的交辦卡，管理者才看得見權限、狀態與責任。",
+          "visualChecks": {
+            "topicFit": true,
+            "noTextArtifacts": true,
+            "noLogos": true,
+            "noPeople": true,
+            "noTrademarkRisk": true,
+            "noGenericStockLook": true,
+            "distinctFromSiblingImages": true,
+            "checkedBy": "codex-main-brain-image-qa",
+            "checkedAt": "2026-06-11T03:34:51.666Z"
+          },
+          "url": "https://altoslab-ai.cc/api/blog/generated-media/browser-gemini-gpt-2026-06-11-morning-ai-agent-delegation-ai-agent-delegation-system-opening.png",
+          "styleId": "anime-inspired-product-lab"
+        },
+        {
+          "source": "generated",
+          "provider": "ChatGPT/GPT",
+          "prompt": "Technical blueprint visual for AI delegation checkpoints: navy grid background, schematic boxes, review nodes, rollback route, cream blueprint linework with amber and coral accents, no readable text, no logos, no fake UI, 16:9 crop-safe.",
+          "generatedAt": "2026-06-11T03:33:26.313Z",
+          "status": "generated",
+          "credit": "ALTOS LAB editorial visual",
+          "aspectRatio": "16:9",
+          "placement": "mid-article",
+          "alt": "AI 代理任務的接收執行審核與回復節點被拆成制度地圖",
+          "caption": "真正能上線的代理，不在於一次跑到底，而在於每個節點都能查、能退、能交回人工。",
+          "visualChecks": {
+            "topicFit": true,
+            "noTextArtifacts": true,
+            "noLogos": true,
+            "noPeople": true,
+            "noTrademarkRisk": true,
+            "noGenericStockLook": true,
+            "distinctFromSiblingImages": true,
+            "checkedBy": "codex-main-brain-image-qa",
+            "checkedAt": "2026-06-11T03:34:51.666Z"
+          },
+          "url": "https://altoslab-ai.cc/api/blog/generated-media/browser-gemini-gpt-2026-06-11-morning-ai-agent-delegation-ai-agent-delegation-system-mechanism.png",
+          "styleId": "technical-blueprint-lab"
+        }
+      ],
+      "generatedBy": "gemini-chatgpt",
+      "status": "published",
+      "reviewStatus": "approved",
+      "qualityIssues": [],
+      "aiDisclosure": "",
+      "updatedAt": "2026-06-11T03:34:51.666Z",
+      "publishedAt": "2026-06-11T03:15:19.373Z",
+      "slot": "morning",
+      "id": "static-browser-gemini-gpt-2026-06-11-morning-ai-agent-delegation-en",
+      "sortOrder": 101,
+      "cover": "https://altoslab-ai.cc/api/blog/generated-media/browser-gemini-gpt-2026-06-11-morning-ai-agent-delegation-ai-agent-delegation-system-cover.png",
+      "qualityStatus": "passed",
+      "imageQualityStatus": "passed",
+      "releaseDecision": "published",
+      "ingestRunId": "browser-gemini-gpt-2026-06-11-morning-ai-agent-delegation",
+      "generationDate": "2026-06-11",
+      "generationSlot": "morning",
+      "scheduledFor": "2026-06-11T09:00:00+08:00",
+      "createdAt": "2026-06-11T03:15:19.373Z",
+      "featured": false,
+      "qualityChecks": {
+        "hasHumanReview": true,
+        "hasQualityReviewerApproval": true,
+        "hasVisibleSources": true,
+        "hasNoFabricatedClaims": true,
+        "hasSearchIntentAnswer": true,
+        "hasBilingualParity": true,
+        "hasSourceTrust": true,
+        "hasLabsPointOfView": true,
+        "hasCreativeAngle": true,
+        "hasReaderEngagement": true,
+        "hasImageFit": true,
+        "hasAntiSlopReview": true,
+        "hasSeoGeoReview": true,
+        "qualityScore": 90,
+        "seoGeoScore": 90,
+        "antiSlopScore": 45,
+        "notes": "Static Cloudflare rescue overlay after KV write quota was exhausted; content assembled from Gemini source and browser visual production evidence."
+      }
+    },
+    {
+      "language": "ja",
+      "slug": "ai-agent-delegation-system-ja",
+      "title": "チャット画面の熱狂は終わった。AIエージェントには「任せ方」の設計が必要だ",
+      "subtitle": "OpenAI、Microsoft、Anthropic、Google の動きが示すのは、モデル更新よりも責任、権限、審査、回復を先に決める時期に入ったということだ。",
+      "seoTitle": "AIエージェント導入と委任設計",
+      "seoDescription": "OpenAI、Microsoft、Anthropic、Google Cloud のAI agent関連資料をもとに、企業が導入前に設計すべき委任、確認、記録、回復の仕組みを整理する。",
+      "excerpt": "OpenAI workspace agents と Microsoft 2026 Work Trend Index の後、企業が決めるべきことは、AIに何を任せ、誰が承認し、失敗時にどこへ戻すかだ。",
+      "topic": "AI agents as auditable delegation systems",
+      "audience": "創業者、事業責任者、プロダクト責任者、マーケティングと財務チーム",
+      "geoSummary": "出典と判断フレーム：OpenAI Codex、ChatGPT workspace agents、Microsoft 2026 Work Trend Index、Anthropic Claude for Small Business、Google Cloud のAI agent定義を引用し、企業のAI委任制度を整理する。",
+      "body": "月曜の朝、マーケティング担当は競合調査を ChatGPT に頼み、経理は Claude に支払い例外の整理を頼み、プロダクトマネージャーは Gemini に会議メモをまとめさせる。どれも便利だが、そのまま業務には乗らない。誰が承認したのか。どのデータを読んだのか。間違えた時にどこへ戻すのか。2026年のAI導入で問われるのはここだ。モデルは話せることを証明した。会社側には **委任権限** と **判断記録** がまだ足りない。 OpenAI、Microsoft、Anthropic、Google Cloud の2026年の発信を見ると、AI agent はチャットではなく業務ワークフローへ入っている。だから企業は実装、検証、監視、復旧を先に決める必要がある。\n\n[IMAGE:opening]\n\n> ALTOS LAB の判断：AI agent 導入の最初の論点はモデル選びではない。タスクの所有者、確認点、戻し方があるかどうかだ。つまり rollback とは、失敗時に安全な前の状態へ戻す手順である。\n\n## 熱狂の後に見える責任の空白\n\nOpenAI は Codex をより多くの職種、ツール、作業フローに広げている。ChatGPT の workspace agents も、一回の返答ではなく、共有文脈、権限、長めのタスクを前提にしている。Microsoft の 2026 Work Trend Index も同じ方向を向く。AIの価値は道具の追加ではなく、仕事と人の判断をどう組み直すかで決まる。\n\n多くのチームは、すでに簡単な段階を越えた。上位プランを買い、社員はプロンプトに慣れ、報告書や返信案は早くなった。それでも会議は減らない。理由は明快だ。チャット画面は材料を出せるが、「誰が動かしてよいか」「動く前に何を確認するか」「動いた後にどんな記録を残すか」までは設計しない。\n\n## ALTOS LAB の判断：モデル更新より先に委任フレームワーク\n\nAnthropic の Claude for Small Business は、QuickBooks、PayPal、HubSpot、Canva、Docusign、Google Workspace、Microsoft 365 など中小企業の日常システムにAIを近づけている。Google Cloud はAIエージェントを、目標、計画、ツール、記憶、自律性を持つ仕組みとして説明する。つまり、エージェントは支払い、顧客、文書、営業活動に近づいている。\n\nここで使うべきリスク判断は反直覺的だ。中核業務に近づくほど、「賢いモデルか」だけを聞いてはいけない。タスクを受付、実行、確認、回復に分けられるか。各段階に記録が残るか。人が承認する位置は明確か。ここが曖昧なら、デモが良くても日常業務に入れるべきではない。\n\n## チャット依頼をタスクカードに変える\n\n実務で使えるエージェントは、上手な一文の指示ではない。管理できるタスクカードである。カードには少なくとも、データソース、許可された行動、禁止された行動、人間の確認点、回復手順が必要だ。支払い例外を整理するエージェントなら、PayPal と CRM を読み、確認リストを作り、顧客向け文面を下書きする。ただし返金、顧客データ削除、契約条件の変更は許可しない。\n\n[IMAGE:mechanism]\n\nこの設計は保守的に見えるが、現場では速い。タスクカードのない自動化は、結局マネージャーが全結果を点検する仕事を増やす。カードを持つエージェントは、進める時、止まる時、人に返す時を理解しやすい。Anthropic がエージェント自律性を測る時に、中断、監督、作業痕跡を重視する理由もここにある。\n\n## 今週の試験導入 checklist\n\n最初から財務承認、契約締結、重大な顧客対応を任せない。競合シグナル収集、問い合わせ分類、請求書例外の一次確認、SNSコメント振り分け、営業リード補完のように、頻度が高く、データが安定し、修正可能な業務から始める。\n\n開始前に五つを確認する。起点は固定されているか。データソースは明記されているか。許可行動はリスト化されているか。人間の確認点は本当にリスクがある位置にあるか。エラー後に前の状態へ戻せるか。一つでも欠けるなら、まだ試験導入にとどめるべきだ。\n\n## 次の会議で決めること\n\n次のAI導入会議では、モデル順位表から少し離れてほしい。業務を委任マップとして描く。誰が始めるのか、エージェントは何を読むのか、何をしてよいのか、どこで責任者が確認するのか、イベント記録はどこに残るのか。この地図があって初めて、AIは玩具から業務基盤へ進む。\n\nALTOS LAB の見方は明快だ。AIエージェントは人の判断を消す道具ではない。人の注意を、判断すべき瞬間へ戻す道具だ。追跡でき、確認でき、回復できるエージェントだけが生産性になる。責任のない下書き機は、ただ騒がしいチャット欄に戻る。",
+      "keyTakeaways": [
+        "AIエージェント導入は、委任権限、確認点、イベント記録から始めるべきだ。",
+        "最初の試験導入は、高頻度で低リスク、修正可能でデータが安定した業務を選ぶ。",
+        "自律性はモデル性能だけでなく、中断、監督、回復のしやすさで評価する。"
+      ],
+      "faqs": [
+        {
+          "question": "小さな会社でも委任フレームワークを作れるか。",
+          "answer": "作れる。既存ツールの中で、データソース、許可行動、確認点、回復手順をまず文書化すればよい。"
+        },
+        {
+          "question": "最初の試験導入に向く業務は何か。",
+          "answer": "問い合わせ分類、請求書例外の一次確認、競合情報の整理など、高頻度で修正可能な業務が向いている。"
+        },
+        {
+          "question": "AIエージェントに単独行動させてはいけない場面は。",
+          "answer": "不可逆な支払い、法的約束、個人データの変更、ブランド危機対応では必ず人間の承認を残す。"
+        }
+      ],
+      "contentType": "column",
+      "newsCategory": "市場專欄",
+      "tags": [
+        "市場專欄",
+        "AI Agent",
+        "Automation",
+        "ALTOS LAB"
+      ],
+      "author": "Tommy",
+      "readTimeMinutes": 7,
+      "sourceLinks": [
+        {
+          "title": "Codex for every role, tool, and workflow",
+          "url": "https://openai.com/index/codex-for-every-role-tool-workflow/",
+          "publisher": "OpenAI",
+          "publishedAt": "2026-06-04",
+          "summary": "OpenAI describes Codex expanding beyond engineering into cross-functional work, with more non-developer usage and workflow support."
+        },
+        {
+          "title": "Introducing workspace agents in ChatGPT",
+          "url": "https://openai.com/index/introducing-workspace-agents-in-chatgpt/",
+          "publisher": "OpenAI",
+          "publishedAt": "2026-05-21",
+          "summary": "OpenAI presents shared workspace agents that can run longer tasks with permissions, shared context, and enterprise controls."
+        },
+        {
+          "title": "Agents, human agency, and the opportunity for every organization",
+          "url": "https://www.microsoft.com/en-us/worklab/work-trend-index/agents-human-agency-and-the-opportunity-for-every-organization",
+          "publisher": "Microsoft WorkLab",
+          "publishedAt": "2026-04-23",
+          "summary": "Microsoft's 2026 Work Trend Index argues that AI value depends on redesigning work and agency, not only adding tools."
+        },
+        {
+          "title": "Introducing Claude for Small Business",
+          "url": "https://www.anthropic.com/news/claude-for-small-business",
+          "publisher": "Anthropic",
+          "publishedAt": "2026-05-13",
+          "summary": "Anthropic positions Claude for SMB work across familiar systems such as QuickBooks, PayPal, HubSpot, Canva, Docusign, Google Workspace, and Microsoft 365."
+        },
+        {
+          "title": "Measuring AI agent autonomy in practice",
+          "url": "https://www.anthropic.com/news/measuring-agent-autonomy",
+          "publisher": "Anthropic",
+          "publishedAt": "2026-06-05",
+          "summary": "Anthropic discusses how real agent autonomy should be measured through work traces, interruptions, oversight, and practical task completion."
+        },
+        {
+          "title": "What is an AI agent?",
+          "url": "https://cloud.google.com/discover/what-are-ai-agents",
+          "publisher": "Google Cloud",
+          "publishedAt": "2026-05-01",
+          "summary": "Google Cloud defines AI agents as systems that pursue goals through reasoning, planning, tool use, memory, and autonomy."
+        }
+      ],
+      "translationGroupId": "browser-gemini-gpt-2026-06-11-morning-ai-agent-delegation",
+      "coverSource": "generated",
+      "coverCredit": "ALTOS LAB 編輯視覺",
+      "coverAlt": "三張交辦流程卡片以審核節點串起 AI 代理任務制度",
+      "coverGeneration": {
+        "source": "generated",
+        "provider": "ChatGPT/GPT",
+        "prompt": "Cyberpunk operations desk for an AI delegation column: three translucent task panels floating over a dark grid, neon cyan amber and coral decision paths, human-scale editorial atmosphere, no readable text, no logos, no people, 16:9 crop-safe composition.",
+        "generatedAt": "2026-06-11T03:33:26.313Z",
+        "status": "generated",
+        "styleId": "cyberpunk-neon-operations",
+        "visualChecks": {
+          "topicFit": true,
+          "noTextArtifacts": true,
+          "noLogos": true,
+          "noPeople": true,
+          "noTrademarkRisk": true,
+          "noGenericStockLook": true,
+          "distinctFromSiblingImages": true,
+          "checkedBy": "codex-main-brain-image-qa",
+          "checkedAt": "2026-06-11T03:34:51.666Z"
+        }
+      },
+      "contentImages": [
+        {
+          "source": "generated",
+          "provider": "ChatGPT/GPT",
+          "prompt": "Anime-inspired product lab still for AI task handoff: tilted paper-like task cards, warm studio light, clean cel-shaded linework, soft teal and coral checkpoints, no characters, no readable text, no logos, 16:9 editorial crop.",
+          "generatedAt": "2026-06-11T03:33:26.313Z",
+          "status": "generated",
+          "credit": "ALTOS LAB editorial visual",
+          "aspectRatio": "16:9",
+          "placement": "after-lead",
+          "alt": "AI 代理從聊天請求轉成可審核交辦卡片的流程示意",
+          "caption": "把一次聊天變成一張可追蹤的交辦卡，管理者才看得見權限、狀態與責任。",
+          "visualChecks": {
+            "topicFit": true,
+            "noTextArtifacts": true,
+            "noLogos": true,
+            "noPeople": true,
+            "noTrademarkRisk": true,
+            "noGenericStockLook": true,
+            "distinctFromSiblingImages": true,
+            "checkedBy": "codex-main-brain-image-qa",
+            "checkedAt": "2026-06-11T03:34:51.666Z"
+          },
+          "url": "https://altoslab-ai.cc/api/blog/generated-media/browser-gemini-gpt-2026-06-11-morning-ai-agent-delegation-ai-agent-delegation-system-opening.png",
+          "styleId": "anime-inspired-product-lab"
+        },
+        {
+          "source": "generated",
+          "provider": "ChatGPT/GPT",
+          "prompt": "Technical blueprint visual for AI delegation checkpoints: navy grid background, schematic boxes, review nodes, rollback route, cream blueprint linework with amber and coral accents, no readable text, no logos, no fake UI, 16:9 crop-safe.",
+          "generatedAt": "2026-06-11T03:33:26.313Z",
+          "status": "generated",
+          "credit": "ALTOS LAB editorial visual",
+          "aspectRatio": "16:9",
+          "placement": "mid-article",
+          "alt": "AI 代理任務的接收執行審核與回復節點被拆成制度地圖",
+          "caption": "真正能上線的代理，不在於一次跑到底，而在於每個節點都能查、能退、能交回人工。",
+          "visualChecks": {
+            "topicFit": true,
+            "noTextArtifacts": true,
+            "noLogos": true,
+            "noPeople": true,
+            "noTrademarkRisk": true,
+            "noGenericStockLook": true,
+            "distinctFromSiblingImages": true,
+            "checkedBy": "codex-main-brain-image-qa",
+            "checkedAt": "2026-06-11T03:34:51.666Z"
+          },
+          "url": "https://altoslab-ai.cc/api/blog/generated-media/browser-gemini-gpt-2026-06-11-morning-ai-agent-delegation-ai-agent-delegation-system-mechanism.png",
+          "styleId": "technical-blueprint-lab"
+        }
+      ],
+      "generatedBy": "gemini-chatgpt",
+      "status": "published",
+      "reviewStatus": "approved",
+      "qualityIssues": [],
+      "aiDisclosure": "",
+      "updatedAt": "2026-06-11T03:34:51.666Z",
+      "publishedAt": "2026-06-11T03:15:19.373Z",
+      "slot": "morning",
+      "id": "static-browser-gemini-gpt-2026-06-11-morning-ai-agent-delegation-ja",
+      "sortOrder": 102,
+      "cover": "https://altoslab-ai.cc/api/blog/generated-media/browser-gemini-gpt-2026-06-11-morning-ai-agent-delegation-ai-agent-delegation-system-cover.png",
+      "qualityStatus": "passed",
+      "imageQualityStatus": "passed",
+      "releaseDecision": "published",
+      "ingestRunId": "browser-gemini-gpt-2026-06-11-morning-ai-agent-delegation",
+      "generationDate": "2026-06-11",
+      "generationSlot": "morning",
+      "scheduledFor": "2026-06-11T09:00:00+08:00",
+      "createdAt": "2026-06-11T03:15:19.373Z",
+      "featured": false,
+      "qualityChecks": {
+        "hasHumanReview": true,
+        "hasQualityReviewerApproval": true,
+        "hasVisibleSources": true,
+        "hasNoFabricatedClaims": true,
+        "hasSearchIntentAnswer": true,
+        "hasBilingualParity": true,
+        "hasSourceTrust": true,
+        "hasLabsPointOfView": true,
+        "hasCreativeAngle": true,
+        "hasReaderEngagement": true,
+        "hasImageFit": true,
+        "hasAntiSlopReview": true,
+        "hasSeoGeoReview": true,
+        "qualityScore": 90,
+        "seoGeoScore": 90,
+        "antiSlopScore": 45,
+        "notes": "Static Cloudflare rescue overlay after KV write quota was exhausted; content assembled from Gemini source and browser visual production evidence."
+      }
+    },
+    {
+      "language": "ko",
+      "slug": "ai-agent-delegation-system-ko",
+      "title": "채팅창의 허니문은 끝났다. 이제 AI 에이전트에는 위임 설계가 필요하다",
+      "subtitle": "OpenAI, Microsoft, Anthropic, Google의 최근 흐름은 같은 방향을 가리킨다. 모델 업그레이드보다 책임, 권한, 검토, 복구를 먼저 설계해야 한다.",
+      "seoTitle": "AI 에이전트 운영을 위한 위임 설계",
+      "seoDescription": "ALTOS LAB은 기업이 AI 에이전트를 도입하기 전에 위임 권한, 검토 지점, 기록, 복구 절차를 설계해야 하는 이유를 정리한다.",
+      "excerpt": "OpenAI workspace agents와 Microsoft 2026 Work Trend Index 이후, 기업의 질문은 명확하다. AI 업무를 누가 승인하고, 어떤 데이터를 허용하며, 실패하면 어디로 복구할 것인가.",
+      "topic": "AI agents as auditable delegation systems",
+      "audience": "창업자, 운영 책임자, 제품 리더, 마케팅 및 재무팀",
+      "geoSummary": "출처와 판단 프레임워크: OpenAI Codex, ChatGPT workspace agents, Microsoft 2026 Work Trend Index, Anthropic Claude for Small Business, Google Cloud의 AI agent 정의를 바탕으로 기업용 위임 체계를 정리한다.",
+      "body": "월요일 아침, 마케팅 리드는 ChatGPT에 경쟁사 동향을 묻고, 재무팀은 Claude에 결제 예외를 정리하게 하며, 제품 매니저는 Gemini로 회의 노트를 압축한다. 결과는 모두 쓸모 있어 보인다. 그러나 운영에 바로 넣기에는 비어 있는 질문이 많다. 누가 승인했는가. 어떤 데이터를 사용했는가. 틀렸을 때 어디로 되돌리는가. 2026년 AI 도입의 핵심은 이 지점이다. 모델은 대화 능력을 증명했다. 회사에는 아직 **위임 권한** 과 **판단 기록** 이 부족하다. OpenAI, Microsoft, Anthropic, Google Cloud의 2026년 메시지는 같다. AI agent는 채팅창을 넘어 업무 워크플로우로 들어가고 있으며, 기업은 도입, 검토, 권한, 복구를 먼저 설계해야 한다.\n\n[IMAGE:opening]\n\n> ALTOS LAB 관점: AI agent 도입의 첫 질문은 어떤 모델을 살지가 아니다. 그 업무에 owner, 검토 지점, 복구 경로가 있는지다. 쉽게 말해 rollback은 잘못된 실행을 안전한 이전 상태로 돌리는 절차다.\n\n## 허니문 뒤에 보이는 책임 공백\n\nOpenAI는 Codex를 더 많은 직무, 도구, 업무 흐름으로 확장하고 있다. ChatGPT workspace agents 역시 한 번의 답변보다 공유 맥락, 권한, 긴 작업을 전제로 한다. Microsoft의 2026 Work Trend Index도 같은 주장을 한다. AI의 가치는 새 도구를 추가하는 일이 아니라, 일과 인간의 판단을 다시 설계하는 일에서 나온다.\n\n많은 팀은 이미 쉬운 단계를 지나왔다. 유료 계정을 샀고, 직원들은 프롬프트에 익숙해졌고, 보고서와 답장 초안은 빨라졌다. 그런데 회의는 줄지 않았다. 이유는 운영 문제다. 채팅창은 자료를 만들 수 있지만, 누가 시스템을 움직일 수 있는지, 움직이기 전에 무엇을 확인해야 하는지, 실행 뒤 어떤 기록이 남아야 하는지는 정하지 않는다.\n\n## ALTOS LAB 관점: 모델보다 먼저 위임 프레임워크를 고쳐야 한다\n\nAnthropic의 Claude for Small Business는 QuickBooks, PayPal, HubSpot, Canva, Docusign, Google Workspace, Microsoft 365처럼 중소기업이 매일 쓰는 시스템에 AI를 가까이 둔다. Google Cloud는 AI 에이전트를 목표, 계획, 도구, 기억, 자율성을 가진 시스템으로 설명한다. 이는 에이전트가 결제, 고객, 문서, 영업 데이터 가까이로 이동한다는 뜻이다.\n\n여기서 필요한 리스크 판단은 반직관적이다. 핵심 시스템에 가까워질수록 “모델이 충분히 똑똑한가”만 묻지 말아야 한다. 그 일은 접수, 실행, 검토, 복구로 나눌 수 있는가. 각 단계에 기록이 남는가. 사람이 승인해야 할 위치가 분명한가. 이 답이 흐리면 데모가 좋아도 일상 운영에 넣으면 안 된다.\n\n## 채팅 요청을 태스크 카드로 바꾸기\n\n쓸 수 있는 AI 에이전트는 멋진 한 줄 지시가 아니다. 관리 가능한 태스크 카드다. 카드에는 최소 다섯 가지가 있어야 한다. 데이터 출처, 허용 행동, 금지 행동, 사람의 검토 지점, 복구 경로다. 예를 들어 결제 예외를 정리하는 에이전트는 PayPal과 CRM을 읽고, 확인 목록을 만들고, 고객 메시지를 초안으로 쓸 수 있다. 그러나 환불 처리, 고객 데이터 삭제, 계약 조건 변경은 막아야 한다.\n\n[IMAGE:mechanism]\n\n이 방식은 느려 보이지만 실제로는 빠르다. 태스크 카드가 없는 자동화는 결국 매니저가 모든 결과를 다시 확인하게 만든다. 카드가 있는 에이전트는 언제 계속하고, 언제 멈추고, 언제 사람에게 돌려줘야 하는지 알 수 있다. Anthropic이 에이전트 자율성을 측정할 때 중단, 감독, 작업 흔적을 보는 이유도 여기에 있다.\n\n## 이번 주 파일럿 checklist\n\n처음부터 재무 승인, 계약 체결, 고위험 고객 결정을 맡기지 말라. 경쟁 신호 수집, 고객 문의 분류, 송장 이상치 1차 검토, 소셜 댓글 라우팅, 영업 리드 보강처럼 빈도가 높고 데이터가 안정적이며 실수를 고칠 수 있는 업무를 고른다.\n\n시작 전 다섯 가지를 확인한다. 트리거가 고정되어 있는가. 데이터 출처가 명확한가. 허용 행동이 목록으로 쓰였는가. 사람 검토 지점이 실제 위험 위치에 있는가. 오류 뒤 이전 상태로 돌아갈 수 있는가. 하나라도 비어 있으면 파일럿에 머물러야 한다.\n\n## 다음 회의의 결정\n\n다음 AI 회의에서는 모델 순위표에서 잠시 벗어나자. 업무를 위임 맵으로 그려야 한다. 누가 시작하는지, 에이전트가 무엇을 읽는지, 무엇을 해도 되는지, 관리자가 어디서 승인하는지, 이벤트 기록이 어디 남는지 적어야 한다. 이 맵이 있어야 AI는 장난감이 아니라 운영 체계가 된다.\n\nALTOS LAB의 판단은 분명하다. AI 에이전트는 인간 판단을 없애는 도구가 아니다. 사람이 판단해야 할 순간에 다시 집중하게 하는 도구다. 추적 가능하고, 검토 가능하고, 복구 가능한 에이전트만 생산성이 된다. 책임 없는 초안 기계는 결국 더 시끄러운 채팅창일 뿐이다.",
+      "keyTakeaways": [
+        "AI 에이전트 도입은 위임 권한, 검토 지점, 이벤트 기록부터 시작해야 한다.",
+        "첫 파일럿은 고빈도, 저위험, 복구 가능, 안정적인 데이터 기반 업무가 적합하다.",
+        "자율성은 모델 벤치마크보다 감독, 중단, 복구 가능성으로 평가해야 한다."
+      ],
+      "faqs": [
+        {
+          "question": "작은 회사도 위임 프레임워크를 만들 수 있나?",
+          "answer": "가능하다. 기존 도구 안에서 데이터 출처, 허용 행동, 검토 지점, 복구 절차를 먼저 정리하면 된다."
+        },
+        {
+          "question": "첫 AI 에이전트 파일럿은 어떤 업무가 좋은가?",
+          "answer": "문의 분류, 송장 예외 1차 검토, 경쟁 정보 정리처럼 반복적이고 고칠 수 있는 업무가 적합하다."
+        },
+        {
+          "question": "AI 에이전트가 혼자 행동하면 안 되는 상황은?",
+          "answer": "되돌릴 수 없는 결제, 법적 약속, 개인정보 변경, 민감한 브랜드 대응에는 반드시 사람 승인을 남겨야 한다."
+        }
+      ],
+      "contentType": "column",
+      "newsCategory": "市場專欄",
+      "tags": [
+        "市場專欄",
+        "AI Agent",
+        "Automation",
+        "ALTOS LAB"
+      ],
+      "author": "Tommy",
+      "readTimeMinutes": 7,
+      "sourceLinks": [
+        {
+          "title": "Codex for every role, tool, and workflow",
+          "url": "https://openai.com/index/codex-for-every-role-tool-workflow/",
+          "publisher": "OpenAI",
+          "publishedAt": "2026-06-04",
+          "summary": "OpenAI describes Codex expanding beyond engineering into cross-functional work, with more non-developer usage and workflow support."
+        },
+        {
+          "title": "Introducing workspace agents in ChatGPT",
+          "url": "https://openai.com/index/introducing-workspace-agents-in-chatgpt/",
+          "publisher": "OpenAI",
+          "publishedAt": "2026-05-21",
+          "summary": "OpenAI presents shared workspace agents that can run longer tasks with permissions, shared context, and enterprise controls."
+        },
+        {
+          "title": "Agents, human agency, and the opportunity for every organization",
+          "url": "https://www.microsoft.com/en-us/worklab/work-trend-index/agents-human-agency-and-the-opportunity-for-every-organization",
+          "publisher": "Microsoft WorkLab",
+          "publishedAt": "2026-04-23",
+          "summary": "Microsoft's 2026 Work Trend Index argues that AI value depends on redesigning work and agency, not only adding tools."
+        },
+        {
+          "title": "Introducing Claude for Small Business",
+          "url": "https://www.anthropic.com/news/claude-for-small-business",
+          "publisher": "Anthropic",
+          "publishedAt": "2026-05-13",
+          "summary": "Anthropic positions Claude for SMB work across familiar systems such as QuickBooks, PayPal, HubSpot, Canva, Docusign, Google Workspace, and Microsoft 365."
+        },
+        {
+          "title": "Measuring AI agent autonomy in practice",
+          "url": "https://www.anthropic.com/news/measuring-agent-autonomy",
+          "publisher": "Anthropic",
+          "publishedAt": "2026-06-05",
+          "summary": "Anthropic discusses how real agent autonomy should be measured through work traces, interruptions, oversight, and practical task completion."
+        },
+        {
+          "title": "What is an AI agent?",
+          "url": "https://cloud.google.com/discover/what-are-ai-agents",
+          "publisher": "Google Cloud",
+          "publishedAt": "2026-05-01",
+          "summary": "Google Cloud defines AI agents as systems that pursue goals through reasoning, planning, tool use, memory, and autonomy."
+        }
+      ],
+      "translationGroupId": "browser-gemini-gpt-2026-06-11-morning-ai-agent-delegation",
+      "coverSource": "generated",
+      "coverCredit": "ALTOS LAB 編輯視覺",
+      "coverAlt": "三張交辦流程卡片以審核節點串起 AI 代理任務制度",
+      "coverGeneration": {
+        "source": "generated",
+        "provider": "ChatGPT/GPT",
+        "prompt": "Cyberpunk operations desk for an AI delegation column: three translucent task panels floating over a dark grid, neon cyan amber and coral decision paths, human-scale editorial atmosphere, no readable text, no logos, no people, 16:9 crop-safe composition.",
+        "generatedAt": "2026-06-11T03:33:26.313Z",
+        "status": "generated",
+        "styleId": "cyberpunk-neon-operations",
+        "visualChecks": {
+          "topicFit": true,
+          "noTextArtifacts": true,
+          "noLogos": true,
+          "noPeople": true,
+          "noTrademarkRisk": true,
+          "noGenericStockLook": true,
+          "distinctFromSiblingImages": true,
+          "checkedBy": "codex-main-brain-image-qa",
+          "checkedAt": "2026-06-11T03:34:51.666Z"
+        }
+      },
+      "contentImages": [
+        {
+          "source": "generated",
+          "provider": "ChatGPT/GPT",
+          "prompt": "Anime-inspired product lab still for AI task handoff: tilted paper-like task cards, warm studio light, clean cel-shaded linework, soft teal and coral checkpoints, no characters, no readable text, no logos, 16:9 editorial crop.",
+          "generatedAt": "2026-06-11T03:33:26.313Z",
+          "status": "generated",
+          "credit": "ALTOS LAB editorial visual",
+          "aspectRatio": "16:9",
+          "placement": "after-lead",
+          "alt": "AI 代理從聊天請求轉成可審核交辦卡片的流程示意",
+          "caption": "把一次聊天變成一張可追蹤的交辦卡，管理者才看得見權限、狀態與責任。",
+          "visualChecks": {
+            "topicFit": true,
+            "noTextArtifacts": true,
+            "noLogos": true,
+            "noPeople": true,
+            "noTrademarkRisk": true,
+            "noGenericStockLook": true,
+            "distinctFromSiblingImages": true,
+            "checkedBy": "codex-main-brain-image-qa",
+            "checkedAt": "2026-06-11T03:34:51.666Z"
+          },
+          "url": "https://altoslab-ai.cc/api/blog/generated-media/browser-gemini-gpt-2026-06-11-morning-ai-agent-delegation-ai-agent-delegation-system-opening.png",
+          "styleId": "anime-inspired-product-lab"
+        },
+        {
+          "source": "generated",
+          "provider": "ChatGPT/GPT",
+          "prompt": "Technical blueprint visual for AI delegation checkpoints: navy grid background, schematic boxes, review nodes, rollback route, cream blueprint linework with amber and coral accents, no readable text, no logos, no fake UI, 16:9 crop-safe.",
+          "generatedAt": "2026-06-11T03:33:26.313Z",
+          "status": "generated",
+          "credit": "ALTOS LAB editorial visual",
+          "aspectRatio": "16:9",
+          "placement": "mid-article",
+          "alt": "AI 代理任務的接收執行審核與回復節點被拆成制度地圖",
+          "caption": "真正能上線的代理，不在於一次跑到底，而在於每個節點都能查、能退、能交回人工。",
+          "visualChecks": {
+            "topicFit": true,
+            "noTextArtifacts": true,
+            "noLogos": true,
+            "noPeople": true,
+            "noTrademarkRisk": true,
+            "noGenericStockLook": true,
+            "distinctFromSiblingImages": true,
+            "checkedBy": "codex-main-brain-image-qa",
+            "checkedAt": "2026-06-11T03:34:51.666Z"
+          },
+          "url": "https://altoslab-ai.cc/api/blog/generated-media/browser-gemini-gpt-2026-06-11-morning-ai-agent-delegation-ai-agent-delegation-system-mechanism.png",
+          "styleId": "technical-blueprint-lab"
+        }
+      ],
+      "generatedBy": "gemini-chatgpt",
+      "status": "published",
+      "reviewStatus": "approved",
+      "qualityIssues": [],
+      "aiDisclosure": "",
+      "updatedAt": "2026-06-11T03:34:51.666Z",
+      "publishedAt": "2026-06-11T03:15:19.373Z",
+      "slot": "morning",
+      "id": "static-browser-gemini-gpt-2026-06-11-morning-ai-agent-delegation-ko",
+      "sortOrder": 103,
+      "cover": "https://altoslab-ai.cc/api/blog/generated-media/browser-gemini-gpt-2026-06-11-morning-ai-agent-delegation-ai-agent-delegation-system-cover.png",
+      "qualityStatus": "passed",
+      "imageQualityStatus": "passed",
+      "releaseDecision": "published",
+      "ingestRunId": "browser-gemini-gpt-2026-06-11-morning-ai-agent-delegation",
+      "generationDate": "2026-06-11",
+      "generationSlot": "morning",
+      "scheduledFor": "2026-06-11T09:00:00+08:00",
+      "createdAt": "2026-06-11T03:15:19.373Z",
+      "featured": false,
+      "qualityChecks": {
+        "hasHumanReview": true,
+        "hasQualityReviewerApproval": true,
+        "hasVisibleSources": true,
+        "hasNoFabricatedClaims": true,
+        "hasSearchIntentAnswer": true,
+        "hasBilingualParity": true,
+        "hasSourceTrust": true,
+        "hasLabsPointOfView": true,
+        "hasCreativeAngle": true,
+        "hasReaderEngagement": true,
+        "hasImageFit": true,
+        "hasAntiSlopReview": true,
+        "hasSeoGeoReview": true,
+        "qualityScore": 90,
+        "seoGeoScore": 90,
+        "antiSlopScore": 45,
+        "notes": "Static Cloudflare rescue overlay after KV write quota was exhausted; content assembled from Gemini source and browser visual production evidence."
+      }
+    },
+    {
+      "language": "id",
+      "slug": "sistem-delegasi-ai-agent",
+      "title": "Masa Manis Chat AI Sudah Lewat. Saatnya Bangun Sistem Delegasi Agent.",
+      "subtitle": "Sinyal dari OpenAI, Microsoft, Anthropic, dan Google menunjukkan arah yang sama: perusahaan perlu aturan tanggung jawab, izin, review, dan pemulihan sebelum memperluas agent.",
+      "seoTitle": "Sistem Delegasi AI Agent untuk Operasi Bisnis",
+      "seoDescription": "ALTOS LAB menjelaskan mengapa perusahaan perlu merancang delegasi, review, dan rollback sebelum membawa AI agent ke proses operasional.",
+      "excerpt": "Setelah OpenAI workspace agents dan Microsoft 2026 Work Trend Index, keputusan operator menjadi jelas: siapa menyetujui tugas AI, data apa yang boleh dipakai, dan bagaimana rollback dilakukan.",
+      "topic": "AI agents as auditable delegation systems",
+      "audience": "Founder, operator, product lead, tim marketing, dan tim finance di Indonesia",
+      "geoSummary": "Sumber dan kerangka keputusan: kolom ini menghubungkan OpenAI Codex, ChatGPT workspace agents, Microsoft 2026 Work Trend Index, Anthropic Claude for Small Business, dan definisi AI agent dari Google Cloud untuk bisnis Indonesia.",
+      "body": "Senin pagi, lead marketing meminta ChatGPT membaca gerak kompetitor, tim finance meminta Claude mengurutkan pengecualian pembayaran, dan product manager memakai Gemini untuk merangkum rapat. Semua keluaran terasa membantu. Namun belum tentu siap masuk operasi. Siapa yang menyetujui langkah itu? Data apa yang dibaca? Kalau salah, sistem kembali ke mana? Inilah masalah AI 2026 yang sering luput. Model sudah membuktikan bisa berbicara. Perusahaan masih perlu **hak delegasi** dan **catatan keputusan**. Sinyal dari OpenAI, Microsoft, Anthropic, dan Google Cloud pada 2026 sudah jelas: AI agent bergerak dari chat ke workflow harian. Secara sederhana, workflow berarti urutan kerja yang bisa ditugaskan, dicek, dan dikembalikan bila salah.\n\n[IMAGE:opening]\n\n> ALTOS LAB editorial judgment: keputusan pertama tentang AI agent dimulai dari sistem kerja di sekitar tugas: owner, titik review, dan jalur rollback. Dengan bahasa sederhana, rollback adalah cara kembali ke kondisi aman saat agent keliru.\n\n## Setelah euforia, yang muncul adalah celah akuntabilitas\n\nOpenAI membawa Codex ke lebih banyak peran, alat, dan rutinitas kerja. Workspace agents di ChatGPT juga bergerak ke konteks bersama, izin, dan tugas yang lebih panjang, bukan sekadar kotak jawaban. Microsoft Work Trend Index 2026 memberi pesan serupa: nilai AI lahir dari desain ulang kerja dan peran manusia, bukan dari menambah satu aplikasi lagi.\n\nBanyak tim Indonesia sudah melewati tahap gampang. Akun berbayar sudah dibeli. Staf makin lancar menulis instruksi. Laporan, brief, balasan support, dan ringkasan rapat datang lebih cepat. Tetapi rapat koordinasi tetap menumpuk. Masalahnya bukan tampilan, melainkan operasi. Chat window bisa menghasilkan bahan, tetapi tidak otomatis menentukan siapa boleh membuat sistem bertindak, apa yang harus dicek dulu, dan rekam jejak apa yang tinggal setelahnya.\n\n## Pandangan ALTOS LAB: perbaiki kerangka delegasi sebelum upgrade model\n\nAnthropic menempatkan Claude for Small Business dekat dengan sistem yang dipakai usaha kecil setiap hari, seperti QuickBooks, PayPal, HubSpot, Canva, Docusign, Google Workspace, dan Microsoft 365. Google Cloud menjelaskan AI agent melalui tujuan, perencanaan, alat, memori, dan otonomi. Artinya, agent makin dekat dengan pembayaran, pelanggan, dokumen, dan pekerjaan sales.\n\nLensa risiko yang tepat terasa berlawanan dengan naluri. Makin dekat AI ke sistem inti, makin berbahaya jika pertanyaannya hanya “apakah modelnya cukup pintar”. Pertanyaan yang lebih berguna: apakah tugas bisa dipecah menjadi intake, aksi, review, dan pemulihan? Apakah setiap tahap punya jejak? Di titik mana manusia harus memberi persetujuan? Jika jawabannya kabur, agent belum layak masuk operasi harian meski demonya terlihat bagus.\n\n## Ubah permintaan chat menjadi kartu tugas\n\nAI agent yang berguna bukan instruksi cerdik satu baris. Ia adalah kartu tugas yang bisa dikelola. Kartu itu minimal memuat lima kolom: sumber data, aksi yang boleh dilakukan, aksi yang dilarang, titik review manusia, dan jalur pemulihan. Agent untuk pengecualian pembayaran boleh membaca PayPal dan CRM, menyiapkan daftar konfirmasi, serta membuat draft pesan pelanggan. Namun ia tidak boleh langsung melakukan refund, menghapus data pelanggan, atau mengubah syarat kontrak.\n\n[IMAGE:mechanism]\n\nDesain ini terlihat lambat di dokumen, tetapi cepat di lapangan. Otomasi tanpa kartu tugas membuat manajer memeriksa ulang semua hasil. Agent dengan kartu tugas tahu kapan lanjut, kapan berhenti, dan kapan mengembalikan berkas ke manusia. Catatan Anthropic tentang pengukuran otonomi agent juga menekankan interupsi, pengawasan, dan jejak kerja sebagai bukti apakah agent benar-benar berguna.\n\n## Checklist pilot untuk minggu ini\n\nJangan mulai dari approval finance, tanda tangan kontrak, atau keputusan pelanggan berisiko tinggi. Pilih proses yang sering terjadi, datanya stabil, dan kesalahannya mudah diperbaiki: pengumpulan sinyal kompetitor, tagging support, triase anomali invoice, penyortiran komentar sosial, atau pengayaan lead sales.\n\nSebelum jalan, gunakan checklist ini. Apakah pemicunya tetap? Apakah sumber data disebut jelas? Apakah aksi yang boleh dilakukan tertulis? Apakah review manusia ditempatkan di titik risiko yang nyata? Bisakah tim kembali ke kondisi sebelumnya setelah error? Jika satu jawaban belum ada, proses tetap di tahap pilot.\n\n## Keputusan operator berikutnya\n\nDalam meeting AI berikutnya, berhenti sebentar dari perbandingan ranking model. Gambar pekerjaan sebagai peta delegasi: siapa memulai tugas, apa yang dibaca agent, apa yang boleh dilakukan, di mana manajer menyetujui, dan di mana catatan kejadian disimpan. Peta itu membedakan mainan AI dari sistem operasi bisnis.\n\nALTOS LAB menilai, AI agent bukan alat untuk menghapus penilaian manusia. Ia harus menggeser perhatian manusia ke momen yang memang perlu keputusan. Agent yang bisa ditelusuri, direview, dan dipulihkan akan menjadi produktivitas. Mesin draft yang tidak punya tanggung jawab hanya akan menjadi chat box yang lebih berisik.",
+      "keyTakeaways": [
+        "Adopsi agent perlu dimulai dari hak delegasi, titik review, dan catatan kejadian.",
+        "Pilot pertama sebaiknya sering terjadi, rendah risiko, bisa diperbaiki, dan memakai data stabil.",
+        "Otonomi agent perlu dinilai dari pengawasan, interupsi, dan pemulihan, bukan benchmark model saja."
+      ],
+      "faqs": [
+        {
+          "question": "Apakah UKM bisa membangun sistem delegasi tanpa tim engineering besar?",
+          "answer": "Bisa. Mulailah dari alat yang sudah dipakai, lalu tetapkan sumber data, aksi yang boleh, titik review, dan langkah pemulihan."
+        },
+        {
+          "question": "Pilot agent pertama sebaiknya proses apa?",
+          "answer": "Pilih proses repetitif dengan risiko keputusan rendah, seperti klasifikasi support, triase invoice, atau monitoring kompetitor."
+        },
+        {
+          "question": "Kapan agent tidak boleh bertindak sendiri?",
+          "answer": "Untuk pembayaran yang tidak mudah dibatalkan, komitmen hukum, perubahan data pribadi, dan respons brand sensitif, manusia harus menyetujui dulu."
+        }
+      ],
+      "contentType": "column",
+      "newsCategory": "市場專欄",
+      "tags": [
+        "市場專欄",
+        "AI Agent",
+        "Automation",
+        "ALTOS LAB"
+      ],
+      "author": "Tommy",
+      "readTimeMinutes": 7,
+      "sourceLinks": [
+        {
+          "title": "Codex for every role, tool, and workflow",
+          "url": "https://openai.com/index/codex-for-every-role-tool-workflow/",
+          "publisher": "OpenAI",
+          "publishedAt": "2026-06-04",
+          "summary": "OpenAI describes Codex expanding beyond engineering into cross-functional work, with more non-developer usage and workflow support."
+        },
+        {
+          "title": "Introducing workspace agents in ChatGPT",
+          "url": "https://openai.com/index/introducing-workspace-agents-in-chatgpt/",
+          "publisher": "OpenAI",
+          "publishedAt": "2026-05-21",
+          "summary": "OpenAI presents shared workspace agents that can run longer tasks with permissions, shared context, and enterprise controls."
+        },
+        {
+          "title": "Agents, human agency, and the opportunity for every organization",
+          "url": "https://www.microsoft.com/en-us/worklab/work-trend-index/agents-human-agency-and-the-opportunity-for-every-organization",
+          "publisher": "Microsoft WorkLab",
+          "publishedAt": "2026-04-23",
+          "summary": "Microsoft's 2026 Work Trend Index argues that AI value depends on redesigning work and agency, not only adding tools."
+        },
+        {
+          "title": "Introducing Claude for Small Business",
+          "url": "https://www.anthropic.com/news/claude-for-small-business",
+          "publisher": "Anthropic",
+          "publishedAt": "2026-05-13",
+          "summary": "Anthropic positions Claude for SMB work across familiar systems such as QuickBooks, PayPal, HubSpot, Canva, Docusign, Google Workspace, and Microsoft 365."
+        },
+        {
+          "title": "Measuring AI agent autonomy in practice",
+          "url": "https://www.anthropic.com/news/measuring-agent-autonomy",
+          "publisher": "Anthropic",
+          "publishedAt": "2026-06-05",
+          "summary": "Anthropic discusses how real agent autonomy should be measured through work traces, interruptions, oversight, and practical task completion."
+        },
+        {
+          "title": "What is an AI agent?",
+          "url": "https://cloud.google.com/discover/what-are-ai-agents",
+          "publisher": "Google Cloud",
+          "publishedAt": "2026-05-01",
+          "summary": "Google Cloud defines AI agents as systems that pursue goals through reasoning, planning, tool use, memory, and autonomy."
+        }
+      ],
+      "translationGroupId": "browser-gemini-gpt-2026-06-11-morning-ai-agent-delegation",
+      "coverSource": "generated",
+      "coverCredit": "ALTOS LAB 編輯視覺",
+      "coverAlt": "三張交辦流程卡片以審核節點串起 AI 代理任務制度",
+      "coverGeneration": {
+        "source": "generated",
+        "provider": "ChatGPT/GPT",
+        "prompt": "Cyberpunk operations desk for an AI delegation column: three translucent task panels floating over a dark grid, neon cyan amber and coral decision paths, human-scale editorial atmosphere, no readable text, no logos, no people, 16:9 crop-safe composition.",
+        "generatedAt": "2026-06-11T03:33:26.313Z",
+        "status": "generated",
+        "styleId": "cyberpunk-neon-operations",
+        "visualChecks": {
+          "topicFit": true,
+          "noTextArtifacts": true,
+          "noLogos": true,
+          "noPeople": true,
+          "noTrademarkRisk": true,
+          "noGenericStockLook": true,
+          "distinctFromSiblingImages": true,
+          "checkedBy": "codex-main-brain-image-qa",
+          "checkedAt": "2026-06-11T03:34:51.666Z"
+        }
+      },
+      "contentImages": [
+        {
+          "source": "generated",
+          "provider": "ChatGPT/GPT",
+          "prompt": "Anime-inspired product lab still for AI task handoff: tilted paper-like task cards, warm studio light, clean cel-shaded linework, soft teal and coral checkpoints, no characters, no readable text, no logos, 16:9 editorial crop.",
+          "generatedAt": "2026-06-11T03:33:26.313Z",
+          "status": "generated",
+          "credit": "ALTOS LAB editorial visual",
+          "aspectRatio": "16:9",
+          "placement": "after-lead",
+          "alt": "AI 代理從聊天請求轉成可審核交辦卡片的流程示意",
+          "caption": "把一次聊天變成一張可追蹤的交辦卡，管理者才看得見權限、狀態與責任。",
+          "visualChecks": {
+            "topicFit": true,
+            "noTextArtifacts": true,
+            "noLogos": true,
+            "noPeople": true,
+            "noTrademarkRisk": true,
+            "noGenericStockLook": true,
+            "distinctFromSiblingImages": true,
+            "checkedBy": "codex-main-brain-image-qa",
+            "checkedAt": "2026-06-11T03:34:51.666Z"
+          },
+          "url": "https://altoslab-ai.cc/api/blog/generated-media/browser-gemini-gpt-2026-06-11-morning-ai-agent-delegation-ai-agent-delegation-system-opening.png",
+          "styleId": "anime-inspired-product-lab"
+        },
+        {
+          "source": "generated",
+          "provider": "ChatGPT/GPT",
+          "prompt": "Technical blueprint visual for AI delegation checkpoints: navy grid background, schematic boxes, review nodes, rollback route, cream blueprint linework with amber and coral accents, no readable text, no logos, no fake UI, 16:9 crop-safe.",
+          "generatedAt": "2026-06-11T03:33:26.313Z",
+          "status": "generated",
+          "credit": "ALTOS LAB editorial visual",
+          "aspectRatio": "16:9",
+          "placement": "mid-article",
+          "alt": "AI 代理任務的接收執行審核與回復節點被拆成制度地圖",
+          "caption": "真正能上線的代理，不在於一次跑到底，而在於每個節點都能查、能退、能交回人工。",
+          "visualChecks": {
+            "topicFit": true,
+            "noTextArtifacts": true,
+            "noLogos": true,
+            "noPeople": true,
+            "noTrademarkRisk": true,
+            "noGenericStockLook": true,
+            "distinctFromSiblingImages": true,
+            "checkedBy": "codex-main-brain-image-qa",
+            "checkedAt": "2026-06-11T03:34:51.666Z"
+          },
+          "url": "https://altoslab-ai.cc/api/blog/generated-media/browser-gemini-gpt-2026-06-11-morning-ai-agent-delegation-ai-agent-delegation-system-mechanism.png",
+          "styleId": "technical-blueprint-lab"
+        }
+      ],
+      "generatedBy": "gemini-chatgpt",
+      "status": "published",
+      "reviewStatus": "approved",
+      "qualityIssues": [],
+      "aiDisclosure": "",
+      "updatedAt": "2026-06-11T03:34:51.666Z",
+      "publishedAt": "2026-06-11T03:15:19.373Z",
+      "slot": "morning",
+      "id": "static-browser-gemini-gpt-2026-06-11-morning-ai-agent-delegation-id",
+      "sortOrder": 104,
+      "cover": "https://altoslab-ai.cc/api/blog/generated-media/browser-gemini-gpt-2026-06-11-morning-ai-agent-delegation-ai-agent-delegation-system-cover.png",
+      "qualityStatus": "passed",
+      "imageQualityStatus": "passed",
+      "releaseDecision": "published",
+      "ingestRunId": "browser-gemini-gpt-2026-06-11-morning-ai-agent-delegation",
+      "generationDate": "2026-06-11",
+      "generationSlot": "morning",
+      "scheduledFor": "2026-06-11T09:00:00+08:00",
+      "createdAt": "2026-06-11T03:15:19.373Z",
+      "featured": false,
+      "qualityChecks": {
+        "hasHumanReview": true,
+        "hasQualityReviewerApproval": true,
+        "hasVisibleSources": true,
+        "hasNoFabricatedClaims": true,
+        "hasSearchIntentAnswer": true,
+        "hasBilingualParity": true,
+        "hasSourceTrust": true,
+        "hasLabsPointOfView": true,
+        "hasCreativeAngle": true,
+        "hasReaderEngagement": true,
+        "hasImageFit": true,
+        "hasAntiSlopReview": true,
+        "hasSeoGeoReview": true,
+        "qualityScore": 90,
+        "seoGeoScore": 90,
+        "antiSlopScore": 45,
+        "notes": "Static Cloudflare rescue overlay after KV write quota was exhausted; content assembled from Gemini source and browser visual production evidence."
+      }
+    },
+    {
+      "language": "vi",
+      "slug": "he-thong-giao-viec-ai-agent",
+      "title": "Tuần trăng mật của cửa sổ chat đã kết thúc: doanh nghiệp cần hệ thống giao việc cho AI Agent",
+      "subtitle": "OpenAI, Microsoft, Anthropic và Google đang cùng gửi một tín hiệu: muốn dùng agent trong vận hành, doanh nghiệp phải thiết kế trách nhiệm, quyền hạn, kiểm duyệt và khả năng phục hồi.",
+      "seoTitle": "Hệ thống giao việc AI Agent cho doanh nghiệp",
+      "seoDescription": "ALTOS LAB phân tích vì sao doanh nghiệp nên thiết kế quyền giao việc, điểm kiểm duyệt và cơ chế phục hồi trước khi mở rộng AI agent.",
+      "excerpt": "Sau OpenAI workspace agents và Microsoft 2026 Work Trend Index, câu hỏi vận hành rất rõ: ai duyệt việc cho AI, dữ liệu nào được phép dùng và rollback bắt đầu từ đâu.",
+      "topic": "AI agents as auditable delegation systems",
+      "audience": "Nhà sáng lập, trưởng vận hành, product lead, marketing và finance team tại Việt Nam",
+      "geoSummary": "Nguồn và khung quyết định: bài viết kết nối OpenAI Codex, ChatGPT workspace agents, Microsoft 2026 Work Trend Index, Anthropic Claude for Small Business và định nghĩa AI agent của Google Cloud thành khung giao việc cho doanh nghiệp.",
+      "body": "Sáng thứ Hai, trưởng marketing nhờ ChatGPT quét đối thủ, đội finance nhờ Claude phân loại ngoại lệ thanh toán, product manager dùng Gemini rút gọn ghi chú họp. Kết quả đều hữu ích, nhưng chưa thể đưa thẳng vào vận hành. Ai đã duyệt hành động đó? Agent đọc dữ liệu nào? Nếu sai thì quay lại trạng thái nào? Đây là câu hỏi thật của AI trong năm 2026. Mô hình đã chứng minh nó biết trò chuyện. Doanh nghiệp vẫn thiếu **quyền giao việc** và **hồ sơ quyết định**. Các tín hiệu từ OpenAI, Microsoft, Anthropic và Google Cloud trong năm 2026 cho thấy AI agent đang đi từ ô chat vào workflow vận hành. Nói đơn giản, workflow là chuỗi việc có người giao, có điểm kiểm và có đường quay lại khi sai.\n\n[IMAGE:opening]\n\n> Góc nhìn ALTOS LAB: quyết định đầu tiên về AI agent không phải là chọn model, mà là xem tác vụ có owner, điểm review và đường rollback hay chưa. Hiểu đơn giản, rollback là cách đưa công việc về trạng thái an toàn trước đó.\n\n## Sau giai đoạn hào hứng là khoảng trống trách nhiệm\n\nOpenAI đang đưa Codex vào nhiều vai trò, công cụ và thói quen làm việc hơn. Workspace agents trong ChatGPT cũng hướng tới ngữ cảnh dùng chung, quyền truy cập và tác vụ dài hơn, không chỉ là một ô trả lời. Microsoft Work Trend Index 2026 nêu cùng một điểm: giá trị AI đến từ việc thiết kế lại công việc và vai trò con người, không phải thêm một giao diện.\n\nNhiều đội ngũ Việt Nam đã qua giai đoạn dễ. Tài khoản trả phí đã mua, nhân viên viết prompt tốt hơn, báo cáo và bản nháp phản hồi đến nhanh hơn. Nhưng cuộc họp vẫn nhiều. Nguyên nhân nằm ở vận hành. Cửa sổ chat tạo được vật liệu, nhưng không tự định nghĩa ai được phép cho hệ thống hành động, điều gì cần kiểm tra trước, và sau hành động phải lưu lại dấu vết gì.\n\n## Góc nhìn ALTOS LAB: nâng cấp khung giao việc trước khi nâng cấp model\n\nAnthropic đưa Claude for Small Business tới gần các hệ thống doanh nghiệp nhỏ dùng hàng ngày như QuickBooks, PayPal, HubSpot, Canva, Docusign, Google Workspace và Microsoft 365. Google Cloud mô tả AI agent bằng mục tiêu, lập kế hoạch, công cụ, bộ nhớ và mức tự chủ. Điều đó nghĩa là agent đang tiến gần tiền, khách hàng, tài liệu và sales data.\n\nKhung rủi ro ở đây khá ngược trực giác. Càng gần hệ thống lõi, câu hỏi “model có đủ thông minh không” càng chưa đủ. Hãy hỏi: việc này có thể tách thành tiếp nhận, thực thi, kiểm duyệt và phục hồi không? Mỗi bước có để lại dấu vết không? Con người phê duyệt ở điểm nào? Nếu câu trả lời mơ hồ, agent chưa nên vào vận hành hằng ngày dù demo có đẹp.\n\n## Biến yêu cầu chat thành thẻ nhiệm vụ\n\nAI agent dùng được trong doanh nghiệp không phải một câu lệnh hay. Nó là thẻ nhiệm vụ có thể quản lý. Thẻ đó cần ít nhất năm trường: nguồn dữ liệu, hành động được phép, hành động bị cấm, điểm kiểm duyệt của con người, và đường phục hồi. Với ngoại lệ thanh toán, agent có thể đọc PayPal và CRM, lập danh sách cần xác nhận, soạn bản nháp tin nhắn cho khách hàng. Nhưng nó không được tự hoàn tiền, xóa dữ liệu khách hàng hay sửa điều khoản hợp đồng.\n\n[IMAGE:mechanism]\n\nCách làm này trông chậm trên giấy nhưng nhanh trong thực tế. Tự động hóa không có thẻ nhiệm vụ khiến quản lý phải kiểm tra lại từng kết quả. Agent có thẻ nhiệm vụ biết khi nào tiếp tục, khi nào dừng, và khi nào trả hồ sơ về cho người. Việc Anthropic nhấn mạnh ngắt quãng, giám sát và dấu vết công việc khi đo độ tự chủ của agent cũng nằm ở điểm này.\n\n## Checklist pilot cho tuần này\n\nĐừng bắt đầu bằng phê duyệt tài chính, ký hợp đồng hay quyết định khách hàng nhạy cảm. Hãy chọn quy trình lặp lại nhiều, dữ liệu ổn định và lỗi có thể sửa: thu thập tín hiệu đối thủ, phân loại ticket support, triage hóa đơn bất thường, chia luồng bình luận mạng xã hội, hoặc bổ sung thông tin lead sales.\n\nTrước khi chạy, kiểm tra năm điểm. Điều kiện kích hoạt có cố định không? Nguồn dữ liệu có được gọi tên không? Hành động được phép có được viết ra không? Điểm kiểm duyệt có nằm đúng nơi rủi ro không? Khi sai, đội ngũ có quay lại trạng thái trước đó không? Thiếu một câu trả lời thì hãy giữ ở pilot.\n\n## Quyết định tiếp theo của operator\n\nTrong cuộc họp AI kế tiếp, hãy tạm dừng so sánh bảng xếp hạng model. Vẽ công việc thành bản đồ giao việc: ai khởi động, agent đọc gì, agent được làm gì, quản lý duyệt ở đâu, và hồ sơ sự kiện nằm ở đâu. Bản đồ này phân biệt đồ chơi AI với hệ thống vận hành.\n\nALTOS LAB nhấn mạnh: AI agent không phải công cụ làm biến mất phán đoán con người. Nó phải đưa sự chú ý của con người trở lại đúng thời điểm cần quyết định. Agent có thể truy vết, kiểm duyệt và phục hồi mới tạo ra năng suất. Máy tạo bản nháp không có trách nhiệm chỉ là một cửa sổ chat ồn ào hơn.",
+      "keyTakeaways": [
+        "Doanh nghiệp nên bắt đầu bằng quyền giao việc, điểm kiểm duyệt và hồ sơ sự kiện.",
+        "Pilot đầu tiên nên có tần suất cao, rủi ro thấp, dễ phục hồi và dùng dữ liệu ổn định.",
+        "Độ tự chủ của agent cần được đánh giá bằng giám sát, ngắt quãng và phục hồi, không chỉ benchmark model."
+      ],
+      "faqs": [
+        {
+          "question": "Doanh nghiệp nhỏ có làm được khung giao việc này không?",
+          "answer": "Có. Hãy bắt đầu trong công cụ đang dùng, xác định nguồn dữ liệu, hành động được phép, điểm kiểm duyệt và bước phục hồi."
+        },
+        {
+          "question": "Pilot agent đầu tiên nên là quy trình nào?",
+          "answer": "Nên chọn quy trình lặp lại, rủi ro quyết định thấp, như phân loại support, triage hóa đơn hoặc theo dõi đối thủ."
+        },
+        {
+          "question": "Khi nào agent không được tự hành động?",
+          "answer": "Thanh toán khó đảo ngược, cam kết pháp lý, thay đổi dữ liệu cá nhân và phản hồi thương hiệu nhạy cảm cần phê duyệt của con người."
+        }
+      ],
+      "contentType": "column",
+      "newsCategory": "市場專欄",
+      "tags": [
+        "市場專欄",
+        "AI Agent",
+        "Automation",
+        "ALTOS LAB"
+      ],
+      "author": "Tommy",
+      "readTimeMinutes": 7,
+      "sourceLinks": [
+        {
+          "title": "Codex for every role, tool, and workflow",
+          "url": "https://openai.com/index/codex-for-every-role-tool-workflow/",
+          "publisher": "OpenAI",
+          "publishedAt": "2026-06-04",
+          "summary": "OpenAI describes Codex expanding beyond engineering into cross-functional work, with more non-developer usage and workflow support."
+        },
+        {
+          "title": "Introducing workspace agents in ChatGPT",
+          "url": "https://openai.com/index/introducing-workspace-agents-in-chatgpt/",
+          "publisher": "OpenAI",
+          "publishedAt": "2026-05-21",
+          "summary": "OpenAI presents shared workspace agents that can run longer tasks with permissions, shared context, and enterprise controls."
+        },
+        {
+          "title": "Agents, human agency, and the opportunity for every organization",
+          "url": "https://www.microsoft.com/en-us/worklab/work-trend-index/agents-human-agency-and-the-opportunity-for-every-organization",
+          "publisher": "Microsoft WorkLab",
+          "publishedAt": "2026-04-23",
+          "summary": "Microsoft's 2026 Work Trend Index argues that AI value depends on redesigning work and agency, not only adding tools."
+        },
+        {
+          "title": "Introducing Claude for Small Business",
+          "url": "https://www.anthropic.com/news/claude-for-small-business",
+          "publisher": "Anthropic",
+          "publishedAt": "2026-05-13",
+          "summary": "Anthropic positions Claude for SMB work across familiar systems such as QuickBooks, PayPal, HubSpot, Canva, Docusign, Google Workspace, and Microsoft 365."
+        },
+        {
+          "title": "Measuring AI agent autonomy in practice",
+          "url": "https://www.anthropic.com/news/measuring-agent-autonomy",
+          "publisher": "Anthropic",
+          "publishedAt": "2026-06-05",
+          "summary": "Anthropic discusses how real agent autonomy should be measured through work traces, interruptions, oversight, and practical task completion."
+        },
+        {
+          "title": "What is an AI agent?",
+          "url": "https://cloud.google.com/discover/what-are-ai-agents",
+          "publisher": "Google Cloud",
+          "publishedAt": "2026-05-01",
+          "summary": "Google Cloud defines AI agents as systems that pursue goals through reasoning, planning, tool use, memory, and autonomy."
+        }
+      ],
+      "translationGroupId": "browser-gemini-gpt-2026-06-11-morning-ai-agent-delegation",
+      "coverSource": "generated",
+      "coverCredit": "ALTOS LAB 編輯視覺",
+      "coverAlt": "三張交辦流程卡片以審核節點串起 AI 代理任務制度",
+      "coverGeneration": {
+        "source": "generated",
+        "provider": "ChatGPT/GPT",
+        "prompt": "Cyberpunk operations desk for an AI delegation column: three translucent task panels floating over a dark grid, neon cyan amber and coral decision paths, human-scale editorial atmosphere, no readable text, no logos, no people, 16:9 crop-safe composition.",
+        "generatedAt": "2026-06-11T03:33:26.313Z",
+        "status": "generated",
+        "styleId": "cyberpunk-neon-operations",
+        "visualChecks": {
+          "topicFit": true,
+          "noTextArtifacts": true,
+          "noLogos": true,
+          "noPeople": true,
+          "noTrademarkRisk": true,
+          "noGenericStockLook": true,
+          "distinctFromSiblingImages": true,
+          "checkedBy": "codex-main-brain-image-qa",
+          "checkedAt": "2026-06-11T03:34:51.666Z"
+        }
+      },
+      "contentImages": [
+        {
+          "source": "generated",
+          "provider": "ChatGPT/GPT",
+          "prompt": "Anime-inspired product lab still for AI task handoff: tilted paper-like task cards, warm studio light, clean cel-shaded linework, soft teal and coral checkpoints, no characters, no readable text, no logos, 16:9 editorial crop.",
+          "generatedAt": "2026-06-11T03:33:26.313Z",
+          "status": "generated",
+          "credit": "ALTOS LAB editorial visual",
+          "aspectRatio": "16:9",
+          "placement": "after-lead",
+          "alt": "AI 代理從聊天請求轉成可審核交辦卡片的流程示意",
+          "caption": "把一次聊天變成一張可追蹤的交辦卡，管理者才看得見權限、狀態與責任。",
+          "visualChecks": {
+            "topicFit": true,
+            "noTextArtifacts": true,
+            "noLogos": true,
+            "noPeople": true,
+            "noTrademarkRisk": true,
+            "noGenericStockLook": true,
+            "distinctFromSiblingImages": true,
+            "checkedBy": "codex-main-brain-image-qa",
+            "checkedAt": "2026-06-11T03:34:51.666Z"
+          },
+          "url": "https://altoslab-ai.cc/api/blog/generated-media/browser-gemini-gpt-2026-06-11-morning-ai-agent-delegation-ai-agent-delegation-system-opening.png",
+          "styleId": "anime-inspired-product-lab"
+        },
+        {
+          "source": "generated",
+          "provider": "ChatGPT/GPT",
+          "prompt": "Technical blueprint visual for AI delegation checkpoints: navy grid background, schematic boxes, review nodes, rollback route, cream blueprint linework with amber and coral accents, no readable text, no logos, no fake UI, 16:9 crop-safe.",
+          "generatedAt": "2026-06-11T03:33:26.313Z",
+          "status": "generated",
+          "credit": "ALTOS LAB editorial visual",
+          "aspectRatio": "16:9",
+          "placement": "mid-article",
+          "alt": "AI 代理任務的接收執行審核與回復節點被拆成制度地圖",
+          "caption": "真正能上線的代理，不在於一次跑到底，而在於每個節點都能查、能退、能交回人工。",
+          "visualChecks": {
+            "topicFit": true,
+            "noTextArtifacts": true,
+            "noLogos": true,
+            "noPeople": true,
+            "noTrademarkRisk": true,
+            "noGenericStockLook": true,
+            "distinctFromSiblingImages": true,
+            "checkedBy": "codex-main-brain-image-qa",
+            "checkedAt": "2026-06-11T03:34:51.666Z"
+          },
+          "url": "https://altoslab-ai.cc/api/blog/generated-media/browser-gemini-gpt-2026-06-11-morning-ai-agent-delegation-ai-agent-delegation-system-mechanism.png",
+          "styleId": "technical-blueprint-lab"
+        }
+      ],
+      "generatedBy": "gemini-chatgpt",
+      "status": "published",
+      "reviewStatus": "approved",
+      "qualityIssues": [],
+      "aiDisclosure": "",
+      "updatedAt": "2026-06-11T03:34:51.666Z",
+      "publishedAt": "2026-06-11T03:15:19.373Z",
+      "slot": "morning",
+      "id": "static-browser-gemini-gpt-2026-06-11-morning-ai-agent-delegation-vi",
+      "sortOrder": 105,
+      "cover": "https://altoslab-ai.cc/api/blog/generated-media/browser-gemini-gpt-2026-06-11-morning-ai-agent-delegation-ai-agent-delegation-system-cover.png",
+      "qualityStatus": "passed",
+      "imageQualityStatus": "passed",
+      "releaseDecision": "published",
+      "ingestRunId": "browser-gemini-gpt-2026-06-11-morning-ai-agent-delegation",
+      "generationDate": "2026-06-11",
+      "generationSlot": "morning",
+      "scheduledFor": "2026-06-11T09:00:00+08:00",
+      "createdAt": "2026-06-11T03:15:19.373Z",
+      "featured": false,
+      "qualityChecks": {
+        "hasHumanReview": true,
+        "hasQualityReviewerApproval": true,
+        "hasVisibleSources": true,
+        "hasNoFabricatedClaims": true,
+        "hasSearchIntentAnswer": true,
+        "hasBilingualParity": true,
+        "hasSourceTrust": true,
+        "hasLabsPointOfView": true,
+        "hasCreativeAngle": true,
+        "hasReaderEngagement": true,
+        "hasImageFit": true,
+        "hasAntiSlopReview": true,
+        "hasSeoGeoReview": true,
+        "qualityScore": 90,
+        "seoGeoScore": 90,
+        "antiSlopScore": 45,
+        "notes": "Static Cloudflare rescue overlay after KV write quota was exhausted; content assembled from Gemini source and browser visual production evidence."
+      }
+    },
+    {
+      "language": "th",
+      "slug": "ai-agent-delegation-system-th",
+      "title": "ช่วงหวานของหน้าต่างแชตจบแล้ว: ธุรกิจต้องมีระบบมอบหมายงานให้ AI Agent",
+      "subtitle": "OpenAI, Microsoft, Anthropic และ Google ส่งสัญญาณเดียวกันว่า การใช้ agent ในงานจริงต้องเริ่มจากความรับผิดชอบ สิทธิ์ ตรวจสอบ และการกู้คืน",
+      "seoTitle": "ระบบมอบหมายงาน AI Agent สำหรับธุรกิจ",
+      "seoDescription": "ALTOS LAB อธิบายว่าทำไมธุรกิจควรออกแบบสิทธิ์มอบหมาย จุดตรวจสอบ และการกู้คืน ก่อนขยายการใช้ AI agent",
+      "excerpt": "หลัง OpenAI workspace agents และ Microsoft 2026 Work Trend Index คำถามของผู้จัดการชัดขึ้น: ใครอนุมัติงาน AI ใช้ข้อมูลใดได้ และถ้าผิดจะ rollback อย่างไร",
+      "topic": "AI agents as auditable delegation systems",
+      "audience": "ผู้ก่อตั้ง ผู้จัดการปฏิบัติการ product lead ทีมการตลาด และทีมการเงิน",
+      "geoSummary": "แหล่งที่มาและกรอบการตัดสินใจ: บทความเชื่อม OpenAI Codex, ChatGPT workspace agents, Microsoft 2026 Work Trend Index, Anthropic Claude for Small Business และนิยาม AI agent ของ Google Cloud เป็นกรอบมอบหมายงานสำหรับธุรกิจ",
+      "body": "เช้าวันจันทร์ หัวหน้าการตลาดให้ ChatGPT อ่านคู่แข่ง ทีมการเงินให้ Claude จัดกลุ่มรายการชำระเงินที่ผิดปกติ และ product manager ใช้ Gemini สรุปประชุม ผลลัพธ์ทุกอย่างดูมีประโยชน์ แต่ยังไม่พร้อมเข้าไปอยู่ในงานจริง ใครอนุมัติให้ทำ ใช้ข้อมูลชุดไหน ถ้าผิดจะกลับไปจุดไหน นี่คือโจทย์ AI ปี 2026 โมเดลพิสูจน์แล้วว่าคุยได้ สิ่งที่บริษัทยังขาดคือ **สิทธิ์การมอบหมายงาน** และ **บันทึกการตัดสินใจ** สัญญาณจาก OpenAI, Microsoft, Anthropic และ Google Cloud ในปี 2026 ชี้ว่า AI agent กำลังออกจากช่องแชตเข้าสู่ workflow ของงานจริง พูดให้ง่ายคือ workflow คือขั้นตอนงานที่มอบหมาย ตรวจสอบ และย้อนกลับได้เมื่อผิดพลาด\n\n[IMAGE:opening]\n\n> มุมมอง ALTOS LAB: คำถามแรกของ AI agent ไม่ใช่จะซื้อโมเดลไหน แต่คืองานนั้นมี owner จุด review และทาง rollback หรือไม่ พูดให้ง่าย rollback คือเส้นทางพางานกลับสู่สถานะปลอดภัยก่อนหน้า\n\n## หลังความตื่นเต้น คือช่องว่างเรื่องความรับผิดชอบ\n\nOpenAI กำลังพา Codex เข้าไปอยู่ในบทบาท เครื่องมือ และงานประจำที่กว้างขึ้น ส่วน workspace agents ใน ChatGPT ก็เน้นบริบทร่วม สิทธิ์ และงานที่ยาวกว่าเดิม ไม่ใช่แค่กล่องตอบคำถาม Microsoft Work Trend Index 2026 พูดในทิศทางเดียวกัน คุณค่าของ AI มาจากการออกแบบงานและบทบาทมนุษย์ใหม่ ไม่ใช่แค่ติดตั้งเครื่องมือเพิ่ม\n\nหลายทีมผ่านช่วงง่ายไปแล้ว ซื้อบัญชีแบบจ่ายเงินแล้ว เขียน prompt ดีขึ้นแล้ว รายงาน ร่างตอบลูกค้า และสรุปประชุมเร็วขึ้นแล้ว แต่ประชุมยังไม่ลด เพราะปัญหาอยู่ที่การปฏิบัติการ หน้าต่างแชตสร้างวัตถุดิบได้ แต่ไม่กำหนดว่าใครให้ระบบลงมือได้ ต้องตรวจอะไรก่อน และหลังจากลงมือแล้วต้องเหลือร่องรอยอะไรไว้\n\n## มุมมอง ALTOS LAB: อัปเกรดกรอบการมอบหมายก่อนอัปเกรดโมเดล\n\nAnthropic นำ Claude for Small Business เข้าใกล้ระบบที่ธุรกิจเล็กใช้ทุกวัน เช่น QuickBooks, PayPal, HubSpot, Canva, Docusign, Google Workspace และ Microsoft 365 ส่วน Google Cloud อธิบาย AI agent ผ่านเป้าหมาย การวางแผน เครื่องมือ ความจำ และความเป็นอิสระ นั่นแปลว่า agent กำลังเข้าใกล้เงิน ลูกค้า เอกสาร และงานขาย\n\nกรอบความเสี่ยงที่ถูกต้องอาจขัดกับสัญชาตญาณ ยิ่ง AI เข้าใกล้ระบบหลัก คำถามว่า “โมเดลฉลาดพอไหม” ยิ่งไม่พอ ต้องถามว่างานนี้แยกเป็นรับงาน ลงมือ ตรวจสอบ และกู้คืนได้หรือไม่ แต่ละขั้นมีบันทึกหรือไม่ คนอนุมัติอยู่ตรงไหน หากตอบไม่ชัด ต่อให้ demo ดูดี ก็ยังไม่ควรเข้าไปในงานประจำ\n\n## เปลี่ยนคำขอในแชตให้เป็นการ์ดงาน\n\nAI agent ที่ใช้ได้จริงไม่ใช่คำสั่งสวย ๆ หนึ่งบรรทัด แต่คือการ์ดงานที่จัดการได้ การ์ดควรมีอย่างน้อยห้าช่อง ได้แก่ แหล่งข้อมูล การกระทำที่อนุญาต การกระทำที่ห้าม จุดตรวจโดยมนุษย์ และเส้นทางกู้คืน เช่น agent ที่ช่วยดูรายการจ่ายเงินผิดปกติ อ่าน PayPal และ CRM ได้ ทำรายการรอเช็กได้ และร่างข้อความหาลูกค้าได้ แต่ห้ามคืนเงิน ลบข้อมูลลูกค้า หรือแก้เงื่อนไขสัญญาเอง\n\n[IMAGE:mechanism]\n\nวิธีนี้ดูช้าบนกระดาษ แต่เร็วกว่าในหน้างาน ระบบอัตโนมัติที่ไม่มีการ์ดงานจะทำให้ผู้จัดการต้องตรวจทุกผลลัพธ์ใหม่ agent ที่มีการ์ดงานรู้ว่าเมื่อไรเดินต่อ เมื่อไรหยุด และเมื่อไรต้องคืนไฟล์ให้คน งานของ Anthropic เรื่องการวัดความเป็นอิสระของ agent ก็ชี้ว่า การหยุดกลางทาง การกำกับ และร่องรอยงาน คือหลักฐานสำคัญว่า agent ใช้งานจริงได้หรือไม่\n\n## Checklist สำหรับ pilot สัปดาห์นี้\n\nอย่าเริ่มจากการอนุมัติการเงิน การเซ็นสัญญา หรือการตัดสินใจลูกค้าที่เสี่ยงสูง ให้เริ่มจากงานที่เกิดบ่อย ข้อมูลนิ่ง และแก้ผิดได้ เช่น เก็บสัญญาณคู่แข่ง จัดหมวดหมู่ support ticket คัดกรอง invoice ผิดปกติ แยกคอมเมนต์โซเชียล หรือเติมข้อมูล lead sales\n\nก่อนเริ่มให้ตรวจห้าข้อ ตัวกระตุ้นงานคงที่หรือไม่ แหล่งข้อมูลถูกระบุหรือไม่ การกระทำที่อนุญาตเขียนไว้หรือไม่ จุดตรวจของมนุษย์อยู่ตรงจุดเสี่ยงจริงหรือไม่ และเมื่อผิด ทีมกลับไปสถานะเดิมได้หรือไม่ หากขาดข้อใดข้อหนึ่ง ให้ยังอยู่ในโหมด pilot\n\n## การตัดสินใจถัดไปของ operator\n\nในการประชุม AI ครั้งหน้า ให้พักเรื่องอันดับโมเดลชั่วคราว แล้ววาดงานเป็นแผนที่การมอบหมาย ใครเริ่มงาน agent อ่านอะไร ทำอะไรได้ ผู้จัดการอนุมัติตรงไหน และบันทึกเหตุการณ์อยู่ที่ใด แผนที่นี้คือเส้นแบ่งระหว่างของเล่น AI กับระบบปฏิบัติการของธุรกิจ\n\nALTOS LAB ชี้ว่า AI agent ไม่ได้เกิดมาเพื่อลบการตัดสินใจของมนุษย์ แต่เพื่อพาความสนใจของมนุษย์กลับไปยังจุดที่ควรตัดสินใจ agent ที่ตรวจสอบได้ ติดตามได้ และกู้คืนได้ จึงกลายเป็นผลิตภาพ ส่วนเครื่องทำร่างงานที่ไม่มีความรับผิดชอบ สุดท้ายก็เป็นเพียงหน้าต่างแชตที่เสียงดังขึ้น",
+      "keyTakeaways": [
+        "การใช้ AI agent ควรเริ่มจากสิทธิ์มอบหมาย จุดตรวจ และบันทึกเหตุการณ์",
+        "pilot แรกควรเป็นงานถี่ ความเสี่ยงต่ำ กู้คืนได้ และใช้ข้อมูลคงที่",
+        "ความเป็นอิสระของ agent ต้องวัดจากการกำกับ การหยุด และการกู้คืน ไม่ใช่ benchmark โมเดลเท่านั้น"
+      ],
+      "faqs": [
+        {
+          "question": "ธุรกิจเล็กสร้างกรอบมอบหมายงานได้ไหม",
+          "answer": "ได้ เริ่มจากเครื่องมือที่ใช้อยู่ ระบุแหล่งข้อมูล การกระทำที่อนุญาต จุดตรวจ และขั้นตอนกู้คืนก่อน"
+        },
+        {
+          "question": "pilot แรกควรเป็นงานแบบใด",
+          "answer": "เลือกงานซ้ำบ่อย ความเสี่ยงการตัดสินใจต่ำ เช่น จัดหมวดหมู่ support คัด invoice หรือเฝ้าดูคู่แข่ง"
+        },
+        {
+          "question": "เมื่อไร agent ไม่ควรทำเอง",
+          "answer": "การจ่ายเงินที่ย้อนกลับยาก ข้อผูกพันทางกฎหมาย การแก้ข้อมูลส่วนบุคคล และการตอบสนองแบรนด์ที่อ่อนไหวต้องมีมนุษย์อนุมัติ"
+        }
+      ],
+      "contentType": "column",
+      "newsCategory": "市場專欄",
+      "tags": [
+        "市場專欄",
+        "AI Agent",
+        "Automation",
+        "ALTOS LAB"
+      ],
+      "author": "Tommy",
+      "readTimeMinutes": 7,
+      "sourceLinks": [
+        {
+          "title": "Codex for every role, tool, and workflow",
+          "url": "https://openai.com/index/codex-for-every-role-tool-workflow/",
+          "publisher": "OpenAI",
+          "publishedAt": "2026-06-04",
+          "summary": "OpenAI describes Codex expanding beyond engineering into cross-functional work, with more non-developer usage and workflow support."
+        },
+        {
+          "title": "Introducing workspace agents in ChatGPT",
+          "url": "https://openai.com/index/introducing-workspace-agents-in-chatgpt/",
+          "publisher": "OpenAI",
+          "publishedAt": "2026-05-21",
+          "summary": "OpenAI presents shared workspace agents that can run longer tasks with permissions, shared context, and enterprise controls."
+        },
+        {
+          "title": "Agents, human agency, and the opportunity for every organization",
+          "url": "https://www.microsoft.com/en-us/worklab/work-trend-index/agents-human-agency-and-the-opportunity-for-every-organization",
+          "publisher": "Microsoft WorkLab",
+          "publishedAt": "2026-04-23",
+          "summary": "Microsoft's 2026 Work Trend Index argues that AI value depends on redesigning work and agency, not only adding tools."
+        },
+        {
+          "title": "Introducing Claude for Small Business",
+          "url": "https://www.anthropic.com/news/claude-for-small-business",
+          "publisher": "Anthropic",
+          "publishedAt": "2026-05-13",
+          "summary": "Anthropic positions Claude for SMB work across familiar systems such as QuickBooks, PayPal, HubSpot, Canva, Docusign, Google Workspace, and Microsoft 365."
+        },
+        {
+          "title": "Measuring AI agent autonomy in practice",
+          "url": "https://www.anthropic.com/news/measuring-agent-autonomy",
+          "publisher": "Anthropic",
+          "publishedAt": "2026-06-05",
+          "summary": "Anthropic discusses how real agent autonomy should be measured through work traces, interruptions, oversight, and practical task completion."
+        },
+        {
+          "title": "What is an AI agent?",
+          "url": "https://cloud.google.com/discover/what-are-ai-agents",
+          "publisher": "Google Cloud",
+          "publishedAt": "2026-05-01",
+          "summary": "Google Cloud defines AI agents as systems that pursue goals through reasoning, planning, tool use, memory, and autonomy."
+        }
+      ],
+      "translationGroupId": "browser-gemini-gpt-2026-06-11-morning-ai-agent-delegation",
+      "coverSource": "generated",
+      "coverCredit": "ALTOS LAB 編輯視覺",
+      "coverAlt": "三張交辦流程卡片以審核節點串起 AI 代理任務制度",
+      "coverGeneration": {
+        "source": "generated",
+        "provider": "ChatGPT/GPT",
+        "prompt": "Cyberpunk operations desk for an AI delegation column: three translucent task panels floating over a dark grid, neon cyan amber and coral decision paths, human-scale editorial atmosphere, no readable text, no logos, no people, 16:9 crop-safe composition.",
+        "generatedAt": "2026-06-11T03:33:26.313Z",
+        "status": "generated",
+        "styleId": "cyberpunk-neon-operations",
+        "visualChecks": {
+          "topicFit": true,
+          "noTextArtifacts": true,
+          "noLogos": true,
+          "noPeople": true,
+          "noTrademarkRisk": true,
+          "noGenericStockLook": true,
+          "distinctFromSiblingImages": true,
+          "checkedBy": "codex-main-brain-image-qa",
+          "checkedAt": "2026-06-11T03:34:51.666Z"
+        }
+      },
+      "contentImages": [
+        {
+          "source": "generated",
+          "provider": "ChatGPT/GPT",
+          "prompt": "Anime-inspired product lab still for AI task handoff: tilted paper-like task cards, warm studio light, clean cel-shaded linework, soft teal and coral checkpoints, no characters, no readable text, no logos, 16:9 editorial crop.",
+          "generatedAt": "2026-06-11T03:33:26.313Z",
+          "status": "generated",
+          "credit": "ALTOS LAB editorial visual",
+          "aspectRatio": "16:9",
+          "placement": "after-lead",
+          "alt": "AI 代理從聊天請求轉成可審核交辦卡片的流程示意",
+          "caption": "把一次聊天變成一張可追蹤的交辦卡，管理者才看得見權限、狀態與責任。",
+          "visualChecks": {
+            "topicFit": true,
+            "noTextArtifacts": true,
+            "noLogos": true,
+            "noPeople": true,
+            "noTrademarkRisk": true,
+            "noGenericStockLook": true,
+            "distinctFromSiblingImages": true,
+            "checkedBy": "codex-main-brain-image-qa",
+            "checkedAt": "2026-06-11T03:34:51.666Z"
+          },
+          "url": "https://altoslab-ai.cc/api/blog/generated-media/browser-gemini-gpt-2026-06-11-morning-ai-agent-delegation-ai-agent-delegation-system-opening.png",
+          "styleId": "anime-inspired-product-lab"
+        },
+        {
+          "source": "generated",
+          "provider": "ChatGPT/GPT",
+          "prompt": "Technical blueprint visual for AI delegation checkpoints: navy grid background, schematic boxes, review nodes, rollback route, cream blueprint linework with amber and coral accents, no readable text, no logos, no fake UI, 16:9 crop-safe.",
+          "generatedAt": "2026-06-11T03:33:26.313Z",
+          "status": "generated",
+          "credit": "ALTOS LAB editorial visual",
+          "aspectRatio": "16:9",
+          "placement": "mid-article",
+          "alt": "AI 代理任務的接收執行審核與回復節點被拆成制度地圖",
+          "caption": "真正能上線的代理，不在於一次跑到底，而在於每個節點都能查、能退、能交回人工。",
+          "visualChecks": {
+            "topicFit": true,
+            "noTextArtifacts": true,
+            "noLogos": true,
+            "noPeople": true,
+            "noTrademarkRisk": true,
+            "noGenericStockLook": true,
+            "distinctFromSiblingImages": true,
+            "checkedBy": "codex-main-brain-image-qa",
+            "checkedAt": "2026-06-11T03:34:51.666Z"
+          },
+          "url": "https://altoslab-ai.cc/api/blog/generated-media/browser-gemini-gpt-2026-06-11-morning-ai-agent-delegation-ai-agent-delegation-system-mechanism.png",
+          "styleId": "technical-blueprint-lab"
+        }
+      ],
+      "generatedBy": "gemini-chatgpt",
+      "status": "published",
+      "reviewStatus": "approved",
+      "qualityIssues": [],
+      "aiDisclosure": "",
+      "updatedAt": "2026-06-11T03:34:51.666Z",
+      "publishedAt": "2026-06-11T03:15:19.373Z",
+      "slot": "morning",
+      "id": "static-browser-gemini-gpt-2026-06-11-morning-ai-agent-delegation-th",
+      "sortOrder": 106,
+      "cover": "https://altoslab-ai.cc/api/blog/generated-media/browser-gemini-gpt-2026-06-11-morning-ai-agent-delegation-ai-agent-delegation-system-cover.png",
+      "qualityStatus": "passed",
+      "imageQualityStatus": "passed",
+      "releaseDecision": "published",
+      "ingestRunId": "browser-gemini-gpt-2026-06-11-morning-ai-agent-delegation",
+      "generationDate": "2026-06-11",
+      "generationSlot": "morning",
+      "scheduledFor": "2026-06-11T09:00:00+08:00",
+      "createdAt": "2026-06-11T03:15:19.373Z",
+      "featured": false,
+      "qualityChecks": {
+        "hasHumanReview": true,
+        "hasQualityReviewerApproval": true,
+        "hasVisibleSources": true,
+        "hasNoFabricatedClaims": true,
+        "hasSearchIntentAnswer": true,
+        "hasBilingualParity": true,
+        "hasSourceTrust": true,
+        "hasLabsPointOfView": true,
+        "hasCreativeAngle": true,
+        "hasReaderEngagement": true,
+        "hasImageFit": true,
+        "hasAntiSlopReview": true,
+        "hasSeoGeoReview": true,
+        "qualityScore": 90,
+        "seoGeoScore": 90,
+        "antiSlopScore": 45,
+        "notes": "Static Cloudflare rescue overlay after KV write quota was exhausted; content assembled from Gemini source and browser visual production evidence."
+      }
+    },
+    {
+      "language": "ms",
+      "slug": "sistem-delegasi-ai-agent-ms",
+      "title": "Fasa Bulan Madu Chat AI Sudah Tamat. Syarikat Perlu Sistem Delegasi Agent.",
+      "subtitle": "OpenAI, Microsoft, Anthropic dan Google menunjukkan arah yang sama: operasi agent memerlukan tanggungjawab, kebenaran, semakan dan pemulihan sebelum diskalakan.",
+      "seoTitle": "Sistem Delegasi AI Agent untuk Operasi Syarikat",
+      "seoDescription": "ALTOS LAB menerangkan mengapa syarikat perlu reka hak delegasi, titik semakan dan rollback sebelum memperluas AI agent dalam operasi.",
+      "excerpt": "Selepas OpenAI workspace agents dan Microsoft 2026 Work Trend Index, keputusan operasi lebih jelas: siapa meluluskan tugas AI, data mana dibenarkan, dan bagaimana rollback dibuat.",
+      "topic": "AI agents as auditable delegation systems",
+      "audience": "Pengasas, operator, ketua produk, pasukan marketing dan finance di Malaysia",
+      "geoSummary": "Sumber dan kerangka keputusan: artikel ini menghubungkan OpenAI Codex, ChatGPT workspace agents, Microsoft 2026 Work Trend Index, Anthropic Claude for Small Business dan definisi AI agent oleh Google Cloud untuk operasi syarikat.",
+      "body": "Pagi Isnin, ketua marketing meminta ChatGPT membaca pergerakan pesaing, pasukan finance meminta Claude menyusun pengecualian pembayaran, dan product manager menggunakan Gemini untuk meringkaskan mesyuarat. Semua hasil nampak berguna, tetapi belum tentu selamat dimasukkan ke operasi. Siapa meluluskan tindakan itu? Data apa yang dibaca? Jika salah, bagaimana ia kembali ke keadaan asal? Itulah soalan sebenar AI pada 2026. Model sudah membuktikan ia boleh bercakap. Syarikat masih memerlukan **hak delegasi** dan **rekod keputusan**. Isyarat daripada OpenAI, Microsoft, Anthropic dan Google Cloud pada 2026 jelas: AI agent sedang bergerak daripada chat kepada workflow operasi. Dalam bahasa mudah, workflow ialah urutan kerja yang boleh diberi pemilik, disemak dan dipulihkan apabila tersilap.\n\n[IMAGE:opening]\n\n> ALTOS LAB editorial judgment: keputusan pertama tentang AI agent bermula dengan sistem kerja di sekeliling tugas: owner, titik review dan laluan rollback. Dalam bahasa mudah, rollback ialah cara membawa kerja kembali ke keadaan selamat apabila agent tersilap.\n\nUntuk pasukan kecil, ini juga mengubah cara membeli alat. Jangan terus sambungkan agent kepada pembayaran, kontrak atau data pelanggan yang sukar dipulihkan. Mulakan dengan satu aliran kerja yang kerap berulang, contohnya semakan prospek, pengelasan tiket sokongan atau ringkasan mesyuarat. Tetapkan siapa yang menerima output, siapa yang boleh meluluskan tindakan, dan apa bukti yang perlu disimpan. Selepas dua minggu, barulah ukur sama ada masa semakan berkurang tanpa menaikkan risiko operasi.\n\n## Selepas euforia, jurang akauntabiliti menjadi jelas\n\nOpenAI membawa Codex ke lebih banyak peranan, alat dan rutin kerja. Workspace agents dalam ChatGPT pula menekankan konteks bersama, kebenaran dan tugasan yang lebih panjang, bukan hanya kotak jawapan. Microsoft Work Trend Index 2026 menyampaikan mesej sehala: nilai AI datang daripada reka bentuk semula kerja dan agensi manusia, bukan daripada menambah satu lagi aplikasi.\n\nBanyak pasukan sudah melepasi tahap mudah. Akaun premium sudah dibeli. Staf makin mahir menulis arahan. Laporan, brief, balasan support dan ringkasan mesyuarat datang lebih cepat. Namun mesyuarat tidak banyak berkurang. Puncanya ialah operasi. Chat window boleh menghasilkan bahan, tetapi tidak menentukan siapa boleh membuat sistem bertindak, apa yang mesti disemak dahulu, dan rekod apa yang tinggal selepas tindakan.\n\n## Pandangan ALTOS LAB: baiki framework delegasi sebelum upgrade model\n\nAnthropic meletakkan Claude for Small Business dekat dengan sistem harian syarikat kecil seperti QuickBooks, PayPal, HubSpot, Canva, Docusign, Google Workspace dan Microsoft 365. Google Cloud pula mentakrifkan AI agent melalui matlamat, perancangan, alat, memori dan autonomi. Ini bermakna agent semakin hampir kepada pembayaran, pelanggan, dokumen dan kerja sales.\n\nLensa risiko yang betul agak berlawanan dengan naluri. Semakin dekat AI kepada sistem teras, semakin tidak cukup untuk bertanya “adakah model cukup pintar”. Tanya sama ada kerja itu boleh dipecahkan kepada penerimaan, tindakan, semakan dan pemulihan. Tanya sama ada setiap langkah meninggalkan jejak. Tanya di mana manusia perlu memberi kelulusan. Jika jawapannya kabur, agent belum bersedia masuk operasi harian walaupun demo nampak kemas.\n\n## Tukar permintaan chat menjadi kad tugasan\n\nAI agent yang berguna bukan arahan bijak satu baris. Ia ialah kad tugasan yang boleh diurus. Kad itu perlu sekurang-kurangnya lima medan: sumber data, tindakan dibenarkan, tindakan dilarang, titik semakan manusia dan laluan pemulihan. Untuk pengecualian pembayaran, agent boleh membaca PayPal dan CRM, menyediakan senarai pengesahan dan merangka mesej pelanggan. Namun ia tidak boleh terus membuat refund, memadam data pelanggan atau mengubah syarat kontrak.\n\n[IMAGE:mechanism]\n\nReka bentuk ini kelihatan perlahan di atas kertas tetapi lebih pantas di lapangan. Automasi tanpa kad tugasan menyebabkan pengurus memeriksa semula setiap hasil. Agent yang ada kad tugasan tahu bila perlu teruskan, bila perlu berhenti dan bila perlu pulangkan fail kepada manusia. Penekanan Anthropic terhadap interupsi, pengawasan dan jejak kerja semasa mengukur autonomi agent juga membuktikan perkara ini.\n\n## Checklist pilot minggu ini\n\nJangan bermula dengan kelulusan kewangan, tandatangan kontrak atau keputusan pelanggan berisiko tinggi. Pilih proses yang kerap berlaku, data stabil dan kesilapan boleh diperbaiki: pengumpulan sinyal pesaing, tagging support, triage invois luar biasa, susunan komen sosial atau pengayaan lead sales.\n\nSebelum mula, semak lima perkara. Adakah pencetus tugas tetap? Adakah sumber data jelas? Adakah tindakan dibenarkan ditulis? Adakah titik semakan manusia berada di tempat risiko sebenar? Bolehkah pasukan kembali kepada keadaan sebelumnya selepas error? Jika satu jawapan masih kosong, kekalkan sebagai pilot.\n\n## Keputusan operator seterusnya\n\nDalam mesyuarat AI seterusnya, berhenti seketika daripada membandingkan ranking model. Lukis kerja sebagai peta delegasi: siapa memulakan tugas, apa yang agent baca, apa yang agent boleh buat, di mana pengurus meluluskan, dan di mana rekod kejadian disimpan. Peta ini membezakan mainan AI daripada sistem operasi syarikat.\n\nALTOS LAB menilai bahawa AI agent bukan alat untuk menghapuskan pertimbangan manusia. Ia sepatutnya mengembalikan perhatian manusia kepada saat yang benar-benar memerlukan keputusan. Agent yang boleh dijejak, disemak dan dipulihkan menjadi produktiviti. Mesin draf tanpa tanggungjawab akhirnya cuma chat box yang lebih bising.",
+      "keyTakeaways": [
+        "Adopsi agent perlu bermula dengan hak delegasi, titik semakan dan rekod kejadian.",
+        "Pilot pertama patut kerap berlaku, rendah risiko, boleh dipulihkan dan berpaksikan data stabil.",
+        "Autonomi agent perlu dinilai melalui pengawasan, interupsi dan pemulihan, bukan benchmark model semata-mata."
+      ],
+      "faqs": [
+        {
+          "question": "Bolehkah SME bina framework ini tanpa pasukan engineering besar?",
+          "answer": "Boleh. Mulakan dalam alat sedia ada dengan menetapkan sumber data, tindakan dibenarkan, titik semakan dan langkah pemulihan."
+        },
+        {
+          "question": "Apakah pilot agent pertama yang sesuai?",
+          "answer": "Pilih proses berulang dengan risiko keputusan rendah seperti klasifikasi support, triage invois atau pemantauan pesaing."
+        },
+        {
+          "question": "Bilakah agent tidak patut bertindak sendiri?",
+          "answer": "Pembayaran tidak boleh balik, komitmen undang-undang, perubahan data peribadi dan respons jenama sensitif mesti mendapat kelulusan manusia."
+        }
+      ],
+      "contentType": "column",
+      "newsCategory": "市場專欄",
+      "tags": [
+        "市場專欄",
+        "AI Agent",
+        "Automation",
+        "ALTOS LAB"
+      ],
+      "author": "Tommy",
+      "readTimeMinutes": 7,
+      "sourceLinks": [
+        {
+          "title": "Codex for every role, tool, and workflow",
+          "url": "https://openai.com/index/codex-for-every-role-tool-workflow/",
+          "publisher": "OpenAI",
+          "publishedAt": "2026-06-04",
+          "summary": "OpenAI describes Codex expanding beyond engineering into cross-functional work, with more non-developer usage and workflow support."
+        },
+        {
+          "title": "Introducing workspace agents in ChatGPT",
+          "url": "https://openai.com/index/introducing-workspace-agents-in-chatgpt/",
+          "publisher": "OpenAI",
+          "publishedAt": "2026-05-21",
+          "summary": "OpenAI presents shared workspace agents that can run longer tasks with permissions, shared context, and enterprise controls."
+        },
+        {
+          "title": "Agents, human agency, and the opportunity for every organization",
+          "url": "https://www.microsoft.com/en-us/worklab/work-trend-index/agents-human-agency-and-the-opportunity-for-every-organization",
+          "publisher": "Microsoft WorkLab",
+          "publishedAt": "2026-04-23",
+          "summary": "Microsoft's 2026 Work Trend Index argues that AI value depends on redesigning work and agency, not only adding tools."
+        },
+        {
+          "title": "Introducing Claude for Small Business",
+          "url": "https://www.anthropic.com/news/claude-for-small-business",
+          "publisher": "Anthropic",
+          "publishedAt": "2026-05-13",
+          "summary": "Anthropic positions Claude for SMB work across familiar systems such as QuickBooks, PayPal, HubSpot, Canva, Docusign, Google Workspace, and Microsoft 365."
+        },
+        {
+          "title": "Measuring AI agent autonomy in practice",
+          "url": "https://www.anthropic.com/news/measuring-agent-autonomy",
+          "publisher": "Anthropic",
+          "publishedAt": "2026-06-05",
+          "summary": "Anthropic discusses how real agent autonomy should be measured through work traces, interruptions, oversight, and practical task completion."
+        },
+        {
+          "title": "What is an AI agent?",
+          "url": "https://cloud.google.com/discover/what-are-ai-agents",
+          "publisher": "Google Cloud",
+          "publishedAt": "2026-05-01",
+          "summary": "Google Cloud defines AI agents as systems that pursue goals through reasoning, planning, tool use, memory, and autonomy."
+        }
+      ],
+      "translationGroupId": "browser-gemini-gpt-2026-06-11-morning-ai-agent-delegation",
+      "coverSource": "generated",
+      "coverCredit": "ALTOS LAB 編輯視覺",
+      "coverAlt": "三張交辦流程卡片以審核節點串起 AI 代理任務制度",
+      "coverGeneration": {
+        "source": "generated",
+        "provider": "ChatGPT/GPT",
+        "prompt": "Cyberpunk operations desk for an AI delegation column: three translucent task panels floating over a dark grid, neon cyan amber and coral decision paths, human-scale editorial atmosphere, no readable text, no logos, no people, 16:9 crop-safe composition.",
+        "generatedAt": "2026-06-11T03:33:26.313Z",
+        "status": "generated",
+        "styleId": "cyberpunk-neon-operations",
+        "visualChecks": {
+          "topicFit": true,
+          "noTextArtifacts": true,
+          "noLogos": true,
+          "noPeople": true,
+          "noTrademarkRisk": true,
+          "noGenericStockLook": true,
+          "distinctFromSiblingImages": true,
+          "checkedBy": "codex-main-brain-image-qa",
+          "checkedAt": "2026-06-11T03:34:51.666Z"
+        }
+      },
+      "contentImages": [
+        {
+          "source": "generated",
+          "provider": "ChatGPT/GPT",
+          "prompt": "Anime-inspired product lab still for AI task handoff: tilted paper-like task cards, warm studio light, clean cel-shaded linework, soft teal and coral checkpoints, no characters, no readable text, no logos, 16:9 editorial crop.",
+          "generatedAt": "2026-06-11T03:33:26.313Z",
+          "status": "generated",
+          "credit": "ALTOS LAB editorial visual",
+          "aspectRatio": "16:9",
+          "placement": "after-lead",
+          "alt": "AI 代理從聊天請求轉成可審核交辦卡片的流程示意",
+          "caption": "把一次聊天變成一張可追蹤的交辦卡，管理者才看得見權限、狀態與責任。",
+          "visualChecks": {
+            "topicFit": true,
+            "noTextArtifacts": true,
+            "noLogos": true,
+            "noPeople": true,
+            "noTrademarkRisk": true,
+            "noGenericStockLook": true,
+            "distinctFromSiblingImages": true,
+            "checkedBy": "codex-main-brain-image-qa",
+            "checkedAt": "2026-06-11T03:34:51.666Z"
+          },
+          "url": "https://altoslab-ai.cc/api/blog/generated-media/browser-gemini-gpt-2026-06-11-morning-ai-agent-delegation-ai-agent-delegation-system-opening.png",
+          "styleId": "anime-inspired-product-lab"
+        },
+        {
+          "source": "generated",
+          "provider": "ChatGPT/GPT",
+          "prompt": "Technical blueprint visual for AI delegation checkpoints: navy grid background, schematic boxes, review nodes, rollback route, cream blueprint linework with amber and coral accents, no readable text, no logos, no fake UI, 16:9 crop-safe.",
+          "generatedAt": "2026-06-11T03:33:26.313Z",
+          "status": "generated",
+          "credit": "ALTOS LAB editorial visual",
+          "aspectRatio": "16:9",
+          "placement": "mid-article",
+          "alt": "AI 代理任務的接收執行審核與回復節點被拆成制度地圖",
+          "caption": "真正能上線的代理，不在於一次跑到底，而在於每個節點都能查、能退、能交回人工。",
+          "visualChecks": {
+            "topicFit": true,
+            "noTextArtifacts": true,
+            "noLogos": true,
+            "noPeople": true,
+            "noTrademarkRisk": true,
+            "noGenericStockLook": true,
+            "distinctFromSiblingImages": true,
+            "checkedBy": "codex-main-brain-image-qa",
+            "checkedAt": "2026-06-11T03:34:51.666Z"
+          },
+          "url": "https://altoslab-ai.cc/api/blog/generated-media/browser-gemini-gpt-2026-06-11-morning-ai-agent-delegation-ai-agent-delegation-system-mechanism.png",
+          "styleId": "technical-blueprint-lab"
+        }
+      ],
+      "generatedBy": "gemini-chatgpt",
+      "status": "published",
+      "reviewStatus": "approved",
+      "qualityIssues": [],
+      "aiDisclosure": "",
+      "updatedAt": "2026-06-11T03:34:51.666Z",
+      "publishedAt": "2026-06-11T03:15:19.373Z",
+      "slot": "morning",
+      "id": "static-browser-gemini-gpt-2026-06-11-morning-ai-agent-delegation-ms",
+      "sortOrder": 107,
+      "cover": "https://altoslab-ai.cc/api/blog/generated-media/browser-gemini-gpt-2026-06-11-morning-ai-agent-delegation-ai-agent-delegation-system-cover.png",
+      "qualityStatus": "passed",
+      "imageQualityStatus": "passed",
+      "releaseDecision": "published",
+      "ingestRunId": "browser-gemini-gpt-2026-06-11-morning-ai-agent-delegation",
+      "generationDate": "2026-06-11",
+      "generationSlot": "morning",
+      "scheduledFor": "2026-06-11T09:00:00+08:00",
+      "createdAt": "2026-06-11T03:15:19.373Z",
+      "featured": false,
+      "qualityChecks": {
+        "hasHumanReview": true,
+        "hasQualityReviewerApproval": true,
+        "hasVisibleSources": true,
+        "hasNoFabricatedClaims": true,
+        "hasSearchIntentAnswer": true,
+        "hasBilingualParity": true,
+        "hasSourceTrust": true,
+        "hasLabsPointOfView": true,
+        "hasCreativeAngle": true,
+        "hasReaderEngagement": true,
+        "hasImageFit": true,
+        "hasAntiSlopReview": true,
+        "hasSeoGeoReview": true,
+        "qualityScore": 90,
+        "seoGeoScore": 90,
+        "antiSlopScore": 45,
+        "notes": "Static Cloudflare rescue overlay after KV write quota was exhausted; content assembled from Gemini source and browser visual production evidence."
+      }
+    },
+    {
+      "language": "fil",
+      "slug": "ai-agent-delegation-system-fil",
+      "title": "Tapos na ang Honeymoon ng Chat AI. Kailangan na ng Sistema ng Pagde-delegate sa Agent.",
+      "subtitle": "Iisa ang sinasabi ng OpenAI, Microsoft, Anthropic, at Google: bago palawakin ang agent, kailangan munang ayusin ang responsibilidad, pahintulot, review, at recovery.",
+      "seoTitle": "Sistema ng Delegation para sa AI Agent",
+      "seoDescription": "ALTOS LAB: bakit dapat unahin ng kumpanya ang delegation rights, review points, at recovery bago gamitin ang AI agent sa operasyon.",
+      "excerpt": "Pagkatapos ng OpenAI workspace agents at Microsoft 2026 Work Trend Index, malinaw ang tanong: sino ang nag-a-approve ng AI task, anong data ang puwede, at paano ang rollback?",
+      "topic": "AI agents as auditable delegation systems",
+      "audience": "Founders, operators, product leads, marketing at finance teams sa Pilipinas",
+      "geoSummary": "Pinagmulan at decision framework: pinagsama ng column na ito ang OpenAI Codex, ChatGPT workspace agents, Microsoft 2026 Work Trend Index, Anthropic Claude for Small Business, at Google Cloud AI agent definition para sa praktikal na operating model.",
+      "body": "Lunes ng umaga, pinagawa ng marketing lead sa ChatGPT ang competitor scan, pinasuri ng finance team kay Claude ang payment exceptions, at ginamit ng product manager ang Gemini para paikliin ang meeting notes. Nakakatulong ang bawat resulta, pero hindi ibig sabihin handa na ito sa operasyon. Sino ang nag-approve? Anong data ang binasa? Kapag mali, saan babalik ang proseso? Ito ang tunay na tanong ng AI sa 2026. Napatunayan na ng model na kaya nitong makipag-usap. Ang kulang ng kumpanya ay **delegation rights** at **decision record**. Malinaw ang signal mula sa OpenAI, Microsoft, Anthropic, at Google Cloud sa 2026: ang AI agent ay lumilipat mula chat papunta sa workflow ng negosyo. Sa simpleng salita, workflow ang sunod-sunod na gawaing may tagapag-utos, review point, at ligtas na balik kapag may mali.\n\n[IMAGE:opening]\n\n> Pananaw ng ALTOS LAB: ang unang tanong sa AI agent ay nagsisimula sa sistema sa paligid ng task: owner, review point, at rollback path. Sa simpleng salita, rollback ang daan pabalik sa ligtas na dating estado.\n\n## Pagkatapos ng excitement, lumilitaw ang accountability gap\n\nDinadala ng OpenAI ang Codex sa mas maraming role, tool, at work routine. Ang workspace agents sa ChatGPT ay nakatuon din sa shared context, permissions, at mas mahahabang task, hindi lang sa isang reply box. Pareho ang direksiyon ng Microsoft Work Trend Index 2026: ang halaga ng AI ay galing sa pagdisenyo muli ng trabaho at papel ng tao, hindi sa pagdagdag ng isa pang app.\n\nMaraming team ang lampas na sa madaling yugto. Nakabili na ng paid accounts. Mas mahusay na ang staff sa prompt. Mas mabilis ang report, brief, support replies, at meeting summaries. Pero hindi naman lumiit ang dami ng coordination. Operational ang dahilan. Kaya ng chat window gumawa ng materyal, pero hindi nito nililinaw kung sino ang puwedeng magpaandar sa system, ano ang dapat i-check bago kumilos, at anong record ang iiwan pagkatapos.\n\n## Pananaw ng ALTOS LAB: ayusin muna ang delegation framework bago ang model upgrade\n\nNilalapit ng Anthropic ang Claude for Small Business sa mga sistemang ginagamit ng maliliit na negosyo araw-araw gaya ng QuickBooks, PayPal, HubSpot, Canva, Docusign, Google Workspace, at Microsoft 365. Inilalarawan naman ng Google Cloud ang AI agent sa pamamagitan ng goals, planning, tools, memory, at autonomy. Ibig sabihin, lumalapit ang agent sa bayad, customer, dokumento, at sales work.\n\nCounterintuitive ang tamang risk lens. Mas lumalapit ang AI sa core system, mas hindi sapat ang tanong na “matalino ba ang model”. Mas mahalagang itanong: nahahati ba ang trabaho sa intake, action, review, at recovery? May bakas ba bawat hakbang? Saan dapat pumasok ang tao para mag-approve? Kung malabo ang sagot, hindi pa dapat ipasok ang agent sa daily operations kahit maganda ang demo.\n\n## Gawing task card ang chat request\n\nAng kapaki-pakinabang na AI agent ay hindi isang magaling na one-line instruction. Isa itong task card na kayang pamahalaan. Dapat may hindi bababa sa limang field ang card: data source, allowed action, blocked action, human review point, at recovery path. Kung payment exceptions ang inaayos, puwedeng basahin ng agent ang PayPal at CRM, gumawa ng confirmation list, at mag-draft ng message sa customer. Pero hindi ito dapat mag-refund, mag-delete ng customer data, o magbago ng contract terms.\n\n[IMAGE:mechanism]\n\nMukhang mabagal ang ganitong disenyo sa papel, pero mas mabilis ito sa totoong trabaho. Ang automation na walang task card ay nauuwi sa manager na nagche-check ulit ng lahat. Ang agent na may task card ay mas malinaw kung kailan magpapatuloy, kailan hihinto, at kailan ibabalik sa tao ang file. Kaya rin binibigyang-diin ng Anthropic ang interruptions, oversight, at work traces sa pagsukat ng agent autonomy.\n\n## Checklist ng pilot ngayong linggo\n\nHuwag magsimula sa finance approval, contract signing, o high-stakes customer decision. Piliin muna ang process na madalas, stable ang data, at madaling itama ang mali: competitor signal collection, support tagging, invoice anomaly triage, social comment sorting, o sales lead enrichment.\n\nBago mag-run, gamitin ang checklist na ito. Fixed ba ang trigger? Malinaw ba ang data sources? Nakasulat ba ang allowed actions? Nasa tunay na risk point ba ang human review? Kaya bang bumalik sa dating state kapag nag-error? Kapag may isang sagot na wala, manatili muna sa pilot.\n\n## Susunod na operator decision\n\nSa susunod na AI planning meeting, itigil muna ang model ranking comparison. Iguhit ang trabaho bilang delegation map: sino ang magsisimula, ano ang babasahin ng agent, ano ang puwede nitong gawin, saan mag-a-approve ang manager, at saan maiimbak ang event record. Ito ang naghihiwalay sa AI toy at business operating system.\n\nDirekta ang pananaw ng ALTOS LAB: hindi dapat burahin ng AI agent ang human judgment. Dapat nitong ibalik ang atensiyon ng tao sa mga sandaling talagang kailangan ng desisyon. Ang agent na traceable, reviewable, at recoverable ay nagiging productivity. Ang magandang draft machine na walang responsibilidad ay mas maingay lang na chat box.",
+      "keyTakeaways": [
+        "Dapat magsimula ang agent adoption sa delegation rights, review points, at event records.",
+        "Unang pilot: madalas, mababa ang risk, madaling i-repair, at may stable data source.",
+        "Sukatin ang autonomy gamit ang oversight, interruptions, at recovery, hindi lang model benchmark."
+      ],
+      "faqs": [
+        {
+          "question": "Kaya ba ito ng maliit na kumpanya na walang malaking engineering team?",
+          "answer": "Oo. Magsimula sa existing tools at tukuyin ang data sources, allowed actions, review points, at recovery steps."
+        },
+        {
+          "question": "Anong process ang magandang unang pilot?",
+          "answer": "Pumili ng repetitive at low-risk process tulad ng support tagging, invoice triage, o competitor monitoring."
+        },
+        {
+          "question": "Kailan hindi dapat kumilos mag-isa ang agent?",
+          "answer": "Kapag may irreversible payment, legal commitment, personal data change, o sensitive brand response, kailangan ng human approval."
+        }
+      ],
+      "contentType": "column",
+      "newsCategory": "市場專欄",
+      "tags": [
+        "市場專欄",
+        "AI Agent",
+        "Automation",
+        "ALTOS LAB"
+      ],
+      "author": "Tommy",
+      "readTimeMinutes": 7,
+      "sourceLinks": [
+        {
+          "title": "Codex for every role, tool, and workflow",
+          "url": "https://openai.com/index/codex-for-every-role-tool-workflow/",
+          "publisher": "OpenAI",
+          "publishedAt": "2026-06-04",
+          "summary": "OpenAI describes Codex expanding beyond engineering into cross-functional work, with more non-developer usage and workflow support."
+        },
+        {
+          "title": "Introducing workspace agents in ChatGPT",
+          "url": "https://openai.com/index/introducing-workspace-agents-in-chatgpt/",
+          "publisher": "OpenAI",
+          "publishedAt": "2026-05-21",
+          "summary": "OpenAI presents shared workspace agents that can run longer tasks with permissions, shared context, and enterprise controls."
+        },
+        {
+          "title": "Agents, human agency, and the opportunity for every organization",
+          "url": "https://www.microsoft.com/en-us/worklab/work-trend-index/agents-human-agency-and-the-opportunity-for-every-organization",
+          "publisher": "Microsoft WorkLab",
+          "publishedAt": "2026-04-23",
+          "summary": "Microsoft's 2026 Work Trend Index argues that AI value depends on redesigning work and agency, not only adding tools."
+        },
+        {
+          "title": "Introducing Claude for Small Business",
+          "url": "https://www.anthropic.com/news/claude-for-small-business",
+          "publisher": "Anthropic",
+          "publishedAt": "2026-05-13",
+          "summary": "Anthropic positions Claude for SMB work across familiar systems such as QuickBooks, PayPal, HubSpot, Canva, Docusign, Google Workspace, and Microsoft 365."
+        },
+        {
+          "title": "Measuring AI agent autonomy in practice",
+          "url": "https://www.anthropic.com/news/measuring-agent-autonomy",
+          "publisher": "Anthropic",
+          "publishedAt": "2026-06-05",
+          "summary": "Anthropic discusses how real agent autonomy should be measured through work traces, interruptions, oversight, and practical task completion."
+        },
+        {
+          "title": "What is an AI agent?",
+          "url": "https://cloud.google.com/discover/what-are-ai-agents",
+          "publisher": "Google Cloud",
+          "publishedAt": "2026-05-01",
+          "summary": "Google Cloud defines AI agents as systems that pursue goals through reasoning, planning, tool use, memory, and autonomy."
+        }
+      ],
+      "translationGroupId": "browser-gemini-gpt-2026-06-11-morning-ai-agent-delegation",
+      "coverSource": "generated",
+      "coverCredit": "ALTOS LAB 編輯視覺",
+      "coverAlt": "三張交辦流程卡片以審核節點串起 AI 代理任務制度",
+      "coverGeneration": {
+        "source": "generated",
+        "provider": "ChatGPT/GPT",
+        "prompt": "Cyberpunk operations desk for an AI delegation column: three translucent task panels floating over a dark grid, neon cyan amber and coral decision paths, human-scale editorial atmosphere, no readable text, no logos, no people, 16:9 crop-safe composition.",
+        "generatedAt": "2026-06-11T03:33:26.313Z",
+        "status": "generated",
+        "styleId": "cyberpunk-neon-operations",
+        "visualChecks": {
+          "topicFit": true,
+          "noTextArtifacts": true,
+          "noLogos": true,
+          "noPeople": true,
+          "noTrademarkRisk": true,
+          "noGenericStockLook": true,
+          "distinctFromSiblingImages": true,
+          "checkedBy": "codex-main-brain-image-qa",
+          "checkedAt": "2026-06-11T03:34:51.666Z"
+        }
+      },
+      "contentImages": [
+        {
+          "source": "generated",
+          "provider": "ChatGPT/GPT",
+          "prompt": "Anime-inspired product lab still for AI task handoff: tilted paper-like task cards, warm studio light, clean cel-shaded linework, soft teal and coral checkpoints, no characters, no readable text, no logos, 16:9 editorial crop.",
+          "generatedAt": "2026-06-11T03:33:26.313Z",
+          "status": "generated",
+          "credit": "ALTOS LAB editorial visual",
+          "aspectRatio": "16:9",
+          "placement": "after-lead",
+          "alt": "AI 代理從聊天請求轉成可審核交辦卡片的流程示意",
+          "caption": "把一次聊天變成一張可追蹤的交辦卡，管理者才看得見權限、狀態與責任。",
+          "visualChecks": {
+            "topicFit": true,
+            "noTextArtifacts": true,
+            "noLogos": true,
+            "noPeople": true,
+            "noTrademarkRisk": true,
+            "noGenericStockLook": true,
+            "distinctFromSiblingImages": true,
+            "checkedBy": "codex-main-brain-image-qa",
+            "checkedAt": "2026-06-11T03:34:51.666Z"
+          },
+          "url": "https://altoslab-ai.cc/api/blog/generated-media/browser-gemini-gpt-2026-06-11-morning-ai-agent-delegation-ai-agent-delegation-system-opening.png",
+          "styleId": "anime-inspired-product-lab"
+        },
+        {
+          "source": "generated",
+          "provider": "ChatGPT/GPT",
+          "prompt": "Technical blueprint visual for AI delegation checkpoints: navy grid background, schematic boxes, review nodes, rollback route, cream blueprint linework with amber and coral accents, no readable text, no logos, no fake UI, 16:9 crop-safe.",
+          "generatedAt": "2026-06-11T03:33:26.313Z",
+          "status": "generated",
+          "credit": "ALTOS LAB editorial visual",
+          "aspectRatio": "16:9",
+          "placement": "mid-article",
+          "alt": "AI 代理任務的接收執行審核與回復節點被拆成制度地圖",
+          "caption": "真正能上線的代理，不在於一次跑到底，而在於每個節點都能查、能退、能交回人工。",
+          "visualChecks": {
+            "topicFit": true,
+            "noTextArtifacts": true,
+            "noLogos": true,
+            "noPeople": true,
+            "noTrademarkRisk": true,
+            "noGenericStockLook": true,
+            "distinctFromSiblingImages": true,
+            "checkedBy": "codex-main-brain-image-qa",
+            "checkedAt": "2026-06-11T03:34:51.666Z"
+          },
+          "url": "https://altoslab-ai.cc/api/blog/generated-media/browser-gemini-gpt-2026-06-11-morning-ai-agent-delegation-ai-agent-delegation-system-mechanism.png",
+          "styleId": "technical-blueprint-lab"
+        }
+      ],
+      "generatedBy": "gemini-chatgpt",
+      "status": "published",
+      "reviewStatus": "approved",
+      "qualityIssues": [],
+      "aiDisclosure": "",
+      "updatedAt": "2026-06-11T03:34:51.666Z",
+      "publishedAt": "2026-06-11T03:15:19.373Z",
+      "slot": "morning",
+      "id": "static-browser-gemini-gpt-2026-06-11-morning-ai-agent-delegation-fil",
+      "sortOrder": 108,
+      "cover": "https://altoslab-ai.cc/api/blog/generated-media/browser-gemini-gpt-2026-06-11-morning-ai-agent-delegation-ai-agent-delegation-system-cover.png",
+      "qualityStatus": "passed",
+      "imageQualityStatus": "passed",
+      "releaseDecision": "published",
+      "ingestRunId": "browser-gemini-gpt-2026-06-11-morning-ai-agent-delegation",
+      "generationDate": "2026-06-11",
+      "generationSlot": "morning",
+      "scheduledFor": "2026-06-11T09:00:00+08:00",
+      "createdAt": "2026-06-11T03:15:19.373Z",
+      "featured": false,
+      "qualityChecks": {
+        "hasHumanReview": true,
+        "hasQualityReviewerApproval": true,
+        "hasVisibleSources": true,
+        "hasNoFabricatedClaims": true,
+        "hasSearchIntentAnswer": true,
+        "hasBilingualParity": true,
+        "hasSourceTrust": true,
+        "hasLabsPointOfView": true,
+        "hasCreativeAngle": true,
+        "hasReaderEngagement": true,
+        "hasImageFit": true,
+        "hasAntiSlopReview": true,
+        "hasSeoGeoReview": true,
+        "qualityScore": 90,
+        "seoGeoScore": 90,
+        "antiSlopScore": 45,
+        "notes": "Static Cloudflare rescue overlay after KV write quota was exhausted; content assembled from Gemini source and browser visual production evidence."
       }
     }
   ]

@@ -231,6 +231,79 @@
     "id": "altos-scheduled-gate"
   },
   {
+    "name": "ALTOS Blog - Column Ready Release Poll",
+    "active": true,
+    "nodes": [
+      {
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "field": "cronExpression",
+                "expression": "*/15 9-23 * * *"
+              }
+            ]
+          }
+        },
+        "id": "column-release-poll-schedule",
+        "name": "Column ready release poll",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.2,
+        "position": [
+          0,
+          0
+        ]
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "http://host.docker.internal:8797/run/column-release",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "x-altos-n8n-token",
+                "value": "={{ $env.ALTOS_N8N_BRIDGE_TOKEN }}"
+              }
+            ]
+          },
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={\"source\":\"n8n\",\"workflow\":\"column-ready-release-poll\"}",
+          "options": {
+            "timeout": 600000
+          }
+        },
+        "id": "column-release-poll-run",
+        "name": "Run column release gate",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          260,
+          0
+        ]
+      }
+    ],
+    "connections": {
+      "Column ready release poll": {
+        "main": [
+          [
+            {
+              "node": "Run column release gate",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "settings": {
+      "timezone": "Asia/Taipei",
+      "executionOrder": "v1"
+    },
+    "id": "altos-column-release-poll"
+  },
+  {
     "name": "ALTOS Blog - Daily SEO GEO Report",
     "active": true,
     "nodes": [
@@ -534,6 +607,177 @@
           280,
           540
         ]
+      },
+      {
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "altos-blog/manual/column-status",
+          "responseMode": "lastNode",
+          "options": {}
+        },
+        "id": "manual-column-status-webhook",
+        "name": "Manual column status webhook",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2,
+        "position": [
+          600,
+          0
+        ],
+        "webhookId": "altos-manual-column-status"
+      },
+      {
+        "parameters": {},
+        "id": "manual-column-status-trigger",
+        "name": "Manual trigger column status",
+        "type": "n8n-nodes-base.manualTrigger",
+        "typeVersion": 1,
+        "position": [
+          600,
+          90
+        ]
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "http://host.docker.internal:8797/run/column-status",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "x-altos-n8n-token",
+                "value": "={{ $env.ALTOS_N8N_BRIDGE_TOKEN }}"
+              }
+            ]
+          },
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={\"source\":\"n8n-webhook\",\"workflow\":\"manual-column-status\"}",
+          "options": {
+            "timeout": 120000
+          }
+        },
+        "id": "manual-column-status-run",
+        "name": "Manual run column status",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          880,
+          0
+        ]
+      },
+      {
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "altos-blog/manual/column-validate",
+          "responseMode": "lastNode",
+          "options": {}
+        },
+        "id": "manual-column-validate-webhook",
+        "name": "Manual column validate webhook",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2,
+        "position": [
+          600,
+          180
+        ],
+        "webhookId": "altos-manual-column-validate"
+      },
+      {
+        "parameters": {},
+        "id": "manual-column-validate-trigger",
+        "name": "Manual trigger column validate",
+        "type": "n8n-nodes-base.manualTrigger",
+        "typeVersion": 1,
+        "position": [
+          600,
+          270
+        ]
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "http://host.docker.internal:8797/run/column-validate",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "x-altos-n8n-token",
+                "value": "={{ $env.ALTOS_N8N_BRIDGE_TOKEN }}"
+              }
+            ]
+          },
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={\"source\":\"n8n-webhook\",\"workflow\":\"manual-column-validate\"}",
+          "options": {
+            "timeout": 600000
+          }
+        },
+        "id": "manual-column-validate-run",
+        "name": "Manual run column validate",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          880,
+          180
+        ]
+      },
+      {
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "altos-blog/manual/column-release",
+          "responseMode": "lastNode",
+          "options": {}
+        },
+        "id": "manual-column-release-webhook",
+        "name": "Manual column release webhook",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2,
+        "position": [
+          600,
+          360
+        ],
+        "webhookId": "altos-manual-column-release"
+      },
+      {
+        "parameters": {},
+        "id": "manual-column-release-trigger",
+        "name": "Manual trigger column release",
+        "type": "n8n-nodes-base.manualTrigger",
+        "typeVersion": 1,
+        "position": [
+          600,
+          450
+        ]
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "http://host.docker.internal:8797/run/column-release",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "x-altos-n8n-token",
+                "value": "={{ $env.ALTOS_N8N_BRIDGE_TOKEN }}"
+              }
+            ]
+          },
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={\"source\":\"n8n-webhook\",\"workflow\":\"manual-column-release\"}",
+          "options": {
+            "timeout": 600000
+          }
+        },
+        "id": "manual-column-release-run",
+        "name": "Manual run column release",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          880,
+          360
+        ]
       }
     ],
     "connections": {
@@ -619,6 +863,72 @@
           [
             {
               "node": "Manual run market scan",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Manual column status webhook": {
+        "main": [
+          [
+            {
+              "node": "Manual run column status",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Manual trigger column status": {
+        "main": [
+          [
+            {
+              "node": "Manual run column status",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Manual column validate webhook": {
+        "main": [
+          [
+            {
+              "node": "Manual run column validate",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Manual trigger column validate": {
+        "main": [
+          [
+            {
+              "node": "Manual run column validate",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Manual column release webhook": {
+        "main": [
+          [
+            {
+              "node": "Manual run column release",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Manual trigger column release": {
+        "main": [
+          [
+            {
+              "node": "Manual run column release",
               "type": "main",
               "index": 0
             }

@@ -57,6 +57,67 @@ function svgShell(title, body) {
 </svg>`;
 }
 
+function neonShell(title, body) {
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="${WIDTH}" height="${HEIGHT}" viewBox="0 0 ${WIDTH} ${HEIGHT}" role="img" aria-label="${escapeXml(title)}">
+  <defs>
+    <radialGradient id="neonGlow" cx="58%" cy="28%" r="72%">
+      <stop offset="0%" stop-color="#1a7f86"/>
+      <stop offset="44%" stop-color="#102a38"/>
+      <stop offset="100%" stop-color="#080b12"/>
+    </radialGradient>
+    <linearGradient id="deskGlow" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#f2b84b"/>
+      <stop offset="55%" stop-color="#2de2c2"/>
+      <stop offset="100%" stop-color="#ed5d7d"/>
+    </linearGradient>
+  </defs>
+  <rect width="${WIDTH}" height="${HEIGHT}" fill="url(#neonGlow)"/>
+  <path d="M0 1050 C430 890 840 1120 1220 930 C1640 720 1980 800 2400 620 L2400 1350 L0 1350 Z" fill="#0f1724" opacity="0.96"/>
+  <g opacity="0.18" stroke="#63f3dc" stroke-width="2">
+    ${Array.from({ length: 18 }, (_, index) => `<path d="M${index * 150} 1250 L${1080 + index * 70} 120"/>`).join("\n    ")}
+    ${Array.from({ length: 9 }, (_, index) => `<path d="M0 ${1080 - index * 90} H2400"/>`).join("\n    ")}
+  </g>
+  ${body}
+</svg>`;
+}
+
+function warmStudioShell(title, body) {
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="${WIDTH}" height="${HEIGHT}" viewBox="0 0 ${WIDTH} ${HEIGHT}" role="img" aria-label="${escapeXml(title)}">
+  <defs>
+    <linearGradient id="studioSky" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fff6df"/>
+      <stop offset="52%" stop-color="#e7f4ee"/>
+      <stop offset="100%" stop-color="#f8d7c9"/>
+    </linearGradient>
+  </defs>
+  <rect width="${WIDTH}" height="${HEIGHT}" fill="url(#studioSky)"/>
+  <path d="M0 940 C420 810 730 965 1050 850 C1460 700 1830 785 2400 610 L2400 1350 L0 1350 Z" fill="#f0dfcc"/>
+  <g opacity="0.32" stroke="#ffffff" stroke-width="8">
+    <path d="M210 190 H2190"/>
+    <path d="M210 370 H2190"/>
+    <path d="M210 550 H2190"/>
+    <path d="M210 730 H2190"/>
+  </g>
+  ${body}
+</svg>`;
+}
+
+function blueprintShell(title, body) {
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="${WIDTH}" height="${HEIGHT}" viewBox="0 0 ${WIDTH} ${HEIGHT}" role="img" aria-label="${escapeXml(title)}">
+  <rect width="${WIDTH}" height="${HEIGHT}" fill="#102238"/>
+  <g opacity="0.22" stroke="#d8eadb" stroke-width="1.4">
+    ${Array.from({ length: 23 }, (_, index) => `<path d="M${80 + index * 100} 0 V1350"/>`).join("\n    ")}
+    ${Array.from({ length: 13 }, (_, index) => `<path d="M0 ${75 + index * 100} H2400"/>`).join("\n    ")}
+  </g>
+  <rect x="95" y="95" width="2210" height="1160" fill="none" stroke="#d8eadb" stroke-width="5" opacity="0.74"/>
+  <path d="M135 1190 H2265" stroke="#f2b84b" stroke-width="7" opacity="0.72"/>
+  ${body}
+</svg>`;
+}
+
 function card(x, y, w, h, fill = "#fffaf1", stroke = "#3b3732", opacity = 1) {
   return `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="26" fill="${fill}" fill-opacity="${opacity}" stroke="${stroke}" stroke-width="5"/>`;
 }
@@ -86,120 +147,107 @@ function connector(points, color = "#27745f", width = 8) {
 
 function coverSvg() {
   const body = `
-  <g transform="translate(0 16)">
-    ${shadowCard(185, 210, 510, 760, "#fffaf1")}
-    ${shadowCard(945, 155, 510, 870, "#f8f2e7")}
-    ${shadowCard(1705, 240, 510, 720, "#fffaf1")}
-
-    ${blankLines(255, 305, [285, 210, 330])}
-    ${blankLines(1015, 255, [335, 245, 310])}
-    ${blankLines(1775, 335, [300, 230, 330])}
-
-    <rect x="275" y="515" width="320" height="56" rx="28" fill="#e4c46e" stroke="#3b3732" stroke-width="4"/>
-    <rect x="1035" y="482" width="330" height="56" rx="28" fill="#6fb196" stroke="#3b3732" stroke-width="4"/>
-    <rect x="1795" y="530" width="300" height="56" rx="28" fill="#d88171" stroke="#3b3732" stroke-width="4"/>
-
-    <g fill="none" stroke="#3b3732" stroke-width="5" stroke-linecap="round">
-      <path d="M315 705 h250"/>
-      <path d="M315 775 h180"/>
-      <path d="M1078 700 h245"/>
-      <path d="M1078 770 h305"/>
-      <path d="M1838 710 h240"/>
-      <path d="M1838 780 h175"/>
+  <g transform="translate(0 18)">
+    <ellipse cx="1200" cy="1040" rx="900" ry="120" fill="#000000" opacity="0.38"/>
+    <path d="M320 890 C620 810 920 850 1190 790 C1500 720 1750 710 2085 790" fill="none" stroke="url(#deskGlow)" stroke-width="18" stroke-linecap="round"/>
+    <g opacity="0.88">
+      <rect x="360" y="330" width="420" height="520" rx="34" fill="#101a28" stroke="#2de2c2" stroke-width="6"/>
+      <rect x="990" y="220" width="430" height="650" rx="34" fill="#141322" stroke="#f2b84b" stroke-width="6"/>
+      <rect x="1645" y="350" width="420" height="500" rx="34" fill="#171425" stroke="#ed5d7d" stroke-width="6"/>
     </g>
-
-    ${connector([[700, 590], [835, 590], [835, 485], [940, 485]], "#2f7d68", 10)}
-    ${connector([[1455, 505], [1588, 505], [1588, 610], [1700, 610]], "#2f7d68", 10)}
-    ${connector([[1210, 1030], [1210, 1132], [450, 1132], [450, 980]], "#9b6b31", 8)}
-
-    ${token(835, 590, 34, "#6fb196")}
-    ${token(1588, 505, 34, "#6fb196")}
-    ${token(1210, 1132, 28, "#e4c46e")}
-
-    <g stroke="#2d312c" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" fill="none">
-      <path d="M818 588 l16 18 l38 -44"/>
-      <path d="M1571 503 l16 18 l38 -44"/>
-      <path d="M1196 1131 l14 16 l32 -39"/>
+    <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M455 455 H690 M455 525 H630 M455 595 H710" stroke="#b8fff3" stroke-width="13" opacity="0.55"/>
+      <path d="M1085 370 H1325 M1085 450 H1265 M1085 530 H1355" stroke="#ffe0a1" stroke-width="13" opacity="0.6"/>
+      <path d="M1740 485 H1970 M1740 555 H1900 M1740 625 H1995" stroke="#ffc4cf" stroke-width="13" opacity="0.58"/>
     </g>
-
-    <g opacity="0.92">
-      <rect x="150" y="1035" width="495" height="42" rx="21" fill="#3b3732"/>
-      <rect x="675" y="1035" width="1010" height="42" rx="21" fill="#6fb196"/>
-      <rect x="1715" y="1035" width="535" height="42" rx="21" fill="#3b3732"/>
+    <g fill="none" stroke-width="11" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M780 590 C905 565 890 445 990 450" stroke="#2de2c2"/>
+      <path d="M1420 520 C1535 520 1535 650 1645 650" stroke="#ed5d7d"/>
+      <path d="M1206 872 C1206 1035 590 1028 590 850" stroke="#f2b84b"/>
+    </g>
+    ${token(890, 445, 38, "#2de2c2", "#d7fff7")}
+    ${token(1535, 650, 38, "#ed5d7d", "#ffd1da")}
+    ${token(1206, 1035, 34, "#f2b84b", "#fff0c0")}
+    <g opacity="0.9">
+      <rect x="505" y="705" width="180" height="36" rx="18" fill="#2de2c2"/>
+      <rect x="1110" y="720" width="220" height="36" rx="18" fill="#f2b84b"/>
+      <rect x="1770" y="735" width="190" height="36" rx="18" fill="#ed5d7d"/>
     </g>
   </g>`;
-  return svgShell("ALTOS LAB editorial visual for AI delivery accountability", body);
+  return neonShell("ALTOS LAB cyberpunk editorial visual for AI delegation control", body);
 }
 
 function openingSvg() {
   const body = `
-  <g transform="rotate(-3 1200 675)">
-    ${shadowCard(310, 265, 500, 660, "#fffaf1")}
-    ${shadowCard(880, 210, 640, 760, "#f8f2e7")}
-    ${shadowCard(1595, 315, 495, 600, "#fffaf1")}
-  </g>
-  <g>
-    <rect x="430" y="355" width="250" height="44" rx="22" fill="#e4c46e" stroke="#3b3732" stroke-width="4"/>
-    <rect x="1005" y="340" width="350" height="44" rx="22" fill="#6fb196" stroke="#3b3732" stroke-width="4"/>
-    <rect x="1700" y="430" width="250" height="44" rx="22" fill="#d88171" stroke="#3b3732" stroke-width="4"/>
-    ${blankLines(420, 520, [275, 225, 320], "#5f574e")}
-    ${blankLines(1005, 505, [360, 280, 430], "#5f574e")}
-    ${blankLines(1700, 585, [260, 210, 300], "#5f574e")}
-
-    ${connector([[675, 700], [835, 700], [835, 620], [980, 620]], "#2f7d68", 9)}
-    ${connector([[1500, 628], [1635, 628], [1635, 710], [1720, 710]], "#2f7d68", 9)}
-
-    ${token(835, 700, 32, "#6fb196")}
-    ${token(1635, 628, 32, "#6fb196")}
-    ${token(1180, 910, 42, "#e4c46e")}
-    <path d="M1160 910 l20 22 l48 -58" fill="none" stroke="#2d312c" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
-
-    <g opacity="0.84" fill="#3b3732">
-      <rect x="360" y="1015" width="370" height="32" rx="16"/>
-      <rect x="820" y="1048" width="730" height="32" rx="16"/>
-      <rect x="1660" y="1015" width="380" height="32" rx="16"/>
+  <g transform="translate(0 22)">
+    <path d="M250 850 L2150 850 L1985 1065 L430 1065 Z" fill="#2f2b28" opacity="0.18"/>
+    <g stroke="#342e2a" stroke-width="6" stroke-linejoin="round">
+      <path d="M290 285 L740 210 L740 770 L290 820 Z" fill="#fff8e6"/>
+      <path d="M910 170 L1525 255 L1445 870 L850 790 Z" fill="#f7fff7"/>
+      <path d="M1660 315 L2110 265 L2090 760 L1610 830 Z" fill="#fff3ee"/>
+    </g>
+    <g opacity="0.55" stroke="#342e2a" stroke-width="12" stroke-linecap="round">
+      <path d="M380 410 H610 M375 485 H650 M370 560 H560"/>
+      <path d="M1035 390 H1320 M1018 470 H1390 M1005 550 H1285"/>
+      <path d="M1745 435 H1970 M1735 515 H2015 M1725 595 H1900"/>
+    </g>
+    <g>
+      <circle cx="790" cy="795" r="46" fill="#76b59d" stroke="#342e2a" stroke-width="6"/>
+      <circle cx="1535" cy="815" r="46" fill="#76b59d" stroke="#342e2a" stroke-width="6"/>
+      <path d="M835 795 C980 725 1285 745 1490 815" fill="none" stroke="#2f7d68" stroke-width="12" stroke-linecap="round"/>
+      <path d="M505 840 C770 1040 1590 1070 1910 820" fill="none" stroke="#d57b65" stroke-width="10" stroke-linecap="round" opacity="0.82"/>
+    </g>
+    <g>
+      <rect x="445" y="660" width="215" height="42" rx="21" fill="#e5c866" stroke="#342e2a" stroke-width="5"/>
+      <rect x="1050" y="660" width="300" height="42" rx="21" fill="#76b59d" stroke="#342e2a" stroke-width="5"/>
+      <rect x="1775" y="660" width="230" height="42" rx="21" fill="#d57b65" stroke="#342e2a" stroke-width="5"/>
+    </g>
+    <g opacity="0.88" fill="#342e2a">
+      <path d="M315 930 C470 900 625 908 785 940 L760 990 C590 960 455 960 300 990 Z"/>
+      <path d="M1010 982 C1190 940 1380 945 1560 990 L1540 1045 C1330 1005 1180 1005 995 1042 Z"/>
+      <path d="M1660 930 C1815 905 1965 910 2115 940 L2100 992 C1935 965 1815 960 1650 990 Z"/>
     </g>
   </g>`;
-  return svgShell("ALTOS LAB editorial visual for AI-assisted delivery handoffs", body);
+  return warmStudioShell("ALTOS LAB anime-inspired editorial visual for AI task handoff", body);
 }
 
 function mechanismSvg() {
   const body = `
-  <g>
-    ${shadowCard(210, 235, 580, 250, "#fffaf1")}
-    ${shadowCard(210, 550, 760, 250, "#f8f2e7")}
-    ${shadowCard(210, 865, 940, 250, "#fffaf1")}
-
-    <rect x="305" y="325" width="330" height="58" rx="29" fill="#6fb196" stroke="#3b3732" stroke-width="4"/>
-    <rect x="305" y="640" width="455" height="58" rx="29" fill="#e4c46e" stroke="#3b3732" stroke-width="4"/>
-    <rect x="305" y="955" width="580" height="58" rx="29" fill="#d88171" stroke="#3b3732" stroke-width="4"/>
-
-    ${shadowCard(1340, 300, 700, 650, "#f7efe2")}
-    <g stroke="#3b3732" stroke-width="5" stroke-linecap="round">
-      <path d="M1455 415 H1905"/>
-      <path d="M1455 515 H1818"/>
-      <path d="M1455 615 H1935"/>
-      <path d="M1455 715 H1775"/>
-      <path d="M1455 815 H1880"/>
+  <g transform="translate(0 10)">
+    <g fill="none" stroke="#d8eadb" stroke-width="7" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M350 350 H860 V585 H1140"/>
+      <path d="M350 675 H920 V585"/>
+      <path d="M350 1000 H860 V760 H1140"/>
+      <path d="M1260 585 H1650 V430 H2050"/>
+      <path d="M1260 760 H1660 V930 H2050"/>
+      <path d="M1760 930 V1105 H520 V1000"/>
     </g>
-
-    ${connector([[790, 360], [1120, 360], [1120, 420], [1340, 420]], "#2f7d68", 9)}
-    ${connector([[970, 675], [1120, 675], [1120, 620], [1340, 620]], "#9b6b31", 9)}
-    ${connector([[1150, 990], [1240, 990], [1240, 820], [1340, 820]], "#a65147", 9)}
-    ${connector([[1690, 950], [1690, 1090], [535, 1090], [535, 1115]], "#5c574f", 8)}
-
-    ${token(1120, 360, 32, "#6fb196")}
-    ${token(1120, 675, 32, "#e4c46e")}
-    ${token(1240, 990, 32, "#d88171")}
-    ${token(1690, 1090, 28, "#3b3732")}
-
-    <g fill="none" stroke="#2d312c" stroke-width="8" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M1104 357 l15 18 l39 -47"/>
-      <path d="M1105 674 l14 17 l38 -45"/>
-      <path d="M1224 989 l14 17 l38 -45"/>
+    <g>
+      <rect x="220" y="255" width="330" height="190" rx="18" fill="#173251" stroke="#d8eadb" stroke-width="5"/>
+      <rect x="220" y="580" width="330" height="190" rx="18" fill="#173251" stroke="#f2b84b" stroke-width="5"/>
+      <rect x="220" y="905" width="330" height="190" rx="18" fill="#173251" stroke="#ec7f6f" stroke-width="5"/>
+      <rect x="1100" y="475" width="260" height="380" rx="26" fill="#12304c" stroke="#d8eadb" stroke-width="6"/>
+      <rect x="1960" y="335" width="240" height="190" rx="18" fill="#173251" stroke="#8bd6bb" stroke-width="5"/>
+      <rect x="1960" y="835" width="240" height="190" rx="18" fill="#173251" stroke="#ec7f6f" stroke-width="5"/>
+    </g>
+    <g opacity="0.78" stroke-linecap="round">
+      <path d="M290 328 H480 M290 380 H430" stroke="#d8eadb" stroke-width="10"/>
+      <path d="M290 653 H480 M290 705 H430" stroke="#f2b84b" stroke-width="10"/>
+      <path d="M290 978 H480 M290 1030 H430" stroke="#ec7f6f" stroke-width="10"/>
+      <path d="M1165 570 H1295 M1165 655 H1255 M1165 740 H1305" stroke="#d8eadb" stroke-width="10"/>
+      <path d="M2025 410 H2145 M2025 905 H2145" stroke="#d8eadb" stroke-width="10"/>
+    </g>
+    ${token(920, 585, 34, "#f2b84b", "#102238")}
+    ${token(1260, 585, 34, "#8bd6bb", "#102238")}
+    ${token(1260, 760, 34, "#ec7f6f", "#102238")}
+    ${token(1760, 930, 30, "#d8eadb", "#102238")}
+    <g fill="none" stroke="#f2b84b" stroke-width="4" opacity="0.9">
+      <circle cx="1230" cy="665" r="255"/>
+      <path d="M1030 665 H1430"/>
+      <path d="M1230 465 V865"/>
     </g>
   </g>`;
-  return svgShell("ALTOS LAB editorial visual for AI work risk tiers and checkpoints", body);
+  return blueprintShell("ALTOS LAB technical blueprint visual for AI delegation checkpoints", body);
 }
 
 async function renderPng(svg, outputPath) {

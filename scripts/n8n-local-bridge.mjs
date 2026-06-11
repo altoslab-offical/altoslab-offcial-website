@@ -87,8 +87,39 @@ const jobs = {
       "--slot",
       "morning",
       "--base-url",
+      DEFAULT_BASE_URL
+    ])
+  },
+  "column-status": {
+    timeoutMs: 120_000,
+    command: () => nodeCommand("scripts/blog-scheduled-runner.mjs", [
+      "--column-status",
+      "--slot",
+      "morning",
+      "--base-url",
       DEFAULT_BASE_URL,
-      "--force"
+      "--no-lock"
+    ])
+  },
+  "column-validate": {
+    timeoutMs: 600_000,
+    command: () => nodeCommand("scripts/blog-scheduled-runner.mjs", [
+      "--column-validate",
+      "--slot",
+      "morning",
+      "--base-url",
+      DEFAULT_BASE_URL
+    ])
+  },
+  "column-release": {
+    timeoutMs: 600_000,
+    command: () => nodeCommand("scripts/blog-scheduled-runner.mjs", [
+      "--release",
+      "--slot",
+      "morning",
+      "--base-url",
+      DEFAULT_BASE_URL,
+      "--force-release"
     ])
   },
   scheduled: {

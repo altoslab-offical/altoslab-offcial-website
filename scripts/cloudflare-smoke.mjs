@@ -42,7 +42,7 @@ function baseUrl() {
 }
 
 function expectedProvider() {
-  return arg("expected-provider", process.env.CLOUDFLARE_SMOKE_EXPECTED_PROVIDER || "cloudflare-kv");
+  return arg("expected-provider", process.env.CLOUDFLARE_SMOKE_EXPECTED_PROVIDER || "cloudflare-d1");
 }
 
 function resolveIp() {
@@ -80,6 +80,10 @@ function pushIssue(errors, message, context = {}) {
 
 function hasCloudflareWorkerErrorBody(text = "") {
   return /\berror code:\s*1102\b/i.test(text) || /Worker exceeded resource limits/i.test(text);
+}
+
+function isRetryableStatus(status) {
+  return status === 429 || status === 503 || status === 504 || status === 520 || status === 521 || status === 522 || status === 524;
 }
 
 async function printJson(payload) {
@@ -133,16 +137,23 @@ async function fetchText(root, path, errors, context) {
 
 async function fetchJson(root, path, errors, context) {
   const url = `${root}${path}`;
+  const attempts = Number(process.env.CLOUDFLARE_SMOKE_ATTEMPTS || "6");
+  let last = { response: null, json: null };
   try {
-    const response = await fetchWithTimeout(url, {
-      headers: {
-        Accept: "application/json",
-        "User-Agent": "altos-cloudflare-smoke/1.0"
-      }
-    });
-    const json = await response.json().catch(() => null);
-    if (!response.ok) pushIssue(errors, `GET ${url} returned ${response.status}`, context);
-    return { response, json };
+    for (let attempt = 1; attempt <= attempts; attempt += 1) {
+      const response = await fetchWithTimeout(url, {
+        headers: {
+          Accept: "application/json",
+          "User-Agent": "altos-cloudflare-smoke/1.0"
+        }
+      });
+      const json = await response.json().catch(() => null);
+      last = { response, json };
+      if (response.ok || attempt >= attempts || !isRetryableStatus(response.status)) break;
+      await new Promise((resolve) => setTimeout(resolve, 1500 * attempt));
+    }
+    if (!last.response?.ok) pushIssue(errors, `GET ${url} returned ${last.response?.status || "no response"}`, context);
+    return last;
   } catch (error) {
     pushIssue(errors, `GET ${url} failed: ${error instanceof Error ? error.message : "unknown error"}`, context);
     return { response: null, json: null };
@@ -235,7 +246,7 @@ async function main() {
   if (health?.integrations?.legacyDeepSeekCronDisabled !== true) {
     pushIssue(errors, "legacy DeepSeek cron must be disabled", { surface: "health" });
   }
-  if (provider === "cloudflare-kv" && health?.integrations?.imageCloudflareKvConfigured !== true) {
+  if ((provider === "cloudflare-kv" || provider === "cloudflare-d1") && health?.integrations?.imageCloudflareKvConfigured !== true) {
     pushIssue(errors, "Cloudflare KV generated-media storage must be configured", { surface: "health" });
   }
   if (JSON.stringify(health?.integrations?.blogLanguages || []) !== JSON.stringify(BLOG_LANGUAGES)) {
