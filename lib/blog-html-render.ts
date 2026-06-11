@@ -132,6 +132,9 @@ const SHELL_CSS = `
   .body h2 { font-size:30px; line-height:1.2; margin:34px 0 12px; letter-spacing:0; }
   .body h3 { font-size:23px; line-height:1.25; margin:26px 0 10px; letter-spacing:0; }
   .body p { margin:0 0 18px; }
+  .body strong { color:var(--text); font-weight:800; }
+  .body blockquote { margin:0 0 22px; padding:4px 0 4px 18px; border-left:3px solid var(--accent); color:var(--muted); }
+  .body blockquote p { margin:0; }
   .body ul { margin:0 0 20px; padding-left:22px; }
   .inline-figure { margin:26px 0; border:1px solid var(--line); border-radius:8px; overflow:hidden; background:var(--panel); }
   .inline-figure img { width:100%; aspect-ratio:16/9; object-fit:cover; }
@@ -273,6 +276,24 @@ function renderInlineImage(image: NonNullable<BlogPost["contentImages"]>[number]
   </figure>`;
 }
 
+function renderInlineMarkdown(value: string) {
+  return escapeHtml(value).replace(/\*\*([^*\n]{1,180})\*\*/g, "<strong>$1</strong>");
+}
+
+function imageMatchesPlaceholder(image: NonNullable<BlogPost["contentImages"]>[number], key: string, index: number) {
+  const imageWithStyle = image as typeof image & { styleId?: string };
+  const normalizedKey = key.toLowerCase();
+  const url = String(image?.url || "").toLowerCase();
+  const styleId = String(imageWithStyle?.styleId || "").toLowerCase();
+  const placement = String(image?.placement || "").toLowerCase();
+  if (url.includes(`-${normalizedKey}.`) || url.includes(`/${normalizedKey}.`)) return true;
+  if (styleId.includes(normalizedKey)) return true;
+  if (normalizedKey === "opening" && placement === "after-lead") return true;
+  if (normalizedKey === "mechanism" && placement === "mid-article") return true;
+  if (normalizedKey === "image" && index === 0) return true;
+  return false;
+}
+
 function renderBody(post: BlogPost) {
   const blocks = String(post.body || "")
     .replace(/\r\n/g, "\n")
@@ -281,28 +302,47 @@ function renderBody(post: BlogPost) {
     .filter(Boolean)
     .filter((block) => !/^常見問題|^FAQ/i.test(block));
   const images = post.contentImages || [];
-  const interval = Math.max(2, Math.floor(blocks.length / Math.max(images.length, 1)));
-  let imageIndex = 0;
+  const usedImages = new Set<number>();
+  const hasImagePlaceholders = blocks.some((block) => /^\[IMAGE:[a-z0-9_-]+\]$/i.test(block));
+
+  const takeImageForPlaceholder = (key: string) => {
+    const matchedIndex = images.findIndex((image, index) => !usedImages.has(index) && imageMatchesPlaceholder(image, key, index));
+    const nextIndex = matchedIndex >= 0 ? matchedIndex : images.findIndex((_, index) => !usedImages.has(index));
+    if (nextIndex < 0) return "";
+    usedImages.add(nextIndex);
+    return renderInlineImage(images[nextIndex]);
+  };
+
+  const renderUnusedImages = () => images.map((image, index) => (usedImages.has(index) ? "" : renderInlineImage(image))).join("");
+  const interval = hasImagePlaceholders ? 0 : Math.max(2, Math.floor(blocks.length / Math.max(images.length, 1)));
 
   return blocks
     .map((block, blockIndex) => {
+      const imagePlaceholder = block.match(/^\[IMAGE:([a-z0-9_-]+)\]$/i);
+      if (imagePlaceholder) return takeImageForPlaceholder(imagePlaceholder[1] || "");
+
       const lines = block.split("\n").map((line) => line.trim()).filter(Boolean);
       let html = "";
       if (/^#{2,3}\s+/.test(block)) {
         const level = block.startsWith("###") ? "h3" : "h2";
-        html = `<${level}>${escapeHtml(block.replace(/^#{2,3}\s+/, ""))}</${level}>`;
+        html = `<${level}>${renderInlineMarkdown(block.replace(/^#{2,3}\s+/, ""))}</${level}>`;
+      } else if (lines.length > 0 && lines.every((line) => /^>\s+/.test(line))) {
+        html = `<blockquote>${lines.map((line) => `<p>${renderInlineMarkdown(line.replace(/^>\s+/, ""))}</p>`).join("")}</blockquote>`;
       } else if (lines.length > 1 && lines.every((line) => /^[-*]\s+/.test(line))) {
-        html = `<ul>${lines.map((line) => `<li>${escapeHtml(line.replace(/^[-*]\s+/, ""))}</li>`).join("")}</ul>`;
+        html = `<ul>${lines.map((line) => `<li>${renderInlineMarkdown(line.replace(/^[-*]\s+/, ""))}</li>`).join("")}</ul>`;
       } else {
-        html = `<p>${lines.map(escapeHtml).join("<br />")}</p>`;
+        html = `<p>${lines.map(renderInlineMarkdown).join("<br />")}</p>`;
       }
-      if (images[imageIndex] && (blockIndex + 1) % interval === 0) {
-        html += renderInlineImage(images[imageIndex]);
-        imageIndex += 1;
+      if (!hasImagePlaceholders && interval > 0 && (blockIndex + 1) % interval === 0) {
+        const nextIndex = images.findIndex((_, index) => !usedImages.has(index));
+        if (nextIndex >= 0) {
+          html += renderInlineImage(images[nextIndex]);
+          usedImages.add(nextIndex);
+        }
       }
       return html;
     })
-    .join("") + images.slice(imageIndex).map(renderInlineImage).join("");
+    .join("") + renderUnusedImages();
 }
 
 export function renderBlogPostHtml(post: BlogPost, alternates: BlogPost[] = []) {
