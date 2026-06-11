@@ -4,7 +4,6 @@ import { shouldRedirectToCanonicalHost, siteUrl } from "./lib/seo";
 
 const AI_CRAWLER_PATTERN =
   /(GPTBot|OAI-SearchBot|ChatGPT-User|ClaudeBot|Claude-SearchBot|PerplexityBot|Google-Extended|Meta-ExternalAgent|Bytespider)/i;
-const BLOG_HTML_LANGUAGE_PREFIXES = new Set(["en", "ja", "ko", "id", "vi", "th", "ms", "fil"]);
 
 function nextWithPathname(request: NextRequest) {
   const requestHeaders = new Headers(request.headers);
@@ -40,23 +39,6 @@ export function middleware(request: NextRequest) {
   ) {
     const canonicalUrl = new URL(request.nextUrl.pathname + request.nextUrl.search, siteUrl);
     return NextResponse.redirect(canonicalUrl, 308);
-  }
-
-  if ((request.method === "GET" || request.method === "HEAD") && !pathname.startsWith("/api/")) {
-    const segments = pathname.split("/").filter(Boolean);
-    const isZhBlogIndex = segments.length === 1 && segments[0] === "blog";
-    const isZhBlogPost = segments.length === 2 && segments[0] === "blog";
-    const isLocalizedBlogIndex = segments.length === 2 && BLOG_HTML_LANGUAGE_PREFIXES.has(segments[0]) && segments[1] === "blog";
-    const isLocalizedBlogPost = segments.length === 3 && BLOG_HTML_LANGUAGE_PREFIXES.has(segments[0]) && segments[1] === "blog";
-
-    if (isZhBlogIndex || isLocalizedBlogIndex || isZhBlogPost || isLocalizedBlogPost) {
-      const rewriteUrl = request.nextUrl.clone();
-      const language = isLocalizedBlogIndex || isLocalizedBlogPost ? segments[0] : "zh-Hant";
-      const slug = isZhBlogPost ? segments[1] : isLocalizedBlogPost ? segments[2] : "";
-      rewriteUrl.pathname = slug ? `/api/blog-html/${slug}` : "/api/blog-html";
-      rewriteUrl.searchParams.set("language", language);
-      return NextResponse.rewrite(rewriteUrl);
-    }
   }
 
   const isAdminPage = pathname.startsWith("/admin");
