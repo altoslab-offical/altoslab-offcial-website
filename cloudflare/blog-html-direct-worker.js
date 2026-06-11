@@ -1,5 +1,6 @@
 const BLOG_LANGUAGES = ["zh-Hant", "en", "ja", "ko", "id", "vi", "th", "ms", "fil"];
 const LANGUAGE_PREFIXES = new Set(BLOG_LANGUAGES.filter((language) => language !== "zh-Hant"));
+const BLOG_INDEX_PAGE_SIZE = 18;
 
 function escapeHtml(value) {
   return String(value ?? "")
@@ -86,11 +87,15 @@ function contentTypeLabel(post) {
   return post.language === "zh-Hant" ? "市場快訊" : "Market News";
 }
 
-function pathRequest(pathname) {
+function routeRequest(pathname) {
   const parts = pathname.split("/").filter(Boolean);
-  if (parts[0] === "blog" && parts[1]) return { language: "zh-Hant", slug: decodeURIComponent(parts[1]) };
+  if (parts[0] === "blog" && !parts[1]) return { kind: "index", language: "zh-Hant" };
+  if (parts[0] === "blog" && parts[1]) return { kind: "post", language: "zh-Hant", slug: decodeURIComponent(parts[1]) };
+  if (LANGUAGE_PREFIXES.has(parts[0]) && parts[1] === "blog" && !parts[2]) {
+    return { kind: "index", language: parts[0] };
+  }
   if (LANGUAGE_PREFIXES.has(parts[0]) && parts[1] === "blog" && parts[2]) {
-    return { language: parts[0], slug: decodeURIComponent(parts[2]) };
+    return { kind: "post", language: parts[0], slug: decodeURIComponent(parts[2]) };
   }
   return null;
 }
@@ -209,7 +214,7 @@ function articleJsonLd(post, canonical, image) {
 
 const CSS = `
 :root{color-scheme:light;--paper:#fafafa;--ink:#111;--muted:#666;--line:#e7e7e7;--soft:#f4f4f4;--accent:#8b5cf6;--badge:#fff1dc;--badge-ink:#7c3f00}
-*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;line-height:1.72}a{color:inherit;text-decoration:none}img{max-width:100%;display:block}.site-nav{position:sticky;top:0;z-index:10;display:flex;align-items:center;justify-content:space-between;gap:28px;padding:26px 7vw;background:rgba(250,250,250,.94);border-bottom:1px solid var(--line);backdrop-filter:blur(12px)}.site-logo{font-weight:800;letter-spacing:.18em}.site-nav nav{display:flex;gap:28px;font-size:14px}.site-nav-cta{display:inline-flex;align-items:center;border-radius:999px;background:#eee;padding:10px 18px;font-weight:700}.language-menu{display:flex;flex-wrap:wrap;gap:8px}.language-menu a{font-size:12px;border:1px solid var(--line);border-radius:999px;padding:6px 10px;color:var(--muted)}.language-menu a.is-current{background:#111;color:#fff}.blog-page{padding:64px 20px}.blog-article-page article{max-width:820px;margin:0 auto}.article-nav-row{margin-bottom:28px}.card-link{font-weight:800}.article-kicker{display:flex;flex-wrap:wrap;gap:10px;align-items:center;color:var(--muted);font-size:14px}.blog-craft-type-badge{border-radius:999px;padding:3px 10px;background:var(--badge);color:var(--badge-ink);font-weight:800}.article-hero h1{margin:12px 0 18px;font-size:clamp(40px,7vw,68px);line-height:1.04;letter-spacing:0}.article-meta{display:flex;gap:12px;color:var(--muted);font-size:14px;font-weight:700}.hero-copy{font-size:20px;color:#333;max-width:760px}.article-cover{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px;border:1px solid var(--line);background:#f1f1f1}.article-cover-credit,.caption,.source-meta,.source-summary{font-size:13px;color:var(--muted)}.geo-summary,.article-takeaways{margin:28px 0;padding:22px;border:1px solid var(--line);border-radius:8px;background:#fff}.article-takeaways ul{margin:8px 0 0;padding-left:22px;color:var(--accent);font-weight:750}.eyebrow{margin:0 0 8px;font-size:13px;letter-spacing:.02em;color:var(--accent);font-weight:800}.rich-text{font-size:18px}.rich-text p{margin:0 0 22px}.rich-text h2{font-size:30px;line-height:1.2;margin:34px 0 12px}.rich-text ul{margin:0 0 22px;padding-left:22px}.inline-figure{margin:28px 0;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:#fff}.inline-figure img{width:100%;aspect-ratio:16/9;object-fit:cover}.inline-figure figcaption{padding:10px 12px;color:var(--muted);font-size:14px}.source-list,.ai-disclosure,.article-author-card{margin-top:34px;padding-top:22px;border-top:1px solid var(--line)}.source-list ul{padding-left:22px}.source-list a{font-weight:800}.article-tag-strip{display:flex;flex-wrap:wrap;gap:8px;margin-top:26px}.article-tag-chip{border:1px solid var(--line);border-radius:999px;padding:7px 11px;background:#fff}.article-author-card{display:flex;gap:14px;align-items:center}.article-author-mark img{width:52px;height:52px;border-radius:50%;object-fit:cover}.site-footer{display:flex;justify-content:space-between;gap:20px;padding:36px 7vw;border-top:1px solid var(--line);color:var(--muted);font-size:14px}.brand-text{font-weight:800;letter-spacing:.12em}@media(max-width:760px){.site-nav{padding:18px 20px;align-items:flex-start;flex-direction:column}.site-nav nav{gap:16px;flex-wrap:wrap}.blog-page{padding:36px 16px}.article-hero h1{font-size:40px}.hero-copy,.rich-text{font-size:17px}.site-footer{flex-direction:column;padding:28px 20px}}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;line-height:1.72}a{color:inherit;text-decoration:none}img{max-width:100%;display:block}.site-nav{position:sticky;top:0;z-index:10;display:flex;align-items:center;justify-content:space-between;gap:28px;padding:26px 7vw;background:rgba(250,250,250,.94);border-bottom:1px solid var(--line);backdrop-filter:blur(12px)}.site-logo{font-weight:800;letter-spacing:.18em}.site-nav nav{display:flex;gap:28px;font-size:14px}.site-nav-cta{display:inline-flex;align-items:center;border-radius:999px;background:#eee;padding:10px 18px;font-weight:700}.language-menu{display:flex;flex-wrap:wrap;gap:8px}.language-menu a{font-size:12px;border:1px solid var(--line);border-radius:999px;padding:6px 10px;color:var(--muted)}.language-menu a.is-current{background:#111;color:#fff}.blog-page{padding:64px 20px}.blog-article-page article,.blog-index-inner{max-width:1100px;margin:0 auto}.blog-article-page article{max-width:820px}.article-nav-row{margin-bottom:28px}.card-link{font-weight:800}.article-kicker{display:flex;flex-wrap:wrap;gap:10px;align-items:center;color:var(--muted);font-size:14px}.blog-craft-type-badge{border-radius:999px;padding:3px 10px;background:var(--badge);color:var(--badge-ink);font-weight:800}.article-hero h1,.blog-index-hero h1{margin:12px 0 18px;font-size:clamp(40px,7vw,68px);line-height:1.04;letter-spacing:0}.article-meta,.blog-card-meta{display:flex;gap:12px;color:var(--muted);font-size:14px;font-weight:700}.hero-copy,.blog-index-hero p{font-size:20px;color:#333;max-width:760px}.article-cover{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px;border:1px solid var(--line);background:#f1f1f1}.article-cover-credit,.caption,.source-meta,.source-summary{font-size:13px;color:var(--muted)}.geo-summary,.article-takeaways{margin:28px 0;padding:22px;border:1px solid var(--line);border-radius:8px;background:#fff}.article-takeaways ul{margin:8px 0 0;padding-left:22px;color:var(--accent);font-weight:750}.eyebrow{margin:0 0 8px;font-size:13px;letter-spacing:.02em;color:var(--accent);font-weight:800}.rich-text{font-size:18px}.rich-text p{margin:0 0 22px}.rich-text h2{font-size:30px;line-height:1.2;margin:34px 0 12px}.rich-text ul{margin:0 0 22px;padding-left:22px}.inline-figure{margin:28px 0;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:#fff}.inline-figure img{width:100%;aspect-ratio:16/9;object-fit:cover}.inline-figure figcaption{padding:10px 12px;color:var(--muted);font-size:14px}.source-list,.ai-disclosure,.article-author-card{margin-top:34px;padding-top:22px;border-top:1px solid var(--line)}.source-list ul{padding-left:22px}.source-list a{font-weight:800}.article-tag-strip{display:flex;flex-wrap:wrap;gap:8px;margin-top:26px}.article-tag-chip{border:1px solid var(--line);border-radius:999px;padding:7px 11px;background:#fff}.article-author-card{display:flex;gap:14px;align-items:center}.article-author-mark img{width:52px;height:52px;border-radius:50%;object-fit:cover}.blog-index-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:22px;margin-top:38px}.blog-card{display:flex;flex-direction:column;min-height:100%;overflow:hidden;border:1px solid var(--line);border-radius:8px;background:#fff}.blog-card img{width:100%;aspect-ratio:16/9;object-fit:cover;background:#eee}.blog-card-body{display:flex;flex-direction:column;gap:12px;padding:18px}.blog-card h2{font-size:24px;line-height:1.18;margin:0}.blog-card p{margin:0;color:#444}.blog-card-meta{font-size:13px}.blog-card-read{margin-top:auto;font-weight:800}.site-footer{display:flex;justify-content:space-between;gap:20px;padding:36px 7vw;border-top:1px solid var(--line);color:var(--muted);font-size:14px}.brand-text{font-weight:800;letter-spacing:.12em}@media(max-width:900px){.blog-index-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:760px){.site-nav{padding:18px 20px;align-items:flex-start;flex-direction:column}.site-nav nav{gap:16px;flex-wrap:wrap}.blog-page{padding:36px 16px}.article-hero h1,.blog-index-hero h1{font-size:40px}.hero-copy,.blog-index-hero p,.rich-text{font-size:17px}.blog-index-grid{grid-template-columns:1fr}.site-footer{flex-direction:column;padding:28px 20px}}
 `;
 
 async function readPost(env, slug, language) {
@@ -227,6 +232,26 @@ async function readPost(env, slug, language) {
   }
 }
 
+async function readIndexPosts(env, language) {
+  const database = env.ALTOS_BLOG_D1;
+  if (!database?.prepare) return [];
+  const result = await database
+    .prepare("SELECT list_json AS payload FROM public_blog_posts WHERE status = 'published' AND language = ?1 ORDER BY updated_at DESC, sort_order ASC LIMIT ?2")
+    .bind(language, BLOG_INDEX_PAGE_SIZE)
+    .all();
+  const rows = Array.isArray(result?.results) ? result.results : [];
+  return rows
+    .map((row) => {
+      if (typeof row?.payload !== "string") return null;
+      try {
+        return JSON.parse(row.payload);
+      } catch {
+        return null;
+      }
+    })
+    .filter(Boolean);
+}
+
 async function readAlternates(env, translationGroupId) {
   if (!translationGroupId || !env.ALTOS_BLOG_D1?.prepare) return [];
   try {
@@ -240,6 +265,98 @@ async function readAlternates(env, translationGroupId) {
   } catch {
     return [];
   }
+}
+
+function indexCopy(language) {
+  return {
+    "zh-Hant": {
+      eyebrow: "ALTOS LAB Journal · Research / Build / Growth",
+      title: "AI 實驗室筆記",
+      description: "我們研究、建造，然後把經驗發布成可引用的知識。",
+      latest: "最新文章",
+      empty: "目前沒有文章。",
+      read: "閱讀文章"
+    },
+    en: {
+      eyebrow: "ALTOS LAB Journal · Research / Build / Growth",
+      title: "AI Lab Notes",
+      description: "We research, build, and publish what becomes reusable intelligence.",
+      latest: "Latest Articles",
+      empty: "No articles yet.",
+      read: "Read article"
+    }
+  }[language] || {
+    eyebrow: "ALTOS LAB Journal",
+    title: "AI Lab Notes",
+    description: "Research, build notes and market updates from ALTOS LAB.",
+    latest: "Latest Articles",
+    empty: "No articles yet.",
+    read: "Read article"
+  };
+}
+
+function renderIndex(posts, language, env, requestUrl) {
+  const siteUrl = env.NEXT_PUBLIC_SITE_URL || new URL(requestUrl).origin;
+  const canonical = `${siteUrl}${blogIndexPath(language)}`;
+  const labels = indexCopy(language);
+  const cards = posts.length
+    ? posts
+        .map((post) => {
+          const path = blogPostPath(post);
+          return `<article class="blog-card">
+            ${post.cover ? `<a href="${escapeAttribute(path)}"><img src="${escapeAttribute(post.cover)}" alt="${escapeAttribute(post.coverAlt || post.title)}" loading="lazy" decoding="async" /></a>` : ""}
+            <div class="blog-card-body">
+              <p class="article-kicker"><span class="blog-craft-type-badge">${escapeHtml(contentTypeLabel(post))}</span><span>${escapeHtml(post.topic || post.newsCategory || "AI")}</span></p>
+              <h2><a href="${escapeAttribute(path)}">${escapeHtml(post.title)}</a></h2>
+              ${post.excerpt ? `<p>${inlineTextHtml(post.excerpt)}</p>` : ""}
+              <div class="blog-card-meta"><span>${escapeHtml(dateLabel(post.updatedAt || post.publishedAt))}</span><span>${escapeHtml(String(post.readTimeMinutes || 3))} 分鐘閱讀</span></div>
+              <a class="blog-card-read" href="${escapeAttribute(path)}">${escapeHtml(labels.read)} →</a>
+            </div>
+          </article>`;
+        })
+        .join("")
+    : `<p>${escapeHtml(labels.empty)}</p>`;
+  return `<!doctype html>
+<html lang="${escapeAttribute(htmlLang(language))}">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#fafafa" />
+  <title>${escapeHtml(labels.title)}｜ALTOS LAB</title>
+  <meta name="description" content="${escapeAttribute(labels.description)}" />
+  <meta name="robots" content="index, follow" />
+  ${env.GOOGLE_SITE_VERIFICATION ? `<meta name="google-site-verification" content="${escapeAttribute(env.GOOGLE_SITE_VERIFICATION)}" />` : ""}
+  <link rel="canonical" href="${escapeAttribute(canonical)}" />
+  ${BLOG_LANGUAGES.map((item) => `<link rel="alternate" hreflang="${escapeAttribute(item === "zh-Hant" ? "zh-Hant-TW" : item)}" href="${escapeAttribute(`${siteUrl}${blogIndexPath(item)}`)}" />`).join("\n")}
+  <meta property="og:title" content="${escapeAttribute(labels.title)}" />
+  <meta property="og:description" content="${escapeAttribute(labels.description)}" />
+  <meta property="og:url" content="${escapeAttribute(canonical)}" />
+  <meta property="og:type" content="website" />
+  ${analyticsHead(env)}
+  <style>${CSS}</style>
+</head>
+<body>
+${analyticsBody(env)}
+<div class="site-home blog-site-shell">
+  <header class="site-nav">
+    <a class="site-logo" aria-label="ALTOS LAB home" href="/"><span class="brand-text">ALTOS LAB</span></a>
+    <nav aria-label="Main navigation"><a href="/#about">關於我們</a><a href="/#services">服務項目</a><a href="/#portfolio">專案介紹</a><a href="/blog">Blog</a></nav>
+    <a class="site-nav-cta" href="/#contact">合作洽談 ↗</a>
+  </header>
+  <main class="blog-page blog-index-page">
+    <div class="blog-index-inner">
+      <header class="blog-index-hero">
+        <p class="eyebrow">${escapeHtml(labels.eyebrow)}</p>
+        <h1>${escapeHtml(labels.title)}</h1>
+        <p>${escapeHtml(labels.description)}</p>
+      </header>
+      <section aria-label="${escapeAttribute(labels.latest)}" class="blog-index-grid">${cards}</section>
+    </div>
+  </main>
+  <footer class="site-footer"><span class="brand-text">ALTOS LAB</span><span>© 2026 ALTOS LAB · AI implementation studio</span></footer>
+</div>
+</body>
+</html>`;
 }
 
 function renderPost(post, alternates, env, requestUrl) {
@@ -319,8 +436,19 @@ ${analyticsBody(env)}
 export async function maybeHandleDirectBlogHtml(request, env) {
   if (request.method !== "GET" && request.method !== "HEAD") return null;
   const url = new URL(request.url);
-  const parsed = pathRequest(url.pathname);
+  const parsed = routeRequest(url.pathname);
   if (!parsed) return null;
+  if (parsed.kind === "index") {
+    const posts = await readIndexPosts(env, parsed.language);
+    const html = renderIndex(posts, parsed.language, env, request.url);
+    return new Response(request.method === "HEAD" ? null : html, {
+      headers: {
+        "content-type": "text/html; charset=utf-8",
+        "cache-control": "public, max-age=120, stale-while-revalidate=1800",
+        "x-altos-direct-blog-render": "cloudflare-d1-index"
+      }
+    });
+  }
   const post = await readPost(env, parsed.slug, parsed.language);
   if (!post) return null;
   const alternates = await readAlternates(env, post.translationGroupId);

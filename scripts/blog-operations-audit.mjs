@@ -10,6 +10,7 @@ const DEFAULT_BASE_URL = "https://altoslab-ai.cc";
 const DEFAULT_COLUMN_TARGET = 9;
 const DAILY_COLUMN_MINIMUM = 1;
 const REQUIRED_COLUMN_CONTENT_IMAGES = 2;
+const COLUMN_BASELINE_POLICY = "advisory";
 
 function arg(name, fallback = "") {
   const index = process.argv.indexOf(`--${name}`);
@@ -427,10 +428,11 @@ function summarizeIssues({ counts, gaps, candidates, launchAgent, n8nLocal, visu
   const minColumn = Math.min(...counts.map((row) => row.column));
   const minTodayColumn = Math.min(...counts.map((row) => row.todayColumn || 0));
   const columnTarget = targets?.column || DEFAULT_COLUMN_TARGET;
+  const strictColumnBaseline = targets?.columnBaselinePolicy === "hard";
   if (minTotal === 0) {
     issues.push("one or more configured languages have zero public posts; verify active CMS provider, public projection and DNS route before content generation or release");
   }
-  if (gaps.some((gap) => gap.columnGap > 0)) issues.push(`columns below target: min column=${minColumn}`);
+  if (strictColumnBaseline && gaps.some((gap) => gap.columnGap > 0)) issues.push(`columns below target: min column=${minColumn}`);
   if (minTodayColumn < DAILY_COLUMN_MINIMUM) {
     issues.push(`daily column minimum not met for ${targets?.date || "today"}: min todayColumn=${minTodayColumn}`);
   }
@@ -446,7 +448,7 @@ function summarizeIssues({ counts, gaps, candidates, launchAgent, n8nLocal, visu
     issues.push(`GA/GTM monitoring needs attention: ${missing || "health integrations not configured"}`);
   }
   const blockedVisuals = visualGap.checked ? visualGap.rows.filter((row) => row.sourceReady && !row.publishableVisuals) : [];
-  if (minColumn < columnTarget && blockedVisuals.length) {
+  if (strictColumnBaseline && minColumn < columnTarget && blockedVisuals.length) {
     issues.push(`column candidates blocked by visuals: ${blockedVisuals.map((row) => `seq${row.sequence}`).join(", ")}`);
   }
   return issues;
@@ -461,6 +463,8 @@ function summarizeBottlenecks({ counts, gaps, candidates, launchAgent, n8nLocal,
   const blockedVisuals = visualGap.checked ? visualGap.rows.filter((row) => row.sourceReady && !row.publishableVisuals) : [];
   const readyMarketCandidates = candidates.filter((candidate) => candidate.exists && candidate.lane === "market" && candidate.status === "ready");
   const readyColumnCandidates = candidates.filter((candidate) => candidate.exists && candidate.lane === "column" && candidate.status === "ready");
+  const strictColumnBaseline = targets?.columnBaselinePolicy === "hard";
+  const columnBaselineGap = minColumn < columnTarget;
   return [
     {
       lane: "market",
@@ -474,19 +478,21 @@ function summarizeBottlenecks({ counts, gaps, candidates, launchAgent, n8nLocal,
     },
     {
       lane: "column",
-      status: minTodayColumn < DAILY_COLUMN_MINIMUM ? "blocked" : minColumn >= columnTarget ? "stable" : "blocked",
+      status: minTodayColumn < DAILY_COLUMN_MINIMUM ? "blocked" : strictColumnBaseline && columnBaselineGap ? "blocked" : "stable",
       summary:
         minTodayColumn < DAILY_COLUMN_MINIMUM
           ? `daily column missing for ${targets?.date || "today"}; todayColumn=${minTodayColumn}/language`
-          : minColumn >= columnTarget
-          ? blockedVisuals.length > 0
-            ? `column target met at ${minColumn}/language; next queued candidates need visuals: ${blockedVisuals.map((row) => `seq${row.sequence}`).join(", ")}`
-            : `column target met at ${minColumn}/language`
-          : blockedVisuals.length > 0
-          ? `columns stuck at ${minColumn}/language because GPT visual evidence is missing for ${blockedVisuals.map((row) => `seq${row.sequence}`).join(", ")}`
-          : readyColumnCandidates.length > 0
-            ? `columns below target at ${minColumn}/language with ready candidates waiting for release`
-            : `columns below target at ${minColumn}/language`
+          : strictColumnBaseline && columnBaselineGap && blockedVisuals.length > 0
+            ? `columns stuck at ${minColumn}/language because GPT visual evidence is missing for ${blockedVisuals.map((row) => `seq${row.sequence}`).join(", ")}`
+            : strictColumnBaseline && columnBaselineGap && readyColumnCandidates.length > 0
+              ? `columns below target at ${minColumn}/language with ready candidates waiting for release`
+              : strictColumnBaseline && columnBaselineGap
+                ? `columns below target at ${minColumn}/language`
+                : columnBaselineGap
+                  ? `daily column met; historical column baseline is advisory at ${minColumn}/${columnTarget} per language`
+                  : blockedVisuals.length > 0
+                    ? `daily column met and baseline target met at ${minColumn}/language; next queued candidates need visuals: ${blockedVisuals.map((row) => `seq${row.sequence}`).join(", ")}`
+                    : `daily column met and baseline target met at ${minColumn}/language`
     },
     {
       lane: "automation",
@@ -516,11 +522,12 @@ function summarizeBottlenecks({ counts, gaps, candidates, launchAgent, n8nLocal,
   ];
 }
 
-function nextActions({ counts, gaps, visualGap, candidates, headlessProviders, analytics }) {
+function nextActions({ counts, gaps, visualGap, candidates, headlessProviders, analytics, targets }) {
   const actions = [];
   const minTotal = Math.min(...counts.map((row) => row.total));
   const columnGap = Math.max(...gaps.map((gap) => gap.columnGap));
   const minTodayColumn = Math.min(...counts.map((row) => row.todayColumn || 0));
+  const strictColumnBaseline = targets?.columnBaselinePolicy === "hard";
   const blockedVisuals = visualGap.checked ? visualGap.rows.filter((row) => row.sourceReady && !row.publishableVisuals) : [];
   const readyMarketCandidates = candidates.filter((candidate) => candidate.exists && candidate.lane === "market" && candidate.status === "ready");
   if (minTotal === 0) {
@@ -535,15 +542,15 @@ function nextActions({ counts, gaps, visualGap, candidates, headlessProviders, a
   if (analytics?.checked && !analytics.ok) {
     actions.push("Repair GA/GTM installation or /api/health analytics configuration before treating the daily operations report as clean.");
   }
-  if (columnGap > 0 && blockedVisuals.length) {
+  if (minTodayColumn < DAILY_COLUMN_MINIMUM) {
+    actions.push("Produce and release today's Gemini-approved daily column set; do not treat the baseline column count as satisfying the daily requirement.");
+  } else if (strictColumnBaseline && columnGap > 0 && blockedVisuals.length) {
     actions.push(`Produce GPT cover plus 2-3 content images for ${blockedVisuals.map((row) => `seq${row.sequence}`).join(", ")} before column release.`);
     if (!headlessProviders?.openaiImageConfigured || !headlessProviders?.uploadStorageConfigured) {
       actions.push("To remove the Chrome bottleneck, configure a headless image provider plus upload storage; otherwise column visuals still require a controlled GPT browser session.");
     }
-  } else if (columnGap > 0) {
+  } else if (strictColumnBaseline && columnGap > 0) {
     actions.push("Prepare/release enough Gemini-approved column sets to close the column target gap.");
-  } else if (minTodayColumn < DAILY_COLUMN_MINIMUM) {
-    actions.push("Produce and release today's Gemini-approved daily column set; do not treat the baseline column count as satisfying the daily requirement.");
   } else {
     const queued = blockedVisuals.map((row) => `seq${row.sequence}`).join(", ");
     actions.push(
@@ -561,7 +568,7 @@ function textReport(report) {
   lines.push(`Checked: ${report.checkedAt}`);
   lines.push("");
   lines.push(
-    `Targets: market news has no hard cap, published column baseline ${report.targets.column}/language, daily column minimum ${report.targets.dailyColumnMinimum} approved set(s)`
+    `Targets: market news has no hard cap, published column baseline ${report.targets.column}/language (${report.targets.columnBaselinePolicy}), daily column minimum ${report.targets.dailyColumnMinimum} approved set(s)`
   );
   lines.push("");
   lines.push("Live counts:");
@@ -616,6 +623,7 @@ async function main() {
   const date = arg("date", taiwanDate());
   const baseUrl = arg("base-url", process.env.ALTOS_BLOG_BASE_URL || DEFAULT_BASE_URL);
   const columnTarget = Number(arg("column-target", String(DEFAULT_COLUMN_TARGET))) || DEFAULT_COLUMN_TARGET;
+  const columnBaselinePolicy = hasFlag("strict-column-baseline") ? "hard" : COLUMN_BASELINE_POLICY;
   const counts = await liveCounts(baseUrl, date);
   const gaps = targetGaps(counts, columnTarget);
   const candidates = await candidateSummary(date);
@@ -626,14 +634,14 @@ async function main() {
   const analytics = await analyticsProbe(baseUrl);
   const report = {
     ok:
-      gaps.every((gap) => gap.breakingGap === 0 && gap.columnGap === 0) &&
+      gaps.every((gap) => gap.breakingGap === 0 && (columnBaselinePolicy !== "hard" || gap.columnGap === 0)) &&
       counts.every((row) => (row.todayColumn || 0) >= DAILY_COLUMN_MINIMUM) &&
       n8nLocal.ok === true &&
       analytics.ok === true,
     checkedAt: new Date().toISOString(),
     date,
     baseUrl,
-    targets: { marketCap: null, column: columnTarget, dailyColumnMinimum: DAILY_COLUMN_MINIMUM, date },
+    targets: { marketCap: null, column: columnTarget, columnBaselinePolicy, dailyColumnMinimum: DAILY_COLUMN_MINIMUM, date },
     counts,
     gaps,
     candidates,
