@@ -12,6 +12,38 @@ function escapeAttribute(value) {
   return escapeHtml(value).replaceAll('"', "&quot;");
 }
 
+function safeLinkHref(value) {
+  const raw = String(value || "").trim();
+  try {
+    const url = new URL(raw, "https://altoslab-ai.cc");
+    if (url.protocol === "http:" || url.protocol === "https:" || url.protocol === "mailto:") return raw;
+  } catch {
+    return "";
+  }
+  return "";
+}
+
+function inlineTextHtml(value) {
+  let html = escapeHtml(value);
+  html = html.replace(/`([^`\n]+)`/g, "<code>$1</code>");
+  html = html.replace(/\*\*([^*\n][\s\S]*?[^*\n])\*\*/g, "<strong>$1</strong>");
+  html = html.replace(/__([^_\n][\s\S]*?[^_\n])__/g, "<strong>$1</strong>");
+  html = html.replace(/\[([^\]\n]+)\]\((https?:\/\/[^)\s]+|mailto:[^)\s]+)\)/g, (_match, label, href) => {
+    const safeHref = safeLinkHref(href);
+    if (!safeHref) return label;
+    return `<a href="${escapeAttribute(safeHref)}" target="_blank" rel="noreferrer">${label}</a>`;
+  });
+  return html;
+}
+
+function plainText(value) {
+  return String(value ?? "")
+    .replace(/\[([^\]\n]+)\]\((https?:\/\/[^)\s]+|mailto:[^)\s]+)\)/g, "$1")
+    .replace(/(\*\*|__)([\s\S]*?)\1/g, "$2")
+    .replace(/`([^`\n]+)`/g, "$1")
+    .trim();
+}
+
 function blogIndexPath(language) {
   return language === "zh-Hant" ? "/blog" : `/${language}/blog`;
 }
@@ -74,17 +106,17 @@ function paragraphHtml(body) {
     .map((paragraph) => paragraph.trim())
     .filter(Boolean)
     .map((paragraph) => {
-      if (/^#{2,3}\s+/.test(paragraph)) return `<h2>${escapeHtml(paragraph.replace(/^#{2,3}\s+/, ""))}</h2>`;
+      if (/^#{2,3}\s+/.test(paragraph)) return `<h2>${inlineTextHtml(paragraph.replace(/^#{2,3}\s+/, ""))}</h2>`;
       if (/^\s*[-*]\s+/m.test(paragraph)) {
         const items = paragraph
           .split(/\n/)
           .map((line) => line.replace(/^\s*[-*]\s+/, "").trim())
           .filter(Boolean)
-          .map((item) => `<li>${escapeHtml(item)}</li>`)
+          .map((item) => `<li>${inlineTextHtml(item)}</li>`)
           .join("");
         return `<ul>${items}</ul>`;
       }
-      return `<p>${escapeHtml(paragraph)}</p>`;
+      return `<p>${inlineTextHtml(paragraph)}</p>`;
     })
     .join("");
 }
@@ -112,7 +144,7 @@ function sourceListHtml(post) {
         (source) => `<li>
           <a href="${escapeAttribute(source.url)}" target="_blank" rel="noreferrer">${escapeHtml(source.title || source.url)}</a>
           <span class="source-meta"> · ${escapeHtml(source.publisher || "")}${source.publishedAt ? ` · ${escapeHtml(dateLabel(source.publishedAt))}` : ""}</span>
-          ${source.summary ? `<p class="source-summary">${escapeHtml(source.summary)}</p>` : ""}
+          ${source.summary ? `<p class="source-summary">${inlineTextHtml(source.summary)}</p>` : ""}
         </li>`
       )
       .join("")}</ul>
@@ -165,7 +197,7 @@ function articleJsonLd(post, canonical, image) {
     "@context": "https://schema.org",
     "@type": "BlogPosting",
     headline: post.title,
-    description: post.excerpt || post.seoDescription,
+    description: plainText(post.excerpt || post.seoDescription),
     image,
     datePublished: post.publishedAt || post.createdAt,
     dateModified: post.updatedAt || post.publishedAt || post.createdAt,
@@ -214,7 +246,7 @@ function renderPost(post, alternates, env, requestUrl) {
   const siteUrl = env.NEXT_PUBLIC_SITE_URL || new URL(requestUrl).origin;
   const canonical = `${siteUrl}${blogPostPath(post)}`;
   const image = post.cover || `${siteUrl}/blog-cover-zh-hant.png`;
-  const description = post.seoDescription || post.excerpt || post.title;
+  const description = plainText(post.seoDescription || post.excerpt || post.title);
   const sourceCredit = post.coverCreditUrl
     ? `<a href="${escapeAttribute(post.coverCreditUrl)}" target="_blank" rel="noreferrer">${escapeHtml(post.coverCredit || "")}</a>`
     : escapeHtml(post.coverCredit || "");
@@ -237,7 +269,7 @@ function renderPost(post, alternates, env, requestUrl) {
   <link rel="canonical" href="${escapeAttribute(canonical)}" />
   ${alternatesHtml(post, alternates, siteUrl)}
   <meta property="og:title" content="${escapeAttribute(post.title)}" />
-  <meta property="og:description" content="${escapeAttribute(post.excerpt || description)}" />
+  <meta property="og:description" content="${escapeAttribute(plainText(post.excerpt || description))}" />
   <meta property="og:url" content="${escapeAttribute(canonical)}" />
   <meta property="og:image" content="${escapeAttribute(image)}" />
   <meta property="og:type" content="article" />
@@ -264,11 +296,11 @@ ${analyticsBody(env)}
         <p class="eyebrow article-kicker"><span class="blog-craft-type-badge">${escapeHtml(contentTypeLabel(post))}</span><span>${escapeHtml(post.topic || post.newsCategory || "AI")}</span><span>${escapeHtml(String(post.readTimeMinutes || 3))} 分鐘閱讀</span></p>
         <h1>${escapeHtml(post.title)}</h1>
         <div class="article-meta"><span>更新 ${escapeHtml(dateLabel(post.updatedAt || post.publishedAt))}</span><span>${escapeHtml(localeLabel(post.language))}</span></div>
-        ${post.excerpt ? `<p class="hero-copy">${escapeHtml(post.excerpt)}</p>` : ""}
+        ${post.excerpt ? `<p class="hero-copy">${inlineTextHtml(post.excerpt)}</p>` : ""}
         ${image ? `<img class="article-cover" src="${escapeAttribute(image)}" alt="${escapeAttribute(post.coverAlt || post.title)}" loading="eager" decoding="async" />` : ""}
         ${sourceCredit ? `<p class="article-cover-credit">圖片來源： ${sourceCredit}</p>` : ""}
       </header>
-      ${post.geoSummary ? `<aside class="geo-summary"><strong>${post.language === "zh-Hant" ? "重點摘要" : "Summary"}:</strong> ${escapeHtml(post.geoSummary)}</aside>` : ""}
+      ${post.geoSummary ? `<aside class="geo-summary"><strong>${post.language === "zh-Hant" ? "重點摘要" : "Summary"}:</strong> ${inlineTextHtml(post.geoSummary)}</aside>` : ""}
       ${takeaways}
       <div class="rich-text">${paragraphHtml(post.body)}${inlineImagesHtml(post.contentImages)}</div>
       ${sourceListHtml(post)}

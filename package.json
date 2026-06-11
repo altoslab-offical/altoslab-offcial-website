@@ -21,7 +21,7 @@
     "verify:gcp": "node scripts/gcp-production-smoke.mjs",
     "verify:cloudflare": "node scripts/cloudflare-smoke.mjs",
     "typecheck": "tsc --noEmit",
-    "test:blog": "node scripts/blog-system-smoke.mjs && node scripts/blog-market-newsroom-smoke.mjs",
+    "test:blog": "node scripts/blog-system-smoke.mjs && node scripts/blog-market-newsroom-smoke.mjs && node scripts/blog-direct-renderer-smoke.mjs",
     "blog:worker": "node scripts/blog-local-worker.mjs",
     "blog:orchestrate": "node scripts/blog-antigravity-orchestrator.mjs",
     "blog:scheduled": "node scripts/blog-scheduled-runner.mjs",
