@@ -193,7 +193,7 @@ const topicAliases: Record<string, string[]> = {
 };
 
 function articleTimestamp(post: LitePost) {
-  return new Date(post.publishedAt || post.updatedAt || post.createdAt).getTime() || 0;
+  return new Date(post.updatedAt || post.publishedAt || post.createdAt).getTime() || 0;
 }
 
 function matchesTopic(post: LitePost, item: string) {

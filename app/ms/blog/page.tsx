@@ -3,7 +3,7 @@ import { BlogIndexLite } from "@/components/BlogIndexLite";
 import { BLOG_LANGUAGES, blogCoverForLanguage, blogIndexPath, metadataLanguageKey } from "@/lib/blog-utils";
 import { siteUrl } from "@/lib/seo";
 
-export const revalidate = 300;
+export const dynamic = "force-dynamic";
 
 const language = "ms" as const;
 const title = "Nota Makmal AI | ALTOS LAB Journal";

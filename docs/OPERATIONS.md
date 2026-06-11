@@ -74,8 +74,8 @@ This path is retained as legacy recovery documentation only. Do not run blind GC
 - Active Cloudflare production should report `cmsStorage.provider = cloudflare-kv`. A GCP recovery service should report `cmsStorage.provider = gcs` only after a fresh GCP migration has been explicitly verified.
 - Legacy `altoslab-ai.cc` and `www.altoslab-ai.cc` Cloud Run domain mappings in GCP project `project-e688c018-aec3-4815-891` should no longer receive production custom-domain traffic only after the Cloudflare DNS cutover is confirmed by live DNS and unpinned smoke checks. Do not use them for normal publishing or repair while Cloudflare Worker URL is the operational base.
 - GA/GTM stay on `GTM-WJ96VR7V` and `G-5VSLFNVD28` unless the analytics owner intentionally replaces them.
-- Google operations now use `altoslab768@gmail.com` as the active operator account. Do not store this account's password in this repo or in Codex memory; use Google's sign-in session, MFA and `gcloud auth` on Tommy's machine.
-- SEO/GEO daily insight should use the stable Cloudflare Worker URL while unpinned custom-domain smoke is still affected by recursive DNS cache: `npm run seo:geo-report -- --base-url https://altoslab-official-website.altoslab-ai.workers.dev --format text`. Switch back to `https://altoslab-ai.cc` only after unpinned Cloudflare verification passes. The daily email must be sent through the Gmail web UI from `altoslab768@gmail.com` to `Altoslab.offical@gmail.com`; if the Gmail web session is not the official sender, hold the send instead of using a connector or another mailbox.
+- Google operations now use `altoslab.offical@gmail.com` as the active operator account. Do not store this account's password in this repo or in Codex memory; use Google's sign-in session, MFA and `gcloud auth` on Tommy's machine.
+- SEO/GEO daily insight should use `https://altoslab-ai.cc` after unpinned Cloudflare verification passes. The daily email must be sent through the Gmail web UI from `altoslab.offical@gmail.com` to `altoslab.offical@gmail.com`; if the Gmail web session is not the official sender, hold the send instead of using a connector or another mailbox.
 - Chrome browser work for Gemini, ChatGPT/GPT and Gmail must use the Chrome profile signed in as `john.wu0120@gmail.com`. Do not use or switch into `tm.studio`; if the required profile is not visible, hold browser work and report the blocker.
 
 Run before any future GCP recovery deploy:
@@ -107,13 +107,13 @@ npm run blog:repair-production -- --base-url https://altoslab-ai.cc --apply
 - `CLOUDFLARE_KV_ENABLED=0`
 - `CLOUDFLARE_R2_ENABLED=0`
 
-The script uses the production GCP account `altoslab768@gmail.com` by default without printing tokens or secret values, updates Cloud Run only when that account has permission, then polls `/api/health` and `/api/blog`. Use `--gcloud-account <account>` only for an explicit one-off operator override, and `--try-all-gcloud-accounts` only during a supervised credentials audit. Reports are written under `data/blog-repair/production-cms-gcs-repair-*.json`.
+The script uses the production GCP account `altoslab.offical@gmail.com` by default without printing tokens or secret values, updates Cloud Run only when that account has permission, then polls `/api/health` and `/api/blog`. Use `--gcloud-account <account>` only for an explicit one-off operator override, and `--try-all-gcloud-accounts` only during a supervised credentials audit. Reports are written under `data/blog-repair/production-cms-gcs-repair-*.json`.
 
 If repair is blocked by expired credentials or missing Cloud Run permission, run:
 
 ```bash
-gcloud auth login altoslab768@gmail.com --force --brief
-gcloud auth application-default login altoslab768@gmail.com
+gcloud auth login altoslab.offical@gmail.com --force --brief
+gcloud auth application-default login altoslab.offical@gmail.com
 npm run blog:repair-production -- --base-url https://altoslab-ai.cc --apply
 npm run verify:gcp -- --base-url https://altoslab-ai.cc
 ```

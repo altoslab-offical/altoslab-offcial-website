@@ -20,6 +20,10 @@ type MediaUploadRequest = {
 const ALLOWED_CONTENT_TYPES = new Set(["image/png", "image/jpeg", "image/webp"]);
 const MAX_BYTES = 8_000_000;
 
+function toArrayBuffer(bytes: Buffer) {
+  return new Uint8Array(bytes).buffer;
+}
+
 function safeFilename(input = "cover.png") {
   const ext = path.extname(input).toLowerCase();
   const stem = path.basename(input, ext).replace(/[^a-z0-9._-]+/gi, "-").replace(/^-+|-+$/g, "");
@@ -97,7 +101,7 @@ async function storeCloudflareR2Image(filename: string, bytes: Buffer, contentTy
 async function storeCloudflareKvImage(filename: string, bytes: Buffer, contentType: string, request: Request) {
   const { namespace } = requireCloudflareKvNamespace();
   const pathname = cloudflareKvMediaPathname(filename);
-  await namespace.put(pathname, bytes, {
+  await namespace.put(pathname, toArrayBuffer(bytes), {
     metadata: {
       contentType,
       size: String(bytes.length),
@@ -151,16 +155,21 @@ export async function POST(request: Request) {
   }
 
   const filename = safeFilename(`${payload.ingestRunId || "manual"}-${payload.filename || "cover.png"}`);
-  const stored =
-    getCloudflareKvConfig()
+  let stored: Awaited<ReturnType<typeof storeCloudflareKvImage>>;
+  try {
+    stored = getCloudflareKvConfig()
       ? await storeCloudflareKvImage(filename, bytes, contentType, request)
       : getCloudflareR2Config()
-      ? await storeCloudflareR2Image(filename, bytes, contentType, request)
-      : getGcsStorageConfig()
-      ? await storeGcsImage(filename, bytes, contentType, request)
-      : process.env.BLOG_MEDIA_ALLOW_LOCAL_STORAGE === "1"
-      ? await storeLocalPublicImage(filename, bytes, request)
-      : await storeBlobImage(filename, bytes, contentType);
+        ? await storeCloudflareR2Image(filename, bytes, contentType, request)
+        : getGcsStorageConfig()
+          ? await storeGcsImage(filename, bytes, contentType, request)
+          : process.env.BLOG_MEDIA_ALLOW_LOCAL_STORAGE === "1"
+            ? await storeLocalPublicImage(filename, bytes, request)
+            : await storeBlobImage(filename, bytes, contentType);
+  } catch (error) {
+    console.error("[blog-media] failed to store generated media", error);
+    return NextResponse.json({ ok: false, error: "generated media storage failed" }, { status: 500 });
+  }
 
   return NextResponse.json({
     ok: true,

@@ -10,6 +10,7 @@ import { normalizeBlogAuthor, publicCoverCreditForPost, publicEditorialReviewNot
 import { getCloudflareKvConfig, getCloudflareKvNamespace } from "./cloudflare-kv";
 import { readCmsDataFromStorage, writeCmsDataToStorage } from "./cms-storage";
 import { seedData } from "./seed";
+import staticBlogOverrides from "../data/static-blog-overrides.json";
 import type {
   BlogLanguage,
   BlogInlineImage,
@@ -450,6 +451,25 @@ function allPublicBlogPostsFromData(data: CmsData) {
     .map(compactPublicBlogPost);
 }
 
+function staticPublishedBlogOverridePosts() {
+  const posts = (staticBlogOverrides as unknown as { posts?: BlogPost[] }).posts || [];
+  return posts
+    .filter((post) => post.status === "published")
+    .map(hydrateBlogPost)
+    .map(compactPublicBlogPost);
+}
+
+function publicBlogMergeKey(post: Pick<BlogPost, "language" | "slug">) {
+  return `${normalizeBlogLanguage(post.language)}::${post.slug}`;
+}
+
+function mergeStaticBlogOverrides(posts: BlogPost[]) {
+  const merged = new Map<string, BlogPost>();
+  posts.forEach((post) => merged.set(publicBlogMergeKey(post), post));
+  staticPublishedBlogOverridePosts().forEach((post) => merged.set(publicBlogMergeKey(post), post));
+  return Array.from(merged.values());
+}
+
 function publicBlogListPostsFromPosts(posts: BlogPost[]) {
   return BLOG_LANGUAGES.flatMap((language) =>
     sortedByPublicRecency(posts.filter((post) => normalizeBlogLanguage(post.language) === language))
@@ -693,15 +713,15 @@ export async function refreshPublicBlogCacheFromStorage() {
 
 async function readPublishedBlogPostsForPublic() {
   const cached = await readPublicBlogCache();
-  if (cached) return cached;
+  if (cached) return mergeStaticBlogOverrides(cached);
 
   if (getCloudflareKvConfig()) {
-    console.warn("[cms] Public blog list cache is missing on Cloudflare; returning empty list instead of rebuilding during a public request.");
-    return [];
+    console.warn("[cms] Public blog list cache is missing on Cloudflare; returning static public overrides instead of rebuilding during a public request.");
+    return mergeStaticBlogOverrides([]);
   }
 
   const data = await readPublicRawCmsData();
-  const posts = publicBlogListPostsFromData(data);
+  const posts = mergeStaticBlogOverrides(publicBlogListPostsFromData(data));
   await writePublicBlogCacheFromData(data).catch((error) => {
     console.warn("[cms] Unable to rebuild public blog cache:", error instanceof Error ? error.message : error);
   });
@@ -761,15 +781,15 @@ export async function getPublishedBlogPostsByLanguage(language?: BlogLanguage) {
 
 export async function getPublishedBlogInventoryPosts() {
   const cached = await readPublicBlogInventoryCache();
-  if (cached) return sortedByPublicRecency(cached);
+  if (cached) return sortedByPublicRecency(mergeStaticBlogOverrides(cached));
 
   if (getCloudflareKvConfig()) {
-    console.warn("[cms] Public blog inventory cache is missing on Cloudflare; returning empty list instead of rebuilding during a public request.");
-    return [];
+    console.warn("[cms] Public blog inventory cache is missing on Cloudflare; returning static public overrides instead of rebuilding during a public request.");
+    return sortedByPublicRecency(mergeStaticBlogOverrides([]));
   }
 
   const data = await readPublicRawCmsData();
-  return sortedByPublicRecency(allPublicBlogPostsFromData(data).map(compactPublicBlogInventoryPost));
+  return sortedByPublicRecency(mergeStaticBlogOverrides(allPublicBlogPostsFromData(data)).map(compactPublicBlogInventoryPost));
 }
 
 export async function getPublishedBlogInventoryPostsByLanguage(language?: BlogLanguage) {
@@ -781,15 +801,15 @@ export async function getPublishedBlogInventoryPostsByLanguage(language?: BlogLa
 
 export async function getPublishedBlogDuplicatePosts() {
   const cached = await readPublicBlogDuplicateCache();
-  if (cached) return sortedByOrder(cached);
+  if (cached) return sortedByOrder(mergeStaticBlogOverrides(cached));
 
   if (getCloudflareKvConfig()) {
-    console.warn("[cms] Public blog duplicate cache is missing on Cloudflare; returning empty list instead of rebuilding during validate.");
-    return [];
+    console.warn("[cms] Public blog duplicate cache is missing on Cloudflare; returning static public overrides instead of rebuilding during validate.");
+    return sortedByOrder(mergeStaticBlogOverrides([]));
   }
 
   const data = await readPublicRawCmsData();
-  return sortedByOrder(allPublicBlogPostsFromData(data).map(compactPublicBlogDuplicatePost));
+  return sortedByOrder(mergeStaticBlogOverrides(allPublicBlogPostsFromData(data)).map(compactPublicBlogDuplicatePost));
 }
 
 function decodeSlugCandidate(slug: string) {
@@ -830,7 +850,14 @@ export async function getPublishedBlogPost(slug: string, language?: BlogLanguage
 }
 
 export async function getPublishedBlogAlternates(post: BlogPost) {
-  if (isCloudflarePublicRuntime()) return [];
+  if (isCloudflarePublicRuntime()) {
+    return staticPublishedBlogOverridePosts().filter(
+      (item) =>
+        item.status === "published" &&
+        item.translationGroupId === post.translationGroupId &&
+        item.id !== post.id
+    );
+  }
 
   const posts = await readPublishedBlogPostsForPublic();
   return posts.filter(

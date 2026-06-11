@@ -268,7 +268,7 @@ assert(productionRepair.includes("altoslab-official-cms-934551798702"), "product
 assert(productionRepair.includes("gcloud") && productionRepair.includes("run") && productionRepair.includes("services") && productionRepair.includes("update"), "production repair can update the existing Cloud Run service env");
 assert(productionRepair.includes("--update-env-vars"), "production repair updates only runtime env vars instead of rebuilding or publishing content");
 assert(productionRepair.includes("CLOUDSDK_CORE_ACCOUNT"), "production repair tests available gcloud accounts without changing global account state");
-assert(productionRepair.includes("DEFAULT_GCLOUD_ACCOUNT = \"altoslab768@gmail.com\""), "production repair defaults to the official production GCP account");
+assert(productionRepair.includes("DEFAULT_GCLOUD_ACCOUNT = \"altoslab.offical@gmail.com\""), "production repair defaults to the official production GCP account");
 assert(productionRepair.includes("ALTOS_GOOGLE_OPERATOR_ACCOUNT"), "production repair can inherit the unified Google operator account");
 assert(!productionRepair.includes("process.env.CLOUDSDK_CORE_ACCOUNT || DEFAULT_GCLOUD_ACCOUNT"), "production repair is not redirected by ambient CLOUDSDK_CORE_ACCOUNT");
 assert(productionRepair.includes("It never generates") && productionRepair.includes("publishes blog content"), "production repair documents its no-content-generation boundary");
@@ -436,8 +436,8 @@ assert(envExample.includes("BLOG_MARKET_TRANSLATION_PROVIDER=local"), "env examp
 assert(envExample.includes("BLOG_IMAGE_PROVIDER=none") && envExample.includes("AUTO_GENERATE_BLOG_COVERS=false"), "env example disables stock/fallback cover generation for the formal workflow");
 assert(envExample.includes("GA4_PROPERTY_ID="), "env example documents GA4 Data API property configuration");
 assert(envExample.includes("SEARCH_CONSOLE_SITE_URL="), "env example documents Search Console reporting configuration");
-assert(envExample.includes("ALTOS_GOOGLE_OPERATOR_ACCOUNT=altoslab768@gmail.com"), "env example documents the unified Google operator account");
-assert(envExample.includes("ALTOS_REPORT_FROM_EMAIL=altoslab768@gmail.com"), "env example documents the official daily report sender");
+assert(envExample.includes("ALTOS_GOOGLE_OPERATOR_ACCOUNT=altoslab.offical@gmail.com"), "env example documents the unified Google operator account");
+assert(envExample.includes("ALTOS_REPORT_FROM_EMAIL=altoslab.offical@gmail.com"), "env example documents the official daily report sender");
 assert(seoGeoReport.includes("ALTOS LAB 每日搜尋與內容成效報告"), "SEO/GEO report renders a plain-language daily report title");
 assert(seoGeoReport.includes("Google 搜尋健康分數") && seoGeoReport.includes("AI 搜尋可引用分數"), "SEO/GEO report renders readable readiness scores");
 assert(seoGeoReport.includes("下一步行動") && seoGeoReport.includes("為什麼"), "SEO/GEO report converts findings into action motivation");
@@ -447,7 +447,7 @@ assert(seoGeoReport.includes("SEARCH_CONSOLE_SITE_URL"), "SEO/GEO report support
 assert(seoGeoReport.includes("gcloud token fallback"), "SEO/GEO report can use local gcloud token fallback for diagnostics");
 assert(seoGeoReport.includes("No qualified public blog posts are currently published"), "SEO/GEO report explains empty fail-closed blog inventory");
 assert(seoGeoReport.includes("incompleteMarketNewsGroups"), "SEO/GEO report calls out market-news language gaps");
-assert(seoGeoReport.includes("altoslab768@gmail.com") && seoGeoReport.includes("Altoslab.offical@gmail.com"), "SEO/GEO report documents the official sender and recipient");
+assert(seoGeoReport.includes("altoslab.offical@gmail.com") && !seoGeoReport.includes("altoslab768@gmail.com"), "SEO/GEO report documents the official sender and blocks the retired account");
 assert(operations.includes("Gmail web UI") && operations.includes("hold the send instead of using a connector"), "operations require SEO/GEO daily email to be sent through Gmail web, not a connector");
 assert(imageStyleGuide.includes("GPT Image 2 / 生成案例庫的採納規則"), "image style guide documents safe use of external GPT Image 2 prompt galleries");
 assert(imageStyleGuide.includes("不照抄完整 prompt") && imageStyleGuide.includes("OpenAI 官方 docs"), "image style guide keeps prompt-gallery inspiration bounded and official-doc grounded");

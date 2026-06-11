@@ -17,7 +17,50 @@ function contentTypeFor(filename: string) {
   return "image/png";
 }
 
-export async function GET(_: Request, context: Params) {
+async function readStaticGeneratedMediaResponse(request: Request, safeFilename: string) {
+  const assetUrl = new URL(`/generated-blog-media/${safeFilename}`, request.url);
+
+  try {
+    const { getCloudflareContext } = await import("@opennextjs/cloudflare");
+    const context = getCloudflareContext();
+    const assets = (context.env as { ASSETS?: { fetch(input: Request): Promise<Response> } }).ASSETS;
+    if (assets?.fetch) {
+      const response = await assets.fetch(new Request(assetUrl));
+      if (response.ok) {
+        return new NextResponse(response.body, {
+          headers: {
+            "Content-Type": response.headers.get("Content-Type") || contentTypeFor(safeFilename),
+            "Cache-Control": response.headers.get("Cache-Control") || "public, max-age=31536000, immutable",
+            ...(response.headers.get("Content-Length") ? { "Content-Length": response.headers.get("Content-Length") || "" } : {}),
+            ...(response.headers.get("ETag") ? { ETag: response.headers.get("ETag") || "" } : {})
+          }
+        });
+      }
+    }
+  } catch {
+    // Local Next runtimes do not expose the Cloudflare ASSETS binding.
+  }
+
+  try {
+    const response = await fetch(assetUrl, { redirect: "follow" });
+    if (response.ok) {
+      return new NextResponse(response.body, {
+        headers: {
+          "Content-Type": response.headers.get("Content-Type") || contentTypeFor(safeFilename),
+          "Cache-Control": response.headers.get("Cache-Control") || "public, max-age=31536000, immutable",
+          ...(response.headers.get("Content-Length") ? { "Content-Length": response.headers.get("Content-Length") || "" } : {}),
+          ...(response.headers.get("ETag") ? { ETag: response.headers.get("ETag") || "" } : {})
+        }
+      });
+    }
+  } catch {
+    // Fall through to local filesystem for non-Cloudflare development.
+  }
+
+  return null;
+}
+
+export async function GET(request: Request, context: Params) {
   const { filename } = await context.params;
   const safeFilename = path.basename(filename);
   const cloudflareKvConfig = getCloudflareKvConfig();
@@ -72,6 +115,9 @@ export async function GET(_: Request, context: Params) {
       });
     }
   }
+
+  const staticResponse = await readStaticGeneratedMediaResponse(request, safeFilename);
+  if (staticResponse) return staticResponse;
 
   const filepath = path.join(process.cwd(), "data", "generated-blog-media", safeFilename);
 
