@@ -5,6 +5,7 @@ import { buildMarketNewsroomPost } from "./blog-market-newsroom.mjs";
 const LANGUAGES = ["zh-Hant", "en", "ja", "ko", "id", "vi", "th", "ms", "fil"];
 const LEGACY_TEMPLATE_PATTERN =
   /消息落在哪個產品環節|來源裡的具體細節|先看採用而不是聲量|下一步先看三個指標|實際使用量是否增加、付費或正式採用|具體使用者與可觀察的使用量|Adoption matters more than buzz|Next step: watch three signals/i;
+const GENERIC_SOURCE_PATTERN = /current AI coverage|related reporting and follow-up context|AI coverage page/i;
 
 function assert(condition, message) {
   if (!condition) {
@@ -101,7 +102,14 @@ for (const fixture of fixtures) {
     const publicText = [post.title, post.excerpt, post.geoSummary, post.body, ...(post.keyTakeaways || [])].join("\n");
     assert(!LEGACY_TEMPLATE_PATTERN.test(publicText), `${fixture.name}/${language} should not use legacy market template`);
     assert(post.coverSource === "source", `${fixture.name}/${language} should keep source cover`);
-    assert(post.sourceLinks.length >= 2, `${fixture.name}/${language} should include the primary source plus a clean publisher AI coverage link`);
+    assert(
+      post.sourceLinks.length === fixture.pack.sourceLinks.length,
+      `${fixture.name}/${language} should keep only verified source links supplied by the candidate`
+    );
+    assert(
+      !GENERIC_SOURCE_PATTERN.test(JSON.stringify(post.sourceLinks)),
+      `${fixture.name}/${language} should not add generic publisher coverage links`
+    );
     for (const terms of fixture.mustAny) {
       assert(
         terms.some((term) => publicText.toLowerCase().includes(term.toLowerCase())),

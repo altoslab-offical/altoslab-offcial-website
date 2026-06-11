@@ -6,6 +6,17 @@ import process from "node:process";
 
 const DEFAULT_BASE_URL = "https://altoslab-ai.cc";
 const MARKET_FORBIDDEN_PATTERNS = [
+  /文中牽涉/i,
+  /報導「」/i,
+  /OpenAI News's current AI coverage/i,
+  /current AI coverage page for related reporting/i,
+  /重點哪家公司發布新功能/i,
+  /Frame \(4\)/i,
+  /Oracle partnership 1x1 art card/i,
+  /PRC-linked influence/i,
+  /Confidential submission of draft S-1/i,
+  /Built for broad benefit/i,
+  /Economic research forum/i,
   /消息落在哪個產品環節/i,
   /來源裡的具體細節/i,
   /先看採用而不是聲量/i,
@@ -85,6 +96,38 @@ async function fetchJson(url) {
   const text = await response.text();
   if (!response.ok) throw new Error(`${response.status} ${text.slice(0, 300)}`);
   return text ? JSON.parse(text) : {};
+}
+
+async function hydrateAuditPosts(root, posts) {
+  const queue = posts
+    .map((post, index) => ({ post, index }))
+    .filter(({ post }) => {
+      if (post.contentType !== "breaking") return false;
+      if (!Array.isArray(post.sourceLinks) || post.sourceLinks.length < 1) return true;
+      if (!Array.isArray(post.keyTakeaways) || post.keyTakeaways.length < 2) return true;
+      return false;
+    });
+  if (!queue.length) return posts;
+  const next = [...posts];
+  let cursor = 0;
+  const workerCount = Math.min(8, queue.length);
+  await Promise.all(
+    Array.from({ length: workerCount }, async () => {
+      while (cursor < queue.length) {
+        const item = queue[cursor];
+        cursor += 1;
+        try {
+          const detail = await fetchJson(
+            `${root}/api/blog/${encodeURIComponent(item.post.slug)}?language=${encodeURIComponent(item.post.language)}`
+          );
+          if (detail?.post) next[item.index] = { ...item.post, ...detail.post };
+        } catch {
+          next[item.index] = item.post;
+        }
+      }
+    })
+  );
+  return next;
 }
 
 function stripHtml(value = "") {
@@ -202,7 +245,7 @@ function renderText(report) {
 async function main() {
   const root = baseUrl();
   const payload = await fetchJson(`${root}/api/blog`);
-  const posts = Array.isArray(payload.posts) ? payload.posts : [];
+  const posts = await hydrateAuditPosts(root, Array.isArray(payload.posts) ? payload.posts : []);
   const audited = posts.map(auditPost);
   const problemPosts = audited.filter((post) => post.issues.length);
   if (posts.length === 0) {

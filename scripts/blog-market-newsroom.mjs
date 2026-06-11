@@ -542,7 +542,7 @@ function supplementalSourceLink(source = {}, profile = {}) {
 
 function publicSourceLinks(sourceLinks = [], source = {}, profile = {}) {
   const links = cleanPublicSourceLinks(sourceLinks);
-  if (links.length >= 2) return links;
+  if (links.length >= 1) return links;
   const supplemental = supplementalSourceLink(source, profile);
   if (!supplemental) return links;
   return cleanPublicSourceLinks([...links, supplemental]);
@@ -1935,6 +1935,8 @@ function sourceFaqs(language, title, frame, source, article, profile) {
 
 function sourceContentImages(language, title, article = {}, post = {}, pack = {}) {
   const raw = Array.isArray(article.images) ? article.images : [];
+  const canonical = `${article.canonicalUrl || ""} ${pack.sourceLinks?.[0]?.url || ""}`;
+  if (/openai\.com\/index\//i.test(canonical)) return [];
   const cover = post.cover || pack.primarySourceImageUrl || article.image?.url || "";
   const imageIdentity = (url = "") => {
     try {

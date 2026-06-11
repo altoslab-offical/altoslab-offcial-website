@@ -7,6 +7,17 @@ const DEFAULT_BASE_URL = "https://altoslab-ai.cc";
 const LANGUAGES = ["zh-Hant", "en", "ja", "ko", "id", "vi", "th", "ms", "fil"];
 
 const INTERNAL_COPY_PATTERNS = [
+  /文中牽涉/i,
+  /報導「」/i,
+  /OpenAI News's current AI coverage/i,
+  /current AI coverage page for related reporting/i,
+  /重點哪家公司發布新功能/i,
+  /Frame \(4\)/i,
+  /Oracle partnership 1x1 art card/i,
+  /PRC-linked influence/i,
+  /Confidential submission of draft S-1/i,
+  /Built for broad benefit/i,
+  /Economic research forum/i,
   /這則消息可以拿來/i,
   /企業檢查/i,
   /卡在哪個流程/i,
@@ -264,6 +275,14 @@ function qaPost(post, mustTerms = []) {
   }
   if (!Array.isArray(post.keyTakeaways) || post.keyTakeaways.length < 2) {
     issues.push({ severity: "major", id: "market-takeaways-too-thin", count: post.keyTakeaways?.length || 0 });
+  }
+  const unrelatedImageCaptions = (post.contentImages || [])
+    .map((image) => `${image.alt || ""} ${image.caption || ""}`)
+    .filter((text) =>
+      /Frame \(4\)|Oracle partnership|PRC-linked influence|Confidential submission of draft S-1|Built for broad benefit|Economic research forum/i.test(text)
+    );
+  if (unrelatedImageCaptions.length) {
+    issues.push({ severity: "critical", id: "unrelated-source-inline-images", captions: unrelatedImageCaptions });
   }
   const sourceNumbers = extractNumbers(source.title || "", source.summary || "")
     .filter((term) => !/^(?:19|20)\d{2}$/.test(String(term)))

@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "build:gcp": "NEXT_OUTPUT_STANDALONE=1 next build",
-    "build:cloudflare": "node scripts/sync-cloudflare-homepage.mjs && node scripts/prepare-cloudflare-build-dir.mjs && NEXT_OUTPUT_STANDALONE=1 next build && node scripts/prepare-cloudflare-build-dir.mjs && opennextjs-cloudflare build --skipNextBuild",
+    "build:cloudflare": "node scripts/sync-cloudflare-homepage.mjs && node scripts/prepare-cloudflare-build-dir.mjs && NEXT_OUTPUT_STANDALONE=1 next build && node scripts/prepare-cloudflare-build-dir.mjs && opennextjs-cloudflare build --skipNextBuild && node scripts/patch-cloudflare-worker-blog-html.mjs",
     "start": "next start",
     "deploy:gcp": "scripts/gcp-deploy-cloudrun.sh",
     "preview:cloudflare": "opennextjs-cloudflare preview",

@@ -165,7 +165,7 @@ function extractArticleSection(html = "") {
   if (start < 0) return "";
   const raw = html.slice(start, start + 110_000);
   const stopPattern =
-    /(?:Models mentioned in this article|Datasets mentioned in this article|Related posts|Related Articles|More from|Recommended|Comments|Newsletter|Subscribe|Sign up)|<(?:footer|aside)\b|class=["'][^"']*(?:related|newsletter|author-card|post-relevant|comments|recommended|footer)[^"']*["']/i;
+    /(?:Keep reading|Models mentioned in this article|Datasets mentioned in this article|Related posts|Related Articles|More from|Recommended|Comments|Newsletter|Subscribe|Sign up)|<(?:footer|aside)\b|class=["'][^"']*(?:related|newsletter|author-card|post-relevant|comments|recommended|footer)[^"']*["']/i;
   const stop = raw.search(stopPattern);
   return stop > 0 ? raw.slice(0, stop) : raw;
 }
