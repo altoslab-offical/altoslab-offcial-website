@@ -417,8 +417,8 @@ assert(blogArticle.includes("const relatedVisualPost = toBlogVisualPost(related)
 assert(!blogArticle.includes("SafeBlogImage compact post={related}"), "related article cards do not serialize full post metadata into client image props");
 assert(blogIndex.includes("const visualPost = toBlogVisualPost(post)"), "blog index image props are sanitized before client serialization");
 assert(!blogIndex.includes("SafeBlogImage compact post={post}"), "blog index cards do not serialize full post metadata into client image props");
-assert(blogIndex.includes("blog-lite-shell") && blogIndex.includes("lightweightCloudflareRender"), "Cloudflare blog index has a lightweight render path");
-assert(globals.includes(".blog-lite-shell") && globals.includes(".blog-lite-card"), "Cloudflare lightweight blog index has scoped styles");
+assert(blogIndex.includes("blog-craft-index") && blogIndex.includes("<SiteHeader />"), "blog index keeps the full source-aligned craft UI shell");
+assert(!blogIndex.includes("blog-lite-shell") && !blogIndex.includes("lightweightCloudflareRender"), "blog index does not degrade to the lightweight Cloudflare UI");
 assert(!/quality gates/i.test(blogAuthors), "public author profiles do not expose internal quality-gate language");
 assert(!globals.includes("site-language-toggle button:nth-child"), "mobile CSS no longer hides segmented language buttons");
 
