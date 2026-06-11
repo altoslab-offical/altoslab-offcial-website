@@ -13,7 +13,7 @@ export async function GET(request: Request) {
   const fields = params.get("fields") || "";
   const rawLimit = Number(params.get("limit") || 0);
   const isInventory = fields === "inventory";
-  const limit = Number.isFinite(rawLimit) && rawLimit > 0 ? Math.min(rawLimit, isInventory ? 600 : 60) : isInventory ? 600 : 60;
+  const limit = Number.isFinite(rawLimit) && rawLimit > 0 ? Math.min(rawLimit, 600) : 600;
   const posts = (
     isInventory
       ? await getPublishedBlogInventoryPostsForApi(language || undefined, limit)

@@ -17,7 +17,9 @@ type BlogIndexProps = {
   query?: string;
 };
 
-const BLOG_INDEX_POST_LIMIT = Number(process.env.BLOG_INDEX_POST_LIMIT || "8");
+const rawBlogIndexPostLimit = Number(process.env.BLOG_INDEX_POST_LIMIT || 0);
+const BLOG_INDEX_POST_LIMIT =
+  Number.isFinite(rawBlogIndexPostLimit) && rawBlogIndexPostLimit > 0 ? rawBlogIndexPostLimit : null;
 
 function articleTimestamp(post: BlogPost) {
   return new Date(post.publishedAt || post.updatedAt || post.createdAt).getTime() || 0;
@@ -444,7 +446,7 @@ export async function BlogIndex({ language, tag, query }: BlogIndexProps) {
       : true;
     return matchesTag && matchesQuery;
   });
-  const visiblePosts = filtered.slice(0, BLOG_INDEX_POST_LIMIT);
+  const visiblePosts = BLOG_INDEX_POST_LIMIT ? filtered.slice(0, BLOG_INDEX_POST_LIMIT) : filtered;
 
   return (
     <div className="site-home blog-site-shell">

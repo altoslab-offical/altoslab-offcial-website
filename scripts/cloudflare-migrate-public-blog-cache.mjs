@@ -9,7 +9,7 @@ import { createDecipheriv, createHash } from "crypto";
 const BLOG_LANGUAGES = ["zh-Hant", "en", "ja", "ko", "id", "vi", "th", "ms", "fil"];
 const DEFAULT_KV_BINDING = "ALTOS_BLOG_KV";
 const DEFAULT_CMS_STORAGE_KEY = "altoslab:cms:v1";
-const LIST_LIMIT_PER_LANGUAGE = Number(process.env.PUBLIC_BLOG_CACHE_LIMIT_PER_LANGUAGE || "8");
+const LIST_LIMIT_PER_LANGUAGE = Number(process.env.PUBLIC_BLOG_CACHE_LIMIT_PER_LANGUAGE || "600");
 const binding = process.env.CLOUDFLARE_KV_BINDING || DEFAULT_KV_BINDING;
 const cmsStorageKey = process.env.CMS_STORAGE_KEY || DEFAULT_CMS_STORAGE_KEY;
 const skipDetail = process.argv.includes("--skip-detail");
