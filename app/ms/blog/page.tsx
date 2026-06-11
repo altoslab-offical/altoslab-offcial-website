@@ -38,10 +38,10 @@ export const metadata: Metadata = {
 };
 
 type PageProps = {
-  searchParams?: Promise<{ tag?: string; query?: string }> | { tag?: string; query?: string };
+  searchParams?: Promise<{ tag?: string; query?: string; page?: string }> | { tag?: string; query?: string; page?: string };
 };
 
 export default async function MalayBlogIndexPage({ searchParams }: PageProps) {
   const params = searchParams ? await searchParams : {};
-  return <BlogIndex language={language} tag={params.tag} query={params.query} />;
+  return <BlogIndex language={language} tag={params.tag} query={params.query} page={params.page} />;
 }

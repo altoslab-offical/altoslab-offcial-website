@@ -15,11 +15,12 @@ type BlogIndexProps = {
   language: BlogLanguage;
   tag?: string;
   query?: string;
+  page?: string | number;
 };
 
-const rawBlogIndexPostLimit = Number(process.env.BLOG_INDEX_POST_LIMIT || 0);
-const BLOG_INDEX_POST_LIMIT =
-  Number.isFinite(rawBlogIndexPostLimit) && rawBlogIndexPostLimit > 0 ? rawBlogIndexPostLimit : null;
+const rawBlogIndexPageSize = Number(process.env.BLOG_INDEX_PAGE_SIZE || "18");
+const BLOG_INDEX_PAGE_SIZE =
+  Number.isFinite(rawBlogIndexPageSize) && rawBlogIndexPageSize > 0 ? Math.min(rawBlogIndexPageSize, 24) : 18;
 
 function articleTimestamp(post: BlogPost) {
   return new Date(post.publishedAt || post.updatedAt || post.createdAt).getTime() || 0;
@@ -428,7 +429,21 @@ function matchesTopic(post: BlogPost, item: string) {
   return aliases.some((alias) => haystack.includes(alias.toLowerCase()));
 }
 
-export async function BlogIndex({ language, tag, query }: BlogIndexProps) {
+function normalizedPage(value: BlogIndexProps["page"]) {
+  const page = Number(value || 1);
+  return Number.isFinite(page) && page > 0 ? Math.floor(page) : 1;
+}
+
+function blogIndexHref(language: BlogLanguage, params: { tag?: string; query?: string; page?: number }) {
+  const queryParams = new URLSearchParams();
+  if (params.tag) queryParams.set("tag", params.tag);
+  if (params.query) queryParams.set("query", params.query);
+  if (params.page && params.page > 1) queryParams.set("page", String(params.page));
+  const queryString = queryParams.toString();
+  return `${blogIndexPath(language)}${queryString ? `?${queryString}` : ""}`;
+}
+
+export async function BlogIndex({ language, tag, query, page }: BlogIndexProps) {
   const dictionary = copy[language];
   const posts = await getPublishedBlogInventoryPostsByLanguage(language);
   const orderedPosts = [...posts].sort(
@@ -446,7 +461,12 @@ export async function BlogIndex({ language, tag, query }: BlogIndexProps) {
       : true;
     return matchesTag && matchesQuery;
   });
-  const visiblePosts = BLOG_INDEX_POST_LIMIT ? filtered.slice(0, BLOG_INDEX_POST_LIMIT) : filtered;
+  const pageCount = Math.max(1, Math.ceil(filtered.length / BLOG_INDEX_PAGE_SIZE));
+  const currentPage = Math.min(normalizedPage(page), pageCount);
+  const pageStart = (currentPage - 1) * BLOG_INDEX_PAGE_SIZE;
+  const visiblePosts = filtered.slice(pageStart, pageStart + BLOG_INDEX_PAGE_SIZE);
+  const previousPage = currentPage > 1 ? currentPage - 1 : null;
+  const nextPage = currentPage < pageCount ? currentPage + 1 : null;
 
   return (
     <div className="site-home blog-site-shell">
@@ -560,6 +580,31 @@ export async function BlogIndex({ language, tag, query }: BlogIndexProps) {
               })}
               {!filtered.length ? <p className="muted">{dictionary.empty}</p> : null}
             </div>
+            {filtered.length > BLOG_INDEX_PAGE_SIZE ? (
+              <nav className="blog-craft-pagination" aria-label="Blog pagination">
+                {previousPage ? (
+                  <Link className="blog-craft-page-link" href={blogIndexHref(language, { tag, query, page: previousPage })}>
+                    <span aria-hidden="true">‹</span>
+                  </Link>
+                ) : (
+                  <span className="blog-craft-page-link is-disabled" aria-hidden="true">
+                    ‹
+                  </span>
+                )}
+                <span className="blog-craft-page-status">
+                  {currentPage} / {pageCount}
+                </span>
+                {nextPage ? (
+                  <Link className="blog-craft-page-link" href={blogIndexHref(language, { tag, query, page: nextPage })}>
+                    <span aria-hidden="true">›</span>
+                  </Link>
+                ) : (
+                  <span className="blog-craft-page-link is-disabled" aria-hidden="true">
+                    ›
+                  </span>
+                )}
+              </nav>
+            ) : null}
           </section>
         </div>
       </main>

@@ -4643,6 +4643,51 @@ img {
   min-width: 0;
 }
 
+.blog-craft-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  margin-top: 54px;
+  color: var(--al-blog-muted);
+}
+
+.blog-craft-page-link {
+  width: 40px;
+  height: 40px;
+  display: inline-grid;
+  place-items: center;
+  border: 1px solid var(--al-blog-border);
+  border-radius: 999px;
+  color: var(--al-blog-ink);
+  background: color-mix(in oklch, var(--paper) 78%, transparent);
+  font-size: 22px;
+  line-height: 1;
+  transition:
+    border-color var(--al-motion-fast),
+    background var(--al-motion-fast),
+    transform var(--al-motion-fast);
+}
+
+.blog-craft-page-link:hover {
+  border-color: var(--al-blog-ink);
+  background: var(--paper);
+  transform: translateY(-1px);
+}
+
+.blog-craft-page-link.is-disabled {
+  opacity: 0.32;
+  pointer-events: none;
+}
+
+.blog-craft-page-status {
+  min-width: 62px;
+  text-align: center;
+  font-family: var(--font-space);
+  font-size: 13px;
+  letter-spacing: 0.08em;
+}
+
 .blog-craft-card-image {
   display: block;
   overflow: hidden;
