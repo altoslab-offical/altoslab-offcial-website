@@ -302,5 +302,334 @@
       "executionOrder": "v1"
     },
     "id": "altos-seo-geo"
+  },
+  {
+    "name": "ALTOS Blog - Local Manual Control",
+    "active": true,
+    "nodes": [
+      {
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "altos-blog/manual/health",
+          "responseMode": "lastNode",
+          "options": {}
+        },
+        "id": "manual-health-webhook",
+        "name": "Manual health webhook",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2,
+        "position": [
+          0,
+          0
+        ],
+        "webhookId": "altos-manual-health"
+      },
+      {
+        "parameters": {},
+        "id": "manual-health-trigger",
+        "name": "Manual trigger health",
+        "type": "n8n-nodes-base.manualTrigger",
+        "typeVersion": 1,
+        "position": [
+          0,
+          90
+        ]
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "http://host.docker.internal:8797/run/health",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "x-altos-n8n-token",
+                "value": "={{ $env.ALTOS_N8N_BRIDGE_TOKEN }}"
+              }
+            ]
+          },
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={\"source\":\"n8n-webhook\",\"workflow\":\"manual-health\"}",
+          "options": {
+            "timeout": 120000
+          }
+        },
+        "id": "manual-health-run",
+        "name": "Manual run health",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          280,
+          0
+        ]
+      },
+      {
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "altos-blog/manual/column-prep",
+          "responseMode": "lastNode",
+          "options": {}
+        },
+        "id": "manual-column-webhook",
+        "name": "Manual column prep webhook",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2,
+        "position": [
+          0,
+          180
+        ],
+        "webhookId": "altos-manual-column-prep"
+      },
+      {
+        "parameters": {},
+        "id": "manual-column-trigger",
+        "name": "Manual trigger column prep",
+        "type": "n8n-nodes-base.manualTrigger",
+        "typeVersion": 1,
+        "position": [
+          0,
+          270
+        ]
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "http://host.docker.internal:8797/run/column-prep",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "x-altos-n8n-token",
+                "value": "={{ $env.ALTOS_N8N_BRIDGE_TOKEN }}"
+              }
+            ]
+          },
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={\"source\":\"n8n-webhook\",\"workflow\":\"manual-column-prep\"}",
+          "options": {
+            "timeout": 600000
+          }
+        },
+        "id": "manual-column-run",
+        "name": "Manual run column prep",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          280,
+          180
+        ]
+      },
+      {
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "altos-blog/manual/market-validate",
+          "responseMode": "lastNode",
+          "options": {}
+        },
+        "id": "manual-market-webhook",
+        "name": "Manual market validate webhook",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2,
+        "position": [
+          0,
+          360
+        ],
+        "webhookId": "altos-manual-market-validate"
+      },
+      {
+        "parameters": {},
+        "id": "manual-market-trigger",
+        "name": "Manual trigger market validate",
+        "type": "n8n-nodes-base.manualTrigger",
+        "typeVersion": 1,
+        "position": [
+          0,
+          450
+        ]
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "http://host.docker.internal:8797/run/market-scan-validate",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "x-altos-n8n-token",
+                "value": "={{ $env.ALTOS_N8N_BRIDGE_TOKEN }}"
+              }
+            ]
+          },
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={\"source\":\"n8n-webhook\",\"workflow\":\"manual-market-validate\"}",
+          "options": {
+            "timeout": 600000
+          }
+        },
+        "id": "manual-market-run",
+        "name": "Manual run market validate",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          280,
+          360
+        ]
+      },
+      {
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "altos-blog/manual/market-scan",
+          "responseMode": "lastNode",
+          "options": {}
+        },
+        "id": "manual-market-publish-webhook",
+        "name": "Manual market scan webhook",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2,
+        "position": [
+          0,
+          540
+        ],
+        "webhookId": "altos-manual-market-scan"
+      },
+      {
+        "parameters": {},
+        "id": "manual-market-publish-trigger",
+        "name": "Manual trigger market scan",
+        "type": "n8n-nodes-base.manualTrigger",
+        "typeVersion": 1,
+        "position": [
+          0,
+          630
+        ]
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "http://host.docker.internal:8797/run/market-scan",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "x-altos-n8n-token",
+                "value": "={{ $env.ALTOS_N8N_BRIDGE_TOKEN }}"
+              }
+            ]
+          },
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={\"source\":\"n8n-webhook\",\"workflow\":\"manual-market-scan\"}",
+          "options": {
+            "timeout": 600000
+          }
+        },
+        "id": "manual-market-publish-run",
+        "name": "Manual run market scan",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          280,
+          540
+        ]
+      }
+    ],
+    "connections": {
+      "Manual health webhook": {
+        "main": [
+          [
+            {
+              "node": "Manual run health",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Manual trigger health": {
+        "main": [
+          [
+            {
+              "node": "Manual run health",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Manual column prep webhook": {
+        "main": [
+          [
+            {
+              "node": "Manual run column prep",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Manual trigger column prep": {
+        "main": [
+          [
+            {
+              "node": "Manual run column prep",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Manual market validate webhook": {
+        "main": [
+          [
+            {
+              "node": "Manual run market validate",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Manual trigger market validate": {
+        "main": [
+          [
+            {
+              "node": "Manual run market validate",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Manual market scan webhook": {
+        "main": [
+          [
+            {
+              "node": "Manual run market scan",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Manual trigger market scan": {
+        "main": [
+          [
+            {
+              "node": "Manual run market scan",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "settings": {
+      "timezone": "Asia/Taipei",
+      "executionOrder": "v1"
+    },
+    "id": "altos-manual-control"
   }
 ]

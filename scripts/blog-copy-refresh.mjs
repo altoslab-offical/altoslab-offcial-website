@@ -59,6 +59,19 @@ async function login(root) {
   return match[1];
 }
 
+async function fetchPublicPost(root, post) {
+  const slug = String(post?.slug || "").trim();
+  const language = String(post?.language || "").trim();
+  if (!slug || !language) return null;
+  const { payload } = await fetchJson(`${root}/api/blog/${encodeURIComponent(slug)}?language=${encodeURIComponent(language)}&ts=${Date.now()}`, {
+    headers: {
+      "Cache-Control": "no-cache",
+      Pragma: "no-cache"
+    }
+  });
+  return payload.post || payload.payload?.post || payload;
+}
+
 function cleanPatch(patch) {
   const next = {
     title: String(patch.title || "").trim(),
@@ -66,9 +79,18 @@ function cleanPatch(patch) {
     seoTitle: String(patch.seoTitle || patch.title || "").trim(),
     seoDescription: String(patch.seoDescription || patch.excerpt || "").trim()
   };
+  if (patch.geoSummary !== undefined) next.geoSummary = String(patch.geoSummary || "").trim();
+  if (patch.body !== undefined) next.body = String(patch.body || "").trim();
+  if (patch.keyTakeaways !== undefined) next.keyTakeaways = patch.keyTakeaways;
+  if (patch.faqs !== undefined) next.faqs = patch.faqs;
   for (const [key, value] of Object.entries(next)) {
-    if (!value) throw new Error(`copy patch for ${patch.id} is missing ${key}`);
-    if (/(SEO|GEO|AI-generated|prompt|quality gate|model selector|Gemini|ChatGPT)/i.test(value)) {
+    if (value === undefined || value === null || value === "" || (Array.isArray(value) && value.length === 0)) {
+      throw new Error(`copy patch for ${patch.id} is missing ${key}`);
+    }
+    const publicText = Array.isArray(value)
+      ? JSON.stringify(value)
+      : String(value);
+    if (/(SEO|GEO|AI-generated|prompt|quality gate|model selector|Gemini|ChatGPT)/i.test(publicText)) {
       throw new Error(`copy patch for ${patch.id} leaks internal production language in ${key}`);
     }
   }
@@ -123,22 +145,26 @@ async function main() {
     return;
   }
 
-  const publicPosts = (await fetchJson(`${root}/api/blog`)).payload.posts || [];
+  const publicPosts = (await fetchJson(`${root}/api/blog?ts=${Date.now()}`, {
+    headers: {
+      "Cache-Control": "no-cache",
+      Pragma: "no-cache"
+    }
+  })).payload.posts || [];
   const publicById = new Map(publicPosts.map((post) => [post.id, post]));
-  const verification = patches.map((patch) => {
-    const live = publicById.get(patch.id);
+  const verification = [];
+  for (const patch of patches) {
+    const summary = publicById.get(patch.id) || adminById.get(patch.id);
+    const live = await fetchPublicPost(root, summary);
     const expected = cleanPatch(patch);
-    return {
+    const expectedEntries = Object.entries(expected);
+    verification.push({
       id: patch.id,
-      ok:
-        live?.title === expected.title &&
-        live?.excerpt === expected.excerpt &&
-        live?.seoTitle === expected.seoTitle &&
-        live?.seoDescription === expected.seoDescription,
+      ok: Boolean(live) && expectedEntries.every(([key, value]) => JSON.stringify(live?.[key]) === JSON.stringify(value)),
       title: live?.title || "",
       excerpt: live?.excerpt || ""
-    };
-  });
+    });
+  }
   const failures = verification.filter((item) => !item.ok);
 
   console.log(JSON.stringify({

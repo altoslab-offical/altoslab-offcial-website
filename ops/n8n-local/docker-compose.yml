@@ -16,7 +16,7 @@ services:
       retries: 10
 
   n8n:
-    image: n8nio/n8n:latest
+    image: n8nio/n8n:2.25.6
     restart: unless-stopped
     depends_on:
       postgres:
@@ -34,7 +34,9 @@ services:
       N8N_HOST: 127.0.0.1
       N8N_PORT: 5678
       N8N_PROTOCOL: http
+      WEBHOOK_URL: ${WEBHOOK_URL:-http://127.0.0.1:5679/}
       N8N_SECURE_COOKIE: "false"
+      N8N_BLOCK_ENV_ACCESS_IN_NODE: ${N8N_BLOCK_ENV_ACCESS_IN_NODE:-false}
       GENERIC_TIMEZONE: ${GENERIC_TIMEZONE:-Asia/Taipei}
       TZ: ${TZ:-Asia/Taipei}
       ALTOS_N8N_BRIDGE_TOKEN: ${ALTOS_N8N_BRIDGE_TOKEN}

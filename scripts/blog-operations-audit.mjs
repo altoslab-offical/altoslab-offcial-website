@@ -107,7 +107,7 @@ function postTaiwanDate(post) {
 async function liveCounts(baseUrl, date) {
   const rows = [];
   for (const language of LANGUAGES) {
-    const response = await fetch(`${normalizeBaseUrl(baseUrl)}/api/blog?language=${encodeURIComponent(language)}&limit=200`, {
+    const response = await fetch(`${normalizeBaseUrl(baseUrl)}/api/blog?fields=inventory&language=${encodeURIComponent(language)}&limit=600`, {
       cache: "no-store",
       headers: { "User-Agent": "ALTOS-LAB-blog-ops-audit/1.0" }
     });
@@ -211,6 +211,46 @@ function launchAgentStatus() {
     runs: runs ? Number(runs) : null,
     lastExitCode: lastExit,
     triggers: [...output.matchAll(/"Hour" => (\d+)[\s\S]*?"Minute" => (\d+)/g)].map((match) => `${String(match[1]).padStart(2, "0")}:${String(match[2]).padStart(2, "0")}`)
+  };
+}
+
+async function n8nLocalStatus() {
+  const composePath = path.join(process.cwd(), "ops/n8n-local/docker-compose.yml");
+  if (!(await exists(composePath))) return { checked: false, reason: "n8n compose file missing" };
+  const result = spawnSync("docker", ["compose", "-f", composePath, "ps", "--format", "json"], { encoding: "utf8" });
+  const output = `${result.stdout || ""}`.trim();
+  const rows = output
+    ? output
+        .split(/\n+/)
+        .map((line) => {
+          try {
+            return JSON.parse(line);
+          } catch {
+            return null;
+          }
+        })
+        .filter(Boolean)
+    : [];
+  const serviceRunning = (name) =>
+    rows.some((row) => row.Service === name && /running|up/i.test(`${row.State || ""} ${row.Status || ""}`));
+  const bridge = await fetchText("http://127.0.0.1:8797/health");
+  let bridgeJson = {};
+  try {
+    bridgeJson = bridge.text ? JSON.parse(bridge.text) : {};
+  } catch {
+    bridgeJson = {};
+  }
+  const n8nRunning = serviceRunning("n8n");
+  const postgresRunning = serviceRunning("postgres");
+  return {
+    checked: true,
+    ok: result.status === 0 && n8nRunning && postgresRunning && bridge.ok && bridgeJson.ok === true,
+    composePath: path.relative(process.cwd(), composePath),
+    n8nRunning,
+    postgresRunning,
+    bridgeOk: bridge.ok && bridgeJson.ok === true,
+    bridgeStatus: bridge.status,
+    services: rows.map((row) => ({ service: row.Service, state: row.State, status: row.Status, image: row.Image }))
   };
 }
 
@@ -381,7 +421,7 @@ function targetGaps(counts, columnTarget) {
   }));
 }
 
-function summarizeIssues({ counts, gaps, candidates, launchAgent, visualGap, targets, analytics }) {
+function summarizeIssues({ counts, gaps, candidates, launchAgent, n8nLocal, visualGap, targets, analytics }) {
   const issues = [];
   const minTotal = Math.min(...counts.map((row) => row.total));
   const minColumn = Math.min(...counts.map((row) => row.column));
@@ -396,7 +436,8 @@ function summarizeIssues({ counts, gaps, candidates, launchAgent, visualGap, tar
   }
   const legacyMarket = candidates.find((candidate) => candidate.lane === "legacy" && /market/i.test(candidate.translationGroupId || ""));
   if (legacyMarket) issues.push(`legacy candidate index still contains market release: ${legacyMarket.path}`);
-  if (launchAgent.checked && !launchAgent.loaded) issues.push("LaunchAgent is not loaded");
+  if (n8nLocal?.checked && !n8nLocal.ok) issues.push("n8n local control plane is not healthy");
+  if (!n8nLocal?.checked && launchAgent.checked && !launchAgent.loaded) issues.push("no active scheduler check passed");
   if (analytics?.checked && !analytics.ok) {
     const missing = analytics.pages
       .filter((page) => !page.ok || !page.hasGtm || (!page.hasGa && !analytics.health.gaConfigured && !analytics.health.ga4PropertyConfigured))
@@ -411,7 +452,7 @@ function summarizeIssues({ counts, gaps, candidates, launchAgent, visualGap, tar
   return issues;
 }
 
-function summarizeBottlenecks({ counts, gaps, candidates, launchAgent, visualGap, targets, headlessProviders, analytics }) {
+function summarizeBottlenecks({ counts, gaps, candidates, launchAgent, n8nLocal, visualGap, targets, headlessProviders, analytics }) {
   const minBreaking = Math.min(...counts.map((row) => row.breaking));
   const minTotal = Math.min(...counts.map((row) => row.total));
   const minColumn = Math.min(...counts.map((row) => row.column));
@@ -449,10 +490,10 @@ function summarizeBottlenecks({ counts, gaps, candidates, launchAgent, visualGap
     },
     {
       lane: "automation",
-      status: launchAgent.checked && launchAgent.loaded && String(launchAgent.lastExitCode || "0") === "0" ? "stable" : "attention",
-      summary: launchAgent.checked
-        ? `LaunchAgent ${launchAgent.loaded ? "loaded" : "not loaded"}; lastExit=${launchAgent.lastExitCode || "n/a"}; state=${launchAgent.state || "n/a"}`
-        : `LaunchAgent not checked: ${launchAgent.reason || "n/a"}`
+      status: n8nLocal?.ok ? "stable" : "attention",
+      summary: n8nLocal?.checked
+        ? `n8nLocal=${n8nLocal.n8nRunning ? "running" : "down"}; postgres=${n8nLocal.postgresRunning ? "running" : "down"}; bridge=${n8nLocal.bridgeOk ? "ok" : "down"}`
+        : `n8n local not checked: ${n8nLocal?.reason || "n/a"}; rollback LaunchAgent=${launchAgent.loaded ? "loaded" : "not loaded"}`
     },
     {
       lane: "analytics",
@@ -533,7 +574,11 @@ function textReport(report) {
     lines.push(`- ${row.path}: ${row.status || "unknown"} (${row.lane}, ${row.translationGroupId || "no group"})`);
   }
   lines.push("");
-  lines.push(`LaunchAgent: ${report.launchAgent.loaded ? "loaded" : "not loaded"}; state=${report.launchAgent.state || "n/a"}; lastExit=${report.launchAgent.lastExitCode || "n/a"}; runs=${report.launchAgent.runs ?? "n/a"}`);
+  lines.push(
+    report.n8nLocal?.checked
+      ? `n8n local: ${report.n8nLocal.ok ? "healthy" : "attention"}; n8n=${report.n8nLocal.n8nRunning ? "running" : "down"}; postgres=${report.n8nLocal.postgresRunning ? "running" : "down"}; bridge=${report.n8nLocal.bridgeOk ? "ok" : "down"}`
+      : `n8n local: not checked (${report.n8nLocal?.reason || "n/a"}); rollback LaunchAgent=${report.launchAgent.loaded ? "loaded" : "not loaded"}`
+  );
   lines.push("");
   if (report.analytics?.checked) {
     const home = report.analytics.pages.find((page) => page.key === "home") || {};
@@ -575,6 +620,7 @@ async function main() {
   const gaps = targetGaps(counts, columnTarget);
   const candidates = await candidateSummary(date);
   const launchAgent = launchAgentStatus();
+  const n8nLocal = await n8nLocalStatus();
   const headlessProviders = await headlessProviderStatus();
   const visualGap = await columnVisualGap(date);
   const analytics = await analyticsProbe(baseUrl);
@@ -582,6 +628,7 @@ async function main() {
     ok:
       gaps.every((gap) => gap.breakingGap === 0 && gap.columnGap === 0) &&
       counts.every((row) => (row.todayColumn || 0) >= DAILY_COLUMN_MINIMUM) &&
+      n8nLocal.ok === true &&
       analytics.ok === true,
     checkedAt: new Date().toISOString(),
     date,
@@ -591,6 +638,7 @@ async function main() {
     gaps,
     candidates,
     launchAgent,
+    n8nLocal,
     headlessProviders,
     visualGap,
     analytics,

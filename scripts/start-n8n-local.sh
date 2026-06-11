@@ -33,6 +33,12 @@ fi
 if ! grep -q '^N8N_LOCAL_PORT=' "$ENV_FILE"; then
   printf 'N8N_LOCAL_PORT=5679\n' >> "$ENV_FILE"
 fi
+if ! grep -q '^WEBHOOK_URL=' "$ENV_FILE"; then
+  printf 'WEBHOOK_URL=http://127.0.0.1:5679/\n' >> "$ENV_FILE"
+fi
+if ! grep -q '^N8N_BLOCK_ENV_ACCESS_IN_NODE=' "$ENV_FILE"; then
+  printf 'N8N_BLOCK_ENV_ACCESS_IN_NODE=false\n' >> "$ENV_FILE"
+fi
 if ! grep -q '^ALTOS_BLOG_AUTOMATION_BASE_URL=' "$ENV_FILE"; then
   printf 'ALTOS_BLOG_AUTOMATION_BASE_URL=https://altoslab-ai.cc\n' >> "$ENV_FILE"
 fi

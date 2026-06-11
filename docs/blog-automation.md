@@ -21,7 +21,7 @@
 - Gemini and ChatGPT/GPT are browser workbenches, not release authorities. They may help draft prose or images only inside the dedicated Chrome tabs documented in `docs/content/blog-subagent-production-loop.md`.
 - Localization is not literal translation. Subagents must rewrite naturally for local readers while preserving the same article identity, source facts, sources, cover/media set and editorial angle.
 - The main brain is the only role allowed to call `--release`.
-- The LaunchAgent is a deterministic safety runner for prep/release timing, while Gemini/GPT browser production is handled by the Codex heartbeat/main-brain workflow.
+- Local n8n is the active deterministic safety runner for prep/release timing. The old blog LaunchAgent is now a rollback path only. Gemini/GPT browser production is still handled by the Codex heartbeat/main-brain workflow.
 
 ## Speed And Chrome Memory Guard
 

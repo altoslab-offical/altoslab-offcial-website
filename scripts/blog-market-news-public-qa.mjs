@@ -312,6 +312,8 @@ function qaPost(post, mustTerms = []) {
     if (/\d/.test(raw) && numberCovered(raw)) return true;
     if (lowerText.includes(raw.toLowerCase())) return true;
     if (/^publishers?$/i.test(raw) && /(出版商|出版社|퍼블리셔|publisher|penerbit|nhà xuất bản|ผู้เผยแพร่|publishers?)/i.test(text)) return true;
+    if (/^companies?$/i.test(raw) && /(company|companies|企業|公司|会社|企業|기업|회사|perusahaan|syarikat|công ty|doanh nghiệp|บริษัท|kompanya)/i.test(text)) return true;
+    if (/^debt$/i.test(raw) && /(debt|loan|borrow|borrows|financing|bond|債務|負債|融資|貸款|借款|債券|ローン|融資|借入|債券|대출|부채|채권|자금 조달|pinjaman|utang|pembiayaan|obligasi|vay|khoản vay|trái phiếu|tài chính|กู้|เงินกู้|พันธบัตร|หนี้|เงินทุน|hutang|pembiayaan|bon|utang|pondo)/i.test(text)) return true;
     if (/^u\.?k\.?$/i.test(raw) && /(U\.?K\.?|UK|英國|英国|영국|Inggris|Anh|สหราชอาณาจักร|United Kingdom)/i.test(text)) return true;
     if (/^africa$/i.test(raw) && /(Africa|非洲|アフリカ|아프리카|Afrika|châu Phi|แอฟริกา)/i.test(text)) return true;
     if (/^middle\s+east$/i.test(raw) && /(Middle East|中東|中东|중동|Timur Tengah|Trung Đông|ตะวันออกกลาง|Gitnang Silangan)/i.test(text)) return true;

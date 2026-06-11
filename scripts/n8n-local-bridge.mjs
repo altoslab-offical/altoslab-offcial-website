@@ -80,9 +80,28 @@ const jobs = {
     timeoutMs: 180_000,
     command: () => nodeCommand("scripts/seo-geo-insight-report.mjs", ["--base-url", DEFAULT_BASE_URL, "--format", "text"])
   },
+  "column-prep": {
+    timeoutMs: 600_000,
+    command: () => nodeCommand("scripts/blog-scheduled-runner.mjs", [
+      "--prep",
+      "--slot",
+      "morning",
+      "--base-url",
+      DEFAULT_BASE_URL,
+      "--force"
+    ])
+  },
   scheduled: {
     timeoutMs: 600_000,
     command: () => nodeCommand("scripts/blog-scheduled-runner.mjs", ["--scheduled", "--base-url", DEFAULT_BASE_URL])
+  },
+  "market-scan-validate": {
+    timeoutMs: 600_000,
+    env: {
+      ALTOS_BLOG_MARKET_SCAN_VALIDATE_ONLY: "true",
+      ALTOS_BLOG_MARKET_SCAN_CANDIDATE_PACKS: "1"
+    },
+    command: () => nodeCommand("scripts/blog-scheduled-runner.mjs", ["--market-scan", "--base-url", DEFAULT_BASE_URL, "--no-index"])
   },
   "market-scan": {
     timeoutMs: 600_000,
@@ -149,6 +168,7 @@ function runCommand(jobName) {
       cwd: ROOT_DIR,
       env: {
         ...bridgeEnv,
+        ...(job.env || {}),
         ALTOS_BLOG_BASE_URL: DEFAULT_BASE_URL
       },
       stdio: ["ignore", "pipe", "pipe"]

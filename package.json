@@ -40,7 +40,8 @@
     "blog:repair-copy": "node scripts/blog-public-copy-repair.mjs",
     "blog:repair-production": "node scripts/blog-production-repair.mjs",
     "blog:ops-audit": "node scripts/blog-operations-audit.mjs",
-    "blog:column-worklist": "node scripts/blog-column-production-worklist.mjs"
+    "blog:column-worklist": "node scripts/blog-column-production-worklist.mjs",
+    "n8n:verify-local": "scripts/verify-n8n-local-control-plane.sh"
   },
   "dependencies": {
     "@next/third-parties": "^16.2.6",

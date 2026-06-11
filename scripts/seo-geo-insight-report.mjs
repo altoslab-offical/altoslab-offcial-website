@@ -465,21 +465,21 @@ function buildInsights({ targetUrl, health, posts, qualityPosts, surface, ga4, s
     actions.push({
       area: "語言入口",
       reason: `${labels} 的 blog 入口在本次檢查中沒有穩定回應，會拉低 Google 搜尋健康分數。`,
-      nextStep: `重新檢查 ${unreachableLanguages.map((language) => blogIndexPathForLanguage(language)).join("、")}；若仍失敗，優先檢查 GCP / Cloud Run 路由與多語頁面渲染。`
+      nextStep: `重新檢查 ${unreachableLanguages.map((language) => blogIndexPathForLanguage(language)).join("、")}；若仍失敗，優先檢查 Cloudflare Worker 路由、KV 內容投影與多語頁面渲染。`
     });
   }
   if (!ga4.ok) {
     actions.push({
       area: "流量數據",
       reason: "目前只能確認網站有裝 GA/GTM，還不能讀到後台實際訪客數字。",
-      nextStep: "補上 GA4_PROPERTY_ID 與 Data API 權限，讓日報能顯示近 7 天流量、AI 來源與熱門文章。"
+      nextStep: "補上或更新 GA4 Data API 憑證與權限，讓日報能顯示近 7 天流量、AI 來源與熱門文章。"
     });
   }
   if (!searchConsole.ok) {
     actions.push({
       area: "Google 搜尋",
       reason: "Search Console API 目前讀不到曝光與點擊，因此不知道哪些文章真的被 Google 帶到。",
-      nextStep: "補 Search Console API 權限，讓日報能追蹤曝光、點擊、平均排名與被索引狀態。"
+      nextStep: "補上或更新 Search Console API 憑證與權限，讓日報能追蹤曝光、點擊、平均排名與被索引狀態。"
     });
   }
   if (incompleteGroups.length) {
@@ -577,8 +577,12 @@ function renderTextReport(report) {
     column: "專欄",
     feature: "深度專題"
   };
-  const zhWarning = (warning) =>
-    warning
+  const zhWarning = (warning) => {
+    const value = String(warning || "");
+    if (/invalid_grant|gcloud|service account impersonation|GOOGLE_APPLICATION_CREDENTIALS|application-default|print-access-token|cannot read Google service account/i.test(value)) {
+      return "Google 後台 API 憑證或權限目前不可用；追蹤碼已安裝，但日報暫時讀不到實際流量、曝光與點擊。";
+    }
+    return value
       .replace("GA4 Data API not producing metrics: GA4_PROPERTY_ID is not configured", "GA4 後台資料還沒接上，所以目前只能確認追蹤碼有裝，還不能看到實際流量數字。")
       .replace("Search Console API not producing metrics: Request had insufficient authentication scopes.", "Search Console API 權限不足，所以目前看不到 Google 搜尋曝光與點擊資料。")
       .replace("Request had insufficient authentication scopes.", "Search Console API 權限不足，所以目前看不到 Google 搜尋曝光與點擊資料。")
@@ -591,12 +595,13 @@ function renderTextReport(report) {
       .replace("Some public posts are missing SEO title/meta/excerpt.", "有些文章缺少搜尋用標題、描述或摘要，會讓 Google 比較難理解。")
       .replace("Some public posts are missing GEO summary or visible sources.", "有些文章缺少給 AI 搜尋引用的摘要或來源，會降低被引用品質。")
       .replaceAll("missing id/vi/th/ms/fil", "缺印尼、越南、泰國、馬來、菲律賓版本");
+  };
   const warningLines = report.warnings.length ? report.warnings.map((warning) => `- ${zhWarning(warning)}`).join("\n") : "- 沒有重大警訊。";
   const aiSourceLines = report.analytics.ga4.ok
     ? Object.entries(report.analytics.ga4.aiSources || {})
         .map(([source, count]) => `- ${source}: ${count} 次造訪`)
         .join("\n") || "- 近 7 天還沒有看到可辨識的 AI 來源流量。"
-    : "- 目前還不能讀 GA4 後台數據，原因是 GA4_PROPERTY_ID / Data API 權限尚未完成。";
+    : "- 目前還不能讀 GA4 後台數據，原因是 GA4 Data API 憑證或權限尚未完成。";
   const ga4DataApiLine = report.technical.ga4PropertyIdConfigured
     ? report.technical.ga4ApiReachable
       ? "GA4 Data API：可讀（已成功回傳 7 天指標）"
