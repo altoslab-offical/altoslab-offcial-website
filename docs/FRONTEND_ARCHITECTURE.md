@@ -28,6 +28,23 @@ These areas use the normal Next App Router surfaces and global CSS:
 
 `app/globals.css` imports `design/tokens.css`, so these pages can use the token contract immediately.
 
+## Blog UI Stability Contract
+
+The blog index routes are not emergency Worker-rendered pages. They are owned by the Next App Router and the canonical `BlogIndex` component:
+
+- `/blog` -> `app/blog/page.tsx` -> `components/BlogIndex.tsx`
+- `/en/blog` -> `app/en/blog/page.tsx` -> `components/BlogIndex.tsx`
+- `/ja/blog`, `/ko/blog`, `/id/blog`, `/vi/blog`, `/th/blog`, `/ms/blog`, `/fil/blog` -> localized route pages -> `components/BlogIndex.tsx`
+
+Cloudflare direct HTML rendering may serve article detail routes only:
+
+- `/blog/:slug`
+- `/:language/blog/:slug`
+
+It must return `null` for `/blog` and `/:language/blog` so the original `BlogIndex` UI remains in control. This is enforced by `scripts/blog-ui-contract-smoke.mjs`, which is part of `npm run test:blog`.
+
+Do not use `BlogIndexLite`, `renderIndex`, direct `list_json` Worker queries, or a replacement static index to solve Worker CPU issues. The accepted approach is to optimize the canonical `BlogIndex` path, paginate inventory, or improve Cloudflare data access without changing route ownership.
+
 ## Inactive Prototype Components
 
 The repo currently contains `components/site/*` from a previous homepage modularization attempt. They are not the public homepage route right now.

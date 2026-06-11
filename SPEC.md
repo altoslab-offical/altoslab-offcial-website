@@ -38,6 +38,28 @@ Public website rendering rule:
 - Public users only see `published` pages, sections, projects, and section items.
 - Draft, archived, and deleted records must never be returned by public APIs.
 
+## Blog UI Stability Contract
+
+The public blog index routes (`/blog` and `/:language/blog`) are canonical user-facing UI surfaces. They must keep the existing `BlogIndex` / `blog-craft` layout unless Tommy explicitly approves a visual redesign.
+
+Route ownership:
+
+- Blog index routes are owned by `components/BlogIndex.tsx` and the route pages in `app/*/blog/page.tsx`.
+- Cloudflare direct rendering may handle article detail pages only (`/blog/:slug` and `/:language/blog/:slug`) for Worker CPU stability and Markdown rendering.
+- Cloudflare direct rendering must never implement or intercept a replacement blog index UI.
+- n8n/content automation may create, validate, release, and monitor posts, but must not mutate index layout, navigation, visual hierarchy, CSS tokens, or route ownership.
+
+Required UI invariants:
+
+- `BlogIndex` must retain `blog-craft-index`, `blog-craft-layout`, `blog-craft-sidebar`, `blog-craft-feed`, and `blog-craft-card`.
+- The list page must keep sidebar topic navigation, search, post count, feed grid, pagination, and `SafeBlogImage` / `BlogEditorialVisual` handling.
+- Any intentional redesign must update `SPEC.md`, `DESIGN.md`, `docs/FRONTEND_ARCHITECTURE.md`, screenshot evidence, and `scripts/blog-ui-contract-smoke.mjs` in the same change.
+
+Release gate:
+
+- `npm run test:blog` must pass before deploy.
+- Live check after deploy must confirm `/blog` returns 200, does not include `x-altos-direct-blog-render`, contains `blog-craft-layout`, and does not show Cloudflare Error 1102.
+
 ## Current State
 
 The previous website was a static built artifact:

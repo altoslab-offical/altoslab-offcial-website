@@ -22,6 +22,7 @@ n8n does not own:
 - Public website serving.
 - Cloudflare Worker deployments.
 - CMS encryption keys or production D1/KV seeding.
+- Blog UI Stability Contract: n8n must not change `/blog`, `/:language/blog`, `components/BlogIndex.tsx`, `app/globals.css` `blog-craft-*` styles, route ownership, or visual hierarchy.
 - Article quality judgment.
 - Nine-language identity/media parity gates.
 - Gemini/ChatGPT browser quality evidence. n8n may trigger or record the workflow, but it cannot fabricate fixed-tab evidence, model/account evidence, or main-brain QA.

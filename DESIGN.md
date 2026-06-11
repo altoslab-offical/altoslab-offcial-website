@@ -167,6 +167,27 @@ Current architecture:
 - `app/globals.css` imports the tokens for admin, blog, project pages, and future component work.
 - `components/site/*` exists as inactive prototype code and is not the public homepage route.
 
+## Blog UI Stability Contract
+
+The blog index is a protected editorial surface. Its current design is the light `AI & Craft` / `blog-craft` experience with sidebar topic navigation, search, feed grid, card imagery, pagination, and the existing editorial rhythm. Do not replace it with a generic card wall, a direct Worker-rendered index, or a temporary emergency layout unless Tommy explicitly approves a visual redesign.
+
+Design ownership:
+
+- `components/BlogIndex.tsx` owns `/blog` and `/:language/blog` visual structure.
+- `app/globals.css` owns the `blog-craft-*` style contract.
+- Cloudflare direct HTML rendering is allowed for article detail resilience only, not for blog index replacement.
+- n8n and content automation may change article data, but they must not change the public blog index layout, component ownership, spacing system, typography hierarchy, navigation, or visual tokens.
+
+Protected index markers:
+
+- `blog-craft-index`
+- `blog-craft-layout`
+- `blog-craft-sidebar`
+- `blog-craft-feed`
+- `blog-craft-card`
+
+Any intentional change to these markers or their visual behavior requires same-change screenshot evidence, product/design rationale, and updates to `SPEC.md`, `docs/FRONTEND_ARCHITECTURE.md`, and `scripts/blog-ui-contract-smoke.mjs`.
+
 Remaining risks:
 
 - `index.html`, `altoslab-website.html`, and `public/index.html` can drift from each other if edited separately.

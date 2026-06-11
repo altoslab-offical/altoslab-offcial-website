@@ -1,6 +1,5 @@
 const BLOG_LANGUAGES = ["zh-Hant", "en", "ja", "ko", "id", "vi", "th", "ms", "fil"];
 const LANGUAGE_PREFIXES = new Set(BLOG_LANGUAGES.filter((language) => language !== "zh-Hant"));
-const BLOG_INDEX_PAGE_SIZE = 18;
 
 function escapeHtml(value) {
   return String(value ?? "")
@@ -232,26 +231,6 @@ async function readPost(env, slug, language) {
   }
 }
 
-async function readIndexPosts(env, language) {
-  const database = env.ALTOS_BLOG_D1;
-  if (!database?.prepare) return [];
-  const result = await database
-    .prepare("SELECT list_json AS payload FROM public_blog_posts WHERE status = 'published' AND language = ?1 ORDER BY updated_at DESC, sort_order ASC LIMIT ?2")
-    .bind(language, BLOG_INDEX_PAGE_SIZE)
-    .all();
-  const rows = Array.isArray(result?.results) ? result.results : [];
-  return rows
-    .map((row) => {
-      if (typeof row?.payload !== "string") return null;
-      try {
-        return JSON.parse(row.payload);
-      } catch {
-        return null;
-      }
-    })
-    .filter(Boolean);
-}
-
 async function readAlternates(env, translationGroupId) {
   if (!translationGroupId || !env.ALTOS_BLOG_D1?.prepare) return [];
   try {
@@ -265,98 +244,6 @@ async function readAlternates(env, translationGroupId) {
   } catch {
     return [];
   }
-}
-
-function indexCopy(language) {
-  return {
-    "zh-Hant": {
-      eyebrow: "ALTOS LAB Journal · Research / Build / Growth",
-      title: "AI 實驗室筆記",
-      description: "我們研究、建造，然後把經驗發布成可引用的知識。",
-      latest: "最新文章",
-      empty: "目前沒有文章。",
-      read: "閱讀文章"
-    },
-    en: {
-      eyebrow: "ALTOS LAB Journal · Research / Build / Growth",
-      title: "AI Lab Notes",
-      description: "We research, build, and publish what becomes reusable intelligence.",
-      latest: "Latest Articles",
-      empty: "No articles yet.",
-      read: "Read article"
-    }
-  }[language] || {
-    eyebrow: "ALTOS LAB Journal",
-    title: "AI Lab Notes",
-    description: "Research, build notes and market updates from ALTOS LAB.",
-    latest: "Latest Articles",
-    empty: "No articles yet.",
-    read: "Read article"
-  };
-}
-
-function renderIndex(posts, language, env, requestUrl) {
-  const siteUrl = env.NEXT_PUBLIC_SITE_URL || new URL(requestUrl).origin;
-  const canonical = `${siteUrl}${blogIndexPath(language)}`;
-  const labels = indexCopy(language);
-  const cards = posts.length
-    ? posts
-        .map((post) => {
-          const path = blogPostPath(post);
-          return `<article class="blog-card">
-            ${post.cover ? `<a href="${escapeAttribute(path)}"><img src="${escapeAttribute(post.cover)}" alt="${escapeAttribute(post.coverAlt || post.title)}" loading="lazy" decoding="async" /></a>` : ""}
-            <div class="blog-card-body">
-              <p class="article-kicker"><span class="blog-craft-type-badge">${escapeHtml(contentTypeLabel(post))}</span><span>${escapeHtml(post.topic || post.newsCategory || "AI")}</span></p>
-              <h2><a href="${escapeAttribute(path)}">${escapeHtml(post.title)}</a></h2>
-              ${post.excerpt ? `<p>${inlineTextHtml(post.excerpt)}</p>` : ""}
-              <div class="blog-card-meta"><span>${escapeHtml(dateLabel(post.updatedAt || post.publishedAt))}</span><span>${escapeHtml(String(post.readTimeMinutes || 3))} 分鐘閱讀</span></div>
-              <a class="blog-card-read" href="${escapeAttribute(path)}">${escapeHtml(labels.read)} →</a>
-            </div>
-          </article>`;
-        })
-        .join("")
-    : `<p>${escapeHtml(labels.empty)}</p>`;
-  return `<!doctype html>
-<html lang="${escapeAttribute(htmlLang(language))}">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="theme-color" content="#fafafa" />
-  <title>${escapeHtml(labels.title)}｜ALTOS LAB</title>
-  <meta name="description" content="${escapeAttribute(labels.description)}" />
-  <meta name="robots" content="index, follow" />
-  ${env.GOOGLE_SITE_VERIFICATION ? `<meta name="google-site-verification" content="${escapeAttribute(env.GOOGLE_SITE_VERIFICATION)}" />` : ""}
-  <link rel="canonical" href="${escapeAttribute(canonical)}" />
-  ${BLOG_LANGUAGES.map((item) => `<link rel="alternate" hreflang="${escapeAttribute(item === "zh-Hant" ? "zh-Hant-TW" : item)}" href="${escapeAttribute(`${siteUrl}${blogIndexPath(item)}`)}" />`).join("\n")}
-  <meta property="og:title" content="${escapeAttribute(labels.title)}" />
-  <meta property="og:description" content="${escapeAttribute(labels.description)}" />
-  <meta property="og:url" content="${escapeAttribute(canonical)}" />
-  <meta property="og:type" content="website" />
-  ${analyticsHead(env)}
-  <style>${CSS}</style>
-</head>
-<body>
-${analyticsBody(env)}
-<div class="site-home blog-site-shell">
-  <header class="site-nav">
-    <a class="site-logo" aria-label="ALTOS LAB home" href="/"><span class="brand-text">ALTOS LAB</span></a>
-    <nav aria-label="Main navigation"><a href="/#about">關於我們</a><a href="/#services">服務項目</a><a href="/#portfolio">專案介紹</a><a href="/blog">Blog</a></nav>
-    <a class="site-nav-cta" href="/#contact">合作洽談 ↗</a>
-  </header>
-  <main class="blog-page blog-index-page">
-    <div class="blog-index-inner">
-      <header class="blog-index-hero">
-        <p class="eyebrow">${escapeHtml(labels.eyebrow)}</p>
-        <h1>${escapeHtml(labels.title)}</h1>
-        <p>${escapeHtml(labels.description)}</p>
-      </header>
-      <section aria-label="${escapeAttribute(labels.latest)}" class="blog-index-grid">${cards}</section>
-    </div>
-  </main>
-  <footer class="site-footer"><span class="brand-text">ALTOS LAB</span><span>© 2026 ALTOS LAB · AI implementation studio</span></footer>
-</div>
-</body>
-</html>`;
 }
 
 function renderPost(post, alternates, env, requestUrl) {

@@ -58,19 +58,6 @@ const env = {
               return null;
             },
             async all() {
-              if (sql.includes("list_json")) {
-                return {
-                  results: [
-                    {
-                      payload: JSON.stringify({
-                        ...post,
-                        excerpt: "列表摘要包含 **粗體摘要**。",
-                        updatedAt: "2026-06-11T00:00:00.000Z"
-                      })
-                    }
-                  ]
-                };
-              }
               return { results: [{ language: "zh-Hant", slug: post.slug, translationGroupId: post.translationGroupId }] };
             }
           };
