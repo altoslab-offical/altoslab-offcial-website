@@ -295,15 +295,34 @@ function imageMatchesPlaceholder(image: NonNullable<BlogPost["contentImages"]>[n
 }
 
 function renderBody(post: BlogPost) {
-  const blocks = String(post.body || "")
-    .replace(/\r\n/g, "\n")
-    .split(/\n{2,}/)
-    .map((block) => block.trim())
-    .filter(Boolean)
-    .filter((block) => !/^常見問題|^FAQ/i.test(block));
+  const rawBody = String(post.body || "").replace(/\r\n/g, "\n");
   const images = post.contentImages || [];
   const usedImages = new Set<number>();
-  const hasImagePlaceholders = blocks.some((block) => /^\[IMAGE:[a-z0-9_-]+\]$/i.test(block));
+
+  const renderBlockHtml = (block: string) => {
+    const lines = block.split("\n").map((line) => line.trim()).filter(Boolean);
+    if (/^#{2,3}\s+/.test(block)) {
+      const level = block.startsWith("###") ? "h3" : "h2";
+      return `<${level}>${renderInlineMarkdown(block.replace(/^#{2,3}\s+/, ""))}</${level}>`;
+    }
+    if (lines.length > 0 && lines.every((line) => /^>\s+/.test(line))) {
+      return `<blockquote>${lines.map((line) => `<p>${renderInlineMarkdown(line.replace(/^>\s+/, ""))}</p>`).join("")}</blockquote>`;
+    }
+    if (lines.length > 1 && lines.every((line) => /^[-*]\s+/.test(line))) {
+      return `<ul>${lines.map((line) => `<li>${renderInlineMarkdown(line.replace(/^[-*]\s+/, ""))}</li>`).join("")}</ul>`;
+    }
+    return `<p>${lines.map(renderInlineMarkdown).join("<br />")}</p>`;
+  };
+
+  const renderBlocksHtml = (value: string) =>
+    value
+      .replace(/\r\n/g, "\n")
+      .split(/\n{2,}/)
+      .map((block) => block.trim())
+      .filter(Boolean)
+      .filter((block) => !/^常見問題|^FAQ/i.test(block))
+      .map(renderBlockHtml)
+      .join("");
 
   const takeImageForPlaceholder = (key: string) => {
     const matchedIndex = images.findIndex((image, index) => !usedImages.has(index) && imageMatchesPlaceholder(image, key, index));
@@ -314,26 +333,34 @@ function renderBody(post: BlogPost) {
   };
 
   const renderUnusedImages = () => images.map((image, index) => (usedImages.has(index) ? "" : renderInlineImage(image))).join("");
-  const interval = hasImagePlaceholders ? 0 : Math.max(2, Math.floor(blocks.length / Math.max(images.length, 1)));
+  const markerRegex = /\[IMAGE:([a-z0-9_-]+)\]/gi;
+  if (markerRegex.test(rawBody)) {
+    markerRegex.lastIndex = 0;
+    const parts: string[] = [];
+    let cursor = 0;
+    let match: RegExpExecArray | null;
+    while ((match = markerRegex.exec(rawBody))) {
+      const before = rawBody.slice(cursor, match.index).replace(/\n{3,}/g, "\n\n").trim();
+      if (before) parts.push(renderBlocksHtml(before));
+      parts.push(takeImageForPlaceholder(match[1] || ""));
+      cursor = markerRegex.lastIndex;
+    }
+    const after = rawBody.slice(cursor).replace(/\n{3,}/g, "\n\n").trim();
+    if (after) parts.push(renderBlocksHtml(after));
+    return parts.join("") + renderUnusedImages();
+  }
+
+  const blocks = rawBody
+    .split(/\n{2,}/)
+    .map((block) => block.trim())
+    .filter(Boolean)
+    .filter((block) => !/^常見問題|^FAQ/i.test(block));
+  const interval = Math.max(2, Math.floor(blocks.length / Math.max(images.length, 1)));
 
   return blocks
     .map((block, blockIndex) => {
-      const imagePlaceholder = block.match(/^\[IMAGE:([a-z0-9_-]+)\]$/i);
-      if (imagePlaceholder) return takeImageForPlaceholder(imagePlaceholder[1] || "");
-
-      const lines = block.split("\n").map((line) => line.trim()).filter(Boolean);
-      let html = "";
-      if (/^#{2,3}\s+/.test(block)) {
-        const level = block.startsWith("###") ? "h3" : "h2";
-        html = `<${level}>${renderInlineMarkdown(block.replace(/^#{2,3}\s+/, ""))}</${level}>`;
-      } else if (lines.length > 0 && lines.every((line) => /^>\s+/.test(line))) {
-        html = `<blockquote>${lines.map((line) => `<p>${renderInlineMarkdown(line.replace(/^>\s+/, ""))}</p>`).join("")}</blockquote>`;
-      } else if (lines.length > 1 && lines.every((line) => /^[-*]\s+/.test(line))) {
-        html = `<ul>${lines.map((line) => `<li>${renderInlineMarkdown(line.replace(/^[-*]\s+/, ""))}</li>`).join("")}</ul>`;
-      } else {
-        html = `<p>${lines.map(renderInlineMarkdown).join("<br />")}</p>`;
-      }
-      if (!hasImagePlaceholders && interval > 0 && (blockIndex + 1) % interval === 0) {
+      let html = renderBlockHtml(block);
+      if (interval > 0 && (blockIndex + 1) % interval === 0) {
         const nextIndex = images.findIndex((_, index) => !usedImages.has(index));
         if (nextIndex >= 0) {
           html += renderInlineImage(images[nextIndex]);

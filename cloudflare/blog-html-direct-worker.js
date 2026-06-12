@@ -111,6 +111,12 @@ function paragraphHtml(body) {
     .filter(Boolean)
     .map((paragraph) => {
       if (/^#{2,3}\s+/.test(paragraph)) return `<h2>${inlineTextHtml(paragraph.replace(/^#{2,3}\s+/, ""))}</h2>`;
+      if (paragraph.split(/\n/).every((line) => /^>\s+/.test(line.trim()))) {
+        return `<blockquote>${paragraph
+          .split(/\n/)
+          .map((line) => `<p>${inlineTextHtml(line.trim().replace(/^>\s+/, ""))}</p>`)
+          .join("")}</blockquote>`;
+      }
       if (/^\s*[-*]\s+/m.test(paragraph)) {
         const items = paragraph
           .split(/\n/)
@@ -125,17 +131,83 @@ function paragraphHtml(body) {
     .join("");
 }
 
+function inlineImageHtml(image) {
+  if (!image?.url || !image?.alt) return "";
+  return `<figure class="inline-figure">
+        <img src="${escapeAttribute(image.url)}" alt="${escapeAttribute(image.alt)}" loading="lazy" decoding="async" />
+        ${image.caption ? `<figcaption>${escapeHtml(image.caption)}</figcaption>` : ""}
+      </figure>`;
+}
+
 function inlineImagesHtml(images = []) {
   return images
     .filter((image) => image?.url && image?.alt)
     .slice(0, 3)
-    .map(
-      (image) => `<figure class="inline-figure">
-        <img src="${escapeAttribute(image.url)}" alt="${escapeAttribute(image.alt)}" loading="lazy" decoding="async" />
-        ${image.caption ? `<figcaption>${escapeHtml(image.caption)}</figcaption>` : ""}
-      </figure>`
-    )
+    .map((image) => inlineImageHtml(image))
     .join("");
+}
+
+function normalizeImageMarker(value) {
+  return String(value || "")
+    .trim()
+    .toLowerCase()
+    .replace(/_/g, "-");
+}
+
+const imageMarkerAliases = {
+  opening: ["opening", "after-lead", "lead", "intro"],
+  mechanism: ["mechanism", "mid-article", "middle", "evidence"],
+  synthesis: ["synthesis", "before-faq", "closing", "close"]
+};
+
+function imageMatchesMarker(image, imageIndex, marker) {
+  const normalizedMarker = normalizeImageMarker(marker);
+  const placement = normalizeImageMarker(image?.placement);
+  const candidates = new Set([normalizedMarker, ...(imageMarkerAliases[normalizedMarker] || [])]);
+  if (placement && candidates.has(placement)) return true;
+  if (normalizedMarker === "opening" && imageIndex === 0) return true;
+  if (normalizedMarker === "mechanism" && imageIndex === 1) return true;
+  if (normalizedMarker === "synthesis" && imageIndex === 2) return true;
+  return false;
+}
+
+function stripImageMarkers(text) {
+  return String(text || "").replace(/\[IMAGE:[^\]]+\]/gi, "").replace(/\n{3,}/g, "\n\n").trim();
+}
+
+function articleBodyHtml(body, images = []) {
+  const text = String(body || "");
+  const validImages = images.filter((image) => image?.url && image?.alt).slice(0, 3);
+  const markerRegex = /\[IMAGE:([a-z0-9_-]+)\]/gi;
+  if (!validImages.length) return paragraphHtml(stripImageMarkers(body));
+  if (!markerRegex.test(text)) return `${paragraphHtml(text)}${inlineImagesHtml(validImages)}`;
+
+  markerRegex.lastIndex = 0;
+  const usedIndexes = new Set();
+  const parts = [];
+  let cursor = 0;
+  let match;
+
+  while ((match = markerRegex.exec(text))) {
+    const before = text.slice(cursor, match.index).replace(/\n{3,}/g, "\n\n").trim();
+    if (before) parts.push(paragraphHtml(before));
+
+    const marker = match[1] || "";
+    const matchedIndex = validImages.findIndex((image, index) => !usedIndexes.has(index) && imageMatchesMarker(image, index, marker));
+    const nextIndex = matchedIndex >= 0 ? matchedIndex : validImages.findIndex((_, index) => !usedIndexes.has(index));
+    if (nextIndex >= 0) {
+      usedIndexes.add(nextIndex);
+      parts.push(inlineImageHtml(validImages[nextIndex]));
+    }
+    cursor = markerRegex.lastIndex;
+  }
+
+  const after = text.slice(cursor).replace(/\n{3,}/g, "\n\n").trim();
+  if (after) parts.push(paragraphHtml(after));
+  validImages.forEach((image, index) => {
+    if (!usedIndexes.has(index)) parts.push(inlineImageHtml(image));
+  });
+  return parts.join("");
 }
 
 function sourceListHtml(post) {
@@ -306,7 +378,7 @@ ${analyticsBody(env)}
       </header>
       ${post.geoSummary ? `<aside class="geo-summary"><strong>${post.language === "zh-Hant" ? "重點摘要" : "Summary"}:</strong> ${inlineTextHtml(post.geoSummary)}</aside>` : ""}
       ${takeaways}
-      <div class="rich-text">${paragraphHtml(post.body)}${inlineImagesHtml(post.contentImages)}</div>
+      <div class="rich-text">${articleBodyHtml(post.body, post.contentImages)}</div>
       ${sourceListHtml(post)}
       <aside class="ai-disclosure"><strong>編輯審核:</strong> 本文由 <span class="brand-text">ALTOS LAB</span> 編輯團隊審校，已確認來源脈絡、可讀性、事實一致性與實務可用性。</aside>
       ${tags ? `<nav class="article-tag-strip" aria-label="文章標籤">${tags}</nav>` : ""}
