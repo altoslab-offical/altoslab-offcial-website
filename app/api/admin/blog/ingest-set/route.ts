@@ -146,13 +146,17 @@ function sourceHostMatches(creditUrl: string, sourceUrl: string) {
   );
 }
 
+function blogSourceLinks(post: Pick<BlogPost, "sourceLinks">) {
+  return Array.isArray(post.sourceLinks) ? post.sourceLinks : [];
+}
+
 function isGenericStockImageUrl(value?: string) {
   const host = parsedHost(value);
   return Boolean(host && genericStockImageHosts.some((stockHost) => host === stockHost || host.endsWith(`.${stockHost}`)));
 }
 
 function sourceCoverCreditMatchesSource(post: BlogPost) {
-  return post.sourceLinks.some((source) => sourceHostMatches(post.coverCreditUrl || "", source.url));
+  return blogSourceLinks(post).some((source) => sourceHostMatches(post.coverCreditUrl || "", source.url));
 }
 
 function generationContractIssues(posts: BlogPost[]) {
@@ -204,7 +208,7 @@ function duplicateTopicIssues(posts: BlogPost[], existingPosts: BlogPost[]) {
     post,
     title: normalizedDuplicateKey(post.title),
     topic: normalizedDuplicateKey(post.topic),
-    sources: new Set(post.sourceLinks.map((source) => source.url.toLowerCase()))
+    sources: new Set(blogSourceLinks(post).map((source) => source.url.toLowerCase()))
   }));
 
   return incomingByLanguage.flatMap(({ post, title, topic, sources }) => {
@@ -216,7 +220,7 @@ function duplicateTopicIssues(posts: BlogPost[], existingPosts: BlogPost[]) {
 
       const existingTitle = normalizedDuplicateKey(existing.title);
       const existingTopic = normalizedDuplicateKey(existing.topic);
-      const sharedSources = existing.sourceLinks.filter((source) => sources.has(source.url.toLowerCase())).length;
+      const sharedSources = blogSourceLinks(existing).filter((source) => sources.has(source.url.toLowerCase())).length;
 
       if (existing.slug === post.slug || (title && title === existingTitle)) {
         issues.push(`${post.language}/${post.slug}: duplicates existing article ${existing.slug}`);
