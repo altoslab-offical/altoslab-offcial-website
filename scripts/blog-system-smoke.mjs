@@ -47,6 +47,8 @@ const cloudflareSetup = read("scripts/cloudflare-free-deploy-setup.sh");
 const cloudflareSeed = read("scripts/cloudflare-seed-kv.mjs");
 const cloudflareMigratePublicBlogCache = read("scripts/cloudflare-migrate-public-blog-cache.mjs");
 const cloudflareSmoke = read("scripts/cloudflare-smoke.mjs");
+const n8nLocalBridge = read("scripts/n8n-local-bridge.mjs");
+const n8nLocalControlPlaneVerifier = read("scripts/verify-n8n-local-control-plane.sh");
 const cloudflareStagingConfig = read("wrangler.staging.jsonc");
 const cmsStorage = read("lib/cms-storage.ts");
 const launchAgentPlist = read("scripts/com.altoslab.blog-local-worker.plist.example");
@@ -326,6 +328,16 @@ assert(cloudflareMigratePublicBlogCache.includes("detailPosts") && cloudflareMig
 assert(cloudflareSmoke.includes("expected-provider") && cloudflareSmoke.includes("imageCloudflareKvConfigured"), "Cloudflare smoke verifies KV storage and generated-media configuration");
 assert(cloudflareSmoke.includes("resolve-ip") && cloudflareSmoke.includes("activeResolveOverride"), "Cloudflare smoke can pin DNS during resolver-cache cutover diagnostics");
 assert(cloudflareSmoke.includes("publishedPosts === 0"), "Cloudflare smoke fails closed when public blog inventory is empty");
+assert(cloudflareSmoke.includes("fastMode") && cloudflareSmoke.includes("CLOUDFLARE_SMOKE_FAST"), "Cloudflare smoke supports a bounded fast mode for daily automation health checks");
+assert(
+  n8nLocalBridge.includes('"--fast"') && n8nLocalBridge.includes('"--attempts"') && n8nLocalBridge.includes('"--timeout-ms"'),
+  "n8n bridge health job uses bounded fast Cloudflare smoke instead of full release verification"
+);
+assert(
+  n8nLocalControlPlaneVerifier.includes("N8N_VERIFY_WEBHOOK_TIMEOUT_SECONDS") &&
+    n8nLocalControlPlaneVerifier.includes("--max-time"),
+  "n8n local control-plane verifier bounds webhook calls so verification cannot hang indefinitely"
+);
 assert(cloudflareStagingConfig.includes("\"name\": \"altoslab-official-website-staging\""), "Cloudflare staging config uses a separate Worker");
 assert(cloudflareStagingConfig.includes("\"id\": \"246977568bf14ed0916a21eedbdbdbc1\""), "Cloudflare staging config binds the staging KV namespace");
 assert(cloudflareStagingConfig.includes("\"ALTOS_BLOG_COLUMN_DAILY_LIMIT\": \"1\""), "Cloudflare staging config enforces one daily column target");

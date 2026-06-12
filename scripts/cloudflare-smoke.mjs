@@ -34,11 +34,39 @@ function arg(name, fallback = "") {
   return index >= 0 ? process.argv[index + 1] || fallback : fallback;
 }
 
+function hasFlag(name) {
+  return process.argv.includes(`--${name}`);
+}
+
+function numericArg(name, fallback) {
+  const raw = arg(name, String(fallback));
+  const parsed = Number(raw);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
+}
+
 function baseUrl() {
   return (arg("base-url") || process.env.CLOUDFLARE_SMOKE_BASE_URL || process.env.ALTOS_BLOG_BASE_URL || DEFAULT_BASE_URL).replace(
     /\/$/,
     ""
   );
+}
+
+function smokeAttempts() {
+  return numericArg("attempts", Number(process.env.CLOUDFLARE_SMOKE_ATTEMPTS || "6"));
+}
+
+function smokeTimeoutMs() {
+  return numericArg("timeout-ms", Number(process.env.CLOUDFLARE_SMOKE_TIMEOUT_MS || "18000"));
+}
+
+function fastMode() {
+  return hasFlag("fast") || process.env.CLOUDFLARE_SMOKE_FAST === "true";
+}
+
+function requiredPaths() {
+  if (!fastMode()) return REQUIRED_PATHS;
+  const fastPaths = new Set(["/blog", "/en/blog", "/feed.xml", "/llms.txt"]);
+  return REQUIRED_PATHS.filter((item) => fastPaths.has(item.path));
 }
 
 function expectedProvider() {
@@ -94,7 +122,7 @@ async function printJson(payload) {
 
 async function fetchWithTimeout(url, options = {}) {
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), options.timeoutMs || 18_000);
+  const timeout = setTimeout(() => controller.abort(), options.timeoutMs || smokeTimeoutMs());
   try {
     return await fetch(url, {
       redirect: "follow",
@@ -109,7 +137,7 @@ async function fetchWithTimeout(url, options = {}) {
 
 async function fetchText(root, path, errors, context) {
   const url = `${root}${path}`;
-  const attempts = Number(process.env.CLOUDFLARE_SMOKE_ATTEMPTS || "6");
+  const attempts = smokeAttempts();
   let last = { response: null, text: "" };
   try {
     for (let attempt = 1; attempt <= attempts; attempt += 1) {
@@ -137,7 +165,7 @@ async function fetchText(root, path, errors, context) {
 
 async function fetchJson(root, path, errors, context) {
   const url = `${root}${path}`;
-  const attempts = Number(process.env.CLOUDFLARE_SMOKE_ATTEMPTS || "6");
+  const attempts = smokeAttempts();
   let last = { response: null, json: null };
   try {
     for (let attempt = 1; attempt <= attempts; attempt += 1) {
@@ -170,7 +198,7 @@ async function main() {
   const warnings = [];
   const surfaces = {};
 
-  for (const item of REQUIRED_PATHS) {
+  for (const item of requiredPaths()) {
     const { response, text } = await fetchText(root, item.path, errors, item);
     surfaces[item.surface] = {
       path: item.path,
@@ -282,9 +310,12 @@ async function main() {
   const result = {
     ok: errors.length === 0,
     phase: "cloudflare-smoke",
+    mode: fastMode() ? "fast" : "full",
     root,
     expectedProvider: provider,
     resolveOverride,
+    attempts: smokeAttempts(),
+    timeoutMs: smokeTimeoutMs(),
     checkedAt: new Date().toISOString(),
     errors,
     warnings,

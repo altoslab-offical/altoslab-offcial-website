@@ -62,8 +62,17 @@ function dateArgs(input = {}) {
 
 const jobs = {
   health: {
-    timeoutMs: 90_000,
-    command: () => nodeCommand("scripts/cloudflare-smoke.mjs", ["--base-url", DEFAULT_BASE_URL])
+    timeoutMs: 45_000,
+    command: () =>
+      nodeCommand("scripts/cloudflare-smoke.mjs", [
+        "--base-url",
+        DEFAULT_BASE_URL,
+        "--fast",
+        "--attempts",
+        "2",
+        "--timeout-ms",
+        "8000"
+      ])
   },
   "worker-smoke": {
     timeoutMs: 90_000,

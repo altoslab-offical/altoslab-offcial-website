@@ -13,23 +13,61 @@ function read(file) {
 }
 
 const indexPaths = ["/blog", "/en/blog", "/ja/blog", "/ko/blog", "/id/blog", "/vi/blog", "/th/blog", "/ms/blog", "/fil/blog"];
-const envThatMustNotBeTouched = {
+const samplePost = {
+  id: "blog-ui-contract-post",
+  slug: "blog-ui-contract-post",
+  status: "published",
+  language: "zh-Hant",
+  translationGroupId: "blog-ui-contract",
+  title: "Blog UI Contract Post",
+  excerpt: "The blog index must stay on the Blog Craft visual system.",
+  contentType: "column",
+  newsCategory: "AI",
+  topic: "AI",
+  tags: ["AI"],
+  cover: "https://example.com/cover.png",
+  coverAlt: "Cover",
+  readTimeMinutes: 3,
+  createdAt: "2026-06-12T00:00:00.000Z",
+  updatedAt: "2026-06-12T00:00:00.000Z",
+  publishedAt: "2026-06-12T00:00:00.000Z"
+};
+const envForDirectIndex = {
   ALTOS_BLOG_D1: {
     prepare() {
-      throw new Error("Blog index routes must not query the direct Worker renderer");
+      return {
+        bind(language) {
+          return {
+            async all() {
+              return {
+                results: [
+                  {
+                    payload: JSON.stringify({ ...samplePost, language, slug: `${samplePost.slug}-${language}` })
+                  }
+                ]
+              };
+            }
+          };
+        }
+      };
     }
   }
 };
 
 for (const pathname of indexPaths) {
-  const response = await maybeHandleDirectBlogHtml(new Request(`https://altoslab-ai.cc${pathname}`), envThatMustNotBeTouched);
-  assert(response === null, `${pathname} falls through to the canonical Next BlogIndex UI`);
+  const response = await maybeHandleDirectBlogHtml(new Request(`https://altoslab-ai.cc${pathname}`), envForDirectIndex);
+  const html = await response.text();
+  assert(response.status === 200, `${pathname} direct Cloudflare index renderer returns 200`);
+  assert(response.headers.get("x-altos-direct-blog-render") === "cloudflare-d1-index", `${pathname} uses the direct D1 index renderer`);
+  assert(html.includes("blog-craft-index") && html.includes("blog-craft-layout") && html.includes("blog-craft-card"), `${pathname} preserves Blog Craft UI classes`);
+  assert(!html.includes("blog-lite-shell") && !html.includes("blog-lite-card"), `${pathname} does not fall back to the old lite UI`);
 }
 
 const directWorker = read("cloudflare/blog-html-direct-worker.js");
-for (const forbidden of ["function renderIndex", "readIndexPosts", "BLOG_INDEX_PAGE_SIZE =", "cloudflare-d1-index"]) {
+for (const forbidden of ["BLOG_INDEX_PAGE_SIZE =", "blog-lite-shell", "blog-lite-card"]) {
   assert(!directWorker.includes(forbidden), `Cloudflare direct renderer must not contain ${forbidden}`);
 }
+assert(directWorker.includes("readIndexPosts") && directWorker.includes("cloudflare-d1-index"), "Cloudflare direct renderer has the Worker-safe Blog index path");
 
 const blogIndex = read("components/BlogIndex.tsx");
 for (const marker of ["blog-craft-index", "blog-craft-layout", "blog-craft-sidebar", "blog-craft-feed", "blog-craft-card"]) {

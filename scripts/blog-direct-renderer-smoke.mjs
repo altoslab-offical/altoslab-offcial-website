@@ -75,9 +75,14 @@ const env = {
               return null;
             },
             async all() {
+              if (sql.includes("inventory_json")) return { results: [{ payload: JSON.stringify(post) }] };
               return { results: [{ language: "zh-Hant", slug: post.slug, translationGroupId: post.translationGroupId }] };
             }
           };
+        },
+        async all() {
+          if (sql.includes("inventory_json")) return { results: [{ payload: JSON.stringify(post) }] };
+          return { results: [] };
         }
       };
     }
@@ -111,6 +116,20 @@ assert(
 );
 
 const indexResponse = await maybeHandleDirectBlogHtml(new Request("https://altoslab-ai.cc/blog"), env);
-assert(indexResponse === null, "blog index falls through to the original Next UI renderer");
+const indexHtml = await indexResponse.text();
+assert(indexResponse.status === 200, "blog index direct renderer returns 200");
+assert(indexResponse.headers.get("x-altos-direct-blog-render") === "cloudflare-d1-index", "blog index direct renderer header is present");
+assert(indexHtml.includes("blog-craft-index") && indexHtml.includes("blog-craft-card"), "blog index direct renderer preserves Blog Craft UI classes");
+assert(indexHtml.includes("Markdown inline rendering smoke"), "blog index direct renderer reads D1 inventory rows");
+
+const feedResponse = await maybeHandleDirectBlogHtml(new Request("https://altoslab-ai.cc/feed.xml"), env);
+const feedXml = await feedResponse.text();
+assert(feedResponse.headers.get("x-altos-direct-blog-render") === "cloudflare-d1-feed", "feed direct renderer header is present");
+assert(feedXml.includes("<rss") && feedXml.includes("<item>"), "feed direct renderer returns RSS XML");
+
+const llmsResponse = await maybeHandleDirectBlogHtml(new Request("https://altoslab-ai.cc/llms.txt"), env);
+const llmsText = await llmsResponse.text();
+assert(llmsResponse.headers.get("x-altos-direct-blog-render") === "cloudflare-d1-llms", "llms direct renderer header is present");
+assert(llmsText.includes("# ALTOS LAB") && llmsText.includes("Markdown inline rendering smoke"), "llms direct renderer returns lightweight blog context");
 
 if (!process.exitCode) console.log("PASS blog direct renderer smoke checks");

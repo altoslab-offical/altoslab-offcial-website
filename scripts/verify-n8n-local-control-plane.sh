@@ -5,6 +5,7 @@ ROOT_DIR="/Users/asdc163/Documents/官方網站"
 ENV_FILE="$HOME/.altoslab-n8n.env"
 COMPOSE_FILE="$ROOT_DIR/ops/n8n-local/docker-compose.yml"
 N8N_PORT="${N8N_LOCAL_PORT:-}"
+WEBHOOK_TIMEOUT_SECONDS="${N8N_VERIFY_WEBHOOK_TIMEOUT_SECONDS:-120}"
 FULL=false
 VERIFY_DATE=""
 
@@ -68,11 +69,12 @@ if (value !== true) {
 json_smoke() {
   local label="$1"
   local url="$2"
+  local timeout_seconds="${3:-$WEBHOOK_TIMEOUT_SECONDS}"
   local out
   local attempt
   local last_error=""
   for attempt in 1 2 3; do
-    if out="$(curl -fsS -X POST -H "content-type: application/json" --data "{\"source\":\"${label}\",\"date\":\"${VERIFY_DATE}\"}" "$url" 2>&1)"; then
+    if out="$(curl -fsS --connect-timeout 5 --max-time "$timeout_seconds" -X POST -H "content-type: application/json" --data "{\"source\":\"${label}\",\"date\":\"${VERIFY_DATE}\"}" "$url" 2>&1)"; then
       break
     fi
     last_error="$out"
@@ -177,23 +179,23 @@ json_smoke "manual-health" "http://127.0.0.1:${N8N_PORT}/webhook/altos-blog/manu
 if [[ "$FULL" == true ]]; then
   echo "Checking n8n manual column prep webhook"
   preserve_column_index
-  json_smoke "manual-column-prep" "http://127.0.0.1:${N8N_PORT}/webhook/altos-blog/manual/column-prep"
+  json_smoke "manual-column-prep" "http://127.0.0.1:${N8N_PORT}/webhook/altos-blog/manual/column-prep" 650
   restore_column_index
 
   echo "Checking n8n manual column status webhook"
-  json_smoke "manual-column-status" "http://127.0.0.1:${N8N_PORT}/webhook/altos-blog/manual/column-status"
+  json_smoke "manual-column-status" "http://127.0.0.1:${N8N_PORT}/webhook/altos-blog/manual/column-status" 180
 
   echo "Checking n8n manual column validate webhook"
-  json_smoke "manual-column-validate" "http://127.0.0.1:${N8N_PORT}/webhook/altos-blog/manual/column-validate"
+  json_smoke "manual-column-validate" "http://127.0.0.1:${N8N_PORT}/webhook/altos-blog/manual/column-validate" 650
 
   echo "Checking n8n manual column release webhook"
-  json_smoke "manual-column-release" "http://127.0.0.1:${N8N_PORT}/webhook/altos-blog/manual/column-release"
+  json_smoke "manual-column-release" "http://127.0.0.1:${N8N_PORT}/webhook/altos-blog/manual/column-release" 650
 
   echo "Checking n8n manual market validate webhook"
-  json_smoke "manual-market-validate" "http://127.0.0.1:${N8N_PORT}/webhook/altos-blog/manual/market-validate"
+  json_smoke "manual-market-validate" "http://127.0.0.1:${N8N_PORT}/webhook/altos-blog/manual/market-validate" 650
 
   echo "Checking n8n manual daily closeout webhook"
-  json_smoke "manual-daily-closeout" "http://127.0.0.1:${N8N_PORT}/webhook/altos-blog/manual/daily-closeout"
+  json_smoke "manual-daily-closeout" "http://127.0.0.1:${N8N_PORT}/webhook/altos-blog/manual/daily-closeout" 240
 fi
 
 echo "n8n local control plane verification passed"
