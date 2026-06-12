@@ -38,6 +38,30 @@ Public website rendering rule:
 - Public users only see `published` pages, sections, projects, and section items.
 - Draft, archived, and deleted records must never be returned by public APIs.
 
+## Homepage UI Stability Contract
+
+The public homepage (`/`) is a protected brand/design surface. The current production contract is the original static homepage bundle, not a modular replacement page.
+
+Route ownership:
+
+- `/` is owned by `app/route.ts`.
+- Locally, `app/route.ts` reads `index.html`.
+- On Cloudflare, `app/route.ts` reads the static asset `/altoslab-homepage`, generated from `index.html` by `scripts/sync-cloudflare-homepage.mjs`.
+- `app/route.ts` may inject only SEO metadata, search verification, JSON-LD, GA/GTM, and no-script SEO fallback.
+
+Forbidden changes:
+
+- Do not inject a replacement homepage header, nav, CTA bar, visible CSS, or visual JavaScript from `app/route.ts`.
+- Do not hide the original `nav.fixed.top-0`.
+- Do not route `/` to `app/page.tsx` or `components/site/*` without explicit approval and screenshot parity.
+- Do not use Cloudflare `HTMLRewriter` to stream-mutate homepage structure.
+
+Required invariants:
+
+- The homepage HTML must retain `<div id="root"></div>`, `fixed top-0`, `children:\`ALTOS\``, and `children:\`LAB\``.
+- `npm run test:homepage` must pass before deploy.
+- After deploy, live `/` must return a full homepage HTML body, not a partial header-only response and not Cloudflare Error 1102.
+
 ## Blog UI Stability Contract
 
 The public blog index routes (`/blog` and `/:language/blog`) are canonical user-facing UI surfaces. They must keep the existing `BlogIndex` / `blog-craft` layout unless Tommy explicitly approves a visual redesign.
@@ -62,23 +86,16 @@ Release gate:
 
 ## Current State
 
-The previous website was a static built artifact:
+The homepage is currently served from the static built artifact:
 
 - Main public site: `index.html`
-- Duplicate built copies: `altoslab-website.html`, `public/index.html`
+- Cloudflare asset mirror: `public/altoslab-homepage.html`
+- Historical duplicate built copy: `altoslab-website.html`
 - Portfolio data is currently hard-coded inside the bundled JavaScript as `rp=[...]`
 - Project images are in `public/`
 - Brand/design rules are documented in `DESIGN.md` and `design/`
 
-The public homepage has now been rebuilt as a modular Next App Router page:
-
-- Route: `app/page.tsx`
-- Sections: `components/site/*`
-- Data access: `lib/cms.ts`
-- Seed content: `lib/seed.ts`
-- Design tokens: `design/tokens.css`, `design/tokens.json`
-
-Backend integration should target the clean data layer and TypeScript models, not the legacy minified bundle.
+`app/route.ts` is only the SEO/analytics wrapper for the static homepage. `components/site/*`, `lib/cms.ts`, `lib/seed.ts`, and `design/tokens.css` remain useful for admin/project/blog surfaces and future migrations, but they are not the current public homepage implementation. Any future homepage CMS migration must preserve visual parity before replacing the static bundle.
 
 ## Recommended Stack Boundary
 

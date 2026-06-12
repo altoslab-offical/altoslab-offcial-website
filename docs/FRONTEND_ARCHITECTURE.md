@@ -15,6 +15,31 @@ the SEO metadata wrapper.
 
 This is intentional. The homepage should not be replaced with a new React implementation unless the migration is explicitly approved and visually checked against the current page.
 
+## Homepage UI Stability Contract
+
+The homepage route is a wrapper, not a redesign surface.
+
+- `/` -> `app/route.ts` -> root `index.html` locally.
+- Cloudflare `/` -> `app/route.ts` -> static asset `/altoslab-homepage`.
+- `scripts/sync-cloudflare-homepage.mjs` keeps `public/altoslab-homepage.html` aligned with `index.html` before Cloudflare builds.
+
+Allowed homepage wrapper changes:
+
+- SEO title and metadata.
+- Search verification tags.
+- JSON-LD.
+- GA/GTM snippets.
+- No-script SEO fallback.
+
+Forbidden homepage wrapper changes:
+
+- Injecting a replacement header, nav, CTA bar, visible layout CSS, or visual JavaScript.
+- Hiding the original `nav.fixed.top-0`.
+- Serving `components/site/*` or `app/page.tsx` as `/`.
+- Using Cloudflare `HTMLRewriter` to replace or stream-mutate homepage structure.
+
+The protected markers are `<div id="root"></div>`, `fixed top-0`, `children:\`ALTOS\``, and `children:\`LAB\``. `scripts/homepage-ui-contract-smoke.mjs` enforces this contract and is part of `npm run test`.
+
 ## Active Next App Areas
 
 These areas use the normal Next App Router surfaces and global CSS:

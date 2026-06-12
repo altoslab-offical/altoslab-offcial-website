@@ -167,6 +167,27 @@ Current architecture:
 - `app/globals.css` imports the tokens for admin, blog, project pages, and future component work.
 - `components/site/*` exists as inactive prototype code and is not the public homepage route.
 
+## Homepage UI Stability Contract
+
+The homepage is a protected brand/design surface. Its canonical visual source is the original static bundle in `index.html`, mirrored to `public/altoslab-homepage.html` for Cloudflare assets by `scripts/sync-cloudflare-homepage.mjs`.
+
+Route ownership:
+
+- `/` is owned by `app/route.ts`, but only as a metadata and analytics wrapper around the existing static homepage HTML.
+- `app/route.ts` may inject title, meta tags, JSON-LD, GA/GTM snippets, and no-script SEO fallback only.
+- `app/route.ts` must not inject visible header/nav DOM, CSS, layout scripts, replacement CTA bars, or any rule that hides `nav.fixed.top-0`.
+- Cloudflare production must serve the same full homepage bundle from `/altoslab-homepage`; it must not use `HTMLRewriter` to stream-replace homepage structure.
+- `components/site/*` remains inactive prototype code and must not be wired to `/` without explicit approval.
+
+Protected homepage markers:
+
+- `<div id="root"></div>`
+- `fixed top-0`
+- `children:\`ALTOS\``
+- `children:\`LAB\``
+
+Any intentional homepage redesign requires Tommy approval, before/after desktop and mobile screenshots, updates to `SPEC.md`, `DESIGN.md`, `docs/FRONTEND_ARCHITECTURE.md`, and a same-change update to `scripts/homepage-ui-contract-smoke.mjs`.
+
 ## Blog UI Stability Contract
 
 The blog index is a protected editorial surface. Its current design is the light `AI & Craft` / `blog-craft` experience with sidebar topic navigation, search, feed grid, card imagery, pagination, and the existing editorial rhythm. Do not replace it with a generic card wall, a direct Worker-rendered index, or a temporary emergency layout unless Tommy explicitly approves a visual redesign.
