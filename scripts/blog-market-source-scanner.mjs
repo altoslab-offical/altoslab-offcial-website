@@ -31,13 +31,18 @@ const SOURCE_PROFILES = {
     "zdnet-ai",
     "the-decoder-ai",
     "ars-technica-ai",
+    "the-register-ai",
+    "infoworld-ai",
     "ieee-spectrum-ai",
     "the-new-stack-ai",
     "openai-news",
     "google-ai-blog",
     "google-deepmind",
     "microsoft-ai",
+    "microsoft-azure-ai",
+    "microsoft-research",
     "nvidia-blog-ai",
+    "channel-newsasia-ai",
     "techcrunch-ai"
   ])
 };

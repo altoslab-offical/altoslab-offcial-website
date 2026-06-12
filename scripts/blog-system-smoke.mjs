@@ -88,8 +88,22 @@ assert(
     sourceRegistry.includes("The Verge AI") &&
     sourceRegistry.includes("VentureBeat AI") &&
     sourceRegistry.includes("WIRED AI") &&
-    sourceRegistry.includes("MIT Technology Review AI"),
+    sourceRegistry.includes("MIT Technology Review AI") &&
+    sourceRegistry.includes("The Register AI/ML") &&
+    sourceRegistry.includes("InfoWorld AI") &&
+    sourceRegistry.includes("Channel NewsAsia AI") &&
+    sourceRegistry.includes("Tech in Asia AI") &&
+    sourceRegistry.includes("KrASIA AI") &&
+    sourceRegistry.includes("DealStreetAsia Southeast Asia"),
   "source registry includes mainstream AI RSS feeds and a free market-news discovery API"
+);
+assert(
+  read("scripts/blog-market-source-scanner.mjs").includes("\"the-register-ai\"") &&
+    read("scripts/blog-market-source-scanner.mjs").includes("\"infoworld-ai\"") &&
+    read("scripts/blog-market-source-scanner.mjs").includes("\"microsoft-azure-ai\"") &&
+    read("scripts/blog-market-source-scanner.mjs").includes("\"microsoft-research\"") &&
+    read("scripts/blog-market-source-scanner.mjs").includes("\"channel-newsasia-ai\""),
+  "longform market-news source profile includes expanded official/media/APAC feeds"
 );
 assert((sourceRegistry.match(/tier: "licensed-image"/g) || []).length >= 3, "source registry has licensed image providers");
 assert(!/pinterest\.(com|[a-z]+)/i.test(sourceRegistry), "source registry does not use Pinterest as an image source");
