@@ -46,15 +46,16 @@ Route ownership:
 
 - `/` is owned by `app/route.ts`.
 - Locally, `app/route.ts` reads `index.html`.
-- On Cloudflare, `app/route.ts` reads the static asset `/altoslab-homepage`, generated from `index.html` by `scripts/sync-cloudflare-homepage.mjs`.
-- `app/route.ts` may inject only SEO metadata, search verification, JSON-LD, GA/GTM, and no-script SEO fallback.
+- On Cloudflare, `app/route.ts` returns the static asset `/altoslab-homepage`, generated from `index.html` by `scripts/sync-cloudflare-homepage.mjs`.
+- `scripts/sync-cloudflare-homepage.mjs` injects SEO metadata, search verification, JSON-LD, GA/GTM, and no-script SEO fallback into the Cloudflare asset at build time.
+- `app/route.ts` may inject SEO metadata, search verification, JSON-LD, GA/GTM, and no-script SEO fallback only for the local Node homepage path.
 
 Forbidden changes:
 
 - Do not inject a replacement homepage header, nav, CTA bar, visible CSS, or visual JavaScript from `app/route.ts`.
 - Do not hide the original `nav.fixed.top-0`.
 - Do not route `/` to `app/page.tsx` or `components/site/*` without explicit approval and screenshot parity.
-- Do not use Cloudflare `HTMLRewriter` to stream-mutate homepage structure.
+- Do not use Cloudflare `HTMLRewriter`, `response.text()`, or any request-time full-HTML rewriting to mutate homepage structure.
 
 Required invariants:
 
@@ -95,7 +96,7 @@ The homepage is currently served from the static built artifact:
 - Project images are in `public/`
 - Brand/design rules are documented in `DESIGN.md` and `design/`
 
-`app/route.ts` is only the SEO/analytics wrapper for the static homepage. `components/site/*`, `lib/cms.ts`, `lib/seed.ts`, and `design/tokens.css` remain useful for admin/project/blog surfaces and future migrations, but they are not the current public homepage implementation. Any future homepage CMS migration must preserve visual parity before replacing the static bundle.
+`app/route.ts` is only the local SEO/analytics wrapper and Cloudflare static asset handoff for the homepage. `components/site/*`, `lib/cms.ts`, `lib/seed.ts`, and `design/tokens.css` remain useful for admin/project/blog surfaces and future migrations, but they are not the current public homepage implementation. Any future homepage CMS migration must preserve visual parity before replacing the static bundle.
 
 ## Recommended Stack Boundary
 

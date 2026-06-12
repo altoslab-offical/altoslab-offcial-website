@@ -115,7 +115,7 @@ function withLaunchMetadata(html: string) {
   return output;
 }
 
-async function readCloudflareHomepageHtml(request: Request) {
+async function readCloudflareHomepageResponse(request: Request) {
   const assetUrl = new URL(CLOUDFLARE_HOMEPAGE_ASSET, request.url);
 
   try {
@@ -124,7 +124,7 @@ async function readCloudflareHomepageHtml(request: Request) {
     const assets = (context.env as { ASSETS?: { fetch(input: Request): Promise<Response> } }).ASSETS;
     if (assets?.fetch) {
       const response = await assets.fetch(new Request(assetUrl));
-      if (response.ok) return response.text();
+      if (response.ok) return response;
     }
   } catch {
     // Cloudflare local and production runtimes differ; fall back to the public asset path.
@@ -132,7 +132,7 @@ async function readCloudflareHomepageHtml(request: Request) {
 
   try {
     const response = await fetch(assetUrl, { redirect: "follow" });
-    if (response.ok) return response.text();
+    if (response.ok) return response;
   } catch {
     // Cloudflare runtimes cannot read the project filesystem; do not fall through there.
   }
@@ -140,22 +140,32 @@ async function readCloudflareHomepageHtml(request: Request) {
   throw new Error(`Homepage asset unavailable at ${CLOUDFLARE_HOMEPAGE_ASSET}`);
 }
 
+function withCloudflareHomepageAssetHeaders(response: Response) {
+  const headers = new Headers(response.headers);
+  headers.set("Cache-Control", "public, max-age=300, stale-while-revalidate=1800");
+  headers.set("Content-Language", "zh-Hant-TW");
+  headers.set("Content-Type", "text/html; charset=utf-8");
+  return new Response(response.body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers
+  });
+}
+
 async function readHomepageHtml() {
   return readFile(path.join(process.cwd(), "index.html"), "utf8");
 }
 
 export async function GET(request: Request) {
-  const html =
-    process.env.CLOUDFLARE_KV_ENABLED === "1"
-      ? await readCloudflareHomepageHtml(request)
-      : await readHomepageHtml();
+  if (process.env.CLOUDFLARE_KV_ENABLED === "1") {
+    return withCloudflareHomepageAssetHeaders(await readCloudflareHomepageResponse(request));
+  }
+
+  const html = await readHomepageHtml();
 
   return new Response(withLaunchMetadata(html), {
     headers: {
-      "Cache-Control":
-        process.env.CLOUDFLARE_KV_ENABLED === "1"
-          ? "public, max-age=300, stale-while-revalidate=1800"
-          : "public, max-age=0, must-revalidate",
+      "Cache-Control": "public, max-age=0, must-revalidate",
       "Content-Language": "zh-Hant-TW",
       "Content-Type": "text/html; charset=utf-8"
     }

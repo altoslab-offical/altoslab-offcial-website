@@ -19,9 +19,9 @@ This is intentional. The homepage should not be replaced with a new React implem
 
 The homepage route is a wrapper, not a redesign surface.
 
-- `/` -> `app/route.ts` -> root `index.html` locally.
-- Cloudflare `/` -> `app/route.ts` -> static asset `/altoslab-homepage`.
-- `scripts/sync-cloudflare-homepage.mjs` keeps `public/altoslab-homepage.html` aligned with `index.html` before Cloudflare builds.
+- `/` -> `app/route.ts` -> root `index.html` locally, with metadata injected in Node runtime.
+- Cloudflare `/` -> `app/route.ts` -> static asset `/altoslab-homepage`, returned directly without request-time HTML rewriting.
+- `scripts/sync-cloudflare-homepage.mjs` keeps `public/altoslab-homepage.html` aligned with `index.html` and injects homepage metadata before Cloudflare builds.
 
 Allowed homepage wrapper changes:
 
@@ -36,9 +36,9 @@ Forbidden homepage wrapper changes:
 - Injecting a replacement header, nav, CTA bar, visible layout CSS, or visual JavaScript.
 - Hiding the original `nav.fixed.top-0`.
 - Serving `components/site/*` or `app/page.tsx` as `/`.
-- Using Cloudflare `HTMLRewriter` to replace or stream-mutate homepage structure.
+- Using Cloudflare `HTMLRewriter`, `response.text()`, or other request-time full-HTML rewriting to replace or stream-mutate homepage structure.
 
-The protected markers are `<div id="root"></div>`, `fixed top-0`, `children:\`ALTOS\``, and `children:\`LAB\``. `scripts/homepage-ui-contract-smoke.mjs` enforces this contract and is part of `npm run test`.
+The protected markers are `<div id="root"></div>`, `fixed top-0`, `children:\`ALTOS\``, and `children:\`LAB\``. `scripts/homepage-ui-contract-smoke.mjs` enforces this contract, including the no request-time Cloudflare rewrite rule, and is part of `npm run test`.
 
 ## Active Next App Areas
 

@@ -23,6 +23,8 @@ for (const forbidden of [
   "body > nav.fixed.top-0",
   "document.body.prepend",
   "HTMLRewriter",
+  "response.text()",
+  "readCloudflareHomepageHtml",
   "components/site",
   "app/page.tsx"
 ]) {
@@ -42,6 +44,7 @@ if (publicHomepage) {
 assert(route.includes("CLOUDFLARE_HOMEPAGE_ASSET = \"/altoslab-homepage\""), "homepage route reads the Cloudflare homepage asset");
 assert(route.includes("withLaunchMetadata(html)"), "homepage route wraps the original homepage HTML");
 assert(route.includes("homepageAnalyticsSnippet()"), "homepage route keeps analytics without visual replacement");
+assert(route.includes("withCloudflareHomepageAssetHeaders(await readCloudflareHomepageResponse(request))"), "Cloudflare homepage returns the static asset without request-time HTML rewriting");
 
 for (const file of ["SPEC.md", "DESIGN.md", "docs/FRONTEND_ARCHITECTURE.md"]) {
   assert(read(file).includes("Homepage UI Stability Contract"), `${file} documents the Homepage UI Stability Contract`);

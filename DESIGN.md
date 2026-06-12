@@ -173,10 +173,12 @@ The homepage is a protected brand/design surface. Its canonical visual source is
 
 Route ownership:
 
-- `/` is owned by `app/route.ts`, but only as a metadata and analytics wrapper around the existing static homepage HTML.
-- `app/route.ts` may inject title, meta tags, JSON-LD, GA/GTM snippets, and no-script SEO fallback only.
+- `/` is owned by `app/route.ts`, but only as a metadata and analytics wrapper around the existing static homepage HTML in local Node runtime.
+- Cloudflare production must receive title, meta tags, JSON-LD, GA/GTM snippets, and no-script SEO fallback from the build-time `public/altoslab-homepage.html` asset, not request-time Worker string rewriting.
+- `app/route.ts` must return the Cloudflare homepage asset directly in production to avoid Worker CPU 1102 errors.
+- `app/route.ts` may inject title, meta tags, JSON-LD, GA/GTM snippets, and no-script SEO fallback only outside the Cloudflare asset path.
 - `app/route.ts` must not inject visible header/nav DOM, CSS, layout scripts, replacement CTA bars, or any rule that hides `nav.fixed.top-0`.
-- Cloudflare production must serve the same full homepage bundle from `/altoslab-homepage`; it must not use `HTMLRewriter` to stream-replace homepage structure.
+- Cloudflare production must serve the same full homepage bundle from `/altoslab-homepage`; it must not use `HTMLRewriter` or `response.text()` to stream-replace homepage structure at request time.
 - `components/site/*` remains inactive prototype code and must not be wired to `/` without explicit approval.
 
 Protected homepage markers:
