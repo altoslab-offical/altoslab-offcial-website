@@ -712,7 +712,7 @@ async function main() {
   await loadEnvFiles();
   const targetUrl = baseUrl();
   const healthResult = await fetchJson(`${targetUrl}/api/health`);
-  const inventoryResult = await fetchJson(`${targetUrl}/api/blog?fields=inventory&limit=600`);
+  const inventoryResult = await fetchJson(`${targetUrl}/api/blog?fields=inventory&limit=120`);
   const listResult = await fetchJson(`${targetUrl}/api/blog?limit=72`);
   const health = healthResult.json || {};
   const languages = health?.integrations?.blogLanguages?.length ? health.integrations.blogLanguages : DEFAULT_LANGUAGES;

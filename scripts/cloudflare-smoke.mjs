@@ -260,7 +260,7 @@ async function main() {
     pushIssue(errors, "marketScanWindows must be configured", { surface: "health" });
   }
 
-  const { json: blogApi } = await fetchJson(root, "/api/blog?fields=inventory&limit=600", errors, { surface: "blog-api" });
+  const { json: blogApi } = await fetchJson(root, "/api/blog?fields=inventory&limit=120", errors, { surface: "blog-api" });
   const publishedPosts = Array.isArray(blogApi?.posts) ? blogApi.posts.length : null;
   surfaces.blogApi = {
     status: publishedPosts === null ? "unavailable" : "ok",

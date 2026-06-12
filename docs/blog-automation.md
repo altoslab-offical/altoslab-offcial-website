@@ -21,7 +21,8 @@
 - Gemini and ChatGPT/GPT are browser workbenches, not release authorities. They may help draft prose or images only inside the dedicated Chrome tabs documented in `docs/content/blog-subagent-production-loop.md`.
 - Localization is not literal translation. Subagents must rewrite naturally for local readers while preserving the same article identity, source facts, sources, cover/media set and editorial angle.
 - The main brain is the only role allowed to call `--release`.
-- Local n8n is the active deterministic safety runner for prep, status, validate-only, ready-release polling, market scans and daily diagnostics. The old blog LaunchAgent is now a rollback path only. Gemini/GPT browser production is still handled by Codex/main-brain inside the fixed Chrome tabs, but n8n owns the repeated wakeups and gate execution around it.
+- Local n8n is the active deterministic safety runner for prep, status, validate-only, ready-release polling, market scans, daily closeout and diagnostics. The old blog LaunchAgent is now a rollback path only. Gemini/GPT browser production is still handled by Codex/main-brain inside the fixed Chrome tabs, but n8n owns the repeated wakeups and gate execution around it.
+- The n8n bridge fails closed at the HTTP layer: if an allowlisted job returns `ok:false`, the bridge returns HTTP 500 so n8n marks the execution as failed.
 
 ## Speed And Chrome Memory Guard
 
@@ -33,7 +34,8 @@
 - `scripts/blog-scheduled-runner.mjs --scheduled` now fails closed outside the configured time windows instead of falling through to release mode.
 - `scripts/blog-scheduled-runner.mjs --column-status` exposes whether the daily column has an `article-set.json`, ready manifest and release-gate issues.
 - `scripts/blog-scheduled-runner.mjs --column-validate` runs validate-only for a browser-produced article set and fails closed when Gemini/GPT evidence, language parity, image metadata or main-brain QA is missing.
-- The n8n column release poll calls the release gate every 15 minutes during the day. It publishes only a `ready` manifest and otherwise records `skipped`/held execution history.
+- The n8n column release poll calls the release gate every 15 minutes during the day. It publishes only a `ready` manifest. Missing candidates, missing article sets and held release gates return `ok:false`, so n8n records execution failure instead of silently passing.
+- The daily closeout gate runs at 23:35 Asia/Taipei and verifies public inventory, not just local files: the same Taipei date must have a complete 9-language column group and a complete 9-language market-news group on `https://altoslab-ai.cc`.
 - The scheduled runner uses a single local lock so overlapping heartbeat/LaunchAgent wakes cannot stack production jobs.
 - Column prep checks Chrome Memory Kit before creating a new browser-production candidate. Default guardrails are `ALTOS_BLOG_CHROME_TOTAL_RSS_MB=5200` and `ALTOS_BLOG_CHROME_RENDERER_RSS_MB=1200`; if either is exceeded, the column is held and the reason is logged.
 - Backfill planning is tied to prep windows by default. Market-scan windows focus on current news; set `ALTOS_BLOG_BACKFILL_ON_MARKET_SCAN=true` only for a deliberate catch-up burst.

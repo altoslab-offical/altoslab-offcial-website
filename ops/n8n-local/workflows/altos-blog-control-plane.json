@@ -480,7 +480,7 @@
           },
           "sendBody": true,
           "specifyBody": "json",
-          "jsonBody": "={\"source\":\"n8n-webhook\",\"workflow\":\"manual-column-prep\"}",
+          "jsonBody": "={{ JSON.stringify({ source: \"n8n-webhook\", workflow: \"manual-column-prep\", date: $json.body && $json.body.date ? $json.body.date : \"\" }) }}",
           "options": {
             "timeout": 600000
           }
@@ -651,7 +651,7 @@
           },
           "sendBody": true,
           "specifyBody": "json",
-          "jsonBody": "={\"source\":\"n8n-webhook\",\"workflow\":\"manual-column-status\"}",
+          "jsonBody": "={{ JSON.stringify({ source: \"n8n-webhook\", workflow: \"manual-column-status\", date: $json.body && $json.body.date ? $json.body.date : \"\" }) }}",
           "options": {
             "timeout": 120000
           }
@@ -708,7 +708,7 @@
           },
           "sendBody": true,
           "specifyBody": "json",
-          "jsonBody": "={\"source\":\"n8n-webhook\",\"workflow\":\"manual-column-validate\"}",
+          "jsonBody": "={{ JSON.stringify({ source: \"n8n-webhook\", workflow: \"manual-column-validate\", date: $json.body && $json.body.date ? $json.body.date : \"\" }) }}",
           "options": {
             "timeout": 600000
           }
@@ -765,7 +765,7 @@
           },
           "sendBody": true,
           "specifyBody": "json",
-          "jsonBody": "={\"source\":\"n8n-webhook\",\"workflow\":\"manual-column-release\"}",
+          "jsonBody": "={{ JSON.stringify({ source: \"n8n-webhook\", workflow: \"manual-column-release\", date: $json.body && $json.body.date ? $json.body.date : \"\" }) }}",
           "options": {
             "timeout": 600000
           }
@@ -777,6 +777,63 @@
         "position": [
           880,
           360
+        ]
+      },
+      {
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "altos-blog/manual/daily-closeout",
+          "responseMode": "lastNode",
+          "options": {}
+        },
+        "id": "manual-daily-closeout-webhook",
+        "name": "Manual daily closeout webhook",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2,
+        "position": [
+          0,
+          840
+        ],
+        "webhookId": "manual-daily-closeout-webhook"
+      },
+      {
+        "parameters": {},
+        "id": "manual-daily-closeout-trigger",
+        "name": "Manual trigger daily closeout",
+        "type": "n8n-nodes-base.manualTrigger",
+        "typeVersion": 1,
+        "position": [
+          0,
+          980
+        ]
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "http://host.docker.internal:8797/run/daily-closeout",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "x-altos-n8n-token",
+                "value": "={{ $env.ALTOS_N8N_BRIDGE_TOKEN }}"
+              }
+            ]
+          },
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ JSON.stringify({ source: \"n8n-webhook\", workflow: \"manual-daily-closeout\", date: $json.body && $json.body.date ? $json.body.date : \"\" }) }}",
+          "options": {
+            "timeout": 180000
+          }
+        },
+        "id": "manual-daily-closeout-run",
+        "name": "Manual run daily closeout",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          300,
+          910
         ]
       }
     ],
@@ -934,6 +991,28 @@
             }
           ]
         ]
+      },
+      "Manual daily closeout webhook": {
+        "main": [
+          [
+            {
+              "node": "Manual run daily closeout",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Manual trigger daily closeout": {
+        "main": [
+          [
+            {
+              "node": "Manual run daily closeout",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
       }
     },
     "settings": {
@@ -941,5 +1020,78 @@
       "executionOrder": "v1"
     },
     "id": "altos-manual-control"
+  },
+  {
+    "name": "ALTOS Blog - Daily Closeout Gate",
+    "active": true,
+    "nodes": [
+      {
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "field": "cronExpression",
+                "expression": "35 23 * * *"
+              }
+            ]
+          }
+        },
+        "id": "daily-closeout-schedule",
+        "name": "Daily closeout window",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.2,
+        "position": [
+          0,
+          0
+        ]
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "http://host.docker.internal:8797/run/daily-closeout",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "x-altos-n8n-token",
+                "value": "={{ $env.ALTOS_N8N_BRIDGE_TOKEN }}"
+              }
+            ]
+          },
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={\"source\":\"n8n\",\"workflow\":\"daily-closeout\"}",
+          "options": {
+            "timeout": 180000
+          }
+        },
+        "id": "daily-closeout-run",
+        "name": "Run daily closeout gate",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          260,
+          0
+        ]
+      }
+    ],
+    "connections": {
+      "Daily closeout window": {
+        "main": [
+          [
+            {
+              "node": "Run daily closeout gate",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "settings": {
+      "timezone": "Asia/Taipei",
+      "executionOrder": "v1"
+    },
+    "id": "altos-daily-closeout-gate"
   }
 ]

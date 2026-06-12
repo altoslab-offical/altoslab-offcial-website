@@ -45,18 +45,20 @@ Local n8n is the primary scheduler for this workflow. The Codex app heartbeat re
 
 - Automation id: `altos-blog-subagent-production-loop`
 - Target: current main-brain thread
-- Times: `08:10`, `09:00`, `09:04`, `10:30`, `12:30`, `14:30`, `15:10`, `16:00`, `16:04`, `18:30`, and `20:30` Asia/Taipei
+- Times: `08:10`, `09:00`, `09:04`, `10:30`, `12:30`, `14:30`, `15:10`, `16:00`, `16:04`, `18:30`, `20:30`, and `23:35` Asia/Taipei
 - Prep windows: `08:10` and `15:10`
 - Release windows: `09:00` and `16:00`
 - Market-scan windows: `10:30`, `12:30`, `14:30`, `18:30`, and `20:30`
 - Post-release follow-up windows: `09:04` and `16:04`
+- Daily closeout window: `23:35`
 
-The local n8n control plane is the deterministic safety runner. It wakes at the same windows and calls the allowlisted local bridge. It does four things:
+The local n8n control plane is the deterministic safety runner. It wakes at the same windows and calls the allowlisted local bridge. It does five things:
 
 - prep windows: create a run folder, prompt card, and `awaiting_browser_production` manifest skeleton;
 - release windows: publish only an already `ready` manifest.
 - market-scan windows: refresh source-fast-lane prompts/manifests for source-translation production;
 - daytime poll windows: recheck the morning column release gate every 15 minutes so a browser-produced candidate can publish after late validate-only completion.
+- daily closeout window: verify the public blog inventory across all nine languages and fail the n8n execution if the Taipei date does not contain one complete column group and one complete market-news group.
 
 The runner is intentionally narrow:
 
@@ -75,10 +77,10 @@ node scripts/blog-sop-doctor.mjs \
 
 The doctor checks the local worker env, LaunchAgent registration, production `/api/health`, durable CMS status (`cloudflare-d1` for the active Cloudflare path), disabled legacy DeepSeek cron, and release candidate readiness. Release mode also requires admin readback credentials so the post-release verifier can inspect protected blog metadata.
 
-It does not pretend to operate Gemini or ChatGPT. Column/feature Gemini/GPT production remains owned by Codex/main-brain because it has to enforce fixed-tab, account, model and evidence rules. n8n owns the repeated prep/status/validate/release execution around that browser work. Market-news source-translation can be prepared without Gemini when the source article, source image and attribution are verifiable.
+It does not pretend to operate Gemini or ChatGPT. Column/feature Gemini/GPT production remains owned by Codex/main-brain because it has to enforce fixed-tab, account, model and evidence rules. n8n owns the repeated prep/status/validate/release execution around that browser work. The bridge returns HTTP 500 whenever a job returns `ok:false`, so a held gate is visible in n8n execution history instead of being hidden inside a successful HTTP response. Market-news source-translation can be prepared without Gemini when the source article, source image and attribution are verifiable.
 
 At prep time, the main brain must prepare a publishable candidate manifest before the release window.
-At release time, the main brain must not start fresh generation. If no prepared, validate-only-passed, design-approved candidate exists, skip publishing. n8n keeps polling `column-release`; it must remain a no-op until the manifest is `ready`.
+At release time, the main brain must not start fresh generation. If no prepared, validate-only-passed, design-approved candidate exists, hold publishing and return `ok:false`. n8n keeps polling `column-release`; it must remain a no-publish gate until the manifest is `ready`.
 At market-scan windows, the runner never publishes. It only creates/updates `awaiting_source_translation_production` manifests and keeps fail-closed gate coverage unchanged for the same-day 09:00 / 16:00 publish windows.
 At post-release follow-up time, the main brain must not start fresh generation. It verifies a released manifest or reruns the release gate once if the manifest is still ready and the five-minute release grace window is still open.
 The manifest contract lives in `docs/content/blog-prepared-candidate-manifest.md`.

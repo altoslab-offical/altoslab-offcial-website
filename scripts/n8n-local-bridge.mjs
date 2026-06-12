@@ -55,6 +55,11 @@ function nodeCommand(scriptPath, args = []) {
   ];
 }
 
+function dateArgs(input = {}) {
+  const date = typeof input.date === "string" ? input.date.trim() : "";
+  return /^\d{4}-\d{2}-\d{2}$/.test(date) ? ["--date", date] : [];
+}
+
 const jobs = {
   health: {
     timeoutMs: 90_000,
@@ -82,8 +87,9 @@ const jobs = {
   },
   "column-prep": {
     timeoutMs: 600_000,
-    command: () => nodeCommand("scripts/blog-scheduled-runner.mjs", [
+    command: (input) => nodeCommand("scripts/blog-scheduled-runner.mjs", [
       "--prep",
+      ...dateArgs(input),
       "--slot",
       "morning",
       "--base-url",
@@ -92,8 +98,9 @@ const jobs = {
   },
   "column-status": {
     timeoutMs: 120_000,
-    command: () => nodeCommand("scripts/blog-scheduled-runner.mjs", [
+    command: (input) => nodeCommand("scripts/blog-scheduled-runner.mjs", [
       "--column-status",
+      ...dateArgs(input),
       "--slot",
       "morning",
       "--base-url",
@@ -103,8 +110,9 @@ const jobs = {
   },
   "column-validate": {
     timeoutMs: 600_000,
-    command: () => nodeCommand("scripts/blog-scheduled-runner.mjs", [
+    command: (input) => nodeCommand("scripts/blog-scheduled-runner.mjs", [
       "--column-validate",
+      ...dateArgs(input),
       "--slot",
       "morning",
       "--base-url",
@@ -113,13 +121,22 @@ const jobs = {
   },
   "column-release": {
     timeoutMs: 600_000,
-    command: () => nodeCommand("scripts/blog-scheduled-runner.mjs", [
+    command: (input) => nodeCommand("scripts/blog-scheduled-runner.mjs", [
       "--release",
+      ...dateArgs(input),
       "--slot",
       "morning",
       "--base-url",
       DEFAULT_BASE_URL,
       "--force-release"
+    ])
+  },
+  "daily-closeout": {
+    timeoutMs: 180_000,
+    command: (input) => nodeCommand("scripts/blog-daily-closeout.mjs", [
+      ...dateArgs(input),
+      "--base-url",
+      DEFAULT_BASE_URL
     ])
   },
   scheduled: {
@@ -187,9 +204,9 @@ async function readRequestBody(request) {
   }
 }
 
-function runCommand(jobName) {
+function runCommand(jobName, input = {}) {
   const job = jobs[jobName];
-  const [command, args] = job.command();
+  const [command, args] = job.command(input);
   const startedAt = new Date().toISOString();
   let stdout = "";
   let stderr = "";
@@ -260,15 +277,15 @@ async function handleRun(request, response, jobName) {
     writeJson(response, 404, { ok: false, error: "unknown job", jobs: Object.keys(jobs) });
     return;
   }
-  await readRequestBody(request);
+  const input = await readRequestBody(request);
   if (activeRun) {
     writeJson(response, 423, { ok: false, error: "bridge busy", activeRun });
     return;
   }
   activeRun = { job: jobName, startedAt: new Date().toISOString() };
   try {
-    const result = await runCommand(jobName);
-    writeJson(response, 200, result);
+    const result = await runCommand(jobName, input);
+    writeJson(response, result.ok ? 200 : 500, result);
   } finally {
     activeRun = null;
   }

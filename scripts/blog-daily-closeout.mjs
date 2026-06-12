@@ -1,0 +1,310 @@
+#!/usr/bin/env node
+
+import fs from "node:fs/promises";
+import path from "node:path";
+import process from "node:process";
+
+const REQUIRED_LANGUAGES = ["zh-Hant", "en", "ja", "ko", "id", "vi", "th", "ms", "fil"];
+const ROOT_DIR = "/Users/asdc163/Documents/官方網站";
+const DEFAULT_BASE_URL = process.env.ALTOS_BLOG_BASE_URL || process.env.ALTOS_BLOG_AUTOMATION_BASE_URL || "https://altoslab-ai.cc";
+
+function hasFlag(name) {
+  return process.argv.includes(`--${name}`);
+}
+
+function arg(name, fallback = "") {
+  const prefix = `--${name}=`;
+  const inline = process.argv.find((value) => value.startsWith(prefix));
+  if (inline) return inline.slice(prefix.length);
+  const index = process.argv.indexOf(`--${name}`);
+  if (index >= 0 && process.argv[index + 1] && !process.argv[index + 1].startsWith("--")) return process.argv[index + 1];
+  return fallback;
+}
+
+function taiwanDate(value = new Date()) {
+  const formatter = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Taipei",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit"
+  });
+  return formatter.format(value);
+}
+
+function postTaiwanDate(post) {
+  const raw = post?.publishedAt || post?.updatedAt || post?.createdAt || post?.date || "";
+  if (!raw) return "";
+  const date = new Date(raw);
+  if (Number.isNaN(date.getTime())) return "";
+  return taiwanDate(date);
+}
+
+function normalizeBaseUrl(value) {
+  return String(value || DEFAULT_BASE_URL).replace(/\/+$/, "");
+}
+
+async function readJsonIfExists(filePath) {
+  try {
+    return JSON.parse(await fs.readFile(filePath, "utf8"));
+  } catch {
+    return null;
+  }
+}
+
+async function exists(filePath) {
+  try {
+    await fs.access(filePath);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+async function fetchJson(url) {
+  const response = await fetch(url, { headers: { accept: "application/json" } });
+  const text = await response.text();
+  if (!response.ok) {
+    throw new Error(`${response.status} ${response.statusText}: ${text.slice(0, 500)}`);
+  }
+  try {
+    return JSON.parse(text);
+  } catch {
+    throw new Error(`invalid JSON from ${url}: ${text.slice(0, 500)}`);
+  }
+}
+
+async function fetchPostsByLanguage(baseUrl) {
+  const result = {};
+  for (const language of REQUIRED_LANGUAGES) {
+    const payload = await fetchJson(`${baseUrl}/api/blog?language=${encodeURIComponent(language)}&fields=inventory&limit=30`);
+    result[language] = Array.isArray(payload.posts) ? payload.posts : [];
+  }
+  return result;
+}
+
+function groupCoverage(postsByLanguage, translationGroupId) {
+  const present = [];
+  const missing = [];
+  for (const language of REQUIRED_LANGUAGES) {
+    const posts = postsByLanguage[language] || [];
+    const match = posts.find((post) => post.translationGroupId === translationGroupId && post.status !== "draft");
+    if (match) present.push(language);
+    else missing.push(language);
+  }
+  return { complete: missing.length === 0, present, missing };
+}
+
+function liveGroupByTranslationGroupId(postsByLanguage, translationGroupId) {
+  if (!translationGroupId) return null;
+  const zhMatch = (postsByLanguage["zh-Hant"] || []).find(
+    (post) => post.translationGroupId === translationGroupId && post.status !== "draft"
+  );
+  if (!zhMatch) return null;
+  return {
+    translationGroupId,
+    slug: zhMatch.slug,
+    title: zhMatch.title,
+    publishedAt: zhMatch.publishedAt || zhMatch.createdAt || "",
+    contentType: zhMatch.contentType || "",
+    coverage: groupCoverage(postsByLanguage, translationGroupId),
+    matchedByCandidate: true
+  };
+}
+
+function liveGroupsForDate(postsByLanguage, { date, contentType }) {
+  const zhPosts = postsByLanguage["zh-Hant"] || [];
+  const candidates = zhPosts.filter((post) => post.contentType === contentType && postTaiwanDate(post) === date && post.translationGroupId);
+  return candidates.map((post) => ({
+    translationGroupId: post.translationGroupId,
+    slug: post.slug,
+    title: post.title,
+    publishedAt: post.publishedAt || post.createdAt || "",
+    coverage: groupCoverage(postsByLanguage, post.translationGroupId)
+  }));
+}
+
+function candidateIndexPath(date, slot, lane) {
+  return path.join(ROOT_DIR, "data/blog-prepared-candidates", `${date}-${slot}-${lane}.json`);
+}
+
+async function summarizeCandidate(filePath) {
+  const index = await readJsonIfExists(filePath);
+  if (!index) return { exists: false, path: filePath };
+  const manifestPath = index.manifestPath || filePath;
+  const manifest = (await readJsonIfExists(manifestPath)) || index;
+  const articleSetPath = manifest.articleSetPath ? path.resolve(manifest.articleSetPath) : "";
+  const articleSetExists = articleSetPath ? await exists(articleSetPath) : false;
+  return {
+    exists: true,
+    path: filePath,
+    manifestPath,
+    status: manifest.status || index.status || "unknown",
+    slot: manifest.slot || index.slot || "",
+    translationGroupId: manifest.translationGroupId || index.translationGroupId || "",
+    articleSetPath,
+    articleSetExists,
+    validateOnly: manifest.validateOnly
+      ? {
+          wouldPublish: manifest.validateOnly.wouldPublish === true,
+          errors: Array.isArray(manifest.validateOnly.errors) ? manifest.validateOnly.errors : []
+        }
+      : null,
+    publish: manifest.publish
+      ? {
+          publishedIds: Array.isArray(manifest.publish.publishedIds) ? manifest.publish.publishedIds : []
+        }
+      : null,
+    releaseVerification: manifest.releaseVerification
+      ? {
+          ok: manifest.releaseVerification.ok === true,
+          errors: Array.isArray(manifest.releaseVerification.errors) ? manifest.releaseVerification.errors : [],
+          warnings: Array.isArray(manifest.releaseVerification.warnings) ? manifest.releaseVerification.warnings : []
+        }
+      : null
+  };
+}
+
+function bestCompleteGroup(groups) {
+  return groups.find((group) => group.coverage.complete) || null;
+}
+
+function summarizeGroups(groups) {
+  return groups.map((group) => ({
+    translationGroupId: group.translationGroupId,
+    slug: group.slug,
+    title: group.title,
+    publishedAt: group.publishedAt,
+    languages: group.coverage.present,
+    missingLanguages: group.coverage.missing
+  }));
+}
+
+function outputAndExit(payload) {
+  console.log(JSON.stringify(payload, null, 2));
+  process.exit(payload.ok ? 0 : 1);
+}
+
+async function main() {
+  if (hasFlag("help") || hasFlag("h")) {
+    console.log("Usage: node scripts/blog-daily-closeout.mjs [--date YYYY-MM-DD] [--base-url URL]");
+    return;
+  }
+
+  const date = arg("date", taiwanDate());
+  const baseUrl = normalizeBaseUrl(arg("base-url", DEFAULT_BASE_URL));
+  const checkedAt = new Date().toISOString();
+  const errors = [];
+  const warnings = [];
+  const actions = [];
+
+  let postsByLanguage = {};
+  try {
+    postsByLanguage = await fetchPostsByLanguage(baseUrl);
+  } catch (error) {
+    outputAndExit({
+      ok: false,
+      checkedAt,
+      date,
+      baseUrl,
+      errors: [`public blog inventory fetch failed: ${error instanceof Error ? error.message : String(error)}`],
+      warnings,
+      actions: ["Repair the public blog API or Cloudflare route before treating daily automation as healthy."]
+    });
+  }
+
+  const columnCandidate = await summarizeCandidate(candidateIndexPath(date, "morning", "column"));
+  const marketCandidates = {
+    morning: await summarizeCandidate(candidateIndexPath(date, "morning", "market")),
+    afternoon: await summarizeCandidate(candidateIndexPath(date, "afternoon", "market"))
+  };
+
+  const columnGroups = liveGroupsForDate(postsByLanguage, { date, contentType: "column" });
+  const marketGroups = liveGroupsForDate(postsByLanguage, { date, contentType: "breaking" });
+  let completeColumn = bestCompleteGroup(columnGroups);
+  const completeMarket = bestCompleteGroup(marketGroups);
+
+  if (!completeColumn && columnCandidate.status === "released" && columnCandidate.translationGroupId) {
+    const fallbackColumn = liveGroupByTranslationGroupId(postsByLanguage, columnCandidate.translationGroupId);
+    if (fallbackColumn?.contentType === "column" && fallbackColumn.coverage.complete) {
+      completeColumn = fallbackColumn;
+      const liveDate = postTaiwanDate(fallbackColumn);
+      warnings.push(
+        liveDate && liveDate !== date
+          ? `daily column is live and complete via released candidate ${columnCandidate.translationGroupId}, but its public timestamp resolves to Taipei date ${liveDate}`
+          : `daily column is live and complete via released candidate ${columnCandidate.translationGroupId}`
+      );
+    }
+  }
+
+  if (!completeColumn) {
+    const missingLanguages = columnGroups.flatMap((group) => group.coverage.missing);
+    const languageDetail = missingLanguages.length ? `; incomplete live groups missing ${[...new Set(missingLanguages)].join(", ")}` : "";
+    errors.push(`daily column is not live as a complete 9-language group for ${date}${languageDetail}`);
+    if (!columnCandidate.articleSetExists) {
+      errors.push("column article-set.json is missing; Gemini/GPT browser production has not produced the publishable candidate");
+      actions.push("Run the John-profile Gemini/GPT column production workbench, write article-set.json, then run /run/column-validate and /run/column-release.");
+    } else {
+      actions.push("Rerun /run/column-validate, fix any validateOnly/design/image errors, then rerun /run/column-release.");
+    }
+  }
+
+  if (!completeMarket) {
+    const missingLanguages = marketGroups.flatMap((group) => group.coverage.missing);
+    const languageDetail = missingLanguages.length ? `; incomplete live groups missing ${[...new Set(missingLanguages)].join(", ")}` : "";
+    errors.push(`market-news lane did not publish a complete 9-language group for ${date}${languageDetail}`);
+    actions.push("Run /run/market-scan, then verify the published translationGroupId across all configured languages.");
+  }
+
+  if (marketCandidates.morning.status === "held" && marketCandidates.afternoon.status === "released") {
+    warnings.push("morning market scan held, but afternoon market scan released a complete item");
+  }
+
+  outputAndExit({
+    ok: errors.length === 0,
+    checkedAt,
+    date,
+    baseUrl,
+    requiredLanguages: REQUIRED_LANGUAGES,
+    live: {
+      dailyColumn: completeColumn
+        ? {
+            ok: true,
+            translationGroupId: completeColumn.translationGroupId,
+            slug: completeColumn.slug,
+            title: completeColumn.title,
+            publishedAt: completeColumn.publishedAt,
+            languages: completeColumn.coverage.present,
+            matchedByCandidate: completeColumn.matchedByCandidate === true
+          }
+        : {
+            ok: false,
+            groups: summarizeGroups(columnGroups)
+          },
+      marketNews: completeMarket
+        ? {
+            ok: true,
+            translationGroupId: completeMarket.translationGroupId,
+            slug: completeMarket.slug,
+            title: completeMarket.title,
+            publishedAt: completeMarket.publishedAt,
+            languages: completeMarket.coverage.present
+          }
+        : {
+            ok: false,
+            groups: summarizeGroups(marketGroups)
+          }
+    },
+    localCandidates: {
+      column: columnCandidate,
+      market: marketCandidates
+    },
+    errors,
+    warnings,
+    actions
+  });
+}
+
+main().catch((error) => {
+  console.error(error instanceof Error ? error.stack || error.message : error);
+  process.exit(1);
+});

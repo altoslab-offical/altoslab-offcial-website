@@ -7,7 +7,7 @@ export async function GET(request: Request) {
   const params = new URL(request.url).searchParams;
   const requestedLanguage = params.get("language");
   const language: BlogLanguage = isBlogLanguage(requestedLanguage) ? requestedLanguage : "zh-Hant";
-  const posts = await getPublishedBlogInventoryPostsForApi(language, 80);
+  const posts = await getPublishedBlogInventoryPostsForApi(language, 30);
   return blogHtmlResponse(
     renderBlogIndexHtml(language, posts, {
       tag: params.get("tag") || undefined,

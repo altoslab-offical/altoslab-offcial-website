@@ -1446,12 +1446,12 @@ function releaseWindowIssue({ date, slot }) {
 async function release({ date, slot }) {
   const indexPath = await resolveCandidateIndexPath({ date, slot, lane: "column" });
   if (!(await exists(indexPath))) {
-    return { ok: true, skipped: true, phase: "release", reason: "missing prepared candidate", indexPath };
+    return { ok: false, skipped: true, phase: "release", reason: "missing prepared candidate", indexPath };
   }
   const index = await readJson(indexPath);
   const manifestPath = index.manifestPath || indexPath;
   if (!(await exists(manifestPath))) {
-    return { ok: true, skipped: true, phase: "release", reason: "prepared candidate manifest file missing", manifestPath };
+    return { ok: false, skipped: true, phase: "release", reason: "prepared candidate manifest file missing", manifestPath };
   }
   const manifest = await readJson(manifestPath);
   const articleSetPath = manifest.articleSetPath ? path.resolve(manifest.articleSetPath) : "";
@@ -1503,7 +1503,7 @@ async function release({ date, slot }) {
   }
   if (issues.length) {
     await appendLog(globalScheduleLogPath(), JSON.stringify({ phase: "release-held", date, slot, manifestPath, issues }));
-    return { ok: true, skipped: true, phase: "release", reason: "release gate held", issues, manifestPath };
+    return { ok: false, skipped: true, phase: "release", reason: "release gate held", issues, manifestPath };
   }
 
   const { doctor, repair } = await runDoctorWithProductionRepair({ mode: "release", date, slot, phase: "release-doctor" });

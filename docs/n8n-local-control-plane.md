@@ -14,6 +14,7 @@ n8n owns:
 - SEO/GEO report generation.
 - Codex-operated automatic QA/release gate execution through the local bridge.
 - Column candidate status checks, validate-only advancement, and ready-candidate release polling.
+- Daily closeout enforcement: by 23:35 Asia/Taipei, the public blog must show one complete 9-language daily column group and one complete 9-language market-news group for the Taipei date, or n8n records a failed execution with the exact blocker.
 - Future status notifications.
 - Retry visibility and execution history.
 
@@ -37,7 +38,7 @@ n8n does not own:
 - Secrets and local overrides: `~/.altoslab-n8n.env` and `~/.altoslab-blog-worker.env`, never committed.
 - Logs: `data/n8n-local-runs/*.json`.
 
-The bridge is deliberately allowlisted. n8n can call `/run/health`, `/run/worker-smoke`, `/run/custom-domain-smoke`, `/run/doctor`, `/run/ops-audit`, `/run/seo-geo-report`, `/run/column-prep`, `/run/column-status`, `/run/column-validate`, `/run/column-release`, `/run/scheduled`, `/run/market-scan-validate`, and `/run/market-scan`. It cannot execute arbitrary shell commands.
+The bridge is deliberately allowlisted. n8n can call `/run/health`, `/run/worker-smoke`, `/run/custom-domain-smoke`, `/run/doctor`, `/run/ops-audit`, `/run/seo-geo-report`, `/run/column-prep`, `/run/column-status`, `/run/column-validate`, `/run/column-release`, `/run/daily-closeout`, `/run/scheduled`, `/run/market-scan-validate`, and `/run/market-scan`. It cannot execute arbitrary shell commands.
 
 The default automation base URL is `https://altoslab-ai.cc`. Set `ALTOS_BLOG_AUTOMATION_BASE_URL=https://altoslab-official-website.altoslab-ai.workers.dev` in `~/.altoslab-n8n.env` only during a verified custom-domain incident.
 
@@ -49,6 +50,7 @@ There is no human approval step in the normal publishing loop. The review gate i
 - n8n owns repeated timing, status visibility, validate-only execution, and ready-release polling.
 - Codex/main-brain remains accountable for editorial/source/media judgment and browser evidence.
 - If any required evidence is missing, the job stops with `ok=false` and the article is not published.
+- The bridge returns HTTP 500 whenever the underlying job returns `ok=false`, so n8n executions fail loudly instead of hiding the failure inside a JSON body.
 - External account blockers such as Chrome login, Gemini/ChatGPT browser evidence, or Gmail sender verification remain fail-closed because automation cannot safely fake those states.
 
 ## Install
@@ -95,6 +97,7 @@ curl -fsS -X POST -H "content-type: application/json" --data '{"source":"manual-
 curl -fsS -X POST -H "content-type: application/json" --data '{"source":"manual-smoke"}' http://127.0.0.1:5679/webhook/altos-blog/manual/column-validate
 curl -fsS -X POST -H "content-type: application/json" --data '{"source":"manual-smoke"}' http://127.0.0.1:5679/webhook/altos-blog/manual/column-release
 curl -fsS -X POST -H "content-type: application/json" --data '{"source":"manual-smoke"}' http://127.0.0.1:5679/webhook/altos-blog/manual/market-validate
+curl -fsS -X POST -H "content-type: application/json" --data '{"source":"manual-smoke"}' http://127.0.0.1:5679/webhook/altos-blog/manual/daily-closeout
 npm run verify:cloudflare -- --base-url https://altoslab-official-website.altoslab-ai.workers.dev
 npm run verify:cloudflare -- --base-url https://altoslab-ai.cc
 ```
@@ -108,6 +111,7 @@ npm run verify:cloudflare -- --base-url https://altoslab-ai.cc
 - `column-prep` returns `awaiting_browser_production`: prep succeeded but the article is not done. The next required action is browser production under the `john.wu0120@gmail.com` Chrome profile, followed by `/run/column-validate`.
 - `column-status` returns `articleSetExists=false`: Gemini/GPT browser production has not written `article-set.json`; do not publish.
 - `column-validate` returns `ok=false`: validation, browser evidence, language, source, image, or design QA failed. Fix the exact reported issue, then rerun `column-validate`.
-- `column-release` returns `release gate held`: the candidate is not `ready`. The 15-minute release poll is working, but it will not publish until validate-only, design/image QA and browser evidence pass.
+- `column-release` returns `release gate held`: the candidate is not `ready`; this is an n8n execution failure, not a harmless skip. The 15-minute release poll will not publish until validate-only, design/image QA and browser evidence pass.
+- `daily-closeout` returns `daily column is not live as a complete 9-language group`: today's column did not reach public inventory. Treat this as the primary daily automation blocker and fix the reported missing article-set or release gate before calling the day complete.
 - `market-scan-validate` returns `ready` in `validate-only`: the news item passed dry-run gates but was not published. Use the timed `market-scan` workflow or the explicit manual market-scan webhook for a release attempt.
 - `KV put() limit exceeded for the day`: do not roll back to GCP or reseed production KV. Confirm `/api/health` reports `cloudflare-d1`, run `POST /api/admin/blog/refresh-public-cache` with admin auth, then rerun release verification. KV is allowed to remain a warning while D1 projection is healthy.

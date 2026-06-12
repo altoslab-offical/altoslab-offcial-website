@@ -6,9 +6,31 @@ ENV_FILE="$HOME/.altoslab-n8n.env"
 COMPOSE_FILE="$ROOT_DIR/ops/n8n-local/docker-compose.yml"
 N8N_PORT="${N8N_LOCAL_PORT:-}"
 FULL=false
+VERIFY_DATE=""
 
-if [[ "${1:-}" == "--full" ]]; then
-  FULL=true
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --full)
+      FULL=true
+      shift
+      ;;
+    --date)
+      VERIFY_DATE="${2:-}"
+      shift 2
+      ;;
+    --date=*)
+      VERIFY_DATE="${1#--date=}"
+      shift
+      ;;
+    *)
+      echo "unknown argument: $1" >&2
+      exit 1
+      ;;
+  esac
+done
+
+if [[ -z "$VERIFY_DATE" ]]; then
+  VERIFY_DATE="$(TZ=Asia/Taipei date +%Y-%m-%d)"
 fi
 
 if [[ ! -f "$ENV_FILE" ]]; then
@@ -50,7 +72,7 @@ json_smoke() {
   local attempt
   local last_error=""
   for attempt in 1 2 3; do
-    if out="$(curl -fsS -X POST -H "content-type: application/json" --data "{\"source\":\"${label}\"}" "$url" 2>&1)"; then
+    if out="$(curl -fsS -X POST -H "content-type: application/json" --data "{\"source\":\"${label}\",\"date\":\"${VERIFY_DATE}\"}" "$url" 2>&1)"; then
       break
     fi
     last_error="$out"
@@ -73,9 +95,7 @@ COLUMN_INDEX_BACKUP=""
 COLUMN_INDEX_HAD_FILE=false
 
 preserve_column_index() {
-  local taipei_date
-  taipei_date="$(TZ=Asia/Taipei date +%Y-%m-%d)"
-  COLUMN_INDEX_PATH="$ROOT_DIR/data/blog-prepared-candidates/${taipei_date}-morning-column.json"
+  COLUMN_INDEX_PATH="$ROOT_DIR/data/blog-prepared-candidates/${VERIFY_DATE}-morning-column.json"
   COLUMN_INDEX_BACKUP="$(mktemp -t altos-n8n-column-index.XXXXXX)"
   if [[ -f "$COLUMN_INDEX_PATH" ]]; then
     cp "$COLUMN_INDEX_PATH" "$COLUMN_INDEX_BACKUP"
@@ -134,7 +154,7 @@ echo "unauthorized bridge request returned 401"
 
 echo "Checking workflow inventory"
 workflow_list="$(docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" exec -T n8n n8n list:workflow)"
-for workflow_id in altos-health-watch altos-market-scan altos-scheduled-gate altos-column-release-poll altos-seo-geo altos-manual-control; do
+for workflow_id in altos-health-watch altos-market-scan altos-scheduled-gate altos-column-release-poll altos-daily-closeout-gate altos-seo-geo altos-manual-control; do
   if ! grep -q "$workflow_id" <<<"$workflow_list"; then
     echo "missing workflow: $workflow_id" >&2
     exit 1
@@ -143,7 +163,7 @@ done
 echo "workflow inventory ok"
 
 echo "Checking bridge job inventory"
-for job_name in health worker-smoke custom-domain-smoke doctor ops-audit seo-geo-report column-prep column-status column-validate column-release scheduled market-scan-validate market-scan; do
+for job_name in health worker-smoke custom-domain-smoke doctor ops-audit seo-geo-report column-prep column-status column-validate column-release daily-closeout scheduled market-scan-validate market-scan; do
   if ! grep -q "\"${job_name}\"" <<<"$bridge_health"; then
     echo "bridge job missing: $job_name" >&2
     exit 1
@@ -171,6 +191,9 @@ if [[ "$FULL" == true ]]; then
 
   echo "Checking n8n manual market validate webhook"
   json_smoke "manual-market-validate" "http://127.0.0.1:${N8N_PORT}/webhook/altos-blog/manual/market-validate"
+
+  echo "Checking n8n manual daily closeout webhook"
+  json_smoke "manual-daily-closeout" "http://127.0.0.1:${N8N_PORT}/webhook/altos-blog/manual/daily-closeout"
 fi
 
 echo "n8n local control plane verification passed"

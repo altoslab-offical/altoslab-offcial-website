@@ -12,6 +12,7 @@ docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" exec -T n8n n8n publish
 docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" exec -T n8n n8n publish:workflow --id=altos-market-scan
 docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" exec -T n8n n8n publish:workflow --id=altos-scheduled-gate
 docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" exec -T n8n n8n publish:workflow --id=altos-column-release-poll
+docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" exec -T n8n n8n publish:workflow --id=altos-daily-closeout-gate
 docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" exec -T n8n n8n publish:workflow --id=altos-seo-geo
 docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" exec -T n8n n8n publish:workflow --id=altos-manual-control
 

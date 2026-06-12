@@ -284,12 +284,12 @@ assert(cms.includes("public-blog-list") && cms.includes("public-blog-detail"), "
 assert(cms.includes("public_blog_posts") && cms.includes("readPublicBlogD1ProjectionDetail"), "public blog reads can use compact D1 projection instead of reconstructing the full CMS blob");
 assert(cms.includes("publicBlogDetailRefreshLimitPerLanguage") && cms.includes("isCloudflarePublicRuntime() ? 0 : 4"), "Cloudflare KV publish avoids per-post detail cache write fan-out by default");
 assert(cms.includes("const data = await readPublicRawCmsData()") && cms.includes("matchesBlogSlug(item.slug, slug)"), "Cloudflare detail pages fall back to primary CMS reads when detail cache is absent");
-assert(cms.includes("public-blog-inventory") && cloudflareSmoke.includes("fields=inventory&limit=600"), "Cloudflare public blog inventory uses a lightweight all-post cache");
+assert(cms.includes("public-blog-inventory") && cloudflareSmoke.includes("fields=inventory&limit=120"), "Cloudflare public blog inventory uses a bounded lightweight cache");
 assert(blogIndex.includes("getPublishedBlogInventoryPostsByLanguage"), "Cloudflare blog index renders from inventory cache instead of full blog bodies");
 assert(blogIndex.includes('BLOG_INDEX_PAGE_SIZE || "18"') && blogIndex.includes("Math.min(rawBlogIndexPageSize, 24)"), "blog index paginates cards within the Cloudflare Worker CPU budget");
 assert(blogIndex.includes("filtered.slice(pageStart, pageStart + BLOG_INDEX_PAGE_SIZE)") && blogIndex.includes("blog-craft-pagination"), "blog index exposes all inventory through pagination instead of rendering every card on one Worker request");
 assert(cms.includes("PUBLIC_BLOG_CACHE_LIMIT_PER_LANGUAGE || 600"), "public blog list projection does not keep the old 8-post-per-language cap");
-assert(blogApiRoute.includes("Math.min(rawLimit, 600)") && !blogApiRoute.includes("isInventory ? 600 : 60"), "public blog API uses the same 600-post safety cap for list and inventory responses");
+assert(blogApiRoute.includes("Math.min(rawLimit, 120)") && blogApiRoute.includes("getPublishedBlogInventoryPostsForApi(language || undefined, limit)"), "public blog API uses bounded D1 inventory projection for list and inventory responses");
 assert(feedRoute.includes("getPublishedBlogInventoryPosts()"), "Cloudflare feed renders from inventory cache instead of full blog bodies");
 assert(
   rssAliasRoute.includes("export const dynamic = \"force-dynamic\"") && rssAliasRoute.includes("export { GET } from \"../feed.xml/route\""),
