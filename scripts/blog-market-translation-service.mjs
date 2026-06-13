@@ -18,6 +18,16 @@ const TARGET_LANGUAGES = {
 
 const LOCAL_PROVIDER_ALIASES = new Set(["local", "deterministic", "source-faithful"]);
 
+function localMarketFallbackAllowed() {
+  return process.env.BLOG_MARKET_ALLOW_LOCAL_TRANSLATION_FALLBACK === "1";
+}
+
+function localMarketFallbackDisabledError(provider) {
+  return new Error(
+    `market translation provider "${provider}" requires BLOG_MARKET_ALLOW_LOCAL_TRANSLATION_FALLBACK=1; local fallback is disabled for production publishing`
+  );
+}
+
 function decodeHtmlEntities(value = "") {
   return String(value)
     .replace(/&#(\d+);/g, (_, code) => String.fromCharCode(Number(code)))
@@ -389,6 +399,7 @@ export async function localizeSourcePack(pack, { projectId = "", required = true
   const bodyOffset = 2 + factBullets.length;
 
   if (LOCAL_PROVIDER_ALIASES.has(provider)) {
+    if (!localMarketFallbackAllowed()) throw localMarketFallbackDisabledError(provider);
     return localizeSourcePackLocally(pack, texts);
   }
 
@@ -413,6 +424,7 @@ export async function localizeSourcePack(pack, { projectId = "", required = true
     }
   } catch (error) {
     if (provider === "google-strict") throw error;
+    if (!localMarketFallbackAllowed()) throw error;
     process.stderr.write("warning: market translation provider unavailable; using local source-faithful fallback\\n");
     return localizeSourcePackLocally(pack, texts);
   }

@@ -11,6 +11,170 @@ const DEFAULT_CMS_KEY = "altoslab:cms:v1";
 const DEFAULT_CHUNK_SIZE = 50_000;
 
 const REPAIRS = {
+  "tg-market-2026-06-13-02-openai-to-acquire-ona": {
+    source: {
+      title: "OpenAI to acquire Ona",
+      url: "https://openai.com/index/openai-to-acquire-ona/",
+      publisher: "OpenAI News",
+      publishedAt: "2026-06-11T00:00:00.000Z",
+      summary:
+        "OpenAI says it plans to acquire Ona to expand Codex with secure, customer-controlled cloud infrastructure for long-running agents across software and knowledge work."
+    },
+    shared: {
+      topic: "OpenAI / Ona / Codex",
+      cover: "https://images.ctfassets.net/kftzwdyauwt9/3vpY0M1x6mrbhiFVcfTF4Y/99dae42f0ed1030d045f56249385ac3a/OAI-Ona-SEO.png?w=1600&h=900&fit=fill",
+      coverCredit: "OpenAI News",
+      coverCreditUrl: "https://openai.com/index/openai-to-acquire-ona/",
+      coverLicense: "source image",
+      coverLicenseUrl: "https://openai.com/index/openai-to-acquire-ona/"
+    },
+    languages: {
+      "zh-Hant": {
+        title: "OpenAI 將收購 Ona，為 Codex 加入持久雲端工作環境",
+        excerpt: "OpenAI 6 月 11 日宣布計畫收購 Ona，將安全、客戶可控的雲端執行與 orchestration 技術納入 Codex，支援能持續數小時或數天的軟體與知識工作代理。",
+        geoSummary: "來源：OpenAI News。OpenAI 計畫收購 Ona，讓 Codex 取得安全、持久且由客戶控制的雲端工作環境；OpenAI 稱 Codex 每週使用者超過 500 萬，較今年初成長 400%。",
+        keyTakeaways: [
+          "OpenAI 表示，Codex 每週已有超過 500 萬人使用，較今年初成長 400%。",
+          "Ona 曾協助 200 萬名開發者在安全、可重現的雲端環境中工作；交易仍需完成慣常交割條件與必要監管批准。"
+        ],
+        body: [
+          "OpenAI 6 月 11 日宣布，計畫收購 Ona，並把 Ona 的安全雲端執行與 orchestration 技術納入 Codex。OpenAI 將這次交易定位為 Codex 能力擴充，目標是讓 AI agent 可以在客戶控制的雲端環境中處理更長時間的軟體與知識工作。",
+          "OpenAI 在公告中表示，Codex 每週已有超過 500 萬人使用，較今年初成長 400%。這個數字說明 Codex 不再只是單次寫程式工具，而是逐步進入需要長時間執行、持續保存環境、並能回到工作脈絡的代理型任務。",
+          "Ona 的核心價值在於雲端工作環境。OpenAI 說，Ona 已協助 200 萬名開發者在安全、可重現的雲端環境中工作，並和 OpenAI 有共同客戶。收購完成後，Ona 團隊將加入 OpenAI 的 Codex 團隊，協助建構更持久的 agent 執行基礎。",
+          "對企業來說，重點是執行環境是否由客戶控制。OpenAI 描述的方向是讓 agent 在企業自己的雲端邊界內運作，由組織管理程式碼、憑證、資料存取與稽核紀錄，而 OpenAI 提供模型智慧與任務 orchestration。",
+          "這筆交易仍需完成慣常交割條件，包括必要的監管批准。在交易完成前，OpenAI 與 Ona 仍會獨立營運；完成後，市場才會看到 Ona 技術如何具體進入 Codex 產品與企業工作流。"
+        ].join("\n\n")
+      },
+      en: {
+        title: "OpenAI to acquire Ona to give Codex persistent cloud workspaces",
+        excerpt: "OpenAI said on June 11 that it plans to acquire Ona, bringing secure, customer-controlled cloud execution and orchestration into Codex for long-running software and knowledge-work agents.",
+        geoSummary: "Source: OpenAI News. OpenAI plans to acquire Ona so Codex can use secure, persistent cloud workspaces controlled by customers; OpenAI says more than 5 million people use Codex each week, up 400% from earlier this year.",
+        keyTakeaways: [
+          "OpenAI says more than 5 million people use Codex each week, up 400% from earlier this year.",
+          "Ona has helped 2 million developers work in secure, reproducible cloud environments; the deal is still subject to customary closing conditions and required regulatory approvals."
+        ],
+        body: [
+          "The Ona deal is about the execution layer behind AI agents. OpenAI wants Codex to work in secure cloud environments that can stay alive for longer tasks, instead of depending only on a short-lived local session or a single coding exchange.",
+          "The company says more than 5 million people now use Codex each week, up 400% from earlier this year. That growth explains why persistent environments matter: longer tasks need state, context, credentials, logs and recovery paths that survive beyond a single chat turn.",
+          "Ona's work is centered on cloud development environments. OpenAI says Ona has helped 2 million developers work in secure, reproducible cloud environments and already shares customers with OpenAI. After closing, the Ona team is expected to join OpenAI's Codex team.",
+          "For enterprise adoption, the important detail is the customer-controlled execution model. OpenAI describes agents operating inside an organization's own cloud boundary, while the organization controls code, credentials, data access and audit records. OpenAI supplies intelligence and orchestration rather than taking over the operating environment.",
+          "The acquisition remains subject to customary closing conditions, including required regulatory approvals. Until the transaction closes, OpenAI and Ona will continue to operate independently."
+        ].join("\n\n")
+      },
+      ja: {
+        title: "OpenAI、Ona 買収で Codex に永続的なクラウド作業環境を追加へ",
+        excerpt: "OpenAI は6月11日、Ona の買収計画を発表した。Codex に安全で顧客管理型のクラウド実行環境と orchestration 技術を取り込み、長時間動くソフトウェア・知識作業エージェントを支える狙いだ。",
+        geoSummary: "出典：OpenAI News。OpenAI は Ona を買収し、Codex に顧客が管理する安全で永続的なクラウド作業環境を加える計画。Codex は週500万人超が利用し、今年初めから400%増えたという。",
+        keyTakeaways: [
+          "OpenAI によると、Codex の週間利用者は500万人を超え、今年初めから400%増加している。",
+          "Ona は200万人の開発者が安全で再現可能なクラウド環境で作業することを支援してきた。買収は通常の完了条件と必要な規制承認を前提としている。"
+        ],
+        body: [
+          "OpenAI は6月11日、Ona を買収する計画を発表した。Ona の安全なクラウド実行環境と orchestration 技術を Codex に取り込み、短いコーディング支援だけでなく、長時間続くソフトウェア開発や知識作業のエージェントを支える狙いだ。",
+          "OpenAI は、Codex の週間利用者が500万人を超え、今年初めから400%増えたとしている。利用が広がるほど、作業状態、文脈、権限、ログ、復旧経路を保てる永続的な環境が重要になる。",
+          "Ona はクラウド開発環境を軸にした会社だ。OpenAI によると、Ona は200万人の開発者が安全で再現可能なクラウド環境で作業することを支援し、OpenAI と共通顧客も持つ。取引完了後、Ona チームは OpenAI の Codex チームに加わる予定だ。",
+          "企業導入で見るべき点は、実行環境を顧客が管理するという設計だ。OpenAI は、agent が組織のクラウド境界内で動き、組織側がコード、認証情報、データアクセス、監査記録を管理する方向を示している。",
+          "買収は通常の完了条件に加え、必要な規制承認を前提としている。完了までは OpenAI と Ona は独立して運営されるため、Ona の技術が Codex の製品体験にどう入るかは今後の発表を待つ必要がある。"
+        ].join("\n\n")
+      },
+      ko: {
+        title: "OpenAI, Ona 인수로 Codex에 지속형 클라우드 작업 환경 추가 추진",
+        excerpt: "OpenAI는 6월 11일 Ona 인수 계획을 발표했다. 안전하고 고객이 통제하는 클라우드 실행 환경과 orchestration 기술을 Codex에 더해 장시간 소프트웨어 및 지식 업무 agent를 지원하려는 움직임이다.",
+        geoSummary: "출처: OpenAI News. OpenAI는 Ona 인수를 통해 Codex에 안전하고 지속적인 고객 통제형 클라우드 작업 환경을 넣으려 한다. OpenAI는 Codex 주간 사용자가 500만 명을 넘고 올해 초보다 400% 증가했다고 밝혔다.",
+        keyTakeaways: [
+          "OpenAI는 Codex 주간 사용자가 500만 명을 넘었고 올해 초보다 400% 증가했다고 설명했다.",
+          "Ona는 200만 명의 개발자가 안전하고 재현 가능한 클라우드 환경에서 일하도록 지원해 왔으며, 거래는 통상적인 종결 조건과 필요한 규제 승인을 거쳐야 한다."
+        ],
+        body: [
+          "OpenAI는 6월 11일 Ona를 인수할 계획이라고 발표했다. Ona의 안전한 클라우드 실행 환경과 orchestration 기술을 Codex에 통합해, 짧은 코드 작성 지원을 넘어 장시간 이어지는 소프트웨어 및 지식 업무 agent를 지원하려는 것이다.",
+          "OpenAI에 따르면 Codex 주간 사용자는 500만 명을 넘었고 올해 초보다 400% 늘었다. 사용 규모가 커질수록 단일 대화 안에서 끝나는 작업보다 상태, 맥락, 권한, 로그, 복구 경로를 오래 유지하는 환경이 중요해진다.",
+          "Ona의 강점은 클라우드 개발 환경이다. OpenAI는 Ona가 200만 명의 개발자가 안전하고 재현 가능한 클라우드 환경에서 일하도록 도왔고, OpenAI와 공동 고객도 보유하고 있다고 밝혔다. 거래가 완료되면 Ona 팀은 OpenAI의 Codex 팀에 합류할 예정이다.",
+          "기업 입장에서 중요한 점은 고객이 실행 환경을 통제한다는 모델이다. OpenAI가 설명한 방향은 agent가 조직의 클라우드 경계 안에서 동작하고, 조직이 코드, 자격 증명, 데이터 접근, 감사 기록을 관리하는 방식이다.",
+          "이번 인수는 통상적인 종결 조건과 필요한 규제 승인을 거쳐야 한다. 거래가 완료되기 전까지 OpenAI와 Ona는 독립적으로 운영되며, Ona 기술이 Codex 제품과 기업 workflow에 어떻게 들어갈지는 후속 발표를 확인해야 한다."
+        ].join("\n\n")
+      },
+      id: {
+        title: "OpenAI akan mengakuisisi Ona untuk memberi Codex workspace cloud yang persisten",
+        excerpt: "Pada 11 Juni, OpenAI mengatakan akan mengakuisisi Ona dan membawa cloud execution serta orchestration yang aman dan dikendalikan pelanggan ke Codex untuk agent software dan knowledge work yang berjalan lama.",
+        geoSummary: "Sumber: OpenAI News. OpenAI berencana mengakuisisi Ona agar Codex punya workspace cloud aman, persisten, dan dikontrol pelanggan; OpenAI menyebut Codex dipakai lebih dari 5 juta orang tiap minggu, naik 400% dari awal tahun ini.",
+        keyTakeaways: [
+          "OpenAI menyebut lebih dari 5 juta orang memakai Codex setiap minggu, naik 400% dari awal tahun ini.",
+          "Ona telah membantu 2 juta developer bekerja di cloud environment yang aman dan reproducible; transaksi masih menunggu closing conditions dan persetujuan regulator yang diperlukan."
+        ],
+        body: [
+          "Kesepakatan dengan Ona menyasar lapisan eksekusi di balik AI agent. OpenAI ingin Codex bisa bekerja di cloud environment yang aman dan tetap hidup untuk tugas panjang, bukan hanya mengandalkan sesi lokal atau pertukaran coding yang singkat.",
+          "OpenAI mengatakan lebih dari 5 juta orang kini memakai Codex setiap minggu, naik 400% dari awal tahun ini. Ketika tugas makin panjang, agent butuh environment yang tetap hidup, menyimpan konteks, mengelola credentials, mencatat log, dan menyediakan jalur recovery.",
+          "Ona berfokus pada cloud development environment. Menurut OpenAI, Ona telah membantu 2 juta developer bekerja di environment cloud yang aman dan reproducible, serta memiliki shared customers dengan OpenAI. Setelah transaksi selesai, tim Ona akan bergabung dengan tim Codex di OpenAI.",
+          "Untuk enterprise, poin pentingnya adalah model eksekusi yang dikontrol pelanggan. OpenAI menggambarkan agent yang berjalan di dalam batas cloud milik organisasi, sementara organisasi tetap mengatur code, credentials, akses data, dan audit record.",
+          "Akuisisi ini masih tunduk pada closing conditions yang lazim, termasuk persetujuan regulator yang dibutuhkan. Sampai transaksi selesai, OpenAI dan Ona tetap beroperasi secara independen."
+        ].join("\n\n")
+      },
+      vi: {
+        title: "OpenAI sẽ mua Ona để bổ sung workspace cloud bền vững cho Codex",
+        excerpt: "Ngày 11/6, OpenAI cho biết họ dự định mua Ona, đưa cloud execution và orchestration an toàn, do khách hàng kiểm soát vào Codex cho các agent phần mềm và knowledge work chạy dài.",
+        geoSummary: "Nguồn: OpenAI News. OpenAI dự định mua Ona để Codex có workspace cloud an toàn, bền vững và do khách hàng kiểm soát; OpenAI nói hơn 5 triệu người dùng Codex mỗi tuần, tăng 400% so với đầu năm.",
+        keyTakeaways: [
+          "OpenAI cho biết Codex có hơn 5 triệu người dùng mỗi tuần, tăng 400% so với đầu năm nay.",
+          "Ona đã giúp 2 triệu developer làm việc trong cloud environment an toàn, có thể tái lập; thương vụ vẫn cần hoàn tất điều kiện closing và các phê duyệt quản lý cần thiết."
+        ],
+        body: [
+          "OpenAI công bố ngày 11/6 rằng họ dự định mua Ona và đưa công nghệ cloud execution cùng orchestration của Ona vào Codex. Mục tiêu là giúp Codex xử lý không chỉ các tác vụ coding ngắn, mà cả agent phần mềm và knowledge work cần chạy trong nhiều giờ hoặc nhiều ngày.",
+          "Theo OpenAI, hơn 5 triệu người hiện dùng Codex mỗi tuần, tăng 400% so với đầu năm nay. Khi tác vụ kéo dài hơn, agent cần môi trường bền vững để giữ trạng thái, bối cảnh, quyền truy cập, log và đường quay lại khi có lỗi.",
+          "Ona tập trung vào cloud development environment. OpenAI nói Ona đã giúp 2 triệu developer làm việc trong môi trường cloud an toàn, có thể tái lập, và hai bên có shared customers. Sau khi thương vụ hoàn tất, đội ngũ Ona dự kiến gia nhập nhóm Codex của OpenAI.",
+          "Với doanh nghiệp, chi tiết đáng chú ý là execution model do khách hàng kiểm soát. OpenAI mô tả agent vận hành bên trong ranh giới cloud của tổ chức, còn tổ chức kiểm soát code, credentials, quyền truy cập dữ liệu và audit record.",
+          "Thương vụ vẫn phụ thuộc vào các điều kiện closing thông thường, gồm cả phê duyệt quản lý cần thiết. Trước khi hoàn tất, OpenAI và Ona tiếp tục vận hành độc lập."
+        ].join("\n\n")
+      },
+      th: {
+        title: "OpenAI เตรียมซื้อ Ona เพื่อเพิ่ม workspace cloud แบบต่อเนื่องให้ Codex",
+        excerpt: "OpenAI ประกาศเมื่อ 11 มิ.ย. ว่ามีแผนซื้อ Ona เพื่อนำ cloud execution และ orchestration ที่ปลอดภัยและลูกค้าควบคุมได้เข้าสู่ Codex สำหรับ agent งานซอฟต์แวร์และงานความรู้ที่ทำงานยาวขึ้น",
+        geoSummary: "แหล่งข่าว: OpenAI News OpenAI มีแผนซื้อ Ona เพื่อให้ Codex มี workspace cloud ที่ปลอดภัย ต่อเนื่อง และลูกค้าควบคุมได้ OpenAI ระบุว่า Codex มีผู้ใช้มากกว่า 5 ล้านคนต่อสัปดาห์ เพิ่มขึ้น 400% จากต้นปี",
+        keyTakeaways: [
+          "OpenAI ระบุว่า Codex มีผู้ใช้มากกว่า 5 ล้านคนต่อสัปดาห์ เพิ่มขึ้น 400% จากต้นปีนี้",
+          "Ona ช่วย developer 2 ล้านคนทำงานใน cloud environment ที่ปลอดภัยและ reproducible แล้ว ดีลนี้ยังต้องผ่านเงื่อนไขปิดธุรกรรมและการอนุมัติจากหน่วยงานกำกับที่จำเป็น"
+        ],
+        body: [
+          "OpenAI ประกาศเมื่อ 11 มิ.ย. ว่ามีแผนซื้อ Ona และนำเทคโนโลยี cloud execution กับ orchestration ของ Ona เข้า Codex ทิศทางนี้ทำให้ Codex ขยับจากงานเขียนโค้ดสั้น ๆ ไปสู่ agent สำหรับงานซอฟต์แวร์และงานความรู้ที่ต้องทำต่อเนื่องนานขึ้น",
+          "OpenAI ระบุว่า Codex มีผู้ใช้มากกว่า 5 ล้านคนต่อสัปดาห์ เพิ่มขึ้น 400% จากต้นปีนี้ เมื่อ task ยาวขึ้น agent ต้องมี environment ที่เก็บสถานะ บริบท credential log และเส้นทาง recovery ได้ ไม่ใช่แค่ตอบกลับครั้งเดียวแล้วจบ",
+          "Ona เชี่ยวชาญ cloud development environment OpenAI บอกว่า Ona ช่วย developer 2 ล้านคนทำงานในสภาพแวดล้อม cloud ที่ปลอดภัยและ reproducible และมีลูกค้าร่วมกับ OpenAI หลังปิดดีล ทีม Ona จะเข้าร่วมทีม Codex ของ OpenAI",
+          "สำหรับ enterprise จุดสำคัญคือ execution model ที่ลูกค้าควบคุมได้ OpenAI อธิบายว่า agent จะทำงานภายในขอบเขต cloud ขององค์กร โดยองค์กรยังควบคุม code, credentials, data access และ audit record ส่วน OpenAI ให้ intelligence และ orchestration",
+          "การซื้อกิจการนี้ยังต้องผ่านเงื่อนไขปิดธุรกรรมตามปกติ รวมถึงการอนุมัติจากหน่วยงานกำกับที่จำเป็น ก่อนธุรกรรมเสร็จสิ้น OpenAI และ Ona จะยังดำเนินงานแยกกัน"
+        ].join("\n\n")
+      },
+      ms: {
+        title: "OpenAI mahu membeli Ona untuk menambah workspace cloud berterusan pada Codex",
+        excerpt: "Pada 11 Jun, OpenAI berkata ia merancang membeli Ona untuk membawa cloud execution dan orchestration yang selamat serta dikawal pelanggan ke dalam Codex bagi agent software dan knowledge work yang berjalan lama.",
+        geoSummary: "Sumber: OpenAI News. OpenAI merancang membeli Ona supaya Codex mempunyai workspace cloud yang selamat, berterusan dan dikawal pelanggan; OpenAI berkata lebih 5 juta orang menggunakan Codex setiap minggu, naik 400% sejak awal tahun.",
+        keyTakeaways: [
+          "OpenAI berkata lebih 5 juta orang menggunakan Codex setiap minggu, naik 400% sejak awal tahun ini.",
+          "Ona telah membantu 2 juta developer bekerja dalam cloud environment yang selamat dan boleh diulang semula; urus niaga masih tertakluk kepada syarat penutupan biasa dan kelulusan regulator yang diperlukan."
+        ],
+        body: [
+          "OpenAI mengumumkan pada 11 Jun bahawa ia merancang membeli Ona dan membawa teknologi cloud execution serta orchestration Ona ke dalam Codex. Langkah ini memperluas Codex daripada tugasan coding pendek kepada agent software dan knowledge work yang perlu berjalan lebih lama.",
+          "OpenAI berkata lebih 5 juta orang kini menggunakan Codex setiap minggu, naik 400% sejak awal tahun ini. Apabila tugasan menjadi lebih panjang, agent memerlukan environment yang boleh mengekalkan state, konteks, credentials, log dan laluan recovery.",
+          "Ona tertumpu pada cloud development environment. Menurut OpenAI, Ona telah membantu 2 juta developer bekerja dalam environment cloud yang selamat dan boleh diulang semula, serta mempunyai pelanggan bersama dengan OpenAI. Selepas transaksi selesai, pasukan Ona dijangka menyertai pasukan Codex di OpenAI.",
+          "Bagi enterprise, perincian penting ialah model execution yang dikawal pelanggan. OpenAI menggambarkan agent beroperasi dalam sempadan cloud organisasi sendiri, sementara organisasi mengawal code, credentials, akses data dan rekod audit.",
+          "Pengambilalihan ini masih tertakluk kepada syarat penutupan biasa, termasuk kelulusan regulator yang diperlukan. Sehingga transaksi selesai, OpenAI dan Ona akan terus beroperasi secara berasingan."
+        ].join("\n\n")
+      },
+      fil: {
+        title: "Bibilhin ng OpenAI ang Ona para dagdagan ang Codex ng persistent cloud workspaces",
+        excerpt: "Noong Hunyo 11, sinabi ng OpenAI na plano nitong bilhin ang Ona at dalhin sa Codex ang secure, customer-controlled cloud execution at orchestration para sa long-running software at knowledge-work agents.",
+        geoSummary: "Source: OpenAI News. Plano ng OpenAI na bilhin ang Ona para magkaroon ang Codex ng secure, persistent cloud workspaces na kontrolado ng customer; sabi ng OpenAI, mahigit 5 milyon ang gumagamit ng Codex bawat linggo, 400% na mas mataas kaysa noong unang bahagi ng taon.",
+        keyTakeaways: [
+          "Ayon sa OpenAI, mahigit 5 milyon ang gumagamit ng Codex bawat linggo, 400% na mas mataas kaysa noong unang bahagi ng taon.",
+          "Nakatulong ang Ona sa 2 milyong developer na magtrabaho sa secure at reproducible cloud environments; kailangan pa ring makumpleto ang customary closing conditions at mga kinakailangang regulatory approval."
+        ],
+        body: [
+          "Ang deal sa Ona ay tungkol sa execution layer sa likod ng AI agents. Gusto ng OpenAI na gumana ang Codex sa secure cloud environments na kayang manatiling buhay para sa mas mahahabang gawain, hindi lang sa isang short local session o mabilisang coding exchange.",
+          "Sabi ng OpenAI, mahigit 5 milyon na ang gumagamit ng Codex bawat linggo, 400% na mas mataas kaysa noong unang bahagi ng taon. Kapag humahaba ang task, kailangan ng agent ng environment na kayang magpanatili ng state, context, credentials, logs at recovery path.",
+          "Nakatuon ang Ona sa cloud development environments. Ayon sa OpenAI, natulungan ng Ona ang 2 milyong developer na magtrabaho sa secure at reproducible cloud environments, at may shared customers na rin ito sa OpenAI. Kapag naisara ang deal, inaasahang sasali ang Ona team sa Codex team ng OpenAI.",
+          "Para sa enterprise adoption, mahalaga ang customer-controlled execution model. Inilalarawan ng OpenAI ang agents na tumatakbo sa loob ng cloud boundary ng organisasyon, habang hawak pa rin ng organisasyon ang code, credentials, data access at audit records.",
+          "Subject pa rin ang acquisition sa customary closing conditions, kabilang ang kinakailangang regulatory approvals. Hanggang hindi pa natatapos ang transaction, hiwalay pa ring mag-o-operate ang OpenAI at Ona."
+        ].join("\n\n")
+      }
+    }
+  },
   "tg-market-2026-06-11-01-from-data-to-decisions-how-lseg-is-scaling-trusted-ai": {
     source: {
       title: "From data to decisions: how LSEG is scaling trusted AI",
@@ -354,6 +518,13 @@ function hasFlag(name) {
   return process.argv.includes(`--${name}`);
 }
 
+function selectedRepairs() {
+  const group = arg("group", "");
+  if (!group) return REPAIRS;
+  if (!REPAIRS[group]) throw new Error(`unknown repair group: ${group}`);
+  return { [group]: REPAIRS[group] };
+}
+
 function sqlString(value) {
   return `'${String(value).replaceAll("'", "''")}'`;
 }
@@ -431,6 +602,20 @@ function currentCmsData(database, cmsKey) {
     .map((chunk) => chunk.value || "")
     .join("");
   return decryptCmsPayload(JSON.parse(content));
+}
+
+function currentProjectionPosts(database, repairs) {
+  const groups = Object.keys(repairs);
+  if (!groups.length) return [];
+  const rows = runWranglerJson(
+    database,
+    `SELECT detail_json FROM public_blog_posts WHERE status = 'published' AND translation_group_id IN (${groups
+      .map(sqlString)
+      .join(", ")}) ORDER BY translation_group_id ASC, language ASC`
+  );
+  return rows
+    .map((row) => JSON.parse(row.detail_json || "{}"))
+    .filter((post) => post && post.translationGroupId && post.language && post.slug);
 }
 
 function versionIdFor(cmsKey) {
@@ -663,13 +848,15 @@ async function main() {
   const database = arg("database", DEFAULT_DATABASE);
   const cmsKey = arg("cms-key", process.env.CMS_STORAGE_KEY || DEFAULT_CMS_KEY);
   const write = hasFlag("write");
-  const data = currentCmsData(database, cmsKey);
+  const projectionOnly = hasFlag("projection-only");
+  const repairs = selectedRepairs();
+  const data = projectionOnly ? { blogPosts: currentProjectionPosts(database, repairs) } : currentCmsData(database, cmsKey);
   if (!Array.isArray(data.blogPosts)) throw new Error("CMS data has no blogPosts array");
 
   const repaired = [];
   const byGroup = new Map();
   data.blogPosts = data.blogPosts.map((post) => {
-    const repair = REPAIRS[post.translationGroupId];
+    const repair = repairs[post.translationGroupId];
     if (!repair) return post;
     const next = repairPost(post, repair);
     repaired.push(next);
@@ -677,11 +864,12 @@ async function main() {
     return next;
   });
 
-  const missingGroups = Object.keys(REPAIRS).filter((group) => !byGroup.has(group));
+  const missingGroups = Object.keys(repairs).filter((group) => !byGroup.has(group));
   const issues = [...missingGroups.map((group) => `${group}: group not found in CMS`), ...validateGroups(byGroup)];
   const summary = {
     ok: issues.length === 0,
     write,
+    projectionOnly,
     repairedGroups: byGroup.size,
     repairedPosts: repaired.length,
     issues
@@ -689,6 +877,25 @@ async function main() {
   console.log(JSON.stringify(summary, null, 2));
   if (issues.length) process.exit(1);
   if (!write) return;
+
+  if (projectionOnly) {
+    const projectionSqlFile = writeSqlFile(buildPublicProjectionSql(repaired), "projection-repair");
+    runWranglerFile(database, projectionSqlFile);
+    console.log(
+      JSON.stringify(
+        {
+          ok: true,
+          phase: "openai-market-news-d1-projection-repair-complete",
+          repairedGroups: byGroup.size,
+          repairedPosts: repaired.length,
+          projectionSqlFile
+        },
+        null,
+        2
+      )
+    );
+    return;
+  }
 
   const backupPath = path.join(os.tmpdir(), `altos-blog-cms-before-openai-market-repair-${Date.now()}.json`);
   fs.writeFileSync(

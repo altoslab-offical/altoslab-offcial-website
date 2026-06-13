@@ -43,6 +43,8 @@ Useful dry runs:
 Environment:
   BLOG_INGEST_HMAC_SECRET   Shared HMAC secret configured in Vercel
   ALTOS_BLOG_BASE_URL       Defaults to ${DEFAULT_BASE_URL}
+  BLOG_MARKET_ALLOW_LOCAL_TRANSLATION_FALLBACK
+                            Must be 1 before local market-news translation fallback is allowed
 `);
 }
 
