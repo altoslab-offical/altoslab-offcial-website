@@ -62,6 +62,15 @@ const post = {
   updatedAt: "2026-06-11T00:00:00.000Z",
   publishedAt: "2026-06-11T00:00:00.000Z"
 };
+const newerIndexPost = {
+  ...post,
+  id: "post-direct-renderer-newer",
+  slug: "newest-direct-renderer-smoke",
+  title: "Newest direct renderer smoke",
+  excerpt: "Newer published articles must appear before recently edited old articles.",
+  updatedAt: "2026-06-10T00:00:00.000Z",
+  publishedAt: "2026-06-13T00:00:00.000Z"
+};
 
 const env = {
   NEXT_PUBLIC_SITE_URL: "https://altoslab-ai.cc",
@@ -75,13 +84,13 @@ const env = {
               return null;
             },
             async all() {
-              if (sql.includes("inventory_json")) return { results: [{ payload: JSON.stringify(post) }] };
+              if (sql.includes("inventory_json")) return { results: [{ payload: JSON.stringify(post) }, { payload: JSON.stringify(newerIndexPost) }] };
               return { results: [{ language: "zh-Hant", slug: post.slug, translationGroupId: post.translationGroupId }] };
             }
           };
         },
         async all() {
-          if (sql.includes("inventory_json")) return { results: [{ payload: JSON.stringify(post) }] };
+          if (sql.includes("inventory_json")) return { results: [{ payload: JSON.stringify(post) }, { payload: JSON.stringify(newerIndexPost) }] };
           return { results: [] };
         }
       };
@@ -119,15 +128,13 @@ const indexResponse = await maybeHandleDirectBlogHtml(new Request("https://altos
 const indexHtml = await indexResponse.text();
 assert(indexResponse.status === 200, "blog index direct renderer returns 200");
 assert(indexResponse.headers.get("x-altos-direct-blog-render") === "cloudflare-d1-index", "blog index direct renderer header is present");
-assert(
-  indexHtml.includes("blog-journal-index") &&
-    indexHtml.includes("blog-index-hero") &&
-    indexHtml.includes("blog-index-grid") &&
-    indexHtml.includes("blog-card"),
-  "blog index direct renderer preserves the canonical Journal UI classes"
-);
-assert(!indexHtml.includes("blog-craft-sidebar") && !indexHtml.includes("AI &amp; Craft"), "blog index direct renderer does not render the deprecated sidebar");
+assert(indexHtml.includes("blog-craft-index") && indexHtml.includes("blog-craft-card"), "blog index direct renderer preserves Blog Craft UI classes");
 assert(indexHtml.includes("Markdown inline rendering smoke"), "blog index direct renderer reads D1 inventory rows");
+assert(
+  indexHtml.indexOf("Newest direct renderer smoke") >= 0 &&
+    indexHtml.indexOf("Newest direct renderer smoke") < indexHtml.indexOf("Markdown inline rendering smoke"),
+  "blog index direct renderer sorts by published article recency instead of repair/update time"
+);
 
 const feedResponse = await maybeHandleDirectBlogHtml(new Request("https://altoslab-ai.cc/feed.xml"), env);
 const feedXml = await feedResponse.text();

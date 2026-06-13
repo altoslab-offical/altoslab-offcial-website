@@ -30,7 +30,9 @@ const copy = {
   "zh-Hant": {
     eyebrow: "ALTOS LAB Journal · Research / Build / Growth",
     title: "AI 實驗室筆記",
-    description: "我們研究、建造，然後把經驗發布成可引用的知識。",
+    brandTitle: "AI",
+    brandScript: "& Craft",
+    description: "Thoughts on the future of work, from the people and teams creating it.",
     labTitle: "我們研究、建造，然後把經驗發布成可引用的知識。",
     labBody:
       "部落格服務的是整個實驗室定位：從 AI 系統設計、企業流程、內容與搜尋，到每天可落地的產品實驗。",
@@ -60,11 +62,15 @@ const copy = {
     ctaBody: "ALTOS LAB 可以協助你把 AI 產品、內部流程、內容系統、後台 CMS、追蹤事件與自動化發佈流程接成一套可維護的能力。",
     cta: "預約合作討論",
     otherLanguage: "English",
+    mobileTopicTitle: "Tech",
+    mobileTopicDescription: "AI 實作、工具與產品筆記。",
     sidebarTopics: ["Latest", "市場快訊", "市場專欄", "專題", "AI 趨勢", "Agents", "Automation", "GEO", "Build Notes"]
   },
   en: {
     eyebrow: "ALTOS LAB Journal · Research / Build / Growth",
     title: "AI Lab Notes",
+    brandTitle: "AI",
+    brandScript: "& Craft",
     description: "Thoughts on the future of work, from the people and teams creating it.",
     labTitle: "We research, build, and publish what becomes reusable intelligence.",
     labBody:
@@ -96,11 +102,15 @@ const copy = {
       "ALTOS LAB can wire AI products, internal workflows, content systems, CMS operations, tracking events and publishing automation into one maintainable capability.",
     cta: "Discuss a project",
     otherLanguage: "繁體中文",
+    mobileTopicTitle: "Tech",
+    mobileTopicDescription: "How we build AI systems, product by product.",
     sidebarTopics: ["Latest", "Market Briefs", "Market Columns", "Features", "AI Trends", "Agents", "Automation", "GEO", "Build Notes"]
   },
   ja: {
     eyebrow: "ALTOS LAB Journal · Research / Build / Growth",
     title: "AI Lab Notes",
+    brandTitle: "AI",
+    brandScript: "& Craft",
     description: "AI を研究し、作り、運用へ落とし込むための実験室ノート。",
     labTitle: "私たちは研究し、作り、その学びを引用できる知識として公開します。",
     labBody:
@@ -132,11 +142,15 @@ const copy = {
       "ALTOS LAB は AI プロダクト、社内ワークフロー、CMS、計測、自動公開フローを一つの運用能力として接続します。",
     cta: "相談する",
     otherLanguage: "繁體中文",
+    mobileTopicTitle: "Tech",
+    mobileTopicDescription: "AI 実装、ツール、プロダクトのノート。",
     sidebarTopics: ["Latest", "市場ブリーフ", "市場コラム", "特集", "AI Trends", "Agents", "Automation", "GEO", "Build Notes"]
   },
   ko: {
     eyebrow: "ALTOS LAB Journal · Research / Build / Growth",
     title: "AI Lab Notes",
+    brandTitle: "AI",
+    brandScript: "& Craft",
     description: "AI를 연구하고 만들고 운영으로 옮기는 실험실 노트.",
     labTitle: "우리는 연구하고 만들며, 그 경험을 인용 가능한 지식으로 공개합니다.",
     labBody:
@@ -168,11 +182,15 @@ const copy = {
       "ALTOS LAB은 AI 제품, 내부 워크플로, CMS, 추적 이벤트, 자동 발행 흐름을 유지 가능한 운영 능력으로 연결합니다.",
     cta: "상담하기",
     otherLanguage: "繁體中文",
+    mobileTopicTitle: "Tech",
+    mobileTopicDescription: "AI 구현, 도구, 제품 노트.",
     sidebarTopics: ["Latest", "시장 브리프", "시장 칼럼", "기획", "AI Trends", "Agents", "Automation", "GEO", "Build Notes"]
   },
   id: {
     eyebrow: "ALTOS LAB Journal · Research / Build / Growth",
     title: "Catatan Lab AI",
+    brandTitle: "AI",
+    brandScript: "& Craft",
     description: "Catatan tentang masa depan kerja, ditulis dari sudut pandang tim yang membangunnya.",
     labTitle: "Kami meneliti, membangun, lalu menerbitkan temuan yang bisa dijadikan rujukan.",
     labBody:
@@ -204,11 +222,15 @@ const copy = {
       "ALTOS LAB membantu merangkai produk AI, workflow internal, CMS, tracking, dan otomasi publikasi menjadi kemampuan yang bisa dipelihara.",
     cta: "Diskusikan proyek",
     otherLanguage: "繁體中文",
+    mobileTopicTitle: "Tech",
+    mobileTopicDescription: "Catatan implementasi AI, alat, dan produk.",
     sidebarTopics: ["Latest", "Kabar Pasar", "Kolom Pasar", "Laporan Khusus", "AI Trends", "Agents", "Automation", "GEO", "Build Notes"]
   },
   vi: {
     eyebrow: "ALTOS LAB Journal · Research / Build / Growth",
     title: "Ghi Chép Phòng Lab AI",
+    brandTitle: "AI",
+    brandScript: "& Craft",
     description: "Những ghi chú về tương lai công việc, từ góc nhìn của đội ngũ đang xây dựng nó.",
     labTitle: "Chúng tôi nghiên cứu, xây dựng, rồi biến kinh nghiệm thành tri thức có thể trích dẫn.",
     labBody:
@@ -240,11 +262,15 @@ const copy = {
       "ALTOS LAB giúp kết nối sản phẩm AI, workflow nội bộ, CMS, tracking event và tự động hoá xuất bản thành một năng lực có thể duy trì.",
     cta: "Trao đổi dự án",
     otherLanguage: "繁體中文",
+    mobileTopicTitle: "Tech",
+    mobileTopicDescription: "Ghi chú về triển khai AI, công cụ và sản phẩm.",
     sidebarTopics: ["Latest", "Tin thị trường", "Chuyên mục thị trường", "Bài chuyên sâu", "AI Trends", "Agents", "Automation", "GEO", "Build Notes"]
   },
   th: {
     eyebrow: "ALTOS LAB Journal · Research / Build / Growth",
     title: "บันทึกจากแล็บ AI",
+    brandTitle: "AI",
+    brandScript: "& Craft",
     description: "บันทึกเรื่องอนาคตของงาน จากมุมมองของทีมที่ลงมือสร้างจริง",
     labTitle: "เราศึกษา สร้าง และเผยแพร่บทเรียนให้กลายเป็นความรู้ที่อ้างอิงได้",
     labBody:
@@ -276,11 +302,15 @@ const copy = {
       "ALTOS LAB ช่วยเชื่อมผลิตภัณฑ์ AI, workflow ภายใน, CMS, event tracking และระบบเผยแพร่อัตโนมัติให้เป็นความสามารถที่ดูแลต่อได้",
     cta: "คุยเรื่องโปรเจกต์",
     otherLanguage: "繁體中文",
+    mobileTopicTitle: "Tech",
+    mobileTopicDescription: "บันทึกเรื่องการสร้าง AI, เครื่องมือ และผลิตภัณฑ์",
     sidebarTopics: ["Latest", "ข่าวตลาด", "คอลัมน์ตลาด", "บทความเจาะลึก", "AI Trends", "Agents", "Automation", "GEO", "Build Notes"]
   },
   ms: {
     eyebrow: "ALTOS LAB Journal · Research / Build / Growth",
     title: "Nota Makmal AI",
+    brandTitle: "AI",
+    brandScript: "& Craft",
     description: "Catatan tentang masa depan kerja daripada pasukan yang membinanya sendiri.",
     labTitle: "Kami mengkaji, membina, kemudian menerbitkan pengalaman sebagai pengetahuan yang boleh dirujuk.",
     labBody:
@@ -312,11 +342,15 @@ const copy = {
       "ALTOS LAB membantu menghubungkan produk AI, workflow dalaman, CMS, event tracking dan automasi penerbitan menjadi keupayaan yang boleh diselenggara.",
     cta: "Bincang projek",
     otherLanguage: "繁體中文",
+    mobileTopicTitle: "Tech",
+    mobileTopicDescription: "Nota pelaksanaan AI, alat dan produk.",
     sidebarTopics: ["Latest", "Berita Pasaran", "Kolum Pasaran", "Rencana Khas", "AI Trends", "Agents", "Automation", "GEO", "Build Notes"]
   },
   fil: {
     eyebrow: "ALTOS LAB Journal · Research / Build / Growth",
     title: "AI Lab Notes",
+    brandTitle: "AI",
+    brandScript: "& Craft",
     description: "Mga tala tungkol sa future of work mula sa team na mismong gumagawa nito.",
     labTitle: "Nagre-research kami, bumubuo, at inilalabas ang natutunan bilang kaalamang puwedeng i-reference.",
     labBody:
@@ -348,6 +382,8 @@ const copy = {
       "ALTOS LAB can connect AI products, internal workflows, CMS, tracking events, and publishing automation into one maintainable capability.",
     cta: "Discuss a project",
     otherLanguage: "繁體中文",
+    mobileTopicTitle: "Tech",
+    mobileTopicDescription: "AI implementation, tools, and product notes.",
     sidebarTopics: ["Latest", "Market Briefs", "Market Columns", "Features", "AI Trends", "Agents", "Automation", "GEO", "Build Notes"]
   }
 };
@@ -435,7 +471,7 @@ export async function BlogIndex({ language, tag, query, page }: BlogIndexProps) 
   return (
     <div className="site-home blog-site-shell">
       <SiteHeader />
-      <main className="blog-page blog-index-page blog-journal-index">
+      <main className="blog-page blog-index-page blog-craft-index">
         <JsonLd
           data={breadcrumbJsonLd([
             { name: "Home", url: "/" },
@@ -443,130 +479,134 @@ export async function BlogIndex({ language, tag, query, page }: BlogIndexProps) 
           ])}
         />
         <JsonLd data={blogIndexItemListJsonLd(visiblePosts, blogIndexPath(language), dictionary.title)} />
-        <header className="blog-index-hero">
-          <div className="blog-hero-copy-stack">
-            <p className="eyebrow">{dictionary.eyebrow}</p>
-            <h1>{dictionary.title}</h1>
-            <p className="hero-copy">{dictionary.description}</p>
-          </div>
-          <aside className="blog-lab-card" aria-label="ALTOS LAB journal scope">
-            <p className="eyebrow">ALTOS LAB</p>
-            <h2>{dictionary.labTitle}</h2>
-            <p>{dictionary.labBody}</p>
-            <div className="blog-lab-lanes">
-              {dictionary.lanes.map((lane) => (
-                <div key={lane.label}>
-                  <span>{lane.label}</span>
-                  <p>{lane.body}</p>
-                </div>
+        <div className="blog-craft-layout">
+          <aside className="blog-craft-sidebar" aria-label="Blog navigation">
+            <div className="blog-craft-brand">
+              <h1>
+                <span>{dictionary.brandTitle}</span>
+                <em>{dictionary.brandScript}</em>
+              </h1>
+              <p>{dictionary.description}</p>
+            </div>
+
+            <nav className="blog-craft-nav" aria-label="Blog topics">
+              {dictionary.sidebarTopics.map((item) => (
+                <Link
+                  className={normalizedTag === item.toLowerCase() || (!normalizedTag && item === "Latest") ? "active" : ""}
+                  href={item === "Latest" ? blogIndexPath(language) : `${blogIndexPath(language)}?tag=${encodeURIComponent(item)}`}
+                  key={item}
+                >
+                  {item}
+                </Link>
               ))}
+            </nav>
+
+            <form className="blog-craft-search blog-craft-search-sidebar" action={blogIndexPath(language)} role="search">
+              {normalizedTag ? <input type="hidden" name="tag" value={tag} /> : null}
+              <label className="sr-only" htmlFor={`blog-search-sidebar-${language}`}>
+                {dictionary.searchLabel}
+              </label>
+              <input
+                id={`blog-search-sidebar-${language}`}
+                name="query"
+                type="search"
+                defaultValue={query || ""}
+                placeholder={dictionary.searchPlaceholder}
+                autoComplete="off"
+              />
+              <button type="submit">{dictionary.searchSubmit}</button>
+            </form>
+
+            <div className="blog-craft-sidebar-footer">
+              <span>
+                <strong>{posts.length}</strong> {dictionary.postsLabel}
+              </span>
             </div>
           </aside>
-        </header>
 
-        <section className="blog-lane-strip" aria-label="ALTOS LAB content lanes">
-          {dictionary.lanes.map((lane, index) => (
-            <article className="blog-lane-item" key={lane.label}>
-              <span>{String(index + 1).padStart(2, "0")}</span>
-              <strong>{lane.label}</strong>
-              <p>{lane.body}</p>
-            </article>
-          ))}
-        </section>
+          <section className="blog-craft-feed" aria-label="Blog posts">
+            <div className="blog-craft-feed-top">
+              <div>
+                <p className="eyebrow">{normalizedTag ? dictionary.categories : dictionary.latest}</p>
+                <h2>
+                  <span>{normalizedTag ? tag : dictionary.mobileTopicTitle}</span>
+                  <em>— {dictionary.mobileTopicDescription}</em>
+                </h2>
+              </div>
+              <form className="blog-craft-search" action={blogIndexPath(language)} role="search">
+                {normalizedTag ? <input type="hidden" name="tag" value={tag} /> : null}
+                <label className="sr-only" htmlFor={`blog-search-${language}`}>
+                  {dictionary.searchLabel}
+                </label>
+                <input
+                  id={`blog-search-${language}`}
+                  name="query"
+                  type="search"
+                  defaultValue={query || ""}
+                  placeholder={dictionary.searchPlaceholder}
+                  autoComplete="off"
+                />
+                <button type="submit">{dictionary.searchSubmit}</button>
+              </form>
+            </div>
 
-        <div className="blog-index-toolbar">
-          <nav className="blog-filter-bar" aria-label="Blog topics">
-            {dictionary.sidebarTopics.map((item) => (
-              <Link
-                className={`tag ${normalizedTag === item.toLowerCase() || (!normalizedTag && item === "Latest") ? "active" : ""}`}
-                href={item === "Latest" ? blogIndexPath(language) : `${blogIndexPath(language)}?tag=${encodeURIComponent(item)}`}
-                key={item}
-              >
-                {item === "Latest" ? dictionary.all : item}
-              </Link>
-            ))}
-          </nav>
-          <form className="blog-index-search" action={blogIndexPath(language)} role="search">
-            {normalizedTag ? <input type="hidden" name="tag" value={tag} /> : null}
-            <label className="sr-only" htmlFor={`blog-search-${language}`}>
-              {dictionary.searchLabel}
-            </label>
-            <input
-              id={`blog-search-${language}`}
-              name="query"
-              type="search"
-              defaultValue={query || ""}
-              placeholder={dictionary.searchPlaceholder}
-              autoComplete="off"
-            />
-            <button type="submit">{dictionary.searchSubmit}</button>
-          </form>
-        </div>
-
-        <section aria-label={normalizedTag ? dictionary.categories : dictionary.latest}>
-          <div className="blog-index-list-head">
-            <p className="eyebrow">{normalizedTag ? dictionary.categories : dictionary.latest}</p>
-            <span>
-              {posts.length} {dictionary.postsLabel}
-            </span>
-          </div>
-          <div className="blog-grid blog-index-grid">
-            {visiblePosts.map((post) => {
-              const visualPost = toBlogVisualPost(post);
-              return (
-                <article className="blog-card" key={post.id}>
-                  <Link className="blog-image" href={blogPostPath(post)}>
-                    {post.cover ? (
-                      <SafeBlogImage compact post={visualPost} />
-                    ) : (
-                      <BlogEditorialVisual compact post={visualPost} />
-                    )}
-                  </Link>
-                  <div className="blog-body">
-                    <p className="eyebrow">
-                      {blogContentTypeLabel(post.contentType, post.language)} · {post.newsCategory || post.tags[0] || post.topic} ·{" "}
-                      {dictionary.readTime(post.readTimeMinutes)}
-                    </p>
-                    <h2>
-                      <Link href={blogPostPath(post)}>{renderBrandText(post.title)}</Link>
-                    </h2>
-                    <p>{renderBrandText(post.excerpt)}</p>
-                    <Link className="card-link" href={blogPostPath(post)}>
-                      {dictionary.read}
+            <div className="blog-craft-grid">
+              {visiblePosts.map((post) => {
+                const visualPost = toBlogVisualPost(post);
+                return (
+                  <article className="blog-craft-card" key={post.id}>
+                    <Link className="blog-craft-card-image" href={blogPostPath(post)}>
+                      {post.cover ? (
+                        <SafeBlogImage compact post={visualPost} />
+                      ) : (
+                        <BlogEditorialVisual compact post={visualPost} />
+                      )}
                     </Link>
-                  </div>
-                </article>
-              );
-            })}
-          </div>
-          {!filtered.length ? <p className="muted">{dictionary.empty}</p> : null}
-        </section>
-
-        {filtered.length > BLOG_INDEX_PAGE_SIZE ? (
-          <nav className="blog-index-pagination" aria-label="Blog pagination">
-            {previousPage ? (
-              <Link className="blog-index-page-link" href={blogIndexHref(language, { tag, query, page: previousPage })}>
-                <span aria-hidden="true">‹</span>
-              </Link>
-            ) : (
-              <span className="blog-index-page-link is-disabled" aria-hidden="true">
-                ‹
-              </span>
-            )}
-            <span className="blog-index-page-status">
-              {currentPage} / {pageCount}
-            </span>
-            {nextPage ? (
-              <Link className="blog-index-page-link" href={blogIndexHref(language, { tag, query, page: nextPage })}>
-                <span aria-hidden="true">›</span>
-              </Link>
-            ) : (
-              <span className="blog-index-page-link is-disabled" aria-hidden="true">
-                ›
-              </span>
-            )}
-          </nav>
-        ) : null}
+                    <div className="blog-craft-card-body">
+                      <h3>
+                        <Link href={blogPostPath(post)}>{renderBrandText(post.title)}</Link>
+                      </h3>
+                      <p>{renderBrandText(post.excerpt)}</p>
+                      <div className="blog-craft-card-meta">
+                        <span className={`blog-craft-type-badge is-${post.contentType}`}>
+                          {blogContentTypeLabel(post.contentType, post.language)}
+                        </span>
+                        <span className="blog-craft-card-taxonomy">{post.newsCategory || post.tags[0]}</span>
+                        <small>{dictionary.readTime(post.readTimeMinutes)}</small>
+                      </div>
+                    </div>
+                  </article>
+                );
+              })}
+              {!filtered.length ? <p className="muted">{dictionary.empty}</p> : null}
+            </div>
+            {filtered.length > BLOG_INDEX_PAGE_SIZE ? (
+              <nav className="blog-craft-pagination" aria-label="Blog pagination">
+                {previousPage ? (
+                  <Link className="blog-craft-page-link" href={blogIndexHref(language, { tag, query, page: previousPage })}>
+                    <span aria-hidden="true">‹</span>
+                  </Link>
+                ) : (
+                  <span className="blog-craft-page-link is-disabled" aria-hidden="true">
+                    ‹
+                  </span>
+                )}
+                <span className="blog-craft-page-status">
+                  {currentPage} / {pageCount}
+                </span>
+                {nextPage ? (
+                  <Link className="blog-craft-page-link" href={blogIndexHref(language, { tag, query, page: nextPage })}>
+                    <span aria-hidden="true">›</span>
+                  </Link>
+                ) : (
+                  <span className="blog-craft-page-link is-disabled" aria-hidden="true">
+                    ›
+                  </span>
+                )}
+              </nav>
+            ) : null}
+          </section>
+        </div>
       </main>
       <SiteFooter />
     </div>

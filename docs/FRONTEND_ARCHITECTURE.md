@@ -55,20 +55,20 @@ These areas use the normal Next App Router surfaces and global CSS:
 
 ## Blog UI Stability Contract
 
-The blog index routes are protected user-facing editorial surfaces. They are owned by the canonical `BlogIndex` component and must keep the no-sidebar ALTOS LAB Journal layout:
+The blog index routes are not emergency Worker-rendered pages. They are owned by the Next App Router and the canonical `BlogIndex` component:
 
 - `/blog` -> `app/blog/page.tsx` -> `components/BlogIndex.tsx`
 - `/en/blog` -> `app/en/blog/page.tsx` -> `components/BlogIndex.tsx`
 - `/ja/blog`, `/ko/blog`, `/id/blog`, `/vi/blog`, `/th/blog`, `/ms/blog`, `/fil/blog` -> localized route pages -> `components/BlogIndex.tsx`
 
-Cloudflare direct HTML rendering may serve article detail routes:
+Cloudflare direct HTML rendering may serve article detail routes only:
 
 - `/blog/:slug`
 - `/:language/blog/:slug`
 
-It may also serve a Worker-safe D1 index for `/blog` and `/:language/blog`, but that direct HTML must preserve the same canonical Journal markers: `blog-journal-index`, `blog-index-hero`, `blog-lane-strip`, `blog-index-toolbar`, `blog-index-grid`, and `blog-card`. It must not render `blog-craft-sidebar`, `blog-craft-layout`, visible `AI & Craft` sidebar copy, `BlogIndexLite`, or `blog-lite-*` emergency UI. This is enforced by `scripts/blog-ui-contract-smoke.mjs`, which is part of `npm run test:blog`.
+It must return `null` for `/blog` and `/:language/blog` so the original `BlogIndex` UI remains in control. This is enforced by `scripts/blog-ui-contract-smoke.mjs`, which is part of `npm run test:blog`.
 
-Do not use `BlogIndexLite`, direct `list_json` Worker queries, the old `AI & Craft` sidebar, or a replacement static index to solve Worker CPU issues. The accepted approach is to optimize the canonical `BlogIndex` path, keep pagination bounded, and keep the Cloudflare direct index visually equivalent to the canonical Journal surface.
+Do not use `BlogIndexLite`, `renderIndex`, direct `list_json` Worker queries, or a replacement static index to solve Worker CPU issues. The accepted approach is to optimize the canonical `BlogIndex` path, paginate inventory, or improve Cloudflare data access without changing route ownership.
 
 ## Inactive Prototype Components
 
