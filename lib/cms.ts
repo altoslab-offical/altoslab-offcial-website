@@ -382,6 +382,29 @@ async function ensurePublicBlogD1Schema(database: D1DatabaseLike) {
   publicBlogD1SchemaReady = true;
 }
 
+const publicMarketNewsPollutionPattern =
+  /文中牽涉|報導「」|放在企業採用脈絡看|重點不只是哪家公司發布新功能|重點哪家公司發布新功能|OpenAI News's current AI coverage|current AI coverage page for related reporting|Frame \(4\)|Oracle partnership|PRC-linked|Confidential submission of draft S-1|Built for broad benefit|Economic research forum/i;
+
+function publicBlogProjectionText(post: BlogPost) {
+  return [
+    post.title,
+    post.seoTitle,
+    post.seoDescription,
+    post.excerpt,
+    post.geoSummary,
+    post.body,
+    ...(post.keyTakeaways || []),
+    ...(post.sourceLinks || []).flatMap((source) => [source.title, source.summary, source.publisher]),
+    ...(post.contentImages || []).flatMap((image) => [image.alt, image.caption, image.credit])
+  ]
+    .filter(Boolean)
+    .join("\n");
+}
+
+function hasPublicMarketNewsPollution(post: BlogPost) {
+  return post.contentType === "breaking" && publicMarketNewsPollutionPattern.test(publicBlogProjectionText(post));
+}
+
 async function writePublicBlogD1Projection(allPosts: BlogPost[]) {
   const database = getCloudflareD1Database();
   if (!getCloudflareD1Config() || !database) {
@@ -390,7 +413,14 @@ async function writePublicBlogD1Projection(allPosts: BlogPost[]) {
 
   await ensurePublicBlogD1Schema(database);
   const projectionUpdatedAt = nowIso();
+  let skippedPollutedPosts = 0;
   for (const post of allPosts) {
+    const mergeKey = publicBlogMergeKey(post);
+    if (hasPublicMarketNewsPollution(post)) {
+      skippedPollutedPosts += 1;
+      await runPublicBlogD1(database, "UPDATE public_blog_posts SET projection_updated_at = ?1 WHERE merge_key = ?2", projectionUpdatedAt, mergeKey);
+      continue;
+    }
     const language = normalizeBlogLanguage(post.language);
     await runPublicBlogD1(
       database,
@@ -422,7 +452,7 @@ async function writePublicBlogD1Projection(allPosts: BlogPost[]) {
         inventory_json = excluded.inventory_json,
         duplicate_json = excluded.duplicate_json,
         detail_json = excluded.detail_json`,
-      publicBlogMergeKey(post),
+      mergeKey,
       language,
       post.slug,
       post.translationGroupId || "",
@@ -442,6 +472,7 @@ async function writePublicBlogD1Projection(allPosts: BlogPost[]) {
   return {
     refreshed: true,
     publishedPosts: allPosts.length,
+    skippedPollutedPosts,
     updatedAt: projectionUpdatedAt
   };
 }
@@ -788,6 +819,7 @@ async function writePublicBlogCacheFromData(data: CmsData) {
   const namespace = getCloudflareKvNamespace();
   const key = publicBlogCacheKey();
   const allPosts = allPublicBlogPostsFromData(data);
+  const publicCachePosts = allPosts.filter((post) => !hasPublicMarketNewsPollution(post));
   const d1Projection = await writePublicBlogD1Projection(allPosts).catch((error) => {
     console.warn("[cms] Unable to refresh D1 public blog projection:", error instanceof Error ? error.message : error);
     return {
@@ -812,10 +844,10 @@ async function writePublicBlogCacheFromData(data: CmsData) {
     };
   }
 
-  const posts = publicBlogListPostsFromPosts(allPosts);
-  const inventoryPosts = allPosts.map(compactPublicBlogInventoryPost);
-  const duplicatePosts = allPosts.map(compactPublicBlogDuplicatePost);
-  const detailPosts = publicBlogDetailRefreshPostsFromPosts(allPosts);
+  const posts = publicBlogListPostsFromPosts(publicCachePosts);
+  const inventoryPosts = publicCachePosts.map(compactPublicBlogInventoryPost);
+  const duplicatePosts = publicCachePosts.map(compactPublicBlogDuplicatePost);
+  const detailPosts = publicBlogDetailRefreshPostsFromPosts(publicCachePosts);
   let kvCacheRefreshed = false;
   let kvCacheError: string | undefined;
 

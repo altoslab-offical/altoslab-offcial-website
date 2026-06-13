@@ -474,6 +474,7 @@ assert(envExample.includes("BLOG_MARKET_ALLOW_LOCAL_TRANSLATION_FALLBACK=0"), "e
 assert(localWorker.includes("BLOG_MARKET_ALLOW_LOCAL_TRANSLATION_FALLBACK"), "local worker documents the explicit local market-news fallback switch");
 assert(marketTranslationService.includes("BLOG_MARKET_ALLOW_LOCAL_TRANSLATION_FALLBACK=1"), "market-news translation service requires an explicit opt-in before local fallback");
 assert(quality.includes("文中牽涉") && quality.includes("報導「」") && quality.includes("放在企業採用脈絡看"), "quality gate blocks market-news source extraction pollution");
+assert(cms.includes("hasPublicMarketNewsPollution") && cms.includes("skippedPollutedPosts"), "public cache refresh refuses to overwrite clean projections with polluted market-news copy");
 assert(envExample.includes("BLOG_IMAGE_PROVIDER=none") && envExample.includes("AUTO_GENERATE_BLOG_COVERS=false"), "env example disables stock/fallback cover generation for the formal workflow");
 assert(envExample.includes("GA4_PROPERTY_ID="), "env example documents GA4 Data API property configuration");
 assert(envExample.includes("SEARCH_CONSOLE_SITE_URL="), "env example documents Search Console reporting configuration");
