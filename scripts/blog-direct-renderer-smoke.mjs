@@ -119,7 +119,14 @@ const indexResponse = await maybeHandleDirectBlogHtml(new Request("https://altos
 const indexHtml = await indexResponse.text();
 assert(indexResponse.status === 200, "blog index direct renderer returns 200");
 assert(indexResponse.headers.get("x-altos-direct-blog-render") === "cloudflare-d1-index", "blog index direct renderer header is present");
-assert(indexHtml.includes("blog-craft-index") && indexHtml.includes("blog-craft-card"), "blog index direct renderer preserves Blog Craft UI classes");
+assert(
+  indexHtml.includes("blog-journal-index") &&
+    indexHtml.includes("blog-index-hero") &&
+    indexHtml.includes("blog-index-grid") &&
+    indexHtml.includes("blog-card"),
+  "blog index direct renderer preserves the canonical Journal UI classes"
+);
+assert(!indexHtml.includes("blog-craft-sidebar") && !indexHtml.includes("AI &amp; Craft"), "blog index direct renderer does not render the deprecated sidebar");
 assert(indexHtml.includes("Markdown inline rendering smoke"), "blog index direct renderer reads D1 inventory rows");
 
 const feedResponse = await maybeHandleDirectBlogHtml(new Request("https://altoslab-ai.cc/feed.xml"), env);

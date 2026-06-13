@@ -192,22 +192,31 @@ Any intentional homepage redesign requires Tommy approval, before/after desktop 
 
 ## Blog UI Stability Contract
 
-The blog index is a protected editorial surface. Its current design is the light `AI & Craft` / `blog-craft` experience with sidebar topic navigation, search, feed grid, card imagery, pagination, and the existing editorial rhythm. Do not replace it with a generic card wall, a direct Worker-rendered index, or a temporary emergency layout unless Tommy explicitly approves a visual redesign.
+The blog index is a protected editorial surface. Its current design is the no-sidebar ALTOS LAB Journal experience with a top hero, lane strip, topic navigation, search, card imagery, pagination, and the existing editorial rhythm. Do not replace it with a generic card wall, the deprecated `AI & Craft` sidebar, or a temporary emergency layout unless Tommy explicitly approves a visual redesign.
 
 Design ownership:
 
 - `components/BlogIndex.tsx` owns `/blog` and `/:language/blog` visual structure.
-- `app/globals.css` owns the `blog-craft-*` style contract.
-- Cloudflare direct HTML rendering is allowed for article detail resilience only, not for blog index replacement.
+- `app/globals.css` owns the `blog-journal-index`, `blog-index-*`, lane strip, card, and article style contract.
+- Cloudflare direct HTML rendering may serve a Worker-safe D1 blog index only when it matches the canonical no-sidebar Journal layout.
 - n8n and content automation may change article data, but they must not change the public blog index layout, component ownership, spacing system, typography hierarchy, navigation, or visual tokens.
 
 Protected index markers:
 
-- `blog-craft-index`
-- `blog-craft-layout`
+- `blog-journal-index`
+- `blog-index-hero`
+- `blog-lane-strip`
+- `blog-index-toolbar`
+- `blog-index-grid`
+- `blog-card`
+
+Forbidden index markers:
+
 - `blog-craft-sidebar`
-- `blog-craft-feed`
-- `blog-craft-card`
+- `blog-craft-layout`
+- `blog-craft-brand`
+- `blog-lite-shell`
+- visible `AI & Craft` sidebar copy
 
 Any intentional change to these markers or their visual behavior requires same-change screenshot evidence, product/design rationale, and updates to `SPEC.md`, `docs/FRONTEND_ARCHITECTURE.md`, and `scripts/blog-ui-contract-smoke.mjs`.
 

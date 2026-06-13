@@ -65,25 +65,26 @@ Required invariants:
 
 ## Blog UI Stability Contract
 
-The public blog index routes (`/blog` and `/:language/blog`) are canonical user-facing UI surfaces. They must keep the existing `BlogIndex` / `blog-craft` layout unless Tommy explicitly approves a visual redesign.
+The public blog index routes (`/blog` and `/:language/blog`) are canonical user-facing UI surfaces. They must keep the existing no-sidebar ALTOS LAB Journal layout unless Tommy explicitly approves a visual redesign.
 
 Route ownership:
 
 - Blog index routes are owned by `components/BlogIndex.tsx` and the route pages in `app/*/blog/page.tsx`.
-- Cloudflare direct rendering may handle article detail pages only (`/blog/:slug` and `/:language/blog/:slug`) for Worker CPU stability and Markdown rendering.
-- Cloudflare direct rendering must never implement or intercept a replacement blog index UI.
+- Cloudflare direct rendering may handle article detail pages and the Worker-safe D1 blog index when needed for CPU stability, but the index HTML must match the canonical ALTOS LAB Journal layout.
+- Cloudflare direct rendering must never implement a temporary replacement index, sidebar redesign, lite card wall, or emergency visual shell.
 - n8n/content automation may create, validate, release, and monitor posts, but must not mutate index layout, navigation, visual hierarchy, CSS tokens, or route ownership.
 
 Required UI invariants:
 
-- `BlogIndex` must retain `blog-craft-index`, `blog-craft-layout`, `blog-craft-sidebar`, `blog-craft-feed`, and `blog-craft-card`.
-- The list page must keep sidebar topic navigation, search, post count, feed grid, pagination, and `SafeBlogImage` / `BlogEditorialVisual` handling.
+- `BlogIndex` must retain `blog-journal-index`, `blog-index-hero`, `blog-lane-strip`, `blog-index-toolbar`, `blog-index-grid`, and `blog-card`.
+- The list page must keep the top Journal hero, lane strip, topic navigation, search, post count, card grid, pagination, and `SafeBlogImage` / `BlogEditorialVisual` handling.
+- The list page must not render `blog-craft-sidebar`, `blog-craft-layout`, `blog-craft-brand`, `blog-lite-shell`, or visible `AI & Craft` sidebar copy.
 - Any intentional redesign must update `SPEC.md`, `DESIGN.md`, `docs/FRONTEND_ARCHITECTURE.md`, screenshot evidence, and `scripts/blog-ui-contract-smoke.mjs` in the same change.
 
 Release gate:
 
 - `npm run test:blog` must pass before deploy.
-- Live check after deploy must confirm `/blog` returns 200, does not include `x-altos-direct-blog-render`, contains `blog-craft-layout`, and does not show Cloudflare Error 1102.
+- Live check after deploy must confirm `/blog` returns 200, contains `blog-journal-index`, `blog-index-hero`, and `blog-index-grid`, and does not include `blog-craft-sidebar`, visible `AI & Craft`, `blog-lite-shell`, or Cloudflare Error 1102.
 
 ## Current State
 

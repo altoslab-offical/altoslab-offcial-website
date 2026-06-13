@@ -313,6 +313,10 @@ const INDEX_CSS = `
 .blog-craft-index{width:min(88vw,1392px);padding-top:40px}.blog-craft-layout{display:grid;grid-template-columns:220px minmax(0,1fr);gap:60px;align-items:start;min-width:0}.blog-craft-sidebar{position:sticky;top:112px;min-width:0;min-height:calc(100svh - 154px);display:grid;grid-template-rows:auto auto auto 1fr;gap:20px;border-right:1px solid var(--al-blog-border);padding-right:32px}.blog-craft-brand h1{width:157px;min-height:93px;margin:0 0 12px;color:#111;font-size:54px;line-height:.9;letter-spacing:0;font-family:var(--font-space);font-weight:900}.blog-craft-brand h1 span,.blog-craft-brand h1 em{display:block}.blog-craft-brand h1 em{margin-top:6px;font-family:var(--font-display);font-size:.84em;line-height:.98;font-style:italic;font-weight:400}.blog-craft-brand p{margin:0;max-width:200px;color:var(--al-blog-muted);font-size:14px;line-height:20px}.blog-craft-brand:after{content:"";width:92px;height:1px;display:block;margin-top:30px;background:var(--border)}.blog-craft-nav{display:grid;align-content:start;gap:0;padding-top:1em}.blog-craft-nav a{width:fit-content;color:var(--al-blog-muted);font-size:15px;line-height:30px;font-weight:400}.blog-craft-nav a.active{color:#111;font-weight:500}.blog-craft-search{width:100%;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:8px}.blog-craft-search input{min-width:0;height:38px;border:1px solid var(--al-blog-border);border-radius:999px;padding:0 14px;color:#111;background:#fff;font-size:13px}.blog-craft-search button{height:38px;border:1px solid #111;border-radius:999px;padding:0 14px;color:#fff;background:#111;font-size:13px}.blog-craft-sidebar-footer{display:flex;align-self:end;justify-content:space-between;gap:14px;color:var(--al-blog-muted);font-size:14px}.blog-craft-sidebar-footer strong{color:#111}.blog-craft-feed{min-width:0}.blog-craft-feed-top{display:none;align-items:end;justify-content:space-between;gap:18px;margin-bottom:30px}.blog-craft-feed-top h2{margin:0;color:#111;font-size:32px;line-height:1.05}.blog-craft-feed-top h2 em{color:var(--al-blog-muted);font-style:normal;font-weight:400}.blog-craft-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:60px;row-gap:40px}.blog-craft-card{min-width:0}.blog-craft-card-image{display:block;overflow:hidden;border:1px solid var(--border-soft);border-radius:8px;background:#111}.blog-craft-card-image img{width:100%;aspect-ratio:16/8.4;display:block;object-fit:cover;object-position:center}.blog-craft-card-body{padding-top:12px}.blog-craft-card h3{margin:0;color:#111;font-size:22px;line-height:28px;font-weight:700;letter-spacing:0}.blog-craft-card-body>p{margin:8px 0 10px;color:#333;font-size:16px;line-height:24px}.blog-craft-card-meta{display:flex;align-items:center;flex-wrap:wrap;gap:7px;margin-top:10px;color:var(--al-blog-muted);font-size:12px;line-height:16px}.blog-craft-card-meta>span,.blog-craft-card-meta small{display:inline-flex;align-items:center;color:var(--al-blog-muted);font-size:inherit;line-height:inherit}.blog-craft-type-badge{display:inline-flex;align-items:center;width:max-content;min-height:24px;padding:3px 9px;border:1px solid var(--type-badge-border,var(--border-soft));border-radius:999px;background:var(--type-badge-bg,#fff);color:var(--type-badge-fg,#111);font-size:11px;line-height:14px;font-weight:700}.blog-craft-type-badge.is-breaking{--type-badge-bg:var(--type-breaking-bg);--type-badge-border:var(--type-breaking-border);--type-badge-fg:var(--type-breaking-fg)}.blog-craft-type-badge.is-column{--type-badge-bg:var(--type-column-bg);--type-badge-border:var(--type-column-border);--type-badge-fg:var(--type-column-fg)}.blog-craft-type-badge.is-feature{--type-badge-bg:var(--type-feature-bg);--type-badge-border:var(--type-feature-border);--type-badge-fg:var(--type-feature-fg)}.blog-craft-pagination{display:flex;align-items:center;justify-content:center;gap:14px;margin-top:54px;color:var(--al-blog-muted)}.blog-craft-page-link{width:40px;height:40px;display:inline-grid;place-items:center;border:1px solid var(--al-blog-border);border-radius:999px;color:#111;background:#fff;font-size:22px;line-height:1}.blog-craft-page-link.is-disabled{opacity:.32;pointer-events:none}.blog-craft-page-status{min-width:62px;text-align:center;font-family:var(--font-space);font-size:13px;letter-spacing:.08em}@media(max-width:980px){.blog-craft-index{width:min(100% - 60px,760px)}.blog-craft-layout{grid-template-columns:1fr;gap:46px}.blog-craft-sidebar{position:static;width:100%;min-height:0;display:block;border-right:0;border-bottom:1px solid var(--al-blog-border);padding-right:0}.blog-craft-nav{display:flex;gap:32px;margin-inline:-30px;overflow-x:auto;padding:26px 30px;scrollbar-width:none}.blog-craft-nav a{flex:0 0 auto;white-space:nowrap}.blog-craft-search-sidebar,.blog-craft-sidebar-footer{display:none}.blog-craft-feed-top{display:grid;justify-items:center;gap:0;margin:-8px 0 34px;text-align:center}.blog-craft-feed-top .eyebrow{display:none}.blog-craft-feed-top h2{max-width:520px;color:var(--al-blog-muted);font-size:24px;line-height:1.35;font-weight:400}.blog-craft-feed-top h2 span{color:#111;font-weight:600}.blog-craft-feed-top .blog-craft-search{width:min(100%,480px);margin-top:20px}.blog-craft-grid{grid-template-columns:1fr;row-gap:52px}}@media(max-width:760px){.blog-craft-index{width:min(100% - 40px,760px);padding-top:48px}.blog-craft-brand h1{width:auto;min-height:0;font-size:50px}.blog-craft-brand p{max-width:340px;font-size:18px;line-height:1.42}.blog-craft-nav{gap:28px;margin-inline:-20px;padding-inline:20px}.blog-craft-nav a{font-size:18px;line-height:1.5}.blog-craft-card h3{font-size:22px;line-height:28px}}
 `;
 
+const JOURNAL_INDEX_CSS = `
+.blog-journal-index{width:min(1180px,calc(100% - 32px));padding-bottom:64px}.blog-index-hero{display:grid;grid-template-columns:minmax(0,1fr) minmax(320px,.55fr);gap:clamp(24px,5vw,56px);align-items:center;margin-bottom:34px}.blog-index-hero h1{max-width:760px}.blog-hero-copy-stack{display:grid;align-content:center;gap:18px;min-height:clamp(300px,42vw,480px)}.blog-lab-card{position:relative;overflow:hidden;border:1px solid var(--line);border-radius:8px;background:#fff;padding:clamp(22px,3vw,32px);display:grid;gap:22px;box-shadow:0 1px 2px rgba(15,15,15,.05)}.blog-lab-card h2{margin:0;font-size:clamp(24px,3vw,38px);line-height:1.16}.blog-lab-card p{margin:0;color:#444}.blog-lab-lanes{display:grid;gap:8px}.blog-lab-lanes div{border:1px solid var(--line);border-radius:8px;background:#f4f4f4;padding:12px}.blog-lab-lanes span,.blog-lane-item span{display:block;color:#111;font-size:11px;font-weight:900}.blog-lab-lanes p,.blog-lane-item p{margin:5px 0 0;color:#555;font-size:13px;line-height:1.5}.blog-lane-strip{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border:1px solid var(--line);border-radius:8px;overflow:hidden;background:#fff;margin:0 0 28px}.blog-lane-item{min-height:130px;padding:18px;border-right:1px solid var(--line);display:grid;align-content:start;gap:8px}.blog-lane-item:last-child{border-right:0}.blog-lane-item strong{font-size:18px;line-height:1.2}.blog-index-toolbar{display:grid;grid-template-columns:minmax(0,1fr) minmax(260px,360px);gap:16px;align-items:center;margin:28px 0 30px}.blog-filter-bar{display:flex;flex-wrap:wrap;gap:8px;margin:0}.tag{display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:999px;background:#fff;color:#666;padding:7px 11px;font-size:13px;font-weight:700}.tag.active{background:#111;color:#fff;border-color:#111}.blog-index-search{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;min-width:0}.blog-index-search input{min-width:0;min-height:42px;border:1px solid var(--line);border-radius:999px;background:#fff;color:#111;padding:0 15px;font:inherit;font-size:14px}.blog-index-search button{min-height:42px;border:1px solid #111;border-radius:999px;background:#111;color:#fff;padding:0 16px;font:inherit;font-size:14px;font-weight:700}.blog-index-list-head{display:flex;align-items:baseline;justify-content:space-between;gap:16px;margin:0 0 10px}.blog-index-list-head .eyebrow{margin:0}.blog-index-list-head span{color:#666;font-size:13px}.blog-index-pagination{display:flex;align-items:center;justify-content:center;gap:14px;margin-top:54px;color:#666}.blog-index-page-link{width:40px;height:40px;display:inline-grid;place-items:center;border:1px solid var(--line);border-radius:999px;background:#fff;color:#111;font-size:22px;line-height:1}.blog-index-page-link.is-disabled{opacity:.32;pointer-events:none}.blog-index-page-status{min-width:62px;text-align:center;font-size:13px;letter-spacing:.08em}.blog-body{padding:18px}.blog-image{display:block;background:#eee}.blog-image img{width:100%;aspect-ratio:16/9;object-fit:cover}@media(max-width:980px){.blog-index-hero,.blog-lane-strip,.blog-index-toolbar{grid-template-columns:1fr}.blog-hero-copy-stack{min-height:0}.blog-lane-item{min-height:0;border-right:0;border-bottom:1px solid var(--line)}.blog-lane-item:last-child{border-bottom:0}.blog-index-search{grid-template-columns:1fr}.blog-index-search button{width:100%}}@media(max-width:760px){.blog-journal-index{width:min(100% - 32px,760px)}}
+`;
+
 async function readPost(env, slug, language) {
   const database = env.ALTOS_BLOG_D1;
   if (!database?.prepare) return null;
@@ -414,29 +418,45 @@ function indexCopy(language) {
     "zh-Hant": {
       eyebrow: "ALTOS LAB Journal · Research / Build / Growth",
       title: "AI 實驗室筆記",
-      brandTitle: "AI",
-      brandScript: "& Craft",
       description: "我們研究、建造，然後把經驗發布成可引用的知識。",
+      labTitle: "我們研究、建造，然後把經驗發布成可引用的知識。",
+      labBody: "部落格服務的是整個實驗室定位：從 AI 系統設計、企業流程、內容與搜尋，到每天可落地的產品實驗。",
+      lanes: [
+        { label: "AI Products", body: "產品化、MVP、使用者流程與交付經驗" },
+        { label: "Agents & Automation", body: "AI Agent、工作流、知識庫與營運自動化" },
+        { label: "Search & GEO", body: "SEO 基礎、生成式搜尋、內容可引用性" },
+        { label: "Build Notes", body: "案例拆解、架構取捨、工具與市場觀察" }
+      ],
       latest: "最新文章",
       searchLabel: "搜尋文章",
       searchPlaceholder: "搜尋 AI、Agent、GEO...",
       searchSubmit: "搜尋",
       readTime: (minutes) => `${minutes || 3} 分鐘閱讀`,
       postsLabel: "篇文章",
+      all: "全部",
+      empty: "目前沒有符合條件的文章。",
       topics: ["Latest", "市場快訊", "市場專欄", "專題", "AI 趨勢", "Agents", "Automation", "GEO", "Build Notes"]
     },
     en: {
       eyebrow: "ALTOS LAB Journal · Research / Build / Growth",
       title: "AI Lab Notes",
-      brandTitle: "AI",
-      brandScript: "& Craft",
       description: "Thoughts on the future of work, from the people and teams creating it.",
+      labTitle: "We research, build, and publish what becomes reusable intelligence.",
+      labBody: "The journal serves the full lab: AI system design, enterprise workflows, content, search visibility and product experiments that can ship.",
+      lanes: [
+        { label: "AI Products", body: "Productization, MVPs, user flows and delivery lessons" },
+        { label: "Agents & Automation", body: "AI agents, workflows, knowledge bases and operations" },
+        { label: "Search & GEO", body: "SEO foundations, generative search and citation design" },
+        { label: "Build Notes", body: "Case breakdowns, architecture tradeoffs, tools and markets" }
+      ],
       latest: "Latest Articles",
       searchLabel: "Search articles",
       searchPlaceholder: "Search AI, agents, GEO...",
       searchSubmit: "Search",
       readTime: (minutes) => `${minutes || 3} min read`,
       postsLabel: "posts",
+      all: "All",
+      empty: "No matching articles yet.",
       topics: ["Latest", "Market Briefs", "Market Columns", "Features", "AI Trends", "Agents", "Automation", "GEO", "Build Notes"]
     }
   };
@@ -490,18 +510,15 @@ function renderIndex(posts, language, env, requestUrl) {
   const cards = visiblePosts
     .map((post) => {
       const cover = post.cover || `${siteUrl}/blog-cover-zh-hant.png`;
-      return `<article class="blog-craft-card">
-        <a class="blog-craft-card-image" href="${escapeAttribute(blogPostPath(post))}">
+      return `<article class="blog-card">
+        <a class="blog-image" href="${escapeAttribute(blogPostPath(post))}">
           <img src="${escapeAttribute(cover)}" alt="${escapeAttribute(post.coverAlt || post.title)}" loading="lazy" decoding="async" />
         </a>
-        <div class="blog-craft-card-body">
-          <h3><a href="${escapeAttribute(blogPostPath(post))}">${inlineTextHtml(post.title)}</a></h3>
+        <div class="blog-body">
+          <p class="eyebrow">${escapeHtml(contentTypeLabel(post))} · ${escapeHtml(post.newsCategory || post.tags?.[0] || post.topic || "AI")} · ${escapeHtml(dictionary.readTime(post.readTimeMinutes))}</p>
+          <h2><a href="${escapeAttribute(blogPostPath(post))}">${inlineTextHtml(post.title)}</a></h2>
           <p>${inlineTextHtml(post.excerpt || "")}</p>
-          <div class="blog-craft-card-meta">
-            <span class="blog-craft-type-badge is-${escapeAttribute(post.contentType || "breaking")}">${escapeHtml(contentTypeLabel(post))}</span>
-            <span class="blog-craft-card-taxonomy">${escapeHtml(post.newsCategory || post.tags?.[0] || post.topic || "AI")}</span>
-            <small>${escapeHtml(dictionary.readTime(post.readTimeMinutes))}</small>
-          </div>
+          <a class="card-link" href="${escapeAttribute(blogPostPath(post))}">${post.language === "zh-Hant" ? "閱讀文章" : "Read article"}</a>
         </div>
       </article>`;
     })
@@ -509,8 +526,16 @@ function renderIndex(posts, language, env, requestUrl) {
   const topics = dictionary.topics
     .map((item) => {
       const active = (tag || "Latest").toLowerCase() === item.toLowerCase() || (!tag && item === "Latest");
-      return `<a class="${active ? "active" : ""}" href="${escapeAttribute(item === "Latest" ? blogIndexPath(language) : indexHref(language, { tag: item }))}">${escapeHtml(item)}</a>`;
+      return `<a class="tag ${active ? "active" : ""}" href="${escapeAttribute(item === "Latest" ? blogIndexPath(language) : indexHref(language, { tag: item }))}">${escapeHtml(item === "Latest" ? dictionary.all : item)}</a>`;
     })
+    .join("");
+  const lanes = (dictionary.lanes || [])
+    .map(
+      (lane, index) => `<article class="blog-lane-item"><span>${String(index + 1).padStart(2, "0")}</span><strong>${escapeHtml(lane.label)}</strong><p>${escapeHtml(lane.body)}</p></article>`
+    )
+    .join("");
+  const labLanes = (dictionary.lanes || [])
+    .map((lane) => `<div><span>${escapeHtml(lane.label)}</span><p>${escapeHtml(lane.body)}</p></div>`)
     .join("");
   const previousPage = currentPage > 1 ? currentPage - 1 : null;
   const nextPage = currentPage < pageCount ? currentPage + 1 : null;
@@ -524,42 +549,48 @@ function renderIndex(posts, language, env, requestUrl) {
   <link rel="icon" href="/icon.svg" type="image/svg+xml" />
   <link rel="canonical" href="${escapeAttribute(`${siteUrl}${blogIndexPath(language)}`)}" />
   ${analyticsHead(env)}
-  <style>${CSS}${INDEX_CSS}</style>
+  <style>${CSS}${JOURNAL_INDEX_CSS}</style>
 </head>
 <body>
 ${analyticsBody(env)}
 <div class="site-home blog-site-shell">
   ${siteHeaderHtml()}
-  <main class="blog-page blog-index-page blog-craft-index">
-    <div class="blog-craft-layout">
-      <aside class="blog-craft-sidebar" aria-label="Blog navigation">
-        <div class="blog-craft-brand"><h1><span>${escapeHtml(dictionary.brandTitle)}</span><em>${escapeHtml(dictionary.brandScript)}</em></h1><p>${escapeHtml(dictionary.description)}</p></div>
-        <nav class="blog-craft-nav" aria-label="Blog topics">${topics}</nav>
-        <form class="blog-craft-search blog-craft-search-sidebar" action="${escapeAttribute(blogIndexPath(language))}" role="search">
-          ${tag ? `<input type="hidden" name="tag" value="${escapeAttribute(tag)}" />` : ""}
-          <label class="sr-only" for="blog-direct-search">${escapeHtml(dictionary.searchLabel)}</label>
-          <input id="blog-direct-search" name="query" type="search" value="${escapeAttribute(query)}" placeholder="${escapeAttribute(dictionary.searchPlaceholder)}" autocomplete="off" />
-          <button type="submit">${escapeHtml(dictionary.searchSubmit)}</button>
-        </form>
-        <div class="blog-craft-sidebar-footer"><span><strong>${posts.length}</strong> ${escapeHtml(dictionary.postsLabel)}</span></div>
+  <main class="blog-page blog-index-page blog-journal-index">
+    <header class="blog-index-hero">
+      <div class="blog-hero-copy-stack">
+        <p class="eyebrow">${escapeHtml(dictionary.eyebrow)}</p>
+        <h1>${escapeHtml(dictionary.title)}</h1>
+        <p class="hero-copy">${escapeHtml(dictionary.description)}</p>
+      </div>
+      <aside class="blog-lab-card" aria-label="ALTOS LAB journal scope">
+        <p class="eyebrow">ALTOS LAB</p>
+        <h2>${escapeHtml(dictionary.labTitle)}</h2>
+        <p>${escapeHtml(dictionary.labBody)}</p>
+        <div class="blog-lab-lanes">${labLanes}</div>
       </aside>
-      <section class="blog-craft-feed" aria-label="${escapeAttribute(dictionary.latest)}">
-        <div class="blog-craft-feed-top">
-          <div><p class="eyebrow">${escapeHtml(dictionary.latest)}</p><h2><span>${escapeHtml(tag || dictionary.title)}</span><em>— ${escapeHtml(dictionary.description)}</em></h2></div>
-          <form class="blog-craft-search" action="${escapeAttribute(blogIndexPath(language))}" role="search">
-            ${tag ? `<input type="hidden" name="tag" value="${escapeAttribute(tag)}" />` : ""}
-            <input name="query" type="search" value="${escapeAttribute(query)}" placeholder="${escapeAttribute(dictionary.searchPlaceholder)}" autocomplete="off" />
-            <button type="submit">${escapeHtml(dictionary.searchSubmit)}</button>
-          </form>
-        </div>
-        <div class="blog-craft-grid">${cards || `<p class="muted">No matching articles yet.</p>`}</div>
-        ${filtered.length > pageSize ? `<nav class="blog-craft-pagination" aria-label="Blog pagination">
-          ${previousPage ? `<a class="blog-craft-page-link" href="${escapeAttribute(indexHref(language, { tag, query, page: previousPage }))}">‹</a>` : `<span class="blog-craft-page-link is-disabled">‹</span>`}
-          <span class="blog-craft-page-status">${currentPage} / ${pageCount}</span>
-          ${nextPage ? `<a class="blog-craft-page-link" href="${escapeAttribute(indexHref(language, { tag, query, page: nextPage }))}">›</a>` : `<span class="blog-craft-page-link is-disabled">›</span>`}
-        </nav>` : ""}
-      </section>
+    </header>
+    <section class="blog-lane-strip" aria-label="ALTOS LAB content lanes">${lanes}</section>
+    <div class="blog-index-toolbar">
+      <nav class="blog-filter-bar" aria-label="Blog topics">${topics}</nav>
+      <form class="blog-index-search" action="${escapeAttribute(blogIndexPath(language))}" role="search">
+        ${tag ? `<input type="hidden" name="tag" value="${escapeAttribute(tag)}" />` : ""}
+        <label class="sr-only" for="blog-direct-search">${escapeHtml(dictionary.searchLabel)}</label>
+        <input id="blog-direct-search" name="query" type="search" value="${escapeAttribute(query)}" placeholder="${escapeAttribute(dictionary.searchPlaceholder)}" autocomplete="off" />
+        <button type="submit">${escapeHtml(dictionary.searchSubmit)}</button>
+      </form>
     </div>
+    <section aria-label="${escapeAttribute(dictionary.latest)}">
+      <div class="blog-index-list-head">
+        <p class="eyebrow">${escapeHtml(tag || dictionary.latest)}</p>
+        <span>${posts.length} ${escapeHtml(dictionary.postsLabel)}</span>
+      </div>
+      <div class="blog-index-grid">${cards || `<p class="muted">${escapeHtml(dictionary.empty)}</p>`}</div>
+      ${filtered.length > pageSize ? `<nav class="blog-index-pagination" aria-label="Blog pagination">
+        ${previousPage ? `<a class="blog-index-page-link" href="${escapeAttribute(indexHref(language, { tag, query, page: previousPage }))}">‹</a>` : `<span class="blog-index-page-link is-disabled">‹</span>`}
+        <span class="blog-index-page-status">${currentPage} / ${pageCount}</span>
+        ${nextPage ? `<a class="blog-index-page-link" href="${escapeAttribute(indexHref(language, { tag, query, page: nextPage }))}">›</a>` : `<span class="blog-index-page-link is-disabled">›</span>`}
+      </nav>` : ""}
+    </section>
   </main>
   <footer class="site-footer"><span class="brand-text">ALTOS LAB</span><span>© 2026 ALTOS LAB · AI implementation studio</span></footer>
 </div>

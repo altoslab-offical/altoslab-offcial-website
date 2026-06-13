@@ -304,7 +304,7 @@ assert(cms.includes("const data = await readPublicRawCmsData()") && cms.includes
 assert(cms.includes("public-blog-inventory") && cloudflareSmoke.includes("fields=inventory&limit=120"), "Cloudflare public blog inventory uses a bounded lightweight cache");
 assert(blogIndex.includes("getPublishedBlogInventoryPostsByLanguage"), "Cloudflare blog index renders from inventory cache instead of full blog bodies");
 assert(blogIndex.includes('BLOG_INDEX_PAGE_SIZE || "18"') && blogIndex.includes("Math.min(rawBlogIndexPageSize, 24)"), "blog index paginates cards within the Cloudflare Worker CPU budget");
-assert(blogIndex.includes("filtered.slice(pageStart, pageStart + BLOG_INDEX_PAGE_SIZE)") && blogIndex.includes("blog-craft-pagination"), "blog index exposes all inventory through pagination instead of rendering every card on one Worker request");
+assert(blogIndex.includes("filtered.slice(pageStart, pageStart + BLOG_INDEX_PAGE_SIZE)") && blogIndex.includes("blog-index-pagination"), "blog index exposes all inventory through pagination instead of rendering every card on one Worker request");
 assert(cms.includes("PUBLIC_BLOG_CACHE_LIMIT_PER_LANGUAGE || 600"), "public blog list projection does not keep the old 8-post-per-language cap");
 assert(blogApiRoute.includes("Math.min(rawLimit, 120)") && blogApiRoute.includes("getPublishedBlogInventoryPostsForApi(language || undefined, limit)"), "public blog API uses bounded D1 inventory projection for list and inventory responses");
 assert(feedRoute.includes("getPublishedBlogInventoryPosts()"), "Cloudflare feed renders from inventory cache instead of full blog bodies");
@@ -422,8 +422,8 @@ assert(!globals.includes("--al-blog-accent: #"), "Blog shell does not hard-code 
 assert(!globals.includes("rgba(188, 255, 77, 0.08)"), "rich chart chrome does not use old green accent wash");
 assert(!globals.includes("rgba(162, 198, 38"), "Blog type badges do not use green UI accents");
 assert(!globals.includes("rgba(45, 95, 225"), "Blog type badges do not use blue UI accents");
-assert(globals.includes(".blog-craft-brand h1") && globals.includes("font-family: var(--font-space);"), "Blog AI wordmark uses the Space Grotesk token");
-assert(globals.includes(".blog-craft-brand h1 em") && globals.includes("font-family: var(--font-display);"), "Blog Craft wordmark stays Newsreader italic");
+assert(globals.includes(".blog-index-hero h1") && globals.includes(".blog-lab-card"), "Blog Journal index keeps the hero and lab card visual structure");
+assert(globals.includes(".blog-lane-strip") && globals.includes(".blog-index-toolbar"), "Blog Journal index keeps lanes plus topic/search toolbar styling");
 assert(globals.includes("--type-badge-bg: var(--type-breaking-bg);"), "breaking badge uses its content-type color token");
 assert(globals.includes("--type-badge-bg: var(--type-column-bg);"), "column badge uses its content-type color token");
 assert(globals.includes("--type-badge-bg: var(--type-feature-bg);"), "feature badge uses its content-type color token");
@@ -449,7 +449,8 @@ assert(blogArticle.includes("const relatedVisualPost = toBlogVisualPost(related)
 assert(!blogArticle.includes("SafeBlogImage compact post={related}"), "related article cards do not serialize full post metadata into client image props");
 assert(blogIndex.includes("const visualPost = toBlogVisualPost(post)"), "blog index image props are sanitized before client serialization");
 assert(!blogIndex.includes("SafeBlogImage compact post={post}"), "blog index cards do not serialize full post metadata into client image props");
-assert(blogIndex.includes("blog-craft-index") && blogIndex.includes("<SiteHeader />"), "blog index keeps the full source-aligned craft UI shell");
+assert(blogIndex.includes("blog-journal-index") && blogIndex.includes("<SiteHeader />"), "blog index keeps the full source-aligned Journal UI shell");
+assert(!blogIndex.includes("blog-craft-sidebar") && !blogIndex.includes("blog-craft-layout"), "blog index does not reintroduce the deprecated Blog Craft sidebar shell");
 assert(!blogIndex.includes("blog-lite-shell") && !blogIndex.includes("lightweightCloudflareRender"), "blog index does not degrade to the lightweight Cloudflare UI");
 assert(!/quality gates/i.test(blogAuthors), "public author profiles do not expose internal quality-gate language");
 assert(!globals.includes("site-language-toggle button:nth-child"), "mobile CSS no longer hides segmented language buttons");

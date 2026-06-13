@@ -20,7 +20,7 @@ const samplePost = {
   language: "zh-Hant",
   translationGroupId: "blog-ui-contract",
   title: "Blog UI Contract Post",
-  excerpt: "The blog index must stay on the Blog Craft visual system.",
+  excerpt: "The blog index must stay on the ALTOS LAB Journal visual system.",
   contentType: "column",
   newsCategory: "AI",
   topic: "AI",
@@ -59,8 +59,18 @@ for (const pathname of indexPaths) {
   const html = await response.text();
   assert(response.status === 200, `${pathname} direct Cloudflare index renderer returns 200`);
   assert(response.headers.get("x-altos-direct-blog-render") === "cloudflare-d1-index", `${pathname} uses the direct D1 index renderer`);
-  assert(html.includes("blog-craft-index") && html.includes("blog-craft-layout") && html.includes("blog-craft-card"), `${pathname} preserves Blog Craft UI classes`);
-  assert(!html.includes("blog-lite-shell") && !html.includes("blog-lite-card"), `${pathname} does not fall back to the old lite UI`);
+  assert(
+    html.includes("blog-journal-index") &&
+      html.includes("blog-index-hero") &&
+      html.includes("blog-lane-strip") &&
+      html.includes("blog-index-toolbar") &&
+      html.includes("blog-index-grid") &&
+      html.includes("blog-card"),
+    `${pathname} preserves the canonical Journal index UI classes`
+  );
+  for (const forbidden of ["blog-craft-sidebar", "blog-craft-layout", "blog-craft-brand", "blog-lite-shell", "blog-lite-card", "AI &amp; Craft", "AI & Craft"]) {
+    assert(!html.includes(forbidden), `${pathname} does not render the deprecated sidebar/lite UI marker ${forbidden}`);
+  }
 }
 
 const directWorker = read("cloudflare/blog-html-direct-worker.js");
@@ -70,8 +80,11 @@ for (const forbidden of ["BLOG_INDEX_PAGE_SIZE =", "blog-lite-shell", "blog-lite
 assert(directWorker.includes("readIndexPosts") && directWorker.includes("cloudflare-d1-index"), "Cloudflare direct renderer has the Worker-safe Blog index path");
 
 const blogIndex = read("components/BlogIndex.tsx");
-for (const marker of ["blog-craft-index", "blog-craft-layout", "blog-craft-sidebar", "blog-craft-feed", "blog-craft-card"]) {
+for (const marker of ["blog-journal-index", "blog-index-hero", "blog-lane-strip", "blog-index-toolbar", "blog-index-grid", "blog-card"]) {
   assert(blogIndex.includes(marker), `BlogIndex keeps ${marker}`);
+}
+for (const forbidden of ["blog-craft-layout", "blog-craft-sidebar", "blog-craft-brand", "blog-craft-feed"]) {
+  assert(!blogIndex.includes(forbidden), `BlogIndex does not render deprecated ${forbidden}`);
 }
 
 const pageFiles = [

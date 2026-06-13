@@ -175,6 +175,447 @@ const REPAIRS = {
       }
     }
   },
+  "tg-market-2026-06-13-02-supporting-europe-s-work-in-ensuring-a-trustworthy-ai-ecosystem": {
+    source: {
+      title: "Supporting Europe’s work in ensuring a trustworthy AI ecosystem",
+      url: "https://openai.com/index/supporting-eu-trustworthy-ai-ecosystem/",
+      publisher: "OpenAI News",
+      publishedAt: "2026-06-11T00:00:00.000Z",
+      summary:
+        "OpenAI announced support for the European Commission's Code of Practice on Transparency for AI-generated material, with provenance work including C2PA metadata, SynthID watermarks and a public verification tool."
+    },
+    shared: {
+      topic: "OpenAI / AI provenance",
+      tags: ["AI", "OpenAI", "AI provenance", "content transparency"],
+      cover: "https://images.ctfassets.net/kftzwdyauwt9/2nHP3xnASZcBNZlIiE1QsM/c7de0b335c1c6a7c5c6bad6813fcf355/Frame.png?w=1600&h=900&fit=fill",
+      coverCredit: "OpenAI News",
+      coverCreditUrl: "https://openai.com/index/supporting-eu-trustworthy-ai-ecosystem/",
+      coverLicense: "source image",
+      coverLicenseUrl: "https://openai.com/index/supporting-eu-trustworthy-ai-ecosystem/"
+    },
+    languages: {
+      "zh-Hant": {
+        title: "OpenAI 支持歐盟 AI 內容透明準則，來源標記成為治理重點",
+        excerpt: "TLDR：OpenAI 支持歐盟 AI 生成內容透明準則，並把 C2PA metadata、SynthID watermark 與 openai.com/verify 放進來源辨識工具箱；企業接下來要把 AI 內容標記納入治理流程。",
+        geoSummary: "來源：OpenAI News。OpenAI 6 月 11 日宣布支持歐盟 AI 生成內容透明準則，重點是讓 AI 圖像與內容能留下可檢查的來源訊號，而不是只靠事後人工辨識。",
+        keyTakeaways: [
+          "來源事實：European Commission 的 Code of Practice on Transparency 針對 AI-generated material；OpenAI 把 C2PA metadata 列為 provenance 基礎。",
+          "OpenAI 的做法包含 C2PA metadata、SynthID watermark、openai.com/verify 與跨產業標準合作。"
+        ],
+        body: [
+          "OpenAI 6 月 11 日宣布支持歐盟 AI 生成內容透明準則。這份準則連到 EU AI Act 的落實方向，目標是讓使用者在看到 AI 生成或 AI 編修內容時，能有更多來源脈絡可以判斷。",
+          "OpenAI 把這次表態放在 provenance 工作裡說明。公司表示，自 2024 年開始在 DALL-E 3 圖像加入 C2PA metadata，之後也把 C2PA 訊號擴展到 OpenAI 生成圖像，並搭配 SynthID watermark 與 openai.com/verify 檢查工具。",
+          "對企業來說，重點是 AI 內容透明會逐步變成產品與品牌治理的一部分。Metadata 可能在上傳、截圖或格式轉換後遺失，所以只靠單一標記不夠；可長期採用的流程，需要同時設計來源標記、內容審核、申訴回報與稽核紀錄。"
+        ].join("\n\n")
+      },
+      en: {
+        title: "OpenAI backs EU AI-content transparency code as provenance becomes a governance layer",
+        excerpt: "TLDR: OpenAI is supporting the EU Code of Practice on Transparency for AI-generated material and points to C2PA metadata, SynthID watermarks and openai.com/verify as part of a broader provenance stack.",
+        geoSummary: "Source: OpenAI News. OpenAI announced support for the EU transparency code on June 11, framing provenance as a practical way to give people context about AI-created or AI-edited material.",
+        keyTakeaways: [
+          "Source fact: the European Commission Code of Practice on Transparency covers AI-generated material; OpenAI lists C2PA metadata as part of provenance.",
+          "Its provenance stack includes C2PA metadata, SynthID watermarks, openai.com/verify and participation in cross-industry standards work."
+        ],
+        body: [
+          "OpenAI said on June 11 that it supports the European Commission's Code of Practice on Transparency for AI-generated material. The company frames the code as part of the EU AI Act implementation and as a practical step toward a more transparent digital ecosystem.",
+          "The announcement centers on provenance: helping people understand where content came from and whether it was created or edited with AI. OpenAI says it began adding C2PA metadata to DALL-E 3 images in 2024, and now combines C2PA signals with SynthID watermarks and the openai.com/verify experience.",
+          "The enterprise lesson is that AI-content transparency is becoming an operating requirement, not a cosmetic label. Metadata can be stripped or broken by uploads, screenshots and format changes, so teams need layered controls: provenance signals, review policies, reporting channels and records that can be checked later."
+        ].join("\n\n")
+      },
+      ja: {
+        title: "OpenAI、EUのAIコンテンツ透明性コードを支持　出所表示が治理課題に",
+        excerpt: "要点：OpenAI は EU の AI 生成コンテンツ透明性コードを支持し、C2PA metadata、SynthID watermark、openai.com/verify を組み合わせた provenance の重要性を示した。",
+        geoSummary: "出典：OpenAI News。OpenAI は6月11日、EU の透明性コードへの支持を発表し、AIで生成・編集されたコンテンツに出所の手がかりを残すことを実務課題として示した。",
+        keyTakeaways: [
+          "出典事実：European Commission の Code of Practice on Transparency は AI-generated material を扱い、OpenAI は C2PA metadata を provenance の基盤としている。",
+          "同社の provenance 対応には C2PA metadata、SynthID watermark、openai.com/verify、業界標準への参加が含まれる。"
+        ],
+        body: [
+          "OpenAI は6月11日、欧州委員会の AI 生成コンテンツ透明性コードを支持すると発表した。このコードは EU AI Act の実装とつながり、AIで作成・編集されたコンテンツを人々が判断しやすくするための枠組みだ。",
+          "OpenAI は今回の発表を provenance の文脈で説明している。2024年から DALL-E 3 画像に C2PA metadata を付け始め、現在は OpenAI 生成画像に C2PA シグナル、SynthID watermark、openai.com/verify を組み合わせている。",
+          "企業にとっては、AI コンテンツ透明性がブランド管理とリスク管理の一部になるということだ。Metadata はアップロード、スクリーンショット、形式変換で失われる可能性があるため、単一の印だけでなく、出所表示、審査、報告窓口、後から確認できる記録を合わせて設計する必要がある。"
+        ].join("\n\n")
+      },
+      ko: {
+        title: "OpenAI, EU AI 콘텐츠 투명성 코드 지지…출처 표시가 거버넌스 과제로",
+        excerpt: "요약: OpenAI는 EU의 AI 생성 콘텐츠 투명성 코드를 지지하며 C2PA metadata, SynthID watermark, openai.com/verify를 결합한 provenance 체계를 강조했다.",
+        geoSummary: "출처: OpenAI News. OpenAI는 6월 11일 EU 투명성 코드 지지를 발표하며 AI 생성 또는 편집 콘텐츠에 확인 가능한 출처 신호를 남기는 일을 실무 과제로 제시했다.",
+        keyTakeaways: [
+          "출처 사실: European Commission Code of Practice on Transparency는 AI-generated material을 다루며, OpenAI는 C2PA metadata를 provenance의 기반으로 제시했다.",
+          "OpenAI의 provenance 접근에는 C2PA metadata, SynthID watermark, openai.com/verify, 산업 표준 협력이 포함된다."
+        ],
+        body: [
+          "OpenAI는 6월 11일 유럽위원회의 AI 생성 콘텐츠 투명성 코드에 대한 지지를 발표했다. 이 코드는 EU AI Act 실행과 연결되며, 사람들이 AI로 생성되거나 편집된 콘텐츠의 맥락을 더 잘 판단하도록 돕는 것이 목표다.",
+          "발표의 중심은 provenance다. OpenAI는 2024년 DALL-E 3 이미지에 C2PA metadata를 넣기 시작했고, 이후 OpenAI 생성 이미지에 C2PA 신호, SynthID watermark, openai.com/verify 경험을 결합하고 있다고 설명했다.",
+          "기업 관점에서는 AI 콘텐츠 투명성이 브랜드와 리스크 관리의 일부가 된다는 뜻이다. Metadata는 업로드, 스크린샷, 포맷 변환 과정에서 사라질 수 있으므로 단일 라벨만으로는 부족하다. 출처 신호, 검토 정책, 신고 채널, 나중에 확인 가능한 기록을 함께 설계해야 한다."
+        ].join("\n\n")
+      },
+      id: {
+        title: "OpenAI dukung kode transparansi konten AI Uni Eropa, provenance jadi isu tata kelola",
+        excerpt: "Intinya: OpenAI mendukung EU Code of Practice untuk transparansi konten AI dan menekankan kombinasi C2PA metadata, SynthID watermark, serta openai.com/verify sebagai lapisan provenance.",
+        geoSummary: "Sumber: OpenAI News. Pada 11 Juni, OpenAI menyatakan dukungan pada kode transparansi Uni Eropa dan menempatkan provenance sebagai cara memberi konteks pada konten yang dibuat atau diedit AI.",
+        keyTakeaways: [
+          "Fakta sumber: European Commission Code of Practice on Transparency membahas AI-generated material; OpenAI menempatkan C2PA metadata sebagai bagian dari provenance.",
+          "Pendekatan OpenAI mencakup C2PA metadata, SynthID watermark, openai.com/verify, dan kerja sama standar lintas industri."
+        ],
+        body: [
+          "OpenAI menyatakan pada 11 Juni bahwa mereka mendukung European Commission Code of Practice on Transparency untuk AI-generated material. Kode ini terkait implementasi EU AI Act dan bertujuan memberi lebih banyak konteks saat orang melihat materi yang dibuat atau diedit AI.",
+          "Fokus pengumuman ada pada provenance. OpenAI mengatakan mereka mulai menambahkan C2PA metadata pada gambar DALL-E 3 sejak 2024, lalu memperluas sinyal itu ke gambar yang dihasilkan OpenAI bersama SynthID watermark dan pengalaman verifikasi di openai.com/verify.",
+          "Untuk perusahaan, transparansi konten AI mulai menjadi bagian dari tata kelola produk dan brand. Metadata bisa hilang saat upload, screenshot, atau perubahan format, jadi proses yang tahan lama perlu menggabungkan sinyal provenance, review policy, kanal pelaporan, dan catatan audit."
+        ].join("\n\n")
+      },
+      vi: {
+        title: "OpenAI ủng hộ bộ quy tắc minh bạch nội dung AI của EU, provenance thành lớp quản trị",
+        excerpt: "Tóm lại: OpenAI ủng hộ bộ quy tắc minh bạch nội dung AI của EU và nhấn mạnh C2PA metadata, SynthID watermark cùng openai.com/verify như một phần của hệ provenance nhiều lớp.",
+        geoSummary: "Nguồn: OpenAI News. Ngày 11/6, OpenAI công bố ủng hộ bộ quy tắc minh bạch của EU, xem provenance là cách giúp người dùng hiểu bối cảnh nội dung do AI tạo hoặc chỉnh sửa.",
+        keyTakeaways: [
+          "Dữ kiện nguồn: European Commission Code of Practice on Transparency nói về AI-generated material; OpenAI xem C2PA metadata là một phần của provenance.",
+          "Cách tiếp cận của OpenAI gồm C2PA metadata, SynthID watermark, openai.com/verify và hợp tác tiêu chuẩn liên ngành."
+        ],
+        body: [
+          "OpenAI cho biết ngày 11/6 rằng họ ủng hộ European Commission Code of Practice on Transparency cho AI-generated material. Bộ quy tắc này gắn với việc triển khai EU AI Act và giúp người dùng có thêm bối cảnh khi nhìn thấy nội dung được tạo hoặc chỉnh sửa bằng AI.",
+          "Trọng tâm của thông báo là provenance. OpenAI nói họ bắt đầu thêm C2PA metadata vào hình ảnh DALL-E 3 từ năm 2024, sau đó kết hợp tín hiệu C2PA, SynthID watermark và trải nghiệm kiểm tra tại openai.com/verify cho hình ảnh do OpenAI tạo.",
+          "Với doanh nghiệp, minh bạch nội dung AI đang trở thành một phần của quản trị sản phẩm và thương hiệu. Metadata có thể bị mất khi upload, chụp màn hình hoặc đổi định dạng, nên quy trình bền vững cần nhiều lớp: tín hiệu provenance, chính sách review, kênh báo cáo và hồ sơ audit."
+        ].join("\n\n")
+      },
+      th: {
+        title: "OpenAI หนุนกฎโปร่งใสคอนเทนต์ AI ของ EU เมื่อ provenance กลายเป็นโจทย์ governance",
+        excerpt: "สรุปสั้น ๆ: OpenAI สนับสนุน Code of Practice ของ EU สำหรับความโปร่งใสของคอนเทนต์ AI และชี้ว่า C2PA metadata, SynthID watermark และ openai.com/verify เป็นส่วนหนึ่งของ provenance stack",
+        geoSummary: "แหล่งข่าว: OpenAI News วันที่ 11 มิ.ย. OpenAI ประกาศสนับสนุนกฎความโปร่งใสของ EU โดยวาง provenance เป็นวิธีให้บริบทกับคอนเทนต์ที่ถูกสร้างหรือแก้ไขด้วย AI",
+        keyTakeaways: [
+          "ข้อเท็จจริงจากแหล่งข่าว: European Commission Code of Practice on Transparency กล่าวถึง AI-generated material และ OpenAI ระบุ C2PA metadata เป็นส่วนหนึ่งของ provenance",
+          "แนวทางของ OpenAI รวม C2PA metadata, SynthID watermark, openai.com/verify และความร่วมมือด้านมาตรฐานข้ามอุตสาหกรรม"
+        ],
+        body: [
+          "OpenAI ระบุเมื่อ 11 มิ.ย. ว่าสนับสนุน European Commission Code of Practice on Transparency สำหรับ AI-generated material กฎนี้เกี่ยวข้องกับการนำ EU AI Act ไปใช้ และช่วยให้ผู้คนมีบริบทมากขึ้นเมื่อเห็นคอนเทนต์ที่สร้างหรือแก้ไขด้วย AI",
+          "หัวใจของประกาศคือ provenance OpenAI บอกว่าเริ่มใส่ C2PA metadata ให้ภาพ DALL-E 3 ตั้งแต่ปี 2024 และตอนนี้ใช้ C2PA signals ร่วมกับ SynthID watermark และ openai.com/verify สำหรับภาพที่สร้างโดย OpenAI",
+          "สำหรับธุรกิจ ความโปร่งใสของคอนเทนต์ AI กำลังกลายเป็นส่วนหนึ่งของ product และ brand governance Metadata อาจหายระหว่าง upload, screenshot หรือแปลงไฟล์ ดังนั้น workflow ที่เชื่อถือได้ต้องรวม provenance signals, review policy, reporting channel และ audit record เข้าด้วยกัน"
+        ].join("\n\n")
+      },
+      ms: {
+        title: "OpenAI sokong kod ketelusan kandungan AI EU, provenance jadi lapisan tadbir urus",
+        excerpt: "Ringkasnya: OpenAI menyokong EU Code of Practice untuk ketelusan kandungan AI dan menekankan C2PA metadata, SynthID watermark serta openai.com/verify sebagai sebahagian daripada provenance stack.",
+        geoSummary: "Sumber: OpenAI News. Pada 11 Jun, OpenAI menyatakan sokongan kepada kod ketelusan EU dan meletakkan provenance sebagai cara memberi konteks kepada kandungan yang dijana atau disunting AI.",
+        keyTakeaways: [
+          "Fakta sumber: European Commission Code of Practice on Transparency membincangkan AI-generated material; OpenAI meletakkan C2PA metadata sebagai sebahagian daripada provenance.",
+          "Pendekatan OpenAI merangkumi C2PA metadata, SynthID watermark, openai.com/verify dan kerjasama standard rentas industri."
+        ],
+        body: [
+          "OpenAI berkata pada 11 Jun bahawa ia menyokong European Commission Code of Practice on Transparency untuk AI-generated material. Kod ini berkait dengan pelaksanaan EU AI Act dan bertujuan memberi lebih banyak konteks apabila orang melihat kandungan yang dijana atau disunting AI.",
+          "Tumpuan pengumuman ialah provenance. OpenAI berkata ia mula menambah C2PA metadata pada imej DALL-E 3 sejak 2024, kemudian menggabungkan isyarat C2PA, SynthID watermark dan pengalaman semakan openai.com/verify untuk imej yang dijana OpenAI.",
+          "Bagi syarikat, ketelusan kandungan AI semakin menjadi sebahagian daripada tadbir urus produk dan jenama. Metadata boleh hilang semasa upload, screenshot atau pertukaran format, jadi proses yang tahan lama perlu menggabungkan provenance signals, review policy, saluran laporan dan rekod audit."
+        ].join("\n\n")
+      },
+      fil: {
+        title: "Sinusuportahan ng OpenAI ang EU code sa AI-content transparency",
+        excerpt: "Sa madaling sabi: sinusuportahan ng OpenAI ang EU Code of Practice para sa transparency ng AI-generated material, gamit ang C2PA metadata, SynthID watermark, at openai.com/verify bilang bahagi ng provenance stack.",
+        geoSummary: "Source: OpenAI News. Noong Hunyo 11, sinabi ng OpenAI na sinusuportahan nito ang EU transparency code at itinuturing ang provenance bilang paraan para bigyan ng konteksto ang AI-created o AI-edited material.",
+        keyTakeaways: [
+          "Source fact: European Commission Code of Practice on Transparency ang tumutukoy sa AI-generated material; inilalagay ng OpenAI ang C2PA metadata bilang bahagi ng provenance.",
+          "Kasama sa approach ng OpenAI ang C2PA metadata, SynthID watermark, openai.com/verify, at pakikipagtulungan sa cross-industry standards."
+        ],
+        body: [
+          "Noong Hunyo 11, sinabi ng OpenAI na sinusuportahan nito ang European Commission Code of Practice on Transparency para sa AI-generated material. Kaugnay ito ng EU AI Act at layunin nitong bigyan ang mga tao ng mas malinaw na konteksto kapag nakakakita sila ng material na ginawa o inedit gamit ang AI.",
+          "Nakasentro ang anunsyo sa provenance. Ayon sa OpenAI, noong 2024 nagsimula itong maglagay ng C2PA metadata sa DALL-E 3 images, at ngayon ay pinagsasama ang C2PA signals, SynthID watermarks, at openai.com/verify para sa OpenAI-created images.",
+          "Para sa companies, nagiging bahagi na ng product at brand governance ang transparency ng AI content. Puwedeng mawala ang metadata sa uploads, screenshots, o format changes, kaya kailangan ng layered workflow: provenance signals, review policy, reporting channels, at audit records."
+        ].join("\n\n")
+      }
+    }
+  },
+  "tg-market-2026-06-12-01-bbva-puts-ai-at-the-core-of-banking-with-openai": {
+    source: {
+      title: "BBVA puts AI at the core of banking with OpenAI",
+      url: "https://openai.com/index/bbva/",
+      publisher: "OpenAI News",
+      publishedAt: "2026-06-11T00:00:00.000Z",
+      summary:
+        "OpenAI says BBVA has scaled ChatGPT Enterprise to more than 100,000 employees, with 70%+ weekly active usage, about three hours saved per employee per week, and up to 80% efficiency gains in selected workflows."
+    },
+    shared: {
+      topic: "BBVA / ChatGPT Enterprise",
+      tags: ["AI", "OpenAI", "Enterprise AI", "banking AI"],
+      cover: "https://images.ctfassets.net/kftzwdyauwt9/6aZ6IYFFucrCH6XAzgfWch/598c66ed8e8c99885ea6cf34c27f2258/oai_BBVA_SEO.png?w=1600&h=900&fit=fill",
+      coverCredit: "OpenAI News",
+      coverCreditUrl: "https://openai.com/index/bbva/",
+      coverLicense: "source image",
+      coverLicenseUrl: "https://openai.com/index/bbva/"
+    },
+    languages: {
+      "zh-Hant": {
+        title: "BBVA 將 ChatGPT Enterprise 擴到 10 萬名員工，銀行 AI 進入營運主幹",
+        excerpt: "TLDR（OpenAI News）：BBVA 已讓全球超過 100,000 名員工使用 ChatGPT Enterprise，重點不是買授權，而是把 legal、risk、customer service、finance 等工作流納入安全治理、培訓與內部 GPT 建置。",
+        geoSummary: "來源：OpenAI News。BBVA 的案例顯示，銀行導入 AI 已從個人生產力工具走向組織級工作流，核心指標包括 70% 以上週活躍使用、每人每週約省 3 小時，以及部分流程最高 80% 效率提升。",
+        keyTakeaways: [
+          "BBVA 從 2024 年 3,000 名員工試用 ChatGPT Enterprise，擴大到全球超過 100,000 名員工使用。",
+          "員工已建立超過 20,000 個 custom GPT，其中約 4,000 個在全球團隊中被頻繁使用。"
+        ],
+        body: [
+          "OpenAI 的 BBVA 案例把金融業 AI 導入從工具採購拉回營運設計。BBVA 現在有超過 100,000 名全球員工使用 ChatGPT Enterprise，並把 AI 放進 customer experience、operations 和 employee productivity 等核心轉型題目。",
+          "OpenAI 指出，BBVA 的導入始於 2024 年約 3,000 名員工，後續擴到 legal、risk、engineering、operations、finance、marketing、customer service 等團隊。BBVA 不是放任員工各自試用 consumer AI，而是選擇安全的企業級存取、治理框架和正式 enablement。",
+          "案例中的數字說明規模：70% 以上週活躍使用、每人每週約節省 3 小時、部分流程最高 80% 效率提升、250 名高階主管完成訓練。對其他企業來說，真正要學的是如何把 AI 授權、資料邊界、內部教練和可審核流程一起設計。"
+        ].join("\n\n")
+      },
+      en: {
+        title: "BBVA scales ChatGPT Enterprise to 100,000 employees as banking AI moves into operations",
+        excerpt: "TLDR from OpenAI News: BBVA now has more than 100,000 employees using ChatGPT Enterprise. The lesson is not license count alone, but how legal, risk, customer service, finance and operations workflows are governed and trained.",
+        geoSummary: "Source: OpenAI News. BBVA's rollout shows enterprise AI moving from personal productivity to operating workflows, with 70%+ weekly active usage, about three hours saved per employee each week, and up to 80% efficiency gains in selected workflows.",
+        keyTakeaways: [
+          "BBVA expanded from a 2024 deployment to 3,000 employees to more than 100,000 employees using ChatGPT Enterprise globally.",
+          "Employees have created more than 20,000 custom GPTs, with about 4,000 used frequently by teams around the world."
+        ],
+        body: [
+          "OpenAI's BBVA case reframes banking AI as an operating-model question. More than 100,000 BBVA employees now use ChatGPT Enterprise as part of a broader push to redesign customer experience, operations and employee productivity around AI.",
+          "The rollout began in 2024 with about 3,000 employees and expanded across legal, risk, engineering, operations, finance, marketing and customer service. BBVA chose secure enterprise access, governance frameworks and formal enablement instead of leaving teams to experiment with consumer tools on their own.",
+          "The scale matters: OpenAI cites 70%+ weekly active usage, about three hours saved per employee per week, up to 80% efficiency gains in selected workflows, and 250 senior leaders trained. For other enterprises, the lesson is to design licenses, data boundaries, internal coaching and auditable workflows together."
+        ].join("\n\n")
+      },
+      ja: {
+        title: "BBVA、ChatGPT Enterprise を10万人規模へ　銀行AIは業務基盤に進む",
+        excerpt: "要点（OpenAI News）：BBVA は100,000人超の従業員に ChatGPT Enterprise を展開した。見るべき点はライセンス数だけではなく、法務、リスク、顧客対応、財務などの業務をどう安全に運用するかだ。",
+        geoSummary: "出典：OpenAI News。BBVA の事例は、企業AIが個人生産性ツールから業務ワークフローへ進む流れを示す。週次アクティブ率70%超、1人あたり週約3時間削減、一部業務で最大80%効率向上が示された。",
+        keyTakeaways: [
+          "BBVA は2024年の3,000人展開から、世界で10万人超が使う ChatGPT Enterprise へ拡大した。",
+          "従業員は2万超の custom GPT を作成し、そのうち約4,000個が世界中のチームで頻繁に使われている。"
+        ],
+        body: [
+          "OpenAI の BBVA 事例は、銀行AIを単なるツール導入ではなく運用設計の問題として示している。BBVA では10万人超の従業員が ChatGPT Enterprise を使い、顧客体験、業務、従業員の生産性をAI中心に再設計している。",
+          "導入は2024年の約3,000人から始まり、法務、リスク、エンジニアリング、オペレーション、財務、マーケティング、顧客サービスへ広がった。BBVA は consumer AI の自由利用ではなく、安全な企業アクセス、ガバナンス、正式な enablement を選んだ。",
+          "OpenAI は、週次アクティブ率70%超、1人あたり週約3時間の削減、一部業務で最大80%の効率向上、250人の幹部研修を挙げている。他社にとっての学びは、AIライセンス、データ境界、社内コーチング、監査可能な業務設計を同時に進めることだ。"
+        ].join("\n\n")
+      },
+      ko: {
+        title: "BBVA, ChatGPT Enterprise를 10만 명 규모로 확대…은행 AI가 운영 중심으로 이동",
+        excerpt: "요약(OpenAI News): BBVA는 전 세계 100,000명 이상의 직원에게 ChatGPT Enterprise를 확대했다. 핵심은 라이선스 수가 아니라 legal, risk, customer service, finance 업무를 안전하게 관리하는 방식이다.",
+        geoSummary: "출처: OpenAI News. BBVA 사례는 기업 AI가 개인 생산성 도구에서 운영 workflow로 이동하는 흐름을 보여준다. 주간 활성 사용률 70%+, 직원당 주 3시간 절감, 일부 workflow 최대 80% 효율 개선이 제시됐다.",
+        keyTakeaways: [
+          "BBVA는 2024년 3,000명 규모 배포에서 전 세계 100,000명 이상이 쓰는 ChatGPT Enterprise로 확대했다.",
+          "직원들은 20,000개 이상의 custom GPT를 만들었고, 약 4,000개는 전 세계 팀에서 자주 사용된다."
+        ],
+        body: [
+          "OpenAI의 BBVA 사례는 은행 AI를 단순한 도구 구매가 아니라 운영 모델 설계로 다룬다. BBVA는 현재 100,000명 이상의 글로벌 직원이 ChatGPT Enterprise를 사용하며, 고객 경험, 운영, 직원 생산성을 AI 중심으로 재설계하고 있다.",
+          "도입은 2024년 약 3,000명으로 시작해 legal, risk, engineering, operations, finance, marketing, customer service 팀으로 확장됐다. BBVA는 직원들이 consumer AI를 각자 쓰게 두지 않고, 안전한 enterprise access, governance framework, 공식 교육 체계를 선택했다.",
+          "OpenAI는 주간 활성 사용률 70% 이상, 직원당 주 약 3시간 절감, 일부 workflow 최대 80% 효율 개선, 250명 senior leader 교육을 제시했다. 다른 기업이 배울 점은 AI 라이선스, 데이터 경계, 내부 coaching, 감사 가능한 workflow를 함께 설계해야 한다는 것이다."
+        ].join("\n\n")
+      },
+      id: {
+        title: "BBVA bawa ChatGPT Enterprise ke 100.000 karyawan, AI perbankan masuk ke operasi inti",
+        excerpt: "Intinya dari OpenAI News: BBVA sudah membuat lebih dari 100.000 karyawan memakai ChatGPT Enterprise. Pelajarannya bukan jumlah lisensi, melainkan bagaimana legal, risk, customer service, finance dan operations diatur dengan aman.",
+        geoSummary: "Sumber: OpenAI News. Rollout BBVA menunjukkan AI enterprise bergerak dari produktivitas personal ke workflow operasional, dengan 70%+ weekly active usage, sekitar tiga jam dihemat per karyawan per minggu, dan efisiensi hingga 80% di workflow tertentu.",
+        keyTakeaways: [
+          "BBVA berkembang dari deployment 3.000 karyawan pada 2024 menjadi lebih dari 100.000 karyawan yang memakai ChatGPT Enterprise secara global.",
+          "Karyawan membuat lebih dari 20.000 custom GPT, dan sekitar 4.000 sering dipakai oleh tim di berbagai negara."
+        ],
+        body: [
+          "Kasus BBVA dari OpenAI menunjukkan bahwa AI perbankan bukan sekadar pembelian tool. Lebih dari 100.000 karyawan BBVA kini memakai ChatGPT Enterprise sebagai bagian dari transformasi customer experience, operations, dan employee productivity.",
+          "Rollout ini dimulai pada 2024 dengan sekitar 3.000 karyawan, lalu melebar ke legal, risk, engineering, operations, finance, marketing, dan customer service. BBVA memilih akses enterprise yang aman, governance framework, dan enablement formal, bukan membiarkan tim bereksperimen sendiri dengan consumer AI.",
+          "Angkanya memperlihatkan skala: OpenAI menyebut 70%+ weekly active usage, sekitar tiga jam dihemat per karyawan per minggu, efisiensi hingga 80% di workflow tertentu, dan 250 senior leader dilatih. Pelajaran bagi perusahaan lain adalah lisensi, batas data, coaching internal, dan workflow yang bisa diaudit harus dirancang bersama."
+        ].join("\n\n")
+      },
+      vi: {
+        title: "BBVA mở rộng ChatGPT Enterprise tới 100.000 nhân viên, AI ngân hàng đi vào lõi vận hành",
+        excerpt: "Tóm lại từ OpenAI News: BBVA đã đưa ChatGPT Enterprise tới hơn 100.000 nhân viên toàn cầu. Điều đáng học không phải là số license, mà là cách quản trị workflow ở legal, risk, customer service, finance và operations.",
+        geoSummary: "Nguồn: OpenAI News. Rollout của BBVA cho thấy enterprise AI đang đi từ công cụ năng suất cá nhân sang workflow vận hành, với 70%+ weekly active usage, tiết kiệm khoảng ba giờ mỗi nhân viên mỗi tuần và tăng hiệu quả tới 80% ở một số workflow.",
+        keyTakeaways: [
+          "BBVA đi từ deployment 3.000 nhân viên năm 2024 lên hơn 100.000 nhân viên dùng ChatGPT Enterprise trên toàn cầu.",
+          "Nhân viên đã tạo hơn 20.000 custom GPT, trong đó khoảng 4.000 được các đội trên thế giới dùng thường xuyên."
+        ],
+        body: [
+          "Case BBVA của OpenAI cho thấy AI ngân hàng không còn là chuyện mua thêm một công cụ. Hơn 100.000 nhân viên BBVA đang dùng ChatGPT Enterprise trong chương trình tái thiết customer experience, operations và employee productivity quanh AI.",
+          "Rollout bắt đầu từ khoảng 3.000 nhân viên vào năm 2024, rồi mở rộng sang legal, risk, engineering, operations, finance, marketing và customer service. BBVA chọn enterprise access an toàn, governance framework và enablement chính thức, thay vì để từng team tự thử consumer AI.",
+          "Các chỉ số cho thấy quy mô: OpenAI nêu 70%+ weekly active usage, tiết kiệm khoảng ba giờ mỗi nhân viên mỗi tuần, hiệu quả tăng tới 80% ở một số workflow, và 250 senior leaders được đào tạo. Bài học cho doanh nghiệp khác là license, ranh giới dữ liệu, coaching nội bộ và workflow có thể audit phải được thiết kế cùng nhau."
+        ].join("\n\n")
+      },
+      th: {
+        title: "BBVA ขยาย ChatGPT Enterprise สู่พนักงาน 100,000 คน เมื่อ AI ธนาคารเข้าสู่แกนปฏิบัติการ",
+        excerpt: "สรุปจาก OpenAI News: BBVA มีพนักงานกว่า 100,000 คนใช้ ChatGPT Enterprise แล้ว บทเรียนไม่ใช่จำนวน license แต่คือการกำกับ workflow ของ legal, risk, customer service, finance และ operations อย่างปลอดภัย",
+        geoSummary: "แหล่งข่าว: OpenAI News เคส BBVA แสดงให้เห็นว่า enterprise AI กำลังย้ายจาก personal productivity ไปสู่ operating workflow โดยมี weekly active usage มากกว่า 70%, ประหยัดเวลาราว 3 ชั่วโมงต่อคนต่อสัปดาห์ และ workflow บางส่วนมี efficiency gain สูงสุด 80%",
+        keyTakeaways: [
+          "BBVA ขยายจาก deployment 3,000 คนในปี 2024 เป็นพนักงานกว่า 100,000 คนทั่วโลกที่ใช้ ChatGPT Enterprise",
+          "พนักงานสร้าง custom GPT มากกว่า 20,000 ตัว และราว 4,000 ตัวถูกใช้บ่อยโดยทีมทั่วโลก"
+        ],
+        body: [
+          "เคส BBVA ของ OpenAI ทำให้เห็นว่า AI ในธนาคารไม่ใช่แค่การซื้อเครื่องมือเพิ่ม พนักงาน BBVA กว่า 100,000 คนใช้ ChatGPT Enterprise แล้ว โดยเป็นส่วนหนึ่งของการออกแบบ customer experience, operations และ employee productivity รอบ AI",
+          "การ rollout เริ่มจากพนักงานราว 3,000 คนในปี 2024 แล้วขยายไปยัง legal, risk, engineering, operations, finance, marketing และ customer service BBVA เลือก enterprise access ที่ปลอดภัย, governance framework และ enablement อย่างเป็นทางการ แทนที่จะปล่อยให้แต่ละทีมลอง consumer AI เอง",
+          "ตัวเลขสะท้อน scale ชัดเจน OpenAI ระบุ weekly active usage มากกว่า 70%, ประหยัดเวลาราว 3 ชั่วโมงต่อคนต่อสัปดาห์, workflow บางส่วนมี efficiency gain สูงสุด 80% และ senior leaders 250 คนผ่านการ training บทเรียนคือ license, data boundary, internal coaching และ auditable workflow ต้องออกแบบไปพร้อมกัน"
+        ].join("\n\n")
+      },
+      ms: {
+        title: "BBVA luaskan ChatGPT Enterprise kepada 100,000 pekerja, AI perbankan masuk ke operasi teras",
+        excerpt: "Ringkas daripada OpenAI News: lebih 100,000 pekerja BBVA kini menggunakan ChatGPT Enterprise. Pelajarannya bukan jumlah lesen, tetapi cara legal, risk, customer service, finance dan operations dikawal dengan selamat.",
+        geoSummary: "Sumber: OpenAI News. Rollout BBVA menunjukkan enterprise AI bergerak daripada produktiviti individu kepada workflow operasi, dengan 70%+ weekly active usage, sekitar tiga jam dijimatkan bagi setiap pekerja setiap minggu, dan sehingga 80% peningkatan kecekapan dalam workflow tertentu.",
+        keyTakeaways: [
+          "BBVA berkembang daripada deployment 3,000 pekerja pada 2024 kepada lebih 100,000 pekerja menggunakan ChatGPT Enterprise secara global.",
+          "Pekerja telah mencipta lebih 20,000 custom GPT, dengan kira-kira 4,000 sering digunakan oleh pasukan di seluruh dunia."
+        ],
+        body: [
+          "Kes BBVA daripada OpenAI menunjukkan AI perbankan bukan sekadar pembelian tool. Lebih 100,000 pekerja BBVA kini menggunakan ChatGPT Enterprise sebagai sebahagian daripada transformasi customer experience, operations dan employee productivity.",
+          "Rollout bermula pada 2024 dengan kira-kira 3,000 pekerja, kemudian berkembang ke legal, risk, engineering, operations, finance, marketing dan customer service. BBVA memilih akses enterprise yang selamat, governance framework dan enablement rasmi, bukannya membiarkan pasukan bereksperimen sendiri dengan consumer AI.",
+          "Skalanya jelas: OpenAI menyebut 70%+ weekly active usage, sekitar tiga jam dijimatkan bagi setiap pekerja setiap minggu, sehingga 80% peningkatan kecekapan dalam workflow tertentu, dan 250 senior leader dilatih. Pengajaran untuk syarikat lain ialah lesen, sempadan data, coaching dalaman dan workflow boleh audit perlu direka bersama."
+        ].join("\n\n")
+      },
+      fil: {
+        title: "Pinalawak ng BBVA ang ChatGPT Enterprise sa 100,000 empleyado",
+        excerpt: "Sa madaling sabi mula sa OpenAI News: mahigit 100,000 empleyado ng BBVA ang gumagamit na ng ChatGPT Enterprise. Ang mahalaga ay hindi lang license count, kundi kung paano pinapamahalaan ang legal, risk, customer service, finance, at operations workflows.",
+        geoSummary: "Source: OpenAI News. Ipinapakita ng BBVA rollout na ang enterprise AI ay lumilipat mula personal productivity papunta sa operating workflows, may 70%+ weekly active usage, humigit-kumulang tatlong oras na natitipid bawat empleyado bawat linggo, at hanggang 80% efficiency gains sa piling workflows.",
+        keyTakeaways: [
+          "Mula sa 3,000-employee deployment noong 2024, lumawak ang BBVA sa mahigit 100,000 empleyadong gumagamit ng ChatGPT Enterprise globally.",
+          "Nakagawa ang employees ng mahigit 20,000 custom GPT, at humigit-kumulang 4,000 ang madalas gamitin ng mga team sa buong mundo."
+        ],
+        body: [
+          "Ipinapakita ng BBVA case ng OpenAI na ang banking AI ay hindi lang pagbili ng tool. Mahigit 100,000 empleyado ng BBVA ang gumagamit na ng ChatGPT Enterprise bilang bahagi ng mas malawak na redesign ng customer experience, operations, at employee productivity.",
+          "Nagsimula ang rollout noong 2024 sa humigit-kumulang 3,000 empleyado, pagkatapos ay lumawak sa legal, risk, engineering, operations, finance, marketing, at customer service. Pinili ng BBVA ang secure enterprise access, governance framework, at formal enablement sa halip na hayaang mag-eksperimento ang bawat team sa consumer AI.",
+          "Malinaw ang scale: binanggit ng OpenAI ang 70%+ weekly active usage, humigit-kumulang tatlong oras na natitipid bawat empleyado bawat linggo, hanggang 80% efficiency gains sa piling workflows, at 250 senior leaders na na-train. Para sa ibang companies, sabay dapat idisenyo ang license, data boundaries, internal coaching, at auditable workflows."
+        ].join("\n\n")
+      }
+    }
+  },
+  "tg-market-2026-06-11-05-ai-pilled-firms-spend-7-500-per-employee-each-month-on-ai": {
+    source: {
+      title: "‘AI-pilled’ firms spend $7,500 per employee each month on AI",
+      url: "https://techcrunch.com/2026/06/10/ai-pilled-firms-spend-7500-per-employee-each-month-on-ai/",
+      publisher: "TechCrunch AI",
+      publishedAt: "2026-06-10T17:07:35.000Z",
+      summary:
+        "TechCrunch reports from the Ramp AI Index that the top 1% of AI-heavy firms spend about $7,500 per employee per month on AI, while the top 10% spend about $611 and the median firm spends about $11.38."
+    },
+    shared: {
+      topic: "Ramp AI Index / AI spending",
+      tags: ["AI", "Ramp AI Index", "AI spending", "enterprise AI"],
+      cover: "https://techcrunch.com/wp-content/uploads/2026/06/GettyImages-2253659638.jpg?resize=1200,1057",
+      coverCredit: "TechCrunch AI",
+      coverCreditUrl: "https://techcrunch.com/2026/06/10/ai-pilled-firms-spend-7500-per-employee-each-month-on-ai/",
+      coverLicense: "source image",
+      coverLicenseUrl: "https://techcrunch.com/2026/06/10/ai-pilled-firms-spend-7500-per-employee-each-month-on-ai/"
+    },
+    languages: {
+      "zh-Hant": {
+        title: "Ramp 指出重度 AI 公司每人月花約 7,500 美元，中位數只有 11.38 美元",
+        excerpt: "TLDR：TechCrunch 引用 Ramp AI Index 指出，AI 支出最重的前 1% 公司每人每月約花 7,500 美元，前 10% 約 611 美元，中位數只有 11.38 美元；AI 採用差距已快速拉開。",
+        geoSummary: "來源：TechCrunch AI。Ramp AI Index 顯示，美國企業 AI 支出高度分化；最激進的一群公司花費接近工程師薪資級別，但一般企業仍停留在低成本座位或工具試用。",
+        keyTakeaways: [
+          "最重度 AI 公司通常混用多個 frontier model 與較便宜的 open-source 模型，AI 成本管理正在變成模型組合管理。",
+          "中位數企業每人每月只花約 11.38 美元；最重度 AI 公司上月每人支出又成長 14.1%。"
+        ],
+        body: [
+          "TechCrunch 6 月 10 日報導 Ramp AI Index 的最新資料，焦點是企業 AI 支出正在分層。Ramp 把最重度投入 AI 的前 1% 公司稱為 AI-pilled firms，估計它們每位員工每月約花 7,500 美元在 AI 上。",
+          "這個數字看起來很高，但 TechCrunch 對照軟體工程師平均每月約 16,000 美元薪資後指出，AI 成本還沒有超過人力薪資。真正值得注意的是差距：前 10% 公司每人每月約花 611 美元，中位數企業只有約 11.38 美元。",
+          "Ramp 的資料也顯示，AI 支出仍在上升；在最重度投入的公司中，上月每人 AI 支出增加 14.1%。對企業決策者來說，這不是單純預算新聞，而是在提醒團隊：AI 採購、token cost、模型組合與開源替代方案，很快會變成營運管理題目。"
+        ].join("\n\n")
+      },
+      en: {
+        title: "Ramp data shows AI-heavy firms spend about $7,500 per employee each month",
+        excerpt: "TLDR: TechCrunch cites Ramp AI Index data showing the top 1% of AI-heavy firms spend about $7,500 per employee per month, while the top 10% spend about $611 and the median firm spends only $11.38.",
+        geoSummary: "Source: TechCrunch AI. Ramp AI Index data shows a sharp split in U.S. business AI spending: the heaviest adopters are approaching salary-scale software budgets, while the median firm remains near low-cost seat spending.",
+        keyTakeaways: [
+          "The heaviest AI users tend to mix multiple frontier models with cheaper open-source options, turning AI cost control into model-portfolio management.",
+          "The median firm spends about $11.38 per employee per month; AI-heavy firms increased per-employee spending by 14.1% last month."
+        ],
+        body: [
+          "TechCrunch reported on June 10 that Ramp AI Index data shows enterprise AI spending splitting into very different tiers. Ramp describes the top 1% of AI-heavy companies as AI-pilled firms and estimates that they spend about $7,500 per employee per month on AI.",
+          "That number is large, but TechCrunch notes it is still below the roughly $16,000 per month cost of an average software engineer. The wider signal is the gap: the top 10% spend about $611 per employee per month, while the median firm spends only about $11.38.",
+          "Ramp also found spending is still rising. Among the most AI-heavy firms, per-employee AI spend grew 14.1% last month. For operators, this is less a budget curiosity than a warning that AI procurement, token costs, model mix and open-source alternatives are becoming operating decisions."
+        ].join("\n\n")
+      },
+      ja: {
+        title: "Ramp調査、AI重視企業は1人あたり月約7,500ドルをAIに支出",
+        excerpt: "要点：TechCrunch は Ramp AI Index を引用し、AI支出上位1%の企業が1人あたり月約7,500ドル、上位10%が約611ドル、中位企業はわずか11.38ドルだと報じた。",
+        geoSummary: "出典：TechCrunch AI。Ramp AI Index は米国企業のAI支出が大きく分かれていることを示す。重度導入企業は給与級のソフトウェア予算に近づく一方、中位企業は低価格の座席費用程度にとどまる。",
+        keyTakeaways: [
+          "最もAIに投資する企業は、複数の frontier model と低コストな open-source モデルを組み合わせ、AIコスト管理をモデルポートフォリオ管理へ変えつつある。",
+          "中位企業は1人あたり月約11.38ドルにとどまり、重度AI企業の1人あたり支出は前月比14.1%増えた。"
+        ],
+        body: [
+          "TechCrunch は6月10日、Ramp AI Index の最新データを取り上げ、企業のAI支出が明確に階層化していると報じた。Ramp はAI支出上位1%の企業を AI-pilled firms と呼び、1人あたり月約7,500ドルをAIに使っていると推計している。",
+          "この金額は大きいが、TechCrunch は平均的なソフトウェアエンジニアの月額コスト約16,000ドルよりは低いと指摘している。重要なのは差だ。上位10%は1人あたり月約611ドル、中位企業は約11.38ドルにとどまる。",
+          "Ramp のデータでは、AI支出はまだ増加している。最もAIに投資する企業群では、1人あたり支出が前月に14.1%増えた。企業にとっては、AI調達、token cost、モデルの使い分け、オープンソース活用が運用判断になり始めている。"
+        ].join("\n\n")
+      },
+      ko: {
+        title: "Ramp 데이터: AI 집중 기업은 직원 1인당 월 약 7,500달러를 AI에 지출",
+        excerpt: "요약: TechCrunch는 Ramp AI Index를 인용해 AI 지출 상위 1% 기업이 직원 1인당 월 약 7,500달러를 쓰고, 상위 10%는 약 611달러, 중위 기업은 11.38달러에 그친다고 전했다.",
+        geoSummary: "출처: TechCrunch AI. Ramp AI Index는 미국 기업의 AI 지출이 크게 갈라지고 있음을 보여준다. 최상위 도입 기업은 급여 규모에 가까운 소프트웨어 예산을 쓰지만, 중위 기업은 저가 seat 비용 수준에 머문다.",
+        keyTakeaways: [
+          "AI를 가장 많이 쓰는 기업들은 여러 frontier model과 더 저렴한 open-source 모델을 섞어 쓰며, AI 비용 관리를 모델 포트폴리오 관리로 바꾸고 있다.",
+          "중위 기업은 직원 1인당 월 약 11.38달러에 그치며, AI 집중 기업의 1인당 지출은 지난달 14.1% 증가했다."
+        ],
+        body: [
+          "TechCrunch는 6월 10일 Ramp AI Index 데이터를 인용해 기업 AI 지출이 뚜렷하게 나뉘고 있다고 보도했다. Ramp는 AI 지출 상위 1% 기업을 AI-pilled firms라고 부르며, 이들이 직원 1인당 월 약 7,500달러를 AI에 쓴다고 추정했다.",
+          "이 금액은 크지만 TechCrunch는 평균 소프트웨어 엔지니어의 월 비용 약 16,000달러보다는 낮다고 설명했다. 더 중요한 신호는 격차다. 상위 10% 기업은 직원 1인당 월 약 611달러를 쓰는 반면, 중위 기업은 약 11.38달러만 쓴다.",
+          "Ramp 데이터에 따르면 AI 지출은 계속 증가하고 있다. 가장 적극적인 기업군의 1인당 AI 지출은 지난달 14.1% 늘었다. 운영자에게 이 수치는 단순 예산 뉴스가 아니라 AI 조달, token cost, 모델 조합, 오픈소스 대안이 운영 의사결정이 되고 있다는 신호다."
+        ].join("\n\n")
+      },
+      id: {
+        title: "Data Ramp: perusahaan paling agresif AI belanja sekitar $7.500 per karyawan per bulan",
+        excerpt: "Intinya: TechCrunch mengutip Ramp AI Index: 1% perusahaan paling agresif AI membelanjakan sekitar $7.500 per karyawan per bulan, 10% teratas sekitar $611, sementara median hanya $11,38.",
+        geoSummary: "Sumber: TechCrunch AI. Data Ramp AI Index menunjukkan belanja AI perusahaan AS makin timpang: adopter terberat mendekati skala biaya talenta software, sedangkan perusahaan median masih di level seat murah.",
+        keyTakeaways: [
+          "Pengguna AI paling berat cenderung menggabungkan beberapa frontier model dengan opsi open-source yang lebih murah, sehingga kontrol biaya AI berubah menjadi manajemen portofolio model.",
+          "Perusahaan median hanya membelanjakan sekitar $11,38 per karyawan per bulan; kelompok paling AI-heavy menaikkan belanja per karyawan 14,1% bulan lalu."
+        ],
+        body: [
+          "TechCrunch melaporkan pada 10 Juni bahwa data Ramp AI Index memperlihatkan belanja AI perusahaan mulai terbagi tajam. Ramp menyebut 1% perusahaan paling agresif sebagai AI-pilled firms dan memperkirakan mereka menghabiskan sekitar $7.500 per karyawan per bulan untuk AI.",
+          "Angka itu besar, tetapi TechCrunch mencatat masih di bawah biaya rata-rata software engineer sekitar $16.000 per bulan. Sinyal yang lebih penting adalah jurangnya: 10% teratas menghabiskan sekitar $611 per karyawan per bulan, sementara perusahaan median hanya sekitar $11,38.",
+          "Ramp juga menunjukkan belanja masih naik. Di kelompok paling AI-heavy, belanja AI per karyawan tumbuh 14,1% bulan lalu. Bagi operator, ini bukan sekadar berita anggaran, tetapi tanda bahwa procurement AI, token cost, kombinasi model, dan alternatif open source menjadi keputusan operasional."
+        ].join("\n\n")
+      },
+      vi: {
+        title: "Dữ liệu Ramp: nhóm công ty dùng AI mạnh nhất chi khoảng 7.500 USD mỗi nhân viên mỗi tháng",
+        excerpt: "Tóm lại: TechCrunch dẫn Ramp AI Index cho biết 1% công ty chi mạnh nhất cho AI tốn khoảng 7.500 USD mỗi nhân viên mỗi tháng, top 10% khoảng 611 USD, còn median chỉ 11,38 USD.",
+        geoSummary: "Nguồn: TechCrunch AI. Dữ liệu Ramp AI Index cho thấy chi tiêu AI của doanh nghiệp Mỹ phân hóa mạnh: nhóm dùng nặng tiến gần quy mô ngân sách nhân sự phần mềm, còn doanh nghiệp trung vị vẫn ở mức seat giá thấp.",
+        keyTakeaways: [
+          "Nhóm dùng AI nặng thường phối hợp nhiều frontier model với lựa chọn open-source rẻ hơn, biến kiểm soát chi phí AI thành bài toán quản trị danh mục model.",
+          "Doanh nghiệp trung vị chỉ chi khoảng 11,38 USD mỗi nhân viên mỗi tháng; nhóm AI-heavy tăng chi tiêu mỗi nhân viên 14,1% trong tháng trước."
+        ],
+        body: [
+          "TechCrunch ngày 10/6 dẫn dữ liệu Ramp AI Index cho thấy chi tiêu AI của doanh nghiệp đang tách thành nhiều tầng rất xa nhau. Ramp gọi top 1% công ty đầu tư AI mạnh nhất là AI-pilled firms và ước tính họ chi khoảng 7.500 USD mỗi nhân viên mỗi tháng cho AI.",
+          "Con số này lớn, nhưng TechCrunch lưu ý nó vẫn thấp hơn mức khoảng 16.000 USD mỗi tháng của một software engineer trung bình. Tín hiệu quan trọng hơn là khoảng cách: top 10% chi khoảng 611 USD mỗi nhân viên mỗi tháng, trong khi doanh nghiệp trung vị chỉ khoảng 11,38 USD.",
+          "Ramp cũng cho thấy chi tiêu vẫn tăng. Trong nhóm AI-heavy nhất, chi tiêu AI mỗi nhân viên tăng 14,1% trong tháng trước. Với đội vận hành, đây không chỉ là tin ngân sách; procurement AI, token cost, phối hợp nhiều model và lựa chọn open source đang trở thành quyết định vận hành."
+        ].join("\n\n")
+      },
+      th: {
+        title: "ข้อมูล Ramp ชี้บริษัทที่ใช้ AI หนักจ่ายราว $7,500 ต่อพนักงานต่อเดือน",
+        excerpt: "สรุปสั้น ๆ: TechCrunch อ้าง Ramp AI Index ว่าบริษัท top 1% ที่ใช้ AI หนักจ่ายราว $7,500 ต่อพนักงานต่อเดือน, top 10% ราว $611 ส่วน median อยู่เพียง $11.38",
+        geoSummary: "แหล่งข่าว: TechCrunch AI ข้อมูล Ramp AI Index ชี้ว่าการใช้จ่าย AI ของธุรกิจสหรัฐฯ แยกชั้นชัด กลุ่มที่ใช้หนักเข้าใกล้งบ software ระดับเงินเดือน ส่วนบริษัท median ยังอยู่แค่ระดับ seat ราคาถูก",
+        keyTakeaways: [
+          "กลุ่มที่ใช้ AI หนักมักผสม frontier model หลายตัวกับตัวเลือก open-source ที่ถูกกว่า ทำให้การคุมต้นทุน AI กลายเป็นการบริหาร model portfolio",
+          "บริษัท median ใช้จ่ายเพียงราว $11.38 ต่อพนักงานต่อเดือน ขณะที่กลุ่ม AI-heavy เพิ่ม spend ต่อคน 14.1% ในเดือนก่อน"
+        ],
+        body: [
+          "TechCrunch รายงานเมื่อ 10 มิ.ย. โดยอ้างข้อมูล Ramp AI Index ว่าการใช้จ่าย AI ขององค์กรเริ่มแบ่งเป็นหลายชั้นชัดเจน Ramp เรียกบริษัท top 1% ที่ทุ่ม AI หนักว่า AI-pilled firms และประเมินว่าจ่ายราว $7,500 ต่อพนักงานต่อเดือน",
+          "ตัวเลขนี้สูง แต่ TechCrunch เทียบว่ายังต่ำกว่าค่าใช้จ่าย software engineer เฉลี่ยราว $16,000 ต่อเดือน สัญญาณสำคัญคือช่องว่าง top 10% จ่ายราว $611 ต่อพนักงานต่อเดือน ส่วนบริษัท median จ่ายเพียงราว $11.38",
+          "ข้อมูล Ramp ยังบอกว่า spend ยังเพิ่มขึ้น ในกลุ่มที่ใช้ AI หนักที่สุด การใช้จ่าย AI ต่อพนักงานโต 14.1% ในเดือนก่อน สำหรับทีมบริหาร นี่ไม่ใช่แค่ข่าวงบประมาณ แต่เป็นสัญญาณว่า AI procurement, token cost, model mix และทางเลือก open source กำลังกลายเป็นการตัดสินใจเชิงปฏิบัติการ"
+        ].join("\n\n")
+      },
+      ms: {
+        title: "Data Ramp: firma paling berat AI belanja sekitar $7,500 setiap pekerja sebulan",
+        excerpt: "Ringkasnya: TechCrunch memetik Ramp AI Index bahawa 1% firma paling berat AI membelanjakan sekitar $7,500 setiap pekerja sebulan, 10% teratas sekitar $611, manakala median hanya $11.38.",
+        geoSummary: "Sumber: TechCrunch AI. Data Ramp AI Index menunjukkan perbelanjaan AI syarikat AS semakin berpecah: pengguna terberat menghampiri skala kos bakat software, sementara firma median masih pada tahap seat murah.",
+        keyTakeaways: [
+          "Pengguna AI paling berat cenderung mencampurkan beberapa frontier model dengan pilihan open-source yang lebih murah, menjadikan kawalan kos AI sebagai pengurusan portfolio model.",
+          "Firma median membelanjakan hanya sekitar $11.38 setiap pekerja sebulan; firma paling AI-heavy menaikkan perbelanjaan setiap pekerja 14.1% bulan lalu."
+        ],
+        body: [
+          "TechCrunch melaporkan pada 10 Jun bahawa data Ramp AI Index menunjukkan perbelanjaan AI perusahaan semakin berlapis. Ramp memanggil 1% firma paling agresif sebagai AI-pilled firms dan menganggarkan mereka membelanjakan sekitar $7,500 setiap pekerja sebulan untuk AI.",
+          "Angka itu besar, tetapi TechCrunch menyatakan ia masih lebih rendah daripada kos purata software engineer sekitar $16,000 sebulan. Isyarat yang lebih penting ialah jurang: 10% teratas membelanjakan sekitar $611 setiap pekerja sebulan, sementara firma median hanya sekitar $11.38.",
+          "Ramp juga menunjukkan perbelanjaan masih meningkat. Dalam kumpulan paling AI-heavy, perbelanjaan AI setiap pekerja meningkat 14.1% bulan lalu. Bagi operator, ini bukan sekadar berita bajet; procurement AI, token cost, gabungan model dan alternatif open source sudah menjadi keputusan operasi."
+        ].join("\n\n")
+      },
+      fil: {
+        title: "Ramp data: ang pinaka-AI-heavy na kumpanya ay gumagastos ng humigit-kumulang $7,500 bawat empleyado buwan-buwan",
+        excerpt: "Sa madaling sabi: ayon sa TechCrunch at Ramp AI Index, ang top 1% AI-heavy firms ay gumagastos ng humigit-kumulang $7,500 bawat empleyado bawat buwan, top 10% ay $611, at median firm ay $11.38 lang.",
+        geoSummary: "Source: TechCrunch AI. Ipinapakita ng Ramp AI Index na malaki ang hati sa AI spending ng U.S. businesses: ang heaviest adopters ay lumalapit sa salary-scale software budgets, habang ang median firm ay nasa low-cost seat spending pa rin.",
+        keyTakeaways: [
+          "Ang pinaka-heavy AI users ay madalas maghalo ng maraming frontier models at mas murang open-source options, kaya nagiging model-portfolio management ang AI cost control.",
+          "Ang median firm ay gumagastos lang ng humigit-kumulang $11.38 bawat empleyado bawat buwan; ang AI-heavy firms ay nagtaas pa ng per-employee spend ng 14.1% noong nakaraang buwan."
+        ],
+        body: [
+          "Iniulat ng TechCrunch noong Hunyo 10 na ipinapakita ng Ramp AI Index ang malinaw na paghihiwalay ng enterprise AI spending. Tinatawag ng Ramp na AI-pilled firms ang top 1% ng AI-heavy companies at tinatayang gumagastos sila ng humigit-kumulang $7,500 bawat empleyado bawat buwan sa AI.",
+          "Malaki ang numerong iyon, pero sinabi ng TechCrunch na mas mababa pa rin ito kaysa humigit-kumulang $16,000 buwanang halaga ng average software engineer. Mas mahalaga ang gap: ang top 10% ay nasa humigit-kumulang $611 bawat empleyado bawat buwan, habang ang median firm ay nasa $11.38 lang.",
+          "Ayon sa Ramp, tumataas pa rin ang spending. Sa pinaka-AI-heavy firms, lumaki ng 14.1% ang per-employee AI spend noong nakaraang buwan. Para sa operators, hindi lang ito budget trivia; AI procurement, token cost, model mix at open-source alternatives ay nagiging tunay na operating decisions."
+        ].join("\n\n")
+      }
+    }
+  },
   "tg-market-2026-06-11-01-from-data-to-decisions-how-lseg-is-scaling-trusted-ai": {
     source: {
       title: "From data to decisions: how LSEG is scaling trusted AI",
@@ -773,6 +1214,9 @@ function repairPost(post, repair) {
   const body = normalizePublicCopy(localized.body);
   const keyTakeaways = localized.keyTakeaways.map((takeaway) => normalizePublicCopy(takeaway));
   const seoDescription = normalizeSeoDescription(localized, keyTakeaways, geoSummary);
+  const tags = [labels.category, ...(repair.shared.tags || ["AI", "OpenAI", repair.shared.topic.split("/")[1]?.trim() || repair.shared.topic.split("/")[0]?.trim()])]
+    .filter(Boolean)
+    .filter((tag, index, items) => items.indexOf(tag) === index);
   return {
     ...post,
     title,
@@ -785,7 +1229,7 @@ function repairPost(post, repair) {
     faqs: [],
     sourceLinks: sourceLinksFor(repair),
     topic: repair.shared.topic,
-    tags: [labels.category, "AI", "OpenAI", repair.shared.topic.split("/")[1]?.trim() || repair.shared.topic.split("/")[0]?.trim()].filter(Boolean),
+    tags,
     cover: repair.shared.cover,
     coverSource: "source",
     coverCredit: repair.shared.coverCredit,
