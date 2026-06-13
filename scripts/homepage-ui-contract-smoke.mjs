@@ -14,6 +14,7 @@ function read(file) {
 const route = read("app/route.ts");
 const agents = read("AGENTS.md");
 const index = read("index.html");
+const siteHeader = read("components/site/SiteHeader.tsx");
 const contactForm = read("components/ContactForm.tsx");
 const contactRoute = read("app/api/contact/route.ts");
 const contactNotification = read("lib/contact-notification.ts");
@@ -44,6 +45,22 @@ assert(
     index.includes("if (element.textContent !== label) element.textContent = label"),
   "homepage header language enhancer avoids repeated textContent mutations"
 );
+
+for (const html of [index, publicHomepage].filter(Boolean)) {
+  assert(html.includes("children:`合作洽談 ↗`"), "homepage raw header CTA keeps the designer-approved cooperation label");
+  assert(html.includes("children:`開始合作 ↗`"), "homepage raw hero CTA keeps the original start-project label");
+  assert(html.includes('cta.textContent = "合作洽談 ↗"'), "homepage fallback CTA keeps the designer-approved cooperation label");
+  assert(html.includes('cta: "合作洽談 ↗"'), "homepage zh-Hant header CTA copy does not get overwritten by unrelated wording");
+  assert(html.includes('mobileCta: "合作洽談 ↗"'), "homepage zh-Hant mobile CTA copy does not get overwritten by unrelated wording");
+  assert(!html.includes('cta: "預約討論 ↗"'), "homepage CTA copy must not be changed to unapproved booking wording");
+  assert(!html.includes('mobileCta: "預約討論 ↗"'), "homepage mobile CTA copy must not be changed to unapproved booking wording");
+  assert(!html.includes('"zh-Hant": "預約討論 ↗"'), "homepage copy aliases must not rewrite approved CTA labels");
+}
+
+assert(siteHeader.includes('"合作洽談"'), "React site header zh-Hant CTA uses the designer-approved cooperation label");
+assert(siteHeader.includes('"Talk"'), "React site header English CTA uses the designer-approved short label");
+assert(!siteHeader.includes('"預約討論"'), "React site header does not expose unapproved booking wording");
+assert(!siteHeader.includes('"Book a Call"'), "React site header does not replace the designer-provided short English CTA");
 
 if (publicHomepage) {
   for (const marker of ["<div id=\"root\"></div>", "children:`ALTOS`", "children:`LAB`"]) {

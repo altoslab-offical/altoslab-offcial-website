@@ -53,6 +53,8 @@ Forbidden homepage wrapper changes:
 
 The protected markers are `<div id="root"></div>`, `fixed top-0`, `children:\`ALTOS\``, and `children:\`LAB\``. `scripts/homepage-ui-contract-smoke.mjs` enforces this contract, including the no request-time Cloudflare rewrite rule, and is part of `npm run test`.
 
+Homepage CTA copy is also protected: the visible header/contact CTA must stay `合作洽談 ↗` in Traditional Chinese, the hero CTA must stay `開始合作 ↗`, and the React header English fallback must stay `Talk` unless a fresh designer-approved source changes it. Do not rewrite CTA copy as part of UI or automation cleanup.
+
 ## Active Next App Areas
 
 These areas use the normal Next App Router surfaces and global CSS:

@@ -110,6 +110,7 @@ Rules:
 Buttons:
 
 - Primary: lime fill, black text, compact arrow icon.
+- Homepage header/contact CTA copy: Traditional Chinese `合作洽談 ↗`; React header English fallback `Talk`. The hero primary CTA remains `開始合作 ↗`.
 - Secondary: transparent/dark surface with subtle border, light text.
 - Hover: small brightness or border shift, 150-200ms.
 - Focus: visible lime ring.
@@ -213,6 +214,7 @@ Protected homepage markers:
 - `fixed top-0`
 - `children:\`ALTOS\``
 - `children:\`LAB\``
+- visible CTA copy `合作洽談 ↗` for header/contact and `開始合作 ↗` for the hero action
 
 Any intentional homepage redesign requires Tommy approval, before/after desktop and mobile screenshots, updates to `SPEC.md`, `DESIGN.md`, `docs/FRONTEND_ARCHITECTURE.md`, and a same-change update to `scripts/homepage-ui-contract-smoke.mjs`.
 

@@ -72,6 +72,7 @@ Forbidden changes:
 Required invariants:
 
 - The homepage HTML must retain `<div id="root"></div>`, `fixed top-0`, `children:\`ALTOS\``, and `children:\`LAB\``.
+- The visible homepage header/contact CTA must keep the designer handoff wording `合作洽談 ↗` in Traditional Chinese and `Talk` in the React header fallback. The hero CTA remains `開始合作 ↗`. Do not rewrite these labels to unrelated booking wording without a fresh designer-approved source.
 - `npm run test:homepage` must pass before deploy.
 - After deploy, live `/` must return a full homepage HTML body, not a partial header-only response and not Cloudflare Error 1102.
 
