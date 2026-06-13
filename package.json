@@ -45,6 +45,7 @@
     "blog:ops-audit": "node scripts/blog-operations-audit.mjs",
     "blog:daily-closeout": "node scripts/blog-daily-closeout.mjs",
     "blog:column-worklist": "node scripts/blog-column-production-worklist.mjs",
+    "gmail:token": "node scripts/gmail-oauth-token.mjs",
     "n8n:verify-local": "scripts/verify-n8n-local-control-plane.sh"
   },
   "dependencies": {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Send } from "lucide-react";
 import { sendAnalyticsEvent } from "@/components/AnalyticsEvents";
 
@@ -12,6 +12,7 @@ type ContactFormLabels = {
 };
 
 export function ContactForm({ labels = {} }: { labels?: ContactFormLabels }) {
+  const formRef = useRef<HTMLFormElement>(null);
   const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
   const [message, setMessage] = useState("");
 
@@ -37,12 +38,13 @@ export function ContactForm({ labels = {} }: { labels?: ContactFormLabels }) {
     }
 
     setStatus("sent");
-    setMessage("已收到需求，我們會盡快回覆。");
+    setMessage("需求已送出，我們已收到你的合作需求，會盡快透過你留下的聯絡方式回覆。");
+    formRef.current?.reset();
     sendAnalyticsEvent({ event: "lead_created", page_path: window.location.pathname });
   }
 
   return (
-    <form action={submit} className="contact-form">
+    <form ref={formRef} action={submit} className="contact-form">
       <label>
         <span>{labels.who || "公司 / 團隊 / 姓名"}</span>
         <input name="who" required placeholder="公司 / 團隊 / 你的名字" />
@@ -59,7 +61,12 @@ export function ContactForm({ labels = {} }: { labels?: ContactFormLabels }) {
         <Send size={16} />
         {status === "sending" ? "送出中" : labels.submit || "送出需求"}
       </button>
-      {message ? <p className={`form-message ${status}`}>{message}</p> : null}
+      {message ? (
+        <div className={`form-message ${status}`} role={status === "error" ? "alert" : "status"} aria-live="polite">
+          {status === "sent" ? <strong>已送出</strong> : null}
+          <span>{message}</span>
+        </div>
+      ) : null}
     </form>
   );
 }

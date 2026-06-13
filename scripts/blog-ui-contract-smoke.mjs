@@ -60,6 +60,8 @@ for (const pathname of indexPaths) {
   assert(response.status === 200, `${pathname} direct Cloudflare index renderer returns 200`);
   assert(response.headers.get("x-altos-direct-blog-render") === "cloudflare-d1-index", `${pathname} uses the direct D1 index renderer`);
   assert(html.includes("blog-craft-index") && html.includes("blog-craft-layout") && html.includes("blog-craft-card"), `${pathname} preserves Blog Craft UI classes`);
+  assert(html.includes("site-mobile-menu-trigger") && html.includes("site-mobile-menu"), `${pathname} direct renderer includes the restored mobile header menu`);
+  assert(html.includes("site-language-menu") && html.includes("role=\"menuitemradio\""), `${pathname} direct renderer includes the full blog language menu`);
   assert(!html.includes("blog-lite-shell") && !html.includes("blog-lite-card"), `${pathname} does not fall back to the old lite UI`);
 }
 
@@ -68,6 +70,7 @@ for (const forbidden of ["BLOG_INDEX_PAGE_SIZE =", "blog-lite-shell", "blog-lite
   assert(!directWorker.includes(forbidden), `Cloudflare direct renderer must not contain ${forbidden}`);
 }
 assert(directWorker.includes("readIndexPosts") && directWorker.includes("cloudflare-d1-index"), "Cloudflare direct renderer has the Worker-safe Blog index path");
+assert(directWorker.includes("headerLanguageMenuHtml") && directWorker.includes("site-mobile-menu-trigger"), "Cloudflare direct renderer keeps the designer handoff header contract");
 
 const blogIndex = read("components/BlogIndex.tsx");
 for (const marker of ["blog-craft-index", "blog-craft-layout", "blog-craft-sidebar", "blog-craft-feed", "blog-craft-card"]) {

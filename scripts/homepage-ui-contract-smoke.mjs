@@ -13,6 +13,9 @@ function read(file) {
 
 const route = read("app/route.ts");
 const index = read("index.html");
+const contactForm = read("components/ContactForm.tsx");
+const contactRoute = read("app/api/contact/route.ts");
+const contactNotification = read("lib/contact-notification.ts");
 const publicHomepage = fs.existsSync(new URL("../public/altoslab-homepage.html", import.meta.url))
   ? read("public/altoslab-homepage.html")
   : "";
@@ -35,10 +38,22 @@ for (const marker of ["<div id=\"root\"></div>", "fixed top-0", "children:`ALTOS
   assert(index.includes(marker), `index.html keeps original homepage marker ${marker}`);
 }
 
+assert(
+  index.includes("function setElementText(element, label)") &&
+    index.includes("if (element.textContent !== label) element.textContent = label"),
+  "homepage header language enhancer avoids repeated textContent mutations"
+);
+
 if (publicHomepage) {
   for (const marker of ["<div id=\"root\"></div>", "children:`ALTOS`", "children:`LAB`"]) {
     assert(publicHomepage.includes(marker), `Cloudflare homepage asset keeps original homepage marker ${marker}`);
   }
+
+  assert(
+    publicHomepage.includes("function setElementText(element, label)") &&
+      publicHomepage.includes("if (element.textContent !== label) element.textContent = label"),
+    "Cloudflare homepage header enhancer avoids repeated textContent mutations"
+  );
 }
 
 assert(route.includes("CLOUDFLARE_HOMEPAGE_ASSET = \"/altoslab-homepage\""), "homepage route reads the Cloudflare homepage asset");
@@ -51,6 +66,13 @@ if (publicHomepage) {
   assert(publicHomepage.includes("id=\"wonda-ai-widget\""), "Cloudflare homepage asset includes the WonDa widget script");
   assert(publicHomepage.includes("data-channel-id=\"cmqb6hynd002hs619tqxc3pe5\""), "Cloudflare homepage asset uses the configured WonDa channel id");
 }
+
+assert(contactForm.includes("formRef.current?.reset()"), "contact form resets only after a successful submit");
+assert(contactForm.includes("已送出"), "contact success state uses the designer-approved heading");
+assert(contactForm.includes("我們已收到你的合作需求"), "contact success state uses the designer-approved message");
+assert(contactRoute.includes("sendContactLeadNotification"), "contact API attempts the Gmail notification after saving the lead");
+assert(contactNotification.includes("multipart/alternative"), "contact Gmail notification sends multipart text and HTML email");
+assert(contactNotification.includes("missing-env"), "contact Gmail notification fails open when Gmail env is not configured");
 
 for (const file of ["SPEC.md", "DESIGN.md", "docs/FRONTEND_ARCHITECTURE.md"]) {
   assert(read(file).includes("Homepage UI Stability Contract"), `${file} documents the Homepage UI Stability Contract`);

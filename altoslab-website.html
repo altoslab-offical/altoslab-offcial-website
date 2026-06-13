@@ -4233,34 +4233,809 @@ void main() {
         window.addEventListener("load", enhanceProductModal);
       })();
     </script>
+    <script>
+      (() => {
+        const headerLinks = [
+          { href: "#about", label: "關於我們" },
+          { href: "#services", label: "服務項目" },
+          { href: "#portfolio", label: "專案介紹" },
+          { href: "/blog", label: "Blog" }
+        ];
+        const storageKey = "altoslab:language";
+        const languageEvent = "altoslab:languagechange";
+        const siteLanguages = [
+          { value: "zh-Hant", label: "繁體中文", shortLabel: "中文" },
+          { value: "en", label: "English", shortLabel: "EN" }
+        ];
+        const languageOptionCopy = {
+          "zh-Hant": {
+            "zh-Hant": { label: "繁體中文", shortLabel: "中文" },
+            en: { label: "English", shortLabel: "EN" }
+          },
+          en: {
+            "zh-Hant": { label: "Traditional Chinese", shortLabel: "ZH" },
+            en: { label: "English", shortLabel: "EN" }
+          }
+        };
+        const languageCopy = {
+          "zh-Hant": {
+            headerLinks: ["關於我們", "服務項目", "專案介紹", "Blog"],
+            mobileLinks: {
+              "#about": "關於",
+              "#services": "服務",
+              "#portfolio": "專案介紹",
+              "#contact": "聯絡"
+            },
+            cta: "預約討論 ↗",
+            mobileCta: "預約討論 ↗"
+          },
+          en: {
+            headerLinks: ["About", "Services", "Work", "Blog"],
+            mobileLinks: {
+              "#about": "About",
+              "#services": "Services",
+              "#portfolio": "Work",
+              "#contact": "Contact"
+            },
+            cta: "Book a Call ↗",
+            mobileCta: "Start a Project ↗"
+          }
+        };
+        const pageCopyMeta = {
+          "zh-Hant": {
+            title: "ALTOS LAB｜企業 AI 系統、Agent 與自動化工作室",
+            description: "ALTOS LAB 協助企業把 AI Agent、知識庫、流程自動化、客服與內容系統落地成可營運的產品能力。"
+          },
+          en: {
+            title: "ALTOS LAB | AI Systems, Agents, and Automation Studio",
+            description: "ALTOS LAB builds practical AI agents, knowledge systems, workflow automation, customer support, and content operations for businesses."
+          }
+        };
+        const contentCopyEntries = [
+          { aliases: ["合作洽談 ↗"], "zh-Hant": "預約討論 ↗", en: "Book a Call ↗" },
+          { aliases: ["開始合作 ↗"], "zh-Hant": "預約討論 ↗", en: "Start a Project ↗" },
+          { aliases: ["了解更多 ↓"], "zh-Hant": "了解服務 ↓", en: "Learn More ↓" },
+          { aliases: ["AI Studio · 人工智慧工作室"], "zh-Hant": "AI Studio · 企業 AI 工作室", en: "AI Studio · Applied AI Systems" },
+          { aliases: ["打造下一代 AI 技能與智能代理，整合系統、自動化流程，"], "zh-Hant": "打造可落地的 AI 技能、智能代理與自動化流程，", en: "We design practical AI skills, agents, and workflow automation" },
+          { aliases: ["協助各類企業釋放人工智慧的真實潛力。"], "zh-Hant": "讓 AI 直接進入客服、營運、內容與決策場景。", en: "so AI can operate inside support, operations, content, and decision workflows." },
+          { aliases: ["專案交付"], "zh-Hant": "已交付專案", en: "Projects Shipped" },
+          { aliases: ["系統整合"], "zh-Hant": "系統串接", en: "Systems Integrated" },
+          { aliases: ["互聯網經驗"], "zh-Hant": "產品與 AI 經驗", en: "Product + AI Experience" },
+          { aliases: ["About · 關於我們"], "zh-Hant": "About · 關於 ALTOS LAB", en: "About · ALTOS LAB" },
+          { aliases: ["ALTOS LAB 擁有一支經驗豐富的跨領域團隊， 深耕互聯網產品開發與 AI 系統整合， 深度參與過多個大型平台從 0 到 1 的完整建構過程。"], "zh-Hant": "ALTOS LAB 是一支結合產品、工程、AI 系統與營運經驗的實作團隊，長期參與互聯網平台從 0 到 1 的規劃、開發與上線。", en: "ALTOS LAB is a hands-on team across product, engineering, AI systems, and operations, with deep experience taking internet platforms from zero to launch." },
+          { aliases: ["我們將前沿的 AI 技術與深厚的系統整合能力結合， 為各類企業提供從策略規劃到落地部署的完整 AI 解決方案， 幫助客戶在智能化浪潮中建立真實競爭優勢。"], "zh-Hant": "我們把前沿 AI 能力接進既有工具、資料與流程，從策略盤點、MVP 設計到部署維運，協助團隊建立真正能持續使用的 AI 能力。", en: "We connect frontier AI capabilities to existing tools, data, and workflows, moving from strategy and MVP design to deployment, iteration, and daily operations." },
+          { aliases: ["Services · 服務項目"], "zh-Hant": "Services · 我們能協助", en: "Services · What We Build" },
+          { aliases: ["AI Skill 開發"], "zh-Hant": "AI Skill 與知識庫建置", en: "AI Skills and Knowledge Systems" },
+          { aliases: ["針對業務場景量身打造高效能 AI 技能模組，讓您的工作流程更智能、更自動化。從需求分析到模型調優，全程護航交付。"], "zh-Hant": "把客服、銷售、營運 SOP 與產品知識整理成可查詢、可回答、可追蹤品質的 AI 技能與知識庫。", en: "We turn support, sales, operations SOPs, and product knowledge into AI skills that can answer, retrieve, and be quality-tracked." },
+          { aliases: ["AI Agent 製作"], "zh-Hant": "AI Agent 與流程自動化", en: "AI Agents and Workflow Automation" },
+          { aliases: ["設計並部署能夠自主完成複雜任務的智能代理，多 Agent 協作架構，覆蓋從簡單自動化到高度複雜的決策場景。"], "zh-Hant": "串接表單、CRM、試算表、內部 API 與通知工具，讓 AI 依規則執行任務，而不是只停留在回答問題。", en: "We connect forms, CRMs, spreadsheets, internal APIs, and notification tools so agents can execute governed tasks, not just answer questions." },
+          { aliases: ["系統整合與串接"], "zh-Hant": "系統整合與 API 串接", en: "System Integration and APIs" },
+          { aliases: ["豐富的互聯網系統整合實戰經驗，無縫串接 ERP、CRM、資料庫、第三方 API，讓 AI 真正融入既有業務架構。"], "zh-Hant": "整合 ERP、CRM、資料庫、第三方 API 與內部工具，讓 AI 能安全地讀取資料、觸發流程並回寫結果。", en: "We integrate ERPs, CRMs, databases, third-party APIs, and internal tools so AI can safely read data, trigger workflows, and write back results." },
+          { aliases: ["AI 策略顧問"], "zh-Hant": "AI 導入策略與 MVP 規劃", en: "AI Strategy and MVP Planning" },
+          { aliases: ["從企業視角評估 AI 導入機會，規劃技術路線圖，確保投資方向精準，幫助客戶在智能化浪潮中建立差異化優勢。"], "zh-Hant": "從業務目標、資料成熟度、風險與可衡量指標出發，規劃最小可行的 AI 導入路線圖。", en: "We assess business goals, data readiness, risks, and measurable outcomes to define the smallest useful AI roadmap." },
+          { aliases: ["Portfolio · 專案介紹"], "zh-Hant": "Portfolio · 實作案例", en: "Portfolio · Selected Work" },
+          { aliases: ["點擊任一作品"], "zh-Hant": "點擊案例", en: "Click any project" },
+          { aliases: ["查看完整介紹"], "zh-Hant": "查看完整細節", en: "View the full case" },
+          { aliases: ["Why Us · 為何選擇"], "zh-Hant": "Why Us · 為什麼是 ALTOS LAB", en: "Why ALTOS LAB" },
+          { aliases: ["深厚的互聯網實戰背景"], "zh-Hant": "懂產品，也懂系統落地", en: "Product-minded, systems-ready" },
+          { aliases: ["我們在 AI 之前，就已深度參與互聯網產品的設計、開發與規模化，理解系統的複雜性與商業的現實挑戰。"], "zh-Hant": "我們不是只做 AI demo；我們熟悉產品規劃、資料流、權限、部署與維運，知道系統要怎麼被團隊長期使用。", en: "We do not stop at AI demos. We understand product planning, data flows, permissions, deployment, and operations, so the system can be used after launch." },
+          { aliases: ["AI 系統整合的核心能力"], "zh-Hant": "先理解流程，再選擇模型", en: "Workflow first, model second" },
+          { aliases: ["不只是調用 API，而是真正將 AI 融入業務流程。從架構設計到部署監控，我們提供完整的工程深度。"], "zh-Hant": "先盤點決策、資料、權限與輸出格式，再決定模型、工具與自動化深度，避免做出無法營運的 AI 專案。", en: "We map decisions, data, permissions, and output formats before choosing models and tools, avoiding AI projects that cannot operate in the real workflow." },
+          { aliases: ["以成果為導向"], "zh-Hant": "以可衡量成果為交付標準", en: "Measured by business outcomes" },
+          { aliases: ["我們不追求技術炫耀，而是聚焦於可量化的業務成果。每個解決方案都以降本增效為核心目標。"], "zh-Hant": "每個 AI 系統都要能追蹤準確率、節省工時、轉換率或內容曝光，讓投資成效可以持續優化。", en: "Every AI system needs measurable signals: accuracy, saved hours, conversion lift, content visibility, or another metric the team can keep improving." },
+          { aliases: ["Team · 我們的團隊"], "zh-Hant": "Team · 實作團隊", en: "Team · Builders and Operators" },
+          { aliases: ["完整開發團隊"], "zh-Hant": "產品工程團隊", en: "Product Engineering Team" },
+          { aliases: ["我們擁有完整的軟體開發團隊，涵蓋後端架構、前端工程、系統整合與 DevOps，具備從需求分析到上線部署的全流程交付能力，確保每個 AI 產品都能穩健落地、持續迭代。"], "zh-Hant": "涵蓋後端架構、前端工程、系統整合與 DevOps，能從需求拆解一路交付到上線、監控與迭代。", en: "Backend architecture, frontend engineering, system integration, and DevOps come together so each AI product can ship, run, and keep improving." },
+          { aliases: ["AI 智能行銷團隊"], "zh-Hant": "AI 內容與成長團隊", en: "AI Content and Growth Team" },
+          { aliases: ["我們配備專業的 AI 智能行銷團隊，整合數據分析、自動化投放與生成式 AI 內容能力，協助客戶精準觸達目標受眾、提升轉換效率，將 AI 技術直接轉化為可量化的行銷成效。"], "zh-Hant": "結合資料分析、內容系統、搜尋能見度與自動化發佈流程，協助品牌把 AI 能力轉成可持續的成長機制。", en: "Data analysis, content systems, search visibility, and automated publishing help brands turn AI capability into a repeatable growth engine." },
+          { aliases: ["Contact · 聯絡我們"], "zh-Hant": "Contact · 合作洽談", en: "Contact · Start a Conversation" },
+          { aliases: ["概述"], "zh-Hant": "概覽", en: "Overview" },
+          { aliases: ["執行細節"], "zh-Hant": "實作細節", en: "Implementation Details" },
+          { aliases: ["成效指標"], "zh-Hant": "成效指標", en: "Impact Metrics" },
+          { aliases: ["前往網站"], "zh-Hant": "前往網站", en: "Visit Website" },
+          { aliases: ["YOUTUBE URL 待設定"], "zh-Hant": "YouTube URL 待設定", en: "YouTube URL pending" },
+          { aliases: ["YouTube · 影片介紹"], "zh-Hant": "YouTube · 影片介紹", en: "YouTube · Video Overview" },
+          { aliases: ["WonDa AI 智慧客服平台"], "zh-Hant": "WonDa AI 智慧客服平台", en: "WonDa AI Customer Support Platform" },
+          { aliases: ["WonDa AI 是一個「會成長的 AI 客服平台」。上傳知識庫、設定個性、嵌入網站，三步驟即可讓 AI 從每次對話中學習，越用越聰明，14 天免費試用不需信用卡。"], "zh-Hant": "WonDa AI 是一套會持續成長的 AI 客服平台。上傳知識庫、設定品牌語氣、嵌入網站後，就能讓客服 AI 在每次對話中累積更好的回答。", en: "WonDa AI is a customer support platform that improves over time. Upload a knowledge base, set the brand voice, embed it on a website, and let support AI learn from every conversation." },
+          { aliases: ["平台核心採用知識圖譜 + RAG 架構，AI 能精準理解文件間的關聯脈絡，搭配智慧對話引擎進行向量搜尋與關鍵字匹配，找出最準確的答案。遇到複雜問題時可自動偵測並無縫轉接真人客服，同時將每次對話的優質回應回寫進知識庫，讓 AI 持續成長。支援一鍵嵌入任意網站，提供多語系界面（繁中／English），部署於 Google Cloud Run 確保高可用性與自動擴展。"], "zh-Hant": "核心採用知識圖譜與 RAG 架構，結合向量搜尋、關鍵字比對與真人轉接。優質回覆可回寫知識庫，並支援多語介面與 Cloud Run 部署。", en: "The platform combines knowledge graphs, RAG, vector search, keyword matching, and human handoff. High-quality answers can be written back to the knowledge base, with multilingual UI and Cloud Run deployment." },
+          { aliases: ["企業流程自動化平台"], "zh-Hant": "企業流程自動化平台", en: "Enterprise Workflow Automation Platform" },
+          { aliases: ["針對製造業客戶設計的端到端 AI 工作流自動化系統，串接 ERP、CRM 與生產系統，透過 AI Agent 自動處理報表生成、異常偵測與排程優化，節省 60% 作業時間。"], "zh-Hant": "為製造業客戶設計端到端 AI 工作流，串接 ERP、CRM 與生產系統，讓 Agent 自動處理報表、異常偵測與排程優化。", en: "An end-to-end AI workflow system for manufacturing teams, connecting ERP, CRM, and production systems so agents can generate reports, detect anomalies, and optimize schedules." },
+          { aliases: ["平台導入 Process Mining 技術，先行分析現有流程瓶頸，再針對性部署 AI Agent。支援視覺化流程設計器，讓業務人員無需寫程式即可調整自動化規則。異常偵測模組採即時串流分析，平均提前 4 小時預警生產異常，大幅降低停機損失。"], "zh-Hant": "先用 Process Mining 分析流程瓶頸，再部署對應 Agent。視覺化流程設計器讓業務團隊能調整規則，異常偵測則以串流分析提前預警。", en: "Process mining identifies workflow bottlenecks before agents are deployed. A visual workflow designer lets business teams adjust rules, while streaming anomaly detection provides earlier warnings." },
+          { aliases: ["GEO Hero AI 能見度平台"], "zh-Hant": "GEO Hero AI 能見度平台", en: "GEO Hero AI Visibility Platform" },
+          { aliases: ["AI 正在談論你的品牌，你知道它說了什麼嗎？GEO Hero 追蹤 ChatGPT、Perplexity、Claude、Gemini 如何引用你的網站，並告訴你如何提升 AI 能見度，免費方案即可開始使用。"], "zh-Hant": "GEO Hero 追蹤 ChatGPT、Perplexity、Claude、Gemini 等 AI 回答如何引用你的品牌與網站，並提供提升 AI 能見度的具體建議。", en: "GEO Hero tracks how ChatGPT, Perplexity, Claude, Gemini, and other AI answer engines mention and cite your brand, then recommends ways to improve AI visibility." },
+          { aliases: ["GEO（Generative Engine Optimization）是 AI 時代的新 SEO。傳統 SEO 優化搜尋排名，GEO 則優化 AI 答案中的品牌曝光。GEO Hero 基於 Princeton、IIT Delhi 與 KDD 2024 同行評審研究，監控 9 大 AI 模型的品牌引用行為，透過 GEO Score 量化 AI 能見度，提供可執行的優化建議。研究數據顯示，使用 GEO Hero 的品牌平均提升 AI 引用頻率 +41%、品牌提及率 +30%、AI 優化可見度 +20%，讓你的品牌在 AI 搜尋時代搶佔先機。"], "zh-Hant": "GEO 將 SEO 延伸到 AI 答案場景。GEO Hero 監控多個 AI 模型的品牌引用行為，用 GEO Score 量化可見度，並把研究方法轉成可執行的內容優化建議。", en: "GEO extends SEO into AI answer surfaces. GEO Hero monitors brand citations across major AI models, quantifies visibility with a GEO Score, and turns research-backed methods into practical content recommendations." },
+          { aliases: ["接案雷達 Freelance Finder"], "zh-Hant": "接案雷達 Freelance Finder", en: "Freelance Finder Opportunity Radar" },
+          { aliases: ["接案雷達是一個 AI 驅動的自由工作聚合平台，同步整合 Freelancer、Guru.com、PeoplePerHour、FreelancerMap 四大接案平台的任務，透過 AI 評分機制幫助自由工作者快速篩選最匹配的案件。"], "zh-Hant": "接案雷達是一個 AI 驅動的自由工作任務聚合平台，整合多個接案來源，並用 AI 評分協助工作者快速篩選合適案件。", en: "Freelance Finder aggregates freelance jobs from multiple marketplaces and uses AI scoring to help independent workers quickly identify the best-fit opportunities." },
+          { aliases: ["平台採用自動化爬蟲定期同步四大接案平台的最新任務，結合 AI 模型對每個任務進行相關性評分（AI Score），讓使用者能依照技能、預算、發布時間快速篩選。支援技術開發、設計創意、行銷文案、翻譯文字等多個類別分類，大幅縮短接案人員搜尋優質案件的時間成本。"], "zh-Hant": "系統定期同步接案平台任務，根據技能、預算、發布時間與相關性產生 AI Score，支援開發、設計、行銷、文案與翻譯等分類。", en: "The system syncs jobs from freelance marketplaces and scores each task by skills, budget, posting time, and relevance, with categories across development, design, marketing, writing, and translation." },
+          { aliases: ["龍蝦雲 — 私人 AI 員工平台"], "zh-Hant": "龍蝦雲 — 私人 AI 員工平台", en: "LobsterCloud - Personal AI Employee Platform" },
+          { aliases: ["你的私人 AI 員工，永遠不下班。直接在 LINE 或 Telegram 上使用，無需安裝新 App。24/7 全天候待命、超強記憶越用越聰明、你不在時它照樣處理任務，60 秒即可完成設定。"], "zh-Hant": "把私人 AI 員工放進 LINE 或 Telegram，不必安裝新 App。它能記住上下文、追蹤任務、提醒與回覆，適合作為團隊導入 AI 自動化的第一步。", en: "A personal AI employee that lives inside LINE or Telegram. It remembers context, tracks tasks, sends reminders, and replies without requiring a new app." },
+          { aliases: ["龍蝦雲將 AI Agent 直接部署在用戶最常用的通訊工具（LINE / Telegram）上，無學習門檻。平台內建 9 種開箱即用技能，涵蓋資訊查詢、任務追蹤、自動回覆、智慧提醒等場景。獨特的長期記憶機制讓 AI 員工隨使用累積個人化知識，並可結合自訂工具滿足特殊業務需求。適合個人工作者、小型團隊與企業導入 AI 自動化的第一步。"], "zh-Hant": "AI Agent 直接部署在常用通訊工具中，內建任務追蹤、自動回覆、資訊查詢與提醒等技能，並透過長期記憶累積個人化知識。", en: "The agent runs inside familiar chat tools, with built-in skills for task tracking, auto-replies, information lookup, and reminders, while long-term memory builds personalized context over time." },
+          { aliases: ["即時語音 AI 助理平台"], "zh-Hant": "即時語音 AI 助理平台", en: "Real-Time Voice AI Assistant Platform" },
+          { aliases: ["為金融業打造的即時語音 AI 助理，整合語音辨識、意圖理解與業務系統，支援通話中即時提示與自動記錄，大幅提升顧問服務效率與客戶滿意度。"], "zh-Hant": "為金融服務場景打造的即時語音 AI 助理，整合語音辨識、意圖理解、業務資料與 CRM，支援通話提示、自動摘要與後續追蹤。", en: "A real-time voice AI assistant for financial service teams, combining speech recognition, intent understanding, business data, and CRM workflows for live prompts, summaries, and follow-up." },
+          { aliases: ["系統採低延遲串流架構，語音辨識端到端延遲低於 300ms，確保通話流暢度。意圖理解模組針對金融產品知識專項訓練，能精準識別客戶需求並即時推送相關資料給顧問。通話結束後自動生成結構化摘要與後續跟進事項，直接同步至 CRM。"], "zh-Hant": "低延遲串流架構讓語音辨識維持即時回應，意圖理解模組能辨識客戶需求並推送資料，通話後自動生成摘要與後續事項。", en: "A low-latency streaming architecture keeps speech recognition responsive, while intent models identify customer needs, surface relevant information, and generate structured summaries after each call." },
+          { aliases: ["AltosLab AI 工作情報電子報平台"], "zh-Hant": "AltosLab AI 工作情報電子報平台", en: "AltosLab AI Work Intelligence Newsletter Platform" },
+          { aliases: ["每天 5 分鐘，把 AI 變化翻成工作判斷的電子報平台，整理 AI 產業變化、工具更新與實務導入方向。"], "zh-Hant": "每天 5 分鐘，把 AI 產業變化、工具更新與導入案例整理成團隊能採取行動的工作判斷。", en: "A five-minute newsletter system that turns AI industry shifts, tool updates, and implementation cases into practical work decisions." },
+          { aliases: ["平台以 AI 趨勢整理、工作應用拆解與可執行觀點為核心，協助讀者快速理解最新工具、產品更新與導入情境。內容架構可延伸為品牌知識庫、訂閱入口與長期內容營運系統。"], "zh-Hant": "內容系統以趨勢整理、工作應用拆解與可執行觀點為核心，可延伸為品牌知識庫、訂閱入口與長期內容營運流程。", en: "The content system focuses on trend curation, work-use breakdowns, and actionable perspectives, and can extend into a brand knowledge base, subscription entry point, and content operations workflow." },
+          { aliases: ["Eternal Line — 紀念親人聊天與照護系統"], "zh-Hant": "Eternal Line — 紀念親人聊天與照護系統", en: "Eternal Line - Memorial Chat and Care System" },
+          { aliases: ["上傳已故家人的對話記錄與語音，讓 AI 延續珍貴的溫度，並透過 LINE 與家人持續連結。"], "zh-Hant": "將家人的對話、語音與記憶整理成可透過 LINE 互動的 AI 角色，用於紀念、陪伴與照護提醒。", en: "A system that organizes family conversations, voice, and memories into an AI character available through LINE for remembrance, companionship, and care reminders." },
+          { aliases: ["Eternal Line 支援紀念與照護兩種情境，將家人的對話、語音與個人記憶整理成可互動的 AI 角色。系統以 LINE Bot 作為低門檻入口，讓使用者不需要安裝新 App，也能進行陪伴式聊天、關懷提醒與家庭記憶保存。"], "zh-Hant": "系統支援紀念與照護兩種情境，以 LINE Bot 作為低門檻入口，讓家庭成員能進行陪伴式聊天、關懷提醒與記憶保存。", en: "The system supports memorial and care scenarios through a LINE Bot, making it easy for families to chat, receive care reminders, and preserve important memories." },
+          { aliases: ["玄衡命理館 — AI 算命大師"], "zh-Hant": "玄衡命理館 — AI 命理互動體驗", en: "Xuanheng Fortune Studio - AI Fortune Experience" },
+          { aliases: ["結合命理問答、占卜流程與 AI 對話的線上算命體驗，讓使用者用更自然的方式提出問題並取得解析。"], "zh-Hant": "把命理問答、占卜流程與 AI 對話整合成線上互動體驗，讓使用者能自然描述問題並取得初步解析。", en: "An online fortune-telling experience that combines guided questions, divination flows, and AI conversation so users can describe questions naturally and receive an initial reading." },
+          { aliases: ["產品將命理服務拆成清楚的線上流程，透過 AI 對話協助使用者描述問題、取得初步解析，並保留後續真人服務或付費升級的延伸空間。適合傳統服務數位化、內容導購與諮詢型產品。"], "zh-Hant": "產品將傳統命理服務拆成清楚的線上流程，透過 AI 對話承接問題、提供初步解析，並保留真人服務與付費升級空間。", en: "The product turns a traditional consultation into a structured online flow, using AI conversation to capture intent, provide an initial reading, and leave room for human follow-up or paid upgrades." },
+          { aliases: ["Koibito 約會平台"], "zh-Hant": "Koibito 約會平台", en: "Koibito Dating Platform" },
+          { aliases: ["結合探索、個人檔案、私密內容、禮物與聊天的約會產品體驗。"], "zh-Hant": "結合探索、個人檔案、聊天、禮物與內容解鎖的約會產品體驗。", en: "A dating product experience built around discovery, profiles, chat, gifts, and private content unlocks." },
+          { aliases: ["Koibito 以探索與個人檔案為核心，搭配私密內容、禮物互動與聊天流程，建立可延伸會員、內容與社交互動的 dating product experience。整體體驗偏向 mobile-first，適合後續接會員制、內容解鎖與互動轉換。"], "zh-Hant": "Koibito 以探索與個人檔案為核心，搭配聊天、禮物與私密內容互動，後續可延伸會員制、內容解鎖與互動轉換。", en: "Koibito centers on discovery and profiles, with chat, gifts, and private content interactions that can extend into memberships, content unlocks, and conversion flows." },
+          { aliases: ["上線時間"], "zh-Hant": "上線時間", en: "Launch Time" },
+          { aliases: ["免費試用"], "zh-Hant": "免費試用", en: "Free Trial" },
+          { aliases: ["14 天"], "zh-Hant": "14 天", en: "14 days" },
+          { aliases: ["支援語言"], "zh-Hant": "支援語言", en: "Languages" },
+          { aliases: ["繁中 / EN"], "zh-Hant": "繁中 / EN", en: "ZH-TW / EN" },
+          { aliases: ["知識圖譜"], "zh-Hant": "知識圖譜", en: "Knowledge Graph" },
+          { aliases: ["作業時間節省"], "zh-Hant": "作業時間節省", en: "Work Time Saved" },
+          { aliases: ["異常提前預警"], "zh-Hant": "異常提前預警", en: "Earlier Anomaly Alerts" },
+          { aliases: ["AI 引用率提升"], "zh-Hant": "AI 引用率提升", en: "AI Citation Lift" },
+          { aliases: ["品牌提及提升"], "zh-Hant": "品牌提及提升", en: "Brand Mention Lift" },
+          { aliases: ["監控 AI 模型"], "zh-Hant": "監控 AI 模型", en: "AI Models Tracked" },
+          { aliases: ["9 個"], "zh-Hant": "9 個", en: "9" },
+          { aliases: ["整合平台數"], "zh-Hant": "整合平台數", en: "Platforms Integrated" },
+          { aliases: ["4 個"], "zh-Hant": "4 個", en: "4" },
+          { aliases: ["任務類別"], "zh-Hant": "任務類別", en: "Task Categories" },
+          { aliases: ["5 類"], "zh-Hant": "5 類", en: "5 categories" },
+          { aliases: ["更新頻率"], "zh-Hant": "更新頻率", en: "Refresh Rate" },
+          { aliases: ["即時"], "zh-Hant": "即時", en: "Live" },
+          { aliases: ["支援平台"], "zh-Hant": "支援平台", en: "Supported Platforms" },
+          { aliases: ["內建技能"], "zh-Hant": "內建技能", en: "Built-in Skills" },
+          { aliases: ["9 種"], "zh-Hant": "9 種", en: "9 skills" },
+          { aliases: ["語音辨識延遲"], "zh-Hant": "語音辨識延遲", en: "Speech Latency" },
+          { aliases: ["顧問效率提升"], "zh-Hant": "顧問效率提升", en: "Advisor Efficiency Lift" },
+          { aliases: ["客戶滿意度"], "zh-Hant": "客戶滿意度", en: "Customer Satisfaction" },
+          { aliases: ["閱讀節奏"], "zh-Hant": "閱讀節奏", en: "Reading Cadence" },
+          { aliases: ["內容主題"], "zh-Hant": "內容主題", en: "Content Theme" },
+          { aliases: ["發佈型態"], "zh-Hant": "發佈型態", en: "Publishing Format" },
+          { aliases: ["互動入口"], "zh-Hant": "互動入口", en: "Interaction Channel" },
+          { aliases: ["資料類型"], "zh-Hant": "資料類型", en: "Data Types" },
+          { aliases: ["對話 / 語音"], "zh-Hant": "對話 / 語音", en: "Chat / Voice" },
+          { aliases: ["使用模式"], "zh-Hant": "使用模式", en: "Use Modes" },
+          { aliases: ["紀念 / 照護"], "zh-Hant": "紀念 / 照護", en: "Memorial / Care" },
+          { aliases: ["服務模式"], "zh-Hant": "服務模式", en: "Service Mode" },
+          { aliases: ["線上問事"], "zh-Hant": "線上問事", en: "Online Reading" },
+          { aliases: ["互動方式"], "zh-Hant": "互動方式", en: "Interaction Type" },
+          { aliases: ["AI 對話"], "zh-Hant": "AI 對話", en: "AI Chat" },
+          { aliases: ["產品類型"], "zh-Hant": "產品類型", en: "Product Type" },
+          { aliases: ["命理諮詢"], "zh-Hant": "命理諮詢", en: "Fortune Consultation" },
+          { aliases: ["核心功能"], "zh-Hant": "核心功能", en: "Core Features" },
+          { aliases: ["配對 / 聊天"], "zh-Hant": "配對 / 聊天", en: "Match / Chat" },
+          { aliases: ["互動內容"], "zh-Hant": "互動內容", en: "Interaction Content" },
+          { aliases: ["禮物 / 私密"], "zh-Hant": "禮物 / 私密", en: "Gifts / Private Content" },
+          { aliases: ["體驗方向"], "zh-Hant": "體驗方向", en: "Experience Direction" },
+          { aliases: ["我們是誰"], "zh-Hant": "公司 / 團隊 / 姓名", en: "Company / Team / Name" },
+          { aliases: ["聯絡方式"], "zh-Hant": "聯絡方式", en: "Contact" },
+          { aliases: ["希望有什麼可以協助的"], "zh-Hant": "想優先解決的問題", en: "What should we help with?" },
+          { aliases: ["請先填完三個欄位，我們才能整理成完整訊息。"], "zh-Hant": "請先填完三個欄位，我們才能整理成完整訊息。", en: "Please complete all three fields so we can understand the request." },
+          { aliases: ["送出合作需求"], "zh-Hant": "送出合作需求", en: "Send Request" },
+          { aliases: ["送出中"], "zh-Hant": "送出中", en: "Sending" },
+          { aliases: ["已收到需求，我們會盡快回覆。"], "zh-Hant": "已收到需求，我們會盡快回覆。", en: "Request received. We will reply as soon as possible." },
+          { aliases: ["送出失敗，請稍後再試。"], "zh-Hant": "送出失敗，請稍後再試。", en: "Submission failed. Please try again later." }
+        ];
+        const attributeCopyEntries = [
+          { aliases: ["切換語言"], "zh-Hant": "切換語言", en: "Switch language" },
+          { aliases: ["公司 / 團隊 / 你的名字"], "zh-Hant": "公司 / 團隊 / 姓名", en: "Company, team, or your name" },
+          { aliases: ["Email、LINE、電話或其他方便聯絡的方式"], "zh-Hant": "Email、LINE、電話或其他方便聯絡的方式", en: "Email, LINE, phone, or another preferred contact method" },
+          { aliases: ["簡單說明想導入 AI、系統整合、自動化流程，或目前遇到的問題。"], "zh-Hant": "簡單說明想導入 AI、系統整合、自動化流程，或目前遇到的問題。", en: "Briefly describe the AI system, integration, automation workflow, or current problem." }
+        ];
+
+        function makeHeaderLink(item) {
+          const link = document.createElement("a");
+          link.href = item.href;
+          link.textContent = item.label;
+          return link;
+        }
+
+        function readLanguage() {
+          try {
+            const stored = window.localStorage.getItem(storageKey);
+            return stored === "en" ? "en" : "zh-Hant";
+          } catch {
+            return "zh-Hant";
+          }
+        }
+
+        function writeLanguage(language) {
+          try {
+            window.localStorage.setItem(storageKey, language);
+          } catch {
+            // Storage can be unavailable in private or embedded contexts.
+          }
+          window.dispatchEvent(new CustomEvent(languageEvent, { detail: { language } }));
+        }
+
+        function languageLabel(language) {
+          return language === "en" ? "EN" : "中";
+        }
+
+        function getLanguageOptionCopy(currentLanguage, optionLanguage) {
+          return languageOptionCopy[currentLanguage]?.[optionLanguage] || languageOptionCopy["zh-Hant"][optionLanguage];
+        }
+
+        function makeLanguageMenuButton(option) {
+          const button = document.createElement("button");
+          button.type = "button";
+          button.dataset.altosLanguageOption = option.value;
+          button.setAttribute("role", "menuitemradio");
+          button.innerHTML = `<span>${option.shortLabel}</span><small>${option.label}</small>`;
+          button.addEventListener("click", () => {
+            writeLanguage(option.value);
+            closeLanguageMenus();
+            applyHomepageLanguage(option.value);
+          });
+          return button;
+        }
+
+        function makeHeaderLanguageToggle() {
+          const wrap = document.createElement("div");
+          wrap.className = "altos-home-language-toggle";
+
+          const trigger = document.createElement("button");
+          trigger.className = "altos-home-language-trigger";
+          trigger.type = "button";
+          trigger.setAttribute("aria-haspopup", "menu");
+          trigger.setAttribute("aria-expanded", "false");
+          trigger.setAttribute("aria-label", "切換語言");
+          trigger.textContent = languageLabel(readLanguage());
+
+          const menu = document.createElement("div");
+          menu.className = "altos-home-language-menu";
+          menu.setAttribute("role", "menu");
+          menu.setAttribute("aria-label", "Language switcher");
+          siteLanguages.forEach(option => menu.appendChild(makeLanguageMenuButton(option)));
+
+          trigger.addEventListener("click", event => {
+            event.stopPropagation();
+            const isOpen = wrap.dataset.open === "true";
+            closeLanguageMenus();
+            wrap.dataset.open = isOpen ? "false" : "true";
+            trigger.setAttribute("aria-expanded", String(!isOpen));
+          });
+
+          wrap.append(trigger, menu);
+          return wrap;
+        }
+
+        function makeMobileLanguageSwitch() {
+          const wrap = document.createElement("div");
+          wrap.className = "altos-home-mobile-language-switch";
+          siteLanguages.forEach(option => {
+            const button = document.createElement("button");
+            button.type = "button";
+            button.dataset.altosLanguageOption = option.value;
+            button.textContent = option.shortLabel;
+            button.addEventListener("click", () => {
+              writeLanguage(option.value);
+              applyHomepageLanguage(option.value);
+            });
+            wrap.appendChild(button);
+          });
+          return wrap;
+        }
+
+        function closeLanguageMenus() {
+          document.querySelectorAll(".altos-home-language-toggle").forEach(toggle => {
+            toggle.dataset.open = "false";
+            toggle.querySelector(".altos-home-language-trigger")?.setAttribute("aria-expanded", "false");
+          });
+        }
+
+        function enhanceHomepageHeader() {
+          const nav = document.querySelector("nav.fixed.top-0");
+          if (!nav) return;
+
+          if (nav.dataset.altosHeaderStyle !== "blog-black") {
+            const existingLinks = nav.querySelector(":scope > div");
+            const menuButton = nav.querySelector(':scope > button[aria-label="Menu"]');
+            nav.querySelectorAll(".altos-home-header-links, .altos-home-header-actions, .altos-home-header-cta").forEach(element => element.remove());
+            if (existingLinks) existingLinks.remove();
+
+            const centerNav = document.createElement("div");
+            centerNav.className = "altos-home-header-links";
+            headerLinks.forEach(item => centerNav.appendChild(makeHeaderLink(item)));
+
+            const actions = document.createElement("div");
+            actions.className = "altos-home-header-actions";
+            actions.appendChild(makeHeaderLanguageToggle());
+
+            const cta = document.createElement("a");
+            cta.className = "altos-home-header-cta";
+            cta.href = "#contact";
+            cta.textContent = "合作洽談 ↗";
+            actions.appendChild(cta);
+
+            if (menuButton) {
+              nav.insertBefore(centerNav, menuButton);
+              nav.insertBefore(actions, menuButton);
+            } else {
+              nav.appendChild(centerNav);
+              nav.appendChild(actions);
+            }
+
+            nav.dataset.altosHeaderStyle = "blog-black";
+          }
+
+          enhanceHomepageMobileMenu();
+          applyHomepageLanguage(readLanguage());
+          updateHeaderSurface(nav);
+        }
+
+        function updateHeaderSurface(nav = document.querySelector("nav.fixed.top-0")) {
+          if (!nav) return;
+          nav.dataset.altosHeaderTop = window.scrollY <= 8 ? "true" : "false";
+        }
+
+        function setAnchorLabel(anchor, label) {
+          const textNode = Array.from(anchor.childNodes).find(node => node.nodeType === Node.TEXT_NODE);
+          if (textNode) {
+            if (textNode.textContent !== label) textNode.textContent = label;
+            return;
+          }
+          anchor.insertBefore(document.createTextNode(label), anchor.firstChild);
+        }
+
+        function setElementText(element, label) {
+          if (element.textContent !== label) element.textContent = label;
+        }
+
+        function normalizeCopyText(value) {
+          return String(value || "").replace(/\s+/g, " ").trim();
+        }
+
+        function buildCopyMap(entries, language) {
+          const map = new Map();
+          entries.forEach(entry => {
+            const target = entry[language];
+            if (!target) return;
+            [entry["zh-Hant"], entry.en, ...(entry.aliases || [])].filter(Boolean).forEach(source => {
+              map.set(normalizeCopyText(source), target);
+            });
+          });
+          return map;
+        }
+
+        function applyPageMetadata(language) {
+          const meta = pageCopyMeta[language] || pageCopyMeta["zh-Hant"];
+          if (document.title !== meta.title) document.title = meta.title;
+          const description = document.querySelector('meta[name="description"]');
+          if (description && description.getAttribute("content") !== meta.description) {
+            description.setAttribute("content", meta.description);
+          }
+        }
+
+        function translateTextNode(node, map) {
+          const value = node.nodeValue || "";
+          const key = normalizeCopyText(value);
+          const target = map.get(key);
+          if (!target || normalizeCopyText(target) === key) return;
+          const leading = value.match(/^\s*/)?.[0] || "";
+          const trailing = value.match(/\s*$/)?.[0] || "";
+          node.nodeValue = `${leading}${target}${trailing}`;
+        }
+
+        function applyTextTranslations(language) {
+          if (!document.body) return;
+          const map = buildCopyMap(contentCopyEntries, language);
+          const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, {
+            acceptNode(node) {
+              const parent = node.parentElement;
+              if (!parent || parent.closest("script, style, textarea, input")) return NodeFilter.FILTER_REJECT;
+              return normalizeCopyText(node.nodeValue) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
+            }
+          });
+          const nodes = [];
+          while (walker.nextNode()) nodes.push(walker.currentNode);
+          nodes.forEach(node => translateTextNode(node, map));
+        }
+
+        function translateAttribute(element, attribute, map) {
+          const value = element.getAttribute(attribute);
+          const target = map.get(normalizeCopyText(value));
+          if (target && value !== target) element.setAttribute(attribute, target);
+        }
+
+        function applyAttributeTranslations(language) {
+          const map = buildCopyMap([...contentCopyEntries, ...attributeCopyEntries], language);
+          ["placeholder", "aria-label", "alt", "title"].forEach(attribute => {
+            document.querySelectorAll(`[${attribute}]`).forEach(element => translateAttribute(element, attribute, map));
+          });
+        }
+
+        function enhanceHomepageMobileMenu() {
+          const menu = document.querySelector("div.fixed.inset-0.z-30.md\\:hidden");
+          if (!menu) return;
+
+          const linkGroup = menu.querySelector(":scope > div.space-y-1.mb-12");
+          if (linkGroup && !menu.querySelector(".altos-home-mobile-language-switch")) {
+            linkGroup.insertAdjacentElement("afterend", makeMobileLanguageSwitch());
+          }
+        }
+
+        function applyHomepageLanguage(language = readLanguage()) {
+          const copy = languageCopy[language] || languageCopy["zh-Hant"];
+          document.documentElement.lang = language === "en" ? "en" : "zh-Hant-TW";
+          document.body?.setAttribute("data-altos-language", language);
+
+          document.querySelectorAll(".altos-home-header-links a").forEach((link, index) => {
+            setElementText(link, copy.headerLinks[index] || link.textContent);
+            if (link.getAttribute("href")?.includes("/blog")) {
+              const blogHref = language === "en" ? "/en/blog" : "/blog";
+              if (link.getAttribute("href") !== blogHref) link.setAttribute("href", blogHref);
+            }
+          });
+
+          document.querySelectorAll(".altos-home-header-cta").forEach(link => {
+            setElementText(link, copy.cta);
+          });
+
+          document.querySelectorAll(".altos-home-language-trigger").forEach(trigger => {
+            setElementText(trigger, languageLabel(language));
+          });
+
+          document.querySelectorAll("[data-altos-language-option]").forEach(option => {
+            const isActive = option.dataset.altosLanguageOption === language;
+            const optionCopy = getLanguageOptionCopy(language, option.dataset.altosLanguageOption);
+            const shortLabel = option.querySelector("span");
+            const fullLabel = option.querySelector("small");
+            if (shortLabel && fullLabel) {
+              setElementText(shortLabel, optionCopy.shortLabel);
+              setElementText(fullLabel, optionCopy.label);
+            } else {
+              setElementText(option, optionCopy.shortLabel);
+            }
+            option.classList.toggle("is-active", isActive);
+            option.setAttribute("aria-checked", String(isActive));
+          });
+
+          const mobileMenu = document.querySelector("div.fixed.inset-0.z-30.md\\:hidden");
+          if (mobileMenu) {
+            mobileMenu.querySelectorAll("a[href^='#']").forEach(anchor => {
+              const href = anchor.getAttribute("href");
+              if (copy.mobileLinks[href]) setAnchorLabel(anchor, copy.mobileLinks[href]);
+            });
+            const mobileCta = mobileMenu.querySelector('a[href="#contact"]');
+            if (mobileCta) setAnchorLabel(mobileCta, copy.mobileCta);
+          }
+
+          applyPageMetadata(language);
+          applyTextTranslations(language);
+          applyAttributeTranslations(language);
+        }
+
+        const headerObserver = new MutationObserver(() => enhanceHomepageHeader());
+        headerObserver.observe(document.body, { childList: true, subtree: true });
+        window.addEventListener(languageEvent, event => {
+          applyHomepageLanguage(event.detail?.language || readLanguage());
+        });
+        window.addEventListener("load", enhanceHomepageHeader);
+        window.addEventListener("scroll", () => updateHeaderSurface(), { passive: true });
+        window.addEventListener("storage", event => {
+          if (event.key === storageKey) applyHomepageLanguage(readLanguage());
+        });
+        window.addEventListener("click", closeLanguageMenus);
+        window.addEventListener("keydown", event => {
+          if (event.key === "Escape") closeLanguageMenus();
+        });
+        enhanceHomepageHeader();
+      })();
+    </script>
     <style>
       nav.fixed.top-0 {
-        min-height: clamp(5rem, 5.2vw, 6.5rem);
-        padding: clamp(1.25rem, 1.7vw, 2rem) clamp(1.5rem, 3vw, 3.5rem) !important;
+        min-height: 72px;
+        padding: 0 clamp(1.4rem, 2.4vw, 3rem) !important;
+        display: grid !important;
+        grid-template-columns: minmax(9rem, 1fr) auto minmax(9rem, 1fr);
+        gap: clamp(0.75rem, 2vw, 2.25rem);
+        align-items: center;
+        border-bottom: 1px solid rgba(247, 247, 242, 0.12);
+        background: rgba(3, 4, 3, 0.94);
+        backdrop-filter: blur(18px);
+        -webkit-backdrop-filter: blur(18px);
+        box-shadow: 0 18px 42px rgba(0, 0, 0, 0.26);
+        transition: background-color 180ms ease, border-color 180ms ease, box-shadow 180ms ease, backdrop-filter 180ms ease;
+      }
+
+      nav.fixed.top-0[data-altos-header-top="true"] {
+        border-bottom-color: rgba(247, 247, 242, 0);
+        background: rgba(3, 4, 3, 0);
+        backdrop-filter: blur(0);
+        -webkit-backdrop-filter: blur(0);
+        box-shadow: none;
       }
 
       nav.fixed.top-0 > span {
-        font-size: clamp(1rem, 1vw, 1.28rem) !important;
+        justify-self: start;
+        font-size: clamp(0.95rem, 0.92vw, 1.16rem) !important;
         line-height: 1;
-        letter-spacing: 0.34em !important;
+        letter-spacing: 0.22em !important;
       }
 
-      nav.fixed.top-0 a {
-        min-height: clamp(2.55rem, 2.5vw, 3.05rem);
+      nav.fixed.top-0 .altos-home-header-links {
+        justify-self: center;
+        display: flex;
+        align-items: center;
+        gap: clamp(1rem, 2.1vw, 2.4rem);
+      }
+
+      nav.fixed.top-0 .altos-home-header-links a {
+        min-height: auto;
         display: inline-flex;
         align-items: center;
-        padding: 0.78rem clamp(1.25rem, 1.8vw, 1.75rem) !important;
-        font-size: clamp(0.78rem, 0.72vw, 0.95rem) !important;
+        border: 0 !important;
+        background: transparent !important;
+        padding: 0.45rem 0.1rem !important;
+        color: rgba(247, 247, 242, 0.82);
+        font-family: Inter, "Noto Sans TC", "PingFang TC", system-ui, sans-serif;
+        font-size: clamp(0.86rem, 0.82vw, 1rem) !important;
+        font-weight: 800;
+        letter-spacing: 0 !important;
+        transition: color 160ms ease;
       }
 
-      nav.fixed.top-0 button[aria-label="Menu"] {
+      nav.fixed.top-0 .altos-home-header-links a:hover {
+        color: #ffffff;
+      }
+
+      nav.fixed.top-0 .altos-home-header-actions {
+        justify-self: end;
+        display: inline-flex;
+        align-items: center;
+        gap: clamp(0.55rem, 1vw, 0.85rem);
+      }
+
+      nav.fixed.top-0 .altos-home-language-toggle {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      nav.fixed.top-0 .altos-home-language-trigger {
+        width: clamp(2.65rem, 2.7vw, 3.15rem);
+        min-width: clamp(2.65rem, 2.7vw, 3.15rem);
+        min-height: clamp(2.65rem, 2.7vw, 3.15rem);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid rgba(247, 247, 242, 0.18);
+        border-radius: 999px;
+        background: rgba(247, 247, 242, 0.06);
+        color: rgba(247, 247, 242, 0.86);
+        font-size: 0.78rem;
+        font-weight: 900;
+        letter-spacing: 0.04em;
+        cursor: pointer;
+      }
+
+      nav.fixed.top-0 .altos-home-language-toggle[data-open="true"] .altos-home-language-trigger,
+      nav.fixed.top-0 .altos-home-language-trigger:hover {
+        border-color: rgba(247, 247, 242, 0.38);
+        color: #ffffff;
+      }
+
+      nav.fixed.top-0 .altos-home-language-menu {
+        position: absolute;
+        top: calc(100% + 0.55rem);
+        right: 0;
+        width: 10.5rem;
+        display: none;
+        gap: 0.25rem;
+        padding: 0.45rem;
+        border: 1px solid rgba(247, 247, 242, 0.14);
+        border-radius: 0.55rem;
+        background: rgba(3, 4, 3, 0.96);
+        box-shadow: 0 18px 42px rgba(0, 0, 0, 0.34);
+      }
+
+      nav.fixed.top-0 .altos-home-language-toggle[data-open="true"] .altos-home-language-menu {
+        display: grid;
+      }
+
+      nav.fixed.top-0 .altos-home-language-menu button {
+        min-height: 2.45rem;
+        display: grid;
+        grid-template-columns: 2.2rem minmax(0, 1fr);
+        align-items: center;
+        gap: 0.55rem;
+        border: 0;
+        border-radius: 0.35rem;
+        background: transparent;
+        color: rgba(247, 247, 242, 0.66);
+        padding: 0 0.6rem;
+        text-align: left;
+        cursor: pointer;
+      }
+
+      nav.fixed.top-0 .altos-home-language-menu button.is-active,
+      nav.fixed.top-0 .altos-home-language-menu button:hover {
+        background: rgba(200, 255, 0, 0.14);
+        color: #ffffff;
+      }
+
+      nav.fixed.top-0 .altos-home-language-menu span {
+        font-size: 0.78rem;
+        font-weight: 900;
+      }
+
+      nav.fixed.top-0 .altos-home-language-menu small {
+        overflow: hidden;
+        font-size: 0.75rem;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      nav.fixed.top-0 .altos-home-header-cta {
+        min-height: clamp(2.65rem, 2.7vw, 3.15rem);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border: 0 !important;
+        border-radius: 999px !important;
+        background: #c8ff00;
+        color: #050603;
+        padding: 0 clamp(1.25rem, 1.9vw, 1.9rem) !important;
+        font-family: Inter, "Noto Sans TC", "PingFang TC", system-ui, sans-serif;
+        font-size: clamp(0.88rem, 0.86vw, 1.05rem) !important;
+        font-weight: 900;
+        letter-spacing: 0 !important;
+        white-space: nowrap;
+      }
+
+      nav.fixed.top-0 .altos-home-header-cta:hover {
+        opacity: 0.92;
+      }
+
+      nav.fixed.top-0 > button {
+        justify-self: end;
         gap: 7px !important;
         padding: 0.85rem !important;
+        color: #ffffff !important;
       }
 
-      nav.fixed.top-0 button[aria-label="Menu"] span {
+      nav.fixed.top-0 > button:focus {
+        outline: none !important;
+        box-shadow: none !important;
+      }
+
+      nav.fixed.top-0 > button:focus-visible {
+        outline: none !important;
+      }
+
+      nav.fixed.top-0 > button span {
         width: 2rem !important;
         height: 2px !important;
+      }
+
+      nav.fixed.top-0 > button svg {
+        width: 2rem !important;
+        height: 2rem !important;
+        color: #ffffff !important;
+        stroke-width: 2 !important;
+      }
+
+      @media (min-width: 640px) {
+        nav.fixed.top-0 .altos-home-header-links {
+          display: flex !important;
+        }
+
+        nav.fixed.top-0 .altos-home-header-cta {
+          display: inline-flex !important;
+        }
+
+        nav.fixed.top-0 > button.md\:hidden {
+          display: none !important;
+        }
+      }
+
+      @media (max-width: 639px) {
+        nav.fixed.top-0 {
+          grid-template-columns: minmax(0, 1fr) auto auto;
+          gap: 0.65rem;
+        }
+
+        nav.fixed.top-0 .altos-home-header-links {
+          display: none !important;
+        }
+
+        nav.fixed.top-0 .altos-home-header-actions {
+          display: inline-flex !important;
+        }
+
+        nav.fixed.top-0 .altos-home-header-cta {
+          display: none !important;
+        }
+
+        nav.fixed.top-0 .altos-home-language-trigger {
+          width: 2.55rem;
+          min-width: 2.55rem;
+          min-height: 2.55rem;
+        }
+
+        nav.fixed.top-0 .altos-home-language-menu {
+          right: -3.2rem;
+        }
+
+        nav.fixed.top-0 > button {
+          min-width: 2.55rem;
+          min-height: 2.55rem;
+          padding: 0.5rem !important;
+        }
+
+        nav.fixed.top-0 > button span {
+          width: 1.55rem !important;
+        }
+
+        div.fixed.inset-0.z-30.md\:hidden {
+          justify-content: flex-start !important;
+          overflow-y: auto;
+          padding: 5.35rem 1.25rem 1.75rem !important;
+        }
+
+        div.fixed.inset-0.z-30.md\:hidden > div.space-y-1.mb-12 {
+          margin-bottom: 1.15rem !important;
+          width: 100%;
+        }
+
+        div.fixed.inset-0.z-30.md\:hidden .altos-home-mobile-language-switch {
+          width: 100%;
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 0.5rem;
+          margin: -0.2rem 0 1rem;
+        }
+
+        div.fixed.inset-0.z-30.md\:hidden .altos-home-mobile-language-switch button {
+          min-height: 2.45rem;
+          border: 1px solid rgba(247, 247, 242, 0.14);
+          border-radius: 0.3rem;
+          background: rgba(247, 247, 242, 0.04);
+          color: rgba(247, 247, 242, 0.72);
+          font-size: 0.9rem;
+          font-weight: 900;
+        }
+
+        div.fixed.inset-0.z-30.md\:hidden .altos-home-mobile-language-switch button.is-active {
+          border-color: #c8ff00;
+          background: #c8ff00;
+          color: #050603;
+        }
+
+        div.fixed.inset-0.z-30.md\:hidden > div.space-y-1.mb-12 > a {
+          min-height: 3.45rem;
+          padding-top: 0.72rem !important;
+          padding-bottom: 0.72rem !important;
+          font-size: clamp(1.42rem, 5.9vw, 1.78rem) !important;
+          line-height: 1.05 !important;
+          letter-spacing: 0 !important;
+        }
+
+        div.fixed.inset-0.z-30.md\:hidden > div.space-y-1.mb-12 > a span {
+          font-size: 0.68rem !important;
+          line-height: 1 !important;
+        }
+
+        div.fixed.inset-0.z-30.md\:hidden > a[href="#contact"] {
+          min-height: 2.85rem;
+          padding: 0 1rem !important;
+          font-size: 0.9rem !important;
+        }
+      }
+
+      #root > div > section:first-of-type h1.font-black.leading-none.tracking-tight {
+        font-size: clamp(4.7rem, 10vw, 11.25rem) !important;
+        line-height: 0.92 !important;
+        letter-spacing: 0 !important;
+      }
+
+      @media (min-width: 1024px) {
+        #root > div > section:first-of-type > div.relative.px-5.pb-0 {
+          transform: translateY(clamp(-7rem, -5.25vw, -4.35rem));
+        }
       }
 
       div.flex.gap-3 > a[href="#about"],
@@ -4379,16 +5154,42 @@ void main() {
       }
 
       .altos-contact-error {
-        color: #c8ff00;
+        border: 1px solid rgba(247, 247, 242, 0.14);
+        background: rgba(247, 247, 242, 0.035);
+        box-sizing: border-box;
+        color: rgba(247, 247, 242, 0.66);
         display: none;
         font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
         font-size: 0.74rem;
+        gap: 0.28rem;
+        line-height: 1.58;
         letter-spacing: 0.08em;
         margin: 0;
+        padding: 0.9rem 1rem;
+      }
+
+      .altos-contact-error strong {
+        color: #f7f7f2;
+        font-size: 0.76rem;
+        font-weight: 900;
+        letter-spacing: 0.16em;
+      }
+
+      .altos-contact-error span {
+        color: rgba(247, 247, 242, 0.66);
       }
 
       .altos-contact-error.is-visible {
-        display: block;
+        display: grid;
+      }
+
+      .altos-contact-error.is-success {
+        border-color: rgba(200, 255, 0, 0.42);
+        background: linear-gradient(90deg, rgba(200, 255, 0, 0.18), rgba(200, 255, 0, 0.055));
+      }
+
+      .altos-contact-error.is-success strong {
+        color: #c8ff00;
       }
 
       @media (max-width: 900px) {
@@ -4433,7 +5234,7 @@ void main() {
                 <label class="altos-contact-label" for="altos-contact-message">希望有什麼可以協助的</label>
                 <textarea class="altos-contact-textarea" id="altos-contact-message" name="message" placeholder="簡單說明想導入 AI、系統整合、自動化流程，或目前遇到的問題。" required></textarea>
               </div>
-              <p class="altos-contact-error" role="alert">請先填完三個欄位，我們才能整理成完整訊息。</p>
+              <div class="altos-contact-error" role="status" aria-live="polite"></div>
               <button class="altos-contact-submit" type="submit">
                 <span>送出合作需求</span>
                 <span>↗</span>
@@ -4444,6 +5245,18 @@ void main() {
 
           const form = panel.querySelector("form");
           const error = panel.querySelector(".altos-contact-error");
+          function showStatus(title, detail, isSuccess) {
+            error.replaceChildren();
+            const titleNode = document.createElement("strong");
+            const detailNode = document.createElement("span");
+            titleNode.textContent = title;
+            detailNode.textContent = detail;
+            error.append(titleNode, detailNode);
+            error.setAttribute("role", isSuccess ? "status" : "alert");
+            error.classList.toggle("is-success", Boolean(isSuccess));
+            error.classList.add("is-visible");
+          }
+
           form.addEventListener("submit", event => {
             event.preventDefault();
             const data = new FormData(form);
@@ -4452,11 +5265,12 @@ void main() {
             const message = String(data.get("message") || "").trim();
 
             if (!who || !contact || !message) {
-              error.classList.add("is-visible");
+              showStatus("請先填完欄位", "我們需要公司 / 團隊 / 姓名、聯絡方式與需求內容。", false);
               return;
             }
 
-            error.classList.remove("is-visible");
+            error.classList.remove("is-visible", "is-success");
+            error.replaceChildren();
             const subject = `ALTOS LAB 合作需求｜${who}`;
             const body = [
               "我們是誰：",
@@ -4470,6 +5284,7 @@ void main() {
             ].join("\n");
 
             window.location.href = `mailto:${mailTo}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+            showStatus("已開啟 Email", "請在你的郵件軟體確認並送出，我們收到後會盡快回覆。", true);
           });
         }
 

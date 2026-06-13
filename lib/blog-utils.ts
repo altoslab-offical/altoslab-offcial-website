@@ -1,6 +1,7 @@
 import type { BlogContentType, BlogLanguage, BlogPost, BlogQualityChecks, BlogSourceLink } from "./types";
 
 export const BLOG_LANGUAGES: BlogLanguage[] = ["zh-Hant", "en", "ja", "ko", "id", "vi", "th", "ms", "fil"];
+export const SITE_LANGUAGES: BlogLanguage[] = ["zh-Hant", "en"];
 
 const BLOG_LANGUAGE_CONFIG: Record<
   BlogLanguage,
@@ -141,6 +142,10 @@ export function isBlogLanguage(value: unknown): value is BlogLanguage {
   return BLOG_LANGUAGES.includes(value as BlogLanguage);
 }
 
+export function isSiteLanguage(value: unknown): value is BlogLanguage {
+  return SITE_LANGUAGES.includes(value as BlogLanguage);
+}
+
 export function blogLanguageConfig(language: BlogLanguage) {
   return BLOG_LANGUAGE_CONFIG[language];
 }
@@ -157,6 +162,14 @@ export function blogLanguageFromPath(pathname: string | null | undefined): BlogL
 
 export function blogLanguageOptions() {
   return BLOG_LANGUAGES.map((language) => ({
+    label: BLOG_LANGUAGE_CONFIG[language].label,
+    shortLabel: BLOG_LANGUAGE_CONFIG[language].shortLabel,
+    value: language
+  }));
+}
+
+export function siteLanguageOptions() {
+  return SITE_LANGUAGES.map((language) => ({
     label: BLOG_LANGUAGE_CONFIG[language].label,
     shortLabel: BLOG_LANGUAGE_CONFIG[language].shortLabel,
     value: language

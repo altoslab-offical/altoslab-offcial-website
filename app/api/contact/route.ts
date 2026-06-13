@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { sendContactLeadNotification } from "@/lib/contact-notification";
 import { createContactLead, mutateCmsData } from "@/lib/cms";
 
 const rateLimit = new Map<string, { count: number; resetAt: number }>();
@@ -55,6 +56,13 @@ export async function POST(request: Request) {
       },
       { status: 503 }
     );
+  }
+
+  const notification = await sendContactLeadNotification(lead);
+  if (notification.ok === false && notification.skipped === true) {
+    console.warn("[contact] Gmail notification skipped:", notification.reason);
+  } else if (notification.ok === false) {
+    console.warn("[contact] Unable to send Gmail notification:", notification.reason);
   }
 
   return NextResponse.json({ ok: true, leadId: lead.id });

@@ -2,18 +2,25 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ArrowUpRight, Globe } from "lucide-react";
+import { ArrowUpRight, Globe, Menu, X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { BrandText } from "@/components/BrandText";
-import { blogIndexPath, blogLanguageFromPath, blogLanguageOptions, isBlogLanguage } from "@/lib/blog-utils";
+import { blogIndexPath, blogLanguageFromPath, blogLanguageOptions, isBlogLanguage, isSiteLanguage, siteLanguageOptions } from "@/lib/blog-utils";
 import { homeNavigation } from "@/lib/site-content";
 import type { BlogLanguage } from "@/lib/types";
 
 const STORAGE_KEY = "altoslab:language";
 const LANGUAGE_EVENT = "altoslab:languagechange";
-const languageOptions: Array<{ label: string; shortLabel: string; value: BlogLanguage }> = blogLanguageOptions();
+const siteOptions: Array<{ label: string; shortLabel: string; value: BlogLanguage }> = siteLanguageOptions();
+const fullBlogOptions: Array<{ label: string; shortLabel: string; value: BlogLanguage }> = blogLanguageOptions();
 
-function readStoredLanguage(): BlogLanguage {
+function readStoredSiteLanguage(): BlogLanguage {
+  if (typeof window === "undefined") return "zh-Hant";
+  const storedLanguage = window.localStorage.getItem(STORAGE_KEY);
+  return isSiteLanguage(storedLanguage) ? storedLanguage : "zh-Hant";
+}
+
+function readStoredBlogLanguage(): BlogLanguage {
   if (typeof window === "undefined") return "zh-Hant";
   const storedLanguage = window.localStorage.getItem(STORAGE_KEY);
   return isBlogLanguage(storedLanguage) ? storedLanguage : "zh-Hant";
@@ -23,13 +30,15 @@ export function SiteHeader() {
   const pathname = usePathname();
   const isHomePage = pathname === "/";
   const routeLanguage = blogLanguageFromPath(pathname);
+  const isBlogPage = Boolean(routeLanguage);
   const [language, setLanguage] = useState<BlogLanguage>(routeLanguage ?? "zh-Hant");
   const [isLanguageMenuOpen, setIsLanguageMenuOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const languageMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    setLanguage(routeLanguage ?? readStoredLanguage());
-  }, [routeLanguage]);
+    setLanguage(routeLanguage ?? (isBlogPage ? readStoredBlogLanguage() : readStoredSiteLanguage()));
+  }, [isBlogPage, routeLanguage]);
 
   useEffect(() => {
     if (!isLanguageMenuOpen) return;
@@ -54,6 +63,19 @@ export function SiteHeader() {
     };
   }, [isLanguageMenuOpen]);
 
+  useEffect(() => {
+    if (!isMobileMenuOpen) return;
+
+    function closeOnEscape(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setIsMobileMenuOpen(false);
+      }
+    }
+
+    document.addEventListener("keydown", closeOnEscape);
+    return () => document.removeEventListener("keydown", closeOnEscape);
+  }, [isMobileMenuOpen]);
+
   const navigation = useMemo(
     () =>
       homeNavigation.filter((item) => item.href !== "#contact").map((item) => {
@@ -66,6 +88,8 @@ export function SiteHeader() {
     [language]
   );
 
+  const languageOptions = useMemo(() => (isBlogPage ? fullBlogOptions : siteOptions), [isBlogPage]);
+
   function siteHref(href: string) {
     if (!href.startsWith("#")) return href;
     return isHomePage ? href : `/${href}`;
@@ -73,6 +97,7 @@ export function SiteHeader() {
 
   function chooseLanguage(nextLanguage: BlogLanguage) {
     setIsLanguageMenuOpen(false);
+    setIsMobileMenuOpen(false);
     setLanguage(nextLanguage);
     window.localStorage.setItem(STORAGE_KEY, nextLanguage);
     window.dispatchEvent(new CustomEvent(LANGUAGE_EVENT, { detail: { language: nextLanguage } }));
@@ -124,11 +149,43 @@ export function SiteHeader() {
             </div>
           ) : null}
         </div>
+        <button
+          aria-expanded={isMobileMenuOpen}
+          aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
+          className="site-mobile-menu-trigger"
+          onClick={() => {
+            setIsLanguageMenuOpen(false);
+            setIsMobileMenuOpen((isOpen) => !isOpen);
+          }}
+          type="button"
+        >
+          {isMobileMenuOpen ? (
+            <X aria-hidden="true" size={21} strokeWidth={1.8} />
+          ) : (
+            <Menu aria-hidden="true" size={21} strokeWidth={1.8} />
+          )}
+        </button>
         <a className="site-nav-cta" href={siteHref("#contact")}>
           <span className="site-nav-cta-label">{language === "zh-Hant" ? "合作洽談" : "Talk"}</span>
           <ArrowUpRight size={16} strokeWidth={2.5} />
         </a>
       </div>
+      {isMobileMenuOpen ? (
+        <div className="site-mobile-menu" role="dialog" aria-label="Mobile navigation">
+          <div className="site-mobile-menu-links">
+            {navigation.map((item, index) => (
+              <a href={siteHref(item.href)} key={item.href} onClick={() => setIsMobileMenuOpen(false)}>
+                <span>{item.label}</span>
+                <small>{String(index + 1).padStart(2, "0")}</small>
+              </a>
+            ))}
+          </div>
+          <a className="site-mobile-menu-cta" href={siteHref("#contact")} onClick={() => setIsMobileMenuOpen(false)}>
+            {language === "zh-Hant" ? "合作洽談" : "Talk"}
+            <ArrowUpRight aria-hidden="true" size={16} strokeWidth={2.5} />
+          </a>
+        </div>
+      ) : null}
     </header>
   );
 }
