@@ -44,7 +44,13 @@ if (publicHomepage) {
 assert(route.includes("CLOUDFLARE_HOMEPAGE_ASSET = \"/altoslab-homepage\""), "homepage route reads the Cloudflare homepage asset");
 assert(route.includes("withLaunchMetadata(html)"), "homepage route wraps the original homepage HTML");
 assert(route.includes("homepageAnalyticsSnippet()"), "homepage route keeps analytics without visual replacement");
+assert(route.includes("wondaWidgetSnippet()"), "homepage route keeps WonDa widget as a script-only integration");
 assert(route.includes("withCloudflareHomepageAssetHeaders(await readCloudflareHomepageResponse(request))"), "Cloudflare homepage returns the static asset without request-time HTML rewriting");
+
+if (publicHomepage) {
+  assert(publicHomepage.includes("id=\"wonda-ai-widget\""), "Cloudflare homepage asset includes the WonDa widget script");
+  assert(publicHomepage.includes("data-channel-id=\"cmqb6hynd002hs619tqxc3pe5\""), "Cloudflare homepage asset uses the configured WonDa channel id");
+}
 
 for (const file of ["SPEC.md", "DESIGN.md", "docs/FRONTEND_ARCHITECTURE.md"]) {
   assert(read(file).includes("Homepage UI Stability Contract"), `${file} documents the Homepage UI Stability Contract`);

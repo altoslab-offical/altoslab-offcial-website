@@ -3,6 +3,7 @@ import { GoogleAnalytics, GoogleTagManager } from "@next/third-parties/google";
 import { headers } from "next/headers";
 import "./globals.css";
 import { CtaAnalytics } from "@/components/AnalyticsEvents";
+import { WonDaWidgetScript } from "@/components/WonDaWidgetScript";
 import { gaMeasurementId, gtmId, isGaConfigured, isGtmConfigured } from "@/lib/analytics";
 import { blogLanguageFromPath, htmlLanguage } from "@/lib/blog-utils";
 import { searchVerificationMetadata, siteName, siteUrl } from "@/lib/seo";
@@ -75,6 +76,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <body>
         {children}
         <CtaAnalytics />
+        <WonDaWidgetScript pathname={pathname} />
         {isGaConfigured() && gaMeasurementId ? <GoogleAnalytics gaId={gaMeasurementId} /> : null}
         {isGtmConfigured() && gtmId ? <GoogleTagManager gtmId={gtmId} /> : null}
       </body>

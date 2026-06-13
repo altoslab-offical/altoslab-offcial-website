@@ -11,6 +11,9 @@ const title = "ALTOS LAB｜AI Studio 人工智慧工作室";
 const description =
   "ALTOS LAB 深耕互聯網產品開發與 AI 系統整合，協助企業導入 AI Skill、AI Agent、系統串接與智能行銷。";
 const image = `${siteUrl}/geo-cover.png`;
+const DEFAULT_WONDA_WIDGET_SCRIPT_SRC = "https://wonda-web-kxbpzwq4sa-de.a.run.app/widget.js";
+const DEFAULT_WONDA_WIDGET_CHANNEL_ID = "cmqb6hynd002hs619tqxc3pe5";
+const DEFAULT_WONDA_WIDGET_API = "https://wonda-api-kxbpzwq4sa-de.a.run.app/api/v1";
 
 const verificationEnv = {
   google: "GOOGLE_SITE_VERIFICATION",
@@ -27,6 +30,21 @@ function escapeHtmlAttribute(value) {
     .replace(/"/g, "&quot;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;");
+}
+
+function isWondaWidgetDisabled(value) {
+  return ["0", "false", "off", "disabled", "no"].includes(String(value || "").trim().toLowerCase());
+}
+
+function wondaWidgetSnippet() {
+  if (isWondaWidgetDisabled(process.env.NEXT_PUBLIC_WONDA_WIDGET_ENABLED)) return "";
+  const scriptSrc = (process.env.NEXT_PUBLIC_WONDA_WIDGET_SCRIPT_SRC || DEFAULT_WONDA_WIDGET_SCRIPT_SRC).trim();
+  const channelId = (process.env.NEXT_PUBLIC_WONDA_WIDGET_CHANNEL_ID || DEFAULT_WONDA_WIDGET_CHANNEL_ID).trim();
+  const api = (process.env.NEXT_PUBLIC_WONDA_WIDGET_API || DEFAULT_WONDA_WIDGET_API).trim();
+  if (!scriptSrc || !channelId || !api) return "";
+  return `<script id="wonda-ai-widget" src="${escapeHtmlAttribute(scriptSrc)}" data-channel-id="${escapeHtmlAttribute(
+    channelId
+  )}" data-api="${escapeHtmlAttribute(api)}" async></script>`;
 }
 
 function searchVerificationMetaTags() {
@@ -223,6 +241,11 @@ function injectHomepageMetadata(html) {
 
   if (!output.includes("window.altosTrack")) {
     output = output.replace(/<\/body>/i, `${homepageAnalyticsSnippet()}</body>`);
+  }
+
+  const wondaWidget = wondaWidgetSnippet();
+  if (wondaWidget && !output.includes("id=\"wonda-ai-widget\"")) {
+    output = output.replace(/<\/body>/i, `${wondaWidget}</body>`);
   }
 
   return output;

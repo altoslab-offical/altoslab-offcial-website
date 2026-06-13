@@ -17,6 +17,28 @@ const FAVICON_LINKS = `<link rel="icon" href="/icon.svg" type="image/svg+xml" />
     <link rel="shortcut icon" href="/icon.svg" type="image/svg+xml" />
     <link rel="mask-icon" href="/icon.svg" color="#A4FF00" />
     <link rel="manifest" href="/manifest.webmanifest" />`;
+const DEFAULT_WONDA_WIDGET_SCRIPT_SRC = "https://wonda-web-kxbpzwq4sa-de.a.run.app/widget.js";
+const DEFAULT_WONDA_WIDGET_CHANNEL_ID = "cmqb6hynd002hs619tqxc3pe5";
+const DEFAULT_WONDA_WIDGET_API = "https://wonda-api-kxbpzwq4sa-de.a.run.app/api/v1";
+
+function escapeHtmlAttribute(value: string) {
+  return value.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+function isWondaWidgetDisabled(value: string | undefined) {
+  return ["0", "false", "off", "disabled", "no"].includes(String(value || "").trim().toLowerCase());
+}
+
+function wondaWidgetSnippet() {
+  if (isWondaWidgetDisabled(process.env.NEXT_PUBLIC_WONDA_WIDGET_ENABLED)) return "";
+  const scriptSrc = (process.env.NEXT_PUBLIC_WONDA_WIDGET_SCRIPT_SRC || DEFAULT_WONDA_WIDGET_SCRIPT_SRC).trim();
+  const channelId = (process.env.NEXT_PUBLIC_WONDA_WIDGET_CHANNEL_ID || DEFAULT_WONDA_WIDGET_CHANNEL_ID).trim();
+  const api = (process.env.NEXT_PUBLIC_WONDA_WIDGET_API || DEFAULT_WONDA_WIDGET_API).trim();
+  if (!scriptSrc || !channelId || !api) return "";
+  return `<script id="wonda-ai-widget" src="${escapeHtmlAttribute(scriptSrc)}" data-channel-id="${escapeHtmlAttribute(
+    channelId
+  )}" data-api="${escapeHtmlAttribute(api)}" async></script>`;
+}
 
 function homepageInjectionParts() {
   const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || "https://altoslab.com").replace(/\/$/, "");
@@ -72,7 +94,8 @@ function homepageInjectionParts() {
 
   return {
     metadata,
-    seoNoScriptFallback
+    seoNoScriptFallback,
+    wondaWidget: wondaWidgetSnippet()
   };
 }
 
@@ -87,7 +110,7 @@ function insertBeforeBodyClose(html: string, insertion: string) {
 }
 
 function withLaunchMetadata(html: string) {
-  const { metadata, seoNoScriptFallback } = homepageInjectionParts();
+  const { metadata, seoNoScriptFallback, wondaWidget } = homepageInjectionParts();
   const analyticsSnippet = homepageAnalyticsSnippet();
 
   let output = html
@@ -110,6 +133,10 @@ function withLaunchMetadata(html: string) {
 
   if (!output.includes("window.altosTrack")) {
     output = insertBeforeBodyClose(output, analyticsSnippet);
+  }
+
+  if (wondaWidget && !output.includes("id=\"wonda-ai-widget\"")) {
+    output = insertBeforeBodyClose(output, wondaWidget);
   }
 
   return output;

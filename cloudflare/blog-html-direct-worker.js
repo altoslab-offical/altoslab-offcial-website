@@ -270,6 +270,25 @@ function analyticsBody(env) {
     : "";
 }
 
+const DEFAULT_WONDA_WIDGET_SCRIPT_SRC = "https://wonda-web-kxbpzwq4sa-de.a.run.app/widget.js";
+const DEFAULT_WONDA_WIDGET_CHANNEL_ID = "cmqb6hynd002hs619tqxc3pe5";
+const DEFAULT_WONDA_WIDGET_API = "https://wonda-api-kxbpzwq4sa-de.a.run.app/api/v1";
+
+function isWondaWidgetDisabled(value) {
+  return ["0", "false", "off", "disabled", "no"].includes(String(value || "").trim().toLowerCase());
+}
+
+function wondaWidgetHtml(env = {}) {
+  if (isWondaWidgetDisabled(env.NEXT_PUBLIC_WONDA_WIDGET_ENABLED)) return "";
+  const scriptSrc = String(env.NEXT_PUBLIC_WONDA_WIDGET_SCRIPT_SRC || DEFAULT_WONDA_WIDGET_SCRIPT_SRC).trim();
+  const channelId = String(env.NEXT_PUBLIC_WONDA_WIDGET_CHANNEL_ID || DEFAULT_WONDA_WIDGET_CHANNEL_ID).trim();
+  const api = String(env.NEXT_PUBLIC_WONDA_WIDGET_API || DEFAULT_WONDA_WIDGET_API).trim();
+  if (!scriptSrc || !channelId || !api) return "";
+  return `<script id="wonda-ai-widget" src="${escapeAttribute(scriptSrc)}" data-channel-id="${escapeAttribute(
+    channelId
+  )}" data-api="${escapeAttribute(api)}" async></script>`;
+}
+
 function articleJsonLd(post, canonical, image) {
   return `<script type="application/ld+json">${JSON.stringify({
     "@context": "https://schema.org",
@@ -544,6 +563,7 @@ ${analyticsBody(env)}
   </main>
   <footer class="site-footer"><span class="brand-text">ALTOS LAB</span><span>© 2026 ALTOS LAB · AI implementation studio</span></footer>
 </div>
+${wondaWidgetHtml(env)}
 </body>
 </html>`;
 }
@@ -642,6 +662,7 @@ ${analyticsBody(env)}
   </main>
   <footer class="site-footer"><span class="brand-text">ALTOS LAB</span><span>© 2026 ALTOS LAB · AI implementation studio</span></footer>
 </div>
+${wondaWidgetHtml(env)}
 </body>
 </html>`;
   return body;
