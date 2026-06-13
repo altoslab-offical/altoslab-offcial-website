@@ -72,6 +72,11 @@ for (const forbidden of ["BLOG_INDEX_PAGE_SIZE =", "blog-lite-shell", "blog-lite
 }
 assert(directWorker.includes("readIndexPosts") && directWorker.includes("cloudflare-d1-index"), "Cloudflare direct renderer has the Worker-safe Blog index path");
 assert(directWorker.includes("headerLanguageMenuHtml") && directWorker.includes("site-mobile-menu-trigger"), "Cloudflare direct renderer keeps the designer handoff header contract");
+assert(directWorker.includes("ARTICLE_DESIGNER_CSS"), "Cloudflare direct renderer keeps article-specific designer CSS overrides");
+assert(
+  directWorker.includes("font-size:clamp(32px,3.05vw,42px)") && directWorker.includes("border-left:4px solid #c8ff00"),
+  "Cloudflare direct renderer keeps compact article titles and lime blockquote treatment"
+);
 
 const blogIndex = read("components/BlogIndex.tsx");
 for (const marker of ["blog-craft-index", "blog-craft-layout", "blog-craft-sidebar", "blog-craft-feed", "blog-craft-card"]) {

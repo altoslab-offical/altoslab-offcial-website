@@ -48,6 +48,7 @@ const cloudflareSetup = read("scripts/cloudflare-free-deploy-setup.sh");
 const cloudflareSeed = read("scripts/cloudflare-seed-kv.mjs");
 const cloudflareMigratePublicBlogCache = read("scripts/cloudflare-migrate-public-blog-cache.mjs");
 const cloudflareSmoke = read("scripts/cloudflare-smoke.mjs");
+const directWorker = read("cloudflare/blog-html-direct-worker.js");
 const n8nLocalBridge = read("scripts/n8n-local-bridge.mjs");
 const n8nLocalControlPlaneVerifier = read("scripts/verify-n8n-local-control-plane.sh");
 const cloudflareStagingConfig = read("wrangler.staging.jsonc");
@@ -389,8 +390,21 @@ assert(globals.includes("source-credit-note"), "article stylesheet displays sour
 assert(richText.includes("rich-highlight"), "rich text renderer supports in-article highlight marks");
 assert(richText.includes("==[^=\\n]+=="), "rich text renderer parses ==highlight== syntax");
 assert(
-  globals.includes("--article-highlight-line: rgb(164 255 0 / 0.18);") && globals.includes("color: #000000;"),
-  "article highlight underline uses ALTOS LAB lime at 18% opacity with black text"
+  globals.includes("--article-highlight-line: rgb(200 255 0 / 0.78);") && globals.includes("color: #050603;"),
+  "article highlight underline uses landing-page lime with black text"
+);
+assert(
+  globals.includes(".blog-site-shell .blog-article-page") &&
+    globals.includes("font-size: clamp(32px, 3.05vw, 42px);") &&
+    globals.includes("border-left: 4px solid #c8ff00;"),
+  "Next blog article CSS keeps the designer-approved compact title and lime blockquote treatment"
+);
+assert(
+  directWorker.includes("ARTICLE_DESIGNER_CSS") &&
+    directWorker.includes("html.replace(/==([^=\\n]+)==/g") &&
+    directWorker.includes("font-size:clamp(32px,3.05vw,42px)") &&
+    directWorker.includes("border-left:4px solid #c8ff00"),
+  "Cloudflare direct article renderer keeps the same Blog article designer CSS and highlight parser"
 );
 assert(adminShell.includes("applyBodyHighlight"), "admin editor can insert article highlight syntax from the body editor");
 assert(generation.includes("#A4FF00 emphasis underline"), "generation prompt teaches the fixed article highlight convention");

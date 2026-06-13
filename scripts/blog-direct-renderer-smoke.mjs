@@ -19,7 +19,7 @@ const post = {
   topic: "Renderer",
   geoSummary: "這段摘要包含 **粗體重點**。",
   body: [
-    "這是一段含有 **粗體文字** 的段落。",
+    "這是一段含有 **粗體文字** 與 ==螢光綠底線重點== 的段落。",
     "> ALTOS LAB 判斷：**責任邊界是護城河**。\n\n[IMAGE:opening]",
     "## 小標也支援 **粗體**",
     "這一段應該出現在第一張圖後面，而不是所有圖片都被堆到文末。",
@@ -107,12 +107,18 @@ assert(!html.includes("**"), "direct renderer does not leak raw Markdown bold ma
 assert(!html.includes("[IMAGE:"), "direct renderer does not leak image placement markers");
 assert(!html.includes("&gt; ALTOS LAB"), "direct renderer does not leak raw blockquote markers");
 assert(html.includes("<strong>粗體文字</strong>"), "paragraph bold markers render as strong");
+assert(html.includes('<mark class="rich-highlight">螢光綠底線重點</mark>'), "highlight markers render as mark");
 assert(html.includes("<blockquote><p>ALTOS LAB 判斷：<strong>責任邊界是護城河</strong>。</p></blockquote>"), "blockquote renders as HTML");
 assert(html.includes("<strong>先切測試環境</strong>"), "list item bold markers render as strong");
 assert(html.includes("<strong>粗體摘要</strong>"), "excerpt bold markers render as strong");
 assert(html.includes("<code>inline code</code>"), "inline code markers render as code");
 assert(html.includes('alt="Opening image"'), "opening image renders");
 assert(html.includes('alt="Mechanism image"'), "mechanism image renders");
+assert(
+  html.includes("ARTICLE_DESIGNER_CSS") ||
+    (html.includes("font-size:clamp(32px,3.05vw,42px)") && html.includes("border-left:4px solid #c8ff00")),
+  "direct renderer includes designer article CSS overrides"
+);
 assert(
   html.indexOf('alt="Opening image"') > html.indexOf("<blockquote>") &&
     html.indexOf('alt="Opening image"') < html.indexOf("<h2>小標也支援 <strong>粗體</strong></h2>"),
