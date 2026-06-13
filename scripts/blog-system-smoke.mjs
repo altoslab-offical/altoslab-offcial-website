@@ -57,6 +57,7 @@ const launchAgentPlist = read("scripts/com.altoslab.blog-local-worker.plist.exam
 const launchAgentInstaller = read("scripts/install-blog-launch-agent.sh");
 const seoGeoReport = read("scripts/seo-geo-insight-report.mjs");
 const operations = read("docs/OPERATIONS.md");
+const automationHandoff = read("docs/blog-automation-handoff.md");
 const imageStyleGuide = read("docs/content/ai-blog-image-style-guide.md");
 const columnVisualStyleLibrary = read("scripts/blog-column-visual-style-library.mjs");
 const adminShell = read("components/AdminShell.tsx");
@@ -385,6 +386,19 @@ assert(launchAgentPlist.includes("<integer>10</integer>") && launchAgentPlist.in
 assert(launchAgentPlist.includes("<integer>4</integer>"), "LaunchAgent includes post-release follow-up minutes");
 assert(launchAgentInstaller.includes("replace-with|test-secret"), "LaunchAgent installer refuses placeholder or test ingest secrets");
 assert(launchAgentInstaller.includes("launchctl bootstrap"), "LaunchAgent installer can bootstrap the scheduled local worker");
+assert(
+  automationHandoff.includes("ALTOS LAB 自動發文交接手冊") &&
+    automationHandoff.includes("Cloudflare Workers + Cloudflare D1") &&
+    automationHandoff.includes("n8n 跑在 Tommy 本機") &&
+    automationHandoff.includes("Market News Lane") &&
+    automationHandoff.includes("Column / Feature Lane") &&
+    automationHandoff.includes("Prepared Candidate Contract") &&
+    automationHandoff.includes("Daily Closeout") &&
+    automationHandoff.includes("不能修改 UI") &&
+    automationHandoff.includes("不能 fabricate Gemini/GPT evidence") &&
+    automationHandoff.includes("npm run verify:cloudflare -- --base-url https://altoslab-ai.cc --expected-provider cloudflare-d1"),
+  "automation handoff documents the Cloudflare+n8n blog publishing contract and fail-closed boundaries"
+);
 assert(blogArticle.includes("extractSourceTranslationNote"), "article renderer extracts source translation note from main body");
 assert(globals.includes("source-credit-note"), "article stylesheet displays source credit note as a compact support block");
 assert(richText.includes("rich-highlight"), "rich text renderer supports in-article highlight marks");
