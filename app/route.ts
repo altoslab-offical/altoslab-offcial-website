@@ -19,7 +19,7 @@ const FAVICON_LINKS = `<link rel="icon" href="/icon.svg" type="image/svg+xml" />
     <link rel="manifest" href="/manifest.webmanifest" />`;
 const DEFAULT_WONDA_WIDGET_SCRIPT_SRC = "https://wonda-web-kxbpzwq4sa-de.a.run.app/widget.js";
 const DEFAULT_WONDA_WIDGET_CHANNEL_ID = "cmqb6hynd002hs619tqxc3pe5";
-const DEFAULT_WONDA_WIDGET_API = "https://wonda-api-kxbpzwq4sa-de.a.run.app/api/v1";
+const DEFAULT_WONDA_WIDGET_API = "https://altoslab-ai.cc/api/wonda";
 
 function escapeHtmlAttribute(value: string) {
   return value.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");

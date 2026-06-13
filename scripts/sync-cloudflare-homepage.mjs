@@ -13,7 +13,7 @@ const description =
 const image = `${siteUrl}/geo-cover.png`;
 const DEFAULT_WONDA_WIDGET_SCRIPT_SRC = "https://wonda-web-kxbpzwq4sa-de.a.run.app/widget.js";
 const DEFAULT_WONDA_WIDGET_CHANNEL_ID = "cmqb6hynd002hs619tqxc3pe5";
-const DEFAULT_WONDA_WIDGET_API = "https://wonda-api-kxbpzwq4sa-de.a.run.app/api/v1";
+const DEFAULT_WONDA_WIDGET_API = "https://altoslab-ai.cc/api/wonda";
 
 const verificationEnv = {
   google: "GOOGLE_SITE_VERIFICATION",

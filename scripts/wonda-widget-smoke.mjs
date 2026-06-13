@@ -4,7 +4,7 @@ import { execFileSync } from "node:child_process";
 const root = new URL("../", import.meta.url);
 const EXPECTED_SCRIPT = "https://wonda-web-kxbpzwq4sa-de.a.run.app/widget.js";
 const EXPECTED_CHANNEL = "cmqb6hynd002hs619tqxc3pe5";
-const EXPECTED_API = "https://wonda-api-kxbpzwq4sa-de.a.run.app/api/v1";
+const EXPECTED_API = "https://altoslab-ai.cc/api/wonda";
 
 function assert(condition, message) {
   if (!condition) {
@@ -29,7 +29,10 @@ const sync = read("scripts/sync-cloudflare-homepage.mjs");
 const directBlog = read("cloudflare/blog-html-direct-worker.js");
 const homepage = existing("public/altoslab-homepage.html");
 const docs = [
+  existing("docs/wonda/altoslab-direct-qa-ai-support-widget.md"),
+  existing("docs/wonda/altoslab-website-support-scope-rules.md"),
   existing("docs/wonda/altoslab-website-knowledge-base.md"),
+  existing("docs/wonda/altoslab-service-tone-and-language-rules.md"),
   existing("docs/wonda/web-widget-integration.md")
 ].join("\n");
 
@@ -48,6 +51,11 @@ assert(route.includes("withCloudflareHomepageAssetHeaders(await readCloudflareHo
 assert(directBlog.includes("wondaWidgetHtml(env)"), "direct Cloudflare blog renderer injects the widget script");
 assert(docs.includes("ALTOS LAB 客服回答邊界"), "WonDa knowledge base documents customer-service boundaries");
 assert(docs.includes("不要回答或透露"), "WonDa knowledge base blocks internal secret disclosure");
+assert(docs.includes("語言匹配"), "WonDa knowledge base documents language matching behavior");
+assert(docs.includes("Filipino / Tagalog"), "WonDa knowledge base covers Filipino / Tagalog language behavior");
+assert(docs.includes("不要像硬推銷或後台機器人"), "WonDa knowledge base documents a warmer customer-service tone");
+assert(docs.includes("不要回答「訪客自己該怎麼操作後台或串接第三方平台」"), "WonDa knowledge base documents website-support scope control");
+assert(docs.includes("Can ALTOS LAB help us add an AI support widget to our website?"), "WonDa knowledge base includes direct AI support widget Q&A");
 
 const trackedFiles = execFileSync("git", ["ls-files"], { cwd: new URL(".", root), encoding: "utf8" })
   .split("\n")

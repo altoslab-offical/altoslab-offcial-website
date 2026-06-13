@@ -2,7 +2,7 @@ import Script from "next/script";
 
 const DEFAULT_WONDA_WIDGET_SCRIPT_SRC = "https://wonda-web-kxbpzwq4sa-de.a.run.app/widget.js";
 const DEFAULT_WONDA_WIDGET_CHANNEL_ID = "cmqb6hynd002hs619tqxc3pe5";
-const DEFAULT_WONDA_WIDGET_API = "https://wonda-api-kxbpzwq4sa-de.a.run.app/api/v1";
+const DEFAULT_WONDA_WIDGET_API = "https://altoslab-ai.cc/api/wonda";
 
 function isDisabled(value: string | undefined) {
   return ["0", "false", "off", "disabled", "no"].includes(String(value || "").trim().toLowerCase());

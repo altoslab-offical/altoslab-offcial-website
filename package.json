@@ -24,6 +24,7 @@
     "test:homepage": "node scripts/homepage-ui-contract-smoke.mjs",
     "test:blog": "node scripts/blog-system-smoke.mjs && node scripts/blog-market-newsroom-smoke.mjs && node scripts/blog-direct-renderer-smoke.mjs && node scripts/blog-ui-contract-smoke.mjs",
     "test:wonda-widget": "node scripts/wonda-widget-smoke.mjs",
+    "wonda:language-smoke": "node scripts/wonda-language-smoke.mjs",
     "blog:worker": "node scripts/blog-local-worker.mjs",
     "blog:orchestrate": "node scripts/blog-antigravity-orchestrator.mjs",
     "blog:scheduled": "node scripts/blog-scheduled-runner.mjs",

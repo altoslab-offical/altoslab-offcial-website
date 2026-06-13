@@ -13,7 +13,7 @@
   id="wonda-ai-widget"
   src="https://wonda-web-kxbpzwq4sa-de.a.run.app/widget.js"
   data-channel-id="cmqb6hynd002hs619tqxc3pe5"
-  data-api="https://wonda-api-kxbpzwq4sa-de.a.run.app/api/v1"
+  data-api="https://altoslab-ai.cc/api/wonda"
   async
 ></script>
 ```
@@ -24,6 +24,7 @@
 - `scripts/sync-cloudflare-homepage.mjs`：首頁靜態 asset 於 build time 注入 widget script，不做 request-time HTML rewrite，也不改首頁 UI。
 - `app/route.ts`：本機 fallback 首頁同樣注入 widget script，讓 local smoke 能對齊 production 行為。
 - `cloudflare/blog-html-direct-worker.js`：Cloudflare D1 直出 blog index 與文章頁注入 widget script。
+- `app/api/wonda/[...path]/route.ts`：公開 proxy，轉發 WonDa widget API，並在回覆出現錯語言、後台串接教學或不適合官網訪客的內容時套用 ALTOS LAB 多語客服 guard。
 
 ## 可覆蓋的環境變數
 
@@ -35,9 +36,12 @@
 ## 驗證
 
 - `npm run test:wonda-widget`
+- `npm run wonda:language-smoke`
 - `npm run test:homepage`
 - `curl -sS https://altoslab-ai.cc | rg "wonda-ai-widget|wonda-web|data-channel-id"`
 - `curl -sS https://altoslab-ai.cc/blog | rg "wonda-ai-widget|wonda-web|data-channel-id"`
+
+`wonda:language-smoke` 會用 public widget API 低成本測繁中、英文、日文、韓文、印尼文、越南文、泰文、馬來文與 Filipino / Tagalog。它不需要後台密鑰，只確認客服回覆是否跟訪客語言走、是否提到 ALTOS LAB、以及是否誤吐後台/API/script/channelId 等不該給訪客的內容。
 
 ## 安全邊界
 
