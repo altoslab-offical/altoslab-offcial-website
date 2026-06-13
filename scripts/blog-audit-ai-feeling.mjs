@@ -6,6 +6,7 @@ import process from "node:process";
 
 const DEFAULT_BASE_URL = "https://altoslab-ai.cc";
 const MARKET_FORBIDDEN_PATTERNS = [
+  /\bTL\s*;?\s*DR\b/i,
   /文中牽涉/i,
   /報導「」/i,
   /OpenAI News's current AI coverage/i,
@@ -61,6 +62,7 @@ const MARKET_GENERIC_ADVICE_PATTERNS = [
 ];
 
 const COLUMN_FORBIDDEN_PATTERNS = [
+  /\bTL\s*;?\s*DR\b/i,
   /###/i,
   /SEO\s*\/\s*GEO/i,
   /prompt card/i,

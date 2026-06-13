@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { SectionIntro } from "./SectionIntro";
+import { stripPublicExcerptPrefix } from "@/lib/public-copy";
 import type { BlogPost, PageSection } from "@/lib/types";
 
 type HomeLanguage = "zh-Hant" | "en";
@@ -54,7 +55,7 @@ export function InsightsSection({ section, posts }: { section: PageSection; post
           <Link className="insight-row" href={postHref(post)} key={post.id}>
             <span>{post.topic}</span>
             <strong>{post.title}</strong>
-            <p>{post.excerpt}</p>
+            <p>{stripPublicExcerptPrefix(post.excerpt)}</p>
           </Link>
         ))}
       </div>

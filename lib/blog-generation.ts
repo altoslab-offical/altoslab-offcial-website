@@ -937,7 +937,7 @@ Quality rules:
 - Write like an editor who expects a busy founder to finish the piece: concrete first sentence, human rhythm, source-backed detail, one useful judgment per section.
 - seoDescription must be 80-150 characters.
 - excerpt must be 90-220 characters or equivalent local-language length; if the subject requires two short sentences, use two.
-- geoSummary is reader-facing TL;DR, not an internal field label. It must be 2-4 useful sentences, 180-420 characters or equivalent local-language length, and explain the article's main judgment, evidence base, uncertainty and next operator action.
+- geoSummary is a reader-facing summary, not an internal field label. It must be 2-4 useful sentences, 180-420 characters or equivalent local-language length, and explain the article's main judgment, evidence base, uncertainty and next operator action.
 - Do not write "GEO answer summary" inside geoSummary. Do not describe the post as an "SEO/GEO asset" unless the topic is specifically search visibility.
 - keyTakeaways must contain 4 concrete, non-generic bullets.
 - faqs must contain 3-5 visible questions and answers covered by the article.

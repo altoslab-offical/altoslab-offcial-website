@@ -10,6 +10,7 @@ import {
   metadataLanguageKey,
   openGraphLocale
 } from "./blog-utils";
+import { stripPublicExcerptPrefix } from "./public-copy";
 import { articleJsonLd, blogIndexItemListJsonLd, breadcrumbJsonLd, siteName, siteUrl, websiteJsonLd } from "./seo";
 import type { BlogLanguage, BlogPost } from "./types";
 
@@ -236,7 +237,7 @@ export function renderBlogIndexHtml(language: BlogLanguage, posts: BlogPost[], p
         <div class="card-body">
           <div class="meta"><span class="badge">${escapeHtml(blogContentTypeLabel(post.contentType, post.language))}</span><span>${escapeHtml(postDate(post))}</span><span>${escapeHtml(String(post.readTimeMinutes || 3))} min</span></div>
           <h2><a href="${escapeAttribute(blogPostPath(post))}">${escapeHtml(post.title)}</a></h2>
-          <p>${escapeHtml(post.excerpt)}</p>
+          <p>${escapeHtml(stripPublicExcerptPrefix(post.excerpt))}</p>
           <a class="read" href="${escapeAttribute(blogPostPath(post))}">${escapeHtml(dictionary.read)}</a>
         </div>
       </article>`
@@ -385,7 +386,7 @@ export function renderBlogPostHtml(post: BlogPost, alternates: BlogPost[] = []) 
         <a class="back" href="${escapeAttribute(blogIndexPath(post.language))}">Back</a>
         <p class="eyebrow">${escapeHtml(blogContentTypeLabel(post.contentType, post.language))} · ${escapeHtml(postDate(post))}</p>
         <h1>${escapeHtml(post.title)}</h1>
-        <p class="lede">${escapeHtml(post.excerpt)}</p>
+        <p class="lede">${escapeHtml(stripPublicExcerptPrefix(post.excerpt))}</p>
         <figure class="cover"><img src="${escapeAttribute(post.cover || blogCoverForLanguage(post.language))}" alt="${escapeAttribute(post.coverAlt || post.title)}" decoding="async" /></figure>
         ${post.coverCredit ? `<p class="caption">${escapeHtml(post.coverCredit)}</p>` : ""}
       </header>

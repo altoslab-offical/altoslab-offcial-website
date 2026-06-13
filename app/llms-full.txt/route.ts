@@ -91,7 +91,7 @@ export async function GET() {
         `Topic: ${publicTaxonomyLabel(post.topic, post.language)}`,
         `Audience: ${publicTaxonomyLabel(post.audience, post.language)}`,
         `Search description: ${publicTaxonomyLabel(post.seoDescription || post.excerpt, post.language)}`,
-        `TL;DR: ${publicTaxonomyLabel(post.geoSummary, post.language)}`,
+        `Summary: ${publicTaxonomyLabel(post.geoSummary, post.language)}`,
         `Key takeaways: ${post.keyTakeaways.map((item) => publicTaxonomyLabel(item, post.language)).join(" | ")}`,
         "Sources:",
         sources,

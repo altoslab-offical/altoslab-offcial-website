@@ -19,6 +19,7 @@ import { blogContentTypeLabel, blogIndexPath, blogPostPath, languageLabel } from
 import { toBlogVisualPost } from "@/lib/blog-visual";
 import { isCloudflareKvConfigured } from "@/lib/cloudflare-kv";
 import { getRelatedPublishedBlogPosts } from "@/lib/cms";
+import { stripPublicExcerptPrefix } from "@/lib/public-copy";
 import { publicTaxonomyLabel, publicTaxonomyLabels } from "@/lib/public-taxonomy";
 import { articleJsonLd, breadcrumbJsonLd, faqJsonLd } from "@/lib/seo";
 import type { BlogInlineImage, BlogPost } from "@/lib/types";
@@ -43,7 +44,7 @@ const copy = {
     back: "← Blog",
     updated: "Updated",
     readTime: (minutes: number) => `${minutes} min read`,
-    geoSummary: "TL;DR",
+    geoSummary: "Summary",
     takeaways: "Key Takeaways",
     faq: "FAQ",
     sources: "Sources",
@@ -478,7 +479,7 @@ export async function BlogArticle({ post }: { post: BlogPost }) {
               </span>
               <span>{languageLabel(post.language)}</span>
             </div>
-            <p className="hero-copy">{renderBrandText(post.excerpt)}</p>
+            <p className="hero-copy">{renderBrandText(stripPublicExcerptPrefix(post.excerpt))}</p>
             {post.cover ? (
               <>
                 <SafeBlogImage className="article-cover" loading="eager" post={coverPost} />

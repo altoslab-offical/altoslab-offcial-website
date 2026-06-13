@@ -67,7 +67,7 @@ const newerIndexPost = {
   id: "post-direct-renderer-newer",
   slug: "newest-direct-renderer-smoke",
   title: "Newest direct renderer smoke",
-  excerpt: "Newer published articles must appear before recently edited old articles.",
+  excerpt: "TLDR（OpenAI News）：Newer published articles must appear before recently edited old articles.",
   updatedAt: "2026-06-10T00:00:00.000Z",
   publishedAt: "2026-06-13T00:00:00.000Z"
 };
@@ -129,6 +129,9 @@ const indexHtml = await indexResponse.text();
 assert(indexResponse.status === 200, "blog index direct renderer returns 200");
 assert(indexResponse.headers.get("x-altos-direct-blog-render") === "cloudflare-d1-index", "blog index direct renderer header is present");
 assert(indexHtml.includes("blog-craft-index") && indexHtml.includes("blog-craft-card"), "blog index direct renderer preserves Blog Craft UI classes");
+assert(indexHtml.includes(".sr-only{"), "blog index direct renderer includes accessible hidden text CSS");
+assert(!/\bTL\s*;?\s*DR\b/i.test(indexHtml), "blog index direct renderer strips public TLDR prefixes");
+assert(indexHtml.includes("Newer published articles must appear before recently edited old articles."), "blog index direct renderer keeps cleaned excerpt text");
 assert(indexHtml.includes("Markdown inline rendering smoke"), "blog index direct renderer reads D1 inventory rows");
 assert(
   indexHtml.indexOf("Newest direct renderer smoke") >= 0 &&
@@ -140,10 +143,12 @@ const feedResponse = await maybeHandleDirectBlogHtml(new Request("https://altosl
 const feedXml = await feedResponse.text();
 assert(feedResponse.headers.get("x-altos-direct-blog-render") === "cloudflare-d1-feed", "feed direct renderer header is present");
 assert(feedXml.includes("<rss") && feedXml.includes("<item>"), "feed direct renderer returns RSS XML");
+assert(!/\bTL\s*;?\s*DR\b/i.test(feedXml), "feed direct renderer strips public TLDR prefixes");
 
 const llmsResponse = await maybeHandleDirectBlogHtml(new Request("https://altoslab-ai.cc/llms.txt"), env);
 const llmsText = await llmsResponse.text();
 assert(llmsResponse.headers.get("x-altos-direct-blog-render") === "cloudflare-d1-llms", "llms direct renderer header is present");
 assert(llmsText.includes("# ALTOS LAB") && llmsText.includes("Markdown inline rendering smoke"), "llms direct renderer returns lightweight blog context");
+assert(!/\bTL\s*;?\s*DR\b/i.test(llmsText), "llms direct renderer strips public TLDR prefixes");
 
 if (!process.exitCode) console.log("PASS blog direct renderer smoke checks");

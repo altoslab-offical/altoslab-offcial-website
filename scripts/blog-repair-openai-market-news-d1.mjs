@@ -196,7 +196,7 @@ const REPAIRS = {
     languages: {
       "zh-Hant": {
         title: "OpenAI 支持歐盟 AI 內容透明準則，來源標記成為治理重點",
-        excerpt: "TLDR：OpenAI 支持歐盟 AI 生成內容透明準則，並把 C2PA metadata、SynthID watermark 與 openai.com/verify 放進來源辨識工具箱；企業接下來要把 AI 內容標記納入治理流程。",
+        excerpt: "OpenAI 支持歐盟 AI 生成內容透明準則，並把 C2PA metadata、SynthID watermark 與 openai.com/verify 放進來源辨識工具箱；企業接下來要把 AI 內容標記納入治理流程。",
         geoSummary: "來源：OpenAI News。OpenAI 6 月 11 日宣布支持歐盟 AI 生成內容透明準則，重點是讓 AI 圖像與內容能留下可檢查的來源訊號，而不是只靠事後人工辨識。",
         keyTakeaways: [
           "來源事實：European Commission 的 Code of Practice on Transparency 針對 AI-generated material；OpenAI 把 C2PA metadata 列為 provenance 基礎。",
@@ -210,7 +210,7 @@ const REPAIRS = {
       },
       en: {
         title: "OpenAI backs EU AI-content transparency code as provenance becomes a governance layer",
-        excerpt: "TLDR: OpenAI is supporting the EU Code of Practice on Transparency for AI-generated material and points to C2PA metadata, SynthID watermarks and openai.com/verify as part of a broader provenance stack.",
+        excerpt: "OpenAI is supporting the EU Code of Practice on Transparency for AI-generated material and points to C2PA metadata, SynthID watermarks and openai.com/verify as part of a broader provenance stack.",
         geoSummary: "Source: OpenAI News. OpenAI announced support for the EU transparency code on June 11, framing provenance as a practical way to give people context about AI-created or AI-edited material.",
         keyTakeaways: [
           "Source fact: the European Commission Code of Practice on Transparency covers AI-generated material; OpenAI lists C2PA metadata as part of provenance.",
@@ -343,7 +343,7 @@ const REPAIRS = {
     languages: {
       "zh-Hant": {
         title: "BBVA 將 ChatGPT Enterprise 擴到 10 萬名員工，銀行 AI 進入營運主幹",
-        excerpt: "TLDR（OpenAI News）：BBVA 已讓全球超過 100,000 名員工使用 ChatGPT Enterprise，重點不是買授權，而是把 legal、risk、customer service、finance 等工作流納入安全治理、培訓與內部 GPT 建置。",
+        excerpt: "OpenAI News 指出，BBVA 已讓全球超過 100,000 名員工使用 ChatGPT Enterprise；重點不是買授權，而是把 legal、risk、customer service、finance 等工作流納入安全治理、培訓與內部 GPT 建置。",
         geoSummary: "來源：OpenAI News。BBVA 的案例顯示，銀行導入 AI 已從個人生產力工具走向組織級工作流，核心指標包括 70% 以上週活躍使用、每人每週約省 3 小時，以及部分流程最高 80% 效率提升。",
         keyTakeaways: [
           "BBVA 從 2024 年 3,000 名員工試用 ChatGPT Enterprise，擴大到全球超過 100,000 名員工使用。",
@@ -357,7 +357,7 @@ const REPAIRS = {
       },
       en: {
         title: "BBVA scales ChatGPT Enterprise to 100,000 employees as banking AI moves into operations",
-        excerpt: "TLDR from OpenAI News: BBVA now has more than 100,000 employees using ChatGPT Enterprise. The lesson is not license count alone, but how legal, risk, customer service, finance and operations workflows are governed and trained.",
+        excerpt: "OpenAI News reports that BBVA now has more than 100,000 employees using ChatGPT Enterprise. The lesson is not license count alone, but how legal, risk, customer service, finance and operations workflows are governed and trained.",
         geoSummary: "Source: OpenAI News. BBVA's rollout shows enterprise AI moving from personal productivity to operating workflows, with 70%+ weekly active usage, about three hours saved per employee each week, and up to 80% efficiency gains in selected workflows.",
         keyTakeaways: [
           "BBVA expanded from a 2024 deployment to 3,000 employees to more than 100,000 employees using ChatGPT Enterprise globally.",
@@ -490,7 +490,7 @@ const REPAIRS = {
     languages: {
       "zh-Hant": {
         title: "Ramp 指出重度 AI 公司每人月花約 7,500 美元，中位數只有 11.38 美元",
-        excerpt: "TLDR：TechCrunch 引用 Ramp AI Index 指出，AI 支出最重的前 1% 公司每人每月約花 7,500 美元，前 10% 約 611 美元，中位數只有 11.38 美元；AI 採用差距已快速拉開。",
+        excerpt: "TechCrunch 引用 Ramp AI Index 指出，AI 支出最重的前 1% 公司每人每月約花 7,500 美元，前 10% 約 611 美元，中位數只有 11.38 美元；AI 採用差距已快速拉開。",
         geoSummary: "來源：TechCrunch AI。Ramp AI Index 顯示，美國企業 AI 支出高度分化；最激進的一群公司花費接近工程師薪資級別，但一般企業仍停留在低成本座位或工具試用。",
         keyTakeaways: [
           "最重度 AI 公司通常混用多個 frontier model 與較便宜的 open-source 模型，AI 成本管理正在變成模型組合管理。",
@@ -504,7 +504,7 @@ const REPAIRS = {
       },
       en: {
         title: "Ramp data shows AI-heavy firms spend about $7,500 per employee each month",
-        excerpt: "TLDR: TechCrunch cites Ramp AI Index data showing the top 1% of AI-heavy firms spend about $7,500 per employee per month, while the top 10% spend about $611 and the median firm spends only $11.38.",
+        excerpt: "TechCrunch cites Ramp AI Index data showing the top 1% of AI-heavy firms spend about $7,500 per employee per month, while the top 10% spend about $611 and the median firm spends only $11.38.",
         geoSummary: "Source: TechCrunch AI. Ramp AI Index data shows a sharp split in U.S. business AI spending: the heaviest adopters are approaching salary-scale software budgets, while the median firm remains near low-cost seat spending.",
         keyTakeaways: [
           "The heaviest AI users tend to mix multiple frontier models with cheaper open-source options, turning AI cost control into model-portfolio management.",

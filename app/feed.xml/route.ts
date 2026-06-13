@@ -1,5 +1,6 @@
 import { getPublishedBlogInventoryPosts, getPublishedBlogPosts } from "@/lib/cms";
 import { blogPostPath } from "@/lib/blog-utils";
+import { stripPublicExcerptPrefix } from "@/lib/public-copy";
 import { publicTaxonomyLabel } from "@/lib/public-taxonomy";
 import { absoluteUrl, siteName, siteUrl } from "@/lib/seo";
 import type { BlogPost } from "@/lib/types";
@@ -39,7 +40,7 @@ export async function GET() {
         <title>${escapeXml(post.title)}</title>
         <link>${url}</link>
         <guid isPermaLink="true">${url}</guid>
-        <description>${escapeXml(post.excerpt)}</description>
+        <description>${escapeXml(stripPublicExcerptPrefix(post.excerpt))}</description>
         <pubDate>${new Date(post.publishedAt || post.createdAt).toUTCString()}</pubDate>
         <category>${escapeXml(post.contentType || "column")}</category>
         <category>${escapeXml(publicTaxonomyLabel(post.newsCategory || post.topic, post.language))}</category>
