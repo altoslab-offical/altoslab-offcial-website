@@ -38,6 +38,18 @@ Public website rendering rule:
 - Public users only see `published` pages, sections, projects, and section items.
 - Draft, archived, and deleted records must never be returned by public APIs.
 
+## Public UI Change Control
+
+Automation and optimization work must not change public UI unless Tommy explicitly asks for a UI/design change in the current task.
+
+This rule applies to content automation, n8n, SEO/GEO, Cloudflare repair, Worker/direct-render fixes, performance work, contact form routing, chatbot integration, cache repair, publishing scripts, and backend/API work. Those tasks may change data, validation, API behavior, health checks, caching, scheduling, or operational guards, but they must not alter homepage layout, Blog index layout, Blog article shell, shared header/navigation, language switcher, sidebar, typography, spacing, visual tokens, or public component ownership.
+
+If a non-design task appears to require touching protected UI surfaces, stop and record the blocker. Do not "clean up", "optimize", or "simplify" visible UI as a side effect.
+
+Protected surfaces include `index.html`, `altoslab-website.html`, `app/route.ts`, `app/globals.css`, `components/BlogIndex.tsx`, `components/site/*`, `cloudflare/blog-html-direct-worker.js`, `public/altoslab-homepage.html`, and any selector used by `blog-craft-*`, homepage hero/header, Blog sidebar, article hero, language menu, contact CTA, or WonDa widget placement.
+
+Any intentional UI/design change requires explicit source-of-truth approval, updated docs, updated smoke guards, `npm test`, and fresh desktop/mobile browser evidence before deploy.
+
 ## Homepage UI Stability Contract
 
 The public homepage (`/`) is a protected brand/design surface. The current production contract is the original static homepage bundle, not a modular replacement page.

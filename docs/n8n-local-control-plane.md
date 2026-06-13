@@ -23,6 +23,7 @@ n8n does not own:
 - Public website serving.
 - Cloudflare Worker deployments.
 - CMS encryption keys or production D1/KV seeding.
+- Public UI Change Control: n8n must not change homepage, Blog, article shell, header, sidebar, language switcher, contact CTA, WonDa widget placement, visual tokens, public route ownership, or `app/globals.css` styles. If a workflow repair appears to need UI changes, record the blocker and stop.
 - Blog UI Stability Contract: n8n must not change `/blog`, `/:language/blog`, `components/BlogIndex.tsx`, `app/globals.css` `blog-craft-*` styles, route ownership, or visual hierarchy.
 - Article quality judgment.
 - Nine-language identity/media parity gates.

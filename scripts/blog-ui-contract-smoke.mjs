@@ -66,6 +66,7 @@ for (const pathname of indexPaths) {
 }
 
 const directWorker = read("cloudflare/blog-html-direct-worker.js");
+const agents = read("AGENTS.md");
 for (const forbidden of ["BLOG_INDEX_PAGE_SIZE =", "blog-lite-shell", "blog-lite-card"]) {
   assert(!directWorker.includes(forbidden), `Cloudflare direct renderer must not contain ${forbidden}`);
 }
@@ -98,6 +99,10 @@ for (const file of pageFiles) {
 
 for (const file of ["SPEC.md", "DESIGN.md", "docs/FRONTEND_ARCHITECTURE.md", "docs/n8n-local-control-plane.md"]) {
   assert(read(file).includes("Blog UI Stability Contract"), `${file} documents the Blog UI Stability Contract`);
+  assert(read(file).includes("Public UI Change Control"), `${file} documents the Public UI Change Control`);
 }
+
+assert(agents.includes("Public UI Change Control"), "AGENTS.md includes the public UI change-control rule");
+assert(agents.includes("must not change public UI unless Tommy explicitly asks"), "AGENTS.md blocks accidental UI changes in non-design work");
 
 if (!process.exitCode) console.log("PASS blog UI contract smoke checks");

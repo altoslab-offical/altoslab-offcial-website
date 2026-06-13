@@ -167,6 +167,32 @@ Current architecture:
 - `app/globals.css` imports the tokens for admin, blog, project pages, and future component work.
 - `components/site/*` exists as inactive prototype code and is not the public homepage route.
 
+## Public UI Change Control
+
+Public UI is locked by default. Automation, n8n, SEO/GEO, Cloudflare repair,
+content publishing, contact form routing, chatbot integration, cache repair,
+performance work, and backend/API optimization must not alter visible layout or
+visual styling unless Tommy explicitly asks for a UI/design change.
+
+Allowed non-design changes:
+
+- Data correctness, content copy cleanup, validation gates, API behavior,
+  health checks, caching, scheduling, and operational reliability.
+
+Forbidden side effects:
+
+- Replacing homepage or Blog layout.
+- Changing header/navigation/language switcher behavior for visual reasons.
+- Changing Blog sidebar, card grid, article hero/title rhythm, typography,
+  spacing, images, visual tokens, or public component ownership.
+- Rewriting `index.html`, `altoslab-website.html`, `app/globals.css`,
+  `components/BlogIndex.tsx`, `components/site/*`, or
+  `cloudflare/blog-html-direct-worker.js` as part of a non-design task.
+
+Any intentional design change must cite the designer/source-of-truth reference,
+update the relevant UI smoke guard, and include fresh desktop and mobile browser
+evidence before deploy.
+
 ## Homepage UI Stability Contract
 
 The homepage is a protected brand/design surface. Its canonical visual source is the original static bundle in `index.html`, mirrored to `public/altoslab-homepage.html` for Cloudflare assets by `scripts/sync-cloudflare-homepage.mjs`.

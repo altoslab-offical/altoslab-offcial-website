@@ -15,6 +15,19 @@ the SEO metadata wrapper.
 
 This is intentional. The homepage should not be replaced with a new React implementation unless the migration is explicitly approved and visually checked against the current page.
 
+## Public UI Change Control
+
+Non-design work must not change public UI. Content automation, n8n, SEO/GEO,
+Cloudflare repair, direct-render optimization, contact form routing, chatbot
+integration, cache repair, and backend/API work may change data and reliability
+paths, but they must not change homepage layout, Blog index layout, article
+layout, header/navigation, language switcher, sidebar, typography, spacing,
+visual tokens, or public route/component ownership.
+
+If a fix would touch protected UI surfaces, treat that as a separate UI/design
+change and require explicit approval, docs, smoke-test updates, and browser
+evidence before deploy.
+
 ## Homepage UI Stability Contract
 
 The homepage route is a wrapper, not a redesign surface.

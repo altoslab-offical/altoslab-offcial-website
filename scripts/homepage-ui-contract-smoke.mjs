@@ -12,6 +12,7 @@ function read(file) {
 }
 
 const route = read("app/route.ts");
+const agents = read("AGENTS.md");
 const index = read("index.html");
 const contactForm = read("components/ContactForm.tsx");
 const contactRoute = read("app/api/contact/route.ts");
@@ -76,6 +77,10 @@ assert(contactNotification.includes("missing-env"), "contact Gmail notification 
 
 for (const file of ["SPEC.md", "DESIGN.md", "docs/FRONTEND_ARCHITECTURE.md"]) {
   assert(read(file).includes("Homepage UI Stability Contract"), `${file} documents the Homepage UI Stability Contract`);
+  assert(read(file).includes("Public UI Change Control"), `${file} documents the Public UI Change Control`);
 }
+
+assert(agents.includes("Public UI Change Control"), "AGENTS.md includes the public UI change-control rule");
+assert(agents.includes("must not change public UI unless Tommy explicitly asks"), "AGENTS.md blocks accidental UI changes in non-design work");
 
 if (!process.exitCode) console.log("PASS homepage UI contract smoke checks");
