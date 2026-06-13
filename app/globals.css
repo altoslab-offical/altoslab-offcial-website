@@ -3829,11 +3829,11 @@ img {
 }
 
 .blog-site-shell .blog-page {
-  padding-top: 64px;
+  padding-top: 28px;
 }
 
 .blog-site-shell .blog-article-page {
-  padding-top: 40px;
+  padding-top: 28px;
 }
 
 .blog-site-shell .eyebrow {
@@ -4052,7 +4052,7 @@ img {
 .blog-site-shell .article-hero h1 {
   margin: 0;
   color: var(--al-blog-strong);
-  font-size: clamp(32px, 3.05vw, 42px);
+  font-size: clamp(34px, 3.25vw, 44px);
   line-height: 1.1;
   letter-spacing: 0;
   font-weight: 700;
@@ -4101,9 +4101,9 @@ img {
 }
 
 .blog-site-shell .geo-summary {
-  border-left-color: #c8ff00;
+  border-left: 4px solid #c8ff00;
   background: linear-gradient(90deg, rgb(200 255 0 / 0.14), rgb(200 255 0 / 0.04));
-  color: var(--al-blog-ink);
+  color: #050603;
   font-size: 16px;
   line-height: 1.5;
 }
@@ -4208,9 +4208,9 @@ img {
 .blog-site-shell .rich-text blockquote {
   margin: 2em 0;
   padding: 18px 20px;
-  border-left: 4px solid #c8ff00;
+  border-left: 4px solid #050603;
   background: linear-gradient(90deg, rgb(200 255 0 / 0.16), rgb(200 255 0 / 0.04) 62%, transparent);
-  color: var(--al-blog-ink);
+  color: #050603;
   font-size: 1.02em;
   line-height: 1.65;
 }
@@ -4267,8 +4267,7 @@ img {
 }
 
 .blog-site-shell .geo-summary strong,
-.blog-site-shell .article-takeaways .eyebrow,
-.blog-site-shell .article-takeaways li {
+.blog-site-shell .article-takeaways .eyebrow {
   color: #050603;
   font-weight: 850;
 }
@@ -4276,6 +4275,8 @@ img {
 .blog-site-shell .article-takeaways li {
   width: fit-content;
   max-width: 100%;
+  color: #050603;
+  font-weight: 850;
   background: linear-gradient(to top, rgb(200 255 0 / 0.68) 0 0.42em, transparent 0.42em);
   box-decoration-break: clone;
   -webkit-box-decoration-break: clone;

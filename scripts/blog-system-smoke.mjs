@@ -394,16 +394,30 @@ assert(
   "article highlight underline uses landing-page lime with black text"
 );
 assert(
-  globals.includes(".blog-site-shell .blog-article-page") &&
-    globals.includes("font-size: clamp(32px, 3.05vw, 42px);") &&
-    globals.includes("border-left: 4px solid #c8ff00;"),
-  "Next blog article CSS keeps the designer-approved compact title and lime blockquote treatment"
+    globals.includes(".blog-site-shell .blog-article-page") &&
+    globals.includes("padding-top: 28px;") &&
+    globals.includes("font-size: clamp(34px, 3.25vw, 44px);") &&
+    globals.includes("border-left: 4px solid #c8ff00;") &&
+    globals.includes("rgb(200 255 0 / 0.14)") &&
+    globals.includes("border-left: 4px solid #050603;") &&
+    globals.includes("rgb(200 255 0 / 0.16)") &&
+    globals.includes(".blog-site-shell .article-takeaways .eyebrow") &&
+    globals.includes("color: #050603;") &&
+    globals.includes(".blog-site-shell .article-takeaways li::marker") &&
+    globals.includes("color: #c8ff00;"),
+  "Next blog article CSS keeps compact titles, black summary/takeaway labels, and lime emphasis"
 );
 assert(
-  directWorker.includes("ARTICLE_DESIGNER_CSS") &&
+    directWorker.includes("ARTICLE_DESIGNER_CSS") &&
     directWorker.includes("html.replace(/==([^=\\n]+)==/g") &&
-    directWorker.includes("font-size:clamp(32px,3.05vw,42px)") &&
-    directWorker.includes("border-left:4px solid #c8ff00"),
+    directWorker.includes(".blog-article-page{padding-top:28px}") &&
+    directWorker.includes("font-size:clamp(34px,3.25vw,44px)") &&
+    directWorker.includes(".article-takeaways .eyebrow{color:#050603") &&
+    directWorker.includes(".geo-summary{border-left:4px solid #c8ff00") &&
+    directWorker.includes("rgb(200 255 0 / .14)") &&
+    directWorker.includes("border-left:4px solid #050603") &&
+    directWorker.includes("rgb(200 255 0 / .16)") &&
+    directWorker.includes(".article-takeaways li::marker{color:#c8ff00"),
   "Cloudflare direct article renderer keeps the same Blog article designer CSS and highlight parser"
 );
 assert(adminShell.includes("applyBodyHighlight"), "admin editor can insert article highlight syntax from the body editor");

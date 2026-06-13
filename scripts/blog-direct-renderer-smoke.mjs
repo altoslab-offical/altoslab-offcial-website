@@ -116,7 +116,13 @@ assert(html.includes('alt="Opening image"'), "opening image renders");
 assert(html.includes('alt="Mechanism image"'), "mechanism image renders");
 assert(
   html.includes("ARTICLE_DESIGNER_CSS") ||
-    (html.includes("font-size:clamp(32px,3.05vw,42px)") && html.includes("border-left:4px solid #c8ff00")),
+    (html.includes("font-size:clamp(34px,3.25vw,44px)") &&
+      html.includes(".geo-summary{border-left:4px solid #c8ff00") &&
+      html.includes("rgb(200 255 0 / .14)") &&
+      html.includes("border-left:4px solid #050603") &&
+      html.includes("rgb(200 255 0 / .16)") &&
+      html.includes(".article-takeaways .eyebrow{color:#050603") &&
+      html.includes(".article-takeaways li::marker{color:#c8ff00")),
   "direct renderer includes designer article CSS overrides"
 );
 assert(

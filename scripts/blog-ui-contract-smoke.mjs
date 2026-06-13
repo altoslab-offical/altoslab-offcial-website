@@ -74,8 +74,14 @@ assert(directWorker.includes("readIndexPosts") && directWorker.includes("cloudfl
 assert(directWorker.includes("headerLanguageMenuHtml") && directWorker.includes("site-mobile-menu-trigger"), "Cloudflare direct renderer keeps the designer handoff header contract");
 assert(directWorker.includes("ARTICLE_DESIGNER_CSS"), "Cloudflare direct renderer keeps article-specific designer CSS overrides");
 assert(
-  directWorker.includes("font-size:clamp(32px,3.05vw,42px)") && directWorker.includes("border-left:4px solid #c8ff00"),
-  "Cloudflare direct renderer keeps compact article titles and lime blockquote treatment"
+  directWorker.includes("font-size:clamp(34px,3.25vw,44px)") &&
+    directWorker.includes(".article-takeaways .eyebrow{color:#050603") &&
+    directWorker.includes(".geo-summary{border-left:4px solid #c8ff00") &&
+    directWorker.includes("rgb(200 255 0 / .14)") &&
+    directWorker.includes("border-left:4px solid #050603") &&
+    directWorker.includes("rgb(200 255 0 / .16)") &&
+    directWorker.includes(".article-takeaways li::marker{color:#c8ff00"),
+  "Cloudflare direct renderer keeps compact article titles, black summary/takeaway labels, and lime emphasis"
 );
 
 const blogIndex = read("components/BlogIndex.tsx");
