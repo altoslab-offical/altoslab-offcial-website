@@ -389,14 +389,15 @@ assert(
   automationHandoff.includes("ALTOS LAB 自動發文交接手冊") &&
     automationHandoff.includes("Cloudflare Workers + Cloudflare D1") &&
     automationHandoff.includes("n8n 跑在 Tommy 本機") &&
+    automationHandoff.includes("Hermes ops profile 作為 CMO/editor owner") &&
     automationHandoff.includes("Market News Lane") &&
     automationHandoff.includes("Column / Feature Lane") &&
     automationHandoff.includes("Prepared Candidate Contract") &&
     automationHandoff.includes("Daily Closeout") &&
-    automationHandoff.includes("不能修改 UI") &&
+    automationHandoff.includes("不能自行修改 UI") &&
     automationHandoff.includes("不能 fabricate Gemini/GPT evidence") &&
     automationHandoff.includes("npm run verify:cloudflare -- --base-url https://altoslab-ai.cc --expected-provider cloudflare-d1"),
-  "automation handoff documents the Cloudflare+n8n blog publishing contract and fail-closed boundaries"
+  "automation handoff documents the Cloudflare+n8n/Hermes blog publishing contract and fail-closed boundaries"
 );
 assert(blogArticle.includes("extractSourceTranslationNote"), "article renderer extracts source translation note from main body");
 assert(globals.includes("source-credit-note"), "article stylesheet displays source credit note as a compact support block");

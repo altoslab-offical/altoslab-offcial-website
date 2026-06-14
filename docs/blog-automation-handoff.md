@@ -6,7 +6,7 @@
 
 ## 一句話架構
 
-網站與 CMS 跑在雲端 Cloudflare Workers + Cloudflare D1；n8n 跑在 Tommy 本機，只負責排程、重試、健康檢查與呼叫 allowlisted local bridge。文章品質、來源判斷、Gemini/GPT 瀏覽器證據、release gate 與最終 publish/no-publish 決策仍由 Codex main-brain 負責，所有 publish 都必須 fail closed。
+網站與 CMS 跑在雲端 Cloudflare Workers + Cloudflare D1；n8n 跑在 Tommy 本機，可作為排程、重試、健康檢查與 allowlisted local bridge 控制平面。文章品質、來源判斷、Gemini/GPT 瀏覽器證據、release gate 與最終 publish/no-publish 決策由 Hermes ops profile 作為 CMO/editor owner 負責；n8n、bridge、scripts 都是 Hermes 可選用或替換的工具。
 
 ## 系統邊界
 
@@ -39,7 +39,7 @@
 - Column / feature 必須先由 Gemini 在指定 Chrome profile 產出 source-of-truth zh-Hant 文章，main-brain 審過後才可 localization。
 - Column / feature 的 cover 與 2-3 張 shared in-article images 只能透過指定 ChatGPT/GPT image workflow 或明確 human-approved editorial design QA。
 - Release window 不產生新內容，只發布已經 `ready` 的 prepared candidate。
-- n8n 不能修改 UI、Blog layout、CSS、header、sidebar、language switcher、WonDa widget placement 或任何 public design surface。
+- n8n/bridge/scripts 不能自行修改 UI、Blog layout、CSS、header、sidebar、language switcher、WonDa widget placement 或任何 public design surface；這類變更必須由 Hermes 明確判斷並留下證據。
 - 任何 gate 不完整，回傳 `ok:false` / HTTP 500，讓 n8n execution 顯示 failed，不可吞掉失敗。
 
 ## 日常排程
@@ -59,13 +59,13 @@
 | 16:04 | afternoon follow-up | 驗證已發布 manifest，或 release grace 內重跑一次 gate |
 | 18:30 | market scan | 同上 |
 | 20:30 | market scan | 同上 |
-| 23:35 | daily closeout | 正式站 public inventory 必須有同日完整 9 語 column group 與 market-news group |
+| 23:35 | daily closeout | 正式站 public inventory 必須有同日完整 9 語 column group；market-news 依同日 source scan 判斷，有 qualified source 才必須發布，沒有則保留 no-qualified-source evidence |
 
 若 heartbeat 或 n8n webhook 在非設定時間醒來，應回傳 skipped，不應猜測要跑哪條 lane。
 
 ## n8n Local Control Plane
 
-### n8n 負責
+### n8n 可負責
 
 - 定時 market-news scan
 - column prep/status/validate/release polling
@@ -79,8 +79,8 @@
 - 網站 runtime
 - Cloudflare deploy
 - production D1/KV seeding
-- 文章品質最終判斷
-- Gemini / ChatGPT fixed-tab browser evidence
+- 文章品質最終判斷，這是 Hermes CMO/editor owner 的責任
+- Gemini / ChatGPT fixed-tab browser evidence，這應由 Hermes 透過 Tommy 的 Chrome 狀態決定如何取得
 - Gmail web UI sender verification
 - UI/design 修改
 - arbitrary shell command execution
@@ -282,12 +282,12 @@ node scripts/verify-blog-release.mjs --manifest <runDir>/prepared-candidate.json
 npm run blog:daily-closeout -- --base-url https://altoslab-ai.cc
 ```
 
-當日必須同時存在：
+當日必須存在：
 
 - 一組完整 9 語 column group
-- 一組完整 9 語 market-news group
+- 若同日 source scan 找到 qualified verified source / official announcement 且圖片可用，必須有一組完整 9 語 market-news group；若沒有合格來源，必須有 no-qualified-source 或 held-source evidence，不可硬編新聞
 
-若缺任一組，closeout 必須 failed 並報 exact blocker。
+若 daily column 缺失，closeout 必須 failed 並報 exact blocker。Market-news 只有在同日有 qualified source 或 actionable market candidate 時缺失才算 failed。
 
 ## 健康檢查與驗證
 
@@ -328,6 +328,7 @@ npm run test:homepage
 - `articleSetExists=false`：`article-set.json` 尚未寫出。
 - `column-release held`：manifest 不是 `ready` 或 validate/design/image/browser evidence 不完整。
 - `daily column is not live as a complete 9-language group`：當日 column 未真正進 public inventory。
+- `market-news lane did not publish...`：先核對同日 source scan；有 qualified source 或 ready/held actionable market candidate 才是必修復，沒有合格來源則記錄 no-qualified-source evidence。
 - `KV put() limit exceeded`：不要回 GCP 或 seed production KV；確認 D1 healthy，刷新 public cache，再重驗。
 - Blog UI 變動需求：不屬於自動發文修復，必須走 designer-approved UI change gate。
 
@@ -341,7 +342,7 @@ npm run test:homepage
 6. 手動打 `/run/health`，確認 bridge token 與 local bridge 正常。
 7. 找最新 `data/blog-worker-runs/*/prepared-candidate.json`，確認狀態與 release gate reason。
 8. 找最新 `data/n8n-local-runs/*.json`，確認是否有 failed execution 需要處理。
-9. 檢查今日 public inventory 是否已有 9 語 column / market-news group。
+9. 檢查今日 public inventory 是否已有 9 語 column；market-news 則核對同日 source scan，有 qualified source 才要求 9 語 group，沒有則要求 no-qualified-source / held-source evidence。
 10. 任何缺失都記 blocker，不要補假完成。
 
 ## 交接引用文件
@@ -366,4 +367,3 @@ npm run test:homepage
 - 文件明確寫出 n8n 不能改 UI、不能 fabricate Gemini/GPT evidence、不能把 held gate 視為成功。
 - `npm test` 通過。
 - `npm run verify:cloudflare -- --base-url https://altoslab-ai.cc --expected-provider cloudflare-d1` 通過。
-
