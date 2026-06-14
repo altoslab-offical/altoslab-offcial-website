@@ -80,7 +80,10 @@ assert(html.includes("<code>inline code</code>"), "inline code markers render as
 assert(html.includes("--highlight:#c8ff00"), "direct renderer carries designer lime highlight token");
 assert(!html.includes("--accent:#8b5cf6"), "direct renderer no longer ships legacy purple article accent");
 assert(html.includes(".article-takeaways .takeaway-text") && html.includes("<span class=\"takeaway-text\">"), "direct renderer applies lime underline to inline takeaway text only");
-assert(html.includes("site-nav-actions") && html.includes("site-language-toggle") && html.includes("site-mobile-menu-trigger") && html.includes("site-nav-cta-label") && html.includes("<svg aria-hidden=\"true\""), "direct renderer uses the same Blog shell header structure");
+assert(html.includes("site-nav-actions") && html.includes("site-language-toggle") && html.includes("site-mobile-menu-trigger") && html.includes("site-nav-cta-label") && html.includes("lucide lucide-globe"), "direct renderer uses the same Blog shell header structure");
+assert(html.includes('<button aria-expanded="false" aria-haspopup="menu" aria-label="Open language menu" class="site-language-trigger" type="button">'), "direct renderer language trigger matches the Blog main header button");
+assert(html.includes('<a class="site-nav-cta" href="/#contact"><span class="site-nav-cta-label">合作洽談</span>'), "direct renderer CTA matches the zh-Hant Blog main header bar");
+assert(!html.includes('class="nav"') && !html.includes('class="langs"'), "direct renderer does not ship the old alternate header bar");
 assert(html.includes("font-size:clamp(34px,3.25vw,44px)") && !html.includes("font-size:clamp(40px,7vw,68px)"), "direct renderer keeps the reduced desktop article title scale");
 assert(html.includes("--highlight-soft:rgba(200,255,0,.56)") && !html.includes(".article-takeaways li{width:fit-content"), "direct renderer keeps takeaway highlights restrained without full-row list-item backgrounds");
 

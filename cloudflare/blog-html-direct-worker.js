@@ -176,6 +176,29 @@ function languageMenuHtml(post, alternates = []) {
   }).join("")}</div>`;
 }
 
+const globeIconHtml = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-globe" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M2 12h20"></path><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>`;
+const menuIconHtml = `<svg xmlns="http://www.w3.org/2000/svg" width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-menu" aria-hidden="true"><path d="M4 12h16"></path><path d="M4 6h16"></path><path d="M4 18h16"></path></svg>`;
+
+function siteHeaderHtml(language) {
+  const localized = language !== "zh-Hant";
+  const navigation = [
+    { label: localized ? "About" : "關於我們", href: "/#about" },
+    { label: localized ? "Services" : "服務項目", href: "/#services" },
+    { label: localized ? "Work" : "專案介紹", href: "/#portfolio" },
+    { label: "Blog", href: blogIndexPath(language) }
+  ];
+  const ctaLabel = localized ? "Talk" : "合作洽談";
+  return `<header class="site-nav">
+    <a class="site-logo" aria-label="ALTOS LAB home" href="/"><span class="brand-text">ALTOS LAB</span></a>
+    <nav aria-label="Main navigation">${navigation.map((item) => `<a href="${escapeAttribute(item.href)}">${escapeHtml(item.label)}</a>`).join("")}</nav>
+    <div class="site-nav-actions">
+      <div class="site-language-toggle"><button aria-expanded="false" aria-haspopup="menu" aria-label="Open language menu" class="site-language-trigger" type="button">${globeIconHtml}</button></div>
+      <button aria-expanded="false" aria-label="Open menu" class="site-mobile-menu-trigger" type="button">${menuIconHtml}</button>
+      <a class="site-nav-cta" href="/#contact"><span class="site-nav-cta-label">${escapeHtml(ctaLabel)}</span><span class="site-nav-cta-icon" aria-hidden="true">↗</span></a>
+    </div>
+  </header>`;
+}
+
 function analyticsHead(env) {
   const gaId = env.NEXT_PUBLIC_GA_MEASUREMENT_ID || "";
   const gtmId = env.NEXT_PUBLIC_GTM_ID || "";
@@ -307,15 +330,7 @@ function renderPost(post, alternates, env, requestUrl) {
 <body>
 ${analyticsBody(env)}
 <div class="site-home blog-site-shell">
-  <header class="site-nav">
-    <a class="site-logo" aria-label="ALTOS LAB home" href="/"><span class="brand-text">ALTOS LAB</span></a>
-    <nav aria-label="Main navigation"><a href="/#about">關於我們</a><a href="/#services">服務項目</a><a href="/#portfolio">專案介紹</a><a href="/blog">Blog</a></nav>
-    <div class="site-nav-actions">
-      <div class="site-language-toggle"><a class="site-language-trigger" href="${escapeAttribute(blogIndexPath(post.language))}" aria-label="Open language menu"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M2 12h20"></path><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg></a></div>
-      <button aria-expanded="false" aria-label="Open menu" class="site-mobile-menu-trigger" type="button"><svg aria-hidden="true" width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16"></path><path d="M4 6h16"></path><path d="M4 18h16"></path></svg></button>
-      <a class="site-nav-cta" href="/#contact"><span class="site-nav-cta-label">合作洽談</span><span class="site-nav-cta-icon" aria-hidden="true">↗</span></a>
-    </div>
-  </header>
+  ${siteHeaderHtml(post.language)}
   <main class="blog-page blog-article-page">
     <article>
       <header class="article-hero">

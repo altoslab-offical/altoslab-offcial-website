@@ -35,7 +35,14 @@ assert(directWorker.includes(".article-takeaways .takeaway-text") && directWorke
 assert(directWorker.includes(".rich-text blockquote") && directWorker.includes("border-left"), "direct article renderer keeps designer blockquote side-marker styling");
 assert(!directWorker.includes("--accent:#8b5cf6"), "direct article renderer does not reintroduce legacy purple article accent");
 assert(directWorker.includes("site-nav-actions") && directWorker.includes("site-language-toggle") && directWorker.includes("site-mobile-menu-trigger") && directWorker.includes("site-nav-cta-label"), "direct article renderer keeps the same Blog shell header action structure");
+assert(directWorker.includes("function siteHeaderHtml(language)") && directWorker.includes("siteHeaderHtml(post.language)"), "direct article renderer centralizes the Blog shell header bar");
+assert(directWorker.includes('aria-haspopup="menu"') && directWorker.includes('class="site-language-trigger" type="button"'), "direct article renderer mirrors the Blog main language trigger button contract");
 assert(directWorker.includes("font-size:clamp(34px,3.25vw,44px)") && !directWorker.includes("font-size:clamp(40px,7vw,68px)"), "direct article renderer keeps the reduced article title scale");
+
+const apiHtmlRenderer = read("lib/blog-html-render.ts");
+assert(apiHtmlRenderer.includes("function siteHeaderHtml(language: BlogLanguage)"), "API blog HTML renderer has the Blog shell header helper");
+assert(apiHtmlRenderer.includes("siteHeaderHtml(post.language)") && apiHtmlRenderer.includes("siteHeaderHtml(language)"), "API blog HTML renderer uses the Blog shell header helper for article and index HTML");
+assert(!apiHtmlRenderer.includes('class="nav"') && !apiHtmlRenderer.includes('class="langs"'), "API blog HTML renderer does not ship the old alternate header bar");
 
 const blogIndex = read("components/BlogIndex.tsx");
 for (const marker of ["blog-craft-index", "blog-craft-layout", "blog-craft-sidebar", "blog-craft-feed", "blog-craft-card"]) {

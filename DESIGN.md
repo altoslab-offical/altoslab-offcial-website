@@ -242,6 +242,7 @@ Protected index markers:
 Protected article detail markers:
 
 - Article detail header must visually match the Blog main shell header. The direct Cloudflare renderer should mirror the `SiteHeader` action structure, including the language wrapper and mobile menu trigger, instead of inventing a separate header.
+- HTML-rendered article routes, including Cloudflare direct rendering and `/api/blog-html`, should share the same Blog-main-style `siteHeaderHtml(...)` structure instead of the older standalone `.nav` / `.langs` header bar.
 - Article hero/title stays left aligned with the restored original article shell rhythm.
 - Desktop article titles should stay editorially strong but not oversized; do not enlarge them as a side effect of content or Worker fixes.
 - Article top spacing should stay compact so the first paragraph and cover image arrive quickly.

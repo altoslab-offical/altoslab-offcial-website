@@ -88,6 +88,7 @@ It must return `null` for `/blog` and `/:language/blog` so the original `BlogInd
 Article detail rendering has a shared visual contract across Next and the direct Worker renderer:
 
 - The direct Worker article header must mirror the Blog shell `SiteHeader` structure: `site-nav`, centered main navigation, `site-nav-actions`, `site-language-toggle`, language trigger, mobile menu trigger, and labeled CTA.
+- The Cloudflare direct renderer and `/api/blog-html` renderer both use a Blog-main-style `siteHeaderHtml(...)` helper. The older standalone `.nav` / `.langs` article header is retired.
 - Hero/title/meta stays left aligned with compact top spacing.
 - `geo-summary`, `article-takeaways`, `strong`, and `blockquote` use black text plus restrained signal-lime `#c8ff00` underline or side-marker styling. Takeaway highlights should fit the text, not fill the row.
 - The retired purple article accent must not appear in direct-rendered article pages.

@@ -98,50 +98,61 @@ const INDEX_COPY: Record<BlogLanguage, IndexCopy> = {
 };
 
 const SHELL_CSS = `
-  :root { color-scheme: dark; --bg:#050806; --panel:#111712; --line:#283228; --text:#f3f7ef; --muted:#a8b2a5; --accent:#b8f26b; }
+  :root { color-scheme: light; --bg:#fafafa; --panel:#fff; --line:#e7e7e7; --text:#111; --muted:#666; --accent:#c8ff00; --accent-soft:rgba(200,255,0,.28); }
   * { box-sizing: border-box; }
   body { margin:0; background:var(--bg); color:var(--text); font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; line-height:1.7; }
   a { color:inherit; text-decoration:none; }
   img { max-width:100%; display:block; }
+  button { font:inherit; }
+  .site-home.blog-site-shell { min-height:100vh; background:var(--bg); color:var(--text); }
+  .site-nav { position:sticky; top:0; z-index:10; min-height:76px; display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:28px; padding:0 clamp(20px,5vw,72px); background:rgba(250,250,250,.92); border-bottom:1px solid var(--line); backdrop-filter:blur(18px); }
+  .site-logo { width:fit-content; font-weight:900; letter-spacing:.18em; font-size:1.12rem; }
+  .site-logo .brand-text { font-family:inherit; }
+  .site-nav nav { display:flex; align-items:center; justify-content:center; gap:28px; color:var(--muted); font-size:14px; }
+  .site-nav nav a { transition:color .18s ease; }
+  .site-nav nav a:hover { color:var(--text); }
+  .site-nav-actions { justify-self:end; display:inline-flex; align-items:center; gap:12px; }
+  .site-language-toggle { position:relative; display:inline-flex; align-items:center; justify-content:center; }
+  .site-language-trigger,.site-mobile-menu-trigger { width:38px; min-width:38px; height:38px; min-height:38px; display:inline-flex; align-items:center; justify-content:center; border:1px solid var(--line); border-radius:999px; background:var(--bg); color:var(--muted); font-weight:800; }
+  .site-mobile-menu-trigger { display:none; padding:0; cursor:default; }
+  .site-nav-cta { min-height:38px; display:inline-flex; align-items:center; gap:8px; border-radius:999px; background:#eee; padding:0 18px; font-weight:900; }
+  .site-nav-cta-icon { font-size:16px; line-height:1; }
   .shell { width:min(1120px, calc(100% - 32px)); margin:0 auto; padding:28px 0 56px; }
-  .nav { display:flex; justify-content:space-between; align-items:center; gap:16px; padding:12px 0 28px; }
-  .brand { font-weight:800; letter-spacing:.04em; }
-  .langs { display:flex; flex-wrap:wrap; gap:8px; font-size:13px; color:var(--muted); }
-  .langs a, .back, .read { border:1px solid var(--line); border-radius:999px; padding:7px 11px; background:rgba(255,255,255,.03); }
+  .back, .read { border:1px solid var(--line); border-radius:999px; padding:7px 11px; background:rgba(255,255,255,.72); }
   .hero { display:grid; grid-template-columns:minmax(0, 1fr); gap:18px; padding:36px 0 26px; border-bottom:1px solid var(--line); }
-  .eyebrow { margin:0 0 8px; color:var(--accent); font-size:13px; letter-spacing:.08em; text-transform:uppercase; }
+  .eyebrow { margin:0 0 8px; color:var(--text); font-size:13px; letter-spacing:.02em; font-weight:800; }
   h1 { margin:0; font-size:clamp(34px, 7vw, 72px); line-height:1.02; letter-spacing:0; max-width:980px; }
   .lede { color:var(--muted); font-size:18px; max-width:780px; }
   .search { display:flex; gap:10px; max-width:620px; }
-  .search input { flex:1; min-width:0; color:var(--text); background:#0c110d; border:1px solid var(--line); border-radius:8px; padding:12px 14px; font:inherit; }
-  .search button { color:#071006; background:var(--accent); border:0; border-radius:8px; padding:12px 16px; font-weight:700; }
+  .search input { flex:1; min-width:0; color:var(--text); background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:12px 14px; font:inherit; }
+  .search button { color:var(--text); background:var(--accent-soft); border:0; border-radius:8px; padding:12px 16px; font-weight:700; }
   .grid { display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:18px; padding-top:28px; }
   .card { border:1px solid var(--line); border-radius:8px; overflow:hidden; background:var(--panel); min-width:0; }
-  .card img { width:100%; aspect-ratio:16/9; object-fit:cover; background:#0b100c; }
+  .card img { width:100%; aspect-ratio:16/9; object-fit:cover; background:#f1f1f1; }
   .card-body { padding:16px; }
   .meta { display:flex; flex-wrap:wrap; gap:8px; color:var(--muted); font-size:12px; }
-  .badge { color:#071006; background:var(--accent); border-radius:999px; padding:2px 8px; font-weight:700; }
+  .badge { color:#7c3f00; background:#fff1dc; border-radius:999px; padding:2px 8px; font-weight:700; }
   .card h2 { margin:10px 0 8px; font-size:20px; line-height:1.25; letter-spacing:0; }
   .card p { margin:0 0 14px; color:var(--muted); }
   .article { max-width:820px; margin:0 auto; padding-bottom:56px; }
   .article-hero { padding:24px 0 26px; border-bottom:1px solid var(--line); }
-  .cover { margin:24px 0 10px; border-radius:8px; overflow:hidden; border:1px solid var(--line); background:#0b100c; }
+  .cover { margin:24px 0 10px; border-radius:8px; overflow:hidden; border:1px solid var(--line); background:#f1f1f1; }
   .cover img { width:100%; aspect-ratio:16/9; object-fit:cover; }
   .caption { color:var(--muted); font-size:13px; margin:8px 0 0; }
   .body { padding-top:26px; font-size:18px; }
   .body h2 { font-size:30px; line-height:1.2; margin:34px 0 12px; letter-spacing:0; }
   .body h3 { font-size:23px; line-height:1.25; margin:26px 0 10px; letter-spacing:0; }
   .body p { margin:0 0 18px; }
-  .body strong { color:var(--text); font-weight:800; }
-  .body blockquote { margin:0 0 22px; padding:4px 0 4px 18px; border-left:3px solid var(--accent); color:var(--muted); }
+  .body strong { color:var(--text); font-weight:850; background:linear-gradient(to top,var(--accent-soft) 0 .36em,transparent .36em); box-decoration-break:clone; -webkit-box-decoration-break:clone; }
+  .body blockquote { margin:0 0 22px; padding:16px 18px; border-left:3px solid var(--accent); border-radius:8px; background:linear-gradient(90deg,rgba(200,255,0,.1),#fff 56%); color:var(--text); }
   .body blockquote p { margin:0; }
   .body ul { margin:0 0 20px; padding-left:22px; }
   .inline-figure { margin:26px 0; border:1px solid var(--line); border-radius:8px; overflow:hidden; background:var(--panel); }
   .inline-figure img { width:100%; aspect-ratio:16/9; object-fit:cover; }
   .inline-figure figcaption { padding:10px 12px; color:var(--muted); font-size:14px; }
   .sources { border-top:1px solid var(--line); margin-top:34px; padding-top:22px; color:var(--muted); }
-  .sources a { color:var(--accent); }
-  @media (max-width: 820px) { .grid { grid-template-columns:1fr; } .shell { width:min(100% - 24px, 1120px); } .search { flex-direction:column; } }
+  .sources a { color:var(--text); font-weight:800; }
+  @media (max-width: 820px) { .site-nav { grid-template-columns:1fr auto; min-height:72px; padding:0 22px; } .site-nav nav { display:none; } .site-nav-actions { gap:8px; } .site-language-trigger,.site-mobile-menu-trigger { width:36px; min-width:36px; height:36px; min-height:36px; } .site-mobile-menu-trigger { display:inline-flex; } .site-nav-cta { display:none; } .grid { grid-template-columns:1fr; } .shell { width:min(100% - 24px, 1120px); } .search { flex-direction:column; } }
 `;
 
 function escapeHtml(value: unknown) {
@@ -199,16 +210,27 @@ ${homepageAnalyticsSnippet()}
 </html>`;
 }
 
-function nav(language: BlogLanguage, alternates?: BlogPost[]) {
-  const links = alternates?.length
-    ? [language, ...BLOG_LANGUAGES.filter((item) => item !== language)].map((item) => {
-        const alternate = item === language ? null : alternates.find((post) => post.language === item);
-        const href = item === language ? blogIndexPath(item) : alternate ? blogPostPath(alternate) : blogIndexPath(item);
-        return `<a href="${escapeAttribute(href)}">${escapeHtml(item)}</a>`;
-      })
-    : BLOG_LANGUAGES.map((item) => `<a href="${escapeAttribute(blogIndexPath(item))}">${escapeHtml(item)}</a>`);
+const globeIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-globe" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M2 12h20"></path><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>`;
+const menuIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-menu" aria-hidden="true"><path d="M4 12h16"></path><path d="M4 6h16"></path><path d="M4 18h16"></path></svg>`;
 
-  return `<nav class="nav"><a class="brand" href="/">ALTOS LAB</a><div class="langs">${links.join("")}</div></nav>`;
+function siteHeaderHtml(language: BlogLanguage) {
+  const localized = language !== "zh-Hant";
+  const navItems = [
+    { label: localized ? "About" : "關於我們", href: "/#about" },
+    { label: localized ? "Services" : "服務項目", href: "/#services" },
+    { label: localized ? "Work" : "專案介紹", href: "/#portfolio" },
+    { label: "Blog", href: blogIndexPath(language) }
+  ];
+  const ctaLabel = localized ? "Talk" : "合作洽談";
+  return `<header class="site-nav">
+    <a class="site-logo" aria-label="ALTOS LAB home" href="/"><span class="brand-text">ALTOS LAB</span></a>
+    <nav aria-label="Main navigation">${navItems.map((item) => `<a href="${escapeAttribute(item.href)}">${escapeHtml(item.label)}</a>`).join("")}</nav>
+    <div class="site-nav-actions">
+      <div class="site-language-toggle"><button aria-expanded="false" aria-haspopup="menu" aria-label="Open language menu" class="site-language-trigger" type="button">${globeIcon}</button></div>
+      <button aria-expanded="false" aria-label="Open menu" class="site-mobile-menu-trigger" type="button">${menuIcon}</button>
+      <a class="site-nav-cta" href="/#contact"><span class="site-nav-cta-label">${escapeHtml(ctaLabel)}</span><span class="site-nav-cta-icon" aria-hidden="true">↗</span></a>
+    </div>
+  </header>`;
 }
 
 function postDate(post: Pick<BlogPost, "updatedAt" | "publishedAt" | "createdAt">) {
@@ -242,20 +264,22 @@ export function renderBlogIndexHtml(language: BlogLanguage, posts: BlogPost[], p
       </article>`
     )
     .join("");
-  const body = `<main class="shell">
-    ${nav(language)}
-    <section class="hero">
-      <p class="eyebrow">ALTOS LAB Journal</p>
-      <h1>${escapeHtml(dictionary.title)}</h1>
-      <p class="lede">${escapeHtml(dictionary.description)}</p>
-      <form class="search" action="${escapeAttribute(blogIndexPath(language))}" role="search">
-        ${params.tag ? `<input type="hidden" name="tag" value="${escapeAttribute(params.tag)}" />` : ""}
-        <input name="query" type="search" value="${escapeAttribute(params.query || "")}" placeholder="${escapeAttribute(dictionary.searchPlaceholder)}" />
-        <button type="submit">Search</button>
-      </form>
-    </section>
-    <section aria-label="${escapeAttribute(dictionary.latest)}" class="grid">${cards || `<p>${escapeHtml(dictionary.empty)}</p>`}</section>
-  </main>`;
+  const body = `<div class="site-home blog-site-shell">
+    ${siteHeaderHtml(language)}
+    <main class="shell">
+      <section class="hero">
+        <p class="eyebrow">ALTOS LAB Journal</p>
+        <h1>${escapeHtml(dictionary.title)}</h1>
+        <p class="lede">${escapeHtml(dictionary.description)}</p>
+        <form class="search" action="${escapeAttribute(blogIndexPath(language))}" role="search">
+          ${params.tag ? `<input type="hidden" name="tag" value="${escapeAttribute(params.tag)}" />` : ""}
+          <input name="query" type="search" value="${escapeAttribute(params.query || "")}" placeholder="${escapeAttribute(dictionary.searchPlaceholder)}" />
+          <button type="submit">Search</button>
+        </form>
+      </section>
+      <section aria-label="${escapeAttribute(dictionary.latest)}" class="grid">${cards || `<p>${escapeHtml(dictionary.empty)}</p>`}</section>
+    </main>
+  </div>`;
 
   return htmlDocument(
     language,
@@ -351,21 +375,23 @@ export function renderBlogPostHtml(post: BlogPost, alternates: BlogPost[] = []) 
   const sources = (post.sourceLinks || [])
     .map((source) => `<li><a href="${escapeAttribute(source.url)}" rel="nofollow noopener" target="_blank">${escapeHtml(source.title || source.publisher || source.url)}</a></li>`)
     .join("");
-  const body = `<main class="shell article">
-    ${nav(post.language, alternates)}
-    <article>
-      <header class="article-hero">
-        <a class="back" href="${escapeAttribute(blogIndexPath(post.language))}">Back</a>
-        <p class="eyebrow">${escapeHtml(blogContentTypeLabel(post.contentType, post.language))} · ${escapeHtml(postDate(post))}</p>
-        <h1>${escapeHtml(post.title)}</h1>
-        <p class="lede">${escapeHtml(post.excerpt)}</p>
-        <figure class="cover"><img src="${escapeAttribute(post.cover || blogCoverForLanguage(post.language))}" alt="${escapeAttribute(post.coverAlt || post.title)}" decoding="async" /></figure>
-        ${post.coverCredit ? `<p class="caption">${escapeHtml(post.coverCredit)}</p>` : ""}
-      </header>
-      <section class="body">${renderBody(post)}</section>
-      ${sources ? `<section class="sources"><p class="eyebrow">Sources</p><ul>${sources}</ul></section>` : ""}
-    </article>
-  </main>`;
+  const body = `<div class="site-home blog-site-shell">
+    ${siteHeaderHtml(post.language)}
+    <main class="shell article">
+      <article>
+        <header class="article-hero">
+          <a class="back" href="${escapeAttribute(blogIndexPath(post.language))}">Back</a>
+          <p class="eyebrow">${escapeHtml(blogContentTypeLabel(post.contentType, post.language))} · ${escapeHtml(postDate(post))}</p>
+          <h1>${escapeHtml(post.title)}</h1>
+          <p class="lede">${escapeHtml(post.excerpt)}</p>
+          <figure class="cover"><img src="${escapeAttribute(post.cover || blogCoverForLanguage(post.language))}" alt="${escapeAttribute(post.coverAlt || post.title)}" decoding="async" /></figure>
+          ${post.coverCredit ? `<p class="caption">${escapeHtml(post.coverCredit)}</p>` : ""}
+        </header>
+        <section class="body">${renderBody(post)}</section>
+        ${sources ? `<section class="sources"><p class="eyebrow">Sources</p><ul>${sources}</ul></section>` : ""}
+      </article>
+    </main>
+  </div>`;
 
   return htmlDocument(
     post.language,
