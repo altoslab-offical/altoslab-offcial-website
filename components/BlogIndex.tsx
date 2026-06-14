@@ -8,7 +8,6 @@ import { SiteHeader } from "@/components/site/SiteHeader";
 import { blogContentTypeLabel, blogIndexPath, blogPostPath } from "@/lib/blog-utils";
 import { toBlogVisualPost } from "@/lib/blog-visual";
 import { getPublishedBlogInventoryPostsByLanguage } from "@/lib/cms";
-import { stripPublicExcerptPrefix } from "@/lib/public-copy";
 import { blogIndexItemListJsonLd, breadcrumbJsonLd } from "@/lib/seo";
 import type { BlogLanguage, BlogPost } from "@/lib/types";
 
@@ -567,7 +566,7 @@ export async function BlogIndex({ language, tag, query, page }: BlogIndexProps) 
                       <h3>
                         <Link href={blogPostPath(post)}>{renderBrandText(post.title)}</Link>
                       </h3>
-                      <p>{renderBrandText(stripPublicExcerptPrefix(post.excerpt))}</p>
+                      <p>{renderBrandText(post.excerpt)}</p>
                       <div className="blog-craft-card-meta">
                         <span className={`blog-craft-type-badge is-${post.contentType}`}>
                           {blogContentTypeLabel(post.contentType, post.language)}

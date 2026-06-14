@@ -80,6 +80,8 @@ Required invariants:
 
 The public blog index routes (`/blog` and `/:language/blog`) are canonical user-facing UI surfaces. They must keep the existing `BlogIndex` / `blog-craft` layout unless Tommy explicitly approves a visual redesign.
 
+2026-06-14 New baseline note: Tommy approved restoring the blog index/header and article detail shell to the original `ALTOSLAB_WEB_MAIN` contract; keep `/blog` on `BlogIndex` and keep direct rendering limited to article detail routes.
+
 Route ownership:
 
 - Blog index routes are owned by `components/BlogIndex.tsx` and the route pages in `app/*/blog/page.tsx`.

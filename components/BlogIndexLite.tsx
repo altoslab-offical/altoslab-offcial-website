@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { blogContentTypeLabel, blogIndexPath, blogPostPath } from "@/lib/blog-utils";
 import { getPublishedBlogInventoryPostsByLanguage } from "@/lib/cms";
-import { stripPublicExcerptPrefix } from "@/lib/public-copy";
 import type { BlogLanguage, BlogPost } from "@/lib/types";
 
 type BlogIndexLiteProps = {
@@ -287,7 +286,7 @@ export async function BlogIndexLite({ language, tag, query }: BlogIndexLiteProps
               <h2>
                 <Link href={blogPostPath(post as BlogPost)}>{post.title}</Link>
               </h2>
-              <p>{stripPublicExcerptPrefix(post.excerpt)}</p>
+              <p>{post.excerpt}</p>
               <Link className="blog-lite-read" href={blogPostPath(post as BlogPost)}>
                 {dictionary.read}
               </Link>

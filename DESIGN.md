@@ -222,6 +222,8 @@ Any intentional homepage redesign requires Tommy approval, before/after desktop 
 
 The blog index is a protected editorial surface. Its current design is the light `AI & Craft` / `blog-craft` experience with sidebar topic navigation, search, feed grid, card imagery, pagination, and the existing editorial rhythm. Do not replace it with a generic card wall, a direct Worker-rendered index, or a temporary emergency layout unless Tommy explicitly approves a visual redesign.
 
+2026-06-14 New baseline note: the New repository was restored to the original blog header/index and article detail visual contract from `ALTOSLAB_WEB_MAIN`; future changes should treat that restored contract as the source of truth.
+
 Design ownership:
 
 - `components/BlogIndex.tsx` owns `/blog` and `/:language/blog` visual structure.

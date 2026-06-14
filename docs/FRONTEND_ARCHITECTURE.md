@@ -83,6 +83,8 @@ Cloudflare direct HTML rendering may serve article detail routes only:
 
 It must return `null` for `/blog` and `/:language/blog` so the original `BlogIndex` UI remains in control. This is enforced by `scripts/blog-ui-contract-smoke.mjs`, which is part of `npm run test:blog`.
 
+2026-06-14 New baseline note: the blog index/header and article detail shell were restored from the original `ALTOSLAB_WEB_MAIN` implementation. Direct Cloudflare rendering keeps article detail resilience and must not become a blog index renderer.
+
 Do not use `BlogIndexLite`, `renderIndex`, direct `list_json` Worker queries, or a replacement static index to solve Worker CPU issues. The accepted approach is to optimize the canonical `BlogIndex` path, paginate inventory, or improve Cloudflare data access without changing route ownership.
 
 ## Inactive Prototype Components

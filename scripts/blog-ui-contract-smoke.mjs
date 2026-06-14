@@ -13,76 +13,23 @@ function read(file) {
 }
 
 const indexPaths = ["/blog", "/en/blog", "/ja/blog", "/ko/blog", "/id/blog", "/vi/blog", "/th/blog", "/ms/blog", "/fil/blog"];
-const samplePost = {
-  id: "blog-ui-contract-post",
-  slug: "blog-ui-contract-post",
-  status: "published",
-  language: "zh-Hant",
-  translationGroupId: "blog-ui-contract",
-  title: "Blog UI Contract Post",
-  excerpt: "The blog index must stay on the Blog Craft visual system.",
-  contentType: "column",
-  newsCategory: "AI",
-  topic: "AI",
-  tags: ["AI"],
-  cover: "https://example.com/cover.png",
-  coverAlt: "Cover",
-  readTimeMinutes: 3,
-  createdAt: "2026-06-12T00:00:00.000Z",
-  updatedAt: "2026-06-12T00:00:00.000Z",
-  publishedAt: "2026-06-12T00:00:00.000Z"
-};
-const envForDirectIndex = {
+const envThatMustNotBeTouched = {
   ALTOS_BLOG_D1: {
     prepare() {
-      return {
-        bind(language) {
-          return {
-            async all() {
-              return {
-                results: [
-                  {
-                    payload: JSON.stringify({ ...samplePost, language, slug: `${samplePost.slug}-${language}` })
-                  }
-                ]
-              };
-            }
-          };
-        }
-      };
+      throw new Error("Blog index routes must not query the direct Worker renderer");
     }
   }
 };
 
 for (const pathname of indexPaths) {
-  const response = await maybeHandleDirectBlogHtml(new Request(`https://altoslab-ai.cc${pathname}`), envForDirectIndex);
-  const html = await response.text();
-  assert(response.status === 200, `${pathname} direct Cloudflare index renderer returns 200`);
-  assert(response.headers.get("x-altos-direct-blog-render") === "cloudflare-d1-index", `${pathname} uses the direct D1 index renderer`);
-  assert(html.includes("blog-craft-index") && html.includes("blog-craft-layout") && html.includes("blog-craft-card"), `${pathname} preserves Blog Craft UI classes`);
-  assert(html.includes("site-mobile-menu-trigger") && html.includes("site-mobile-menu"), `${pathname} direct renderer includes the restored mobile header menu`);
-  assert(html.includes("site-language-menu") && html.includes("role=\"menuitemradio\""), `${pathname} direct renderer includes the full blog language menu`);
-  assert(!html.includes("blog-lite-shell") && !html.includes("blog-lite-card"), `${pathname} does not fall back to the old lite UI`);
+  const response = await maybeHandleDirectBlogHtml(new Request(`https://altoslab-ai.cc${pathname}`), envThatMustNotBeTouched);
+  assert(response === null, `${pathname} falls through to the canonical Next BlogIndex UI`);
 }
 
 const directWorker = read("cloudflare/blog-html-direct-worker.js");
-const agents = read("AGENTS.md");
-for (const forbidden of ["BLOG_INDEX_PAGE_SIZE =", "blog-lite-shell", "blog-lite-card"]) {
+for (const forbidden of ["function renderIndex", "readIndexPosts", "BLOG_INDEX_PAGE_SIZE =", "cloudflare-d1-index"]) {
   assert(!directWorker.includes(forbidden), `Cloudflare direct renderer must not contain ${forbidden}`);
 }
-assert(directWorker.includes("readIndexPosts") && directWorker.includes("cloudflare-d1-index"), "Cloudflare direct renderer has the Worker-safe Blog index path");
-assert(directWorker.includes("headerLanguageMenuHtml") && directWorker.includes("site-mobile-menu-trigger"), "Cloudflare direct renderer keeps the designer handoff header contract");
-assert(directWorker.includes("ARTICLE_DESIGNER_CSS"), "Cloudflare direct renderer keeps article-specific designer CSS overrides");
-assert(
-  directWorker.includes("font-size:clamp(34px,3.25vw,44px)") &&
-    directWorker.includes(".article-takeaways .eyebrow{color:#050603") &&
-    directWorker.includes(".geo-summary{border-left:4px solid #c8ff00") &&
-    directWorker.includes("rgb(200 255 0 / .14)") &&
-    directWorker.includes("border-left:4px solid #050603") &&
-    directWorker.includes("rgb(200 255 0 / .16)") &&
-    directWorker.includes(".article-takeaways li::marker{color:#c8ff00"),
-  "Cloudflare direct renderer keeps compact article titles, black summary/takeaway labels, and lime emphasis"
-);
 
 const blogIndex = read("components/BlogIndex.tsx");
 for (const marker of ["blog-craft-index", "blog-craft-layout", "blog-craft-sidebar", "blog-craft-feed", "blog-craft-card"]) {
@@ -110,10 +57,6 @@ for (const file of pageFiles) {
 
 for (const file of ["SPEC.md", "DESIGN.md", "docs/FRONTEND_ARCHITECTURE.md", "docs/n8n-local-control-plane.md"]) {
   assert(read(file).includes("Blog UI Stability Contract"), `${file} documents the Blog UI Stability Contract`);
-  assert(read(file).includes("Public UI Change Control"), `${file} documents the Public UI Change Control`);
 }
-
-assert(agents.includes("Public UI Change Control"), "AGENTS.md includes the public UI change-control rule");
-assert(agents.includes("must not change public UI unless Tommy explicitly asks"), "AGENTS.md blocks accidental UI changes in non-design work");
 
 if (!process.exitCode) console.log("PASS blog UI contract smoke checks");

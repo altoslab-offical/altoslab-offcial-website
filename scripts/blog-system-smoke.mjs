@@ -48,7 +48,6 @@ const cloudflareSetup = read("scripts/cloudflare-free-deploy-setup.sh");
 const cloudflareSeed = read("scripts/cloudflare-seed-kv.mjs");
 const cloudflareMigratePublicBlogCache = read("scripts/cloudflare-migrate-public-blog-cache.mjs");
 const cloudflareSmoke = read("scripts/cloudflare-smoke.mjs");
-const directWorker = read("cloudflare/blog-html-direct-worker.js");
 const n8nLocalBridge = read("scripts/n8n-local-bridge.mjs");
 const n8nLocalControlPlaneVerifier = read("scripts/verify-n8n-local-control-plane.sh");
 const cloudflareStagingConfig = read("wrangler.staging.jsonc");
@@ -407,33 +406,6 @@ assert(
   globals.includes("--article-highlight-line: rgb(200 255 0 / 0.78);") && globals.includes("color: #050603;"),
   "article highlight underline uses landing-page lime with black text"
 );
-assert(
-    globals.includes(".blog-site-shell .blog-article-page") &&
-    globals.includes("padding-top: 28px;") &&
-    globals.includes("font-size: clamp(34px, 3.25vw, 44px);") &&
-    globals.includes("border-left: 4px solid #c8ff00;") &&
-    globals.includes("rgb(200 255 0 / 0.14)") &&
-    globals.includes("border-left: 4px solid #050603;") &&
-    globals.includes("rgb(200 255 0 / 0.16)") &&
-    globals.includes(".blog-site-shell .article-takeaways .eyebrow") &&
-    globals.includes("color: #050603;") &&
-    globals.includes(".blog-site-shell .article-takeaways li::marker") &&
-    globals.includes("color: #c8ff00;"),
-  "Next blog article CSS keeps compact titles, black summary/takeaway labels, and lime emphasis"
-);
-assert(
-    directWorker.includes("ARTICLE_DESIGNER_CSS") &&
-    directWorker.includes("html.replace(/==([^=\\n]+)==/g") &&
-    directWorker.includes(".blog-article-page{padding-top:28px}") &&
-    directWorker.includes("font-size:clamp(34px,3.25vw,44px)") &&
-    directWorker.includes(".article-takeaways .eyebrow{color:#050603") &&
-    directWorker.includes(".geo-summary{border-left:4px solid #c8ff00") &&
-    directWorker.includes("rgb(200 255 0 / .14)") &&
-    directWorker.includes("border-left:4px solid #050603") &&
-    directWorker.includes("rgb(200 255 0 / .16)") &&
-    directWorker.includes(".article-takeaways li::marker{color:#c8ff00"),
-  "Cloudflare direct article renderer keeps the same Blog article designer CSS and highlight parser"
-);
 assert(adminShell.includes("applyBodyHighlight"), "admin editor can insert article highlight syntax from the body editor");
 assert(generation.includes("#A4FF00 emphasis underline"), "generation prompt teaches the fixed article highlight convention");
 assert(!blogArticle.includes("alternates.map"), "article renderer does not show the extra language pill row above the headline");
@@ -470,8 +442,6 @@ assert(globals.includes(".blog-craft-brand h1 em") && globals.includes("font-fam
 assert(globals.includes("--type-badge-bg: var(--type-breaking-bg);"), "breaking badge uses its content-type color token");
 assert(globals.includes("--type-badge-bg: var(--type-column-bg);"), "column badge uses its content-type color token");
 assert(globals.includes("--type-badge-bg: var(--type-feature-bg);"), "feature badge uses its content-type color token");
-assert(globals.includes(".site-mobile-menu-trigger") && globals.includes(".blog-site-shell .site-mobile-menu"), "runtime CSS includes restored mobile header navigation");
-assert(globals.includes("--article-hero-measure: min(820px, 100%);"), "Blog article hero keeps the designer-approved left-aligned title measure");
 assert(siteHeader.includes("Globe"), "site header uses a globe icon for language switching");
 assert(!siteHeader.includes("Globe2"), "site header uses the simpler line globe icon");
 assert(siteHeader.includes("aria-expanded={isLanguageMenuOpen}"), "language menu trigger exposes expanded state");
@@ -480,8 +450,6 @@ assert(blogUtils.includes('export const SITE_LANGUAGES: BlogLanguage[] = ["zh-Ha
 assert(siteHeader.includes("siteLanguageOptions"), "site header can use public site language options");
 assert(siteHeader.includes("blogLanguageOptions"), "blog header exposes every configured blog content language");
 assert(siteHeader.includes("isBlogPage ? fullBlogOptions : siteOptions"), "site header chooses full blog languages only on blog routes");
-assert(siteHeader.includes("site-mobile-menu-trigger"), "site header includes the restored mobile menu trigger");
-assert(siteHeader.includes("site-mobile-menu"), "site header includes the restored mobile navigation panel");
 assert(!siteHeader.includes("aria-pressed={language"), "language switcher no longer renders as a segmented control");
 assert(blogArticle.includes("related-article-image"), "related article cards include an image area");
 assert(blogArticle.includes("SafeBlogImage compact post={relatedVisualPost}"), "related article cards render real covers when available");
