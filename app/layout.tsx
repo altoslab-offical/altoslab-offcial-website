@@ -4,7 +4,14 @@ import { headers } from "next/headers";
 import "./globals.css";
 import { CtaAnalytics } from "@/components/AnalyticsEvents";
 import { WonDaWidgetScript } from "@/components/WonDaWidgetScript";
-import { gaMeasurementId, gtmId, isGaConfigured, isGtmConfigured } from "@/lib/analytics";
+import {
+  adsenseScriptSrc,
+  gaMeasurementId,
+  gtmId,
+  isAdsenseConfigured,
+  isGaConfigured,
+  isGtmConfigured
+} from "@/lib/analytics";
 import { blogLanguageFromPath, htmlLanguage } from "@/lib/blog-utils";
 import { searchVerificationMetadata, siteName, siteUrl } from "@/lib/seo";
 
@@ -70,9 +77,11 @@ export const viewport: Viewport = {
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const pathname = (await headers()).get("x-altos-pathname") || "";
   const language = htmlLanguage(blogLanguageFromPath(pathname) || "zh-Hant");
+  const adsenseSrc = isAdsenseConfigured() ? adsenseScriptSrc() : "";
 
   return (
     <html lang={language}>
+      <head>{adsenseSrc ? <script async src={adsenseSrc} crossOrigin="anonymous" /> : null}</head>
       <body>
         {children}
         <CtaAnalytics />

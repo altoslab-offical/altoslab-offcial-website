@@ -202,13 +202,18 @@ function siteHeaderHtml(language) {
 function analyticsHead(env) {
   const gaId = env.NEXT_PUBLIC_GA_MEASUREMENT_ID || "";
   const gtmId = env.NEXT_PUBLIC_GTM_ID || "";
+  const adsenseClient = env.NEXT_PUBLIC_ADSENSE_CLIENT || "";
+  const adsenseScript = /^ca-pub-\d+$/i.test(adsenseClient)
+    ? `<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${escapeAttribute(adsenseClient)}" crossorigin="anonymous"></script>`
+    : "";
   return [
     gaId
       ? `<script async src="https://www.googletagmanager.com/gtag/js?id=${escapeAttribute(gaId)}"></script><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','${escapeHtml(gaId)}');</script>`
       : "",
     gtmId
       ? `<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','${escapeHtml(gtmId)}');</script>`
-      : ""
+      : "",
+    adsenseScript
   ].join("");
 }
 

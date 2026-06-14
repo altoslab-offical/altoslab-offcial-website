@@ -1,6 +1,12 @@
 import { readFile } from "fs/promises";
 import path from "path";
-import { gaHeadSnippet, gtmHeadSnippet, gtmNoScriptSnippet, homepageAnalyticsSnippet } from "@/lib/analytics";
+import {
+  adsenseHeadSnippet,
+  gaHeadSnippet,
+  gtmHeadSnippet,
+  gtmNoScriptSnippet,
+  homepageAnalyticsSnippet
+} from "@/lib/analytics";
 import {
   homepageWebPageJsonLd,
   organizationJsonLd,
@@ -90,7 +96,8 @@ function homepageInjectionParts() {
     <meta name="twitter:image" content="${image}" />
     ${jsonLd}
     ${gaHeadSnippet()}
-    ${gtmHeadSnippet()}`;
+    ${gtmHeadSnippet()}
+    ${adsenseHeadSnippet()}`;
 
   return {
     metadata,

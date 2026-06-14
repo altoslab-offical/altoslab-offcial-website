@@ -1,8 +1,10 @@
 const GTM_ID_PATTERN = /^GTM-[A-Z0-9]+$/i;
 const GA_MEASUREMENT_ID_PATTERN = /^G-[A-Z0-9]+$/i;
+const ADSENSE_CLIENT_PATTERN = /^ca-pub-\d+$/i;
 
 export const gtmId = process.env.NEXT_PUBLIC_GTM_ID?.trim();
 export const gaMeasurementId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID?.trim();
+export const adsenseClient = process.env.NEXT_PUBLIC_ADSENSE_CLIENT?.trim();
 
 export function isGtmConfigured() {
   return Boolean(gtmId && GTM_ID_PATTERN.test(gtmId));
@@ -10,6 +12,21 @@ export function isGtmConfigured() {
 
 export function isGaConfigured() {
   return Boolean(gaMeasurementId && GA_MEASUREMENT_ID_PATTERN.test(gaMeasurementId));
+}
+
+export function isAdsenseConfigured() {
+  return Boolean(adsenseClient && ADSENSE_CLIENT_PATTERN.test(adsenseClient));
+}
+
+export function adsenseScriptSrc() {
+  if (!isAdsenseConfigured()) return "";
+  return `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adsenseClient}`;
+}
+
+export function adsenseHeadSnippet() {
+  const src = adsenseScriptSrc();
+  if (!src) return "";
+  return `<script async src="${src}" crossorigin="anonymous"></script>`;
 }
 
 export function gtmHeadSnippet() {

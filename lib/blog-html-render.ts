@@ -1,4 +1,4 @@
-import { gaHeadSnippet, gtmHeadSnippet, gtmNoScriptSnippet, homepageAnalyticsSnippet } from "./analytics";
+import { adsenseHeadSnippet, gaHeadSnippet, gtmHeadSnippet, gtmNoScriptSnippet, homepageAnalyticsSnippet } from "./analytics";
 import {
   BLOG_LANGUAGES,
   blogContentTypeLabel,
@@ -199,6 +199,7 @@ function htmlDocument(language: BlogLanguage, title: string, description: string
   <meta name="twitter:image" content="${escapeAttribute(image)}" />
   ${gaHeadSnippet()}
   ${gtmHeadSnippet()}
+  ${adsenseHeadSnippet()}
   <style>${SHELL_CSS}</style>
   ${extraHead}
 </head>

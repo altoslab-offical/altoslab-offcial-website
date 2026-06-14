@@ -11,6 +11,7 @@ const title = "ALTOS LAB｜AI Studio 人工智慧工作室";
 const description =
   "ALTOS LAB 深耕互聯網產品開發與 AI 系統整合，協助企業導入 AI Skill、AI Agent、系統串接與智能行銷。";
 const image = `${siteUrl}/geo-cover.png`;
+const adsenseClient = (process.env.NEXT_PUBLIC_ADSENSE_CLIENT || "ca-pub-8663357592872896").trim();
 const DEFAULT_WONDA_WIDGET_SCRIPT_SRC = "https://wonda-web-kxbpzwq4sa-de.a.run.app/widget.js";
 const DEFAULT_WONDA_WIDGET_CHANNEL_ID = "cmqb6hynd002hs619tqxc3pe5";
 const DEFAULT_WONDA_WIDGET_API = "https://altoslab-ai.cc/api/wonda";
@@ -155,6 +156,11 @@ function gaHeadSnippet() {
   </script>`;
 }
 
+function adsenseHeadSnippet() {
+  if (!/^ca-pub-\d+$/i.test(adsenseClient)) return "";
+  return `<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adsenseClient}" crossorigin="anonymous"></script>`;
+}
+
 function homepageAnalyticsSnippet() {
   return `<script>
     window.dataLayer = window.dataLayer || [];
@@ -213,7 +219,8 @@ function homepageMetadata() {
     <meta name="twitter:image" content="${image}" />
     ${homepageJsonLd()}
     ${gaHeadSnippet()}
-    ${gtmHeadSnippet()}`;
+    ${gtmHeadSnippet()}
+    ${adsenseHeadSnippet()}`;
 }
 
 function seoNoScriptFallback() {
