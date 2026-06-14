@@ -95,6 +95,7 @@ Required UI invariants:
 - The list page must keep sidebar topic navigation, search, post count, feed grid, pagination, and `SafeBlogImage` / `BlogEditorialVisual` handling.
 - Article detail pages must keep the designer-approved editorial highlight system: left-aligned hero, reduced desktop title scale, compact top spacing, black highlight text, signal-lime `#c8ff00` underline or side marker, and no legacy purple article accent.
 - Article `strong`, `blockquote`, `geo-summary`, and `article-takeaways` styling must use the same black text + signal-lime visual language across the Next article shell and the Cloudflare direct renderer.
+- Direct-rendered article pages must keep the same Blog shell header structure as `SiteHeader`: `site-nav`, centered main navigation, `site-nav-actions`, `site-language-toggle`, language trigger, `site-mobile-menu-trigger`, and `site-nav-cta-label`. Do not ship a separate simplified article header.
 - Any intentional redesign must update `SPEC.md`, `DESIGN.md`, `docs/FRONTEND_ARCHITECTURE.md`, screenshot evidence, and `scripts/blog-ui-contract-smoke.mjs` in the same change.
 
 Release gate:

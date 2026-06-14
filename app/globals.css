@@ -4264,18 +4264,21 @@ img {
 
 .blog-site-shell .geo-summary strong,
 .blog-site-shell .article-takeaways .eyebrow,
-.blog-site-shell .article-takeaways li {
+.blog-site-shell .article-takeaways li,
+.blog-site-shell .article-takeaways .takeaway-text {
   color: #050603;
   font-weight: 850;
 }
 
 .blog-site-shell .article-takeaways li {
-  width: fit-content;
-  max-width: 100%;
-  background: linear-gradient(to top, rgb(200 255 0 / 0.68) 0 0.42em, transparent 0.42em);
+  line-height: 1.55;
+}
+
+.blog-site-shell .article-takeaways .takeaway-text {
+  background: linear-gradient(to top, rgb(200 255 0 / 0.56) 0 0.36em, transparent 0.36em);
   box-decoration-break: clone;
   -webkit-box-decoration-break: clone;
-  line-height: 1.55;
+  padding: 0 0.02em;
 }
 
 .blog-site-shell .article-takeaways li::marker {

@@ -509,7 +509,9 @@ export async function BlogArticle({ post }: { post: BlogPost }) {
               <p className="eyebrow">{dictionary.takeaways}</p>
               <ul>
                 {post.keyTakeaways.map((item) => (
-                  <li key={item}>{renderBrandText(item)}</li>
+                  <li key={item}>
+                    <span className="takeaway-text">{renderBrandText(item)}</span>
+                  </li>
                 ))}
               </ul>
             </section>

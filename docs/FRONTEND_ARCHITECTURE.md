@@ -87,8 +87,9 @@ It must return `null` for `/blog` and `/:language/blog` so the original `BlogInd
 
 Article detail rendering has a shared visual contract across Next and the direct Worker renderer:
 
+- The direct Worker article header must mirror the Blog shell `SiteHeader` structure: `site-nav`, centered main navigation, `site-nav-actions`, `site-language-toggle`, language trigger, mobile menu trigger, and labeled CTA.
 - Hero/title/meta stays left aligned with compact top spacing.
-- `geo-summary`, `article-takeaways`, `strong`, and `blockquote` use black text plus signal-lime `#c8ff00` underline or side-marker styling.
+- `geo-summary`, `article-takeaways`, `strong`, and `blockquote` use black text plus restrained signal-lime `#c8ff00` underline or side-marker styling. Takeaway highlights should fit the text, not fill the row.
 - The retired purple article accent must not appear in direct-rendered article pages.
 - Data cleanup and market-news automation must fix content/source correctness without changing article layout or visual tokens.
 
