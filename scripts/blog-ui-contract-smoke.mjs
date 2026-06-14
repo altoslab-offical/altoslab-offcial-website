@@ -44,6 +44,10 @@ assert(apiHtmlRenderer.includes("function siteHeaderHtml(language: BlogLanguage)
 assert(apiHtmlRenderer.includes("siteHeaderHtml(post.language)") && apiHtmlRenderer.includes("siteHeaderHtml(language)"), "API blog HTML renderer uses the Blog shell header helper for article and index HTML");
 assert(!apiHtmlRenderer.includes('class="nav"') && !apiHtmlRenderer.includes('class="langs"'), "API blog HTML renderer does not ship the old alternate header bar");
 
+const cloudflarePatch = read("scripts/patch-cloudflare-worker-blog-html.mjs");
+assert(cloudflarePatch.includes('ALTOS_ENABLE_DIRECT_BLOG_HTML === "1"'), "Cloudflare direct article HTML is opt-in only");
+assert(cloudflarePatch.includes("directBlogHtmlInjected: enableDirectBlogHtml"), "Cloudflare patch reports whether direct article HTML was injected");
+
 const blogIndex = read("components/BlogIndex.tsx");
 for (const marker of ["blog-craft-index", "blog-craft-layout", "blog-craft-sidebar", "blog-craft-feed", "blog-craft-card"]) {
   assert(blogIndex.includes(marker), `BlogIndex keeps ${marker}`);

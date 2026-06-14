@@ -87,6 +87,7 @@ Route ownership:
 - Blog index routes are owned by `components/BlogIndex.tsx` and the route pages in `app/*/blog/page.tsx`.
 - Cloudflare direct rendering may handle article detail pages only (`/blog/:slug` and `/:language/blog/:slug`) for Worker CPU stability and Markdown rendering.
 - Cloudflare direct rendering must never implement or intercept a replacement blog index UI.
+- Production Cloudflare builds do not inject direct article HTML by default; article detail pages should normally render through the Next `BlogArticle` / `SiteHeader` path. The direct renderer is an explicit emergency fallback only when `ALTOS_ENABLE_DIRECT_BLOG_HTML=1`.
 - n8n/content automation may create, validate, release, and monitor posts, but must not mutate index layout, navigation, visual hierarchy, CSS tokens, or route ownership.
 
 Required UI invariants:
@@ -103,6 +104,7 @@ Release gate:
 
 - `npm run test:blog` must pass before deploy.
 - Live check after deploy must confirm `/blog` returns 200, does not include `x-altos-direct-blog-render`, contains `blog-craft-layout`, and does not show Cloudflare Error 1102.
+- Live article checks must also confirm article detail pages do not include `x-altos-direct-blog-render` unless an emergency direct-render incident is explicitly active.
 
 ## Current State
 

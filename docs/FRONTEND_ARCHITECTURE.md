@@ -81,7 +81,7 @@ Cloudflare direct HTML rendering may serve article detail routes only:
 - `/blog/:slug`
 - `/:language/blog/:slug`
 
-It must return `null` for `/blog` and `/:language/blog` so the original `BlogIndex` UI remains in control. This is enforced by `scripts/blog-ui-contract-smoke.mjs`, which is part of `npm run test:blog`.
+It must return `null` for `/blog` and `/:language/blog` so the original `BlogIndex` UI remains in control. Production builds also do not inject direct article HTML by default; article detail pages normally render through the Next `BlogArticle` / shared `SiteHeader` path. The direct article renderer is copied into the Cloudflare build only as an explicit emergency fallback when `ALTOS_ENABLE_DIRECT_BLOG_HTML=1`. This is enforced by `scripts/blog-ui-contract-smoke.mjs`, which is part of `npm run test:blog`.
 
 2026-06-14 New baseline note: the blog index/header and article detail shell were restored from the original `ALTOSLAB_WEB_MAIN` implementation. Direct Cloudflare rendering keeps article detail resilience and must not become a blog index renderer.
 
@@ -89,6 +89,7 @@ Article detail rendering has a shared visual contract across Next and the direct
 
 - The direct Worker article header must mirror the Blog shell `SiteHeader` structure: `site-nav`, centered main navigation, `site-nav-actions`, `site-language-toggle`, language trigger, mobile menu trigger, and labeled CTA.
 - The Cloudflare direct renderer and `/api/blog-html` renderer both use a Blog-main-style `siteHeaderHtml(...)` helper. The older standalone `.nav` / `.langs` article header is retired.
+- Default production article routes should not include `x-altos-direct-blog-render`; that header means the emergency direct renderer is active.
 - Hero/title/meta stays left aligned with compact top spacing.
 - `geo-summary`, `article-takeaways`, `strong`, and `blockquote` use black text plus restrained signal-lime `#c8ff00` underline or side-marker styling. Takeaway highlights should fit the text, not fill the row.
 - The retired purple article accent must not appear in direct-rendered article pages.

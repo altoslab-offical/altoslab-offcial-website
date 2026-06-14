@@ -17,20 +17,25 @@ fs.copyFileSync(source, target);
 
 let text = fs.readFileSync(worker, "utf8");
 const importLine = 'import { maybeHandleDirectBlogHtml } from "./cloudflare/blog-html-direct.js";';
-if (!text.includes(importLine)) {
-  text = `${importLine}\n${text}`;
-}
-
 const hook = `            const directBlogHtml = await maybeHandleDirectBlogHtml(request, env);
             if (directBlogHtml) {
                 return directBlogHtml;
             }
 `;
+const enableDirectBlogHtml = process.env.ALTOS_ENABLE_DIRECT_BLOG_HTML === "1";
 
-if (!text.includes("maybeHandleDirectBlogHtml(request, env)")) {
+if (enableDirectBlogHtml && !text.includes(importLine)) {
+  text = `${importLine}\n${text}`;
+}
+
+if (enableDirectBlogHtml && !text.includes("maybeHandleDirectBlogHtml(request, env)")) {
   const marker = "            // Serve images in development.";
   if (!text.includes(marker)) throw new Error("OpenNext worker patch marker not found.");
   text = text.replace(marker, `${hook}${marker}`);
+}
+
+if (!enableDirectBlogHtml) {
+  text = text.replace(`${importLine}\n`, "").replace(hook, "");
 }
 
 fs.writeFileSync(worker, text, "utf8");
@@ -38,7 +43,8 @@ console.log(
   JSON.stringify(
     {
       ok: true,
-      phase: "cloudflare-worker-blog-html-patched",
+      phase: enableDirectBlogHtml ? "cloudflare-worker-blog-html-patched" : "cloudflare-worker-blog-html-available",
+      directBlogHtmlInjected: enableDirectBlogHtml,
       worker: path.relative(root, worker),
       renderer: path.relative(root, target)
     },
