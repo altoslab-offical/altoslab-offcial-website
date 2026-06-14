@@ -252,7 +252,7 @@ function localFallbackTranslation(language, pack, texts) {
   };
 
   const evidenceByLanguage = {
-    "zh-Hant": entityText || numberText ? `文中牽涉 ${entityText || "相關公司與平台"}${numberText ? `，並提到 ${numberText}` : ""}。` : `文章聚焦 ${publisher} 原文可核對的公開資訊。`,
+    "zh-Hant": entityText || numberText ? `來源報導聚焦 ${entityText || "相關公司與平台"}${numberText ? `，並列出 ${numberText} 等可核對數字` : ""}。` : `文章聚焦 ${publisher} 原文可核對的公開資訊。`,
     en: summary,
     ja: entityText || numberText ? `記事では ${entityText || "関連企業とプラットフォーム"}${numberText ? ` に加え、${numberText} という数字` : ""} が示されています。` : `記事は ${publisher} の原文で確認できる公開情報に焦点を当てています。`,
     ko: entityText || numberText ? `보도에는 ${entityText || "관련 기업과 플랫폼"}${numberText ? `, 그리고 ${numberText}` : ""}가 언급됩니다.` : `이 글은 ${publisher} 원문에서 확인되는 공개 정보를 중심으로 합니다.`,
@@ -264,7 +264,7 @@ function localFallbackTranslation(language, pack, texts) {
   };
 
   const analysisByLanguage = {
-    "zh-Hant": "放在企業採用脈絡看，重點不只是哪家公司發布新功能，而是它是否改變導入成本、治理責任、資料流向或使用者信任。",
+    "zh-Hant": "企業讀者應先判斷這項消息是否改變採購成本、治理責任、資料流向或使用者信任，而不只是看發布聲量。",
     en: "ALTOS LAB treats this kind of update as a market signal, not just product promotion: the key question is whether it changes AI adoption cost, governance responsibility, data flow, or user trust.",
     ja: "ALTOS LAB はこの種のニュースを単なる製品宣伝ではなく市場シグナルとして見ます。焦点は、AI 導入コスト、ガバナンス責任、データの流れ、利用者の信頼を変えるかどうかです。",
     ko: "ALTOS LAB은 이런 업데이트를 단순한 제품 홍보가 아니라 시장 신호로 봅니다. 핵심은 AI 도입 비용, 거버넌스 책임, 데이터 흐름, 사용자 신뢰를 바꾸는지입니다.",

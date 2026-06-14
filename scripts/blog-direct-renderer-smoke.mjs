@@ -77,6 +77,9 @@ assert(html.includes("<strong>粗體文字</strong>"), "paragraph bold markers r
 assert(html.includes("<strong>先切測試環境</strong>"), "list item bold markers render as strong");
 assert(html.includes("<strong>粗體摘要</strong>"), "excerpt bold markers render as strong");
 assert(html.includes("<code>inline code</code>"), "inline code markers render as code");
+assert(html.includes("--highlight:#c8ff00"), "direct renderer carries designer lime highlight token");
+assert(!html.includes("--accent:#8b5cf6"), "direct renderer no longer ships legacy purple article accent");
+assert(html.includes(".article-takeaways li{") && html.includes("var(--highlight-soft)"), "direct renderer styles takeaways with black text and lime underline");
 
 const indexResponse = await maybeHandleDirectBlogHtml(new Request("https://altoslab-ai.cc/blog"), env);
 assert(indexResponse === null, "blog index falls through to the original Next UI renderer");

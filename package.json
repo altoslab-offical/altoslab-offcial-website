@@ -41,6 +41,7 @@
     "blog:market-public-qa": "node scripts/blog-market-news-public-qa.mjs",
     "blog:audit-ai-feeling": "node scripts/blog-audit-ai-feeling.mjs",
     "blog:repair-copy": "node scripts/blog-public-copy-repair.mjs",
+    "blog:clean-public-market": "node scripts/blog-clean-public-market-news-projection.mjs",
     "blog:repair-production": "node scripts/blog-production-repair.mjs",
     "blog:ops-audit": "node scripts/blog-operations-audit.mjs",
     "blog:daily-closeout": "node scripts/blog-daily-closeout.mjs",

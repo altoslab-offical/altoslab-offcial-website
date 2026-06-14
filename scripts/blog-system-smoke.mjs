@@ -42,12 +42,14 @@ const backfillPlanner = read("scripts/blog-backfill-planner.mjs");
 const subagentModelPolicy = read("scripts/blog-subagent-model-policy.mjs");
 const marketSourceScanner = read("scripts/blog-market-source-scanner.mjs");
 const marketTranslationService = read("scripts/blog-market-translation-service.mjs");
+const publicMarketProjectionCleaner = read("scripts/blog-clean-public-market-news-projection.mjs");
 const sopDoctor = read("scripts/blog-sop-doctor.mjs");
 const releaseVerifier = read("scripts/verify-blog-release.mjs");
 const cloudflareSetup = read("scripts/cloudflare-free-deploy-setup.sh");
 const cloudflareSeed = read("scripts/cloudflare-seed-kv.mjs");
 const cloudflareMigratePublicBlogCache = read("scripts/cloudflare-migrate-public-blog-cache.mjs");
 const cloudflareSmoke = read("scripts/cloudflare-smoke.mjs");
+const cloudflareDirectBlog = read("cloudflare/blog-html-direct-worker.js");
 const n8nLocalBridge = read("scripts/n8n-local-bridge.mjs");
 const n8nLocalControlPlaneVerifier = read("scripts/verify-n8n-local-control-plane.sh");
 const cloudflareStagingConfig = read("wrangler.staging.jsonc");
@@ -279,6 +281,7 @@ assert(marketSourceScanner.includes("og:image") && marketSourceScanner.includes(
 assert(marketSourceScanner.includes("GDELT") || sourceRegistry.includes("GDELT DOC API"), "market source scanner is backed by expanded free discovery sources");
 assert(marketSourceScanner.includes("CONSUMER_NOISE_PATTERN"), "market source scanner filters irrelevant consumer-news noise");
 assert(marketSourceScanner.includes("liveDuplicateState"), "market source scanner checks live duplicate source URLs, covers and titles");
+assert(!marketSourceScanner.includes("current AI coverage page for related reporting"), "market source scanner does not publish generic source index pages as article sources");
 assert(sopDoctor.includes("BLOG_DISABLE_DEEPSEEK_CRON must be true"), "SOP doctor requires the legacy DeepSeek cron to stay disabled");
 assert(sopDoctor.includes("[8, 10]") && sopDoctor.includes("[9, 0]") && sopDoctor.includes("[9, 4]"), "SOP doctor enforces prep/release launch windows in its trigger checks");
 assert(sopDoctor.includes("[10, 30]") && sopDoctor.includes("[12, 30]") && sopDoctor.includes("[14, 30]"), "SOP doctor enforces all market-scan launch windows");
@@ -493,8 +496,16 @@ assert(envExample.includes("BLOG_MARKET_TRANSLATION_PROVIDER=google-strict"), "e
 assert(envExample.includes("BLOG_MARKET_ALLOW_LOCAL_TRANSLATION_FALLBACK=0"), "env example keeps local market-news fallback disabled for production publishing");
 assert(localWorker.includes("BLOG_MARKET_ALLOW_LOCAL_TRANSLATION_FALLBACK"), "local worker documents the explicit local market-news fallback switch");
 assert(marketTranslationService.includes("BLOG_MARKET_ALLOW_LOCAL_TRANSLATION_FALLBACK=1"), "market-news translation service requires an explicit opt-in before local fallback");
+assert(!marketTranslationService.includes("文中牽涉") && !marketTranslationService.includes("放在企業採用脈絡看"), "market-news fallback no longer emits legacy extraction-template copy");
 assert(quality.includes("文中牽涉") && quality.includes("報導「」") && quality.includes("放在企業採用脈絡看"), "quality gate blocks market-news source extraction pollution");
+assert(
+  cloudflareDirectBlog.includes("--highlight:#c8ff00") &&
+    cloudflareDirectBlog.includes(".article-takeaways li") &&
+    !cloudflareDirectBlog.includes("--accent:#8b5cf6"),
+  "Cloudflare direct blog article renderer uses designer article highlight styling instead of legacy purple"
+);
 assert(cms.includes("hasPublicMarketNewsPollution") && cms.includes("skippedPollutedPosts"), "public cache refresh refuses to overwrite clean projections with polluted market-news copy");
+assert(publicMarketProjectionCleaner.includes("OpenAI News's current AI coverage") && publicMarketProjectionCleaner.includes("cleanContentImages"), "public market projection cleaner removes generic OpenAI index links and unrelated inline images");
 assert(envExample.includes("BLOG_IMAGE_PROVIDER=none") && envExample.includes("AUTO_GENERATE_BLOG_COVERS=false"), "env example disables stock/fallback cover generation for the formal workflow");
 assert(envExample.includes("GA4_PROPERTY_ID="), "env example documents GA4 Data API property configuration");
 assert(envExample.includes("SEARCH_CONSOLE_SITE_URL="), "env example documents Search Console reporting configuration");

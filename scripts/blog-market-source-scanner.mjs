@@ -613,15 +613,6 @@ function sourcePackFromCandidate(sequence, candidate, { newsDepth } = {}) {
       summary: sourceSummary(candidate)
     }
   ];
-  if (candidate.sourceUrl && candidate.sourceUrl !== primaryUrl) {
-    sourceLinks.push({
-      title: `${candidate.publisher} AI coverage`,
-      url: candidate.sourceUrl,
-      publisher: candidate.publisher,
-      publishedAt,
-      summary: `${candidate.publisher}'s current AI coverage page for related reporting and follow-up context.`
-    });
-  }
   return {
     sequence,
     topic: title,

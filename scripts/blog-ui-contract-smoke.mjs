@@ -30,6 +30,10 @@ const directWorker = read("cloudflare/blog-html-direct-worker.js");
 for (const forbidden of ["function renderIndex", "readIndexPosts", "BLOG_INDEX_PAGE_SIZE =", "cloudflare-d1-index"]) {
   assert(!directWorker.includes(forbidden), `Cloudflare direct renderer must not contain ${forbidden}`);
 }
+assert(directWorker.includes("--highlight:#c8ff00"), "direct article renderer keeps designer signal-lime highlight token");
+assert(directWorker.includes(".article-takeaways li") && directWorker.includes("var(--highlight-soft)"), "direct article renderer keeps black text plus lime takeaway underline styling");
+assert(directWorker.includes(".rich-text blockquote") && directWorker.includes("border-left"), "direct article renderer keeps designer blockquote side-marker styling");
+assert(!directWorker.includes("--accent:#8b5cf6"), "direct article renderer does not reintroduce legacy purple article accent");
 
 const blogIndex = read("components/BlogIndex.tsx");
 for (const marker of ["blog-craft-index", "blog-craft-layout", "blog-craft-sidebar", "blog-craft-feed", "blog-craft-card"]) {

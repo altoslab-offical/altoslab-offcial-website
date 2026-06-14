@@ -85,6 +85,13 @@ It must return `null` for `/blog` and `/:language/blog` so the original `BlogInd
 
 2026-06-14 New baseline note: the blog index/header and article detail shell were restored from the original `ALTOSLAB_WEB_MAIN` implementation. Direct Cloudflare rendering keeps article detail resilience and must not become a blog index renderer.
 
+Article detail rendering has a shared visual contract across Next and the direct Worker renderer:
+
+- Hero/title/meta stays left aligned with compact top spacing.
+- `geo-summary`, `article-takeaways`, `strong`, and `blockquote` use black text plus signal-lime `#c8ff00` underline or side-marker styling.
+- The retired purple article accent must not appear in direct-rendered article pages.
+- Data cleanup and market-news automation must fix content/source correctness without changing article layout or visual tokens.
+
 Do not use `BlogIndexLite`, `renderIndex`, direct `list_json` Worker queries, or a replacement static index to solve Worker CPU issues. The accepted approach is to optimize the canonical `BlogIndex` path, paginate inventory, or improve Cloudflare data access without changing route ownership.
 
 ## Inactive Prototype Components
