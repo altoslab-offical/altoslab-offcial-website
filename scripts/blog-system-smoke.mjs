@@ -309,8 +309,8 @@ assert(cms.includes("const data = await readPublicRawCmsData()") && cms.includes
 assert(cms.includes("public-blog-inventory") && cloudflareSmoke.includes("fields=inventory&limit=120"), "Cloudflare public blog inventory uses a bounded lightweight cache");
 assert(blogIndex.includes("getPublishedBlogInventoryPostsByLanguage"), "Cloudflare blog index renders from inventory cache instead of full blog bodies");
 assert(
-  blogIndex.includes('BLOG_INDEX_PAGE_SIZE || "24"') && blogIndex.includes("Math.min(rawBlogIndexPageSize, 24)"),
-  "blog index shows the full 24-card page while staying within the Cloudflare Worker CPU budget"
+  blogIndex.includes("const BLOG_INDEX_PAGE_SIZE = 24") && !blogIndex.includes("process.env.BLOG_INDEX_PAGE_SIZE"),
+  "blog index shows the full 24-card page without runtime env shrinking the archive shelf"
 );
 assert(blogIndex.includes("filtered.slice(pageStart, pageStart + BLOG_INDEX_PAGE_SIZE)") && blogIndex.includes("blog-craft-pagination"), "blog index exposes all inventory through pagination instead of rendering every card on one Worker request");
 assert(cms.includes("PUBLIC_BLOG_CACHE_LIMIT_PER_LANGUAGE || 600"), "public blog list projection does not keep the old 8-post-per-language cap");

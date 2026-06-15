@@ -18,9 +18,7 @@ type BlogIndexProps = {
   page?: string | number;
 };
 
-const rawBlogIndexPageSize = Number(process.env.BLOG_INDEX_PAGE_SIZE || "24");
-const BLOG_INDEX_PAGE_SIZE =
-  Number.isFinite(rawBlogIndexPageSize) && rawBlogIndexPageSize > 0 ? Math.min(rawBlogIndexPageSize, 24) : 24;
+const BLOG_INDEX_PAGE_SIZE = 24;
 
 function articleTimestamp(post: BlogPost) {
   return new Date(post.publishedAt || post.updatedAt || post.createdAt).getTime() || 0;
