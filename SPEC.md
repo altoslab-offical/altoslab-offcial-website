@@ -94,6 +94,7 @@ Required UI invariants:
 
 - `BlogIndex` must retain `blog-craft-index`, `blog-craft-layout`, `blog-craft-sidebar`, `blog-craft-feed`, and `blog-craft-card`.
 - The list page must keep sidebar topic navigation, search, post count, feed grid, pagination, and `SafeBlogImage` / `BlogEditorialVisual` handling.
+- The list page should show up to 24 cards per page, then expose the rest of the published archive through pagination. Cloudflare D1 projection reads must be chunked so the public inventory cannot silently stop at a 20-row runtime page.
 - Article detail pages must keep the designer-approved editorial highlight system: left-aligned hero, reduced desktop title scale, compact top spacing, black highlight text, signal-lime `#c8ff00` underline or side marker, and no legacy purple article accent.
 - Article `strong`, `blockquote`, `geo-summary`, and `article-takeaways` styling must use the same black text + signal-lime visual language across the Next article shell and the Cloudflare direct renderer.
 - Direct-rendered article pages must keep the same Blog shell header structure as `SiteHeader`: `site-nav`, centered main navigation, `site-nav-actions`, `site-language-toggle`, language trigger, `site-mobile-menu-trigger`, and `site-nav-cta-label`. Do not ship a separate simplified article header.

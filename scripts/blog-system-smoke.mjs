@@ -308,9 +308,16 @@ assert(cms.includes("publicBlogDetailRefreshLimitPerLanguage") && cms.includes("
 assert(cms.includes("const data = await readPublicRawCmsData()") && cms.includes("matchesBlogSlug(item.slug, slug)"), "Cloudflare detail pages fall back to primary CMS reads when detail cache is absent");
 assert(cms.includes("public-blog-inventory") && cloudflareSmoke.includes("fields=inventory&limit=120"), "Cloudflare public blog inventory uses a bounded lightweight cache");
 assert(blogIndex.includes("getPublishedBlogInventoryPostsByLanguage"), "Cloudflare blog index renders from inventory cache instead of full blog bodies");
-assert(blogIndex.includes('BLOG_INDEX_PAGE_SIZE || "18"') && blogIndex.includes("Math.min(rawBlogIndexPageSize, 24)"), "blog index paginates cards within the Cloudflare Worker CPU budget");
+assert(
+  blogIndex.includes('BLOG_INDEX_PAGE_SIZE || "24"') && blogIndex.includes("Math.min(rawBlogIndexPageSize, 24)"),
+  "blog index shows the full 24-card page while staying within the Cloudflare Worker CPU budget"
+);
 assert(blogIndex.includes("filtered.slice(pageStart, pageStart + BLOG_INDEX_PAGE_SIZE)") && blogIndex.includes("blog-craft-pagination"), "blog index exposes all inventory through pagination instead of rendering every card on one Worker request");
 assert(cms.includes("PUBLIC_BLOG_CACHE_LIMIT_PER_LANGUAGE || 600"), "public blog list projection does not keep the old 8-post-per-language cap");
+assert(
+  cms.includes("PUBLIC_BLOG_D1_PROJECTION_READ_CHUNK_SIZE = 20") && cms.includes("OFFSET ${offset}"),
+  "public D1 projection reads are chunked so Worker reads do not stop at the runtime's 20-row page"
+);
 assert(blogApiRoute.includes("Math.min(rawLimit, 120)") && blogApiRoute.includes("getPublishedBlogInventoryPostsForApi(language || undefined, limit)"), "public blog API uses bounded D1 inventory projection for list and inventory responses");
 assert(feedRoute.includes("getPublishedBlogInventoryPosts()"), "Cloudflare feed renders from inventory cache instead of full blog bodies");
 assert(

@@ -85,6 +85,8 @@ It must return `null` for `/blog` and `/:language/blog` so the original `BlogInd
 
 2026-06-14 New baseline note: the blog index/header and article detail shell were restored from the original `ALTOSLAB_WEB_MAIN` implementation. Direct Cloudflare rendering keeps article detail resilience and must not become a blog index renderer.
 
+The production blog index reads compact D1 inventory projections in bounded chunks, because the Worker/D1 path can otherwise behave like a 20-row page. `/blog` and localized blog indexes should surface the full published archive through `BlogIndex` pagination, with 24 cards on each page by default.
+
 Article detail rendering has a shared visual contract across Next and the direct Worker renderer:
 
 - The direct Worker article header must mirror the Blog shell `SiteHeader` structure: `site-nav`, centered main navigation, `site-nav-actions`, `site-language-toggle`, language trigger, mobile menu trigger, and labeled CTA.

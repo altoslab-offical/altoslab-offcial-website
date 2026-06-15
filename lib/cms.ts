@@ -34,6 +34,7 @@ const PUBLIC_BLOG_LIST_CACHE_VERSION = "v2";
 const PUBLIC_BLOG_DETAIL_CACHE_VERSION = "v1";
 const PUBLIC_BLOG_INVENTORY_CACHE_VERSION = "v2";
 const PUBLIC_BLOG_DUPLICATE_CACHE_VERSION = "v1";
+const PUBLIC_BLOG_D1_PROJECTION_READ_CHUNK_SIZE = 20;
 
 let publicRawCmsCache: { data: CmsData; expiresAt: number } | null = null;
 let publicBlogPostsCache: { posts: BlogPost[]; expiresAt: number } | null = null;
@@ -487,27 +488,32 @@ async function readPublicBlogD1ProjectionPosts(
   await ensurePublicBlogD1Schema(database);
   const column = kind === "list" ? "list_json" : kind === "inventory" ? "inventory_json" : "duplicate_json";
   const normalizedLanguage = options.language ? normalizeBlogLanguage(options.language) : null;
-  const limit = Number.isFinite(options.limit) && Number(options.limit) > 0 ? Math.min(Number(options.limit), 600) : null;
+  const requestedLimit = Number.isFinite(options.limit) && Number(options.limit) > 0 ? Math.min(Number(options.limit), 600) : null;
+  const maxRows =
+    requestedLimit || (normalizedLanguage ? PUBLIC_BLOG_CACHE_LIMIT_PER_LANGUAGE : PUBLIC_BLOG_CACHE_LIMIT_PER_LANGUAGE * BLOG_LANGUAGES.length);
   const where = normalizedLanguage ? "WHERE status = 'published' AND language = ?1" : "WHERE status = 'published'";
-  const limitClause = limit ? ` LIMIT ${limit}` : "";
-  const rows = normalizedLanguage
-    ? await database
-        .prepare(`SELECT ${column} AS payload FROM public_blog_posts ${where} ORDER BY updated_at DESC, sort_order ASC${limitClause}`)
-        .bind(normalizedLanguage)
-        .all<{ payload?: string }>()
-    : await database
-        .prepare(`SELECT ${column} AS payload FROM public_blog_posts ${where} ORDER BY updated_at DESC, sort_order ASC${limitClause}`)
-        .all<{ payload?: string }>();
-  const posts = (rows.results || [])
-    .map((row) => {
-      if (typeof row.payload !== "string") return null;
+  const posts: BlogPost[] = [];
+
+  for (let offset = 0; offset < maxRows; ) {
+    const currentLimit = Math.min(PUBLIC_BLOG_D1_PROJECTION_READ_CHUNK_SIZE, maxRows - offset);
+    const query = `SELECT ${column} AS payload FROM public_blog_posts ${where} ORDER BY updated_at DESC, sort_order ASC LIMIT ${currentLimit} OFFSET ${offset}`;
+    const rows = normalizedLanguage
+      ? await database.prepare(query).bind(normalizedLanguage).all<{ payload?: string }>()
+      : await database.prepare(query).all<{ payload?: string }>();
+    const results = rows.results || [];
+
+    for (const row of results) {
+      if (typeof row.payload !== "string") continue;
       try {
-        return JSON.parse(row.payload) as BlogPost;
+        posts.push(JSON.parse(row.payload) as BlogPost);
       } catch {
-        return null;
+        // Skip malformed projection rows and keep the public surface available.
       }
-    })
-    .filter(Boolean) as BlogPost[];
+    }
+
+    if (results.length < currentLimit) break;
+    offset += results.length;
+  }
 
   if (!posts.length) return null;
   return kind === "list" ? publicBlogListPostsFromPosts(posts) : posts;
