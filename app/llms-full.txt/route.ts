@@ -1,5 +1,5 @@
 import {
-  getPublishedBlogInventoryPosts,
+  getPublishedBlogInventoryPostsForApi,
   getPublishedBlogPost,
   getPublishedBlogPosts,
   getPublishedProjects
@@ -42,8 +42,9 @@ function latestArticleGroups(posts: BlogPost[]) {
 
 export async function GET() {
   const lightweightCloudflareRender = process.env.CLOUDFLARE_KV_ENABLED === "1";
+  const inventoryLimit = Math.min(LLMS_FULL_ARTICLE_GROUP_LIMIT * BLOG_LANGUAGES.length, 120);
   const [posts, projects] = await Promise.all([
-    lightweightCloudflareRender ? getPublishedBlogInventoryPosts() : getPublishedBlogPosts(),
+    lightweightCloudflareRender ? getPublishedBlogInventoryPostsForApi(undefined, inventoryLimit) : getPublishedBlogPosts(),
     lightweightCloudflareRender ? Promise.resolve([]) : getPublishedProjects()
   ]);
   const recentPostSummaries = latestArticleGroups(posts);

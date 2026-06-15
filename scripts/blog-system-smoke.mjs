@@ -324,8 +324,11 @@ assert(
   rssAliasRoute.includes("export const dynamic = \"force-dynamic\"") && rssAliasRoute.includes("export { GET } from \"../feed.xml/route\""),
   "rss.xml aliases the canonical feed.xml endpoint with a local route config"
 );
-assert(llmsRoute.includes("getPublishedBlogInventoryPosts()"), "Cloudflare llms.txt renders from inventory cache instead of full blog bodies");
-assert(llmsFullRoute.includes("getPublishedBlogInventoryPosts()") && llmsFullRoute.includes("recentPostSummaries"), "Cloudflare llms-full avoids detail cache fan-out during Worker requests");
+assert(llmsRoute.includes("getPublishedBlogInventoryPostsForApi(undefined, inventoryLimit)"), "Cloudflare llms.txt reads a bounded inventory window instead of scanning the full archive");
+assert(
+  llmsFullRoute.includes("getPublishedBlogInventoryPostsForApi(undefined, inventoryLimit)") && llmsFullRoute.includes("recentPostSummaries"),
+  "Cloudflare llms-full avoids detail cache fan-out and full-archive scans during Worker requests"
+);
 assert(sitemapRoute.includes("lightweightCloudflareRender") && sitemapRoute.includes("Promise.resolve([])"), "Cloudflare sitemap avoids full project CMS reads during Worker requests");
 assert(cms.includes("public-blog-duplicates") && cms.includes("getPublishedBlogDuplicatePosts"), "Cloudflare validate has a lightweight duplicate-check cache");
 assert(cms.includes("sortedByPublicRecency") && cms.includes("updatedAt || post.publishedAt || post.createdAt"), "Cloudflare public blog lists are selected by release recency, not sortOrder");

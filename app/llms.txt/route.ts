@@ -1,4 +1,4 @@
-import { getPublishedBlogInventoryPosts, getPublishedBlogPosts, getPublishedProjects } from "@/lib/cms";
+import { getPublishedBlogInventoryPostsForApi, getPublishedBlogPosts, getPublishedProjects } from "@/lib/cms";
 import { BLOG_LANGUAGES, blogPostPath } from "@/lib/blog-utils";
 import { publicTaxonomyLabel } from "@/lib/public-taxonomy";
 import { siteName, siteUrl } from "@/lib/seo";
@@ -29,8 +29,9 @@ function orderedLlmsArticles(posts: BlogPost[]) {
 
 export async function GET() {
   const lightweightCloudflareRender = process.env.CLOUDFLARE_KV_ENABLED === "1";
+  const inventoryLimit = Math.min(LLMS_ARTICLE_GROUP_LIMIT * BLOG_LANGUAGES.length, 120);
   const [posts, projects] = await Promise.all([
-    lightweightCloudflareRender ? getPublishedBlogInventoryPosts() : getPublishedBlogPosts(),
+    lightweightCloudflareRender ? getPublishedBlogInventoryPostsForApi(undefined, inventoryLimit) : getPublishedBlogPosts(),
     lightweightCloudflareRender ? Promise.resolve([]) : getPublishedProjects()
   ]);
   const articles = orderedLlmsArticles(posts);
