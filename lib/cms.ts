@@ -553,7 +553,7 @@ async function readPublicBlogD1SitemapEntries() {
   for (let offset = 0; offset < PUBLIC_BLOG_D1_SITEMAP_READ_LIMIT; ) {
     const rows = await database
       .prepare(
-        `SELECT id, slug, language, translation_group_id AS translationGroupId, updated_at AS updatedAt, published_at AS publishedAt, created_at AS createdAt
+        `SELECT merge_key AS id, slug, language, translation_group_id AS translationGroupId, updated_at AS updatedAt, published_at AS publishedAt, updated_at AS createdAt
         FROM public_blog_posts
         WHERE status = 'published'
         ORDER BY updated_at DESC, sort_order ASC
