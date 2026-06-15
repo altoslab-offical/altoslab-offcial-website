@@ -3,6 +3,7 @@ substitutions:
   _NEXT_PUBLIC_SITE_URL: https://altoslab-ai.cc
   _NEXT_PUBLIC_GTM_ID: GTM-WJ96VR7V
   _NEXT_PUBLIC_GA_MEASUREMENT_ID: G-5VSLFNVD28
+  _NEXT_PUBLIC_ADSENSE_CLIENT: ca-pub-8663357592872896
   _CANONICAL_REDIRECT_HOSTS: www.altoslab-ai.cc,altoslab.com,www.altoslab.com,altoslab-offcial-website.vercel.app
 
 steps:
@@ -15,6 +16,8 @@ steps:
       - NEXT_PUBLIC_GTM_ID=${_NEXT_PUBLIC_GTM_ID}
       - --build-arg
       - NEXT_PUBLIC_GA_MEASUREMENT_ID=${_NEXT_PUBLIC_GA_MEASUREMENT_ID}
+      - --build-arg
+      - NEXT_PUBLIC_ADSENSE_CLIENT=${_NEXT_PUBLIC_ADSENSE_CLIENT}
       - --build-arg
       - CANONICAL_REDIRECT_HOSTS=${_CANONICAL_REDIRECT_HOSTS}
       - -t

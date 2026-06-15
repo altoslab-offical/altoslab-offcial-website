@@ -4271,6 +4271,11 @@ img {
 }
 
 .blog-site-shell .article-takeaways li {
+  width: fit-content;
+  max-width: 100%;
+  background: linear-gradient(to top, rgb(200 255 0 / 0.68) 0 0.42em, transparent 0.42em);
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
   line-height: 1.55;
 }
 
