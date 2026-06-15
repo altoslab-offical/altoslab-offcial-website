@@ -87,6 +87,8 @@ It must return `null` for `/blog` and `/:language/blog` so the original `BlogInd
 
 The production blog index reads compact D1 inventory projections in bounded chunks, because the Worker/D1 path can otherwise behave like a 20-row page. `/blog` and localized blog indexes should surface the full published archive through `BlogIndex` pagination, with 24 cards on each page by default.
 
+On Cloudflare, the default unfiltered blog index must use a count + paged read: D1 `COUNT(*)` supplies the total archive count, while the card grid fetches only the current 24-post page. Feed, LLM metadata, public API smoke checks, and sitemap generation should also avoid full inventory JSON scans; sitemap generation uses lightweight slug/language/update columns.
+
 Article detail rendering has a shared visual contract across Next and the direct Worker renderer:
 
 - The direct Worker article header must mirror the Blog shell `SiteHeader` structure: `site-nav`, centered main navigation, `site-nav-actions`, `site-language-toggle`, language trigger, mobile menu trigger, and labeled CTA.

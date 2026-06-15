@@ -7,7 +7,7 @@ import { SiteFooter } from "@/components/site/SiteFooter";
 import { SiteHeader } from "@/components/site/SiteHeader";
 import { blogContentTypeLabel, blogIndexPath, blogPostPath } from "@/lib/blog-utils";
 import { toBlogVisualPost } from "@/lib/blog-visual";
-import { getPublishedBlogInventoryPostsByLanguage } from "@/lib/cms";
+import { getPublishedBlogInventoryPageByLanguage, getPublishedBlogInventoryPostsByLanguage } from "@/lib/cms";
 import { blogIndexItemListJsonLd, breadcrumbJsonLd } from "@/lib/seo";
 import type { BlogLanguage, BlogPost } from "@/lib/types";
 
@@ -443,26 +443,46 @@ function blogIndexHref(language: BlogLanguage, params: { tag?: string; query?: s
 
 export async function BlogIndex({ language, tag, query, page }: BlogIndexProps) {
   const dictionary = copy[language];
-  const posts = await getPublishedBlogInventoryPostsByLanguage(language);
-  const orderedPosts = [...posts].sort(
-    (a, b) => articleTimestamp(b) - articleTimestamp(a) || Number(a.sortOrder || 0) - Number(b.sortOrder || 0)
-  );
   const normalizedTag = tag?.trim().toLowerCase();
   const normalizedQuery = query?.trim().toLowerCase();
-  const filtered = orderedPosts.filter((post) => {
-    const matchesTag = normalizedTag ? matchesTopic(post, tag || "") : true;
-    const matchesQuery = normalizedQuery
-      ? [post.title, post.excerpt, post.topic, post.geoSummary, post.tags.join(" ")]
-          .join(" ")
-          .toLowerCase()
-          .includes(normalizedQuery)
-      : true;
-    return matchesTag && matchesQuery;
-  });
-  const pageCount = Math.max(1, Math.ceil(filtered.length / BLOG_INDEX_PAGE_SIZE));
-  const currentPage = Math.min(normalizedPage(page), pageCount);
-  const pageStart = (currentPage - 1) * BLOG_INDEX_PAGE_SIZE;
-  const visiblePosts = filtered.slice(pageStart, pageStart + BLOG_INDEX_PAGE_SIZE);
+  const hasArchiveFilters = Boolean(normalizedTag || normalizedQuery);
+  const requestedPage = normalizedPage(page);
+  let totalPostCount = 0;
+  let filteredPostCount = 0;
+  let pageCount = 1;
+  let currentPage = requestedPage;
+  let visiblePosts: BlogPost[];
+
+  if (hasArchiveFilters) {
+    const posts = await getPublishedBlogInventoryPostsByLanguage(language);
+    const orderedPosts = [...posts].sort(
+      (a, b) => articleTimestamp(b) - articleTimestamp(a) || Number(a.sortOrder || 0) - Number(b.sortOrder || 0)
+    );
+    const filtered = orderedPosts.filter((post) => {
+      const matchesTag = normalizedTag ? matchesTopic(post, tag || "") : true;
+      const matchesQuery = normalizedQuery
+        ? [post.title, post.excerpt, post.topic, post.geoSummary, post.tags.join(" ")]
+            .join(" ")
+            .toLowerCase()
+            .includes(normalizedQuery)
+        : true;
+      return matchesTag && matchesQuery;
+    });
+    totalPostCount = posts.length;
+    filteredPostCount = filtered.length;
+    pageCount = Math.max(1, Math.ceil(filtered.length / BLOG_INDEX_PAGE_SIZE));
+    currentPage = Math.min(requestedPage, pageCount);
+    const pageStart = (currentPage - 1) * BLOG_INDEX_PAGE_SIZE;
+    visiblePosts = filtered.slice(pageStart, pageStart + BLOG_INDEX_PAGE_SIZE);
+  } else {
+    const pageData = await getPublishedBlogInventoryPageByLanguage(language, requestedPage, BLOG_INDEX_PAGE_SIZE);
+    totalPostCount = pageData.total;
+    filteredPostCount = pageData.total;
+    pageCount = pageData.pageCount;
+    currentPage = pageData.page;
+    visiblePosts = pageData.posts;
+  }
+
   const previousPage = currentPage > 1 ? currentPage - 1 : null;
   const nextPage = currentPage < pageCount ? currentPage + 1 : null;
 
@@ -517,7 +537,7 @@ export async function BlogIndex({ language, tag, query, page }: BlogIndexProps) 
 
             <div className="blog-craft-sidebar-footer">
               <span>
-                <strong>{posts.length}</strong> {dictionary.postsLabel}
+                <strong>{totalPostCount}</strong> {dictionary.postsLabel}
               </span>
             </div>
           </aside>
@@ -576,9 +596,9 @@ export async function BlogIndex({ language, tag, query, page }: BlogIndexProps) 
                   </article>
                 );
               })}
-              {!filtered.length ? <p className="muted">{dictionary.empty}</p> : null}
+              {!filteredPostCount ? <p className="muted">{dictionary.empty}</p> : null}
             </div>
-            {filtered.length > BLOG_INDEX_PAGE_SIZE ? (
+            {filteredPostCount > BLOG_INDEX_PAGE_SIZE ? (
               <nav className="blog-craft-pagination" aria-label="Blog pagination">
                 {previousPage ? (
                   <Link className="blog-craft-page-link" href={blogIndexHref(language, { tag, query, page: previousPage })}>

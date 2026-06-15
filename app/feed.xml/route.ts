@@ -1,4 +1,4 @@
-import { getPublishedBlogInventoryPosts, getPublishedBlogPosts } from "@/lib/cms";
+import { getPublishedBlogInventoryPostsForApi, getPublishedBlogPosts } from "@/lib/cms";
 import { blogPostPath } from "@/lib/blog-utils";
 import { stripPublicExcerptPrefix } from "@/lib/public-copy";
 import { publicTaxonomyLabel } from "@/lib/public-taxonomy";
@@ -8,15 +8,16 @@ import type { BlogPost } from "@/lib/types";
 export const dynamic = "force-dynamic";
 
 const RSS_ITEM_LIMIT = Number(process.env.RSS_ITEM_LIMIT || 108);
+const CLOUDFLARE_RSS_ITEM_LIMIT = 48;
 
 function articleTimestamp(post: BlogPost) {
   return new Date(post.updatedAt || post.publishedAt || post.createdAt).getTime() || 0;
 }
 
-function latestFeedPosts(posts: BlogPost[]) {
+function latestFeedPosts(posts: BlogPost[], limit = RSS_ITEM_LIMIT) {
   return [...posts]
     .sort((a, b) => articleTimestamp(b) - articleTimestamp(a))
-    .slice(0, RSS_ITEM_LIMIT);
+    .slice(0, limit);
 }
 
 function escapeXml(value: string) {
@@ -30,8 +31,10 @@ function escapeXml(value: string) {
 
 export async function GET() {
   const lightweightCloudflareRender = process.env.CLOUDFLARE_KV_ENABLED === "1";
+  const itemLimit = lightweightCloudflareRender ? Math.min(RSS_ITEM_LIMIT, CLOUDFLARE_RSS_ITEM_LIMIT) : RSS_ITEM_LIMIT;
   const posts = latestFeedPosts(
-    lightweightCloudflareRender ? await getPublishedBlogInventoryPosts() : await getPublishedBlogPosts()
+    lightweightCloudflareRender ? await getPublishedBlogInventoryPostsForApi(undefined, itemLimit) : await getPublishedBlogPosts(),
+    itemLimit
   );
   const items = posts
     .map((post) => {

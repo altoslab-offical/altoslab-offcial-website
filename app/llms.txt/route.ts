@@ -7,6 +7,7 @@ import type { BlogPost } from "@/lib/types";
 export const dynamic = "force-dynamic";
 
 const LLMS_ARTICLE_GROUP_LIMIT = Number(process.env.LLMS_ARTICLE_GROUP_LIMIT || 12);
+const CLOUDFLARE_LLMS_INVENTORY_LIMIT = 36;
 
 function articleTimestamp(post: BlogPost) {
   return new Date(post.updatedAt || post.publishedAt || post.createdAt).getTime() || 0;
@@ -29,7 +30,7 @@ function orderedLlmsArticles(posts: BlogPost[]) {
 
 export async function GET() {
   const lightweightCloudflareRender = process.env.CLOUDFLARE_KV_ENABLED === "1";
-  const inventoryLimit = Math.min(LLMS_ARTICLE_GROUP_LIMIT * BLOG_LANGUAGES.length, 120);
+  const inventoryLimit = Math.min(LLMS_ARTICLE_GROUP_LIMIT * BLOG_LANGUAGES.length, CLOUDFLARE_LLMS_INVENTORY_LIMIT);
   const [posts, projects] = await Promise.all([
     lightweightCloudflareRender ? getPublishedBlogInventoryPostsForApi(undefined, inventoryLimit) : getPublishedBlogPosts(),
     lightweightCloudflareRender ? Promise.resolve([]) : getPublishedProjects()

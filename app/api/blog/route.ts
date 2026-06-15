@@ -9,7 +9,9 @@ export async function GET(request: Request) {
   const fields = params.get("fields") || "";
   const rawLimit = Number(params.get("limit") || 0);
   const isInventory = fields === "inventory";
-  const limit = Number.isFinite(rawLimit) && rawLimit > 0 ? Math.min(rawLimit, 120) : 80;
+  const cloudflareLimitCap = process.env.CLOUDFLARE_KV_ENABLED === "1" ? 24 : 120;
+  const defaultLimit = process.env.CLOUDFLARE_KV_ENABLED === "1" ? 24 : 80;
+  const limit = Number.isFinite(rawLimit) && rawLimit > 0 ? Math.min(rawLimit, cloudflareLimitCap) : defaultLimit;
   const posts = await getPublishedBlogInventoryPostsForApi(language || undefined, limit);
   const serializer = isInventory ? toPublicBlogInventoryPost : toPublicBlogListPost;
   return NextResponse.json(

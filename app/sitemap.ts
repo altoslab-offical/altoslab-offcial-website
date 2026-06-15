@@ -1,17 +1,17 @@
 import type { MetadataRoute } from "next";
-import { getPublishedBlogPostsForMetadata, getPublishedProjects } from "@/lib/cms";
+import { getPublishedBlogSitemapEntries, getPublishedProjects } from "@/lib/cms";
 import { BLOG_LANGUAGES, blogIndexPath, blogPostPath, metadataLanguageKey } from "@/lib/blog-utils";
 import { siteUrl } from "@/lib/seo";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const lightweightCloudflareRender = process.env.CLOUDFLARE_KV_ENABLED === "1";
   const [posts, projects] = await Promise.all([
-    getPublishedBlogPostsForMetadata(),
+    getPublishedBlogSitemapEntries(),
     lightweightCloudflareRender ? Promise.resolve([]) : getPublishedProjects()
   ]);
   const now = new Date();
   const uniquePosts = Array.from(
-    new Map(posts.map((post) => [`${siteUrl}${blogPostPath(post)}`, post])).values()
+    new Map(posts.map((post) => [`${siteUrl}${blogPostPath(post.slug, post.language)}`, post])).values()
   );
   const alternatesByGroup = new Map<string, typeof posts>();
   for (const post of posts) {
@@ -61,15 +61,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       const defaultPost = alternates.find((alternate) => alternate.language === "zh-Hant") || post;
 
       return {
-        url: `${siteUrl}${blogPostPath(post)}`,
+        url: `${siteUrl}${blogPostPath(post.slug, post.language)}`,
         lastModified: new Date(post.updatedAt),
         changeFrequency: "monthly" as const,
         priority: 0.7,
         alternates: {
           languages: Object.fromEntries(
             alternates
-              .map((alternate) => [metadataLanguageKey(alternate.language), `${siteUrl}${blogPostPath(alternate)}`])
-              .concat([["x-default", `${siteUrl}${blogPostPath(defaultPost)}`]])
+              .map((alternate) => [metadataLanguageKey(alternate.language), `${siteUrl}${blogPostPath(alternate.slug, alternate.language)}`])
+              .concat([["x-default", `${siteUrl}${blogPostPath(defaultPost.slug, defaultPost.language)}`]])
           )
         }
       };

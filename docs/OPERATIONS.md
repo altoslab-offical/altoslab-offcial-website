@@ -178,7 +178,7 @@ Notes:
 - `ADMIN_SESSION_TOKEN` should be at least 32 random bytes.
 - Active production should prefer `cmsStorage.provider = cloudflare-d1`. `cmsStorage.provider = cloudflare-kv` is a legacy Cloudflare fallback and `cmsStorage.provider = gcs` is valid only for a freshly reverified GCP recovery path.
 - Cloud Storage stores encrypted CMS JSON when `CMS_ENCRYPTION_KEY` is configured. Generated blog covers are public website assets but are served through the site, not a public bucket URL.
-- Cloudflare D1 stores encrypted CMS JSON in chunked form plus a compact public blog projection used by public blog/API/feed/sitemap reads. Cloudflare KV stores generated blog covers and best-effort public cache entries; generated covers are not encrypted because they are public website assets.
+- Cloudflare D1 stores encrypted CMS JSON in chunked form plus a compact public blog projection used by public blog/API/feed/sitemap reads. The public blog index uses D1 `COUNT(*)` plus a 24-post paged inventory read so `/blog` can show the full archive count without rendering every article on one Worker request. Cloudflare KV stores generated blog covers and best-effort public cache entries; generated covers are not encrypted because they are public website assets.
 - Vercel Blob remains a legacy fallback. Active Cloudflare production uses KV for CMS state and same-origin generated media routes for approved column/feature visuals.
 - Upstash Redis is also supported and takes priority when `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` are configured. The token must be the standard write token, not the read-only token.
 - Without Vercel Blob or Upstash env vars, production can still render seed content, but admin edits and contact leads will not persist.
@@ -255,7 +255,7 @@ Expected results:
 - `/` returns 200 and preserves the original UI from `index.html`.
 - `/admin` redirects to `/admin/login` when not signed in.
 - `/api/health` reports `adminConfigured: true`, `integrations.externalBlogIngestConfigured: true`, `integrations.legacyDeepSeekCronDisabled: true`, `integrations.imageCloudflareKvConfigured: true`, and `cmsStorage.provider = cloudflare-d1` on active Cloudflare production.
-- Cloudflare staging/production smoke expects `/api/health` to report `cmsStorage.provider = cloudflare-d1`, `adminConfigured: true`, `integrations.externalBlogIngestConfigured: true`, `integrations.legacyDeepSeekCronDisabled: true`, `integrations.imageCloudflareKvConfigured: true`, `GTM-WJ96VR7V`, `G-5VSLFNVD28`, all nine blog languages, at least five market-scan windows, and non-empty public `/api/blog`.
+- Cloudflare staging/production smoke expects `/api/health` to report `cmsStorage.provider = cloudflare-d1`, `adminConfigured: true`, `integrations.externalBlogIngestConfigured: true`, `integrations.legacyDeepSeekCronDisabled: true`, `integrations.imageCloudflareKvConfigured: true`, `GTM-WJ96VR7V`, `G-5VSLFNVD28`, all nine blog languages, at least five market-scan windows, and non-empty bounded public `/api/blog`.
 - `/blog` returns 200 and remains indexable.
 - `/feed.xml` returns RSS XML for published blog posts.
 - `/rss.xml` aliases the canonical RSS feed and returns the same RSS XML shape.

@@ -35,6 +35,7 @@ const PUBLIC_BLOG_DETAIL_CACHE_VERSION = "v1";
 const PUBLIC_BLOG_INVENTORY_CACHE_VERSION = "v2";
 const PUBLIC_BLOG_DUPLICATE_CACHE_VERSION = "v1";
 const PUBLIC_BLOG_D1_PROJECTION_READ_CHUNK_SIZE = 20;
+const PUBLIC_BLOG_D1_SITEMAP_READ_LIMIT = 1000;
 
 let publicRawCmsCache: { data: CmsData; expiresAt: number } | null = null;
 let publicBlogPostsCache: { posts: BlogPost[]; expiresAt: number } | null = null;
@@ -480,7 +481,7 @@ async function writePublicBlogD1Projection(allPosts: BlogPost[]) {
 
 async function readPublicBlogD1ProjectionPosts(
   kind: "list" | "inventory" | "duplicate",
-  options: { language?: BlogLanguage; limit?: number } = {}
+  options: { language?: BlogLanguage; limit?: number; offset?: number } = {}
 ) {
   const database = getCloudflareD1Database();
   if (!getCloudflareD1Config() || !database) return null;
@@ -489,6 +490,7 @@ async function readPublicBlogD1ProjectionPosts(
   const column = kind === "list" ? "list_json" : kind === "inventory" ? "inventory_json" : "duplicate_json";
   const normalizedLanguage = options.language ? normalizeBlogLanguage(options.language) : null;
   const requestedLimit = Number.isFinite(options.limit) && Number(options.limit) > 0 ? Math.min(Number(options.limit), 600) : null;
+  const requestedOffset = Number.isFinite(options.offset) && Number(options.offset) > 0 ? Math.floor(Number(options.offset)) : 0;
   const maxRows =
     requestedLimit || (normalizedLanguage ? PUBLIC_BLOG_CACHE_LIMIT_PER_LANGUAGE : PUBLIC_BLOG_CACHE_LIMIT_PER_LANGUAGE * BLOG_LANGUAGES.length);
   const where = normalizedLanguage ? "WHERE status = 'published' AND language = ?1" : "WHERE status = 'published'";
@@ -496,7 +498,9 @@ async function readPublicBlogD1ProjectionPosts(
 
   for (let offset = 0; offset < maxRows; ) {
     const currentLimit = Math.min(PUBLIC_BLOG_D1_PROJECTION_READ_CHUNK_SIZE, maxRows - offset);
-    const query = `SELECT ${column} AS payload FROM public_blog_posts ${where} ORDER BY updated_at DESC, sort_order ASC LIMIT ${currentLimit} OFFSET ${offset}`;
+    const query = `SELECT ${column} AS payload FROM public_blog_posts ${where} ORDER BY updated_at DESC, sort_order ASC LIMIT ${currentLimit} OFFSET ${
+      requestedOffset + offset
+    }`;
     const rows = normalizedLanguage
       ? await database.prepare(query).bind(normalizedLanguage).all<{ payload?: string }>()
       : await database.prepare(query).all<{ payload?: string }>();
@@ -517,6 +521,63 @@ async function readPublicBlogD1ProjectionPosts(
 
   if (!posts.length) return null;
   return kind === "list" ? publicBlogListPostsFromPosts(posts) : posts;
+}
+
+async function readPublicBlogD1ProjectionCount(language?: BlogLanguage) {
+  const database = getCloudflareD1Database();
+  if (!getCloudflareD1Config() || !database) return null;
+
+  await ensurePublicBlogD1Schema(database);
+  const normalizedLanguage = language ? normalizeBlogLanguage(language) : null;
+  const row = normalizedLanguage
+    ? await database
+        .prepare("SELECT COUNT(*) AS total FROM public_blog_posts WHERE status = 'published' AND language = ?1")
+        .bind(normalizedLanguage)
+        .first<{ total?: number | string }>()
+    : await database.prepare("SELECT COUNT(*) AS total FROM public_blog_posts WHERE status = 'published'").first<{ total?: number | string }>();
+  const total = Number(row?.total ?? 0);
+  return Number.isFinite(total) ? total : null;
+}
+
+export type PublishedBlogSitemapEntry = Pick<
+  BlogPost,
+  "id" | "slug" | "language" | "translationGroupId" | "updatedAt" | "publishedAt" | "createdAt"
+>;
+
+async function readPublicBlogD1SitemapEntries() {
+  const database = getCloudflareD1Database();
+  if (!getCloudflareD1Config() || !database) return null;
+
+  await ensurePublicBlogD1Schema(database);
+  const entries: PublishedBlogSitemapEntry[] = [];
+  for (let offset = 0; offset < PUBLIC_BLOG_D1_SITEMAP_READ_LIMIT; ) {
+    const rows = await database
+      .prepare(
+        `SELECT id, slug, language, translation_group_id AS translationGroupId, updated_at AS updatedAt, published_at AS publishedAt, created_at AS createdAt
+        FROM public_blog_posts
+        WHERE status = 'published'
+        ORDER BY updated_at DESC, sort_order ASC
+        LIMIT ${PUBLIC_BLOG_D1_PROJECTION_READ_CHUNK_SIZE} OFFSET ${offset}`
+      )
+      .all<PublishedBlogSitemapEntry>();
+    const results = rows.results || [];
+    entries.push(
+      ...results
+        .filter((row) => row.id && row.slug)
+        .map((row) => ({
+          id: row.id,
+          slug: row.slug,
+          language: normalizeBlogLanguage(row.language),
+          translationGroupId: row.translationGroupId || "",
+          updatedAt: row.updatedAt || row.publishedAt || row.createdAt || nowIso(),
+          publishedAt: row.publishedAt,
+          createdAt: row.createdAt || row.publishedAt || row.updatedAt || nowIso()
+        }))
+    );
+    if (results.length < PUBLIC_BLOG_D1_PROJECTION_READ_CHUNK_SIZE) break;
+    offset += results.length;
+  }
+  return entries;
 }
 
 async function readPublicBlogD1ProjectionDetail(slug: string, language?: BlogLanguage) {
@@ -1028,6 +1089,23 @@ export async function getPublishedBlogPostsForMetadata() {
   return sortedByPublicRecency(await getPublishedBlogInventoryPosts());
 }
 
+export async function getPublishedBlogSitemapEntries(): Promise<PublishedBlogSitemapEntry[]> {
+  if (shouldReadPublicBlogDirectlyFromCms()) {
+    const projected = await readPublicBlogD1SitemapEntries();
+    if (projected) return projected;
+  }
+
+  return (await getPublishedBlogInventoryPosts()).map((post) => ({
+    id: post.id,
+    slug: post.slug,
+    language: post.language,
+    translationGroupId: post.translationGroupId,
+    updatedAt: post.updatedAt,
+    publishedAt: post.publishedAt,
+    createdAt: post.createdAt
+  }));
+}
+
 export async function getPublishedBlogPostsByLanguage(language?: BlogLanguage) {
   const posts = await readPublishedBlogPostsForPublic();
   return sortedByPublicRecency(
@@ -1069,6 +1147,49 @@ export async function getPublishedBlogInventoryPostsByLanguage(language?: BlogLa
   return sortedByPublicRecency(
     posts.filter((post) => post.status === "published" && (!language || normalizeBlogLanguage(post.language) === language))
   );
+}
+
+export async function getPublishedBlogInventoryPageByLanguage(language: BlogLanguage, page = 1, pageSize = 24) {
+  const normalizedPageSize = Math.max(1, Math.min(Math.floor(Number(pageSize) || 24), 24));
+  const requestedPage = Math.max(1, Math.floor(Number(page) || 1));
+
+  if (shouldReadPublicBlogDirectlyFromCms() && language) {
+    const total = await readPublicBlogD1ProjectionCount(language);
+    if (total !== null) {
+      const pageCount = Math.max(1, Math.ceil(total / normalizedPageSize));
+      const currentPage = Math.min(requestedPage, pageCount);
+      const projected =
+        total > 0
+          ? await readPublicBlogD1ProjectionPosts("inventory", {
+              language,
+              limit: normalizedPageSize,
+              offset: (currentPage - 1) * normalizedPageSize
+            })
+          : [];
+      if (projected) {
+        const merged = isCloudflarePublicRuntime() ? projected : mergeStaticBlogOverrides(projected);
+        return {
+          posts: sortedByPublicRecency(
+            merged.filter((post) => post.status === "published" && normalizeBlogLanguage(post.language) === language)
+          ),
+          total,
+          page: currentPage,
+          pageCount
+        };
+      }
+    }
+  }
+
+  const posts = await getPublishedBlogInventoryPostsByLanguage(language);
+  const pageCount = Math.max(1, Math.ceil(posts.length / normalizedPageSize));
+  const currentPage = Math.min(requestedPage, pageCount);
+  const pageStart = (currentPage - 1) * normalizedPageSize;
+  return {
+    posts: posts.slice(pageStart, pageStart + normalizedPageSize),
+    total: posts.length,
+    page: currentPage,
+    pageCount
+  };
 }
 
 export async function getPublishedBlogInventoryPostsForApi(language?: BlogLanguage, limit?: number) {

@@ -229,6 +229,7 @@ Design ownership:
 - `components/BlogIndex.tsx` owns `/blog` and `/:language/blog` visual structure.
 - `app/globals.css` owns the `blog-craft-*` style contract.
 - The blog index should keep a fuller editorial shelf: up to 24 cards per page, with pagination carrying the rest of the published archive instead of hiding older releases behind a runtime data cap.
+- Cloudflare production should preserve that 24-card shelf with a count + paged inventory read. The sidebar/page count can come from D1 `COUNT(*)`, but the rendered card grid should only fetch the current page, not the full language archive.
 - Cloudflare direct HTML rendering is kept as an explicit emergency fallback for article detail resilience only, not for default production article rendering and not for blog index replacement.
 - n8n and content automation may change article data, but they must not change the public blog index layout, component ownership, spacing system, typography hierarchy, navigation, or visual tokens.
 

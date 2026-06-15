@@ -12,6 +12,7 @@ import type { BlogPost } from "@/lib/types";
 export const dynamic = "force-dynamic";
 
 const LLMS_FULL_ARTICLE_GROUP_LIMIT = Number(process.env.LLMS_FULL_ARTICLE_GROUP_LIMIT || 6);
+const CLOUDFLARE_LLMS_FULL_INVENTORY_LIMIT = 36;
 
 function normalizePlainText(value: string) {
   return value.replace(/\r/g, "").replace(/\n{3,}/g, "\n\n").trim();
@@ -42,7 +43,7 @@ function latestArticleGroups(posts: BlogPost[]) {
 
 export async function GET() {
   const lightweightCloudflareRender = process.env.CLOUDFLARE_KV_ENABLED === "1";
-  const inventoryLimit = Math.min(LLMS_FULL_ARTICLE_GROUP_LIMIT * BLOG_LANGUAGES.length, 120);
+  const inventoryLimit = Math.min(LLMS_FULL_ARTICLE_GROUP_LIMIT * BLOG_LANGUAGES.length, CLOUDFLARE_LLMS_FULL_INVENTORY_LIMIT);
   const [posts, projects] = await Promise.all([
     lightweightCloudflareRender ? getPublishedBlogInventoryPostsForApi(undefined, inventoryLimit) : getPublishedBlogPosts(),
     lightweightCloudflareRender ? Promise.resolve([]) : getPublishedProjects()

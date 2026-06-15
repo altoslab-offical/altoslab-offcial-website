@@ -306,30 +306,32 @@ assert(cms.includes("public-blog-list") && cms.includes("public-blog-detail"), "
 assert(cms.includes("public_blog_posts") && cms.includes("readPublicBlogD1ProjectionDetail"), "public blog reads can use compact D1 projection instead of reconstructing the full CMS blob");
 assert(cms.includes("publicBlogDetailRefreshLimitPerLanguage") && cms.includes("isCloudflarePublicRuntime() ? 0 : 4"), "Cloudflare KV publish avoids per-post detail cache write fan-out by default");
 assert(cms.includes("const data = await readPublicRawCmsData()") && cms.includes("matchesBlogSlug(item.slug, slug)"), "Cloudflare detail pages fall back to primary CMS reads when detail cache is absent");
-assert(cms.includes("public-blog-inventory") && cloudflareSmoke.includes("fields=inventory&limit=120"), "Cloudflare public blog inventory uses a bounded lightweight cache");
-assert(blogIndex.includes("getPublishedBlogInventoryPostsByLanguage"), "Cloudflare blog index renders from inventory cache instead of full blog bodies");
+assert(cms.includes("public-blog-inventory") && cloudflareSmoke.includes("fields=inventory&limit=24"), "Cloudflare public blog inventory uses a bounded lightweight cache");
+assert(blogIndex.includes("getPublishedBlogInventoryPageByLanguage"), "Cloudflare blog index renders the default archive from a paged inventory read");
 assert(
   blogIndex.includes("const BLOG_INDEX_PAGE_SIZE = 24") && !blogIndex.includes("process.env.BLOG_INDEX_PAGE_SIZE"),
   "blog index shows the full 24-card page without runtime env shrinking the archive shelf"
 );
-assert(blogIndex.includes("filtered.slice(pageStart, pageStart + BLOG_INDEX_PAGE_SIZE)") && blogIndex.includes("blog-craft-pagination"), "blog index exposes all inventory through pagination instead of rendering every card on one Worker request");
+assert(blogIndex.includes("filteredPostCount > BLOG_INDEX_PAGE_SIZE") && blogIndex.includes("blog-craft-pagination"), "blog index exposes all inventory through pagination instead of rendering every card on one Worker request");
 assert(cms.includes("PUBLIC_BLOG_CACHE_LIMIT_PER_LANGUAGE || 600"), "public blog list projection does not keep the old 8-post-per-language cap");
 assert(
   cms.includes("PUBLIC_BLOG_D1_PROJECTION_READ_CHUNK_SIZE = 20") && cms.includes("OFFSET ${offset}"),
   "public D1 projection reads are chunked so Worker reads do not stop at the runtime's 20-row page"
 );
-assert(blogApiRoute.includes("Math.min(rawLimit, 120)") && blogApiRoute.includes("getPublishedBlogInventoryPostsForApi(language || undefined, limit)"), "public blog API uses bounded D1 inventory projection for list and inventory responses");
-assert(feedRoute.includes("getPublishedBlogInventoryPosts()"), "Cloudflare feed renders from inventory cache instead of full blog bodies");
+assert(blogApiRoute.includes("cloudflareLimitCap") && blogApiRoute.includes("getPublishedBlogInventoryPostsForApi(language || undefined, limit)"), "public blog API uses bounded D1 inventory projection for list and inventory responses");
+assert(feedRoute.includes("getPublishedBlogInventoryPostsForApi(undefined, itemLimit)"), "Cloudflare feed renders from bounded inventory cache instead of full blog bodies");
 assert(
   rssAliasRoute.includes("export const dynamic = \"force-dynamic\"") && rssAliasRoute.includes("export { GET } from \"../feed.xml/route\""),
   "rss.xml aliases the canonical feed.xml endpoint with a local route config"
 );
-assert(llmsRoute.includes("getPublishedBlogInventoryPostsForApi(undefined, inventoryLimit)"), "Cloudflare llms.txt reads a bounded inventory window instead of scanning the full archive");
+assert(llmsRoute.includes("CLOUDFLARE_LLMS_INVENTORY_LIMIT") && llmsRoute.includes("getPublishedBlogInventoryPostsForApi(undefined, inventoryLimit)"), "Cloudflare llms.txt reads a bounded inventory window instead of scanning the full archive");
 assert(
-  llmsFullRoute.includes("getPublishedBlogInventoryPostsForApi(undefined, inventoryLimit)") && llmsFullRoute.includes("recentPostSummaries"),
+  llmsFullRoute.includes("CLOUDFLARE_LLMS_FULL_INVENTORY_LIMIT") &&
+    llmsFullRoute.includes("getPublishedBlogInventoryPostsForApi(undefined, inventoryLimit)") &&
+    llmsFullRoute.includes("recentPostSummaries"),
   "Cloudflare llms-full avoids detail cache fan-out and full-archive scans during Worker requests"
 );
-assert(sitemapRoute.includes("lightweightCloudflareRender") && sitemapRoute.includes("Promise.resolve([])"), "Cloudflare sitemap avoids full project CMS reads during Worker requests");
+assert(sitemapRoute.includes("getPublishedBlogSitemapEntries") && sitemapRoute.includes("Promise.resolve([])"), "Cloudflare sitemap avoids full project CMS reads and full blog JSON parsing during Worker requests");
 assert(cms.includes("public-blog-duplicates") && cms.includes("getPublishedBlogDuplicatePosts"), "Cloudflare validate has a lightweight duplicate-check cache");
 assert(cms.includes("sortedByPublicRecency") && cms.includes("updatedAt || post.publishedAt || post.createdAt"), "Cloudflare public blog lists are selected by release recency, not sortOrder");
 assert(cms.includes("PUBLIC_BLOG_DETAIL_REFRESH_LIMIT_PER_LANGUAGE") && cms.includes("publicBlogDetailRefreshPostsFromPosts"), "publish-time detail cache refresh is bounded per language for Cloudflare subrequest safety");
