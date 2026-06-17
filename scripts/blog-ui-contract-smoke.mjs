@@ -39,6 +39,12 @@ assert(directWorker.includes("function siteHeaderHtml(language)") && directWorke
 assert(directWorker.includes('aria-haspopup="menu"') && directWorker.includes('class="site-language-trigger" type="button"'), "direct article renderer mirrors the Blog main language trigger button contract");
 assert(directWorker.includes("font-size:clamp(34px,3.25vw,44px)") && !directWorker.includes("font-size:clamp(40px,7vw,68px)"), "direct article renderer keeps the reduced article title scale");
 
+const globalCss = read("app/globals.css");
+assert(globalCss.includes("font-size: clamp(34px, 3.25vw, 44px)") && !globalCss.includes("font-size: clamp(42px, 4.25vw, 54px)"), "Next article page keeps the reduced article title scale");
+assert(globalCss.includes(".blog-site-shell .article-takeaways .takeaway-text") && globalCss.includes("rgb(200 255 0 / 0.56)"), "Next article page keeps lime takeaway underline on inline text");
+assert(!globalCss.includes(".blog-site-shell .article-takeaways li {\n  width: fit-content"), "Next article page does not highlight full takeaway list rows");
+assert(!globalCss.includes("#6f3ff5"), "Next article page does not reintroduce the retired purple takeaway accent");
+
 const apiHtmlRenderer = read("lib/blog-html-render.ts");
 assert(apiHtmlRenderer.includes("function siteHeaderHtml(language: BlogLanguage)"), "API blog HTML renderer has the Blog shell header helper");
 assert(apiHtmlRenderer.includes("siteHeaderHtml(post.language)") && apiHtmlRenderer.includes("siteHeaderHtml(language)"), "API blog HTML renderer uses the Blog shell header helper for article and index HTML");

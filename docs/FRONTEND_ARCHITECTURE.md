@@ -96,6 +96,7 @@ Article detail rendering has a shared visual contract across Next and the direct
 - Default production article routes should not include `x-altos-direct-blog-render`; that header means the emergency direct renderer is active.
 - Hero/title/meta stays left aligned with compact top spacing.
 - `geo-summary`, `article-takeaways`, `strong`, and `blockquote` use black text plus restrained signal-lime `#c8ff00` underline or side-marker styling. Takeaway highlights should fit the text, not fill the row.
+- Cloudflare builds must clean stale Next artifacts before generating OpenNext output, and deploy preflight must inspect the built CSS chunks so the reduced article title scale and inline signal-lime takeaway treatment cannot regress during publish.
 - The retired purple article accent must not appear in direct-rendered article pages.
 - Data cleanup and market-news automation must fix content/source correctness without changing article layout or visual tokens.
 

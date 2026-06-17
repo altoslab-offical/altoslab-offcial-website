@@ -49,6 +49,16 @@ function readRelative(file, required = false) {
   return fs.readFileSync(absolute, "utf8");
 }
 
+function collectFiles(dir, predicate) {
+  if (!fs.existsSync(dir)) return [];
+  const entries = fs.readdirSync(dir, { withFileTypes: true });
+  return entries.flatMap((entry) => {
+    const absolute = path.join(dir, entry.name);
+    if (entry.isDirectory()) return collectFiles(absolute, predicate);
+    return predicate(absolute) ? [absolute] : [];
+  });
+}
+
 for (const check of guardedFiles) {
   const text = readRelative(check.file, check.required);
   if (!text) continue;
@@ -61,6 +71,34 @@ for (const check of guardedFiles) {
 
 if (process.env.ALTOS_ENABLE_DIRECT_BLOG_HTML === "1") {
   errors.push("ALTOS_ENABLE_DIRECT_BLOG_HTML=1 would activate the emergency direct blog renderer in production.");
+}
+
+const cssFiles = [
+  ...collectFiles(path.join(root, ".open-next", "assets"), (file) => file.endsWith(".css")),
+  ...collectFiles(path.join(root, ".next", "static"), (file) => file.endsWith(".css"))
+];
+const cssText = cssFiles.map((file) => fs.readFileSync(file, "utf8")).join("\n");
+const compactCss = cssText.replace(/\s+/g, "");
+if (!compactCss.includes(".blog-site-shell.article-heroh1{") && !compactCss.includes(".blog-site-shell.article-heroh1,")) {
+  // Keep this check separate from the exact size check so missing blog CSS is easy to diagnose.
+  if (!compactCss.includes(".blog-site-shell.article-heroh1")) {
+    errors.push("Built CSS is missing the scoped blog article title rule.");
+  }
+}
+if (!compactCss.includes("font-size:clamp(34px,3.25vw,44px)")) {
+  errors.push("Built CSS is missing the approved reduced blog article title scale: clamp(34px, 3.25vw, 44px).");
+}
+if (!compactCss.includes(".blog-site-shell.article-takeaways.takeaway-text")) {
+  errors.push("Built CSS is missing the inline lime takeaway highlight rule.");
+}
+if (compactCss.includes("font-size:clamp(42px,4.25vw,54px)")) {
+  errors.push("Built CSS contains the retired oversized article title scale: clamp(42px, 4.25vw, 54px).");
+}
+if (compactCss.includes("#6f3ff5")) {
+  errors.push("Built CSS contains the retired purple article takeaway color #6f3ff5.");
+}
+if (compactCss.includes(".blog-site-shell.article-takeawaysli{width:fit-content")) {
+  errors.push("Built CSS contains the retired full-row takeaway highlight style.");
 }
 
 const packageJson = JSON.parse(readRelative("package.json", true));

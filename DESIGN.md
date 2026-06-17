@@ -250,6 +250,7 @@ Protected article detail markers:
 - Desktop article titles should stay editorially strong but not oversized; do not enlarge them as a side effect of content or Worker fixes.
 - Article top spacing should stay compact so the first paragraph and cover image arrive quickly.
 - `重點摘要`, `本文重點`, inline `strong`, and `blockquote` use black text with restrained signal-lime `#C8FF00` side marker, underline, or highlight treatment. Highlights must fit text content, not stretch as full-width bars.
+- Cloudflare deploy artifacts are part of the design contract: built CSS must keep the reduced article title scale and inline signal-lime takeaway emphasis, and preflight must block stale chunks that reintroduce oversized titles or purple accents.
 - The old purple article accent is retired and must not return in article metadata, takeaways, blockquotes, or direct-rendered Cloudflare pages.
 
 Any intentional change to these markers or their visual behavior requires same-change screenshot evidence, product/design rationale, and updates to `SPEC.md`, `docs/FRONTEND_ARCHITECTURE.md`, and `scripts/blog-ui-contract-smoke.mjs`.

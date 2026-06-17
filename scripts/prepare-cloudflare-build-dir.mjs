@@ -5,8 +5,10 @@ import path from "node:path";
 
 const root = process.cwd();
 const openNextDir = path.join(root, ".open-next");
+const nextDir = path.join(root, ".next");
 const nextDevDir = path.join(root, ".next", "dev");
 const stamp = new Date().toISOString().replace(/[:.]/g, "-");
+const cleanNext = process.argv.includes("--clean-next");
 
 function moveAside(dir, label) {
   if (!fs.existsSync(dir)) return;
@@ -21,5 +23,9 @@ function removeIfPresent(dir) {
   console.log(`Removed ${path.relative(root, dir)}`);
 }
 
-removeIfPresent(nextDevDir);
+if (cleanNext) {
+  removeIfPresent(nextDir);
+} else {
+  removeIfPresent(nextDevDir);
+}
 moveAside(openNextDir, "open-next");
