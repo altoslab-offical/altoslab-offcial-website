@@ -194,6 +194,8 @@ Any intentional design change must cite the designer/source-of-truth reference,
 update the relevant UI smoke guard, and include fresh desktop and mobile browser
 evidence before deploy.
 
+Current approved public UI baseline: commit `1ae34d3c2f931836226a2bf1528ae408a335c5e0` is the source of truth for future protected homepage, Blog index, Blog article shell, shared chrome, and visual-token changes. Start from `docs/design-review/current-approved-baseline.md`, add a new `docs/design-review/*.md` record for intentional differences, and keep `npm run review:design` passing.
+
 ## Homepage UI Stability Contract
 
 The homepage is a protected brand/design surface. Its canonical visual source is the original static bundle in `index.html`, mirrored to `public/altoslab-homepage.html` for Cloudflare assets by `scripts/sync-cloudflare-homepage.mjs`.

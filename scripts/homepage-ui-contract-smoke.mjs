@@ -18,6 +18,7 @@ const siteHeader = read("components/site/SiteHeader.tsx");
 const contactForm = read("components/ContactForm.tsx");
 const contactRoute = read("app/api/contact/route.ts");
 const contactNotification = read("lib/contact-notification.ts");
+const packageJson = JSON.parse(read("package.json"));
 const publicHomepage = fs.existsSync(new URL("../public/altoslab-homepage.html", import.meta.url))
   ? read("public/altoslab-homepage.html")
   : "";
@@ -99,5 +100,10 @@ for (const file of ["SPEC.md", "DESIGN.md", "docs/FRONTEND_ARCHITECTURE.md"]) {
 
 assert(agents.includes("Public UI Change Control"), "AGENTS.md includes the public UI change-control rule");
 assert(agents.includes("must not change public UI unless Tommy explicitly asks"), "AGENTS.md blocks accidental UI changes in non-design work");
+assert(agents.includes("Current approved public UI baseline"), "AGENTS.md names the current approved public UI baseline");
+assert(agents.includes("npm run review:design"), "AGENTS.md requires the design review gate");
+assert(packageJson.scripts?.["review:design"]?.includes("scripts/design-review-gate.mjs"), "package.json exposes the design review gate");
+assert(packageJson.scripts?.test?.includes("review:design"), "npm test runs the design review gate");
+assert(packageJson.scripts?.["preflight:cloudflare"]?.includes("review:design"), "Cloudflare preflight runs the design review gate");
 
 if (!process.exitCode) console.log("PASS homepage UI contract smoke checks");

@@ -1,0 +1,49 @@
+{
+  "baselineName": "ALTOSLAB public UI baseline after restored blog article shell",
+  "approvedAt": "2026-06-18",
+  "approvedBy": "Tommy",
+  "baselineCommit": "1ae34d3c2f931836226a2bf1528ae408a335c5e0",
+  "baselineUrl": "https://altoslab-ai.cc/blog/codex-for-every-role-tool-and-workflow",
+  "reviewDoc": "docs/design-review/current-approved-baseline.md",
+  "reviewRecordTemplate": "docs/design-review/change-record-template.md",
+  "protectedPatterns": [
+    "index.html",
+    "altoslab-website.html",
+    "app/route.ts",
+    "app/globals.css",
+    "public/altoslab-homepage.html",
+    "components/BlogIndex.tsx",
+    "components/BlogArticle.tsx",
+    "components/site/**",
+    "components/ContactForm.tsx",
+    "cloudflare/blog-html-direct-worker.js",
+    "lib/blog-html-render.ts",
+    "app/blog/**",
+    "app/en/blog/**",
+    "app/ja/blog/**",
+    "app/ko/blog/**",
+    "app/id/blog/**",
+    "app/vi/blog/**",
+    "app/th/blog/**",
+    "app/ms/blog/**",
+    "app/fil/blog/**",
+    "design/tokens.css",
+    "design/tokens.json",
+    "design/visual-tokens.md"
+  ],
+  "requiredDocs": [
+    "SPEC.md",
+    "DESIGN.md",
+    "docs/FRONTEND_ARCHITECTURE.md"
+  ],
+  "requiredSmokeGuards": [
+    "scripts/homepage-ui-contract-smoke.mjs",
+    "scripts/blog-ui-contract-smoke.mjs"
+  ],
+  "requiredBaselineMarkers": [
+    "reduced article title scale",
+    "inline signal-lime takeaway emphasis",
+    "Blog main shell header",
+    "no legacy purple article accent"
+  ]
+}

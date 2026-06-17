@@ -28,6 +28,8 @@ If a fix would touch protected UI surfaces, treat that as a separate UI/design
 change and require explicit approval, docs, smoke-test updates, and browser
 evidence before deploy.
 
+Current approved public UI baseline: commit `1ae34d3c2f931836226a2bf1528ae408a335c5e0` is the source of truth for future protected UI work. The review flow lives in `docs/design-review/current-approved-baseline.md`; protected UI changes must add a new `docs/design-review/*.md` record and pass `npm run review:design`.
+
 ## Homepage UI Stability Contract
 
 The homepage route is a wrapper, not a redesign surface.

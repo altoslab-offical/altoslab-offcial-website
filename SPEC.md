@@ -50,6 +50,8 @@ Protected surfaces include `index.html`, `altoslab-website.html`, `app/route.ts`
 
 Any intentional UI/design change requires explicit source-of-truth approval, updated docs, updated smoke guards, `npm test`, and fresh desktop/mobile browser evidence before deploy.
 
+2026-06-18 approved baseline: commit `1ae34d3c2f931836226a2bf1528ae408a335c5e0` is the current public UI source of truth. Future protected UI/design changes must compare against `docs/design-review/current-approved-baseline.md`, add a new `docs/design-review/*.md` review record, and pass `npm run review:design`.
+
 ## Homepage UI Stability Contract
 
 The public homepage (`/`) is a protected brand/design surface. The current production contract is the original static homepage bundle, not a modular replacement page.

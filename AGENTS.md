@@ -19,6 +19,14 @@ Treat these as protected design surfaces:
 - Shared public chrome: header, navigation, language switcher, contact CTA,
   WonDa widget placement, spacing, typography, and visual tokens.
 
+Current approved public UI baseline:
+
+- Baseline commit: `1ae34d3c2f931836226a2bf1528ae408a335c5e0`.
+- Baseline doc: `docs/design-review/current-approved-baseline.md`.
+- Review gate: `npm run review:design`.
+- Future public UI/design work must compare against this baseline first and
+  record any intentional differences in a new `docs/design-review/*.md` file.
+
 If a non-design task appears to require changing these files or selectors, stop
 and record the blocker instead of guessing. The safe default is to fix data,
 rendering logic, API contracts, validation, caching, or automation flow without
@@ -38,3 +46,5 @@ the same change:
   claiming completion or deploying.
 
 Do not deploy UI-affecting changes when those checks are missing or failing.
+Cloudflare deploys and normal test runs must keep `npm run review:design`
+enabled so this baseline review cannot be skipped accidentally.
