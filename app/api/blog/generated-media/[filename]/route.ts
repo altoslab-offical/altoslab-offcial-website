@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 import { cloudflareKvMediaPathname, getCloudflareKvConfig, getCloudflareKvNamespace } from "@/lib/cloudflare-kv";
 import { cloudflareR2MediaPathname, getCloudflareR2Config, getCloudflareR2Bucket } from "@/lib/cloudflare-r2";
 import { gcsMediaPathname, getGcsStorageConfig, readGcsObject } from "@/lib/gcp-storage";
+import { awsS3MediaPathname, getAwsS3StorageConfig, readAwsS3Object } from "@/lib/aws-s3-storage";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -111,6 +112,21 @@ export async function GET(request: Request, context: Params) {
           "Cache-Control": "public, max-age=31536000, immutable",
           "Content-Length": String(object.size),
           ...(object.generation ? { ETag: object.generation } : {})
+        }
+      });
+    }
+  }
+
+  const awsS3Config = getAwsS3StorageConfig();
+  if (awsS3Config) {
+    const object = await readAwsS3Object(awsS3Config, awsS3MediaPathname(safeFilename));
+    if (object) {
+      return new NextResponse(object.arrayBuffer, {
+        headers: {
+          "Content-Type": object.contentType || contentTypeFor(safeFilename),
+          "Cache-Control": "public, max-age=31536000, immutable",
+          "Content-Length": String(object.size),
+          ...(object.etag ? { ETag: object.etag } : {})
         }
       });
     }

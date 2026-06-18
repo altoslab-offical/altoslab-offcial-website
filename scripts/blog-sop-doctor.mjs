@@ -8,7 +8,7 @@ import { spawnSync } from "node:child_process";
 const DEFAULT_BASE_URL = "https://altoslab-ai.cc";
 const LANGUAGES = ["zh-Hant", "en", "ja", "ko", "id", "vi", "th", "ms", "fil"];
 const REQUIRED_CHROME_PROFILE_EMAIL = "john.wu0120@gmail.com";
-const PRODUCTION_CMS_PROVIDERS = new Set(["cloudflare-d1", "cloudflare-kv", "gcs"]);
+const PRODUCTION_CMS_PROVIDERS = new Set(["cloudflare-d1", "cloudflare-kv", "gcs", "aws-s3"]);
 const GENERIC_STOCK_IMAGE_HOSTS = [
   "unsplash.com",
   "images.unsplash.com",

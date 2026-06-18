@@ -7,6 +7,7 @@ import { BLOG_LANGUAGES } from "@/lib/blog-utils";
 import { isCloudflareKvConfigured } from "@/lib/cloudflare-kv";
 import { isCloudflareR2Configured } from "@/lib/cloudflare-r2";
 import { getCmsStorageStatus } from "@/lib/cms-storage";
+import { isAwsS3StorageConfigured } from "@/lib/aws-s3-storage";
 import { isGcsStorageConfigured } from "@/lib/gcp-storage";
 import { hasSearchVerificationConfigured, siteUrl } from "@/lib/seo";
 
@@ -34,6 +35,7 @@ export async function GET() {
       imageBlobStorageConfigured: process.env.BLOG_IMAGE_STORE_BLOB !== "false" && Boolean(process.env.BLOB_READ_WRITE_TOKEN?.trim()),
       imageCloudflareKvConfigured: isCloudflareKvConfigured(),
       imageCloudflareR2Configured: isCloudflareR2Configured(),
+      imageAwsS3StorageConfigured: isAwsS3StorageConfigured(),
       imageGcsStorageConfigured: isGcsStorageConfigured(),
       externalBlogIngestConfigured: Boolean(process.env.BLOG_INGEST_HMAC_SECRET?.trim()),
       legacyDeepSeekCronDisabled: process.env.BLOG_DISABLE_DEEPSEEK_CRON !== "false",

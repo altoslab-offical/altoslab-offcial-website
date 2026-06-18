@@ -6,6 +6,7 @@ import { verifyBlogIngestRequest } from "@/lib/blog-ingest-auth";
 import { cloudflareKvMediaPathname, getCloudflareKvConfig, requireCloudflareKvNamespace } from "@/lib/cloudflare-kv";
 import { cloudflareR2MediaPathname, getCloudflareR2Config, requireCloudflareR2Bucket } from "@/lib/cloudflare-r2";
 import { gcsMediaPathname, getGcsStorageConfig, requireGcsStorageConfig, writeGcsObject } from "@/lib/gcp-storage";
+import { awsS3MediaPathname, getAwsS3StorageConfig, requireAwsS3StorageConfig, writeAwsS3Object } from "@/lib/aws-s3-storage";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -127,6 +128,17 @@ async function storeGcsImage(filename: string, bytes: Buffer, contentType: strin
   };
 }
 
+async function storeAwsS3Image(filename: string, bytes: Buffer, contentType: string, request: Request) {
+  const config = requireAwsS3StorageConfig();
+  const pathname = awsS3MediaPathname(filename);
+  await writeAwsS3Object(config, pathname, bytes, contentType);
+  return {
+    url: `${publicBaseUrl(request)}/api/blog/generated-media/${encodeURIComponent(filename)}`,
+    pathname,
+    provider: "aws-s3"
+  };
+}
+
 export async function POST(request: Request) {
   const body = await request.text();
   if (!hasAdminSession(request)) {
@@ -163,9 +175,11 @@ export async function POST(request: Request) {
         ? await storeCloudflareR2Image(filename, bytes, contentType, request)
         : getGcsStorageConfig()
           ? await storeGcsImage(filename, bytes, contentType, request)
-          : process.env.BLOG_MEDIA_ALLOW_LOCAL_STORAGE === "1"
-            ? await storeLocalPublicImage(filename, bytes, request)
-            : await storeBlobImage(filename, bytes, contentType);
+          : getAwsS3StorageConfig()
+            ? await storeAwsS3Image(filename, bytes, contentType, request)
+            : process.env.BLOG_MEDIA_ALLOW_LOCAL_STORAGE === "1"
+              ? await storeLocalPublicImage(filename, bytes, request)
+              : await storeBlobImage(filename, bytes, contentType);
   } catch (error) {
     console.error("[blog-media] failed to store generated media", error);
     return NextResponse.json({ ok: false, error: "generated media storage failed" }, { status: 500 });

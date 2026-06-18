@@ -32,6 +32,16 @@ import {
   writeGcsObject,
   type GcsStorageConfig
 } from "./gcp-storage";
+import {
+  AwsS3PreconditionError,
+  deleteAwsS3Object,
+  getAwsS3StorageConfig,
+  listAwsS3Objects,
+  readAwsS3Text,
+  requireAwsS3StorageConfig,
+  writeAwsS3Object,
+  type AwsS3StorageConfig
+} from "./aws-s3-storage";
 import { seedData } from "./seed";
 import type { CmsData } from "./types";
 
@@ -134,6 +144,7 @@ export function getCmsStorageStatus() {
   const cloudflareKv = getCloudflareKvConfig();
   const cloudflareR2 = getCloudflareR2Config();
   const gcs = getGcsStorageConfig();
+  const awsS3 = getAwsS3StorageConfig();
   const upstash = getUpstashConfig();
   const blob = getBlobConfig();
   if (cloudflareD1) {
@@ -181,6 +192,20 @@ export function getCmsStorageStatus() {
       key: gcs.cmsKey,
       bucket: gcs.bucket,
       pathname: gcs.cmsPathname,
+      encrypted: Boolean(process.env.CMS_ENCRYPTION_KEY)
+    };
+  }
+
+  if (awsS3) {
+    return {
+      provider: "aws-s3",
+      durable: true,
+      writable: true,
+      configured: true,
+      key: awsS3.cmsKey,
+      bucket: awsS3.bucket,
+      region: awsS3.region,
+      pathname: awsS3.cmsPathname,
       encrypted: Boolean(process.env.CMS_ENCRYPTION_KEY)
     };
   }
@@ -877,6 +902,89 @@ async function withGcsLock<T>(config: GcsStorageConfig, name: string, task: () =
   }
 }
 
+async function readVersionedAwsS3CmsData(config: AwsS3StorageConfig, pathname: string) {
+  const primary = await readAwsS3Text(config, pathname).catch(() => null);
+  if (primary) {
+    try {
+      return parseCmsBlobText(primary.text);
+    } catch (error) {
+      console.warn(
+        "[cms] Primary AWS S3 CMS payload is unreadable; trying version history:",
+        error instanceof Error ? error.message : error
+      );
+    }
+  }
+
+  const versions = await listAwsS3Objects(config, cmsVersionPrefix(pathname), 1000);
+  const latestVersions = versions
+    .filter((item) => item.name.endsWith(".json"))
+    .sort((a, b) => {
+      const aTime = a.updated ? new Date(a.updated).getTime() : 0;
+      const bTime = b.updated ? new Date(b.updated).getTime() : 0;
+      return bTime - aTime;
+    });
+
+  for (const version of latestVersions.slice(0, 20)) {
+    const raw = await readAwsS3Text(config, version.name).catch(() => null);
+    if (!raw) continue;
+    try {
+      return parseCmsBlobText(raw.text);
+    } catch (error) {
+      console.warn(
+        "[cms] Skipping unreadable AWS S3 CMS version:",
+        version.name,
+        error instanceof Error ? error.message : error
+      );
+    }
+  }
+
+  return null;
+}
+
+async function writeAwsS3Json(config: AwsS3StorageConfig, pathname: string, value: unknown, options: { ifMatch?: string; ifNoneMatch?: "*" } = {}) {
+  await writeAwsS3Object(config, pathname, JSON.stringify(value, null, 2), "application/json", options);
+}
+
+async function writeVersionedAwsS3Json(config: AwsS3StorageConfig, value: unknown) {
+  await writeAwsS3Json(config, cmsVersionPathname(config.cmsPathname), value);
+  await writeAwsS3Json(config, config.cmsPathname, value);
+}
+
+async function withAwsS3Lock<T>(config: AwsS3StorageConfig, name: string, task: () => Promise<T>, ttlMs: number) {
+  const lockPathname = config.cmsPathname.replace(/\.json$/, `.lock.${name.replace(/[^a-z0-9_-]+/gi, "-")}.json`);
+  const token = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+  const expiresAt = Date.now() + ttlMs;
+
+  try {
+    await writeAwsS3Json(config, lockPathname, { token, expiresAt }, { ifNoneMatch: "*" });
+  } catch (error) {
+    if (!(error instanceof AwsS3PreconditionError)) throw error;
+
+    const existing = await readAwsS3Text(config, lockPathname);
+    if (!existing) throw new CmsLockError();
+
+    const payload = JSON.parse(existing.text) as { expiresAt?: number };
+    if (!payload.expiresAt || payload.expiresAt > Date.now()) throw new CmsLockError();
+
+    try {
+      await writeAwsS3Json(config, lockPathname, { token, expiresAt }, { ifMatch: existing.etag });
+    } catch (overwriteError) {
+      if (overwriteError instanceof AwsS3PreconditionError) throw new CmsLockError();
+      throw overwriteError;
+    }
+  }
+
+  try {
+    return await task();
+  } finally {
+    const current = await readAwsS3Text(config, lockPathname).catch(() => null);
+    if (current) {
+      const payload = JSON.parse(current.text) as { token?: string };
+      if (payload.token === token) await deleteAwsS3Object(config, lockPathname).catch(() => undefined);
+    }
+  }
+}
+
 async function readVersionedPublicCmsBlobText(pathname: string) {
   const { list } = await vercelBlobClient();
   const result = await list({ prefix: cmsVersionPrefix(pathname), limit: 1000 });
@@ -1052,6 +1160,9 @@ export async function withCmsStorageLock<T>(
   const gcs = getGcsStorageConfig();
   if (gcs) return withGcsLock(gcs, name, task, ttlMs);
 
+  const awsS3 = getAwsS3StorageConfig();
+  if (awsS3) return withAwsS3Lock(awsS3, name, task, ttlMs);
+
   const upstash = getUpstashConfig();
   const blob = getBlobConfig();
   if (!upstash) {
@@ -1119,6 +1230,12 @@ export async function readCmsDataFromStorage(): Promise<CmsData> {
     return data || cloneSeedData();
   }
 
+  const awsS3 = getAwsS3StorageConfig();
+  if (awsS3) {
+    const data = await readVersionedAwsS3CmsData(awsS3, awsS3.cmsPathname);
+    return data || cloneSeedData();
+  }
+
   const upstash = getUpstashConfig();
   const blob = getBlobConfig();
   if (upstash) {
@@ -1167,6 +1284,12 @@ export async function writeCmsDataToStorage(data: CmsData) {
   const gcs = getGcsStorageConfig();
   if (gcs) {
     await writeVersionedGcsJson(requireGcsStorageConfig(), encryptCmsData(data));
+    return;
+  }
+
+  const awsS3 = getAwsS3StorageConfig();
+  if (awsS3) {
+    await writeVersionedAwsS3Json(requireAwsS3StorageConfig(), encryptCmsData(data));
     return;
   }
 

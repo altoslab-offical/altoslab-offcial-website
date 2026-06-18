@@ -67,6 +67,24 @@ Treat pinned smoke as transition evidence only. The normal custom-domain gate is
 
 This path is retained as legacy recovery documentation only. Do not run blind GCP repair or deploy commands while `gcloud`/ADC credentials are invalid. If GCP is intentionally restored later, treat it as a new migration: preview first, verify the Cloud Run URL, then cut over DNS only after all public and admin checks pass.
 
+## AWS Migration Preparation
+
+AWS is the preferred next production migration target if Cloudflare Worker/D1/KV
+instability continues. The first supported AWS storage adapter is `aws-s3`,
+documented in `docs/aws-migration-plan.md`. Do not cut DNS directly from
+Cloudflare to AWS; first deploy an AWS preview runtime, configure
+`AWS_S3_STORAGE_ENABLED=1`, confirm `/api/health` reports
+`cmsStorage.provider = aws-s3`, then run:
+
+```bash
+npm test
+npm run build:aws
+npm run verify:aws -- --base-url <aws-preview-url> --expected-provider aws-s3
+```
+
+Only after the preview smoke passes should `altoslab-ai.cc` be moved from the
+Cloudflare Worker route to the AWS CloudFront/custom-domain path.
+
 - Next.js builds as a standalone Node server in `Dockerfile` and runs on Cloud Run port `8080`.
 - Cloud Run is configured with request-based billing, `min-instances=0`, `max-instances=3`, 512Mi memory and 80 concurrency.
 - CMS JSON and generated blog covers are stored in a private Cloud Storage bucket in `us-central1` so the workload stays inside the Cloud Storage Always Free eligible regions.
