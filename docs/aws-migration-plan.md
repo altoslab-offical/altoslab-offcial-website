@@ -96,12 +96,38 @@ mkdir -p data/migration
 npx wrangler d1 export altos-blog-cms --remote --output data/migration/altos-blog-cms.sql
 ```
 
-The app now supports `aws-s3` as a CMS provider. A migration helper still needs
-to convert the current encrypted D1 CMS blob into the S3 object:
+The app supports `aws-s3` as a CMS provider. Dry-run the D1 to S3 CMS migration
+first:
+
+```bash
+npm run aws:migrate-cms -- --profile altoslab
+```
+
+Then write the current D1 CMS payload into S3:
+
+```bash
+npm run aws:migrate-cms -- --profile altoslab --write
+```
+
+The script resolves Cloudflare D1 chunk markers and copies the CMS payload
+without decrypting it, so the AWS runtime must use the same `CMS_ENCRYPTION_KEY`
+as production Cloudflare. It writes the primary object to:
 
 ```text
 s3://altoslab-official-cms-487316829524/cms/altoslab-cms-v1.json
 ```
+
+If the production `CMS_ENCRYPTION_KEY` is unavailable during emergency AWS
+recovery, use the public D1 projection as a readable fallback so `/blog` and
+article detail pages keep the full published inventory:
+
+```bash
+npm run aws:migrate-cms -- --profile altoslab --source public-projection --write
+```
+
+This fallback reconstructs published blog posts only. It intentionally omits
+private admin-only CMS state and can be replaced later by rerunning the normal
+CMS blob migration after the original encryption key is available.
 
 Generated media should be copied into:
 

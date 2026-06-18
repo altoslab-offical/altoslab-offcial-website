@@ -249,7 +249,7 @@ async function checkProductionHealth(errors, warnings) {
     }
     const integrations = json.integrations || {};
     if (!PRODUCTION_CMS_PROVIDERS.has(json.cmsStorage?.provider)) {
-      addIssue(errors, "production cmsStorage.provider must be cloudflare-d1, cloudflare-kv or gcs");
+      addIssue(errors, "production cmsStorage.provider must be cloudflare-d1, cloudflare-kv, gcs or aws-s3");
     }
     for (const field of ["durable", "writable", "configured"]) {
       if (json.cmsStorage?.[field] !== true) addIssue(errors, `production cmsStorage.${field} must be true`);

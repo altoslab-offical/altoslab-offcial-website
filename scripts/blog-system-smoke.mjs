@@ -287,8 +287,15 @@ assert(sopDoctor.includes("[8, 10]") && sopDoctor.includes("[9, 0]") && sopDocto
 assert(sopDoctor.includes("[10, 30]") && sopDoctor.includes("[12, 30]") && sopDoctor.includes("[14, 30]"), "SOP doctor enforces all market-scan launch windows");
 assert(sopDoctor.includes("[15, 10]") && sopDoctor.includes("[16, 0]") && sopDoctor.includes("[16, 4]"), "SOP doctor enforces late-day prep/release launch windows");
 assert(sopDoctor.includes("[18, 30]") && sopDoctor.includes("[20, 30]"), "SOP doctor enforces late market-scan launch windows");
-assert(sopDoctor.includes("production cmsStorage.provider must be cloudflare-d1, cloudflare-kv or gcs"), "SOP doctor verifies a durable production CMS store");
+assert(sopDoctor.includes("production cmsStorage.provider must be cloudflare-d1, cloudflare-kv, gcs or aws-s3"), "SOP doctor verifies a durable production CMS store");
 assert(cmsStorage.includes('provider: "cloudflare-d1"') || cmsStorage.includes("provider: \"cloudflare-d1\""), "CMS storage can use Cloudflare D1 as the primary durable store");
+assert(cmsStorage.includes('provider: "aws-s3"') || cmsStorage.includes("provider: \"aws-s3\""), "CMS storage can use AWS S3 as the migration durable store");
+assert(
+  read("scripts/migrate-d1-cms-to-aws-s3.mjs").includes("cloudflareD1Chunked") &&
+    read("scripts/migrate-d1-cms-to-aws-s3.mjs").includes("PutObjectCommand") &&
+    read("scripts/migrate-d1-cms-to-aws-s3.mjs").includes("public-projection"),
+  "AWS migration can copy the chunked D1 CMS payload into S3 or rebuild from public projection"
+);
 assert(productionRepair.includes("altoslab-official-cms-934551798702"), "production repair targets the canonical GCS CMS bucket");
 assert(productionRepair.includes("gcloud") && productionRepair.includes("run") && productionRepair.includes("services") && productionRepair.includes("update"), "production repair can update the existing Cloud Run service env");
 assert(productionRepair.includes("--update-env-vars"), "production repair updates only runtime env vars instead of rebuilding or publishing content");

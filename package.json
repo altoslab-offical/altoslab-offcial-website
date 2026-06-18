@@ -23,6 +23,7 @@
     "cloudflare:types": "wrangler types --env-interface CloudflareEnv",
     "verify:gcp": "node scripts/gcp-production-smoke.mjs",
     "verify:aws": "node scripts/aws-production-smoke.mjs",
+    "aws:migrate-cms": "node scripts/migrate-d1-cms-to-aws-s3.mjs",
     "verify:cloudflare": "node scripts/cloudflare-smoke.mjs",
     "typecheck": "tsc --noEmit",
     "test:homepage": "node scripts/homepage-ui-contract-smoke.mjs",
