@@ -1,6 +1,7 @@
 # ALTOSLAB Cloudflare to AWS Migration Plan
 
-Status: preparation only. Do not cut DNS until an AWS preview URL passes smoke.
+Status: AWS HTTP preview is active. Do not cut DNS until HTTPS/ACM and custom
+domain smoke pass.
 
 Current production is Cloudflare Workers + Cloudflare D1 + Cloudflare KV. This
 plan moves runtime and storage to AWS without changing the protected public UI
@@ -19,6 +20,48 @@ Phase 1, lowest-risk AWS cutover:
   `/api/blog/generated-media/:filename`.
 - Secrets: AWS Secrets Manager or ECS task environment secrets.
 - DNS: cut `altoslab-ai.cc` only after the AWS preview URL passes smoke.
+
+## AWS Preview Created On 2026-06-18
+
+The first AWS preview is running on ECS/Fargate because App Runner returned
+`SubscriptionRequiredException` for this AWS account.
+
+Resources:
+
+```text
+AWS account: 487316829524
+Region: ap-northeast-1
+S3 bucket: altoslab-official-cms-487316829524
+ECR repo: 487316829524.dkr.ecr.ap-northeast-1.amazonaws.com/altoslab-official-website
+ECS cluster: altoslab-web
+ECS service: altoslab-web-service
+Task family: altoslab-official-website
+ALB: altoslab-web-alb
+Target group: altoslab-web-tg
+Preview URL: http://altoslab-web-alb-1062055193.ap-northeast-1.elb.amazonaws.com
+```
+
+Secrets are stored in AWS Secrets Manager under `altoslab/aws/*`. A local
+operator copy was written to `~/.altoslab-aws.env`; do not commit or paste those
+values into chat.
+
+Verified preview smoke:
+
+```bash
+npm run verify:aws -- --base-url http://altoslab-web-alb-1062055193.ap-northeast-1.elb.amazonaws.com --expected-provider aws-s3
+```
+
+Last verified result on 2026-06-18:
+
+```text
+ok: true
+cmsStorage.provider: aws-s3
+home/blog/feed/rss/sitemap/llms/admin/health: pass
+```
+
+Next infrastructure step is adding ACM + HTTPS, then either CloudFront or an
+HTTPS ALB custom-domain cutover. Keep Cloudflare live until that HTTPS smoke
+passes.
 
 Phase 2, optional:
 
