@@ -49,6 +49,10 @@ const apiHtmlRenderer = read("lib/blog-html-render.ts");
 assert(apiHtmlRenderer.includes("function siteHeaderHtml(language: BlogLanguage)"), "API blog HTML renderer has the Blog shell header helper");
 assert(apiHtmlRenderer.includes("siteHeaderHtml(post.language)") && apiHtmlRenderer.includes("siteHeaderHtml(language)"), "API blog HTML renderer uses the Blog shell header helper for article and index HTML");
 assert(!apiHtmlRenderer.includes('class="nav"') && !apiHtmlRenderer.includes('class="langs"'), "API blog HTML renderer does not ship the old alternate header bar");
+assert(apiHtmlRenderer.includes('blogAdSlotHtml("index-feed")'), "API blog HTML renderer keeps the opt-in index AdSense slot");
+assert(apiHtmlRenderer.includes('blogAdSlotHtml("after-summary")'), "API blog HTML renderer keeps the opt-in article after-summary AdSense slot");
+assert(apiHtmlRenderer.includes('blogAdSlotHtml("mid-article")'), "API blog HTML renderer keeps the opt-in article mid-article AdSense slot");
+assert(apiHtmlRenderer.includes('blogAdSlotHtml("before-related")'), "API blog HTML renderer keeps the opt-in article before-related AdSense slot");
 
 const cloudflarePatch = read("scripts/patch-cloudflare-worker-blog-html.mjs");
 assert(cloudflarePatch.includes('ALTOS_ENABLE_DIRECT_BLOG_HTML === "1"'), "Cloudflare direct article HTML is opt-in only");
@@ -58,6 +62,14 @@ const blogIndex = read("components/BlogIndex.tsx");
 for (const marker of ["blog-craft-index", "blog-craft-layout", "blog-craft-sidebar", "blog-craft-feed", "blog-craft-card"]) {
   assert(blogIndex.includes(marker), `BlogIndex keeps ${marker}`);
 }
+assert(blogIndex.includes('<BlogAdSlot placement="index-feed" />'), "BlogIndex keeps the opt-in feed AdSense slot without replacing the card grid");
+
+const blogArticle = read("components/BlogArticle.tsx");
+assert(blogArticle.includes('<BlogAdSlot placement="after-summary" />'), "BlogArticle keeps the opt-in after-summary AdSense slot");
+assert(blogArticle.includes('<BlogAdSlot placement="mid-article" />'), "BlogArticle keeps the opt-in mid-article AdSense slot");
+assert(blogArticle.includes('<BlogAdSlot placement="before-related" />'), "BlogArticle keeps the opt-in before-related AdSense slot");
+assert(globalCss.includes(".blog-adsense-slot") && globalCss.includes('ins.adsbygoogle[data-ad-status="unfilled"]'), "Next Blog CSS keeps neutral AdSense slot and unfilled-collapse styling");
+assert(directWorker.includes("function blogAdSlotHtml(env, placement)") && directWorker.includes('blogAdSlotHtml(env, "after-summary")'), "direct article renderer keeps the opt-in AdSense slot helper");
 
 const pageFiles = [
   "app/blog/page.tsx",

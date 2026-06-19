@@ -1,4 +1,5 @@
 import { adsenseHeadSnippet, gaHeadSnippet, gtmHeadSnippet, gtmNoScriptSnippet, homepageAnalyticsSnippet } from "./analytics";
+import { blogAdSlotHtml } from "./blog-adsense";
 import {
   BLOG_LANGUAGES,
   blogContentTypeLabel,
@@ -150,6 +151,9 @@ const SHELL_CSS = `
   .inline-figure { margin:26px 0; border:1px solid var(--line); border-radius:8px; overflow:hidden; background:var(--panel); }
   .inline-figure img { width:100%; aspect-ratio:16/9; object-fit:cover; }
   .inline-figure figcaption { padding:10px 12px; color:var(--muted); font-size:14px; }
+  .blog-adsense-slot { box-sizing:border-box; width:min(760px,100%); min-height:96px; display:block; margin:28px auto; overflow:hidden; }
+  .blog-adsense-slot.is-index-feed { width:100%; margin:0 0 24px; }
+  .blog-adsense-slot ins.adsbygoogle[data-ad-status="unfilled"] { display:none!important; }
   .sources { border-top:1px solid var(--line); margin-top:34px; padding-top:22px; color:var(--muted); }
   .sources a { color:var(--text); font-weight:800; }
   @media (max-width: 820px) { .site-nav { grid-template-columns:1fr auto; min-height:72px; padding:0 22px; } .site-nav nav { display:none; } .site-nav-actions { gap:8px; } .site-language-trigger,.site-mobile-menu-trigger { width:36px; min-width:36px; height:36px; min-height:36px; } .site-mobile-menu-trigger { display:inline-flex; } .site-nav-cta { display:none; } .grid { grid-template-columns:1fr; } .shell { width:min(100% - 24px, 1120px); } .search { flex-direction:column; } }
@@ -278,6 +282,7 @@ export function renderBlogIndexHtml(language: BlogLanguage, posts: BlogPost[], p
           <button type="submit">Search</button>
         </form>
       </section>
+      ${blogAdSlotHtml("index-feed")}
       <section aria-label="${escapeAttribute(dictionary.latest)}" class="grid">${cards || `<p>${escapeHtml(dictionary.empty)}</p>`}</section>
     </main>
   </div>`;
@@ -388,7 +393,10 @@ export function renderBlogPostHtml(post: BlogPost, alternates: BlogPost[] = []) 
           <figure class="cover"><img src="${escapeAttribute(post.cover || blogCoverForLanguage(post.language))}" alt="${escapeAttribute(post.coverAlt || post.title)}" decoding="async" /></figure>
           ${post.coverCredit ? `<p class="caption">${escapeHtml(post.coverCredit)}</p>` : ""}
         </header>
+        ${blogAdSlotHtml("after-summary")}
         <section class="body">${renderBody(post)}</section>
+        ${blogAdSlotHtml("mid-article")}
+        ${blogAdSlotHtml("before-related")}
         ${sources ? `<section class="sources"><p class="eyebrow">Sources</p><ul>${sources}</ul></section>` : ""}
       </article>
     </main>

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { BlogAdSlot } from "@/components/BlogAdSlot";
 import { BlogEditorialVisual } from "@/components/BlogEditorialVisual";
 import { renderBrandText } from "@/components/BrandText";
 import { JsonLd } from "@/components/JsonLd";
@@ -567,6 +568,8 @@ export async function BlogIndex({ language, tag, query, page }: BlogIndexProps) 
                 <button type="submit">{dictionary.searchSubmit}</button>
               </form>
             </div>
+
+            <BlogAdSlot placement="index-feed" />
 
             <div className="blog-craft-grid">
               {visiblePosts.map((post) => {

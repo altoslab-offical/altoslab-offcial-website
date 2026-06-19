@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Fragment } from "react";
 import { AnalyticsEvent } from "@/components/AnalyticsEvents";
+import { BlogAdSlot } from "@/components/BlogAdSlot";
 import { BlogEditorialVisual } from "@/components/BlogEditorialVisual";
 import { renderBrandText } from "@/components/BrandText";
 import { JsonLd } from "@/components/JsonLd";
@@ -19,6 +20,7 @@ import { blogContentTypeLabel, blogIndexPath, blogPostPath, languageLabel } from
 import { toBlogVisualPost } from "@/lib/blog-visual";
 import { isCloudflareKvConfigured } from "@/lib/cloudflare-kv";
 import { getRelatedPublishedBlogPosts } from "@/lib/cms";
+import { getBlogAdSlotConfig } from "@/lib/blog-adsense";
 import { publicTaxonomyLabel, publicTaxonomyLabels } from "@/lib/public-taxonomy";
 import { articleJsonLd, breadcrumbJsonLd, faqJsonLd } from "@/lib/seo";
 import type { BlogInlineImage, BlogPost } from "@/lib/types";
@@ -352,7 +354,24 @@ function imageMatchesMarker(image: BlogInlineImage, imageIndex: number, marker: 
 
 function ArticleBodyWithImages({ text, images }: { text: string; images: BlogInlineImage[] }) {
   const validImages = images.filter((image) => image.url && image.alt).slice(0, 3);
-  if (!validImages.length) return <RichText text={stripImageMarkers(text)} />;
+  const midArticleAd = getBlogAdSlotConfig("mid-article");
+
+  if (!validImages.length) {
+    if (!midArticleAd) return <RichText text={stripImageMarkers(text)} />;
+
+    const sections = splitArticleSections(stripImageMarkers(text));
+    const adAfterSectionIndex = Math.max(0, Math.floor((sections.length - 1) / 2));
+    return (
+      <div className="article-body-with-images">
+        {sections.map((section, sectionIndex) => (
+          <Fragment key={`${sectionIndex}-${section.slice(0, 24)}`}>
+            <RichText text={section} />
+            {sectionIndex === adAfterSectionIndex ? <BlogAdSlot placement="mid-article" /> : null}
+          </Fragment>
+        ))}
+      </div>
+    );
+  }
 
   const markerRegex = /\[IMAGE:([a-z0-9_-]+)\]/gi;
   const hasExplicitMarkers = markerRegex.test(text);
@@ -384,20 +403,21 @@ function ArticleBodyWithImages({ text, images }: { text: string; images: BlogInl
       if (!usedImageIndexes.has(index)) parts.push({ kind: "image", image });
     });
 
+    const adAfterPartIndex = Math.max(0, Math.floor((parts.length - 1) / 2));
     return (
       <div className="article-body-with-images">
-        {parts.map((part, index) =>
-          part.kind === "image" ? (
-            <ArticleInlineImage image={part.image} key={`${part.image.url}-${index}`} />
-          ) : (
-            <RichText text={part.text} key={`${index}-${part.text.slice(0, 24)}`} />
-          )
-        )}
+        {parts.map((part, index) => (
+          <Fragment key={part.kind === "image" ? `${part.image.url}-${index}` : `${index}-${part.text.slice(0, 24)}`}>
+            {part.kind === "image" ? <ArticleInlineImage image={part.image} /> : <RichText text={part.text} />}
+            {midArticleAd && index === adAfterPartIndex ? <BlogAdSlot placement="mid-article" /> : null}
+          </Fragment>
+        ))}
       </div>
     );
   }
 
   const sections = splitArticleSections(text);
+  const adAfterSectionIndex = Math.max(0, Math.floor((sections.length - 1) / 2));
   const buckets = new Map<number, BlogInlineImage[]>();
   validImages.forEach((image, index) => {
     const sectionIndex = contentImageIndex(image, index, sections.length);
@@ -412,6 +432,7 @@ function ArticleBodyWithImages({ text, images }: { text: string; images: BlogInl
           {(buckets.get(sectionIndex) || []).map((image, imageIndex) => (
             <ArticleInlineImage image={image} key={`${image.url}-${imageIndex}`} />
           ))}
+          {midArticleAd && sectionIndex === adAfterSectionIndex ? <BlogAdSlot placement="mid-article" /> : null}
         </Fragment>
       ))}
     </div>
@@ -504,6 +525,8 @@ export async function BlogArticle({ post }: { post: BlogPost }) {
             <strong>{dictionary.geoSummary}:</strong> {renderBrandText(post.geoSummary)}
           </aside>
 
+          <BlogAdSlot placement="after-summary" />
+
           {post.keyTakeaways.length ? (
             <section className="project-detail-card article-takeaways">
               <p className="eyebrow">{dictionary.takeaways}</p>
@@ -586,6 +609,8 @@ export async function BlogArticle({ post }: { post: BlogPost }) {
               <p>{authorProfile.bio}</p>
             </div>
           </section>
+
+          <BlogAdSlot placement="before-related" />
 
           {relatedPosts.length ? (
             <section className="related-articles">

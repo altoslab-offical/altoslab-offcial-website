@@ -48,6 +48,10 @@ const post = {
 
 const env = {
   NEXT_PUBLIC_SITE_URL: "https://altoslab-ai.cc",
+  NEXT_PUBLIC_ADSENSE_CLIENT: "ca-pub-8663357592872896",
+  NEXT_PUBLIC_ADSENSE_BLOG_AFTER_SUMMARY_SLOT: "1111111111",
+  NEXT_PUBLIC_ADSENSE_BLOG_MID_ARTICLE_SLOT: "2222222222",
+  NEXT_PUBLIC_ADSENSE_BLOG_BEFORE_RELATED_SLOT: "3333333333",
   ALTOS_BLOG_D1: {
     prepare(sql) {
       return {
@@ -86,6 +90,10 @@ assert(html.includes('<a class="site-nav-cta" href="/#contact"><span class="site
 assert(!html.includes('class="nav"') && !html.includes('class="langs"'), "direct renderer does not ship the old alternate header bar");
 assert(html.includes("font-size:clamp(34px,3.25vw,44px)") && !html.includes("font-size:clamp(40px,7vw,68px)"), "direct renderer keeps the reduced desktop article title scale");
 assert(html.includes("--highlight-soft:rgba(200,255,0,.56)") && !html.includes(".article-takeaways li{width:fit-content"), "direct renderer keeps takeaway highlights restrained without full-row list-item backgrounds");
+assert(html.includes('data-blog-ad-placement="after-summary"'), "direct renderer includes configured after-summary AdSense slot");
+assert(html.includes('data-blog-ad-placement="mid-article"'), "direct renderer includes configured mid-article AdSense slot");
+assert(html.includes('data-blog-ad-placement="before-related"'), "direct renderer includes configured before-related AdSense slot");
+assert(html.includes('data-ad-client="ca-pub-8663357592872896"'), "direct renderer uses the configured AdSense client on manual slots");
 
 const indexResponse = await maybeHandleDirectBlogHtml(new Request("https://altoslab-ai.cc/blog"), env);
 assert(indexResponse === null, "blog index falls through to the original Next UI renderer");

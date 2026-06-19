@@ -196,6 +196,19 @@ evidence before deploy.
 
 Current approved public UI baseline: commit `1ae34d3c2f931836226a2bf1528ae408a335c5e0` is the source of truth for future protected homepage, Blog index, Blog article shell, shared chrome, and visual-token changes. Start from `docs/design-review/current-approved-baseline.md`, add a new `docs/design-review/*.md` record for intentional differences, and keep `npm run review:design` passing.
 
+## Blog AdSense Design Guardrail
+
+Blog AdSense support is allowed only as opt-in monetization infrastructure. It must not be used as a reason to redesign the Blog index, article hero, typography, sidebar, header, language switcher, related posts, author card, or editorial visual system.
+
+Design rules:
+
+- Manual ad slots render only when `NEXT_PUBLIC_ADSENSE_CLIENT` and a numeric placement slot id are configured.
+- With slot ids empty, the Blog public UI must have no visible ad container and no layout spacing change.
+- Configured slots should align to existing content width: article slots use the article/media column, and index slots use the feed column.
+- Slots must stay visually neutral. Do not add decorative frames, marketing copy, gradients, or CTA styling around AdSense units.
+- Unfilled AdSense units should collapse through the `data-ad-status="unfilled"` CSS rule.
+- Any future visible ad-label treatment, density change, sticky unit, anchor unit, or Auto ads overlay tuning requires a separate design review record and browser evidence.
+
 ## Homepage UI Stability Contract
 
 The homepage is a protected brand/design surface. Its canonical visual source is the original static bundle in `index.html`, mirrored to `public/altoslab-homepage.html` for Cloudflare assets by `scripts/sync-cloudflare-homepage.mjs`.

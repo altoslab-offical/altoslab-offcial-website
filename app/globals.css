@@ -4169,6 +4169,24 @@ img {
   color: var(--al-blog-muted);
 }
 
+.blog-adsense-slot {
+  box-sizing: border-box;
+  width: min(760px, 100%);
+  min-height: 96px;
+  display: block;
+  margin: 28px auto;
+  overflow: hidden;
+}
+
+.blog-adsense-slot.is-index-feed {
+  width: 100%;
+  margin: 0 0 var(--sp-6);
+}
+
+.blog-adsense-slot ins.adsbygoogle[data-ad-status="unfilled"] {
+  display: none !important;
+}
+
 .blog-site-shell .rich-text p,
 .blog-site-shell .rich-text ul,
 .blog-site-shell .rich-text ol {

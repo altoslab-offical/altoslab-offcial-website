@@ -1,12 +1,28 @@
-# ALTOS LAB Blog API Publishing Spec
+# ALTOS LAB Blog Article Publishing API
 
-Status: draft v1  
-Last updated: 2026-06-17  
+Status: production guide v2
+Last updated: 2026-06-18
 Owner: ALTOS LAB website/blog automation
 
-This document defines the supported API contract for publishing blog articles into the ALTOS LAB official website. It is written for external workers, n8n flows, local schedulers, or future API clients that need to submit complete article sets safely.
+這份文件整理目前正式站「用 API 發佈文章」的安全流程。適用於 n8n、
+外部 worker、本機排程器、Codex/Claude 產文流程，或任何需要把完整
+文章組寫入 ALTOS LAB official website 的 API client。
 
-The production publishing path is intentionally fail-closed. A caller must validate the exact article set first, then publish the same content through the signed release endpoint. Do not publish by calling generic admin CRUD endpoints directly.
+正式站目前跑在 AWS ECS/Fargate，CMS 與 generated media 存在 AWS S3。
+Cloudflare 只保留 DNS-only，不是目前 production runtime。
+
+## Current Production Target
+
+```txt
+Production base URL: https://altoslab-ai.cc
+CMS provider: aws-s3
+CMS object: s3://altoslab-official-cms-487316829524/cms/altoslab-cms-v1.json
+Generated media prefix: blog-generated/
+```
+
+發佈文章不需要重新部署 ECS。文章 API 會直接寫入 CMS storage，前台
+blog route 是 dynamic read。只有改程式碼、API contract 或 smoke guard
+時才需要重新 build image / update ECS task definition。
 
 ## Source Of Truth
 
@@ -15,82 +31,75 @@ Implementation files:
 - `app/api/admin/blog/media/route.ts`
 - `app/api/admin/blog/ingest-set/route.ts`
 - `app/api/admin/blog/release-set/route.ts`
+- `app/api/blog/route.ts`
+- `app/api/blog/[slug]/route.ts`
 - `lib/blog-ingest-auth.ts`
-- `lib/types.ts`
 - `lib/cms.ts`
-- `scripts/blog-local-worker.mjs`
+- `lib/types.ts`
+- `scripts/aws-production-smoke.mjs`
 
-Related operating docs:
+Related docs:
 
 - `docs/content/blog-external-ingest-quality-system.md`
 - `docs/content/blog-prepared-candidate-manifest.md`
 - `docs/content/blog-subagent-production-loop.md`
+- `docs/aws-migration-plan.md`
 - `docs/OPERATIONS.md`
 
-## Supported Environments
+## Supported Flow
 
-Production base URL:
+Production publishing is fail-closed. Use this sequence:
 
-```txt
-https://altoslab-ai.cc
-```
+1. Prepare one complete article set with 9 language versions.
+2. Upload generated cover/content images with `POST /api/admin/blog/media`.
+3. Validate the exact article set with `POST /api/admin/blog/ingest-set?validateOnly=true`.
+4. Build a `qualityManifest` for the same payload.
+5. Publish with `POST /api/admin/blog/release-set`.
+6. Verify public API, article pages, RSS/sitemap/llms, and AWS smoke.
 
-Worker preview base URL:
+Do not publish by calling generic admin CRUD endpoints directly.
 
-```txt
-https://altoslab-official-website.altoslab-ai.workers.dev
-```
+## Authentication
 
-Local development base URL:
-
-```txt
-http://localhost:3001
-```
-
-Clients may also use `ALTOS_BLOG_BASE_URL` to switch the target base URL.
-
-## Required Secrets
-
-The publishing API uses HMAC signing. The client and production must share:
+Publishing APIs use HMAC. The API client and production server must share:
 
 ```txt
 BLOG_INGEST_HMAC_SECRET
 ```
 
-Never send this value in the request body or logs.
+Never put the secret in the request body, URL, article payload, logs, or docs.
 
-## Authentication
-
-Every publishing request must sign the exact JSON body string that is sent over the wire.
+Every write request signs the exact JSON body string sent over the wire.
 
 Required headers:
 
 ```http
 Content-Type: application/json
-X-Altos-Timestamp: 2026-06-17T09:00:00.000Z
+X-Altos-Timestamp: 2026-06-18T09:00:00.000Z
 X-Altos-Nonce: 4f2c0d9f1f604aa8a8e7e37c8f879c2e
-X-Altos-Signature: 8d4f...
+X-Altos-Signature: sha256=<hex hmac sha256>
 ```
 
 Signature formula:
 
 ```txt
-hex_hmac_sha256(BLOG_INGEST_HMAC_SECRET, X-Altos-Timestamp + "." + X-Altos-Nonce + "." + body)
+hex_hmac_sha256(secret, X-Altos-Timestamp + "." + X-Altos-Nonce + "." + body)
 ```
 
 Rules:
 
-- Timestamp must parse as a date and be within 5 minutes of server time.
+- Timestamp must parse as a date.
+- Timestamp must be within 5 minutes of server time.
 - Nonce/signature pairs are rejected on replay during the accepted window.
-- Signature may be sent as raw hex or `sha256=<hex>`.
-- If the body is modified after signing, the request will fail.
+- Signature can be raw hex or `sha256=<hex>`.
+- If body formatting changes after signing, the signature fails.
 
-Node signing helper:
+Node helper:
 
 ```js
 import crypto from "node:crypto";
 
-function signedHeaders(secret, body) {
+export function signedHeaders(secret, body) {
   const timestamp = new Date().toISOString();
   const nonce = crypto.randomBytes(16).toString("hex");
   const signature = crypto
@@ -102,25 +111,12 @@ function signedHeaders(secret, body) {
     "Content-Type": "application/json",
     "X-Altos-Timestamp": timestamp,
     "X-Altos-Nonce": nonce,
-    "X-Altos-Signature": signature
+    "X-Altos-Signature": `sha256=${signature}`
   };
 }
 ```
 
-## Publishing Flow
-
-Use this sequence for all automated publishing:
-
-1. Prepare a complete article set.
-2. Upload generated column/feature media with `POST /api/admin/blog/media` if needed.
-3. Dry-run the exact article set with `POST /api/admin/blog/ingest-set?validateOnly=true`.
-4. Build and sign a `qualityManifest` from the approved article set.
-5. Publish the same article set with `POST /api/admin/blog/release-set`.
-6. Verify the live public URLs and API metadata.
-
-Release-time jobs must not generate fresh content. If the payload changes after validation, validate again.
-
-## Endpoint: Upload Generated Media
+## Endpoint 1: Upload Generated Media
 
 ```http
 POST /api/admin/blog/media
@@ -128,19 +124,20 @@ POST /api/admin/blog/media
 
 Purpose:
 
-- Store generated covers or in-article images for `column` and `feature` posts.
-- Return a same-origin public URL under `/api/blog/generated-media/:filename`.
+- Upload generated covers or in-article images.
+- Store bytes in the active media backend, currently AWS S3.
+- Return a same-origin URL under `/api/blog/generated-media/:filename`.
 
 Authentication:
 
-- Admin session cookie, or
-- HMAC headers described above.
+- HMAC headers above, or
+- Admin session cookie from the CMS admin UI.
 
-Request body:
+Request:
 
 ```json
 {
-  "ingestRunId": "ingest_20260617_morning_agents",
+  "ingestRunId": "ingest_20260618_morning_agents",
   "filename": "agents-workflow-cover.webp",
   "contentType": "image/webp",
   "base64": "<base64 image bytes>"
@@ -150,26 +147,27 @@ Request body:
 Constraints:
 
 - `contentType` must be `image/png`, `image/jpeg`, or `image/webp`.
-- `base64` is required.
-- Maximum decoded image size is 8 MB.
-- The returned `url` must be copied into `post.cover` or `post.contentImages[].url`.
+- Decoded image must be greater than 0 bytes and no more than 8 MB.
+- `filename` is sanitized by the server and prefixed with `ingestRunId`.
+- Returned `url` must be copied into `post.cover` or `post.contentImages[].url`.
 
-Success response:
+Success response on AWS:
 
 ```json
 {
   "ok": true,
-  "url": "https://altoslab-ai.cc/api/blog/generated-media/ingest_20260617_morning_agents-agents-workflow-cover.webp",
-  "pathname": "blog-generated/ingest_20260617_morning_agents-agents-workflow-cover.webp",
-  "provider": "cloudflare-kv",
+  "url": "https://altoslab-ai.cc/api/blog/generated-media/ingest_20260618_morning_agents-agents-workflow-cover.webp",
+  "pathname": "blog-generated/ingest_20260618_morning_agents-agents-workflow-cover.webp",
+  "provider": "aws-s3",
   "contentType": "image/webp",
   "size": 483920
 }
 ```
 
-Market-news posts normally do not use this endpoint. They should use credited source or official images.
+Market-news posts normally should not use generated covers. They should use
+credited source or official images.
 
-## Endpoint: Validate Article Set
+## Endpoint 2: Validate Article Set
 
 ```http
 POST /api/admin/blog/ingest-set?validateOnly=true
@@ -177,19 +175,19 @@ POST /api/admin/blog/ingest-set?validateOnly=true
 
 Purpose:
 
-- Run contract, duplicate, content, multilingual, source, and image QA.
-- Return whether the set would publish.
-- Diagnose release problems before a production write.
+- Validate article contract, language coverage, duplicate topic/cover risk,
+  source links, writing quality, image quality, and public publish readiness.
+- Return `wouldPublish` without writing to CMS.
 
-Request body:
+Required top-level fields:
 
 ```json
 {
-  "ingestRunId": "ingest_20260617_morning_agents",
+  "ingestRunId": "ingest_20260618_morning_agents",
   "slot": "morning",
-  "generationDate": "2026-06-17",
-  "scheduledFor": "2026-06-17T09:00:00+08:00",
-  "translationGroupId": "tg_20260617_agents_ops",
+  "generationDate": "2026-06-18",
+  "scheduledFor": "2026-06-18T09:00:00+08:00",
+  "translationGroupId": "tg_20260618_agents_ops",
   "publishMode": "publish-if-valid",
   "validateOnly": true,
   "generation": {
@@ -202,16 +200,13 @@ Request body:
 }
 ```
 
-Required top-level fields:
+Rules:
 
-- `slot`: `morning` or `afternoon`.
-- `publishMode`: `publish-if-valid` for production candidates.
-- `generation.provider`: `gemini-chatgpt` or `source-translation`.
-- `posts`: complete article set.
-
-Language requirement:
-
-`posts` must include exactly one post for each configured language:
+- `slot` must be `morning` or `afternoon`.
+- Default scheduled time is `09:00 +08:00` for morning and `16:00 +08:00` for afternoon.
+- `generation.provider` must be `gemini-chatgpt` or `source-translation`.
+- `publishMode` should be `publish-if-valid` for production candidates.
+- `posts` must contain exactly one post for each language:
 
 ```txt
 zh-Hant, en, ja, ko, id, vi, th, ms, fil
@@ -223,7 +218,7 @@ Validate-only success response:
 {
   "ok": true,
   "validateOnly": true,
-  "ingestRunId": "ingest_20260617_morning_agents",
+  "ingestRunId": "ingest_20260618_morning_agents",
   "wouldPublish": true,
   "publishedIds": [],
   "heldDraftIds": [],
@@ -245,7 +240,7 @@ Validate-only success response:
   },
   "posts": [
     {
-      "id": "blog_...",
+      "id": "post_...",
       "language": "zh-Hant",
       "slug": "ai-agents-customer-ops",
       "status": "published",
@@ -257,9 +252,11 @@ Validate-only success response:
 }
 ```
 
-If `wouldPublish` is false or `errors` is not empty, fix the payload and validate again.
+If `wouldPublish` is false or `errors` is non-empty, fix the article set and
+validate again. Do not proceed to release with a changed payload unless you
+revalidate and regenerate the release manifest.
 
-## Endpoint: Release Article Set
+## Endpoint 3: Release Article Set
 
 ```http
 POST /api/admin/blog/release-set
@@ -267,21 +264,21 @@ POST /api/admin/blog/release-set
 
 Purpose:
 
-- Publish an already-reviewed article set.
+- Publish an already validated and reviewed article set.
 - Require a signed `qualityManifest`.
 - Write only if every release gate passes.
 
-Request body:
+Request skeleton:
 
 ```json
 {
-  "ingestRunId": "ingest_20260617_morning_agents",
+  "ingestRunId": "ingest_20260618_morning_agents",
   "slot": "morning",
-  "generationDate": "2026-06-17",
-  "scheduledFor": "2026-06-17T09:00:00+08:00",
-  "translationGroupId": "tg_20260617_agents_ops",
+  "generationDate": "2026-06-18",
+  "scheduledFor": "2026-06-18T09:00:00+08:00",
+  "translationGroupId": "tg_20260618_agents_ops",
   "publishMode": "publish-if-valid",
-  "replaceExistingPublished": true,
+  "replaceExistingPublished": false,
   "generation": {
     "provider": "gemini-chatgpt",
     "model": "gemini-and-chatgpt-browser",
@@ -291,13 +288,13 @@ Request body:
   "qualityManifest": {
     "gateVersion": "altos-blog-release-v1",
     "reviewer": "main-brain",
-    "reviewedAt": "2026-06-17T00:55:00.000Z",
+    "reviewedAt": "2026-06-18T01:00:00.000Z",
     "contentSha256": "<release content digest>",
     "posts": [
       {
         "language": "zh-Hant",
         "slug": "ai-agents-customer-ops",
-        "bodySha256": "<sha256 of body>",
+        "bodySha256": "<sha256 of post.body>",
         "cover": "https://altoslab-ai.cc/api/blog/generated-media/agents-cover.webp",
         "contentImages": [
           "https://altoslab-ai.cc/api/blog/generated-media/agents-inline-1.webp",
@@ -329,13 +326,14 @@ Release constraints:
 - Request body must be no larger than 850,000 bytes.
 - `publishMode` must be `publish-if-valid`.
 - `posts` must contain exactly 9 language versions.
-- `qualityManifest.qualitySummary.approved` must be `true`.
-- `qualityManifest.imageQualitySummary.approved` must be `true`.
-- Scores must meet their thresholds.
-- `qualityManifest.qualitySummary.issues` must be empty.
-- `qualityManifest.imageQualitySummary.issues` and `warnings` must be empty.
+- `qualityManifest.gateVersion`, `reviewer`, `reviewedAt`, and `contentSha256` are required.
 - `qualityManifest.contentSha256` must match the current request payload.
 - Every manifest post must match the corresponding payload `language`, `slug`, `body`, `cover`, and `contentImages`.
+- `qualityManifest.qualitySummary.approved` must be `true`.
+- `qualityManifest.imageQualitySummary.approved` must be `true`.
+- Quality and image scores must meet thresholds.
+- Quality issues must be empty.
+- Image issues and image warnings must be empty.
 
 Success response:
 
@@ -343,10 +341,10 @@ Success response:
 {
   "ok": true,
   "skipped": false,
-  "ingestRunId": "ingest_20260617_morning_agents",
-  "publishedIds": ["blog_zh_...", "blog_en_..."],
+  "ingestRunId": "ingest_20260618_morning_agents",
+  "publishedIds": ["post_..."],
   "heldDraftIds": [],
-  "updatedIds": ["blog_old_..."],
+  "updatedIds": [],
   "errors": [],
   "qualitySummary": {
     "approved": true,
@@ -370,7 +368,7 @@ Success response:
   },
   "posts": [
     {
-      "id": "blog_...",
+      "id": "post_...",
       "language": "zh-Hant",
       "slug": "ai-agents-customer-ops",
       "status": "published",
@@ -383,17 +381,23 @@ Success response:
 }
 ```
 
-If release validation fails, the route returns `400` with `errors`. If the article set is valid but not publishable, it may write held drafts and return `event: "blog_release_held"`.
+If release validation fails, the route returns `400` with `errors`. If CMS
+storage is locked, the route may return `202`; retry the same exact request
+after a short delay.
 
-## Post Payload Schema
+Use `replaceExistingPublished: true` only for an intentional quality refresh or
+replacement of an already-published article set. Otherwise keep it false.
 
-Each item in `posts` is a partial `BlogPost`, but these fields are required for publishable generated posts:
+## Post Payload Minimum Schema
+
+Each `posts[]` item is a partial `BlogPost`, but publishable posts should carry
+at least:
 
 ```json
 {
   "slug": "ai-agents-customer-ops",
   "language": "zh-Hant",
-  "translationGroupId": "tg_20260617_agents_ops",
+  "translationGroupId": "tg_20260618_agents_ops",
   "title": "AI Agent 不是工具清單，而是營運系統",
   "seoTitle": "AI Agent 營運系統指南｜ALTOS LAB",
   "seoDescription": "用營運系統角度看 AI Agent 導入，避免只買工具卻沒有流程閉環。",
@@ -405,8 +409,7 @@ Each item in `posts` is a partial `BlogPost`, but these fields are required for 
   "geoSummary": "短答摘要，回答搜尋者最想知道的導入重點。",
   "body": "Markdown article body...",
   "keyTakeaways": [
-    "AI Agent 導入要從流程責任開始。",
-    "評估重點是可維護的判斷閉環。"
+    "AI Agent 導入要從流程責任開始。"
   ],
   "faqs": [
     {
@@ -419,7 +422,7 @@ Each item in `posts` is a partial `BlogPost`, but these fields are required for 
       "title": "Source title",
       "url": "https://example.com/source",
       "publisher": "Example",
-      "publishedAt": "2026-06-17T00:00:00.000Z",
+      "publishedAt": "2026-06-18T00:00:00.000Z",
       "summary": "Why this source supports the article."
     }
   ],
@@ -433,7 +436,7 @@ Each item in `posts` is a partial `BlogPost`, but these fields are required for 
     "provider": "ChatGPT/GPT image",
     "model": "gpt-image",
     "prompt": "Full prompt used to generate the cover...",
-    "generatedAt": "2026-06-17T00:40:00.000Z",
+    "generatedAt": "2026-06-18T00:40:00.000Z",
     "status": "generated",
     "storedUrl": "https://altoslab-ai.cc/api/blog/generated-media/agents-cover.webp",
     "visualChecks": {
@@ -457,7 +460,7 @@ Each item in `posts` is a partial `BlogPost`, but these fields are required for 
       "placement": "after-lead",
       "provider": "ChatGPT/GPT image",
       "prompt": "Full image prompt...",
-      "generatedAt": "2026-06-17T00:43:00.000Z",
+      "generatedAt": "2026-06-18T00:43:00.000Z",
       "visualChecks": {
         "topicFit": true,
         "noTextArtifacts": true,
@@ -474,55 +477,60 @@ Each item in `posts` is a partial `BlogPost`, but these fields are required for 
 }
 ```
 
-Notes:
+Server-normalized fields:
 
-- `status`, `reviewStatus`, `qualityStatus`, `imageQualityStatus`, `releaseDecision`, timestamps, author normalization, and public editorial disclosure are normalized by the API.
-- `readTimeMinutes` is required for publish validation.
-- Generated posts require at least one `sourceLinks` item.
-- Non-breaking posts require at least one FAQ for GEO.
+- `status`
+- `reviewStatus`
+- `qualityStatus`
+- `imageQualityStatus`
+- `releaseDecision`
+- `publishedAt`, `updatedAt`, `createdAt`
+- public editorial disclosure
+- author normalization
 
 ## Content-Type Contracts
 
-### breaking
+### `breaking`
 
 Use for market-news/source-translation articles.
 
 Required:
 
-- `generation.provider`: `source-translation`.
-- `coverSource`: `source`.
+- `generation.provider: "source-translation"`
+- `coverSource: "source"`
 - `cover`: public HTTPS source or official image URL.
 - `coverCredit`: visible attribution.
-- `coverCreditUrl`: public URL that matches one of `sourceLinks`.
+- `coverCreditUrl`: public URL matching one of `sourceLinks`.
 - `coverLicense`: source-rights metadata.
 - `coverAlt`: descriptive alt text.
-- `contentImages`: optional unless reusable source supporting media is available.
 
 Forbidden:
 
-- Generic stock/free image providers for covers.
+- Generic stock/free image provider covers.
 - GPT/generated art as the default market-news cover.
 
-### column and feature
+### `column` and `feature`
 
 Use for original ALTOS LAB perspective articles.
 
 Required:
 
-- `generation.provider`: `gemini-chatgpt`.
-- `coverSource`: `generated`.
+- `generation.provider: "gemini-chatgpt"`
+- `coverSource: "generated"`
 - `cover`: public HTTPS URL, normally returned from `/api/admin/blog/media`.
-- `coverGeneration.provider`: ChatGPT/GPT/OpenAI wording.
-- `coverGeneration.prompt`: stored full prompt.
+- `coverGeneration.provider`: contains ChatGPT/GPT/OpenAI wording.
+- `coverGeneration.prompt`: full stored prompt.
 - `coverGeneration.generatedAt`: ISO timestamp.
 - `coverGeneration.visualChecks`: all core checks true.
 - `contentImages`: 2 to 3 images.
-- Every translated version must share the same `contentImages` URLs in the same order.
-- Every content image must use public HTTPS URL, `source: "generated"`, ChatGPT/GPT provider wording, prompt, alt, caption, credit, generatedAt, and visual checks.
+- Every translated version shares the same `cover` URL.
+- Every translated version shares the same `contentImages[].url` values in the same order.
+- Every content image has public HTTPS URL, `source: "generated"`, ChatGPT/GPT provider wording, prompt, alt, caption, credit, generatedAt, and visual checks.
 
 ## Quality Manifest Digest Contract
 
-`release-set` recalculates the release digest. A client must compute the same values.
+`release-set` recalculates the release digest. A client must compute the same
+values.
 
 Per-post `bodySha256`:
 
@@ -532,54 +540,93 @@ sha256(String(post.body || ""))
 
 Top-level `contentSha256`:
 
-1. Create a digest copy of every post with these fields only:
-   - `language`
-   - `slug`
-   - `title`
-   - `seoTitle`
-   - `seoDescription`
-   - `excerpt`
-   - `contentType`
-   - `newsCategory`
-   - `topic`
-   - `audience`
-   - `geoSummary`
-   - `body`
-   - `keyTakeaways`
-   - `faqs`
-   - `sourceLinks`
-   - `tags`
-   - `author`
-   - `cover`
-   - `coverAlt`
-   - `coverSource`
-   - `coverGeneration`
-   - `coverCredit`
-   - `coverCreditUrl`
-   - `coverLicense`
-   - `coverLicenseUrl`
-   - `contentImages`
-   - `aiDisclosure`
-2. Sort the digest posts by `language`.
-3. Build this object:
+1. Create a digest copy of every post with only these fields:
+
+```txt
+language
+slug
+title
+seoTitle
+seoDescription
+excerpt
+contentType
+newsCategory
+topic
+audience
+geoSummary
+body
+keyTakeaways
+faqs
+sourceLinks
+tags
+author
+cover
+coverAlt
+coverSource
+coverGeneration
+coverCredit
+coverCreditUrl
+coverLicense
+coverLicenseUrl
+contentImages
+aiDisclosure
+```
+
+2. Sort digest posts by `language`.
+3. Build:
 
 ```json
 {
-  "translationGroupId": "tg_20260617_agents_ops",
+  "translationGroupId": "tg_20260618_agents_ops",
   "slot": "morning",
-  "generationDate": "2026-06-17",
-  "scheduledFor": "2026-06-17T09:00:00+08:00",
+  "generationDate": "2026-06-18",
+  "scheduledFor": "2026-06-18T09:00:00+08:00",
   "posts": []
 }
 ```
 
-4. Serialize with stable JSON: object keys sorted recursively, arrays in existing order.
+4. Serialize with stable JSON: object keys sorted recursively, arrays in
+   existing order.
 5. Hash with SHA-256 hex.
 
 Reference helper:
 
 ```js
 import crypto from "node:crypto";
+
+const DIGEST_POST_FIELDS = [
+  "language",
+  "slug",
+  "title",
+  "seoTitle",
+  "seoDescription",
+  "excerpt",
+  "contentType",
+  "newsCategory",
+  "topic",
+  "audience",
+  "geoSummary",
+  "body",
+  "keyTakeaways",
+  "faqs",
+  "sourceLinks",
+  "tags",
+  "author",
+  "cover",
+  "coverAlt",
+  "coverSource",
+  "coverGeneration",
+  "coverCredit",
+  "coverCreditUrl",
+  "coverLicense",
+  "coverLicenseUrl",
+  "contentImages",
+  "aiDisclosure"
+];
+
+function sha256(input) {
+  return crypto.createHash("sha256").update(input).digest("hex");
+}
 
 function stableJson(value) {
   if (Array.isArray(value)) return `[${value.map(stableJson).join(",")}]`;
@@ -592,15 +639,107 @@ function stableJson(value) {
   return JSON.stringify(value);
 }
 
-function sha256(input) {
-  return crypto.createHash("sha256").update(input).digest("hex");
+function digestSourcePost(post) {
+  return Object.fromEntries(DIGEST_POST_FIELDS.map((field) => [field, post[field]]));
+}
+
+export function bodySha256(post) {
+  return sha256(String(post.body || ""));
+}
+
+export function releaseContentSha256(payload) {
+  const posts = [...payload.posts]
+    .map(digestSourcePost)
+    .sort((a, b) => String(a.language || "").localeCompare(String(b.language || "")));
+
+  return sha256(
+    stableJson({
+      translationGroupId:
+        payload.translationGroupId || payload.posts.find((post) => post.translationGroupId)?.translationGroupId,
+      slot: payload.slot,
+      generationDate: payload.generationDate,
+      scheduledFor: payload.scheduledFor,
+      posts
+    })
+  );
 }
 ```
 
-Important:
+Any translation edit, copy edit, media URL change, metadata change, or body
+formatting change after digest generation requires a new manifest.
 
-- The manifest must reference the same `cover` and `contentImages[].url` values that are present in `posts`.
-- Any translation, copy edit, media URL change, or metadata change after digest generation requires a new digest.
+## Public Readback APIs
+
+These are read-only verification surfaces.
+
+List/inventory:
+
+```http
+GET /api/blog?fields=inventory&limit=24
+GET /api/blog?fields=inventory&language=zh-Hant&limit=24
+```
+
+Article detail:
+
+```http
+GET /api/blog/:slug?language=zh-Hant
+```
+
+Public page:
+
+```txt
+/blog/:slug
+/en/blog/:slug
+/ja/blog/:slug
+/ko/blog/:slug
+/id/blog/:slug
+/vi/blog/:slug
+/th/blog/:slug
+/ms/blog/:slug
+/fil/blog/:slug
+```
+
+## Post-Release Verification
+
+Run the production smoke:
+
+```bash
+npm run verify:aws -- --base-url https://altoslab-ai.cc --expected-provider aws-s3
+```
+
+This smoke checks:
+
+- homepage 200
+- all language blog indexes 200
+- RSS/feed aliases
+- sitemap
+- `llms.txt`
+- unauthenticated admin redirect
+- `/api/health` reports `cmsStorage.provider: aws-s3`
+- public blog API returns posts
+- at least one article detail page renders non-empty `.rich-text`
+
+Manual spot checks:
+
+```bash
+curl -sS "https://altoslab-ai.cc/api/blog?fields=inventory&limit=24" \
+  | jq '.posts[0] | {language, slug, title}'
+
+curl -sS "https://altoslab-ai.cc/api/blog/<slug>?language=<language>" \
+  | jq '.post | {language, slug, bodyLength: (.body | length)}'
+
+curl -sS "https://altoslab-ai.cc/<language-prefix>/blog/<slug>" \
+  | rg '<div class="rich-text"><(p|h2|h3|ul|ol|blockquote)'
+```
+
+Also verify:
+
+- `/blog` includes the article in the expected archive position.
+- `/feed.xml` and `/rss.xml` are 200 and include recent URLs.
+- `/sitemap.xml` includes the new public URLs.
+- `/llms.txt` and `/llms-full.txt` are 200.
+- Cover and content image URLs return image content types.
+- Public API does not expose secrets or unapproved internal fields.
 
 ## Error Handling
 
@@ -608,6 +747,10 @@ Common responses:
 
 ```json
 { "ok": false, "error": "Missing ingest signature headers" }
+```
+
+```json
+{ "ok": false, "error": "Ingest signature timestamp is outside the accepted window" }
 ```
 
 ```json
@@ -630,41 +773,24 @@ Retry guidance:
 
 - For `400`, fix the payload and validate again.
 - For `401`, regenerate timestamp, nonce, signature, and send the exact signed body.
-- For `202`, retry the same request after a short delay.
-- For `500`, do not blindly retry in a loop; inspect logs and public CMS health first.
+- For `202`, retry the exact same request after a short delay.
+- For `500`, inspect logs and `/api/health`; do not blindly retry in a tight loop.
 
-## Post-Release Verification
-
-After a successful release, verify all of these:
-
-```bash
-npm run verify:cloudflare -- --base-url https://altoslab-ai.cc --expected-provider cloudflare-d1
-```
-
-For each language version:
-
-```txt
-GET /api/blog/:slug?language=<language>
-GET /<language-prefix>/blog/:slug
-```
-
-Also verify:
-
-- `/blog` returns the article in the expected archive position.
-- `/feed.xml` and `/rss.xml` return XML with recent posts.
-- `/sitemap.xml` includes new public URLs.
-- `/llms.txt` and `/llms-full.txt` remain 200.
-- Cover and content image URLs return image content types.
-- Public API does not expose internal prompt or secret fields beyond approved public metadata.
-
-## Do Not Use
+## Do Not Use For External Publishing
 
 Do not use these as external publishing APIs:
 
 - `POST /api/admin/blog`
 - `PATCH /api/admin/blog/:id`
-- Any direct Cloudflare D1/KV write
-- Any public `/api/blog` route
+- Direct S3 object writes
+- Direct Cloudflare D1/KV writes
+- Public `/api/blog` routes as write targets
 
-Those routes are for admin UI, public readback, or storage internals. The supported write path is the signed `media` plus `ingest-set` plus `release-set` flow above.
+Those routes are for admin UI, readback, or storage internals. The supported
+external write path is:
 
+```txt
+POST /api/admin/blog/media
+POST /api/admin/blog/ingest-set?validateOnly=true
+POST /api/admin/blog/release-set
+```

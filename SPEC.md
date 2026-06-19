@@ -112,6 +112,25 @@ Release gate:
 - Live check after deploy must confirm `/blog` returns 200, does not include `x-altos-direct-blog-render`, contains `blog-craft-layout`, and does not show Cloudflare Error 1102.
 - Live article checks must also confirm article detail pages do not include `x-altos-direct-blog-render` unless an emergency direct-render incident is explicitly active.
 
+## Blog AdSense Monetization Contract
+
+Tommy approved blog-focused AdSense architecture work on 2026-06-19. This is a monetization infrastructure change, not a Blog redesign.
+
+Required behavior:
+
+- The AdSense publisher client remains `NEXT_PUBLIC_ADSENSE_CLIENT`.
+- The root `/ads.txt` route must continue deriving the `google.com, pub-..., DIRECT, f08c47fec0942fa0` line from that client id.
+- Blog manual ad units are opt-in through numeric slot env vars only:
+  - `NEXT_PUBLIC_ADSENSE_BLOG_INDEX_SLOT`
+  - `NEXT_PUBLIC_ADSENSE_BLOG_AFTER_SUMMARY_SLOT`
+  - `NEXT_PUBLIC_ADSENSE_BLOG_MID_ARTICLE_SLOT`
+  - `NEXT_PUBLIC_ADSENSE_BLOG_BEFORE_RELATED_SLOT`
+- `NEXT_PUBLIC_ADSENSE_BLOG_ADS_ENABLED=false` / `0` / `off` must disable all manual blog slots without removing the global AdSense head script.
+- If a slot id is missing or invalid, the public Blog UI must render exactly as before with no empty ad container.
+- The canonical React Blog surfaces, `/api/blog-html` renderer, and Cloudflare direct article fallback must share the same placement names.
+- Manual ad slots must not replace `BlogIndex`, `SiteHeader`, article hero, source links, author card, related posts, or WonDa widget behavior.
+- `npm run test:adsense` must fail if the blog slot contract, env examples, direct renderer, or AdSense smoke coverage drift.
+
 ## Current State
 
 The homepage is currently served from the static built artifact:

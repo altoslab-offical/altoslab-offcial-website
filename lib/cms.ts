@@ -1260,16 +1260,14 @@ export async function getPublishedBlogPost(slug: string, language?: BlogLanguage
   );
   if (post?.body) return post;
 
-  if (isCloudflarePublicRuntime()) {
-    const data = await readPublicRawCmsData();
-    const cmsPost = mergeStaticBlogOverrides(allPublicBlogPostsFromData(data)).find(
-      (item) =>
-        matchesBlogSlug(item.slug, slug) &&
-        item.status === "published" &&
-        (!language || normalizeBlogLanguage(item.language) === language)
-    );
-    return cmsPost || null;
-  }
+  const data = await readPublicRawCmsData();
+  const cmsPost = mergeStaticBlogOverrides(allPublicBlogPostsFromData(data)).find(
+    (item) =>
+      matchesBlogSlug(item.slug, slug) &&
+      item.status === "published" &&
+      (!language || normalizeBlogLanguage(item.language) === language)
+  );
+  if (cmsPost?.body || !post) return cmsPost || null;
 
   return post || null;
 }

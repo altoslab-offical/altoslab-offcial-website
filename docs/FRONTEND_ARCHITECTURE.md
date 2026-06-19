@@ -104,6 +104,36 @@ Article detail rendering has a shared visual contract across Next and the direct
 
 Do not use `BlogIndexLite`, `renderIndex`, direct `list_json` Worker queries, or a replacement static index to solve Worker CPU issues. The accepted approach is to optimize the canonical `BlogIndex` path, paginate inventory, or improve Cloudflare data access without changing route ownership.
 
+## Blog AdSense Architecture
+
+AdSense support for Blog is intentionally split into a global head script and opt-in manual ad unit slots.
+
+Ownership:
+
+- AdSense client validation and head snippets live in `lib/analytics.ts`.
+- Blog manual slot configuration lives in `lib/blog-adsense.ts`.
+- React slot rendering and `adsbygoogle.push({})` initialization live in `components/BlogAdSlot.tsx`.
+- Canonical Blog index placement is rendered by `components/BlogIndex.tsx`.
+- Canonical Blog article placements are rendered by `components/BlogArticle.tsx`.
+- `/api/blog-html` string rendering must use `blogAdSlotHtml(...)` from `lib/blog-adsense.ts`.
+- Cloudflare emergency direct article rendering must keep a local equivalent of the same placement names.
+
+Environment contract:
+
+- `NEXT_PUBLIC_ADSENSE_CLIENT`: AdSense publisher client, e.g. `ca-pub-...`.
+- `NEXT_PUBLIC_ADSENSE_BLOG_ADS_ENABLED`: optional manual-slot kill switch; false-like values disable all Blog manual units.
+- `NEXT_PUBLIC_ADSENSE_BLOG_INDEX_SLOT`: feed-column unit for `/blog` and localized index routes.
+- `NEXT_PUBLIC_ADSENSE_BLOG_AFTER_SUMMARY_SLOT`: article unit after the GEO summary.
+- `NEXT_PUBLIC_ADSENSE_BLOG_MID_ARTICLE_SLOT`: article body unit.
+- `NEXT_PUBLIC_ADSENSE_BLOG_BEFORE_RELATED_SLOT`: article unit before related posts.
+
+Rules:
+
+- Missing or invalid slot ids must render no ad container.
+- Slot ids must be numeric AdSense ad unit ids; do not hard-code them into components.
+- Manual slots may not change Blog route ownership, replace content sections, or introduce sticky/overlay formats.
+- Keep `npm run test:adsense` in the default test chain so AdSense env, `ads.txt`, Blog slots, and direct renderer support remain covered.
+
 ## Inactive Prototype Components
 
 The repo currently contains `components/site/*` from a previous homepage modularization attempt. They are not the public homepage route right now.

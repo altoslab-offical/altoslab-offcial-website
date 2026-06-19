@@ -38,6 +38,11 @@ function expectedProvider() {
   return arg("expected-provider", process.env.AWS_SMOKE_EXPECTED_PROVIDER || "aws-s3");
 }
 
+function articlePathForPost(post) {
+  const prefix = LANGUAGE_PATH_PREFIX[post.language] || "";
+  return `${prefix}/blog/${encodeURIComponent(post.slug)}`;
+}
+
 function pushIssue(errors, message, context = {}) {
   errors.push({ message, ...context });
 }
@@ -193,6 +198,35 @@ async function main() {
       message: "No qualified public blog posts are currently published. Treat this as fail-closed unless Tommy explicitly approved empty public inventory.",
       surface: "blog-api"
     });
+  }
+
+  const articleCandidate = Array.isArray(blogApi?.posts)
+    ? blogApi.posts.find((post) => post?.slug && BLOG_LANGUAGES.includes(post.language))
+    : null;
+  if (articleCandidate) {
+    const path = articlePathForPost(articleCandidate);
+    const { response, text } = await fetchText(root, path, errors, { surface: "blog-article-detail", path });
+    const hasRichTextBody =
+      /<div class="rich-text">[\s\S]*?<(?:p|h2|h3|ul|ol|blockquote|div class="rich-table-wrap")\b/i.test(text) &&
+      !/<div class="rich-text"><\/div>/.test(text);
+    surfaces.blogArticleDetail = {
+      path,
+      status: response?.status || null,
+      bytes: text.length,
+      slug: articleCandidate.slug,
+      language: articleCandidate.language,
+      hasRichTextBody
+    };
+    if (!hasRichTextBody) {
+      pushIssue(errors, "Blog article detail rendered without rich-text body content", {
+        surface: "blog-article-detail",
+        path,
+        slug: articleCandidate.slug,
+        language: articleCandidate.language
+      });
+    }
+  } else if (publishedPosts && publishedPosts > 0) {
+    pushIssue(errors, "Public blog API returned posts but no article detail candidate with slug/language", { surface: "blog-api" });
   }
 
   const result = {
