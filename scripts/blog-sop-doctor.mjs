@@ -25,21 +25,31 @@ const LAUNCH_AGENT_TRIGGERS = [
   [8, 10],
   [9, 0],
   [9, 4],
-  [10, 30],
-  [12, 30],
-  [14, 30],
+  [10, 15],
+  [11, 15],
+  [12, 15],
+  [13, 15],
+  [14, 15],
   [15, 10],
+  [15, 15],
   [16, 0],
   [16, 4],
-  [18, 30],
-  [20, 30]
+  [17, 15],
+  [18, 15],
+  [19, 10],
+  [19, 15],
+  [20, 0],
+  [20, 4],
+  [20, 15],
+  [21, 15]
 ];
 const LAUNCH_AGENT_PLIST = path.join(process.env.HOME || "", "Library/LaunchAgents/com.altoslab.blog-local-worker.plist");
 const N8N_BRIDGE_PLIST = path.join(process.env.HOME || "", "Library/LaunchAgents/com.altoslab.n8n-bridge.plist");
 const N8N_BRIDGE_HEALTH_URL = "http://127.0.0.1:8797/health";
 const SLOTS = {
   morning: "09:00",
-  afternoon: "16:00"
+  afternoon: "16:00",
+  evening: "20:00"
 };
 
 function arg(name, fallback = "") {

@@ -6,33 +6,29 @@ import process from "node:process";
 import { spawn } from "node:child_process";
 import { subagentModelPolicyText } from "./blog-subagent-model-policy.mjs";
 
-const SLOT_HOURS = { morning: "09:00", afternoon: "16:00" };
+const SLOT_HOURS = { morning: "09:00", afternoon: "16:00", evening: "20:00" };
 const LANGUAGES = ["zh-Hant", "en", "ja", "ko", "id", "vi", "th", "ms", "fil"];
 const REQUIRED_CHROME_PROFILE_EMAIL = "john.wu0120@gmail.com";
 const LANGUAGE_LABEL = LANGUAGES.join(", ");
 const DEFAULT_BASE_URL = "https://altoslab-ai.cc";
-const COLUMN_SLOT_SETTING = (process.env.ALTOS_BLOG_COLUMN_SLOTS || "morning")
+const COLUMN_SLOT_SETTING = (process.env.ALTOS_BLOG_COLUMN_SLOTS || "morning,afternoon,evening")
   .split(",")
   .map((slot) => slot.trim())
   .filter(Boolean);
 const COLUMN_SLOTS = new Set(COLUMN_SLOT_SETTING.length ? COLUMN_SLOT_SETTING : ["morning"]);
 const ALL_PREP_WINDOWS = {
   morning: { hour: 8, minute: 10 },
-  afternoon: { hour: 15, minute: 10 }
+  afternoon: { hour: 15, minute: 10 },
+  evening: { hour: 19, minute: 10 }
 };
 const ALL_RELEASE_WINDOWS = {
   morning: { hour: 9, minute: 0 },
-  afternoon: { hour: 16, minute: 0 }
+  afternoon: { hour: 16, minute: 0 },
+  evening: { hour: 20, minute: 0 }
 };
 const PREP_WINDOWS = Object.fromEntries(Object.entries(ALL_PREP_WINDOWS).filter(([slot]) => COLUMN_SLOTS.has(slot)));
 const RELEASE_WINDOWS = Object.fromEntries(Object.entries(ALL_RELEASE_WINDOWS).filter(([slot]) => COLUMN_SLOTS.has(slot)));
-const MARKET_SCAN_WINDOWS = [
-  { hour: 10, minute: 30 },
-  { hour: 12, minute: 30 },
-  { hour: 14, minute: 30 },
-  { hour: 18, minute: 30 },
-  { hour: 20, minute: 30 }
-];
+const MARKET_SCAN_WINDOWS = Array.from({ length: 12 }, (_, index) => ({ hour: index + 10, minute: 15 }));
 const RELEASE_GRACE_MINUTES = 5;
 const PREP_GRACE_MINUTES = Number(process.env.ALTOS_BLOG_PREP_GRACE_MINUTES || "2");
 const MARKET_SCAN_GRACE_MINUTES = Number(process.env.ALTOS_BLOG_MARKET_SCAN_GRACE_MINUTES || "2");
@@ -647,6 +643,7 @@ Manual checks:
   node scripts/blog-scheduled-runner.mjs --prep --slot morning
   node scripts/blog-scheduled-runner.mjs --column-status --slot morning
   node scripts/blog-scheduled-runner.mjs --column-validate --slot morning
+  node scripts/blog-scheduled-runner.mjs --column-validate --slot morning --publish-after-validate --force-release
   node scripts/blog-scheduled-runner.mjs --release --slot afternoon
   node scripts/blog-scheduled-runner.mjs --market-scan
   node scripts/blog-scheduled-runner.mjs --backfill --target-posts 40
@@ -658,7 +655,9 @@ Market scan checks live public inventory for duplicate/source context only; it
 does not treat any post count as a hard stop. Qualified longform source-news
 items can keep publishing beyond the old recovery milestone.
 Release publishes only a ready prepared-candidate manifest produced after
-lane-specific evidence + validate-only + main-brain QA.
+lane-specific evidence + validate-only + main-brain QA. A missing or held
+candidate is repair-required work, not a successful skip; once repaired and
+validated, it must be published and verified before the slot is complete.
 Backfill creates an alternating market/column prompt queue only; it never
 publishes or bypasses the same release gates.
 `);
@@ -1026,7 +1025,7 @@ ${await fs.readFile(orchestratorPromptPath, "utf8").catch(() => "")}
     };
     await writeJson(manifestPath, held);
     await writeMarketIndex({ ...held, manifestPath });
-    return { ok: true, skipped: true, phase: "market-scan", reason: "no qualified source pack", runDir, manifestPath, scanner: held.pipeline.scanner, doctor: compactDoctorResult(doctor) };
+    return { ok: true, skipped: false, phase: "market-scan", status: "no_new_qualified_source", reason: "no qualified source pack", runDir, manifestPath, scanner: held.pipeline.scanner, doctor: compactDoctorResult(doctor) };
   }
   const sourcePacks = await readJson(sourcePacksPath).catch(() => []);
   const availableSequences = Array.isArray(sourcePacks)
@@ -1057,8 +1056,9 @@ ${await fs.readFile(orchestratorPromptPath, "utf8").catch(() => "")}
     await writeMarketIndex({ ...held, manifestPath });
     return {
       ok: true,
-      skipped: true,
+      skipped: false,
       phase: "market-scan",
+      status: "no_new_qualified_source",
       reason: "no qualified source pack",
       runDir,
       manifestPath,
@@ -1321,7 +1321,17 @@ ${await fs.readFile(orchestratorPromptPath, "utf8").catch(() => "")}
   };
   await writeJson(manifestPath, held);
   await writeMarketIndex({ ...held, manifestPath });
-  return { ok: true, skipped: true, phase: "market-scan", reason: "all candidates held", runDir, manifestPath, attempts, doctor: compactDoctorResult(doctor) };
+  const repairPlan = await writeQualityRepairPlan({
+    date,
+    slot,
+    lane: "market",
+    reason: "all market candidates were held after validation and auto-repair attempts",
+    issues: held.validateOnly.errors || [],
+    manifestPath,
+    articleSetPath,
+    status: held
+  });
+  return { ok: false, skipped: false, phase: "market-quality-repair-required", reason: "all candidates held", runDir, manifestPath, attempts, repairPlan, doctor: compactDoctorResult(doctor) };
 }
 
 async function runBackfillPlanner({ date }) {
@@ -1374,6 +1384,72 @@ async function runBackfillPlanner({ date }) {
     return { ok: false, phase: "backfill", code: result.code, stdout: result.stdout, stderr: result.stderr };
   }
   return { ok: true, phase: "backfill", ...payload };
+}
+
+async function writeQualityRepairPlan({ date, slot, lane = "column", reason, issues = [], status = {}, manifestPath = "", articleSetPath = "" }) {
+  const runDir = path.join(runRoot(), "quality-repair", date, `${slot}-${lane}-${taiwanStamp(currentNow())}`);
+  const planPath = path.join(runDir, "repair-plan.json");
+  const promptPath = path.join(runDir, "repair-prompt.md");
+  const normalizedIssues = issues.map((issue) => String(issue || "")).filter(Boolean);
+  const payload = {
+    schema: "altos_blog_quality_repair_plan_v1",
+    date,
+    slot,
+    lane,
+    reason,
+    issues: normalizedIssues,
+    status,
+    manifestPath,
+    articleSetPath,
+    requiredOutcome: lane === "market"
+      ? "repair_or_replace_source_translation_candidate_until_validate_publish_verify_passes"
+      : "produce_or_rewrite_candidate_until_validate_publish_verify_passes",
+    completionCannotBeClaimedFrom: ["missing_candidate", "held_candidate", "skipped", "validate_only_failed", "quality_warning"],
+    nextCommands: lane === "market"
+      ? [
+          "node scripts/blog-scheduled-runner.mjs --market-scan --force",
+          articleSetPath && manifestPath
+            ? `node scripts/blog-local-worker.mjs --article-set "${articleSetPath}" --slot ${slot} --publish --manifest "${manifestPath}" --reuse-validated-manifest --approve-design-qa`
+            : "",
+          manifestPath ? `node scripts/verify-blog-release.mjs --manifest "${manifestPath}" --admin-readback` : ""
+        ].filter(Boolean)
+      : [
+          `node scripts/blog-scheduled-runner.mjs --prep --date ${date} --slot ${slot} --force`,
+          articleSetPath && manifestPath
+            ? `node scripts/blog-local-worker.mjs --article-set "${articleSetPath}" --slot ${slot} --validate-only --manifest "${manifestPath}" --approve-design-qa`
+            : "",
+          articleSetPath && manifestPath
+            ? `node scripts/blog-local-worker.mjs --article-set "${articleSetPath}" --slot ${slot} --publish --manifest "${manifestPath}" --reuse-validated-manifest --approve-design-qa`
+            : "",
+          manifestPath ? `node scripts/verify-blog-release.mjs --manifest "${manifestPath}" --admin-readback` : ""
+        ].filter(Boolean),
+    createdAt: new Date().toISOString()
+  };
+  await writeJson(planPath, payload);
+  await fs.writeFile(promptPath, `# ALTOS LAB Blog Quality Repair
+
+Date: ${date}
+Slot: ${slot}
+Lane: ${lane}
+Reason: ${reason}
+
+This is not a skip. Hermes must repair, regenerate, or replace the candidate until the slot can pass validate-only. Once it passes, Hermes must publish it through the local worker and verify public readback; validated-but-unpublished is still incomplete.
+
+## Issues
+
+${normalizedIssues.map((issue) => `- ${issue}`).join("\n") || "- candidate missing or not yet produced"}
+
+## Files
+
+- Manifest: ${manifestPath || "missing"}
+- Article set: ${articleSetPath || "missing"}
+
+## Required Outcome
+
+${payload.requiredOutcome}
+`, "utf8");
+  await appendLog(globalScheduleLogPath(), JSON.stringify({ phase: "quality-repair-required", date, slot, lane, reason, planPath, promptPath, issues: normalizedIssues }));
+  return { planPath, promptPath, ...payload };
 }
 
 function chromeProfileEmail(evidence) {
@@ -1446,12 +1522,30 @@ function releaseWindowIssue({ date, slot }) {
 async function release({ date, slot }) {
   const indexPath = await resolveCandidateIndexPath({ date, slot, lane: "column" });
   if (!(await exists(indexPath))) {
-    return { ok: false, skipped: true, phase: "release", reason: "missing prepared candidate", indexPath };
+    const repairPlan = await writeQualityRepairPlan({
+      date,
+      slot,
+      lane: "column",
+      reason: "missing prepared candidate at release time",
+      issues: ["candidate_generation_required"],
+      manifestPath: indexPath,
+      status: { indexPath }
+    });
+    return { ok: false, skipped: false, phase: "column-quality-repair-required", reason: "missing prepared candidate", indexPath, repairPlan };
   }
   const index = await readJson(indexPath);
   const manifestPath = index.manifestPath || indexPath;
   if (!(await exists(manifestPath))) {
-    return { ok: false, skipped: true, phase: "release", reason: "prepared candidate manifest file missing", manifestPath };
+    const repairPlan = await writeQualityRepairPlan({
+      date,
+      slot,
+      lane: "column",
+      reason: "prepared candidate manifest file missing at release time",
+      issues: ["manifest_generation_required"],
+      manifestPath,
+      status: { indexPath, manifestPath }
+    });
+    return { ok: false, skipped: false, phase: "column-quality-repair-required", reason: "prepared candidate manifest file missing", manifestPath, repairPlan };
   }
   const manifest = await readJson(manifestPath);
   const articleSetPath = manifest.articleSetPath ? path.resolve(manifest.articleSetPath) : "";
@@ -1503,7 +1597,17 @@ async function release({ date, slot }) {
   }
   if (issues.length) {
     await appendLog(globalScheduleLogPath(), JSON.stringify({ phase: "release-held", date, slot, manifestPath, issues }));
-    return { ok: false, skipped: true, phase: "release", reason: "release gate held", issues, manifestPath };
+    const repairPlan = await writeQualityRepairPlan({
+      date,
+      slot,
+      lane: "column",
+      reason: "release gate held; repair until valid, then publish and verify",
+      issues,
+      manifestPath,
+      articleSetPath: articleSetPath || manifest.articleSetPath || "",
+      status: manifest
+    });
+    return { ok: false, skipped: false, phase: "column-quality-repair-required", reason: "release gate held", issues, manifestPath, repairPlan };
   }
 
   const { doctor, repair } = await runDoctorWithProductionRepair({ mode: "release", date, slot, phase: "release-doctor" });
@@ -1614,7 +1718,17 @@ async function columnStatus({ date, slot }) {
 async function validateColumn({ date, slot }) {
   const status = await columnStatus({ date, slot });
   if (status.skipped || !status.manifestPath) {
-    return { ok: false, skipped: true, phase: "column-validate", reason: status.reason || "missing prepared candidate", status };
+    const repairPlan = await writeQualityRepairPlan({
+      date,
+      slot,
+      lane: "column",
+      reason: status.reason || "missing prepared candidate",
+      issues: ["candidate_generation_required"],
+      manifestPath: status.manifestPath || status.indexPath || "",
+      articleSetPath: status.articleSetPath || "",
+      status
+    });
+    return { ok: false, skipped: false, phase: "column-quality-repair-required", reason: status.reason || "missing prepared candidate", status, repairPlan };
   }
   if (status.status === "released") {
     return {
@@ -1628,13 +1742,17 @@ async function validateColumn({ date, slot }) {
     };
   }
   if (!status.articleSetExists) {
-    return {
-      ok: false,
-      skipped: true,
-      phase: "column-validate",
+    const repairPlan = await writeQualityRepairPlan({
+      date,
+      slot,
+      lane: "column",
       reason: "article-set is missing; Gemini/GPT browser production has not written the candidate output",
+      issues: ["article_set_generation_required"],
+      manifestPath: status.manifestPath,
+      articleSetPath: status.articleSetPath || "",
       status
-    };
+    });
+    return { ok: false, skipped: false, phase: "column-quality-repair-required", reason: "article-set is missing; Gemini/GPT browser production has not written the candidate output", status, repairPlan };
   }
   const result = await runCommand(process.execPath, [
     "scripts/blog-local-worker.mjs",
@@ -1656,6 +1774,48 @@ async function validateColumn({ date, slot }) {
     code: result.code,
     status: manifest?.status || "unknown"
   }));
+  if (result.code !== 0 || manifest?.status !== "ready") {
+    const issues = [
+      ...(manifest?.validateOnly?.errors || []),
+      ...(manifest?.validateOnly?.warnings || []),
+      result.stderr || result.stdout || "validate-only failed"
+    ].map((issue) => String(issue || "")).filter(Boolean);
+    const repairPlan = await writeQualityRepairPlan({
+      date,
+      slot,
+      lane: "column",
+      reason: "validate-only held; repair until valid, then publish and verify",
+      issues,
+      manifestPath: status.manifestPath,
+      articleSetPath: status.articleSetPath,
+      status: manifest || status
+    });
+    return {
+      ok: false,
+      skipped: false,
+      phase: "column-quality-repair-required",
+      code: result.code,
+      status: manifest?.status || "unknown",
+      manifestPath: status.manifestPath,
+      articleSetPath: status.articleSetPath,
+      repairPlan,
+      stdout: result.stdout,
+      stderr: result.stderr
+    };
+  }
+  if (hasFlag("publish-after-validate") || process.env.ALTOS_BLOG_PUBLISH_AFTER_VALIDATE === "true") {
+    const publish = await release({ date, slot });
+    return {
+      ...publish,
+      phase: publish.ok ? "column-validate-publish" : publish.phase,
+      validateOnly: {
+        code: result.code,
+        status: manifest?.status || "ready",
+        manifestPath: status.manifestPath,
+        articleSetPath: status.articleSetPath
+      }
+    };
+  }
   return {
     ok: result.code === 0,
     skipped: false,
@@ -1698,7 +1858,7 @@ async function main() {
   }
   if (!mode) throw new Error("Use --scheduled, --prep, --column-status, --column-validate, --release, --market-scan or --backfill");
   const slot = arg("slot") || scheduledSlot || slotFromClock(mode, now);
-  if (mode !== "market-scan" && !SLOT_HOURS[slot]) throw new Error("--slot must be morning or afternoon");
+  if (mode !== "market-scan" && !SLOT_HOURS[slot]) throw new Error("--slot must be morning, afternoon or evening");
 
   const lock = await acquireRunLock({ mode, date, slot });
   if (!lock.ok) {

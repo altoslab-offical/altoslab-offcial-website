@@ -176,7 +176,7 @@ assert(releaseRoute.includes("releaseCoverContractIssues"), "release-set route b
 assert(releaseRoute.includes("column/feature posts require at least two in-article images"), "release-set route blocks columns/features without required in-article images");
 assert(releaseRoute.includes("contentImages URLs do not match release payload"), "release-set route verifies signed content image URLs during publish");
 assert(releaseRoute.includes("applyManifestReleaseReview"), "release-set route applies the signed manifest release decision directly");
-assert(!releaseRoute.includes("reviewBlogPairForAutoPublish"), "release-set route does not rerun full article QA during publish");
+assert(releaseRoute.includes("reviewBlogPairForAutoPublish"), "release-set route reruns full article QA during publish");
 assert(!releaseRoute.includes("reviewBlogImagesForRelease"), "release-set route does not rerun remote image QA during publish");
 assert(mediaRoute.includes("verifyBlogIngestRequest"), "media upload route is protected by the same signed request contract");
 assert(mediaRoute.includes("@vercel/blob"), "media upload route stores production images in Vercel Blob");
@@ -230,15 +230,8 @@ assert(scheduledRunner.includes("PREP_WINDOWS") && scheduledRunner.includes("REL
 assert(scheduledRunner.includes("MARKET_SCAN_WINDOWS"), "scheduled runner has a separate market-news scan cadence");
 assert(scheduledRunner.includes("--market-scan"), "scheduled runner can create market-news fast-lane scan prompts");
 assert(
-  scheduledRunner.includes("{ hour: 10, minute: 30 }") &&
-    scheduledRunner.includes("{ hour: 12, minute: 30 }") &&
-    scheduledRunner.includes("{ hour: 14, minute: 30 }"),
-  "scheduled runner includes all daytime market-scan window times"
-);
-assert(
-  scheduledRunner.includes("{ hour: 18, minute: 30 }") &&
-    scheduledRunner.includes("{ hour: 20, minute: 30 }"),
-  "scheduled runner includes all late market-scan window times"
+  scheduledRunner.includes("Array.from({ length: 12 }") && scheduledRunner.includes("hour: index + 10, minute: 15"),
+  "scheduled runner scans market fastlane hourly during the active website window"
 );
 assert(
   scheduledRunner.includes("skipped remote source reachability probe in bounded Worker validate path"),
@@ -249,7 +242,10 @@ assert(scheduledRunner.includes("releaseGateIssues"), "scheduled release checks 
 assert(scheduledRunner.includes("releaseWindowIssue"), "scheduled release refuses to publish outside the configured release window");
 assert(scheduledRunner.includes("RELEASE_GRACE_MINUTES"), "scheduled release allows a small launchd delay but no early or stale publish");
 assert(scheduledRunner.includes("force-release"), "scheduled release has an explicit manual override for emergency operation");
-assert(scheduledRunner.includes("missing prepared candidate"), "scheduled release skips safely when no candidate exists");
+assert(
+  scheduledRunner.includes("column-quality-repair-required") && scheduledRunner.includes("quality-repair-required") && scheduledRunner.includes("publish-after-validate"),
+  "scheduled release turns missing or held candidates into repair-required work and publishes after validation"
+);
 assert(scheduledRunner.includes("articleSetPath file is missing"), "scheduled release checks that the ready article set still exists");
 assert(scheduledRunner.includes("scripts/blog-sop-doctor.mjs"), "scheduled prep/release runs the SOP doctor before continuing");
 assert(scheduledRunner.includes("compactDoctorResult") && scheduledRunner.includes("scheduled-runner.log"), "scheduled runner records compact doctor evidence in output and logs");
@@ -284,9 +280,9 @@ assert(marketSourceScanner.includes("liveDuplicateState"), "market source scanne
 assert(!marketSourceScanner.includes("current AI coverage page for related reporting"), "market source scanner does not publish generic source index pages as article sources");
 assert(sopDoctor.includes("BLOG_DISABLE_DEEPSEEK_CRON must be true"), "SOP doctor requires the legacy DeepSeek cron to stay disabled");
 assert(sopDoctor.includes("[8, 10]") && sopDoctor.includes("[9, 0]") && sopDoctor.includes("[9, 4]"), "SOP doctor enforces prep/release launch windows in its trigger checks");
-assert(sopDoctor.includes("[10, 30]") && sopDoctor.includes("[12, 30]") && sopDoctor.includes("[14, 30]"), "SOP doctor enforces all market-scan launch windows");
+assert(sopDoctor.includes("[10, 15]") && sopDoctor.includes("[11, 15]") && sopDoctor.includes("[14, 15]"), "SOP doctor enforces hourly market-scan launch windows");
 assert(sopDoctor.includes("[15, 10]") && sopDoctor.includes("[16, 0]") && sopDoctor.includes("[16, 4]"), "SOP doctor enforces late-day prep/release launch windows");
-assert(sopDoctor.includes("[18, 30]") && sopDoctor.includes("[20, 30]"), "SOP doctor enforces late market-scan launch windows");
+assert(sopDoctor.includes("[19, 10]") && sopDoctor.includes("[20, 0]") && sopDoctor.includes("[21, 15]"), "SOP doctor enforces evening release and late market-scan launch windows");
 assert(sopDoctor.includes("production cmsStorage.provider must be cloudflare-d1, cloudflare-kv, gcs or aws-s3"), "SOP doctor verifies a durable production CMS store");
 assert(cmsStorage.includes('provider: "cloudflare-d1"') || cmsStorage.includes("provider: \"cloudflare-d1\""), "CMS storage can use Cloudflare D1 as the primary durable store");
 assert(cmsStorage.includes('provider: "aws-s3"') || cmsStorage.includes("provider: \"aws-s3\""), "CMS storage can use AWS S3 as the migration durable store");

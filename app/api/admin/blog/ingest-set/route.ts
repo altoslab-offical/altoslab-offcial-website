@@ -18,7 +18,7 @@ import type { BlogGenerationSlot, BlogPost } from "@/lib/types";
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
-type IngestSlot = Extract<BlogGenerationSlot, "morning" | "afternoon">;
+type IngestSlot = Extract<BlogGenerationSlot, "morning" | "afternoon" | "evening">;
 type PublishMode = "publish-if-valid" | "draft";
 
 type BlogIngestRequest = {
@@ -41,7 +41,8 @@ type BlogIngestRequest = {
 
 const SLOT_CONFIG: Record<IngestSlot, { hour: string }> = {
   morning: { hour: "09:00" },
-  afternoon: { hour: "16:00" }
+  afternoon: { hour: "16:00" },
+  evening: { hour: "20:00" }
 };
 
 function scheduledFor(date: string, slot: IngestSlot) {
@@ -53,7 +54,7 @@ function json(status: number, payload: Record<string, unknown>) {
 }
 
 function isIngestSlot(value: unknown): value is IngestSlot {
-  return value === "morning" || value === "afternoon";
+  return value === "morning" || value === "afternoon" || value === "evening";
 }
 
 function isPublishMode(value: unknown): value is PublishMode {
@@ -364,7 +365,7 @@ export async function POST(request: Request) {
   const ingestRunId = payload.ingestRunId || createId("ingest");
   const inputIssues: string[] = [];
 
-  if (!slot) inputIssues.push("slot must be morning or afternoon");
+  if (!slot) inputIssues.push("slot must be morning, afternoon or evening");
   if (!Array.isArray(payload.posts)) inputIssues.push("posts must be an array");
   if (payload.generation?.provider !== "gemini-chatgpt" && payload.generation?.provider !== "source-translation") {
     inputIssues.push("generation.provider must be gemini-chatgpt or source-translation");

@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { normalizeBlogAuthor, publicEditorialReviewNote } from "@/lib/blog-authors";
 import { verifyBlogIngestRequest } from "@/lib/blog-ingest-auth";
 import { multilingualCoverConsistencyIssues } from "@/lib/blog-image-quality";
+import { reviewBlogPairForAutoPublish } from "@/lib/blog-quality";
 import { BLOG_LANGUAGES, defaultQualityChecks, taiwanDate } from "@/lib/blog-utils";
 import { createId, mutateRawCmsData, normalizeBlogPostInput, nowIso, publishValidationForBlogPost } from "@/lib/cms";
 import { CmsLockError, withCmsStorageLock } from "@/lib/cms-storage";
@@ -13,7 +14,7 @@ export const runtime = "nodejs";
 
 const MAX_RELEASE_BODY_BYTES = 850_000;
 
-type IngestSlot = Extract<BlogGenerationSlot, "morning" | "afternoon">;
+type IngestSlot = Extract<BlogGenerationSlot, "morning" | "afternoon" | "evening">;
 
 type ReleaseSummary = {
   approved?: boolean;
@@ -57,7 +58,8 @@ type BlogReleaseRequest = {
 
 const SLOT_CONFIG: Record<IngestSlot, { hour: string }> = {
   morning: { hour: "09:00" },
-  afternoon: { hour: "16:00" }
+  afternoon: { hour: "16:00" },
+  evening: { hour: "20:00" }
 };
 
 function scheduledFor(date: string, slot: IngestSlot) {
@@ -69,7 +71,7 @@ function json(status: number, payload: Record<string, unknown>) {
 }
 
 function isIngestSlot(value: unknown): value is IngestSlot {
-  return value === "morning" || value === "afternoon";
+  return value === "morning" || value === "afternoon" || value === "evening";
 }
 
 function parsePayload(body: string): BlogReleaseRequest {
@@ -494,7 +496,7 @@ export async function POST(request: Request) {
   const ingestRunId = payload.ingestRunId || createId("ingest");
   const inputIssues: string[] = [];
 
-  if (!slot) inputIssues.push("slot must be morning or afternoon");
+  if (!slot) inputIssues.push("slot must be morning, afternoon or evening");
   if (payload.publishMode !== "publish-if-valid") inputIssues.push("publishMode must be publish-if-valid");
   if (!Array.isArray(payload.posts)) inputIssues.push("posts must be an array");
   if (Array.isArray(payload.posts) && payload.posts.length !== BLOG_LANGUAGES.length) {
@@ -541,6 +543,21 @@ export async function POST(request: Request) {
     contentSha256: payload.qualityManifest?.contentSha256
   };
   const preliminaryCanPublish = qualitySummary.approved && imageQualitySummary.approved;
+  const intrinsicReview = await reviewBlogPairForAutoPublish(normalizedPosts, { verifySourceLinks: false });
+  if (!intrinsicReview.approved) {
+    return json(400, {
+      ok: false,
+      ingestRunId,
+      errors: intrinsicReview.issues,
+      warnings: intrinsicReview.warnings,
+      qualitySummary: {
+        approved: intrinsicReview.approved,
+        score: intrinsicReview.score,
+        threshold: intrinsicReview.threshold
+      },
+      event: "blog_release_held_intrinsic_quality"
+    });
+  }
   const preliminaryPosts = normalizedPosts.map((post) => applyManifestReleaseReview(post, payload, preliminaryCanPublish));
   const publishValidationErrors = preliminaryCanPublish ? validationSummary(preliminaryPosts) : [];
   const canPublish = preliminaryCanPublish && publishValidationErrors.length === 0;
