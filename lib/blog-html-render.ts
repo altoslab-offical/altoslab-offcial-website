@@ -151,8 +151,10 @@ const SHELL_CSS = `
   .inline-figure { margin:26px 0; border:1px solid var(--line); border-radius:8px; overflow:hidden; background:var(--panel); }
   .inline-figure img { width:100%; aspect-ratio:16/9; object-fit:cover; }
   .inline-figure figcaption { padding:10px 12px; color:var(--muted); font-size:14px; }
-  .blog-adsense-slot { box-sizing:border-box; width:min(760px,100%); min-height:96px; display:block; margin:28px auto; overflow:hidden; }
-  .blog-adsense-slot.is-index-feed { width:100%; margin:0 0 24px; }
+  .blog-adsense-slot { box-sizing:border-box; width:min(760px,100%); min-height:0; display:block; margin:0 auto; overflow:hidden; }
+  .blog-adsense-slot.is-index-feed { width:100%; margin:0; }
+  .blog-adsense-slot:has(ins.adsbygoogle[data-ad-status="filled"]) { min-height:96px; margin:24px auto; }
+  .blog-adsense-slot.is-index-feed:has(ins.adsbygoogle[data-ad-status="filled"]) { margin:0 0 24px; }
   .blog-adsense-slot ins.adsbygoogle[data-ad-status="unfilled"] { display:none!important; }
   .sources { border-top:1px solid var(--line); margin-top:34px; padding-top:22px; color:var(--muted); }
   .sources a { color:var(--text); font-weight:800; }

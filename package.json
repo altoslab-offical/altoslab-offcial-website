@@ -37,6 +37,7 @@
     "blog:backfill": "node scripts/blog-backfill-planner.mjs",
     "blog:market-sources": "node scripts/blog-market-source-scanner.mjs",
     "blog:media-style-corpus": "node scripts/blog-media-style-corpus.mjs",
+    "blog:nine-language-style-corpus": "node scripts/blog-nine-language-style-corpus.mjs",
     "blog:doctor": "node scripts/blog-sop-doctor.mjs",
     "blog:verify-release": "node scripts/verify-blog-release.mjs",
     "blog:install-agent": "scripts/install-blog-launch-agent.sh",

@@ -29,6 +29,32 @@ export function RichText({ text }: { text: string }) {
     });
   }
 
+  function splitOverlongHeading(value: string) {
+    const trimmed = value.trim();
+    const knownPrefixes = [
+      "讀者今天要先判斷什麼",
+      "常見問題",
+      "下一步看哪裡",
+      "What to watch next",
+      "FAQ"
+    ];
+    const matchedPrefix = knownPrefixes.find((prefix) => trimmed.startsWith(prefix) && trimmed.length > prefix.length + 12);
+    if (matchedPrefix) {
+      return {
+        heading: matchedPrefix,
+        remainder: trimmed.slice(matchedPrefix.length).trim()
+      };
+    }
+
+    if (trimmed.length < 86) return { heading: trimmed, remainder: "" };
+    const splitMatch = trimmed.match(/^(.{10,34}?[：:。?？])(.{20,})$/u);
+    if (!splitMatch) return { heading: trimmed, remainder: "" };
+    return {
+      heading: splitMatch[1].trim(),
+      remainder: splitMatch[2].trim()
+    };
+  }
+
   function flushBullets() {
     if (!bullets.length) return;
     elements.push(
@@ -150,6 +176,9 @@ export function RichText({ text }: { text: string }) {
       return;
     }
     if (!line) {
+      const nextLine = lines.slice(index + 1).find(Boolean) || "";
+      if (orderedItems.length && /^\d+\.\s+/.test(nextLine)) return;
+      if (bullets.length && /^(?:-|\*)\s+/.test(nextLine)) return;
       flushLists();
       return;
     }
@@ -161,7 +190,9 @@ export function RichText({ text }: { text: string }) {
     }
     if (line.startsWith("## ")) {
       flushLists();
-      elements.push(<h2 key={index}>{inlineMarkdown(line.replace(/^## /, ""))}</h2>);
+      const { heading, remainder } = splitOverlongHeading(line.replace(/^## /, ""));
+      elements.push(<h2 key={index}>{inlineMarkdown(heading)}</h2>);
+      if (remainder) elements.push(<p key={`${index}-heading-remainder`}>{inlineMarkdown(remainder)}</p>);
       return;
     }
     if (/^>\s+/.test(line)) {

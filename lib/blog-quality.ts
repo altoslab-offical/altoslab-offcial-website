@@ -1219,6 +1219,12 @@ function reviewReadability(post: BlogPost): ReviewResult {
     if (isMarketNews) warnings.push(message);
     else issues.push(message);
   }
+  if (h2Titles.some((title) => [...title].length > 92 || /。|；|:|：/.test(title) && [...title].length > 64)) {
+    issues.push("H2 headings must be short section labels; body paragraphs must not be merged into headings");
+  }
+  if (/^(.{2,28})\s+(報導|reports|が報じ|보도|melaporkan|công bố|เผยแพร่|naglathala)[\s\S]{0,180}\1\s+(報導|reports|が報じ|보도|melaporkan|công bố|เผยแพร่|naglathala)/i.test(post.body)) {
+    issues.push("article repeats the source-attribution template; rewrite into a source-bounded brief with a distinct editorial angle");
+  }
   if (post.body.includes("**") && !/\*\*[^*\n]{4,80}\*\*/.test(post.body)) {
     warnings.push("bold emphasis should highlight a short judgment, vivid phrase or reader tension, not decorative formatting");
   }

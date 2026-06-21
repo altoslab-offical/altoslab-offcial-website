@@ -1,0 +1,332 @@
+{
+  "generatedFrom": "九語言 AI 網站與 SEO 寫作深度研究報告.pdf",
+  "generatedAt": "2026-06-21T14:00:00.000Z",
+  "copyrightPolicy": "Store URLs, metadata, outline, structural signals, and short excerpts only. Do not store full article text.",
+  "targetPerSite": 50,
+  "sites": [
+    {
+      "id": "ithome-tw-ai",
+      "name": "iThome AI",
+      "language": "zh-Hant",
+      "country": "TW",
+      "audience": "enterprise IT, developers, technology decision makers",
+      "cadence": "6-12h",
+      "hubUrls": ["https://www.ithome.com.tw/tags/AI", "https://www.ithome.com.tw/news"]
+    },
+    {
+      "id": "inside-tw-ai",
+      "name": "INSIDE AI",
+      "language": "zh-Hant",
+      "country": "TW",
+      "audience": "product, business, startup, technology readers",
+      "cadence": "6-12h",
+      "hubUrls": ["https://www.inside.com.tw/category/ai", "https://www.inside.com.tw/feature/ai-agent-new-wave"]
+    },
+    {
+      "id": "techorange-tw-ai",
+      "name": "TechOrange AI",
+      "language": "zh-Hant",
+      "country": "TW",
+      "audience": "business, innovation, product and AI transformation readers",
+      "cadence": "6-12h",
+      "hubUrls": ["https://techorange.com/category/ai/", "https://techorange.com/latest/"]
+    },
+    {
+      "id": "google-cloud-learn-zh-tw",
+      "name": "Google Cloud Learn zh-TW",
+      "language": "zh-Hant",
+      "country": "TW",
+      "audience": "developers, IT teams, enterprise education readers",
+      "cadence": "monthly",
+      "hubUrls": ["https://cloud.google.com/learn/what-is-artificial-intelligence?hl=zh-TW"]
+    },
+    {
+      "id": "jiqizhixin-cn",
+      "name": "机器之心",
+      "language": "zh-CN",
+      "country": "CN",
+      "audience": "AI industry, researchers, developers",
+      "cadence": "6-12h",
+      "hubUrls": ["https://www.jiqizhixin.com/", "https://www.jiqizhixin.com/columns/aiplatform", "https://www.jiqizhixin.com/topics"]
+    },
+    {
+      "id": "qbitai-cn",
+      "name": "量子位",
+      "language": "zh-CN",
+      "country": "CN",
+      "audience": "AI industry, startup, engineering and frequent news readers",
+      "cadence": "6-12h",
+      "hubUrls": ["https://www.qbitai.com/", "https://www.qbitai.com/category/zhiku", "https://www.qbitai.com/tag/ai"]
+    },
+    {
+      "id": "baidu-cloud-dev-cn",
+      "name": "百度智能云开发者社区",
+      "language": "zh-CN",
+      "country": "CN",
+      "audience": "developers and enterprise technical teams",
+      "cadence": "weekly",
+      "hubUrls": ["https://cloud.baidu.com/article/5283787", "https://cloud.baidu.com/article/4687188", "https://cloud.baidu.com/article/3844061"]
+    },
+    {
+      "id": "aliyun-dev-cn",
+      "name": "阿里云开发者社区",
+      "language": "zh-CN",
+      "country": "CN",
+      "audience": "developers, architects, enterprise implementation teams",
+      "cadence": "weekly",
+      "hubUrls": ["https://developer.aliyun.com/article/1684778", "https://developer.aliyun.com/article/1706238", "https://developer.aliyun.com/article/1689414"]
+    },
+    {
+      "id": "openai-index",
+      "name": "OpenAI Index",
+      "language": "en",
+      "country": "US",
+      "audience": "researchers, developers, enterprise AI adopters",
+      "cadence": "6-12h",
+      "hubUrls": ["https://openai.com/index/", "https://openai.com/news/rss.xml"]
+    },
+    {
+      "id": "anthropic-news",
+      "name": "Anthropic News",
+      "language": "en",
+      "country": "US",
+      "audience": "developers, enterprise AI teams, policy and safety readers",
+      "cadence": "6-12h",
+      "hubUrls": ["https://www.anthropic.com/news", "https://www.anthropic.com/news/rss.xml"]
+    },
+    {
+      "id": "google-deepmind-blog",
+      "name": "Google DeepMind Blog",
+      "language": "en",
+      "country": "US",
+      "audience": "researchers, technical media, science application readers",
+      "cadence": "6-12h",
+      "hubUrls": ["https://deepmind.google/blog/", "https://deepmind.google/discover/blog/rss.xml"]
+    },
+    {
+      "id": "huggingface-blog",
+      "name": "Hugging Face Blog",
+      "language": "en",
+      "country": "US",
+      "audience": "open-source developers and ML engineers",
+      "cadence": "weekly",
+      "hubUrls": ["https://huggingface.co/blog"]
+    },
+    {
+      "id": "ainow-jp",
+      "name": "AINOW",
+      "language": "ja",
+      "country": "JP",
+      "audience": "Japanese AI and DX media readers",
+      "cadence": "6-12h",
+      "hubUrls": ["https://ainow.ai/", "https://ainow.ai/tag/ai/"]
+    },
+    {
+      "id": "ai-scholar-jp",
+      "name": "AI-SCHOLAR",
+      "language": "ja",
+      "country": "JP",
+      "audience": "research-oriented and paper explanation readers",
+      "cadence": "weekly",
+      "hubUrls": ["https://ai-scholar.tech/", "https://ai-scholar.tech/articles"]
+    },
+    {
+      "id": "preferred-networks-tech",
+      "name": "Preferred Networks Tech Blog",
+      "language": "ja",
+      "country": "JP",
+      "audience": "research engineers and LLM developers",
+      "cadence": "weekly",
+      "hubUrls": ["https://tech.preferred.jp/ja/blog/", "https://tech.preferred.jp/ja/tag/llm/"]
+    },
+    {
+      "id": "google-cloud-japan-blog",
+      "name": "Google Cloud Japan Blog",
+      "language": "ja",
+      "country": "JP",
+      "audience": "enterprise IT, developers, case-study readers",
+      "cadence": "weekly",
+      "hubUrls": ["https://cloud.google.com/blog/ja", "https://cloud.google.com/blog/ja/products/ai-machine-learning"]
+    },
+    {
+      "id": "naver-d2",
+      "name": "NAVER D2",
+      "language": "ko",
+      "country": "KR",
+      "audience": "developers and engineering teams",
+      "cadence": "weekly",
+      "hubUrls": ["https://d2.naver.com/helloworld", "https://d2.naver.com/helloworld/7321313"]
+    },
+    {
+      "id": "upstage-blog-ko",
+      "name": "Upstage Blog",
+      "language": "ko",
+      "country": "KR",
+      "audience": "AI adopters and model developers",
+      "cadence": "weekly",
+      "hubUrls": ["https://www.upstage.ai/blog/ko"]
+    },
+    {
+      "id": "lg-ai-research",
+      "name": "LG AI Research",
+      "language": "ko",
+      "country": "KR",
+      "audience": "enterprise research and science application readers",
+      "cadence": "weekly",
+      "hubUrls": ["https://www.lgresearch.ai/", "https://www.lgresearch.ai/blog"]
+    },
+    {
+      "id": "kakao-tech",
+      "name": "kakao tech",
+      "language": "ko",
+      "country": "KR",
+      "audience": "platform, anti-abuse, and LLM engineering teams",
+      "cadence": "weekly",
+      "hubUrls": ["https://tech.kakao.com/blog", "https://tech.kakao.com/posts/625"]
+    },
+    {
+      "id": "heise-ai",
+      "name": "heise AI",
+      "language": "de",
+      "country": "DE",
+      "audience": "IT professionals and enterprise technical managers",
+      "cadence": "weekly",
+      "hubUrls": ["https://business-services.heise.de/software/machine-learning-ki", "https://www.heise.de/tipps-tricks/Was-ist-der-Unterschied-zwischen-KI-und-AI-9060211.html"]
+    },
+    {
+      "id": "t3n-ai",
+      "name": "t3n AI",
+      "language": "de",
+      "country": "DE",
+      "audience": "digital business, product, technology trend readers",
+      "cadence": "weekly",
+      "hubUrls": ["https://t3n.de/tag/kuenstliche-intelligenz/"]
+    },
+    {
+      "id": "fraunhofer-iais",
+      "name": "Fraunhofer IAIS",
+      "language": "de",
+      "country": "DE",
+      "audience": "research, enterprise innovation, trustworthy AI teams",
+      "cadence": "monthly",
+      "hubUrls": ["https://www.iais.fraunhofer.de/de/publikationen/studien.html", "https://www.iais.fraunhofer.de/de/kuenstliche-intelligenz.html"]
+    },
+    {
+      "id": "appliedai-de",
+      "name": "appliedAI",
+      "language": "de",
+      "country": "DE",
+      "audience": "enterprise AI, EU governance and production-first teams",
+      "cadence": "monthly",
+      "hubUrls": ["https://www.appliedai.de/en/"]
+    },
+    {
+      "id": "actuia-fr",
+      "name": "ActuIA",
+      "language": "fr",
+      "country": "FR",
+      "audience": "French AI news and industry readers",
+      "cadence": "6-12h",
+      "hubUrls": ["https://www.actuia.com/", "https://www.actuia.com/thematique/recherche/", "https://www.actuia.com/en/topic/ia-en-entreprise/"]
+    },
+    {
+      "id": "lebigdata-fr",
+      "name": "LEBIGDATA.FR",
+      "language": "fr",
+      "country": "FR",
+      "audience": "data, AI beginner/intermediate and enterprise content readers",
+      "cadence": "weekly",
+      "hubUrls": ["https://www.lebigdata.fr/", "https://www.lebigdata.fr/intelligence-artificielle-et-big-data"]
+    },
+    {
+      "id": "inria-fr",
+      "name": "Inria",
+      "language": "fr",
+      "country": "FR",
+      "audience": "research, policy, industry partnership readers",
+      "cadence": "monthly",
+      "hubUrls": ["https://www.inria.fr/fr/intelligence-artificielle", "https://www.inria.fr/fr/actualites-recherche-savoir-numerique"]
+    },
+    {
+      "id": "mistral-ai-fr",
+      "name": "Mistral AI",
+      "language": "fr",
+      "country": "FR",
+      "audience": "developers, enterprise AI and French AI ecosystem readers",
+      "cadence": "6-12h",
+      "hubUrls": ["https://mistral.ai/fr/", "https://mistral.ai/news/"]
+    },
+    {
+      "id": "planeta-chatbot",
+      "name": "Planeta Chatbot",
+      "language": "es",
+      "country": "ES",
+      "audience": "conversational AI, customer service and chatbot builders",
+      "cadence": "weekly",
+      "hubUrls": ["https://planetachatbot.com/", "https://planetachatbot.com/category/tutoriales-chatbots/"]
+    },
+    {
+      "id": "bbva-ai-factory",
+      "name": "BBVA AI Factory",
+      "language": "es",
+      "country": "ES",
+      "audience": "financial AI, product data and data science teams",
+      "cadence": "weekly",
+      "hubUrls": ["https://www.bbvaaifactory.com/es/", "https://www.bbvaaifactory.com/es/blog/"]
+    },
+    {
+      "id": "xataka-ai",
+      "name": "Xataka AI",
+      "language": "es",
+      "country": "ES",
+      "audience": "mainstream technology and business tech readers",
+      "cadence": "6-12h",
+      "hubUrls": ["https://www.xataka.com/tag/inteligencia-artificial", "https://www.xataka.com/tag/inteligencia-artificial-y-trabajo"]
+    },
+    {
+      "id": "google-cloud-learn-es",
+      "name": "Google Cloud Learn es-419",
+      "language": "es",
+      "country": "LATAM",
+      "audience": "developers and enterprise education readers",
+      "cadence": "monthly",
+      "hubUrls": ["https://cloud.google.com/learn/what-is-artificial-intelligence?hl=es-419"]
+    },
+    {
+      "id": "alura-ia",
+      "name": "Alura IA",
+      "language": "pt-BR",
+      "country": "BR",
+      "audience": "developers, learners and digital professionals",
+      "cadence": "weekly",
+      "hubUrls": ["https://www.alura.com.br/artigos/inteligencia-artificial", "https://www.alura.com.br/artigos/agentes-de-ia", "https://www.alura.com.br/artigos/como-usar-ia-sem-saber-programar"]
+    },
+    {
+      "id": "totvs-blog-ai",
+      "name": "TOTVS Blog AI",
+      "language": "pt-BR",
+      "country": "BR",
+      "audience": "enterprise IT, managers and process automation readers",
+      "cadence": "weekly",
+      "hubUrls": ["https://www.totvs.com/blog/inovacoes/guia-de-inteligencia-artificial/", "https://www.totvs.com/blog/inovacoes/o-que-e-inteligencia-artificial/", "https://www.totvs.com/blog/inovacoes/agentes-de-ia/"]
+    },
+    {
+      "id": "startse-ai",
+      "name": "StartSe AI",
+      "language": "pt-BR",
+      "country": "BR",
+      "audience": "business leaders, founders and AI transformation readers",
+      "cadence": "weekly",
+      "hubUrls": ["https://www.startse.com/artigos/como-dar-os-primeiros-passos-para-implementar-inteligencia-artificial-no-seu-negocio/", "https://www.startse.com/artigos/a-estrategia-de-ia-do-nubank-o-framework-explicado/"]
+    },
+    {
+      "id": "mit-tech-review-brasil",
+      "name": "MIT Technology Review Brasil",
+      "language": "pt-BR",
+      "country": "BR",
+      "audience": "senior business and technology decision readers",
+      "cadence": "weekly",
+      "hubUrls": ["https://mittechreview.com.br/topicos/inteligencia-artificial/"]
+    }
+  ]
+}

@@ -4172,17 +4172,29 @@ img {
 .blog-adsense-slot {
   box-sizing: border-box;
   width: min(760px, 100%);
-  min-height: 96px;
   display: block;
-  margin: 28px auto;
+  min-height: 0;
+  margin: 0 auto;
   overflow: hidden;
 }
 
 .blog-adsense-slot.is-index-feed {
   width: 100%;
+  margin: 0;
+}
+
+.blog-adsense-slot.is-filled,
+.blog-adsense-slot:has(ins.adsbygoogle[data-ad-status="filled"]) {
+  min-height: 96px;
+  margin: 24px auto;
+}
+
+.blog-adsense-slot.is-index-feed.is-filled,
+.blog-adsense-slot.is-index-feed:has(ins.adsbygoogle[data-ad-status="filled"]) {
   margin: 0 0 var(--sp-6);
 }
 
+.blog-adsense-slot.is-unfilled,
 .blog-adsense-slot ins.adsbygoogle[data-ad-status="unfilled"] {
   display: none !important;
 }
@@ -4191,6 +4203,31 @@ img {
 .blog-site-shell .rich-text ul,
 .blog-site-shell .rich-text ol {
   margin: 0.35em 0 0.65em;
+}
+
+.blog-site-shell .rich-text ul,
+.blog-site-shell .rich-text ol {
+  padding-left: 1.45em;
+}
+
+.blog-site-shell .rich-text ul {
+  list-style-type: disc;
+}
+
+.blog-site-shell .rich-text ol {
+  list-style-type: decimal;
+}
+
+.blog-site-shell .rich-text ul > li,
+.blog-site-shell .rich-text ol > li {
+  display: list-item;
+  padding-left: 0.2em;
+}
+
+.blog-site-shell .rich-text ul > li::marker,
+.blog-site-shell .rich-text ol > li::marker {
+  color: var(--al-blog-muted);
+  font-weight: 700;
 }
 
 .blog-site-shell .rich-text h2 {

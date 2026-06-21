@@ -13,6 +13,7 @@ function nextWithPathname(request: NextRequest) {
       headers: requestHeaders
     }
   });
+  response.headers.append("Vary", "Accept-Encoding");
   const userAgent = request.headers.get("user-agent") || "";
   if (AI_CRAWLER_PATTERN.test(userAgent)) {
     response.headers.set("x-altos-ai-crawler", "detected");

@@ -1,5 +1,6 @@
 import { readFile } from "fs/promises";
 import path from "path";
+import { brotliCompressSync, constants as zlibConstants, gzipSync } from "zlib";
 import {
   adsenseHeadSnippet,
   gaHeadSnippet,
@@ -26,6 +27,7 @@ const FAVICON_LINKS = `<link rel="icon" href="/icon.svg" type="image/svg+xml" />
 const DEFAULT_WONDA_WIDGET_SCRIPT_SRC = "https://wonda-web-kxbpzwq4sa-de.a.run.app/widget.js";
 const DEFAULT_WONDA_WIDGET_CHANNEL_ID = "cmqb6hynd002hs619tqxc3pe5";
 const DEFAULT_WONDA_WIDGET_API = "https://altoslab-ai.cc/api/wonda";
+const HOMEPAGE_CACHE_CONTROL = "public, max-age=300, stale-while-revalidate=1800";
 
 function escapeHtmlAttribute(value: string) {
   return value.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
@@ -176,7 +178,7 @@ async function readCloudflareHomepageResponse(request: Request) {
 
 function withCloudflareHomepageAssetHeaders(response: Response) {
   const headers = new Headers(response.headers);
-  headers.set("Cache-Control", "public, max-age=300, stale-while-revalidate=1800");
+  headers.set("Cache-Control", HOMEPAGE_CACHE_CONTROL);
   headers.set("Content-Language", "zh-Hant-TW");
   headers.set("Content-Type", "text/html; charset=utf-8");
   return new Response(response.body, {
@@ -186,8 +188,57 @@ function withCloudflareHomepageAssetHeaders(response: Response) {
   });
 }
 
+type HomepageCache = {
+  html: string;
+  gzip: Buffer;
+  br: Buffer;
+};
+
+let homepageCachePromise: Promise<HomepageCache> | null = null;
+
 async function readHomepageHtml() {
   return readFile(path.join(process.cwd(), "index.html"), "utf8");
+}
+
+async function readHomepageCache() {
+  if (!homepageCachePromise) {
+    homepageCachePromise = readHomepageHtml().then((sourceHtml) => {
+      const html = withLaunchMetadata(sourceHtml);
+      const bytes = Buffer.from(html);
+      return {
+        html,
+        gzip: gzipSync(bytes, { level: 6 }),
+        br: brotliCompressSync(bytes, {
+          params: {
+            [zlibConstants.BROTLI_PARAM_QUALITY]: 4
+          }
+        })
+      };
+    });
+  }
+  return homepageCachePromise;
+}
+
+function compressedHtmlResponse(request: Request, cache: HomepageCache) {
+  const headers = new Headers({
+    "Cache-Control": HOMEPAGE_CACHE_CONTROL,
+    "Content-Language": "zh-Hant-TW",
+    "Content-Type": "text/html; charset=utf-8",
+    Vary: "Accept-Encoding"
+  });
+  const accepted = request.headers.get("accept-encoding") || "";
+
+  if (/\bbr\b/i.test(accepted)) {
+    headers.set("Content-Encoding", "br");
+    return new Response(new Uint8Array(cache.br), { headers });
+  }
+
+  if (/\bgzip\b/i.test(accepted)) {
+    headers.set("Content-Encoding", "gzip");
+    return new Response(new Uint8Array(cache.gzip), { headers });
+  }
+
+  return new Response(cache.html, { headers });
 }
 
 export async function GET(request: Request) {
@@ -195,13 +246,6 @@ export async function GET(request: Request) {
     return withCloudflareHomepageAssetHeaders(await readCloudflareHomepageResponse(request));
   }
 
-  const html = await readHomepageHtml();
-
-  return new Response(withLaunchMetadata(html), {
-    headers: {
-      "Cache-Control": "public, max-age=0, must-revalidate",
-      "Content-Language": "zh-Hant-TW",
-      "Content-Type": "text/html; charset=utf-8"
-    }
-  });
+  const cache = await readHomepageCache();
+  return compressedHtmlResponse(request, cache);
 }

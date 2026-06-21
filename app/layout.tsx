@@ -79,9 +79,16 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const language = htmlLanguage(blogLanguageFromPath(pathname) || "zh-Hant");
   const adsenseSrc = isAdsenseConfigured() ? adsenseScriptSrc() : "";
 
+  const wondaOrigin = "https://wonda-web-kxbpzwq4sa-de.a.run.app";
+
   return (
     <html lang={language}>
-      <head>{adsenseSrc ? <script async src={adsenseSrc} crossOrigin="anonymous" /> : null}</head>
+      <head>
+        <link rel="preconnect" href="https://www.googletagmanager.com" />
+        <link rel="preconnect" href="https://pagead2.googlesyndication.com" crossOrigin="anonymous" />
+        <link rel="preconnect" href={wondaOrigin} />
+        {adsenseSrc ? <script async src={adsenseSrc} crossOrigin="anonymous" /> : null}
+      </head>
       <body>
         {children}
         <CtaAnalytics />

@@ -35,7 +35,7 @@ export function WonDaWidgetScript({ pathname = "" }: { pathname?: string }) {
       data-channel-id={config.channelId}
       id="wonda-ai-widget"
       src={config.scriptSrc}
-      strategy="afterInteractive"
+      strategy="lazyOnload"
     />
   );
 }
