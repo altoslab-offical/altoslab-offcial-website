@@ -9,6 +9,8 @@ const MIN_EXCERPT_LENGTH = 82;
 const MAX_EXCERPT_LENGTH = 238;
 const MIN_SEO_DESCRIPTION_LENGTH = 92;
 const MAX_SEO_DESCRIPTION_LENGTH = 176;
+const SUBTITLE_EVIDENCE_PATTERN =
+  /(OpenAI|Anthropic|Google|DeepMind|Hugging Face|IBM|Microsoft|NVIDIA|Vercel|TechCrunch|The Verge|WIRED|VentureBeat|MIT Technology Review|Reuters|Bloomberg|AI Magazine|Search Console|ChatGPT|Claude|Gemini|Perplexity|Codex|AI Mode|AI Factories|Gartner|Osmos|Fabric|Maia|Kubernetes|KubeCon|GPU|official|report|source|workflow|rollback|trace|eval|launch|released|published|case|官方|報導|來源|案例|發布|審核|回滾|試點|採購|導入|ワークフロー|出典|検証|롤백|출처|검토)/i;
 
 const BAD_PUBLIC_PATTERNS = [
   /這則消息可以拿來[^。\n]*(?:。|\n)?/gi,
@@ -309,6 +311,21 @@ function sourceReportSentence(language, publisher, fact) {
   return `${publisher} reports: ${cleanFact}`;
 }
 
+function sourceEventSentence(language, post, fact) {
+  const publisher = sourcePublisher(post);
+  const title = sourceTitle(post);
+  const cleanFact = cleanText(fact);
+  if (language === "zh-Hant") return `${publisher} 報導 ${title}；${cleanFact}`;
+  if (language === "ja") return `${publisher} は ${title} を報じました。${cleanFact}`;
+  if (language === "ko") return `${publisher}는 ${title}를 보도했습니다. ${cleanFact}`;
+  if (language === "id") return `${publisher} melaporkan ${title}. ${cleanFact}`;
+  if (language === "vi") return `${publisher} đưa tin ${title}. ${cleanFact}`;
+  if (language === "th") return `${publisher} รายงาน ${title}: ${cleanFact}`;
+  if (language === "ms") return `${publisher} melaporkan ${title}. ${cleanFact}`;
+  if (language === "fil") return `Iniulat ng ${publisher} ang ${title}. ${cleanFact}`;
+  return `${publisher} reports ${title}. ${cleanFact}`;
+}
+
 function compactCompare(value = "") {
   return cleanText(value).toLowerCase().replace(/[，。,.!?！？；;:\s"'「」]/g, "");
 }
@@ -413,13 +430,26 @@ function ensureMinimum(value, additions, min = MIN_EXCERPT_LENGTH, max = MAX_EXC
   return capText(text, max);
 }
 
+function ensureEvidenceCue(post, text, facts, max = MAX_EXCERPT_LENGTH) {
+  const language = LANGUAGES.includes(post.language) ? post.language : "en";
+  const clean = cleanText(text);
+  if (SUBTITLE_EVIDENCE_PATTERN.test(clean)) return capText(clean, max);
+  const fact = combineMetadataFacts(facts, { count: 2, max: 170 }) || facts[0] || post.geoSummary || post.excerpt || "";
+  return ensureMinimum(sourceEventSentence(language, post, fact), facts.slice(1), MIN_EXCERPT_LENGTH, max);
+}
+
 function buildExcerpt(post) {
   const language = LANGUAGES.includes(post.language) ? post.language : "en";
   const facts = bestMetadataFacts(post, 4);
   const publisher = sourcePublisher(post);
   const bodyParagraphs = splitParagraphs(post.body);
   const fact = combineMetadataFacts(facts, { avoid: bodyParagraphs.slice(0, 1), start: 1, count: 2, max: 170 }) || facts[0] || sourceTitle(post);
-  return ensureMinimum(sourceReportSentence(language, publisher, fact), facts.slice(1), MIN_EXCERPT_LENGTH, MAX_EXCERPT_LENGTH);
+  return ensureEvidenceCue(
+    post,
+    ensureMinimum(sourceReportSentence(language, publisher, fact), facts.slice(1), MIN_EXCERPT_LENGTH, MAX_EXCERPT_LENGTH),
+    facts,
+    MAX_EXCERPT_LENGTH
+  );
 }
 
 function buildSeoDescription(post) {
@@ -427,7 +457,12 @@ function buildSeoDescription(post) {
   const facts = bestMetadataFacts(post, 4);
   const publisher = sourcePublisher(post);
   const primary = combineMetadataFacts(facts, { avoid: [post.excerpt], start: 2, count: 1, max: 145 }) || facts[1] || facts[0] || post.excerpt || sourceTitle(post);
-  const repaired = ensureMinimum(sourceReportSentence(language, publisher, primary), facts.slice(3), MIN_SEO_DESCRIPTION_LENGTH, MAX_SEO_DESCRIPTION_LENGTH);
+  const repaired = ensureEvidenceCue(
+    post,
+    ensureMinimum(sourceReportSentence(language, publisher, primary), facts.slice(3), MIN_SEO_DESCRIPTION_LENGTH, MAX_SEO_DESCRIPTION_LENGTH),
+    facts,
+    MAX_SEO_DESCRIPTION_LENGTH
+  );
   if (repaired.length >= 70) return repaired;
   return ensureMinimum(
     repaired,
@@ -484,9 +519,14 @@ function repairAntiSlop(text = "") {
     .replace(/\bnormally\b/gi, "in normal cases")
     .replace(/不只是單純([^。]{0,60})而是/gi, "$1，重點在於")
     .replace(/不只是([^。]{0,60})而是/gi, "$1，重點在於")
+    .replace(/而不只是看[^。.!?！？]*(?:[。.!?！？]|$)/gi, "。")
+    .replace(/而不只是[^。.!?！？]*(?:[。.!?！？]|$)/gi, "。")
+    .replace(/不只是看[^。.!?！？]*(?:[。.!?！？]|$)/gi, "")
+    .replace(/不只是[^。.!?！？]*(?:[。.!?！？]|$)/gi, "")
     .replace(/不僅是([^。]{0,60})而是/gi, "$1，重點在於")
     .replace(/不是單純([^。]{0,60})而是/gi, "$1，重點在於")
     .replace(/\bnot (?:just|only)\b([^.!?]{0,90})\bbut\b/gi, "$1; the report focuses on")
+    .replace(/\b(?:not just|not only)\b[^.!?]*(?:[.!?]|$)/gi, "")
     .replace(/(?:単なる|ただの)([^。]{0,60})(?:ではなく|ではない)/gi, "$1にとどまらず")
     .replace(/(?:단순히|그저)\s*/gi, "")
     .replace(/\b(game-changing|cutting-edge|revolutionary|transformative|ever-evolving|landscape|delve|showcase)\b/gi, "")

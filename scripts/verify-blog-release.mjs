@@ -156,6 +156,7 @@ function normalizeText(value = "") {
     .replace(/&lt;/g, "<")
     .replace(/&gt;/g, ">")
     .replace(/&#39;/g, "'")
+    .replace(/&#x27;/gi, "'")
     .replace(/&apos;/g, "'")
     .replace(/\s+/g, " ")
     .trim();
