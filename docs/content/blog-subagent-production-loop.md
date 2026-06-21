@@ -58,7 +58,7 @@ The local n8n control plane is the deterministic safety runner. It wakes at the 
 - release windows: publish only an already `ready` manifest.
 - market-scan windows: refresh source-fast-lane prompts/manifests for source-translation production;
 - daytime poll windows: recheck the morning column release gate every 15 minutes so a browser-produced candidate can publish after late validate-only completion.
-- daily closeout window: verify the public blog inventory across all nine languages and fail the n8n execution if the Taipei date does not contain one complete column group and one complete market-news group.
+- daily closeout window: verify the public blog inventory across all nine languages and fail the n8n execution if the Taipei date does not contain three complete column groups and one complete market-news group.
 
 The runner is intentionally narrow:
 

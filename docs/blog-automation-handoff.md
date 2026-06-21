@@ -1,25 +1,27 @@
 # ALTOS LAB 自動發文交接手冊
 
-最後更新：2026-06-13
+最後更新：2026-06-22
 
 這份文件是 ALTOS LAB 官網 Blog 自動發文系統的單一交接入口。接手者應先讀本文件，再依需要展開閱讀引用文件。
 
 ## 一句話架構
 
-網站與 CMS 跑在雲端 Cloudflare Workers + Cloudflare D1；n8n 跑在 Tommy 本機，可作為排程、重試、健康檢查與 allowlisted local bridge 控制平面。文章品質、來源判斷、Gemini/GPT 瀏覽器證據、release gate 與最終 publish/no-publish 決策由 Hermes ops profile 作為 CMO/editor owner 負責；n8n、bridge、scripts 都是 Hermes 可選用或替換的工具。
+正式網站跑在 AWS ECS/Fargate，CMS 與 generated media 跑在 AWS S3；Cloudflare 只保留 DNS/legacy context，不是當前 Blog runtime。Tommy 本機的 scheduled runner / n8n / LaunchAgent 可作為排程、重試、健康檢查與 allowlisted local bridge 控制平面。文章品質、來源判斷、Gemini/GPT 瀏覽器證據、release gate 與最終 publish/no-publish 決策由 Hermes ops profile 作為 CMO/editor owner 負責；n8n、bridge、scripts 都是 Hermes 可選用或替換的工具。
 
 ## 系統邊界
 
 ### 雲端
 
 - 正式網站：`https://altoslab-ai.cc`
-- Cloudflare Worker：官網、Blog、API、RSS、sitemap、`llms.txt`
-- Cloudflare D1：正式 CMS / public blog projection 的 durable storage
-- Cloudflare KV：generated media 與 best-effort public cache
-- 正式健康檢查必須看到 `cmsStorage.provider = cloudflare-d1`
+- AWS ECS/Fargate：官網、Blog、API、RSS、sitemap、`llms.txt`
+- AWS S3：正式 CMS / generated media durable storage
+- Public Blog read path：優先走 bounded public projection / in-memory cache；CMS write/release 後必須刷新 public cache
+- 正式健康檢查必須看到 `cmsStorage.provider = aws-s3`
 
 ### 本機
 
+- scheduled runtime mirror：`/Users/asdc163/LocalProjects/altoslab-offcial-website-runtime`
+- source/work repo：`/Users/asdc163/LocalProjects/altoslab-offcial-website`
 - n8n：`http://127.0.0.1:5679`
 - local bridge：`http://127.0.0.1:8797`
 - n8n compose：`ops/n8n-local/docker-compose.yml`
@@ -34,11 +36,11 @@
 
 - 每個正式 article set 必須剛好包含 `zh-Hant`, `en`, `ja`, `ko`, `id`, `vi`, `th`, `ms`, `fil`。
 - 同一組語言必須共享同一個 `translationGroupId`、sourceLinks、cover URL、coverSource、cover credit、contentImages URL set、visual metadata；只有 localized public copy 可以不同。
-- Market news 是 source-translation，不是專欄。它必須使用 verified source article 或 official announcement，並使用 credited source/official image。
+- Market news 是 source-translation，不是專欄。它必須使用 verified source article 或 official announcement，並使用 credited source/official image；若來源可用但品質不合格，進入 repair/rewrite/re-image/re-QA，不把正常品質問題記成 successful skip。
 - Market news 不使用 Gemini，不使用 GPT art，不使用 Unsplash、Pexels、Pixabay、Openverse、local fallback art、generic stock image。
 - Column / feature 必須先由 Gemini 在指定 Chrome profile 產出 source-of-truth zh-Hant 文章，main-brain 審過後才可 localization。
 - Column / feature 的 cover 與 2-3 張 shared in-article images 只能透過指定 ChatGPT/GPT image workflow 或明確 human-approved editorial design QA。
-- Release window 不產生新內容，只發布已經 `ready` 的 prepared candidate。
+- Release window 不產生新內容，只發布已經 `ready` 的 prepared candidate；若沒有可發布 candidate，必須產出 repair plan，直到 validate-only pass 後 publish + public readback。
 - n8n/bridge/scripts 不能自行修改 UI、Blog layout、CSS、header、sidebar、language switcher、WonDa widget placement 或任何 public design surface；這類變更必須由 Hermes 明確判斷並留下證據。
 - 任何 gate 不完整，回傳 `ok:false` / HTTP 500，讓 n8n execution 顯示 failed，不可吞掉失敗。
 
@@ -69,7 +71,7 @@
 
 - 定時 market-news scan
 - column prep/status/validate/release polling
-- Cloudflare health checks
+- AWS `/api/health` / production smoke checks
 - SEO/GEO report job
 - daily closeout
 - execution history 與 retry visibility
@@ -77,8 +79,8 @@
 ### n8n 不負責
 
 - 網站 runtime
-- Cloudflare deploy
-- production D1/KV seeding
+- AWS ECS deploy
+- production S3 CMS mutation outside signed blog API
 - 文章品質最終判斷，這是 Hermes CMO/editor owner 的責任
 - Gemini / ChatGPT fixed-tab browser evidence，這應由 Hermes 透過 Tommy 的 Chrome 狀態決定如何取得
 - Gmail web UI sender verification
@@ -184,14 +186,14 @@ npm run blog:market-public-qa -- --slug <slug> --must <entity> --must <publisher
 
 ### 目的
 
-每天至少一篇有 ALTOS LAB 判斷的原創 column group。重點是觀點、source-backed argument、可讀節奏與企業讀者決策價值。
+每天至少一篇好讀、有知識量、保 SEO、非來源摘要堆疊的原創 column group。重點是讀者願意讀完、語言自然、資訊密度足、文章節奏符合目標市場。
 
 ### 流程
 
 1. n8n / scheduled runner 建立 run folder、prompt card、candidate skeleton。
 2. main-brain 審 prompt card，不清楚就 hold。
 3. 在指定 Chrome profile `john.wu0120@gmail.com` 的 `ALTOS Blog QA` Gemini tab 產出 zh-Hant source-of-truth。
-4. main-brain 檢查標題、副標、lead、source claims、ALTOS LAB judgment、public wording。
+4. main-brain 檢查標題、副標、lead、source claims、knowledge density、language-native rhythm、SEO fit、public wording。
 5. 若 source article 通過，使用 bounded workers localize：
    - `en-ja-ko`
    - `id-vi`
@@ -211,6 +213,27 @@ npm run blog:market-public-qa -- --slug <slug> --must <entity> --must <publisher
 - sourceLinks、cover、contentImages 在語言間不一致
 - copy 有 raw `###`、AI/process/backend wording、弱模板節奏
 - image QA 未通過或只有 fallback art
+
+## Public Blog Performance Gate
+
+Blog 點進文章慢時，先查 public read path，不先重寫內容或圖片。
+
+必跑：
+
+```bash
+npm run blog:performance-smoke -- --base-url https://altoslab-ai.cc
+npm run verify:aws -- --base-url https://altoslab-ai.cc --expected-provider aws-s3
+```
+
+Release 前後都要看：
+
+- `/api/blog?language=zh-Hant&limit=12&fields=inventory` TTFB；
+- `/blog` TTFB 與 bytes；
+- 最新 article detail TTFB；
+- `/feed.xml` 與 `/llms.txt`；
+- Chrome extension 從 `/blog` 點進文章的實際體感。
+
+若 `/api/health` 快但 `/api/blog` / article detail 慢，根因通常是 CMS/S3 public projection 或 detail cache，而不是整個 AWS service 慢。
 
 ## Prepared Candidate Contract
 
@@ -284,7 +307,7 @@ npm run blog:daily-closeout -- --base-url https://altoslab-ai.cc
 
 當日必須存在：
 
-- 一組完整 9 語 column group
+- 三組完整 9 語 column group
 - 若同日 source scan 找到 qualified verified source / official announcement 且圖片可用，必須有一組完整 9 語 market-news group；若沒有合格來源，必須有 no-qualified-source 或 held-source evidence，不可硬編新聞
 
 若 daily column 缺失，closeout 必須 failed 並報 exact blocker。Market-news 只有在同日有 qualified source 或 actionable market candidate 時缺失才算 failed。
@@ -301,10 +324,11 @@ docker compose --env-file "$HOME/.altoslab-n8n.env" -f ops/n8n-local/docker-comp
 docker compose --env-file "$HOME/.altoslab-n8n.env" -f ops/n8n-local/docker-compose.yml exec -T n8n n8n list:workflow
 ```
 
-Cloudflare：
+AWS production：
 
 ```bash
-npm run verify:cloudflare -- --base-url https://altoslab-ai.cc --expected-provider cloudflare-d1
+npm run verify:aws -- --base-url https://altoslab-ai.cc --expected-provider aws-s3
+npm run blog:performance-smoke -- --base-url https://altoslab-ai.cc
 curl -sSI https://altoslab-ai.cc/api/health
 ```
 
@@ -327,22 +351,22 @@ npm run test:homepage
 - `awaiting_browser_production`：candidate skeleton 已建立，但 Gemini/GPT browser evidence 尚未產出；不能 publish。
 - `articleSetExists=false`：`article-set.json` 尚未寫出。
 - `column-release held`：manifest 不是 `ready` 或 validate/design/image/browser evidence 不完整。
-- `daily column is not live as a complete 9-language group`：當日 column 未真正進 public inventory。
+- `daily columns are below target`：當日 3 組 column 未真正進 public inventory。
 - `market-news lane did not publish...`：先核對同日 source scan；有 qualified source 或 ready/held actionable market candidate 才是必修復，沒有合格來源則記錄 no-qualified-source evidence。
-- `KV put() limit exceeded`：不要回 GCP 或 seed production KV；確認 D1 healthy，刷新 public cache，再重驗。
+- `S3 read path slow`：不要回舊 Cloudflare KV/D1 mental model；先看 AWS S3 CMS public projection、memory cache TTL、release 後 cache invalidation 與 `blog:performance-smoke`。
 - Blog UI 變動需求：不屬於自動發文修復，必須走 designer-approved UI change gate。
 
 ## 接手者第一天檢查清單
 
 1. 確認 `git status --short` 乾淨。
 2. 跑 `npm test`。
-3. 跑 `npm run verify:cloudflare -- --base-url https://altoslab-ai.cc --expected-provider cloudflare-d1`。
+3. 跑 `npm run verify:aws -- --base-url https://altoslab-ai.cc --expected-provider aws-s3`。
 4. 跑 `npm run n8n:verify-local`。
 5. 確認 n8n workflows 已 import 且 active。
 6. 手動打 `/run/health`，確認 bridge token 與 local bridge 正常。
 7. 找最新 `data/blog-worker-runs/*/prepared-candidate.json`，確認狀態與 release gate reason。
 8. 找最新 `data/n8n-local-runs/*.json`，確認是否有 failed execution 需要處理。
-9. 檢查今日 public inventory 是否已有 9 語 column；market-news 則核對同日 source scan，有 qualified source 才要求 9 語 group，沒有則要求 no-qualified-source / held-source evidence。
+9. 檢查今日 public inventory 是否已有三組 9 語 column；market-news 則核對同日 source scan，有 qualified source 才要求 9 語 group，沒有則要求 no-qualified-source / held-source evidence。
 10. 任何缺失都記 blocker，不要補假完成。
 
 ## 交接引用文件
@@ -363,7 +387,14 @@ npm run test:homepage
 
 - 本文件存在並被 smoke test 檢查。
 - n8n local control plane 文件與 workflow 存在。
-- market-news lane、column lane、candidate manifest、release gate、daily closeout、Cloudflare verification 都有明確命令。
+- market-news lane、column lane、candidate manifest、release gate、daily closeout、AWS verification 都有明確命令。
 - 文件明確寫出 n8n 不能改 UI、不能 fabricate Gemini/GPT evidence、不能把 held gate 視為成功。
 - `npm test` 通過。
-- `npm run verify:cloudflare -- --base-url https://altoslab-ai.cc --expected-provider cloudflare-d1` 通過。
+- `npm run verify:aws -- --base-url https://altoslab-ai.cc --expected-provider aws-s3` 通過。
+
+## 2026-06-22 Style Corpus And Image Gate Evidence
+
+- `npm run blog:nine-language-style-corpus -- --max-per-site 50 --concurrency 4 --discover-only` found 1340 candidate articles across 36 seed sites. This is candidate discovery, not proof that 50 articles per site were absorbed.
+- `npm run blog:nine-language-style-corpus -- --max-per-site 8 --concurrency 4` absorbed 261/288 bounded article samples. 28/36 sites met the bounded target; incomplete sites are recorded in `data/blog-research/nine-language-style-corpus/latest-summary.json`.
+- `npm run blog:media-style-corpus -- --target 400` completed 400 metadata samples with 0 failures.
+- Training/handoff should learn compact style signals from `latest-summary.json`, `latest-report.md`, and `media-style-corpus.md`; do not store large raw excerpts or copy source passages.

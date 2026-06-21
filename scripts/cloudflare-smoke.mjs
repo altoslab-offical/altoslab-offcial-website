@@ -280,7 +280,7 @@ async function main() {
   if (JSON.stringify(health?.integrations?.blogLanguages || []) !== JSON.stringify(BLOG_LANGUAGES)) {
     pushIssue(errors, "blogLanguages must match the configured multilingual set", { surface: "health" });
   }
-  const expectedDailyColumnTarget = Number(process.env.ALTOS_BLOG_COLUMN_DAILY_LIMIT || "1");
+  const expectedDailyColumnTarget = Number(process.env.ALTOS_BLOG_COLUMN_DAILY_LIMIT || "3");
   if (health?.integrations?.dailyColumnTarget !== expectedDailyColumnTarget) {
     pushIssue(errors, `dailyColumnTarget must be ${expectedDailyColumnTarget}`, { surface: "health" });
   }

@@ -27,8 +27,8 @@ import type {
 } from "./types";
 
 const PUBLIC_STATUSES = new Set(["published"]);
-const PUBLIC_CMS_CACHE_TTL_MS = 15_000;
-const PUBLIC_BLOG_CACHE_TTL_MS = 60_000;
+const PUBLIC_CMS_CACHE_TTL_MS = Number(process.env.PUBLIC_CMS_CACHE_TTL_MS || 120_000);
+const PUBLIC_BLOG_CACHE_TTL_MS = Number(process.env.PUBLIC_BLOG_CACHE_TTL_MS || 600_000);
 const PUBLIC_BLOG_CACHE_LIMIT_PER_LANGUAGE = Number(process.env.PUBLIC_BLOG_CACHE_LIMIT_PER_LANGUAGE || 600);
 const PUBLIC_BLOG_LIST_CACHE_VERSION = "v2";
 const PUBLIC_BLOG_DETAIL_CACHE_VERSION = "v1";
@@ -1023,6 +1023,7 @@ async function writePublicBlogCacheFromData(data: CmsData) {
     publicBlogPostsCache = { posts, expiresAt: Date.now() + PUBLIC_BLOG_CACHE_TTL_MS };
     publicBlogInventoryCache = { posts: inventoryPosts, expiresAt: Date.now() + PUBLIC_BLOG_CACHE_TTL_MS };
     publicBlogDuplicateCache = { posts: duplicatePosts, expiresAt: Date.now() + PUBLIC_BLOG_CACHE_TTL_MS };
+    detailPosts.forEach((post) => writePublicBlogDetailMemoryCache(post.slug, normalizeBlogLanguage(post.language), post));
   }
 
   return {
@@ -1157,7 +1158,11 @@ export async function getPublishedBlogInventoryPosts() {
   }
 
   const data = await readPublicRawCmsData();
-  return sortedByPublicRecency(mergeStaticBlogOverrides(allPublicBlogPostsFromData(data)).map(compactPublicBlogInventoryPost));
+  const posts = sortedByPublicRecency(mergeStaticBlogOverrides(allPublicBlogPostsFromData(data)).map(compactPublicBlogInventoryPost));
+  await writePublicBlogCacheFromData(data).catch((error) => {
+    console.warn("[cms] Unable to warm public blog inventory cache:", error instanceof Error ? error.message : error);
+  });
+  return posts;
 }
 
 export async function getPublishedBlogInventoryPostsByLanguage(language?: BlogLanguage) {
@@ -1281,6 +1286,24 @@ export async function getPublishedBlogPost(slug: string, language?: BlogLanguage
   if (cachedPost) {
     writePublicBlogDetailMemoryCache(slug, language, cachedPost);
     return cachedPost;
+  }
+
+  if (!isCloudflarePublicRuntime()) {
+    const data = await readPublicRawCmsData();
+    const cmsPosts = mergeStaticBlogOverrides(allPublicBlogPostsFromData(data));
+    const cmsPost = cmsPosts.find(
+      (item) =>
+        matchesBlogSlug(item.slug, slug) &&
+        item.status === "published" &&
+        (!language || normalizeBlogLanguage(item.language) === normalizeBlogLanguage(language))
+    );
+    await writePublicBlogCacheFromData(data).catch((error) => {
+      console.warn("[cms] Unable to warm public blog detail cache:", error instanceof Error ? error.message : error);
+    });
+    if (cmsPost) {
+      writePublicBlogDetailMemoryCache(slug, language, cmsPost);
+      return cmsPost;
+    }
   }
 
   const posts = await readPublishedBlogPostsForPublic();

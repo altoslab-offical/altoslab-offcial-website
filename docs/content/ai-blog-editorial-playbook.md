@@ -9,11 +9,14 @@ self-introduction archive.
 Every article should start from a market signal and decide what job the post is
 doing. Some posts translate the signal into an operator decision. Some simply
 help the reader understand the market faster. Both are valid, as long as the
-piece has evidence, judgment and a reason to exist.
+piece is readable, evidence-backed, language-native and useful enough that a
+human would keep reading.
 
 - What changed in AI, search, agents, products, infrastructure or governance?
 - Why does it matter to a founder, operator, marketing lead or executive?
-- What would ALTOS LAB observe, test, build, audit, measure or avoid next?
+- What would a smart reader understand faster after this piece?
+- Add ALTOS LAB's own read only when it makes the article sharper; do not force
+  a fixed "judgment / limits / next step" template.
 - Which sources make the claim traceable?
 
 ## Market Writing Patterns To Learn From
@@ -85,7 +88,7 @@ Better:
 SEO description formulas:
 
 - Market brief: `source-backed signal + why it matters + what to watch next`
-- Column: `specific tension + reader decision + ALTOS LAB editorial read`
+- Column: `specific tension + reader value + optional ALTOS LAB editorial read`
 - Feature: `mechanism + evidence + framework/table/chart + practical next step`
 
 ## Content Mix
@@ -94,8 +97,9 @@ Use three content types and six writing archetypes:
 
 - `breaking`: fast market brief. One sentence answer, what happened, why it
   matters, what remains uncertain, source links.
-- `column`: operator opinion. One concrete question, tradeoffs, decision table,
-  ALTOS LAB point of view and next steps.
+- `column`: operator opinion or explainer. One concrete question, tradeoffs,
+  examples and readable knowledge density. ALTOS LAB point of view and next
+  steps are optional tools, not mandatory sections.
 - `feature`: durable asset. Background, mechanism, comparison table, framework,
   risk, source evidence and implementation path.
 
@@ -141,7 +145,7 @@ Each published article needs:
 
 - crawlable body text with 4-6 useful H2 sections
 - direct answer in the first 40-50 words
-- original ALTOS LAB judgment or editorial read, not only source summary
+- readable, knowledge-dense editorial value, not only source summary
 - SEO title, description, excerpt/subtitle and GEO summary
 - visible source links from credible domains
 - key takeaways and FAQ that are visible on the page

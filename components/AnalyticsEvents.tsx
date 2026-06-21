@@ -11,7 +11,9 @@ type AnalyticsEventName =
   | "blog_post_published"
   | "ai_blog_draft_generated"
   | "ai_referral_landing"
-  | "lead_created";
+  | "lead_created"
+  | "web_vital"
+  | "navigation_timing";
 
 type AnalyticsPayload = {
   event: AnalyticsEventName;
@@ -107,9 +109,64 @@ export function CtaAnalytics() {
 
     document.addEventListener("click", onClick);
     document.addEventListener("submit", onSubmit, true);
+
+    const navigationTiming = performance.getEntriesByType("navigation")[0] as PerformanceNavigationTiming | undefined;
+    if (navigationTiming) {
+      sendAnalyticsEvent({
+        event: "navigation_timing",
+        page_path: window.location.pathname,
+        ttfb_ms: Math.round(navigationTiming.responseStart),
+        dom_content_loaded_ms: Math.round(navigationTiming.domContentLoadedEventEnd),
+        load_ms: Math.round(navigationTiming.loadEventEnd)
+      });
+    }
+
+    let cls = 0;
+    const observers: PerformanceObserver[] = [];
+    if ("PerformanceObserver" in window) {
+      try {
+        const lcpObserver = new PerformanceObserver((list) => {
+          const entries = list.getEntries();
+          const lastEntry = entries[entries.length - 1] as PerformanceEntry | undefined;
+          if (!lastEntry) return;
+          sendAnalyticsEvent({
+            event: "web_vital",
+            metric_name: "LCP",
+            metric_value: Math.round(lastEntry.startTime),
+            page_path: window.location.pathname
+          });
+        });
+        lcpObserver.observe({ type: "largest-contentful-paint", buffered: true });
+        observers.push(lcpObserver);
+      } catch {}
+      try {
+        const clsObserver = new PerformanceObserver((list) => {
+          for (const entry of list.getEntries() as Array<PerformanceEntry & { value?: number; hadRecentInput?: boolean }>) {
+            if (!entry.hadRecentInput) cls += entry.value || 0;
+          }
+        });
+        clsObserver.observe({ type: "layout-shift", buffered: true });
+        observers.push(clsObserver);
+      } catch {}
+    }
+
+    const onPageHide = () => {
+      if (cls > 0) {
+        sendAnalyticsEvent({
+          event: "web_vital",
+          metric_name: "CLS",
+          metric_value: Number(cls.toFixed(4)),
+          page_path: window.location.pathname
+        });
+      }
+    };
+    window.addEventListener("pagehide", onPageHide);
+
     return () => {
       document.removeEventListener("click", onClick);
       document.removeEventListener("submit", onSubmit, true);
+      window.removeEventListener("pagehide", onPageHide);
+      observers.forEach((observer) => observer.disconnect());
     };
   }, []);
 

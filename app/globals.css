@@ -4075,10 +4075,13 @@ img {
   width: min(100%, 940px);
   max-height: none;
   aspect-ratio: 1200 / 630;
-  margin: 40px auto 0;
+  margin: 30px auto 0;
   border-color: var(--al-blog-border);
   border-radius: var(--r-md);
   background: var(--al-blog-panel);
+  display: block;
+  object-fit: cover;
+  object-position: center;
   box-shadow: var(--al-shadow-blog-card);
 }
 
@@ -4231,7 +4234,7 @@ img {
 }
 
 .blog-site-shell .rich-text h2 {
-  margin: 2em 0 0.65em;
+  margin: 1.45em 0 0.55em;
   color: var(--al-blog-strong);
   font-family: var(--font-body);
   font-size: var(--fs-h2);
@@ -5293,7 +5296,9 @@ img {
 }
 
 .article-hero > .blog-editorial-visual {
-  margin-top: 24px;
+  width: min(100%, 940px);
+  aspect-ratio: 1200 / 630;
+  margin: 30px auto 0;
 }
 
 .blog-craft-card:hover .blog-craft-card-image .blog-editorial-visual {

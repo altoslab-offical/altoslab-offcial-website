@@ -46,6 +46,8 @@ const LAUNCH_AGENT_TRIGGERS = [
 const LAUNCH_AGENT_PLIST = path.join(process.env.HOME || "", "Library/LaunchAgents/com.altoslab.blog-local-worker.plist");
 const N8N_BRIDGE_PLIST = path.join(process.env.HOME || "", "Library/LaunchAgents/com.altoslab.n8n-bridge.plist");
 const N8N_BRIDGE_HEALTH_URL = "http://127.0.0.1:8797/health";
+const EXPECTED_WORKER_ROOT =
+  process.env.ALTOS_BLOG_WORKER_ROOT || "/Users/asdc163/LocalProjects/altoslab-offcial-website-runtime";
 const SLOTS = {
   morning: "09:00",
   afternoon: "16:00",
@@ -315,8 +317,8 @@ function launchctlPrint(label) {
 function checkN8nBridge(errors, warnings) {
   const launchAgent = launchctlPrint("com.altoslab.n8n-bridge");
   if (!launchAgent.loaded) return null;
-  if (!launchAgent.output.includes("/Users/asdc163/Documents/官方網站")) {
-    addIssue(errors, "n8n bridge LaunchAgent must run from /Users/asdc163/Documents/官方網站");
+  if (!launchAgent.output.includes(EXPECTED_WORKER_ROOT)) {
+    addIssue(errors, `n8n bridge LaunchAgent must run from ${EXPECTED_WORKER_ROOT}`);
   }
   if (!fs.existsSync(N8N_BRIDGE_PLIST)) {
     addIssue(errors, "n8n bridge LaunchAgent plist is missing", { plistPath: N8N_BRIDGE_PLIST });
@@ -359,8 +361,8 @@ function checkN8nBridge(errors, warnings) {
 
 function checkLegacyLaunchAgent(errors, warnings, launchAgent) {
   const output = launchAgent.output;
-  if (!output.includes("/Users/asdc163/Documents/官方網站")) {
-    addIssue(errors, "LaunchAgent must run from /Users/asdc163/Documents/官方網站");
+  if (!output.includes(EXPECTED_WORKER_ROOT)) {
+    addIssue(errors, `LaunchAgent must run from ${EXPECTED_WORKER_ROOT}`);
   }
   if (!fs.existsSync(LAUNCH_AGENT_PLIST)) {
     addIssue(errors, "LaunchAgent plist is missing", { plistPath: LAUNCH_AGENT_PLIST });

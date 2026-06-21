@@ -41,6 +41,7 @@
     "blog:doctor": "node scripts/blog-sop-doctor.mjs",
     "blog:verify-release": "node scripts/verify-blog-release.mjs",
     "blog:install-agent": "scripts/install-blog-launch-agent.sh",
+    "blog:performance-smoke": "node scripts/blog-performance-smoke.mjs",
     "seo:geo-report": "node scripts/seo-geo-insight-report.mjs",
     "test": "npm run review:design && npm run typecheck && npm run test:homepage && npm run test:blog && npm run test:wonda-widget && npm run test:adsense",
     "blog:market-scan": "node scripts/blog-scheduled-runner.mjs --market-scan",

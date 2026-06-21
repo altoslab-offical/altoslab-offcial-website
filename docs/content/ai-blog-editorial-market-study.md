@@ -192,7 +192,8 @@ Required sections:
 - Supply / demand / distribution or platform lens.
 - Stakeholder impact table.
 - Scenario map: optimistic, base, cautious.
-- ALTOS LAB judgment and next operator action.
+- A clear reader value path; ALTOS LAB perspective or next action only when it
+  fits the article naturally.
 
 Must include:
 
@@ -232,11 +233,14 @@ Required sections:
 - Tradeoff table.
 - What to do this week.
 
-Must include:
+May include when useful:
 
-- An quotable judgment.
+- A quotable line.
 - The best opposing argument.
 - Practical next steps.
+
+Do not force these as fixed public sections. The harder requirement is that the
+article feels useful, readable, source-aware and written for the target market.
 
 ## SEO And GEO Without Killing The Article
 
@@ -257,7 +261,8 @@ Avoid:
 - Adding GEO claims that Google does not support.
 - Treating `llms.txt`, schema or FAQ as a magic ranking lever.
 - Overstating one study as a universal platform rule.
-- Source summaries with no ALTOS LAB judgment.
+- Source summaries with no added reader value, knowledge density or editorial
+  structure.
 
 ## Image Direction Learned From Market References
 
@@ -289,8 +294,8 @@ Hold the draft unless it passes all checks:
   verbally separable.
 - Reader gate: the piece contains at least one table, checklist, decision rule,
   quote box, field note or scenario map.
-- Judgment gate: one paragraph must be unmistakably ALTOS LAB's view, not a
-  rewritten source.
+- Value gate: the article must add readable knowledge, examples, comparison,
+  context or structure beyond rewritten source material.
 - GEO humility gate: the article does not imply secret AI-search tricks or
   unsupported ranking guarantees.
 - Image gate: the cover has one subject, no protected brands or people, no fake
@@ -310,12 +315,12 @@ Use this before drafting:
 2. 關鍵變數
 3. 下一個觀察點或讀者要做的決策
 
-文章中必須清楚分開：
+文章中需要自然分清楚：
 - 來源事實
 - 官方立場
-- ALTOS LAB 判斷
-- 不確定性
-- 讀者下一步
+- 可補充的編輯理解、背景、例子或比較
+- 不確定性或限制，若它影響讀者理解
+- 下一步或 FAQ，若讀者真的會需要
 
 SEO title、meta、FAQ、GEO summary 只能服務文章，不可以變成文章骨架。
 ```

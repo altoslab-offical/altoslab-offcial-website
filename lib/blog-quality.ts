@@ -170,8 +170,8 @@ const readerTensionPattern =
 const readerActionPattern =
   /(本週|今天|下一步|行動清單|檢查|盤點|優先級|先做|不要做|判斷標準|scorecard|checklist|next step|priority|what to check|what to do|this week|audit|今週|次に|チェック|優先順位|이번 주|다음 단계|체크|우선순위|minggu ini|langkah berikut|periksa|prioritas|tuần này|bước tiếp theo|kiểm tra|ưu tiên|สัปดาห์นี้|ขั้นต่อไป|ตรวจ|ลำดับความสำคัญ|susunod|suriin|prayoridad)/i;
 
-const quotableJudgmentPattern =
-  /(可引用段落|ALTOS LAB (判斷|觀點|編輯)|實驗室判斷|編輯台觀點|thought leadership|quotable|pull quote|blockquote|引用したい判断|인용할 판단|^>\s+)/im;
+const knowledgeDenseAnglePattern =
+  /(案例|場景|取捨|反直覺|比較|定義|步驟|檢查表|常見問題|來源卡|source card|field note|decision memo|checklist|tradeoff|case|scenario|comparison|definition|FAQ|pull quote|blockquote|^>\s+)/im;
 
 const genericLeadPatterns = [
   /^(AI|人工智慧|生成式 AI|搜尋引擎|企業|品牌|現代企業|數位行銷).{0,30}(正在|已經|逐漸|快速|持續|成為|面臨)/i,
@@ -989,9 +989,9 @@ export function reviewLabsPointOfView(post: BlogPost): ReviewResult {
   const hitCount = labsSignals.filter((signal) => text.includes(signal)).length;
   const lower = text.toLowerCase();
 
-  if (hitCount < 4) issues.push("article does not carry enough ALTOS LAB lab/product studio perspective");
-  if (!/ALTOS LAB/i.test(text)) issues.push("article should name ALTOS LAB as the publishing lab");
-  if (!labsPointOfViewPattern.test(text)) warnings.push("article should make the publishing lab's editorial read visible without repeating a fixed heading");
+  if (hitCount < 3) warnings.push("article can add more ALTOS LAB product/lab perspective when it improves the reader's understanding");
+  if (!/ALTOS LAB/i.test(text)) warnings.push("article should usually name ALTOS LAB as the publishing lab");
+  if (!labsPointOfViewPattern.test(text)) warnings.push("ALTOS LAB editorial read is optional, but should be visible when it adds knowledge density");
   if (lower.includes("seo") && lower.includes("geo") && hitCount < 6) {
     warnings.push("article risks sounding like an SEO/GEO tool page instead of a broader AI lab note");
   }
@@ -1053,8 +1053,8 @@ export function reviewReaderEngagement(post: BlogPost): ReviewResult {
   if (contentType !== "breaking" && !readerActionPattern.test(text) && !/(案例|場景|tradeoff|取捨|反直覺|失敗|事故|例外|operator|現場|source-backed|case)/i.test(text)) {
     issues.push("article needs a visible reader payoff: concrete case, tension, tradeoff, audit cue or decision lens");
   }
-  if (contentType !== "breaking" && !quotableJudgmentPattern.test(text)) {
-    issues.push("column/feature needs a quotable ALTOS LAB judgment or pull-quote style paragraph");
+  if (contentType !== "breaking" && !knowledgeDenseAnglePattern.test(text)) {
+    issues.push("column/feature needs a readable knowledge-dense angle, concrete example, useful contrast or pull-quote style paragraph");
   }
   if (!/(FAQ|常見問題|Q&A|よくある質問|자주 묻는 질문)/i.test(post.body) && post.faqs.length < 3) {
     warnings.push("reader journey is missing a visible FAQ or objection-handling section");

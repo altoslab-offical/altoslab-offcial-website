@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-ROOT_DIR="/Users/asdc163/Documents/官方網站"
+ROOT_DIR="${ALTOS_BLOG_WORKER_ROOT:-/Users/asdc163/LocalProjects/altoslab-offcial-website-runtime}"
 ENV_FILE="$HOME/.altoslab-n8n.env"
 COMPOSE_FILE="$ROOT_DIR/ops/n8n-local/docker-compose.yml"
 

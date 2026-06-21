@@ -1,89 +1,61 @@
 # Nine-language AI SEO Style Corpus Intake
 
-Generated: 2026-06-21T13:55:17.376Z
+Generated: 2026-06-21T16:52:07.395Z
 Seed sites: 36
-Target per site: 50
-Absorbed total: 0/1800
+Target per site: 8
+Absorbed total: 261/288
 
 ## Site Coverage
 
 | Site | Language | Country | Absorbed | Target | Outline ratio | FAQ ratio |
 |---|---|---|---:|---:|---:|---:|
-| iThome AI | zh-Hant | TW | 0 | 50 | 0 | 0 |
-| INSIDE AI | zh-Hant | TW | 0 | 50 | 0 | 0 |
-| TechOrange AI | zh-Hant | TW | 0 | 50 | 0 | 0 |
-| Google Cloud Learn zh-TW | zh-Hant | TW | 0 | 50 | 0 | 0 |
-| 机器之心 | zh-CN | CN | 0 | 50 | 0 | 0 |
-| 量子位 | zh-CN | CN | 0 | 50 | 0 | 0 |
-| 百度智能云开发者社区 | zh-CN | CN | 0 | 50 | 0 | 0 |
-| 阿里云开发者社区 | zh-CN | CN | 0 | 50 | 0 | 0 |
-| OpenAI Index | en | US | 0 | 50 | 0 | 0 |
-| Anthropic News | en | US | 0 | 50 | 0 | 0 |
-| Google DeepMind Blog | en | US | 0 | 50 | 0 | 0 |
-| Hugging Face Blog | en | US | 0 | 50 | 0 | 0 |
-| AINOW | ja | JP | 0 | 50 | 0 | 0 |
-| AI-SCHOLAR | ja | JP | 0 | 50 | 0 | 0 |
-| Preferred Networks Tech Blog | ja | JP | 0 | 50 | 0 | 0 |
-| Google Cloud Japan Blog | ja | JP | 0 | 50 | 0 | 0 |
-| NAVER D2 | ko | KR | 0 | 50 | 0 | 0 |
-| Upstage Blog | ko | KR | 0 | 50 | 0 | 0 |
-| LG AI Research | ko | KR | 0 | 50 | 0 | 0 |
-| kakao tech | ko | KR | 0 | 50 | 0 | 0 |
-| heise AI | de | DE | 0 | 50 | 0 | 0 |
-| t3n AI | de | DE | 0 | 50 | 0 | 0 |
-| Fraunhofer IAIS | de | DE | 0 | 50 | 0 | 0 |
-| appliedAI | de | DE | 0 | 50 | 0 | 0 |
-| ActuIA | fr | FR | 0 | 50 | 0 | 0 |
-| LEBIGDATA.FR | fr | FR | 0 | 50 | 0 | 0 |
-| Inria | fr | FR | 0 | 50 | 0 | 0 |
-| Mistral AI | fr | FR | 0 | 50 | 0 | 0 |
-| Planeta Chatbot | es | ES | 0 | 50 | 0 | 0 |
-| BBVA AI Factory | es | ES | 0 | 50 | 0 | 0 |
-| Xataka AI | es | ES | 0 | 50 | 0 | 0 |
-| Google Cloud Learn es-419 | es | LATAM | 0 | 50 | 0 | 0 |
-| Alura IA | pt-BR | BR | 0 | 50 | 0 | 0 |
-| TOTVS Blog AI | pt-BR | BR | 0 | 50 | 0 | 0 |
-| StartSe AI | pt-BR | BR | 0 | 50 | 0 | 0 |
-| MIT Technology Review Brasil | pt-BR | BR | 0 | 50 | 0 | 0 |
+| iThome AI | zh-Hant | TW | 8 | 8 | 1 | 0 |
+| INSIDE AI | zh-Hant | TW | 0 | 8 | 0 | 0 |
+| TechOrange AI | zh-Hant | TW | 6 | 8 | 1 | 0 |
+| Google Cloud Learn zh-TW | zh-Hant | TW | 8 | 8 | 1 | 1 |
+| 机器之心 | zh-CN | CN | 6 | 8 | 0 | 0 |
+| 量子位 | zh-CN | CN | 8 | 8 | 1 | 0 |
+| 百度智能云开发者社区 | zh-CN | CN | 8 | 8 | 0.88 | 0 |
+| 阿里云开发者社区 | zh-CN | CN | 8 | 8 | 1 | 0 |
+| OpenAI Index | en | US | 2 | 8 | 1 | 1 |
+| Anthropic News | en | US | 8 | 8 | 1 | 0.25 |
+| Google DeepMind Blog | en | US | 8 | 8 | 0.88 | 0.13 |
+| Hugging Face Blog | en | US | 8 | 8 | 0.75 | 0 |
+| AINOW | ja | JP | 8 | 8 | 0.88 | 0.13 |
+| AI-SCHOLAR | ja | JP | 8 | 8 | 1 | 0 |
+| Preferred Networks Tech Blog | ja | JP | 8 | 8 | 1 | 0 |
+| Google Cloud Japan Blog | ja | JP | 8 | 8 | 1 | 1 |
+| NAVER D2 | ko | KR | 3 | 8 | 0 | 0 |
+| Upstage Blog | ko | KR | 8 | 8 | 1 | 0.13 |
+| LG AI Research | ko | KR | 8 | 8 | 0 | 1 |
+| kakao tech | ko | KR | 8 | 8 | 1 | 0.13 |
+| heise AI | de | DE | 8 | 8 | 1 | 0.13 |
+| t3n AI | de | DE | 8 | 8 | 1 | 1 |
+| Fraunhofer IAIS | de | DE | 6 | 8 | 1 | 0 |
+| appliedAI | de | DE | 8 | 8 | 1 | 0.63 |
+| ActuIA | fr | FR | 8 | 8 | 1 | 0 |
+| LEBIGDATA.FR | fr | FR | 7 | 8 | 0.86 | 0.86 |
+| Inria | fr | FR | 8 | 8 | 0.75 | 0 |
+| Mistral AI | fr | FR | 8 | 8 | 1 | 0 |
+| Planeta Chatbot | es | ES | 8 | 8 | 1 | 1 |
+| BBVA AI Factory | es | ES | 8 | 8 | 1 | 1 |
+| Xataka AI | es | ES | 8 | 8 | 1 | 0 |
+| Google Cloud Learn es-419 | es | LATAM | 8 | 8 | 1 | 1 |
+| Alura IA | pt-BR | BR | 8 | 8 | 1 | 1 |
+| TOTVS Blog AI | pt-BR | BR | 8 | 8 | 1 | 0 |
+| StartSe AI | pt-BR | BR | 7 | 8 | 0.86 | 0.29 |
+| MIT Technology Review Brasil | pt-BR | BR | 8 | 8 | 1 | 0 |
 
 ## Incomplete Sites
 
-- ithome-tw-ai: 0/50
-- inside-tw-ai: 0/50
-- techorange-tw-ai: 0/50
-- google-cloud-learn-zh-tw: 0/50
-- jiqizhixin-cn: 0/50
-- qbitai-cn: 0/50
-- baidu-cloud-dev-cn: 0/50
-- aliyun-dev-cn: 0/50
-- openai-index: 0/50
-- anthropic-news: 0/50
-- google-deepmind-blog: 0/50
-- huggingface-blog: 0/50
-- ainow-jp: 0/50
-- ai-scholar-jp: 0/50
-- preferred-networks-tech: 0/50
-- google-cloud-japan-blog: 0/50
-- naver-d2: 0/50
-- upstage-blog-ko: 0/50
-- lg-ai-research: 0/50
-- kakao-tech: 0/50
-- heise-ai: 0/50
-- t3n-ai: 0/50
-- fraunhofer-iais: 0/50
-- appliedai-de: 0/50
-- actuia-fr: 0/50
-- lebigdata-fr: 0/50
-- inria-fr: 0/50
-- mistral-ai-fr: 0/50
-- planeta-chatbot: 0/50
-- bbva-ai-factory: 0/50
-- xataka-ai: 0/50
-- google-cloud-learn-es: 0/50
-- alura-ia: 0/50
-- totvs-blog-ai: 0/50
-- startse-ai: 0/50
-- mit-tech-review-brasil: 0/50
+- inside-tw-ai: 0/8
+- techorange-tw-ai: 6/8
+- jiqizhixin-cn: 6/8
+- openai-index: 2/8
+- naver-d2: 3/8
+- fraunhofer-iais: 6/8
+- lebigdata-fr: 7/8
+- startse-ai: 7/8
 
 ## Use Rules
 

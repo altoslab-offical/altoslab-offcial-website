@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-ROOT_DIR="/Users/asdc163/Documents/官方網站"
+ROOT_DIR="${ALTOS_BLOG_WORKER_ROOT:-/Users/asdc163/LocalProjects/altoslab-offcial-website-runtime}"
 ENV_FILE="$HOME/.altoslab-blog-worker.env"
 PLIST_SOURCE="$ROOT_DIR/scripts/com.altoslab.blog-local-worker.plist.example"
 PLIST_TARGET="$HOME/Library/LaunchAgents/com.altoslab.blog-local-worker.plist"

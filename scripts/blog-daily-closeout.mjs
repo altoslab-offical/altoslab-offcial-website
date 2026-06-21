@@ -5,8 +5,14 @@ import path from "node:path";
 import process from "node:process";
 
 const REQUIRED_LANGUAGES = ["zh-Hant", "en", "ja", "ko", "id", "vi", "th", "ms", "fil"];
-const ROOT_DIR = "/Users/asdc163/Documents/官方網站";
+const ROOT_DIR =
+  process.env.ALTOS_BLOG_WORKER_ROOT || "/Users/asdc163/LocalProjects/altoslab-offcial-website-runtime";
 const DEFAULT_BASE_URL = process.env.ALTOS_BLOG_BASE_URL || process.env.ALTOS_BLOG_AUTOMATION_BASE_URL || "https://altoslab-ai.cc";
+const COLUMN_DAILY_TARGET = Number(process.env.ALTOS_BLOG_COLUMN_DAILY_LIMIT || "3");
+const COLUMN_SLOTS = (process.env.ALTOS_BLOG_COLUMN_SLOTS || "morning,afternoon,evening")
+  .split(",")
+  .map((slot) => slot.trim())
+  .filter(Boolean);
 
 function hasFlag(name) {
   return process.argv.includes(`--${name}`);
@@ -127,6 +133,18 @@ function candidateIndexPath(date, slot, lane) {
   return path.join(ROOT_DIR, "data/blog-prepared-candidates", `${date}-${slot}-${lane}.json`);
 }
 
+function legacyCandidateIndexPath(date, slot) {
+  return path.join(ROOT_DIR, "data/blog-prepared-candidates", `${date}-${slot}.json`);
+}
+
+async function resolveCandidateIndexPath(date, slot, lane) {
+  const lanePath = candidateIndexPath(date, slot, lane);
+  if (await exists(lanePath)) return lanePath;
+  if (lane !== "column") return lanePath;
+  const legacyPath = legacyCandidateIndexPath(date, slot);
+  return (await exists(legacyPath)) ? legacyPath : lanePath;
+}
+
 async function summarizeCandidate(filePath) {
   const index = await readJsonIfExists(filePath);
   if (!index) return { exists: false, path: filePath };
@@ -208,11 +226,15 @@ async function main() {
       baseUrl,
       errors: [`public blog inventory fetch failed: ${error instanceof Error ? error.message : String(error)}`],
       warnings,
-      actions: ["Repair the public blog API or Cloudflare route before treating daily automation as healthy."]
+      actions: ["Repair the public blog API or AWS production route before treating daily automation as healthy."]
     });
   }
 
-  const columnCandidate = await summarizeCandidate(candidateIndexPath(date, "morning", "column"));
+  const columnCandidates = Object.fromEntries(
+    await Promise.all(
+      COLUMN_SLOTS.map(async (slot) => [slot, await summarizeCandidate(await resolveCandidateIndexPath(date, slot, "column"))])
+    )
+  );
   const marketCandidates = {
     morning: await summarizeCandidate(candidateIndexPath(date, "morning", "market")),
     afternoon: await summarizeCandidate(candidateIndexPath(date, "afternoon", "market"))
@@ -220,31 +242,41 @@ async function main() {
 
   const columnGroups = liveGroupsForDate(postsByLanguage, { date, contentType: "column" });
   const marketGroups = liveGroupsForDate(postsByLanguage, { date, contentType: "breaking" });
-  let completeColumn = bestCompleteGroup(columnGroups);
+  const completeColumns = columnGroups.filter((group) => group.coverage.complete);
   const completeMarket = bestCompleteGroup(marketGroups);
 
-  if (!completeColumn && columnCandidate.status === "released" && columnCandidate.translationGroupId) {
+  for (const [slot, columnCandidate] of Object.entries(columnCandidates)) {
+    if (columnCandidate.status !== "released" || !columnCandidate.translationGroupId) continue;
     const fallbackColumn = liveGroupByTranslationGroupId(postsByLanguage, columnCandidate.translationGroupId);
     if (fallbackColumn?.contentType === "column" && fallbackColumn.coverage.complete) {
-      completeColumn = fallbackColumn;
+      if (!completeColumns.some((group) => group.translationGroupId === fallbackColumn.translationGroupId)) {
+        completeColumns.push(fallbackColumn);
+      }
       const liveDate = postTaiwanDate(fallbackColumn);
       warnings.push(
         liveDate && liveDate !== date
-          ? `daily column is live and complete via released candidate ${columnCandidate.translationGroupId}, but its public timestamp resolves to Taipei date ${liveDate}`
-          : `daily column is live and complete via released candidate ${columnCandidate.translationGroupId}`
+          ? `daily column ${slot} is live and complete via released candidate ${columnCandidate.translationGroupId}, but its public timestamp resolves to Taipei date ${liveDate}`
+          : `daily column ${slot} is live and complete via released candidate ${columnCandidate.translationGroupId}`
       );
     }
   }
 
-  if (!completeColumn) {
+  if (completeColumns.length < COLUMN_DAILY_TARGET) {
     const missingLanguages = columnGroups.flatMap((group) => group.coverage.missing);
     const languageDetail = missingLanguages.length ? `; incomplete live groups missing ${[...new Set(missingLanguages)].join(", ")}` : "";
-    errors.push(`daily column is not live as a complete 9-language group for ${date}${languageDetail}`);
-    if (!columnCandidate.articleSetExists) {
-      errors.push("column article-set.json is missing; Gemini/GPT browser production has not produced the publishable candidate");
-      actions.push("Run the John-profile Gemini/GPT column production workbench, write article-set.json, then run /run/column-validate and /run/column-release.");
+    errors.push(
+      `daily columns are below target for ${date}: ${completeColumns.length}/${COLUMN_DAILY_TARGET} complete 9-language groups${languageDetail}`
+    );
+    const missingCandidateSlots = Object.entries(columnCandidates)
+      .filter(([, candidate]) => !candidate.articleSetExists)
+      .map(([slot]) => slot);
+    if (missingCandidateSlots.length) {
+      errors.push(
+        `column article-set.json is missing for slot(s): ${missingCandidateSlots.join(", ")}; Gemini/GPT browser production has not produced every publishable candidate`
+      );
+      actions.push("Run the John-profile Gemini/GPT column production workbench for each missing slot, write article-set.json, then run /run/column-validate and /run/column-release.");
     } else {
-      actions.push("Rerun /run/column-validate, fix any validateOnly/design/image errors, then rerun /run/column-release.");
+      actions.push("Rerun /run/column-validate for the incomplete slots, fix validateOnly/design/image errors, then rerun /run/column-release.");
     }
   }
 
@@ -266,20 +298,23 @@ async function main() {
     baseUrl,
     requiredLanguages: REQUIRED_LANGUAGES,
     live: {
-      dailyColumn: completeColumn
+      dailyColumnTarget: COLUMN_DAILY_TARGET,
+      dailyColumnCount: completeColumns.length,
+      dailyColumn: completeColumns[0]
         ? {
             ok: true,
-            translationGroupId: completeColumn.translationGroupId,
-            slug: completeColumn.slug,
-            title: completeColumn.title,
-            publishedAt: completeColumn.publishedAt,
-            languages: completeColumn.coverage.present,
-            matchedByCandidate: completeColumn.matchedByCandidate === true
+            translationGroupId: completeColumns[0].translationGroupId,
+            slug: completeColumns[0].slug,
+            title: completeColumns[0].title,
+            publishedAt: completeColumns[0].publishedAt,
+            languages: completeColumns[0].coverage.present,
+            matchedByCandidate: completeColumns[0].matchedByCandidate === true
           }
         : {
             ok: false,
             groups: summarizeGroups(columnGroups)
           },
+      dailyColumns: summarizeGroups(completeColumns),
       marketNews: completeMarket
         ? {
             ok: true,
@@ -295,7 +330,7 @@ async function main() {
           }
     },
     localCandidates: {
-      column: columnCandidate,
+      column: columnCandidates,
       market: marketCandidates
     },
     errors,

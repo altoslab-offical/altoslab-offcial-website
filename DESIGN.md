@@ -118,6 +118,14 @@ Buttons:
 Cards:
 
 - Portfolio cards may use image-first composition.
+
+## Blog Article Visual Stability
+
+- Article covers use a stable 1200:630 ratio with centered `object-fit: cover`.
+- Cover spacing should feel editorial, not poster-like: enough air after the
+  subtitle, but no large blank before the summary or first body section.
+- H2 spacing should create scan rhythm without pushing body content far below
+  the viewport on desktop or mobile.
 - Radius should stay at or below 8px unless preserving an existing pill CTA.
 - Do not place cards inside cards.
 - Use one clear title, one metadata tag, and one action affordance.

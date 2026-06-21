@@ -7,7 +7,8 @@ import http from "node:http";
 import path from "node:path";
 import process from "node:process";
 
-const ROOT_DIR = "/Users/asdc163/Documents/官方網站";
+const ROOT_DIR =
+  process.env.ALTOS_BLOG_WORKER_ROOT || "/Users/asdc163/LocalProjects/altoslab-offcial-website-runtime";
 const WORKER_URL = "https://altoslab-official-website.altoslab-ai.workers.dev";
 const CUSTOM_DOMAIN_URL = "https://altoslab-ai.cc";
 const HOST = process.env.ALTOS_N8N_BRIDGE_HOST || "127.0.0.1";
@@ -60,18 +61,20 @@ function dateArgs(input = {}) {
   return /^\d{4}-\d{2}-\d{2}$/.test(date) ? ["--date", date] : [];
 }
 
+function slotArgs(input = {}, fallback = "morning") {
+  const slot = typeof input.slot === "string" ? input.slot.trim() : "";
+  return ["--slot", /^(morning|afternoon|evening)$/.test(slot) ? slot : fallback];
+}
+
 const jobs = {
   health: {
     timeoutMs: 45_000,
     command: () =>
-      nodeCommand("scripts/cloudflare-smoke.mjs", [
+      nodeCommand("scripts/aws-production-smoke.mjs", [
         "--base-url",
         DEFAULT_BASE_URL,
-        "--fast",
-        "--attempts",
-        "2",
-        "--timeout-ms",
-        "8000"
+        "--expected-provider",
+        "aws-s3"
       ])
   },
   "worker-smoke": {
@@ -80,7 +83,7 @@ const jobs = {
   },
   "custom-domain-smoke": {
     timeoutMs: 90_000,
-    command: () => nodeCommand("scripts/cloudflare-smoke.mjs", ["--base-url", CUSTOM_DOMAIN_URL])
+    command: () => nodeCommand("scripts/aws-production-smoke.mjs", ["--base-url", CUSTOM_DOMAIN_URL, "--expected-provider", "aws-s3"])
   },
   doctor: {
     timeoutMs: 90_000,
@@ -99,8 +102,7 @@ const jobs = {
     command: (input) => nodeCommand("scripts/blog-scheduled-runner.mjs", [
       "--prep",
       ...dateArgs(input),
-      "--slot",
-      "morning",
+      ...slotArgs(input),
       "--base-url",
       DEFAULT_BASE_URL
     ])
@@ -110,8 +112,7 @@ const jobs = {
     command: (input) => nodeCommand("scripts/blog-scheduled-runner.mjs", [
       "--column-status",
       ...dateArgs(input),
-      "--slot",
-      "morning",
+      ...slotArgs(input),
       "--base-url",
       DEFAULT_BASE_URL,
       "--no-lock"
@@ -122,8 +123,7 @@ const jobs = {
     command: (input) => nodeCommand("scripts/blog-scheduled-runner.mjs", [
       "--column-validate",
       ...dateArgs(input),
-      "--slot",
-      "morning",
+      ...slotArgs(input),
       "--base-url",
       DEFAULT_BASE_URL
     ])
@@ -133,8 +133,7 @@ const jobs = {
     command: (input) => nodeCommand("scripts/blog-scheduled-runner.mjs", [
       "--release",
       ...dateArgs(input),
-      "--slot",
-      "morning",
+      ...slotArgs(input),
       "--base-url",
       DEFAULT_BASE_URL,
       "--force-release"

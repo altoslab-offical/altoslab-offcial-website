@@ -43,7 +43,7 @@ export async function GET() {
       autoPublishBlog: process.env.AUTO_PUBLISH_BLOG !== "false",
       blogLanguages: BLOG_LANGUAGES,
       dailyBlogSlots: ["morning", "afternoon", "evening"],
-      dailyColumnTarget: Number(process.env.ALTOS_BLOG_COLUMN_DAILY_LIMIT || "1"),
+      dailyColumnTarget: Number(process.env.ALTOS_BLOG_COLUMN_DAILY_LIMIT || "3"),
       marketScanWindows: [
         "10:15",
         "11:15",

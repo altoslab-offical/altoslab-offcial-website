@@ -433,7 +433,7 @@ function buildInsights({ targetUrl, health, posts, qualityPosts, surface, ga4, s
       { key: "blog covers have alt text", ok: scoredPosts.length > 0 && percent(postsWithImages, scoredPosts.length) >= 90, weight: 8 },
       {
         key: "daily column minimum matches configured target",
-        ok: health?.integrations?.dailyColumnTarget === Number(process.env.ALTOS_BLOG_COLUMN_DAILY_LIMIT || "1"),
+        ok: health?.integrations?.dailyColumnTarget === Number(process.env.ALTOS_BLOG_COLUMN_DAILY_LIMIT || "3"),
         weight: 8
       }
     ],

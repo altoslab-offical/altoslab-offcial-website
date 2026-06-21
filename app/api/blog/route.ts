@@ -18,7 +18,7 @@ export async function GET(request: Request) {
     { posts: posts.map(serializer) },
     {
       headers: {
-        "Cache-Control": "public, max-age=60, stale-while-revalidate=300"
+        "Cache-Control": "public, max-age=300, stale-while-revalidate=1800"
       }
     }
   );

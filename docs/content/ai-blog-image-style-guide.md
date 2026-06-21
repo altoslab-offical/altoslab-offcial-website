@@ -68,6 +68,7 @@
 
 - generic neon grid（泛泛霓虹網格）
 - fake dashboard（看起來像未接資料的 Dashboard 偽作）
+- tilted / skewed / slanted generated composition（看起來歪斜或像被錯誤裁切）
 - robot handshake / 人形機器人擬人化
 - stock business meeting（會議照、握手照、商務頭像）
 - 文字亂碼 / 無意義大量字體
@@ -76,6 +77,21 @@
 - AI 頭顱/晶片 clichés（腦袋、金色晶片、電路腦殼）
 - 過密線條與硬體零件堆疊（像 CAD 教科書風）
 - 單一主題過度反覆：藍色霓虹+金屬面板+浮動線條（易廉價化）
+
+## 3.1) 2026-06-22 Runtime Gate Update
+
+正式站 image gate 已把這些詞列為低質或疲勞風險：`placeholder`,
+`fake dashboard`, `network map`, `glass cube`, `tilted`, `skewed`, `slanted`,
+`抽象科技`, `假儀表板`, `網路圖`, `玻璃方塊`, `斜的`, `歪斜`。
+
+Hermes 產圖時不要把禁忌詞放進 negative prompt，因為 metadata scanner
+不推理意圖，只看風險詞是否進入 public metadata。改用正向描述：
+
+- concrete source/event anchor；
+- one visible subject；
+- clean editorial hierarchy；
+- brand-free, typography-free, human-free；
+- source/rights/credit 可回查。
 
 ---
 

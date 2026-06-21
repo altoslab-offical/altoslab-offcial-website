@@ -76,7 +76,7 @@ if (publicHomepage) {
 }
 
 assert(route.includes("CLOUDFLARE_HOMEPAGE_ASSET = \"/altoslab-homepage\""), "homepage route reads the Cloudflare homepage asset");
-assert(route.includes("withLaunchMetadata(html)"), "homepage route wraps the original homepage HTML");
+assert(/withLaunchMetadata\(\s*(?:html|sourceHtml)\s*\)/.test(route), "homepage route wraps the original homepage HTML");
 assert(route.includes("homepageAnalyticsSnippet()"), "homepage route keeps analytics without visual replacement");
 assert(route.includes("wondaWidgetSnippet()"), "homepage route keeps WonDa widget as a script-only integration");
 assert(route.includes("withCloudflareHomepageAssetHeaders(await readCloudflareHomepageResponse(request))"), "Cloudflare homepage returns the static asset without request-time HTML rewriting");

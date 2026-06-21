@@ -2,7 +2,7 @@
 
 ## Decision
 
-The official website and CMS runtime stay in the cloud on Cloudflare Workers + Cloudflare D1, with Cloudflare KV retained for generated media and best-effort public cache. n8n runs locally on Tommy's Mac and replaces the scattered local scheduling layer. It is an orchestration and monitoring control plane, not the public website runtime.
+The official website and CMS runtime stay in the cloud on AWS ECS/Fargate + AWS S3 CMS. Cloudflare Worker/D1/KV routes are legacy diagnostics and rollback context, not production truth. n8n runs locally on Tommy's Mac and replaces the scattered local scheduling layer. It is an orchestration and monitoring control plane, not the public website runtime.
 
 ## Responsibilities
 
@@ -10,18 +10,18 @@ n8n owns:
 
 - Timed market-news scan windows.
 - Scheduled prep/release wakeups.
-- Cloudflare health monitoring.
+- AWS production health monitoring.
 - SEO/GEO report generation.
 - Codex-operated automatic QA/release gate execution through the local bridge.
 - Column candidate status checks, validate-only advancement, and ready-candidate release polling.
-- Daily closeout enforcement: by 23:35 Asia/Taipei, the public blog must show one complete 9-language daily column group and one complete 9-language market-news group for the Taipei date, or n8n records a failed execution with the exact blocker.
+- Daily closeout enforcement: by 23:35 Asia/Taipei, the public blog must show three complete 9-language daily column groups and one complete 9-language market-news group for the Taipei date, or n8n records a failed execution with the exact blocker.
 - Future status notifications.
 - Retry visibility and execution history.
 
 n8n does not own:
 
 - Public website serving.
-- Cloudflare Worker deployments.
+- AWS ECS deployments.
 - CMS encryption keys or production D1/KV seeding.
 - Public UI Change Control: n8n must not change homepage, Blog, article shell, header, sidebar, language switcher, contact CTA, WonDa widget placement, visual tokens, public route ownership, or `app/globals.css` styles. If a workflow repair appears to need UI changes, record the blocker and stop.
 - Blog UI Stability Contract: n8n must not change `/blog`, `/:language/blog`, `components/BlogIndex.tsx`, `app/globals.css` `blog-craft-*` styles, route ownership, or visual hierarchy.

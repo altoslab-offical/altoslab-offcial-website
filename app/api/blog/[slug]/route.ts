@@ -10,5 +10,12 @@ export async function GET(request: Request, context: Params) {
   const language = new URL(request.url).searchParams.get("language") as BlogLanguage | null;
   const post = await getPublishedBlogPost(slug, language || undefined);
   if (!post) return NextResponse.json({ error: "Not found" }, { status: 404 });
-  return NextResponse.json({ post: toPublicBlogPost(post) });
+  return NextResponse.json(
+    { post: toPublicBlogPost(post) },
+    {
+      headers: {
+        "Cache-Control": "public, max-age=300, stale-while-revalidate=1800"
+      }
+    }
+  );
 }

@@ -30,12 +30,12 @@ Newsletters and commentary: Axios, The Skimm, Morning Brew, Finimize, The Hustle
 ## ALTOS LAB House Pattern
 
 1. Open with a concrete decision, scene or source-backed event.
-2. State the ALTOS LAB judgment early.
+2. Make the article's useful angle clear early.
 3. Explain the source trail without sounding like a bibliography.
 4. Translate technical terms into operational meaning.
-5. Add the tradeoff: cost, risk, timing, who should wait.
-6. Give a short action path: what to check this week, who owns it, what to measure.
-7. End with a useful test, not a slogan.
+5. Add tradeoff, cost, risk, timing or next action only when it improves reader value.
+6. Keep the structure natural for the article type and target language.
+7. End with something useful, not a slogan.
 
 ## Title And Subtitle Rules
 

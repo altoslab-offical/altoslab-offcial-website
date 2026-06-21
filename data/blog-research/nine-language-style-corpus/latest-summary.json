@@ -1,190 +1,50 @@
 {
-  "generated_at": "2026-06-21T13:55:17.376Z",
+  "generated_at": "2026-06-21T16:52:07.395Z",
   "seed_sites": 36,
-  "target_per_site": 50,
-  "total_target": 1800,
-  "absorbed_total": 0,
-  "complete_sites": 0,
+  "target_per_site": 8,
+  "total_target": 288,
+  "absorbed_total": 261,
+  "complete_sites": 28,
   "incomplete_sites": [
-    {
-      "id": "ithome-tw-ai",
-      "absorbed": 0,
-      "target": 50
-    },
     {
       "id": "inside-tw-ai",
       "absorbed": 0,
-      "target": 50
+      "target": 8
     },
     {
       "id": "techorange-tw-ai",
-      "absorbed": 0,
-      "target": 50
-    },
-    {
-      "id": "google-cloud-learn-zh-tw",
-      "absorbed": 0,
-      "target": 50
+      "absorbed": 6,
+      "target": 8
     },
     {
       "id": "jiqizhixin-cn",
-      "absorbed": 0,
-      "target": 50
-    },
-    {
-      "id": "qbitai-cn",
-      "absorbed": 0,
-      "target": 50
-    },
-    {
-      "id": "baidu-cloud-dev-cn",
-      "absorbed": 0,
-      "target": 50
-    },
-    {
-      "id": "aliyun-dev-cn",
-      "absorbed": 0,
-      "target": 50
+      "absorbed": 6,
+      "target": 8
     },
     {
       "id": "openai-index",
-      "absorbed": 0,
-      "target": 50
-    },
-    {
-      "id": "anthropic-news",
-      "absorbed": 0,
-      "target": 50
-    },
-    {
-      "id": "google-deepmind-blog",
-      "absorbed": 0,
-      "target": 50
-    },
-    {
-      "id": "huggingface-blog",
-      "absorbed": 0,
-      "target": 50
-    },
-    {
-      "id": "ainow-jp",
-      "absorbed": 0,
-      "target": 50
-    },
-    {
-      "id": "ai-scholar-jp",
-      "absorbed": 0,
-      "target": 50
-    },
-    {
-      "id": "preferred-networks-tech",
-      "absorbed": 0,
-      "target": 50
-    },
-    {
-      "id": "google-cloud-japan-blog",
-      "absorbed": 0,
-      "target": 50
+      "absorbed": 2,
+      "target": 8
     },
     {
       "id": "naver-d2",
-      "absorbed": 0,
-      "target": 50
-    },
-    {
-      "id": "upstage-blog-ko",
-      "absorbed": 0,
-      "target": 50
-    },
-    {
-      "id": "lg-ai-research",
-      "absorbed": 0,
-      "target": 50
-    },
-    {
-      "id": "kakao-tech",
-      "absorbed": 0,
-      "target": 50
-    },
-    {
-      "id": "heise-ai",
-      "absorbed": 0,
-      "target": 50
-    },
-    {
-      "id": "t3n-ai",
-      "absorbed": 0,
-      "target": 50
+      "absorbed": 3,
+      "target": 8
     },
     {
       "id": "fraunhofer-iais",
-      "absorbed": 0,
-      "target": 50
-    },
-    {
-      "id": "appliedai-de",
-      "absorbed": 0,
-      "target": 50
-    },
-    {
-      "id": "actuia-fr",
-      "absorbed": 0,
-      "target": 50
+      "absorbed": 6,
+      "target": 8
     },
     {
       "id": "lebigdata-fr",
-      "absorbed": 0,
-      "target": 50
-    },
-    {
-      "id": "inria-fr",
-      "absorbed": 0,
-      "target": 50
-    },
-    {
-      "id": "mistral-ai-fr",
-      "absorbed": 0,
-      "target": 50
-    },
-    {
-      "id": "planeta-chatbot",
-      "absorbed": 0,
-      "target": 50
-    },
-    {
-      "id": "bbva-ai-factory",
-      "absorbed": 0,
-      "target": 50
-    },
-    {
-      "id": "xataka-ai",
-      "absorbed": 0,
-      "target": 50
-    },
-    {
-      "id": "google-cloud-learn-es",
-      "absorbed": 0,
-      "target": 50
-    },
-    {
-      "id": "alura-ia",
-      "absorbed": 0,
-      "target": 50
-    },
-    {
-      "id": "totvs-blog-ai",
-      "absorbed": 0,
-      "target": 50
+      "absorbed": 7,
+      "target": 8
     },
     {
       "id": "startse-ai",
-      "absorbed": 0,
-      "target": 50
-    },
-    {
-      "id": "mit-tech-review-brasil",
-      "absorbed": 0,
-      "target": 50
+      "absorbed": 7,
+      "target": 8
     }
   ],
   "sites": [
@@ -193,20 +53,20 @@
       "name": "iThome AI",
       "language": "zh-Hant",
       "country": "TW",
-      "target": 50,
-      "absorbed": 0,
-      "meets_target": false,
-      "title_median_chars": 0,
-      "outline_ratio": 0,
+      "target": 8,
+      "absorbed": 8,
+      "meets_target": true,
+      "title_median_chars": 15,
+      "outline_ratio": 1,
       "faq_ratio": 0,
-      "image_ratio": 0
+      "image_ratio": 1
     },
     {
       "id": "inside-tw-ai",
       "name": "INSIDE AI",
       "language": "zh-Hant",
       "country": "TW",
-      "target": 50,
+      "target": 8,
       "absorbed": 0,
       "meets_target": false,
       "title_median_chars": 0,
@@ -219,192 +79,192 @@
       "name": "TechOrange AI",
       "language": "zh-Hant",
       "country": "TW",
-      "target": 50,
-      "absorbed": 0,
+      "target": 8,
+      "absorbed": 6,
       "meets_target": false,
-      "title_median_chars": 0,
-      "outline_ratio": 0,
+      "title_median_chars": 24,
+      "outline_ratio": 1,
       "faq_ratio": 0,
-      "image_ratio": 0
+      "image_ratio": 1
     },
     {
       "id": "google-cloud-learn-zh-tw",
       "name": "Google Cloud Learn zh-TW",
       "language": "zh-Hant",
       "country": "TW",
-      "target": 50,
-      "absorbed": 0,
-      "meets_target": false,
-      "title_median_chars": 0,
-      "outline_ratio": 0,
-      "faq_ratio": 0,
-      "image_ratio": 0
+      "target": 8,
+      "absorbed": 8,
+      "meets_target": true,
+      "title_median_chars": 51,
+      "outline_ratio": 1,
+      "faq_ratio": 1,
+      "image_ratio": 1
     },
     {
       "id": "jiqizhixin-cn",
       "name": "机器之心",
       "language": "zh-CN",
       "country": "CN",
-      "target": 50,
-      "absorbed": 0,
+      "target": 8,
+      "absorbed": 6,
       "meets_target": false,
-      "title_median_chars": 0,
+      "title_median_chars": 9,
       "outline_ratio": 0,
       "faq_ratio": 0,
-      "image_ratio": 0
+      "image_ratio": 0.17
     },
     {
       "id": "qbitai-cn",
       "name": "量子位",
       "language": "zh-CN",
       "country": "CN",
-      "target": 50,
-      "absorbed": 0,
-      "meets_target": false,
-      "title_median_chars": 0,
-      "outline_ratio": 0,
+      "target": 8,
+      "absorbed": 8,
+      "meets_target": true,
+      "title_median_chars": 10,
+      "outline_ratio": 1,
       "faq_ratio": 0,
-      "image_ratio": 0
+      "image_ratio": 1
     },
     {
       "id": "baidu-cloud-dev-cn",
       "name": "百度智能云开发者社区",
       "language": "zh-CN",
       "country": "CN",
-      "target": 50,
-      "absorbed": 0,
-      "meets_target": false,
-      "title_median_chars": 0,
-      "outline_ratio": 0,
+      "target": 8,
+      "absorbed": 8,
+      "meets_target": true,
+      "title_median_chars": 16,
+      "outline_ratio": 0.88,
       "faq_ratio": 0,
-      "image_ratio": 0
+      "image_ratio": 0.75
     },
     {
       "id": "aliyun-dev-cn",
       "name": "阿里云开发者社区",
       "language": "zh-CN",
       "country": "CN",
-      "target": 50,
-      "absorbed": 0,
-      "meets_target": false,
-      "title_median_chars": 0,
-      "outline_ratio": 0,
+      "target": 8,
+      "absorbed": 8,
+      "meets_target": true,
+      "title_median_chars": 25,
+      "outline_ratio": 1,
       "faq_ratio": 0,
-      "image_ratio": 0
+      "image_ratio": 1
     },
     {
       "id": "openai-index",
       "name": "OpenAI Index",
       "language": "en",
       "country": "US",
-      "target": 50,
-      "absorbed": 0,
+      "target": 8,
+      "absorbed": 2,
       "meets_target": false,
-      "title_median_chars": 0,
-      "outline_ratio": 0,
-      "faq_ratio": 0,
-      "image_ratio": 0
+      "title_median_chars": 92,
+      "outline_ratio": 1,
+      "faq_ratio": 1,
+      "image_ratio": 1
     },
     {
       "id": "anthropic-news",
       "name": "Anthropic News",
       "language": "en",
       "country": "US",
-      "target": 50,
-      "absorbed": 0,
-      "meets_target": false,
-      "title_median_chars": 0,
-      "outline_ratio": 0,
-      "faq_ratio": 0,
-      "image_ratio": 0
+      "target": 8,
+      "absorbed": 8,
+      "meets_target": true,
+      "title_median_chars": 39,
+      "outline_ratio": 1,
+      "faq_ratio": 0.25,
+      "image_ratio": 0.88
     },
     {
       "id": "google-deepmind-blog",
       "name": "Google DeepMind Blog",
       "language": "en",
       "country": "US",
-      "target": 50,
-      "absorbed": 0,
-      "meets_target": false,
-      "title_median_chars": 0,
-      "outline_ratio": 0,
-      "faq_ratio": 0,
-      "image_ratio": 0
+      "target": 8,
+      "absorbed": 8,
+      "meets_target": true,
+      "title_median_chars": 33,
+      "outline_ratio": 0.88,
+      "faq_ratio": 0.13,
+      "image_ratio": 1
     },
     {
       "id": "huggingface-blog",
       "name": "Hugging Face Blog",
       "language": "en",
       "country": "US",
-      "target": 50,
-      "absorbed": 0,
-      "meets_target": false,
-      "title_median_chars": 0,
-      "outline_ratio": 0,
+      "target": 8,
+      "absorbed": 8,
+      "meets_target": true,
+      "title_median_chars": 54,
+      "outline_ratio": 0.75,
       "faq_ratio": 0,
-      "image_ratio": 0
+      "image_ratio": 1
     },
     {
       "id": "ainow-jp",
       "name": "AINOW",
       "language": "ja",
       "country": "JP",
-      "target": 50,
-      "absorbed": 0,
-      "meets_target": false,
-      "title_median_chars": 0,
-      "outline_ratio": 0,
-      "faq_ratio": 0,
-      "image_ratio": 0
+      "target": 8,
+      "absorbed": 8,
+      "meets_target": true,
+      "title_median_chars": 27,
+      "outline_ratio": 0.88,
+      "faq_ratio": 0.13,
+      "image_ratio": 1
     },
     {
       "id": "ai-scholar-jp",
       "name": "AI-SCHOLAR",
       "language": "ja",
       "country": "JP",
-      "target": 50,
-      "absorbed": 0,
-      "meets_target": false,
-      "title_median_chars": 0,
-      "outline_ratio": 0,
+      "target": 8,
+      "absorbed": 8,
+      "meets_target": true,
+      "title_median_chars": 67,
+      "outline_ratio": 1,
       "faq_ratio": 0,
-      "image_ratio": 0
+      "image_ratio": 0.63
     },
     {
       "id": "preferred-networks-tech",
       "name": "Preferred Networks Tech Blog",
       "language": "ja",
       "country": "JP",
-      "target": 50,
-      "absorbed": 0,
-      "meets_target": false,
-      "title_median_chars": 0,
-      "outline_ratio": 0,
+      "target": 8,
+      "absorbed": 8,
+      "meets_target": true,
+      "title_median_chars": 42,
+      "outline_ratio": 1,
       "faq_ratio": 0,
-      "image_ratio": 0
+      "image_ratio": 1
     },
     {
       "id": "google-cloud-japan-blog",
       "name": "Google Cloud Japan Blog",
       "language": "ja",
       "country": "JP",
-      "target": 50,
-      "absorbed": 0,
-      "meets_target": false,
-      "title_median_chars": 0,
-      "outline_ratio": 0,
-      "faq_ratio": 0,
-      "image_ratio": 0
+      "target": 8,
+      "absorbed": 8,
+      "meets_target": true,
+      "title_median_chars": 18,
+      "outline_ratio": 1,
+      "faq_ratio": 1,
+      "image_ratio": 1
     },
     {
       "id": "naver-d2",
       "name": "NAVER D2",
       "language": "ko",
       "country": "KR",
-      "target": 50,
-      "absorbed": 0,
+      "target": 8,
+      "absorbed": 3,
       "meets_target": false,
-      "title_median_chars": 0,
+      "title_median_chars": 8,
       "outline_ratio": 0,
       "faq_ratio": 0,
       "image_ratio": 0
@@ -414,265 +274,250 @@
       "name": "Upstage Blog",
       "language": "ko",
       "country": "KR",
-      "target": 50,
-      "absorbed": 0,
-      "meets_target": false,
-      "title_median_chars": 0,
-      "outline_ratio": 0,
-      "faq_ratio": 0,
-      "image_ratio": 0
+      "target": 8,
+      "absorbed": 8,
+      "meets_target": true,
+      "title_median_chars": 29,
+      "outline_ratio": 1,
+      "faq_ratio": 0.13,
+      "image_ratio": 1
     },
     {
       "id": "lg-ai-research",
       "name": "LG AI Research",
       "language": "ko",
       "country": "KR",
-      "target": 50,
-      "absorbed": 0,
-      "meets_target": false,
-      "title_median_chars": 0,
+      "target": 8,
+      "absorbed": 8,
+      "meets_target": true,
+      "title_median_chars": 34,
       "outline_ratio": 0,
-      "faq_ratio": 0,
-      "image_ratio": 0
+      "faq_ratio": 1,
+      "image_ratio": 1
     },
     {
       "id": "kakao-tech",
       "name": "kakao tech",
       "language": "ko",
       "country": "KR",
-      "target": 50,
-      "absorbed": 0,
-      "meets_target": false,
-      "title_median_chars": 0,
-      "outline_ratio": 0,
-      "faq_ratio": 0,
-      "image_ratio": 0
+      "target": 8,
+      "absorbed": 8,
+      "meets_target": true,
+      "title_median_chars": 22,
+      "outline_ratio": 1,
+      "faq_ratio": 0.13,
+      "image_ratio": 1
     },
     {
       "id": "heise-ai",
       "name": "heise AI",
       "language": "de",
       "country": "DE",
-      "target": 50,
-      "absorbed": 0,
-      "meets_target": false,
-      "title_median_chars": 0,
-      "outline_ratio": 0,
-      "faq_ratio": 0,
-      "image_ratio": 0
+      "target": 8,
+      "absorbed": 8,
+      "meets_target": true,
+      "title_median_chars": 46,
+      "outline_ratio": 1,
+      "faq_ratio": 0.13,
+      "image_ratio": 1
     },
     {
       "id": "t3n-ai",
       "name": "t3n AI",
       "language": "de",
       "country": "DE",
-      "target": 50,
-      "absorbed": 0,
-      "meets_target": false,
-      "title_median_chars": 0,
-      "outline_ratio": 0,
-      "faq_ratio": 0,
-      "image_ratio": 0
+      "target": 8,
+      "absorbed": 8,
+      "meets_target": true,
+      "title_median_chars": 49,
+      "outline_ratio": 1,
+      "faq_ratio": 1,
+      "image_ratio": 1
     },
     {
       "id": "fraunhofer-iais",
       "name": "Fraunhofer IAIS",
       "language": "de",
       "country": "DE",
-      "target": 50,
-      "absorbed": 0,
+      "target": 8,
+      "absorbed": 6,
       "meets_target": false,
-      "title_median_chars": 0,
-      "outline_ratio": 0,
+      "title_median_chars": 34,
+      "outline_ratio": 1,
       "faq_ratio": 0,
-      "image_ratio": 0
+      "image_ratio": 1
     },
     {
       "id": "appliedai-de",
       "name": "appliedAI",
       "language": "de",
       "country": "DE",
-      "target": 50,
-      "absorbed": 0,
-      "meets_target": false,
-      "title_median_chars": 0,
-      "outline_ratio": 0,
-      "faq_ratio": 0,
-      "image_ratio": 0
+      "target": 8,
+      "absorbed": 8,
+      "meets_target": true,
+      "title_median_chars": 56,
+      "outline_ratio": 1,
+      "faq_ratio": 0.63,
+      "image_ratio": 1
     },
     {
       "id": "actuia-fr",
       "name": "ActuIA",
       "language": "fr",
       "country": "FR",
-      "target": 50,
-      "absorbed": 0,
-      "meets_target": false,
-      "title_median_chars": 0,
-      "outline_ratio": 0,
+      "target": 8,
+      "absorbed": 8,
+      "meets_target": true,
+      "title_median_chars": 36,
+      "outline_ratio": 1,
       "faq_ratio": 0,
-      "image_ratio": 0
+      "image_ratio": 1
     },
     {
       "id": "lebigdata-fr",
       "name": "LEBIGDATA.FR",
       "language": "fr",
       "country": "FR",
-      "target": 50,
-      "absorbed": 0,
+      "target": 8,
+      "absorbed": 7,
       "meets_target": false,
-      "title_median_chars": 0,
-      "outline_ratio": 0,
-      "faq_ratio": 0,
-      "image_ratio": 0
+      "title_median_chars": 44,
+      "outline_ratio": 0.86,
+      "faq_ratio": 0.86,
+      "image_ratio": 1
     },
     {
       "id": "inria-fr",
       "name": "Inria",
       "language": "fr",
       "country": "FR",
-      "target": 50,
-      "absorbed": 0,
-      "meets_target": false,
-      "title_median_chars": 0,
-      "outline_ratio": 0,
+      "target": 8,
+      "absorbed": 8,
+      "meets_target": true,
+      "title_median_chars": 32,
+      "outline_ratio": 0.75,
       "faq_ratio": 0,
-      "image_ratio": 0
+      "image_ratio": 0.75
     },
     {
       "id": "mistral-ai-fr",
       "name": "Mistral AI",
       "language": "fr",
       "country": "FR",
-      "target": 50,
-      "absorbed": 0,
-      "meets_target": false,
-      "title_median_chars": 0,
-      "outline_ratio": 0,
+      "target": 8,
+      "absorbed": 8,
+      "meets_target": true,
+      "title_median_chars": 74,
+      "outline_ratio": 1,
       "faq_ratio": 0,
-      "image_ratio": 0
+      "image_ratio": 1
     },
     {
       "id": "planeta-chatbot",
       "name": "Planeta Chatbot",
       "language": "es",
       "country": "ES",
-      "target": 50,
-      "absorbed": 0,
-      "meets_target": false,
-      "title_median_chars": 0,
-      "outline_ratio": 0,
-      "faq_ratio": 0,
-      "image_ratio": 0
+      "target": 8,
+      "absorbed": 8,
+      "meets_target": true,
+      "title_median_chars": 28,
+      "outline_ratio": 1,
+      "faq_ratio": 1,
+      "image_ratio": 1
     },
     {
       "id": "bbva-ai-factory",
       "name": "BBVA AI Factory",
       "language": "es",
       "country": "ES",
-      "target": 50,
-      "absorbed": 0,
-      "meets_target": false,
-      "title_median_chars": 0,
-      "outline_ratio": 0,
-      "faq_ratio": 0,
-      "image_ratio": 0
+      "target": 8,
+      "absorbed": 8,
+      "meets_target": true,
+      "title_median_chars": 70,
+      "outline_ratio": 1,
+      "faq_ratio": 1,
+      "image_ratio": 1
     },
     {
       "id": "xataka-ai",
       "name": "Xataka AI",
       "language": "es",
       "country": "ES",
-      "target": 50,
-      "absorbed": 0,
-      "meets_target": false,
-      "title_median_chars": 0,
-      "outline_ratio": 0,
+      "target": 8,
+      "absorbed": 8,
+      "meets_target": true,
+      "title_median_chars": 54,
+      "outline_ratio": 1,
       "faq_ratio": 0,
-      "image_ratio": 0
+      "image_ratio": 1
     },
     {
       "id": "google-cloud-learn-es",
       "name": "Google Cloud Learn es-419",
       "language": "es",
       "country": "LATAM",
-      "target": 50,
-      "absorbed": 0,
-      "meets_target": false,
-      "title_median_chars": 0,
-      "outline_ratio": 0,
-      "faq_ratio": 0,
-      "image_ratio": 0
+      "target": 8,
+      "absorbed": 8,
+      "meets_target": true,
+      "title_median_chars": 51,
+      "outline_ratio": 1,
+      "faq_ratio": 1,
+      "image_ratio": 1
     },
     {
       "id": "alura-ia",
       "name": "Alura IA",
       "language": "pt-BR",
       "country": "BR",
-      "target": 50,
-      "absorbed": 0,
-      "meets_target": false,
-      "title_median_chars": 0,
-      "outline_ratio": 0,
-      "faq_ratio": 0,
-      "image_ratio": 0
+      "target": 8,
+      "absorbed": 8,
+      "meets_target": true,
+      "title_median_chars": 54,
+      "outline_ratio": 1,
+      "faq_ratio": 1,
+      "image_ratio": 1
     },
     {
       "id": "totvs-blog-ai",
       "name": "TOTVS Blog AI",
       "language": "pt-BR",
       "country": "BR",
-      "target": 50,
-      "absorbed": 0,
-      "meets_target": false,
-      "title_median_chars": 0,
-      "outline_ratio": 0,
+      "target": 8,
+      "absorbed": 8,
+      "meets_target": true,
+      "title_median_chars": 55,
+      "outline_ratio": 1,
       "faq_ratio": 0,
-      "image_ratio": 0
+      "image_ratio": 1
     },
     {
       "id": "startse-ai",
       "name": "StartSe AI",
       "language": "pt-BR",
       "country": "BR",
-      "target": 50,
-      "absorbed": 0,
+      "target": 8,
+      "absorbed": 7,
       "meets_target": false,
-      "title_median_chars": 0,
-      "outline_ratio": 0,
-      "faq_ratio": 0,
-      "image_ratio": 0
+      "title_median_chars": 31,
+      "outline_ratio": 0.86,
+      "faq_ratio": 0.29,
+      "image_ratio": 0.86
     },
     {
       "id": "mit-tech-review-brasil",
       "name": "MIT Technology Review Brasil",
       "language": "pt-BR",
       "country": "BR",
-      "target": 50,
-      "absorbed": 0,
-      "meets_target": false,
-      "title_median_chars": 0,
-      "outline_ratio": 0,
+      "target": 8,
+      "absorbed": 8,
+      "meets_target": true,
+      "title_median_chars": 84,
+      "outline_ratio": 1,
       "faq_ratio": 0,
-      "image_ratio": 0
+      "image_ratio": 1
     }
   ],
   "failures": [
-    {
-      "site_id": "techorange-tw-ai",
-      "url": "https://techorange.com/latest/",
-      "error": "403 Forbidden"
-    },
-    {
-      "site_id": "techorange-tw-ai",
-      "url": "https://techorange.com/sitemap.xml",
-      "error": "403 Forbidden"
-    },
-    {
-      "site_id": "techorange-tw-ai",
-      "url": "https://techorange.com/rss.xml",
-      "error": "403 Forbidden"
-    },
     {
       "site_id": "inside-tw-ai",
       "url": "https://www.inside.com.tw/category/ai",
@@ -694,53 +539,13 @@
       "error": "403 Forbidden"
     },
     {
-      "site_id": "google-cloud-learn-zh-tw",
-      "url": "https://cloud.google.com/feed",
-      "error": "404 Not Found"
-    },
-    {
-      "site_id": "google-cloud-learn-zh-tw",
-      "url": "https://cloud.google.com/rss.xml",
-      "error": "404 Not Found"
-    },
-    {
-      "site_id": "jiqizhixin-cn",
-      "url": "https://www.jiqizhixin.com/sitemap.xml",
-      "error": "404 Not Found"
-    },
-    {
-      "site_id": "qbitai-cn",
-      "url": "https://www.qbitai.com/sitemap.xml",
-      "error": "403 Forbidden"
-    },
-    {
-      "site_id": "qbitai-cn",
-      "url": "https://www.qbitai.com/rss.xml",
-      "error": "404 Not Found"
-    },
-    {
-      "site_id": "baidu-cloud-dev-cn",
-      "url": "https://cloud.baidu.com/sitemap.xml",
-      "error": "404 Not Found"
-    },
-    {
-      "site_id": "baidu-cloud-dev-cn",
-      "url": "https://cloud.baidu.com/feed",
-      "error": "404 Not Found"
-    },
-    {
-      "site_id": "baidu-cloud-dev-cn",
-      "url": "https://cloud.baidu.com/rss.xml",
-      "error": "404 Not Found"
-    },
-    {
       "site_id": "openai-index",
       "url": "https://openai.com/index/",
       "error": "403 Forbidden"
     },
     {
-      "site_id": "huggingface-blog",
-      "url": "https://huggingface.co/rss.xml",
+      "site_id": "jiqizhixin-cn",
+      "url": "https://www.jiqizhixin.com/sitemap.xml",
       "error": "404 Not Found"
     },
     {
@@ -764,18 +569,18 @@
       "error": "404 Not Found"
     },
     {
-      "site_id": "anthropic-news",
-      "url": "https://www.anthropic.com/news/rss.xml",
+      "site_id": "baidu-cloud-dev-cn",
+      "url": "https://cloud.baidu.com/sitemap.xml",
       "error": "404 Not Found"
     },
     {
-      "site_id": "preferred-networks-tech",
-      "url": "https://tech.preferred.jp/feed",
+      "site_id": "baidu-cloud-dev-cn",
+      "url": "https://cloud.baidu.com/feed",
       "error": "404 Not Found"
     },
     {
-      "site_id": "preferred-networks-tech",
-      "url": "https://tech.preferred.jp/rss.xml",
+      "site_id": "baidu-cloud-dev-cn",
+      "url": "https://cloud.baidu.com/rss.xml",
       "error": "404 Not Found"
     },
     {
@@ -796,71 +601,6 @@
     {
       "site_id": "naver-d2",
       "url": "https://d2.naver.com/rss.xml",
-      "error": "404 Not Found"
-    },
-    {
-      "site_id": "lg-ai-research",
-      "url": "https://www.lgresearch.ai/feed",
-      "error": "404 Not Found"
-    },
-    {
-      "site_id": "lg-ai-research",
-      "url": "https://www.lgresearch.ai/rss.xml",
-      "error": "404 Not Found"
-    },
-    {
-      "site_id": "kakao-tech",
-      "url": "https://tech.kakao.com/rss.xml",
-      "error": "404 Server Error"
-    },
-    {
-      "site_id": "fraunhofer-iais",
-      "url": "https://www.iais.fraunhofer.de/sitemap.xml",
-      "error": "404 Not Found"
-    },
-    {
-      "site_id": "fraunhofer-iais",
-      "url": "https://www.iais.fraunhofer.de/feed",
-      "error": "404 Not Found"
-    },
-    {
-      "site_id": "fraunhofer-iais",
-      "url": "https://www.iais.fraunhofer.de/rss.xml",
-      "error": "404 Not Found"
-    },
-    {
-      "site_id": "appliedai-de",
-      "url": "https://www.appliedai.de/feed",
-      "error": "404 Not Found"
-    },
-    {
-      "site_id": "appliedai-de",
-      "url": "https://www.appliedai.de/rss.xml",
-      "error": "404 Not Found"
-    },
-    {
-      "site_id": "google-cloud-japan-blog",
-      "url": "https://cloud.google.com/feed",
-      "error": "404 Not Found"
-    },
-    {
-      "site_id": "google-cloud-japan-blog",
-      "url": "https://cloud.google.com/rss.xml",
-      "error": "404 Not Found"
-    },
-    {
-      "site_id": "heise-ai",
-      "url": "https://business-services.heise.de/feed",
-      "error": "404 Not Found"
-    },
-    {
-      "site_id": "heise-ai",
-      "url": "https://business-services.heise.de/rss.xml",
-      "error": "404 Not Found"
-    },
-    {
-      "site_id": "inria-fr",
-      "url": "https://www.inria.fr/feed",
       "error": "404 Not Found"
     },
     {
@@ -889,18 +629,78 @@
       "error": "404 Not Found"
     },
     {
-      "site_id": "google-cloud-learn-es",
-      "url": "https://cloud.google.com/feed",
+      "site_id": "heise-ai",
+      "url": "https://business-services.heise.de/feed",
       "error": "404 Not Found"
     },
     {
-      "site_id": "google-cloud-learn-es",
-      "url": "https://cloud.google.com/rss.xml",
+      "site_id": "heise-ai",
+      "url": "https://business-services.heise.de/rss.xml",
       "error": "404 Not Found"
     },
     {
-      "site_id": "totvs-blog-ai",
-      "url": "https://www.totvs.com/rss.xml",
+      "site_id": "techorange-tw-ai",
+      "url": "https://techorange.com/feature/ai-security/",
+      "error": "403 Forbidden"
+    },
+    {
+      "site_id": "techorange-tw-ai",
+      "url": "https://techorange.com/feature/ai-agent/",
+      "error": "403 Forbidden"
+    },
+    {
+      "site_id": "inside-tw-ai",
+      "url": "https://www.inside.com.tw/category/ai",
+      "error": "403 Forbidden"
+    },
+    {
+      "site_id": "inside-tw-ai",
+      "url": "https://www.inside.com.tw/feature/ai-agent-new-wave",
+      "error": "403 Forbidden"
+    },
+    {
+      "site_id": "openai-index",
+      "url": "https://openai.com/index/diagnose-rare-childhood-diseases",
+      "error": "403 Forbidden"
+    },
+    {
+      "site_id": "openai-index",
+      "url": "https://openai.com/index/improving-health-intelligence-in-chatgpt",
+      "error": "403 Forbidden"
+    },
+    {
+      "site_id": "openai-index",
+      "url": "https://openai.com/index/chatgpt-enterprise-spend-controls",
+      "error": "403 Forbidden"
+    },
+    {
+      "site_id": "openai-index",
+      "url": "https://openai.com/index/deployment-simulation",
+      "error": "403 Forbidden"
+    },
+    {
+      "site_id": "openai-index",
+      "url": "https://openai.com/index/introducing-life-sci-bench",
+      "error": "403 Forbidden"
+    },
+    {
+      "site_id": "openai-index",
+      "url": "https://openai.com/index/academy-courses-applying-ai-at-work",
+      "error": "403 Forbidden"
+    },
+    {
+      "site_id": "fraunhofer-iais",
+      "url": "https://www.iais.fraunhofer.de/de/kuenstliche-intelligenz.html",
+      "error": "The operation was aborted due to timeout"
+    },
+    {
+      "site_id": "fraunhofer-iais",
+      "url": "https://www.iais.fraunhofer.de/de/kuenstliche-intelligenz/generative-ki.html",
+      "error": "The operation was aborted due to timeout"
+    },
+    {
+      "site_id": "startse-ai",
+      "url": "https://www.startse.com/ia-para-negocios/?amp%3Butm_medium=organic&amp%3Butm_campaign=artigo",
       "error": "404 Not Found"
     }
   ]

@@ -78,10 +78,10 @@ const unsafeImageMetadataPattern =
   /\b(?:dead|corpse|prisoner|concentration camp|nazi|war crime|weapon|gun|blood|accident|disaster|protest|politician|minister|government|military|army|logo|trademark|celebrity|real person|portrait of|screenshot|ui screenshot|fake dashboard)\b|(?:亂碼|錯字|商標|真人|肖像|政治人物|ロゴ|実在人物|초상|상표|로고)/i;
 
 const genericGeneratedImagePattern =
-  /(generic|abstract background|glowing dashboard|futuristic dashboard|server room|business meeting|robot handshake|stock photo|科技感背景|抽象科技|會議室|儀表板|伺服器機房|汎用|会議|서버룸|회의실|추상 배경)/i;
+  /(generic|placeholder|abstract background|glowing dashboard|futuristic dashboard|fake dashboard|network map|glass cube|server room|business meeting|robot handshake|stock photo|tilted|skewed|slanted|科技感背景|抽象科技|假儀表板|網路圖|玻璃方塊|會議室|儀表板|伺服器機房|斜的|歪斜|汎用|会議|傾いた|서버룸|회의실|추상 배경)/i;
 
 const sourceCoverWeakContextPattern =
-  /(generic|abstract|placeholder|wallpaper|stock|gradient|dashboard|network map|glass cube|科技感背景|抽象|漸層|占位|汎用|抽象背景|추상|그라데이션)/i;
+  /(generic|abstract|placeholder|wallpaper|stock|gradient|dashboard|fake dashboard|network map|glass cube|tilted|skewed|slanted|科技感背景|抽象|漸層|占位|假儀表板|網路圖|玻璃方塊|斜的|歪斜|汎用|抽象背景|추상|그라데이션)/i;
 
 function removeNegativeImageConstraints(input: string) {
   return input

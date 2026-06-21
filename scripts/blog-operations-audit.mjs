@@ -8,7 +8,7 @@ import { spawnSync } from "node:child_process";
 const LANGUAGES = ["zh-Hant", "en", "ja", "ko", "id", "vi", "th", "ms", "fil"];
 const DEFAULT_BASE_URL = "https://altoslab-ai.cc";
 const DEFAULT_COLUMN_TARGET = 9;
-const DAILY_COLUMN_MINIMUM = 1;
+const DAILY_COLUMN_MINIMUM = Number(process.env.ALTOS_BLOG_COLUMN_DAILY_LIMIT || "3");
 const REQUIRED_COLUMN_CONTENT_IMAGES = 2;
 const COLUMN_BASELINE_POLICY = "advisory";
 
@@ -280,7 +280,7 @@ async function headlessProviderStatus() {
 }
 
 async function candidateSummary(date) {
-  const slots = ["morning", "afternoon"];
+  const slots = ["morning", "afternoon", "evening"];
   const lanes = ["column", "market"];
   const rows = [];
   for (const slot of slots) {
@@ -462,7 +462,12 @@ function summarizeBottlenecks({ counts, gaps, candidates, launchAgent, n8nLocal,
   const columnTarget = targets?.column || DEFAULT_COLUMN_TARGET;
   const blockedVisuals = visualGap.checked ? visualGap.rows.filter((row) => row.sourceReady && !row.publishableVisuals) : [];
   const readyMarketCandidates = candidates.filter((candidate) => candidate.exists && candidate.lane === "market" && candidate.status === "ready");
-  const readyColumnCandidates = candidates.filter((candidate) => candidate.exists && candidate.lane === "column" && candidate.status === "ready");
+  const readyColumnCandidates = candidates.filter(
+    (candidate) =>
+      candidate.exists &&
+      candidate.status === "ready" &&
+      (candidate.lane === "column" || (candidate.lane === "legacy" && !/market/i.test(candidate.translationGroupId || "")))
+  );
   const strictColumnBaseline = targets?.columnBaselinePolicy === "hard";
   const columnBaselineGap = minColumn < columnTarget;
   return [
@@ -543,7 +548,7 @@ function nextActions({ counts, gaps, visualGap, candidates, headlessProviders, a
     actions.push("Repair GA/GTM installation or /api/health analytics configuration before treating the daily operations report as clean.");
   }
   if (minTodayColumn < DAILY_COLUMN_MINIMUM) {
-    actions.push("Produce and release today's Gemini-approved daily column set; do not treat the baseline column count as satisfying the daily requirement.");
+    actions.push(`Produce and release today's Gemini-approved daily column sets until ${DAILY_COLUMN_MINIMUM}/language is live; do not treat the baseline column count as satisfying the daily requirement.`);
   } else if (strictColumnBaseline && columnGap > 0 && blockedVisuals.length) {
     actions.push(`Produce GPT cover plus 2-3 content images for ${blockedVisuals.map((row) => `seq${row.sequence}`).join(", ")} before column release.`);
     if (!headlessProviders?.openaiImageConfigured || !headlessProviders?.uploadStorageConfigured) {
@@ -555,8 +560,8 @@ function nextActions({ counts, gaps, visualGap, candidates, headlessProviders, a
     const queued = blockedVisuals.map((row) => `seq${row.sequence}`).join(", ");
     actions.push(
       queued
-        ? `Keep daily column minimum at one approved column set; next queued columns (${queued}) must wait for GPT visual evidence before release.`
-        : "Keep daily column minimum at one approved column set; additional columns still require Gemini approval plus GPT visual evidence."
+        ? `Keep daily column minimum at ${DAILY_COLUMN_MINIMUM} approved column sets; next queued columns (${queued}) must wait for GPT visual evidence before release.`
+        : `Keep daily column minimum at ${DAILY_COLUMN_MINIMUM} approved column sets; additional columns still require Gemini approval plus GPT visual evidence.`
     );
   }
   return actions;

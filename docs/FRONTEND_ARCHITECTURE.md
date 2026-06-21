@@ -97,6 +97,9 @@ Article detail rendering has a shared visual contract across Next and the direct
 - The Cloudflare direct renderer and `/api/blog-html` renderer both use a Blog-main-style `siteHeaderHtml(...)` helper. The older standalone `.nav` / `.langs` article header is retired.
 - Default production article routes should not include `x-altos-direct-blog-render`; that header means the emergency direct renderer is active.
 - Hero/title/meta stays left aligned with compact top spacing.
+- Article cover media must keep a stable 1200:630 box with centered crop. This
+  protects source and generated covers from causing distorted hero imagery or
+  large blank gaps between hero, summary, ads and body content.
 - `geo-summary`, `article-takeaways`, `strong`, and `blockquote` use black text plus restrained signal-lime `#c8ff00` underline or side-marker styling. Takeaway highlights should fit the text, not fill the row.
 - Cloudflare builds must clean stale Next artifacts before generating OpenNext output, and deploy preflight must inspect the built CSS chunks so the reduced article title scale and inline signal-lime takeaway treatment cannot regress during publish.
 - The retired purple article accent must not appear in direct-rendered article pages.

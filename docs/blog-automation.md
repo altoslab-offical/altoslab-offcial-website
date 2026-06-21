@@ -3,7 +3,7 @@
 ## Legal Source Strategy
 
 - The cron job reads a source registry of official RSS/API/docs, trusted media and licensed image sources as research signals.
-- The old 40-post recovery number is only a backfill milestone, not a production cap. Routine production is at least one Gemini-approved column per Taipei day, with the remaining capacity going to source-verified longform market news whenever qualified items arrive.
+- The old 40-post recovery number is only a backfill milestone, not a production cap. Routine production is three Gemini-approved columns per Taipei day, with the remaining capacity going to source-verified longform market news whenever qualified items arrive.
 - It does not scrape or republish full articles.
 - The production path must write original ALTOS LAB synthesis in its own words.
 - Every generated article keeps visible `sourceLinks` for attribution and fact checking.
@@ -74,16 +74,16 @@ Auto-publishing requires:
 ## Column Cadence Guard
 
 - Market news and columns must stay separated. Market news can publish during market-scan windows when a source-verifiable item and source/official image pass QA.
-- Columns/features are capped at one translation group per Taipei calendar day by default.
-- `scripts/blog-local-worker.mjs --publish` enforces `ALTOS_BLOG_COLUMN_DAILY_LIMIT=1` for non-breaking article sets. It blocks release when a payload contains more than one column/feature translation group or when the daily limit is already reached.
+- Columns/features are capped at three translation groups per Taipei calendar day by default.
+- `scripts/blog-local-worker.mjs --publish` enforces `ALTOS_BLOG_COLUMN_DAILY_LIMIT=3` for non-breaking article sets. It blocks release when a payload would exceed the daily limit.
 - Backfill column drafts must be rewritten and released through the normal column lane instead of being bulk-published. A local batch of nine draft columns is a backlog, not a publish queue.
 - Emergency bursts require an explicit `--allow-column-burst` flag or `ALTOS_BLOG_ALLOW_COLUMN_BURST=true`; do not use that override for ordinary content catch-up.
 
 ## Production Targets
 
-- Public production is `https://altoslab-ai.cc` on Cloudflare Worker with Cloudflare KV-backed CMS storage. The `workers.dev` URL is a fallback diagnostic endpoint, not the normal automation base.
+- Public production is `https://altoslab-ai.cc` on AWS ECS/Fargate with AWS S3-backed CMS storage. Cloudflare Worker/KV/D1 paths are legacy diagnostics and must not be treated as production truth.
 - Market-news inventory has no hard upper cap; each configured language grows together through complete 9-language translation groups.
-- Column inventory grows at the daily cadence guard: at least one Gemini-produced column per Taipei calendar day, with additional columns allowed only when the same Gemini/GPT visual and release gates pass.
-- Routine cadence: at least one Gemini-produced column per Taipei calendar day; market news publishes opportunistically during scheduled scan windows when a verified source item, source image and multilingual source-faithful copy pass release checks.
+- Column inventory grows at the daily cadence guard: three Gemini-produced columns per Taipei calendar day, each released only after the same quality, visual and public readback gates pass.
+- Routine cadence: three Gemini-produced columns per Taipei calendar day; market news publishes opportunistically during scheduled scan windows when a verified source item, source image and multilingual source-faithful copy pass release checks.
 - Bulk column backfills stay staged and are released over time; do not publish nine columns in one burst unless Tommy explicitly approves a burst.
 - Market news must preserve the source article's news style: natural headline, clear subtitle, source facts in readable paragraphs, no fixed H2 template, no generic adoption checklist, no internal QA or automation language.

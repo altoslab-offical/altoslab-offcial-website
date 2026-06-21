@@ -14,9 +14,12 @@ type SafeBlogImageProps = {
 
 const rejectedCoverPattern =
   /(dead|corpse|prisoner|concentration camp|nazi|war crime|weapon|gun|blood|accident|disaster|protest|politician|minister|government|military|army|anti-aircraft|air defense|defense computer|radarno|usdagov|john lennon|austen|desire screenshot|unabridged|dead prisoners|robot arm picks up|shixart|malaria|microscopy training|nigeria)/i;
+const lowQualityGeneratedCoverPattern =
+  /(generic|placeholder|abstract background|glowing dashboard|fake dashboard|network map|glass cube|server room|robot handshake|tilted|skewed|slanted|科技感背景|抽象科技|假儀表板|網路圖|玻璃方塊|漸層背景|斜的|歪斜)/i;
 
 function hasRejectedCover(post: BlogVisualPost) {
-  return rejectedCoverPattern.test([post.cover, post.coverAlt, post.coverCredit, post.coverPrompt].filter(Boolean).join(" "));
+  const metadata = [post.cover, post.coverAlt, post.coverCredit, post.coverPrompt].filter(Boolean).join(" ");
+  return rejectedCoverPattern.test(metadata) || lowQualityGeneratedCoverPattern.test(metadata);
 }
 
 export function SafeBlogImage({ post, className, loading = "lazy", fetchPriority, compact }: SafeBlogImageProps) {

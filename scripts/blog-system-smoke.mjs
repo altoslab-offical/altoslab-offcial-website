@@ -357,8 +357,10 @@ assert(cloudflareSmoke.includes("resolve-ip") && cloudflareSmoke.includes("activ
 assert(cloudflareSmoke.includes("publishedPosts === 0"), "Cloudflare smoke fails closed when public blog inventory is empty");
 assert(cloudflareSmoke.includes("fastMode") && cloudflareSmoke.includes("CLOUDFLARE_SMOKE_FAST"), "Cloudflare smoke supports a bounded fast mode for daily automation health checks");
 assert(
-  n8nLocalBridge.includes('"--fast"') && n8nLocalBridge.includes('"--attempts"') && n8nLocalBridge.includes('"--timeout-ms"'),
-  "n8n bridge health job uses bounded fast Cloudflare smoke instead of full release verification"
+  n8nLocalBridge.includes("aws-production-smoke.mjs") &&
+    n8nLocalBridge.includes('"--expected-provider"') &&
+    n8nLocalBridge.includes('"aws-s3"'),
+  "n8n bridge health job verifies the AWS/S3 production runtime"
 );
 assert(
   n8nLocalControlPlaneVerifier.includes("N8N_VERIFY_WEBHOOK_TIMEOUT_SECONDS") &&
@@ -367,10 +369,10 @@ assert(
 );
 assert(cloudflareStagingConfig.includes("\"name\": \"altoslab-official-website-staging\""), "Cloudflare staging config uses a separate Worker");
 assert(cloudflareStagingConfig.includes("\"id\": \"246977568bf14ed0916a21eedbdbdbc1\""), "Cloudflare staging config binds the staging KV namespace");
-assert(cloudflareStagingConfig.includes("\"ALTOS_BLOG_COLUMN_DAILY_LIMIT\": \"1\""), "Cloudflare staging config enforces one daily column target");
+assert(cloudflareStagingConfig.includes("\"ALTOS_BLOG_COLUMN_DAILY_LIMIT\": \"3\""), "Cloudflare staging config enforces three daily column target");
 assert(!cloudflareStagingConfig.includes("\"routes\""), "Cloudflare staging config does not bind production custom-domain routes");
 const cloudflareProductionConfig = read("wrangler.jsonc");
-assert(cloudflareProductionConfig.includes("\"ALTOS_BLOG_COLUMN_DAILY_LIMIT\": \"1\""), "Cloudflare production config enforces one daily column target");
+assert(cloudflareProductionConfig.includes("\"ALTOS_BLOG_COLUMN_DAILY_LIMIT\": \"3\""), "Cloudflare production config enforces three daily column target");
 assert(cloudflareProductionConfig.includes("\"pattern\": \"altoslab-ai.cc/*\""), "Cloudflare production config uses a zone route for the apex domain");
 assert(!cloudflareProductionConfig.includes("\"custom_domain\": true"), "Cloudflare production config does not use custom-domain records that conflict with existing DNS");
 assert(sopDoctor.includes("release verification requires ALTOS_ADMIN_PASSWORD"), "SOP doctor requires admin readback credentials for release");
@@ -411,17 +413,20 @@ assert(launchAgentInstaller.includes("replace-with|test-secret"), "LaunchAgent i
 assert(launchAgentInstaller.includes("launchctl bootstrap"), "LaunchAgent installer can bootstrap the scheduled local worker");
 assert(
   automationHandoff.includes("ALTOS LAB 自動發文交接手冊") &&
-    automationHandoff.includes("Cloudflare Workers + Cloudflare D1") &&
-    automationHandoff.includes("n8n 跑在 Tommy 本機") &&
+    automationHandoff.includes("AWS ECS/Fargate") &&
+    automationHandoff.includes("AWS S3") &&
+    automationHandoff.includes("scheduled runner / n8n / LaunchAgent") &&
     automationHandoff.includes("Hermes ops profile 作為 CMO/editor owner") &&
     automationHandoff.includes("Market News Lane") &&
     automationHandoff.includes("Column / Feature Lane") &&
     automationHandoff.includes("Prepared Candidate Contract") &&
     automationHandoff.includes("Daily Closeout") &&
+    automationHandoff.includes("Public Blog Performance Gate") &&
     automationHandoff.includes("不能自行修改 UI") &&
     automationHandoff.includes("不能 fabricate Gemini/GPT evidence") &&
-    automationHandoff.includes("npm run verify:cloudflare -- --base-url https://altoslab-ai.cc --expected-provider cloudflare-d1"),
-  "automation handoff documents the Cloudflare+n8n/Hermes blog publishing contract and fail-closed boundaries"
+    automationHandoff.includes("npm run blog:performance-smoke -- --base-url https://altoslab-ai.cc") &&
+    automationHandoff.includes("npm run verify:aws -- --base-url https://altoslab-ai.cc --expected-provider aws-s3"),
+  "automation handoff documents the AWS/S3 local-scheduler/Hermes blog publishing contract and fail-closed boundaries"
 );
 assert(blogArticle.includes("extractSourceTranslationNote"), "article renderer extracts source translation note from main body");
 assert(globals.includes("source-credit-note"), "article stylesheet displays source credit note as a compact support block");

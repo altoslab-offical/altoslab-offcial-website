@@ -61,7 +61,7 @@ The chosen pattern must shape section order and headings.
 行為規則：
 1. 先確認讀者為什麼現在要看這篇，再寫任何段落。
 2. 所有事實必須能回到 source_brief；不能補假案例、假數據、假引用。
-3. 每篇要有一句可被引用的 ALTOS LAB judgment。
+3. 每篇都要讓讀者覺得好讀、有知識量、不是來源摘要；可引用句、ALTOS LAB 觀點、限制或下一步只在自然需要時加入。
 4. 先讓文章好讀、有節奏、有觀點；搜尋與生成式引用需求只能進入 metadata、FAQ、自然定義與來源結構，不可以變成公開口號。
 5. 若資訊不足，輸出 status="held" 與缺口，不要硬寫。
 6. 正文只用網站支援格式：##、列表、少量表格、timeline、source card、callout、短 **粗體重點**；不要輸出 ###，FAQ 要放 faqs 欄位。
@@ -70,7 +70,7 @@ The chosen pattern must shape section order and headings.
 9. 中文段落多數維持 2-3 句、手機閱讀約 80-160 字；每 250 字換一次節奏：短句、bold judgment、source card、callout、小列表、團隊視角或時間節點。
 10. Public author 只能是 Tommy 或 Ken；public review note 不要寫 AI 生成或 AI 協助。
 11. 專欄/專題要規劃 2-3 張內文圖的位置與功能：opening anchor、mechanism/evidence、closing synthesis；九語版本共用同一組圖片 URL。
-12. 東南亞語言要用當地科技商業媒體語氣，不要逐字翻譯英文句型。市場新聞保留原始事實；ALTOS LAB 專欄可加入當地決策含意與下一步。
+12. 東南亞語言要用當地科技商業媒體語氣，不要逐字翻譯英文句型。市場新聞保留原始事實；專欄與快訊都要依語言市場調整標題、導言、FAQ、內鏈和段落節奏。
 ```
 
 ## 6. Gemini Source-Of-Truth Prompt Chain
@@ -79,11 +79,11 @@ The chosen pattern must shape section order and headings.
 2. `angle_selection`: three angles, reader tension, selected angle, why now.
 3. `outline`: 4-6 H2s, each with a job, evidence, and reader payoff.
 4. `source_draft`: write one approved source-of-truth article first, usually `zh-Hant`.
-5. `anti_slop_rewrite`: remove generic phrasing, sharpen judgment, preserve facts.
+5. `anti_slop_rewrite`: remove generic phrasing, improve readability and knowledge density, preserve facts.
    Cut announcement openings, binary "not X but Y" pivots, vague high-stakes
    claims, narrator-from-a-distance voice, repeated sentence rhythm and
    unnecessary adverbs. Keep only the specific actor, action, consequence and
-   ALTOS LAB judgment.
+   useful reader value.
 6. `qa_repair`: fix only failed article QA items.
 7. `source_json`: final structured source post for local review.
 
@@ -127,7 +127,7 @@ say approved=false and explain the concrete fix.
 
 - The title names a concrete tension, event, decision, or framework.
 - The first 40-80 words include the conclusion, key variable, and next watchpoint.
-- The article has a clear ALTOS LAB judgment, not only source summary.
+- The article is readable, knowledge-dense and useful, not only source summary.
 - Every technical term is explained in plain language on first use.
 - Search/answer visibility appears through natural definitions, FAQ, source links, metadata and schema; public copy must not say SEO/GEO unless the article topic itself is search visibility.
 - The draft includes at least one scannable asset: checklist, table, decision
@@ -161,11 +161,11 @@ say approved=false and explain the concrete fix.
 
 ```text
 請沿用前文，只做 anti-slop rewrite。
-刪掉空泛 AI 套話，保留來源事實，補上一句 ALTOS LAB judgment、
-一個讀者決策點，以及一個下一步觀察指標。
+刪掉空泛 AI 套話，保留來源事實，補足讀者真正會想知道的背景、
+例子、比較、定義、操作脈絡或搜尋問題。
 同時移除「這就是為什麼」、「不是 X 而是 Y」、「真正的問題是」、
 「影響很深遠」這類宣布式、反轉式或空泛強調；請直接寫出誰做了什麼、
-改變了哪個流程、讀者接下來要觀察哪個具體變數。
+改變了哪個流程、這篇對讀者有什麼知識價值。
 ```
 
 ### Image is generic or weak
