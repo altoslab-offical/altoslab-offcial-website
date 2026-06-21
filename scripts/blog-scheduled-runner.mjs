@@ -266,7 +266,9 @@ async function loadEnvFileIfPresent() {
 
 function isMarketArticleSet(articleSet) {
   const posts = Array.isArray(articleSet?.posts) ? articleSet.posts : [];
-  return articleSet?.generation?.provider === "source-translation" && posts.length > 0 && posts.every((post) => post.contentType === "breaking");
+  const provider = String(articleSet?.generation?.provider || "").toLowerCase();
+  const sourceRendered = provider === "source-translation" || ["hermes-owner", "codex-gpt-5.4", "codex-gpt-5.4-subagent"].includes(provider);
+  return sourceRendered && posts.length > 0 && posts.every((post) => post.contentType === "breaking");
 }
 
 async function candidateLooksLikeLane(index, lane) {
@@ -1461,10 +1463,7 @@ function chromeProfileEmail(evidence) {
 function releaseGateIssues(manifest, { date, slot, articleSet }) {
   const issues = [];
   const posts = Array.isArray(articleSet?.posts) ? articleSet.posts : [];
-  const isSourceTranslationMarketOnly =
-    articleSet?.generation?.provider === "source-translation" &&
-    posts.length > 0 &&
-    posts.every((post) => post.contentType === "breaking");
+  const isSourceTranslationMarketOnly = isMarketArticleSet(articleSet);
   const requiresGptCover = posts.some((post) => post.contentType !== "breaking");
   const retryableHeldManifest =
     manifest.status === "held" &&

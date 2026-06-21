@@ -541,11 +541,7 @@ function supplementalSourceLink(source = {}, profile = {}) {
 }
 
 function publicSourceLinks(sourceLinks = [], source = {}, profile = {}) {
-  const links = cleanPublicSourceLinks(sourceLinks);
-  if (links.length >= 1) return links;
-  const supplemental = supplementalSourceLink(source, profile);
-  if (!supplemental) return links;
-  return cleanPublicSourceLinks([...links, supplemental]);
+  return cleanPublicSourceLinks(sourceLinks);
 }
 
 function cleanPublicSourceSummary(value = "") {
@@ -1075,6 +1071,79 @@ function sourceTextForArticle(article = {}) {
 
 function knownProfile(article = {}, frame = {}) {
   const text = `${frame?.key || ""}\n${article.canonicalUrl || ""}\n${article.url || ""}\n${sourceTextForArticle(article)}`.toLowerCase();
+  if (/openai.*academy-courses-applying-ai-at-work|new openai academy courses for the next era of work|academy courses.*applying ai at work/.test(text)) {
+    return {
+      title: {
+        "zh-Hant": "OpenAI Academy 新課程把 AI 導入焦點放回日常工作流",
+        en: "OpenAI Academy adds courses for practical AI workflows at work",
+        ja: "OpenAI Academy、新コースで実務 AI ワークフローを強化",
+        ko: "OpenAI Academy, 업무용 AI 워크플로 강좌 추가",
+        id: "OpenAI Academy menambah kursus untuk workflow AI praktis di tempat kerja",
+        vi: "OpenAI Academy bổ sung khóa học cho workflow AI thực tế tại nơi làm việc",
+        th: "OpenAI Academy เพิ่มคอร์สสำหรับ workflow AI ในงานจริง",
+        ms: "OpenAI Academy menambah kursus untuk workflow AI praktikal di tempat kerja",
+        fil: "Nagdagdag ang OpenAI Academy ng courses para sa practical AI workflows sa trabaho"
+      },
+      standfirst: {
+        "zh-Hant": "OpenAI 發布三門 Academy 課程，重點放在 AI 基礎、可重複工作流，以及把 agent 用進日常工作。",
+        en: "OpenAI published three Academy courses focused on AI fundamentals, repeatable workflows, and applying agents in everyday work.",
+        ja: "OpenAI は、AI 基礎、再現できるワークフロー、日常業務での agent 活用に焦点を当てた Academy の 3 コースを公開しました。",
+        ko: "OpenAI는 AI 기초, 반복 가능한 워크플로, 일상 업무에서 agent를 활용하는 방법에 초점을 둔 Academy 강좌 3개를 공개했습니다.",
+        id: "OpenAI merilis tiga kursus Academy tentang dasar AI, workflow yang bisa diulang, dan penggunaan agent dalam pekerjaan sehari-hari.",
+        vi: "OpenAI công bố ba khóa Academy về nền tảng AI, workflow có thể lặp lại và cách dùng agent trong công việc hằng ngày.",
+        th: "OpenAI เผยแพร่คอร์ส Academy สามรายการ เน้นพื้นฐาน AI, workflow ที่ทำซ้ำได้ และการใช้ agent ในงานประจำวัน",
+        ms: "OpenAI menerbitkan tiga kursus Academy tentang asas AI, workflow yang boleh diulang, dan penggunaan agent dalam kerja harian.",
+        fil: "Naglabas ang OpenAI ng tatlong Academy courses tungkol sa AI fundamentals, repeatable workflows, at paggamit ng agent sa araw-araw na trabaho."
+      },
+      facts: {
+        "zh-Hant": [
+          "來源確認 OpenAI 發布三門 Academy 課程，主題涵蓋 AI 基礎、工作流與 agent 實作。",
+          "來源把學習定位成部署的一部分，強調把成功用法變成可重複的工作方式。",
+          "課程提供完成證明，並可被組織導入到內部學習安排。"
+        ],
+        en: [
+          "The source confirms that OpenAI published three Academy courses covering AI fundamentals, workflows, and agent practice.",
+          "OpenAI frames learning as part of deployment, with emphasis on turning successful uses into repeatable ways of working.",
+          "The courses include completion certificates and can be brought into organizational learning programs."
+        ],
+        ja: [
+          "出典では、OpenAI が AI 基礎、ワークフロー、agent 実践を扱う Academy の 3 コースを公開したことが確認できます。",
+          "OpenAI は学習を導入の一部と位置づけ、成功した使い方を再現できる業務方法へ変える点を強調しています。",
+          "コースには修了証明があり、組織の学習プログラムにも組み込めます。"
+        ],
+        ko: [
+          "출처는 OpenAI가 AI 기초, 워크플로, agent 실습을 다루는 Academy 강좌 3개를 공개했다고 확인합니다.",
+          "OpenAI는 학습을 배포의 일부로 보고, 성공한 사용 방식을 반복 가능한 업무 방식으로 만드는 점을 강조합니다.",
+          "강좌에는 수료 증명이 있으며 조직의 학습 프로그램으로 가져갈 수 있습니다."
+        ],
+        id: [
+          "Sumber mengonfirmasi OpenAI merilis tiga kursus Academy tentang dasar AI, workflow, dan praktik agent.",
+          "OpenAI menempatkan learning sebagai bagian dari deployment, dengan fokus mengubah penggunaan yang berhasil menjadi cara kerja berulang.",
+          "Kursus ini menyediakan sertifikat penyelesaian dan dapat dibawa ke program pembelajaran organisasi."
+        ],
+        vi: [
+          "Nguồn xác nhận OpenAI công bố ba khóa Academy về nền tảng AI, workflow và thực hành agent.",
+          "OpenAI xem học tập là một phần của triển khai, nhấn mạnh việc biến cách dùng hiệu quả thành phương thức làm việc lặp lại được.",
+          "Các khóa học có chứng nhận hoàn thành và có thể đưa vào chương trình học nội bộ của tổ chức."
+        ],
+        th: [
+          "แหล่งข่าวยืนยันว่า OpenAI เผยแพร่คอร์ส Academy สามรายการ ครอบคลุมพื้นฐาน AI, workflow และการใช้ agent",
+          "OpenAI วาง learning เป็นส่วนหนึ่งของ deployment โดยเน้นการเปลี่ยน use case ที่สำเร็จให้เป็นวิธีทำงานที่ทำซ้ำได้",
+          "คอร์สมีใบรับรองเมื่อเรียนจบ และองค์กรสามารถนำไปใช้ในโปรแกรมเรียนรู้ภายในได้"
+        ],
+        ms: [
+          "Sumber mengesahkan OpenAI menerbitkan tiga kursus Academy tentang asas AI, workflow dan amalan agent.",
+          "OpenAI meletakkan pembelajaran sebagai sebahagian daripada deployment, dengan tumpuan mengubah penggunaan berjaya menjadi cara kerja berulang.",
+          "Kursus ini menyediakan sijil tamat dan boleh dibawa ke program pembelajaran organisasi."
+        ],
+        fil: [
+          "Kinumpirma ng source na naglabas ang OpenAI ng tatlong Academy courses tungkol sa AI fundamentals, workflows, at agent practice.",
+          "Itinuturing ng OpenAI ang learning bilang bahagi ng deployment, lalo na ang pag-convert ng successful uses sa repeatable ways of working.",
+          "May completion certificates ang courses at puwedeng dalhin sa learning programs ng organisasyon."
+        ]
+      }
+    };
+  }
   if (/openai.*lockdown[-\s]mode|lockdown[-\s]mode.*openai|prompt[-\s]injection.*sensitive data|提示注入.*敏感資料|プロンプトインジェクション.*機密データ/.test(text)) {
     return {
       title: {
@@ -1122,9 +1191,15 @@ function articleTitle(language, frame, source, article, profile) {
   const profiled = profileText(profile, "title", language);
   if (profiled) return profiled;
   const sourceHeadline = cleanArticleSourceTitle(article.headline || source.title || "");
-  if (sourceHeadline) return sourceHeadline;
   const focus = frame.focus?.[language] || frame.focus?.en;
+  const sourceHeadlineLooksEnglish =
+    /[a-z]{4,}\s+[a-z]{4,}/i.test(sourceHeadline) &&
+    !/[\u4e00-\u9fff\u3040-\u30ff\uac00-\ud7af\u0e00-\u0e7f]/.test(sourceHeadline);
+  if (sourceHeadline && (language === "en" || article.localizedLanguage === language || !sourceHeadlineLooksEnglish)) {
+    return sourceHeadline;
+  }
   if (focus && !/generic|ai-market-update/i.test(frame.key || "") && !/source index|current ai feed|article claims should remain anchored/i.test(focus)) return focus;
+  if (sourceHeadline) return sourceHeadline;
   return "AI market update";
 }
 
@@ -1156,6 +1231,19 @@ function usableExistingMarketTitle(value = "") {
   if (/^(OpenAI|Google|Microsoft|NVIDIA|Anthropic|Vercel|Hugging Face|TechCrunch).*(發布|公開|merilis|menerbitkan|công bố|เผยแพร่|inilathala|공개|公開).*(["「]).*[A-Za-z]{4}/i.test(text)) return false;
   if (/^(OpenAI|Google|Microsoft|NVIDIA|Anthropic|Vercel|Hugging Face|TechCrunch).*(["「])[^"」]*[A-Za-z]{4}[^"」]*(["」])?.*(發布|公開|merilis|menerbitkan|công bố|เผยแพร่|inilathala|공개|公開)/i.test(text)) return false;
   return true;
+}
+
+function existingTitleFitsLanguage(value = "", language = "") {
+  const text = normalizeNewsText(value);
+  if (!text) return false;
+  if (language === "en") return true;
+  const hasRawEnglishPhrase = /[a-z]{4,}\s+[a-z]{4,}/i.test(text);
+  if (!hasRawEnglishPhrase) return true;
+  if (language === "zh-Hant") return /[\u4e00-\u9fff]/.test(text) && !/["「][^"」]*[a-z]{4,}\s+[a-z]{4,}[^"」]*["」]?/i.test(text);
+  if (language === "ja") return /[\u3040-\u30ff\u4e00-\u9fff]/.test(text) && !/["「][^"」]*[a-z]{4,}\s+[a-z]{4,}[^"」]*["」]?/i.test(text);
+  if (language === "ko") return /[\uac00-\ud7af]/.test(text) && !/["「][^"」]*[a-z]{4,}\s+[a-z]{4,}[^"」]*["」]?/i.test(text);
+  if (language === "th") return /[\u0e00-\u0e7f]/.test(text) && !/["「][^"」]*[a-z]{4,}\s+[a-z]{4,}[^"」]*["」]?/i.test(text);
+  return !/["「][^"」]*[a-z]{4,}\s+[a-z]{4,}[^"」]*["」]?/i.test(text);
 }
 
 function titleCompatibleWithArticle(title = "", article = {}, frame = {}) {
@@ -1785,6 +1873,177 @@ function reinforceJargonParagraph(paragraph = "", language = "", title = "") {
   return cleanMarketPublicText(`${text} ${marketPlainLanguageCue(language, title)}`, language);
 }
 
+function marketSectionLabels(language = "") {
+  const labels = {
+    "zh-Hant": {
+      event: "來源事件",
+      facts: "可核對事實",
+      boundary: "ALTOS LAB 判讀",
+      watch: "接下來看什麼",
+      boundaryText: "ALTOS LAB 會把這類更新先當成 **導入成本與治理責任** 的訊號，而不是單純的產品宣傳。讀者應該分開看兩件事：來源已經證明的功能與案例，以及市場還沒有證明的採用速度、成本變化與責任分工。",
+      watchText: "下一步要觀察官方文件、客戶案例、定價與企業部署限制是否同步更新。如果只有單篇公告，這比較像短期曝光；如果後續出現明確的使用邊界、權限設計與實作案例，才更接近可採用的市場訊號。"
+    },
+    en: {
+      event: "Source event",
+      facts: "What the source confirms",
+      boundary: "ALTOS LAB read",
+      watch: "What to watch next",
+      boundaryText: "ALTOS LAB treats this update as a signal about **adoption cost and governance responsibility**, not just product promotion. Readers should separate what the source confirms from what the market has not yet proven: deployment speed, cost change, and accountability.",
+      watchText: "Next, watch whether official docs, customer cases, pricing, and enterprise deployment limits move with the announcement. A single post is short-term visibility; repeated evidence about permissions, workflow boundaries, and adoption cases is a stronger market signal."
+    },
+    ja: {
+      event: "出典で起きたこと",
+      facts: "確認できる事実",
+      boundary: "ALTOS LAB の読み",
+      watch: "次に見る点",
+      boundaryText: "ALTOS LAB はこの更新を単なる製品宣伝ではなく、**導入コストとガバナンス責任** のシグナルとして読みます。出典が確認した内容と、まだ市場が証明していない導入速度、コスト変化、責任分担を分けて見る必要があります。",
+      watchText: "次に見るべきは、公式ドキュメント、顧客事例、価格、企業導入の制限が発表に追随するかです。単発の投稿なら短期的な露出に近く、権限設計、ワークフロー境界、採用事例が続けばより強い市場シグナルになります。"
+    },
+    ko: {
+      event: "출처 이벤트",
+      facts: "확인 가능한 사실",
+      boundary: "ALTOS LAB 해석",
+      watch: "다음 관찰 지점",
+      boundaryText: "ALTOS LAB은 이 업데이트를 단순한 제품 홍보가 아니라 **도입 비용과 거버넌스 책임** 의 신호로 봅니다. 출처가 확인한 내용과 아직 시장이 증명하지 않은 도입 속도, 비용 변화, 책임 분담을 나눠 봐야 합니다.",
+      watchText: "다음에는 공식 문서, 고객 사례, 가격, 기업 배포 제한이 발표와 함께 움직이는지 봐야 합니다. 단일 게시물은 단기 노출에 가깝고, 권한 설계, 워크플로 경계, 도입 사례가 이어지면 더 강한 시장 신호입니다."
+    },
+    id: {
+      event: "Peristiwa sumber",
+      facts: "Fakta yang bisa dicek",
+      boundary: "Pembacaan ALTOS LAB",
+      watch: "Yang perlu dipantau",
+      boundaryText: "ALTOS LAB membaca update ini sebagai sinyal tentang **biaya adopsi dan tanggung jawab governance**, bukan sekadar promosi produk. Pembaca perlu memisahkan apa yang dikonfirmasi sumber dari hal yang belum terbukti di pasar: kecepatan deployment, perubahan biaya, dan pembagian akuntabilitas.",
+      watchText: "Berikutnya, pantau apakah dokumentasi resmi, kasus pelanggan, pricing, dan batas deployment enterprise ikut bergerak. Satu pengumuman hanya memberi visibilitas jangka pendek; bukti berulang tentang permission, batas workflow, dan kasus adopsi lebih kuat sebagai sinyal pasar."
+    },
+    vi: {
+      event: "Sự kiện từ nguồn",
+      facts: "Điều nguồn xác nhận",
+      boundary: "Góc đọc của ALTOS LAB",
+      watch: "Điểm cần theo dõi",
+      boundaryText: "ALTOS LAB xem cập nhật này như tín hiệu về **chi phí triển khai và trách nhiệm governance**, không chỉ là quảng bá sản phẩm. Người đọc cần tách phần nguồn đã xác nhận khỏi phần thị trường chưa chứng minh: tốc độ triển khai, thay đổi chi phí và phân công trách nhiệm.",
+      watchText: "Tiếp theo, hãy theo dõi liệu tài liệu chính thức, case khách hàng, giá và giới hạn triển khai doanh nghiệp có được cập nhật cùng thông báo hay không. Một bài đăng chỉ là độ phủ ngắn hạn; bằng chứng lặp lại về quyền hạn, ranh giới workflow và case áp dụng mới là tín hiệu mạnh hơn."
+    },
+    th: {
+      event: "เหตุการณ์จากแหล่งข่าว",
+      facts: "ข้อเท็จจริงที่ตรวจสอบได้",
+      boundary: "มุมมอง ALTOS LAB",
+      watch: "สิ่งที่ต้องดูต่อ",
+      boundaryText: "ALTOS LAB อ่านอัปเดตนี้เป็นสัญญาณเรื่อง **ต้นทุนการนำไปใช้และความรับผิดชอบด้าน governance** ไม่ใช่แค่การโปรโมตสินค้า ผู้อ่านควรแยกสิ่งที่แหล่งข่าวยืนยันแล้ว ออกจากสิ่งที่ตลาดยังไม่พิสูจน์ เช่น ความเร็ว deployment ต้นทุน และความรับผิดชอบ",
+      watchText: "ขั้นต่อไปให้ดูว่าเอกสารทางการ case ลูกค้า ราคา และข้อจำกัดสำหรับ enterprise deployment ขยับตามประกาศหรือไม่ โพสต์เดียวคือ visibility ระยะสั้น แต่หลักฐานซ้ำเรื่อง permission ขอบเขต workflow และ adoption case คือสัญญาณตลาดที่แข็งแรงกว่า"
+    },
+    ms: {
+      event: "Peristiwa sumber",
+      facts: "Fakta yang boleh disemak",
+      boundary: "Bacaan ALTOS LAB",
+      watch: "Apa yang perlu dipantau",
+      boundaryText: "ALTOS LAB membaca kemas kini ini sebagai isyarat tentang **kos adopsi dan tanggungjawab governance**, bukan sekadar promosi produk. Pembaca perlu memisahkan perkara yang disahkan sumber daripada perkara yang belum dibuktikan pasaran: kelajuan deployment, perubahan kos dan pembahagian akauntabiliti.",
+      watchText: "Seterusnya, pantau sama ada dokumentasi rasmi, kes pelanggan, harga dan had deployment enterprise bergerak bersama pengumuman. Satu post hanya memberi visibiliti jangka pendek; bukti berulang tentang permission, sempadan workflow dan kes adopsi ialah isyarat pasaran yang lebih kuat."
+    },
+    fil: {
+      event: "Source event",
+      facts: "Nabeberipikang facts",
+      boundary: "Basa ng ALTOS LAB",
+      watch: "Susunod na babantayan",
+      boundaryText: "Binabasa ito ng ALTOS LAB bilang signal tungkol sa **adoption cost at governance responsibility**, hindi lang product promotion. Kailangang paghiwalayin ng reader ang kinumpirma ng source mula sa hindi pa napapatunayan ng market: deployment speed, cost change, at accountability.",
+      watchText: "Susunod, bantayan kung gagalaw din ang official docs, customer cases, pricing, at enterprise deployment limits. Ang isang post ay short-term visibility; mas malakas na market signal ang paulit-ulit na ebidensya tungkol sa permissions, workflow boundaries, at adoption cases."
+    }
+  };
+  return labels[language] || labels.en;
+}
+
+function sourceDateLine(language, publisher, date) {
+  return {
+    "zh-Hant": `${publisher} 的原始報導日期是 ${date}；讀者應以來源連結回查完整上下文、圖片出處與後續更新。`,
+    en: `${publisher}'s source report is dated ${date}; readers should use the source link to check the full context, image credit, and later updates.`,
+    ja: `${publisher} の出典記事の日付は ${date} です。読者は出典リンクで文脈、画像クレジット、後続更新を確認する必要があります。`,
+    ko: `${publisher}의 원문 보도일은 ${date}입니다. 독자는 출처 링크에서 전체 맥락, 이미지 출처, 후속 업데이트를 확인해야 합니다.`,
+    id: `Laporan sumber ${publisher} bertanggal ${date}; pembaca sebaiknya mengecek tautan sumber untuk konteks penuh, kredit gambar, dan update lanjutan.`,
+    vi: `Bài nguồn của ${publisher} ghi ngày ${date}; người đọc nên kiểm tra liên kết nguồn để xem đầy đủ bối cảnh, credit hình ảnh và cập nhật sau đó.`,
+    th: `รายงานต้นทางของ ${publisher} ลงวันที่ ${date} ผู้อ่านควรเปิดลิงก์แหล่งข่าวเพื่อตรวจบริบทเต็ม เครดิตภาพ และอัปเดตต่อมา`,
+    ms: `Laporan sumber ${publisher} bertarikh ${date}; pembaca patut menyemak pautan sumber untuk konteks penuh, kredit imej dan kemas kini berikutnya.`,
+    fil: `May petsang ${date} ang source report ng ${publisher}; dapat gamitin ng reader ang source link para tingnan ang buong context, image credit, at mga kasunod na update.`
+  }[language] || `${publisher}'s source report is dated ${date}.`;
+}
+
+function sourceFactIntro(language, facts = [], sourceLine = "") {
+  const filtered = facts
+    .map((fact) => cleanMarketPublicText(fact, language))
+    .filter(Boolean)
+    .filter((fact) => !/(ALTOS LAB|market signal|市場訊號|isyarat pasaran|sinyal pasar|สัญญาณตลาด|market signal)/i.test(fact))
+    .slice(0, 4);
+  const joined = sentenceJoin(filtered, language);
+  return cleanMarketPublicText([joined, sourceLine].filter(Boolean).join("\n\n"), language);
+}
+
+function sectionedMarketBody(language, title, source, article, paragraphs = [], sourceFacts = [], eventLead = "") {
+  const labels = marketSectionLabels(language);
+  const publisher = sourceArticlePublisher(article.publisher || source.publisher);
+  const date = formatDate(article.publishedAt || source.publishedAt, language);
+  const sourceLine = sourceDateLine(language, publisher, date);
+  const first = eventLead || paragraphs.find((paragraph) => includesPublisher(paragraph, publisher)) || sourceLeadWithPublisher(language, publisher, title);
+  const factText = sourceFactIntro(language, sourceFacts.length ? sourceFacts : paragraphs.slice(1, 4), sourceLine);
+  const boundaryTable = evidenceBoundaryTable(language, sourceFacts.length ? sourceFacts : paragraphs.slice(1, 4));
+  return cleanMarketPublicText([
+    `## ${labels.event}`,
+    first,
+    `## ${labels.facts}`,
+    factText || sourceLine,
+    boundaryTable,
+    `## ${labels.boundary}`,
+    labels.boundaryText,
+    `## ${labels.watch}`,
+    labels.watchText
+  ].filter(Boolean).join("\n\n"), language);
+}
+
+function evidenceBoundaryTable(language, facts = []) {
+  const firstFact = cleanMarketPublicText(facts[0] || "", language);
+  const factCell = truncate(firstFact || sourceFactIntro(language, facts, ""), 170);
+  const rows = {
+    "zh-Hant": {
+      heads: ["來源已確認", "尚未證明"],
+      unproven: "採用速度、成本變化與責任分工仍需後續案例、文件與部署限制驗證。"
+    },
+    en: {
+      heads: ["Confirmed by source", "Not yet proven"],
+      unproven: "Adoption speed, cost change, and accountability still need later cases, docs, and deployment limits."
+    },
+    ja: {
+      heads: ["出典で確認", "未検証"],
+      unproven: "導入速度、コスト変化、責任分担は後続事例、文書、導入制限で確認する必要があります。"
+    },
+    ko: {
+      heads: ["출처 확인", "아직 미확인"],
+      unproven: "도입 속도, 비용 변화, 책임 분담은 후속 사례, 문서, 배포 제한으로 확인해야 합니다."
+    },
+    id: {
+      heads: ["Dikonfirmasi sumber", "Belum terbukti"],
+      unproven: "Kecepatan adopsi, perubahan biaya, dan akuntabilitas masih perlu bukti kasus, dokumen, dan batas deployment."
+    },
+    vi: {
+      heads: ["Nguồn xác nhận", "Chưa được chứng minh"],
+      unproven: "Tốc độ áp dụng, thay đổi chi phí và trách nhiệm vẫn cần case, tài liệu và giới hạn triển khai sau đó."
+    },
+    th: {
+      heads: ["แหล่งข่าวยืนยัน", "ยังไม่พิสูจน์"],
+      unproven: "ความเร็ว adoption ต้นทุน และ accountability ยังต้องดู case เอกสาร และข้อจำกัด deployment ต่อไป"
+    },
+    ms: {
+      heads: ["Disahkan sumber", "Belum terbukti"],
+      unproven: "Kelajuan adopsi, perubahan kos dan akauntabiliti masih perlukan kes, dokumen dan had deployment."
+    },
+    fil: {
+      heads: ["Kinumpirma ng source", "Hindi pa proven"],
+      unproven: "Kailangan pa ng later cases, docs, at deployment limits para mapatunayan ang adoption speed, cost change, at accountability."
+    }
+  }[language] || {
+    heads: ["Confirmed by source", "Not yet proven"],
+    unproven: "Adoption speed, cost change, and accountability still need later cases, docs, and deployment limits."
+  };
+  if (!factCell) return "";
+  return `| ${rows.heads[0]} | ${rows.heads[1]} |\n| --- | --- |\n| ${factCell.replace(/\|/g, "/")} | ${rows.unproven.replace(/\|/g, "/")} |`;
+}
+
 function strengthenMarketNewsBody(language, frame, source, article, profile, body = "", title = "") {
   const publisher = sourceArticlePublisher(article.publisher || source.publisher);
   const lead = compactNewsDeck(language, title, articleStandfirst(language, frame, source, article, profile));
@@ -1819,7 +2078,8 @@ function strengthenMarketNewsBody(language, frame, source, article, profile, bod
     paragraphs.push(paragraph);
   }
 
-  return cleanMarketPublicText(paragraphs.slice(0, 6).join("\n\n"), language);
+  const eventLead = sourceLeadWithPublisher(language, publisher, lead);
+  return sectionedMarketBody(language, title, source, article, paragraphs.slice(0, 6), facts, eventLead);
 }
 
 function marketNewsContextParagraph(language, frame, source, article, firstParagraph = "", factParagraph = "") {
@@ -2003,7 +2263,7 @@ export function buildMarketNewsroomPost({ language, pack = {}, post = {}, frame,
   const generatedTitle = cleanMarketPublicText(articleTitle(language, inferredFrame, source, article, profile), language);
   const existingTitle = cleanExistingMarketTitle(post.title || "", source.publisher || article.publisher);
   const title = cleanMarketPublicText(
-    !profile?.title && usableExistingMarketTitle(existingTitle) && titleCompatibleWithArticle(existingTitle, article, inferredFrame)
+    !profile?.title && usableExistingMarketTitle(existingTitle) && existingTitleFitsLanguage(existingTitle, language) && titleCompatibleWithArticle(existingTitle, article, inferredFrame)
       ? existingTitle
       : generatedTitle,
     language
@@ -2046,7 +2306,7 @@ export function buildMarketNewsroomPost({ language, pack = {}, post = {}, frame,
     coverLicenseUrl: post.coverLicenseUrl || pack.coverLicenseUrl || coverCreditUrl,
     coverAlt: cleanCoverAlt(post.coverAlt, title, coverCredit),
     contentImages: sourceContentImages(language, title, article, post, pack),
-    generatedBy: post.generatedBy || "market-source-worker",
+    generatedBy: post.generatedBy || "hermes-owner:market-source-worker",
     aiDisclosure: ""
   };
 }

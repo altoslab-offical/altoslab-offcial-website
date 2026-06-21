@@ -160,6 +160,9 @@ export type BlogGenerationTrace = {
     | "local-antigravity"
     | "gemini-chatgpt"
     | "source-translation"
+    | "hermes-owner"
+    | "codex-gpt-5.4"
+    | "codex-gpt-5.4-subagent"
     | "codex-image"
     | "chatgpt-image";
   task: BlogGenerationTask;

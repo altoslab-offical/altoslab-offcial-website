@@ -118,7 +118,9 @@ function readJson(filePath) {
 
 function isMarketArticleSet(articleSet) {
   const posts = Array.isArray(articleSet?.posts) ? articleSet.posts : [];
-  return articleSet?.generation?.provider === "source-translation" && posts.length > 0 && posts.every((post) => post.contentType === "breaking");
+  const provider = String(articleSet?.generation?.provider || "").toLowerCase();
+  const sourceRendered = provider === "source-translation" || ["hermes-owner", "codex-gpt-5.4", "codex-gpt-5.4-subagent"].includes(provider);
+  return sourceRendered && posts.length > 0 && posts.every((post) => post.contentType === "breaking");
 }
 
 function candidateLooksLikeLane(index, lane) {
@@ -451,8 +453,7 @@ function checkReleaseCandidate({ date, slot, lane }, errors, warnings) {
     if (lane === "column" && marketOnly) addIssue(errors, "release candidate lane must be column, got market");
     if (lane === "market" && !marketOnly) addIssue(errors, "release candidate lane must be market, got column");
     const requiresGptCover = posts.some((post) => post.contentType !== "breaking");
-    const isSourceTranslationMarketOnly =
-      articleSet.generation?.provider === "source-translation" && posts.length > 0 && posts.every((post) => post.contentType === "breaking");
+    const isSourceTranslationMarketOnly = isMarketArticleSet(articleSet);
     if (!isSourceTranslationMarketOnly && manifest.chromeEvidence?.gemini?.usedExistingTab !== true) {
       addIssue(errors, "Gemini browser evidence is missing");
     }
@@ -484,7 +485,7 @@ function checkReleaseCandidate({ date, slot, lane }, errors, warnings) {
     for (const post of posts) {
       const generatedBy = String(post.generatedBy || "").toLowerCase();
       const sourceTranslatedMarketNews =
-        post.contentType === "breaking" && /source-translation|source_translat|codex-market|market-source/.test(generatedBy);
+        post.contentType === "breaking" && /source-translation|source_translat|source-worker|codex-market|market-source/.test(generatedBy);
       if (!sourceTranslatedMarketNews && !generatedBy.includes("gemini")) {
         addIssue(errors, `${post.language}/${post.slug}: generatedBy must include gemini`);
       }

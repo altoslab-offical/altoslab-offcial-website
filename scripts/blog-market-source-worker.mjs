@@ -104,17 +104,24 @@ function buildPost(language, pack, date, localizedPack = pack) {
     sortOrder: Number(pack.sequence) || 0,
     updatedAt: new Date().toISOString(),
     publishedAt: source.publishedAt || new Date().toISOString(),
-    generatedBy: "market-source-worker",
+    generatedBy: `hermes-owner:market-source-worker:${marketGenerationProvider()}`,
     generationTrace: [
       {
         lane: "market-news",
         worker: "scripts/blog-market-source-worker.mjs",
+        owner: "Hermes",
         sourcePackSequence: pack.sequence,
         sourceUrl: source.url,
         renderer: "blog-market-newsroom.source-faithful"
       }
     ]
   };
+}
+
+function marketGenerationProvider() {
+  const provider = String(process.env.BLOG_MARKET_TRANSLATION_PROVIDER || "hermes-owner").trim().toLowerCase();
+  const allowed = new Set(["gemini-chatgpt", "local-antigravity", "local", "hermes-owner", "codex-gpt-5.4", "codex-gpt-5.4-subagent"]);
+  return allowed.has(provider) ? provider : "hermes-owner";
 }
 
 async function main() {
@@ -166,9 +173,10 @@ async function main() {
       translationGroupId: posts[0]?.translationGroupId || "",
       generatedAt: new Date().toISOString(),
       generation: {
-        provider: "source-translation",
+        provider: marketGenerationProvider(),
         promptVersion: "altos-market-source-worker-v2",
-        model: "Codex source article extractor + source-faithful localization worker"
+        model: "Codex source article extractor + source-faithful localization worker",
+        lane: "source-translation"
       },
       generator: "blog-market-source-worker",
       sourcePackPath: path.relative(process.cwd(), sourcePacksPath),

@@ -164,14 +164,20 @@ assert(ingestRoute.includes("getPublishedBlogDuplicatePosts"), "Cloudflare inges
 assert(ingestRoute.includes("verifySourceLinks: !boundedValidate"), "Cloudflare ingest validate skips remote source probes in bounded Worker path");
 assert(ingestRoute.includes("verifyRemoteImage: !boundedValidate"), "Cloudflare ingest validate skips remote image probes in bounded Worker path");
 assert(ingestRoute.includes("publish-if-valid"), "ingest route supports publish-if-valid fail-closed mode");
-assert(ingestRoute.includes("generation.provider must be gemini-chatgpt or source-translation"), "ingest route accepts Gemini/GPT columns and source-translation market news");
+assert(
+  ingestRoute.includes("hermes-owner") && ingestRoute.includes("codex-gpt-5.4") && ingestRoute.includes("source-translation"),
+  "ingest route accepts Gemini/GPT columns plus source-translation and Hermes/Codex market-news lanes"
+);
 assert(ingestRoute.includes("duplicateTopicIssues"), "ingest route blocks repeated topics/source angles");
 assert(ingestRoute.includes("duplicateCoverIssues"), "ingest route blocks repeated cover images across different article groups");
 assert(ingestRoute.includes("market news coverSource must be source"), "ingest route requires source images for market-news posts");
 assert(ingestRoute.includes("not stock/free image providers"), "ingest route blocks stock/free images for market-news source covers");
 assert(releaseRoute.includes("verifyBlogIngestRequest"), "release-set route verifies HMAC before parsing release payloads");
 assert(releaseRoute.includes("qualityManifest") && releaseRoute.includes("contentSha256"), "release-set route requires a signed quality manifest digest");
-assert(releaseRoute.includes("generation.provider must be gemini-chatgpt or source-translation"), "release-set route accepts Gemini/GPT columns and source-translation market news");
+assert(
+  releaseRoute.includes("hermes-owner") && releaseRoute.includes("codex-gpt-5.4") && releaseRoute.includes("source-translation"),
+  "release-set route accepts Gemini/GPT columns plus source-translation and Hermes/Codex market-news lanes"
+);
 assert(releaseRoute.includes("releaseCoverContractIssues"), "release-set route blocks localhost/http covers and mismatched multilingual covers");
 assert(releaseRoute.includes("column/feature posts require at least two in-article images"), "release-set route blocks columns/features without required in-article images");
 assert(releaseRoute.includes("contentImages URLs do not match release payload"), "release-set route verifies signed content image URLs during publish");

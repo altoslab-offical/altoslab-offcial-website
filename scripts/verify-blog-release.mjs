@@ -804,7 +804,7 @@ async function verifyAdminReadback(posts, root, errors, warnings, cookie) {
     }
     const generatedBy = String(adminPost.generatedBy || "").toLowerCase();
     const sourceTranslatedMarketNews =
-      adminPost.contentType === "breaking" && /source-translation|source_translat|codex-market|market-source/.test(generatedBy);
+      adminPost.contentType === "breaking" && /source-translation|source_translat|source-worker|codex-market|market-source/.test(generatedBy);
     if (!generatedBy.includes("gemini") && !sourceTranslatedMarketNews) {
       pushIssue(errors, "admin readback generatedBy must keep Gemini provenance for columns/features or source-translation provenance for market news", {
         language: post.language,

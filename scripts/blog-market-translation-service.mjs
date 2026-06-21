@@ -17,8 +17,13 @@ const TARGET_LANGUAGES = {
 };
 
 const LOCAL_PROVIDER_ALIASES = new Set(["local", "deterministic", "source-faithful"]);
+const HERMES_DETERMINISTIC_PROVIDER_ALIASES = new Set(["hermes-owner", "codex-gpt-5.4", "codex-gpt-5.4-subagent"]);
 
-function localMarketFallbackAllowed() {
+function localMarketFallbackAllowed(provider = "") {
+  if (LOCAL_PROVIDER_ALIASES.has(provider)) return process.env.BLOG_MARKET_ALLOW_LOCAL_TRANSLATION_FALLBACK === "1";
+  if (HERMES_DETERMINISTIC_PROVIDER_ALIASES.has(provider)) {
+    return process.env.BLOG_MARKET_HERMES_ALLOW_DETERMINISTIC_SOURCE_TRANSLATION === "1";
+  }
   return process.env.BLOG_MARKET_ALLOW_LOCAL_TRANSLATION_FALLBACK === "1";
 }
 
@@ -398,8 +403,8 @@ export async function localizeSourcePack(pack, { projectId = "", required = true
   }
   const bodyOffset = 2 + factBullets.length;
 
-  if (LOCAL_PROVIDER_ALIASES.has(provider)) {
-    if (!localMarketFallbackAllowed()) throw localMarketFallbackDisabledError(provider);
+  if (LOCAL_PROVIDER_ALIASES.has(provider) || HERMES_DETERMINISTIC_PROVIDER_ALIASES.has(provider)) {
+    if (!localMarketFallbackAllowed(provider)) throw localMarketFallbackDisabledError(provider);
     return localizeSourcePackLocally(pack, texts);
   }
 
@@ -424,7 +429,7 @@ export async function localizeSourcePack(pack, { projectId = "", required = true
     }
   } catch (error) {
     if (provider === "google-strict") throw error;
-    if (!localMarketFallbackAllowed()) throw error;
+    if (!localMarketFallbackAllowed(provider)) throw error;
     process.stderr.write("warning: market translation provider unavailable; using local source-faithful fallback\\n");
     return localizeSourcePackLocally(pack, texts);
   }

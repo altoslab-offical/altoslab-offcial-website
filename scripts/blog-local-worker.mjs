@@ -457,6 +457,13 @@ function requireChromeProfileEvidence(issues, evidence, label) {
   }
 }
 
+function isSourceRenderedMarketSet(payload) {
+  const posts = Array.isArray(payload?.posts) ? payload.posts : [];
+  if (!posts.length || !posts.every((post) => post.contentType === "breaking")) return false;
+  if (payload?.generation?.provider === "source-translation") return true;
+  return posts.every((post) => /source-translation|source_translat|source-worker|codex-market|market-source/i.test(String(post.generatedBy || "")));
+}
+
 function localPreflight(payload) {
   const issues = [];
   const posts = Array.isArray(payload.posts) ? payload.posts : [];
@@ -467,7 +474,7 @@ function localPreflight(payload) {
   const requiresGptCover = posts.some((post) => post.contentType !== "breaking");
   const isMarketNewsSet = posts.some((post) => post.contentType === "breaking");
   const isMarketOnlySet = posts.length > 0 && posts.every((post) => post.contentType === "breaking");
-  const isSourceTranslationLane = payload.generation?.provider === "source-translation";
+  const isSourceTranslationLane = isSourceRenderedMarketSet(payload);
 
   if (!isMarketOnlySet || !isSourceTranslationLane) {
     if (geminiEvidence.usedExistingTab !== true) issues.push("chromeEvidence.gemini.usedExistingTab must be true");
@@ -644,12 +651,7 @@ async function writeJsonFile(filePath, payload) {
 }
 
 function articleSetLane(payload) {
-  const posts = Array.isArray(payload?.posts) ? payload.posts : [];
-  const isMarketOnlySet =
-    payload?.generation?.provider === "source-translation" &&
-    posts.length > 0 &&
-    posts.every((post) => post.contentType === "breaking");
-  return isMarketOnlySet ? "market" : "column";
+  return isSourceRenderedMarketSet(payload) ? "market" : "column";
 }
 
 function preparedCandidateIndexPath(payload, slot) {

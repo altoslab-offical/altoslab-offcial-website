@@ -31,7 +31,14 @@ type BlogIngestRequest = {
   validateOnly?: boolean;
   replaceExistingPublished?: boolean;
   generation?: {
-    provider?: "gemini-chatgpt" | "source-translation" | "local-antigravity" | "local";
+    provider?:
+      | "gemini-chatgpt"
+      | "source-translation"
+      | "local-antigravity"
+      | "local"
+      | "hermes-owner"
+      | "codex-gpt-5.4"
+      | "codex-gpt-5.4-subagent";
     model?: string;
     promptVersion?: string;
     sourceCount?: number;
@@ -44,6 +51,20 @@ const SLOT_CONFIG: Record<IngestSlot, { hour: string }> = {
   afternoon: { hour: "16:00" },
   evening: { hour: "20:00" }
 };
+
+const allowedGenerationProviders = new Set([
+  "gemini-chatgpt",
+  "source-translation",
+  "local-antigravity",
+  "local",
+  "hermes-owner",
+  "codex-gpt-5.4",
+  "codex-gpt-5.4-subagent"
+]);
+
+function isAllowedGenerationProvider(provider?: string) {
+  return Boolean(provider && allowedGenerationProviders.has(provider));
+}
 
 function scheduledFor(date: string, slot: IngestSlot) {
   return `${date}T${SLOT_CONFIG[slot].hour}:00+08:00`;
@@ -367,8 +388,8 @@ export async function POST(request: Request) {
 
   if (!slot) inputIssues.push("slot must be morning, afternoon or evening");
   if (!Array.isArray(payload.posts)) inputIssues.push("posts must be an array");
-  if (payload.generation?.provider !== "gemini-chatgpt" && payload.generation?.provider !== "source-translation") {
-    inputIssues.push("generation.provider must be gemini-chatgpt or source-translation");
+  if (!isAllowedGenerationProvider(payload.generation?.provider)) {
+    inputIssues.push("generation.provider must be gemini-chatgpt, source-translation, local-antigravity, local, hermes-owner, codex-gpt-5.4, or codex-gpt-5.4-subagent");
   }
   if (inputIssues.length || !slot || !Array.isArray(payload.posts)) {
     return json(400, { ok: false, ingestRunId, errors: inputIssues });
