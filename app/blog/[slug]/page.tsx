@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { cache } from "react";
 import { BlogArticle } from "@/components/BlogArticle";
 import { blogCoverForLanguage, blogPostPath, cleanBlogSeoTitle, metadataLanguageKey } from "@/lib/blog-utils";
 import { getPublishedBlogAlternates, getPublishedBlogPost } from "@/lib/cms";
@@ -7,13 +8,15 @@ import { absoluteUrl } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
 
+const getZhHantPost = cache((slug: string) => getPublishedBlogPost(slug, "zh-Hant"));
+
 type PageProps = {
   params: Promise<{ slug: string }> | { slug: string };
 };
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
-  const post = await getPublishedBlogPost(slug, "zh-Hant");
+  const post = await getZhHantPost(slug);
   if (!post) return {};
   const alternates = await getPublishedBlogAlternates(post);
   const image = absoluteUrl(post.cover || blogCoverForLanguage(post.language));
@@ -50,7 +53,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function BlogPostPage({ params }: PageProps) {
   const { slug } = await params;
-  const post = await getPublishedBlogPost(slug, "zh-Hant");
+  const post = await getZhHantPost(slug);
   if (!post) notFound();
 
   return <BlogArticle post={post} />;

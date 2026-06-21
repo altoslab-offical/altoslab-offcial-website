@@ -56,9 +56,9 @@ const IMAGE_THRESHOLD = 82;
 const MIN_IMAGE_WIDTH = 1200;
 const MIN_IMAGE_HEIGHT = 630;
 const MIN_IMAGE_BYTES = 40_000;
-const MIN_SOURCE_IMAGE_WIDTH = 768;
-const MIN_SOURCE_IMAGE_HEIGHT = 432;
-const MIN_SOURCE_IMAGE_BYTES = 25_000;
+const MIN_SOURCE_IMAGE_WIDTH = 1200;
+const MIN_SOURCE_IMAGE_HEIGHT = 630;
+const MIN_SOURCE_IMAGE_BYTES = 80_000;
 const MAX_IMAGE_BYTES = 8_000_000;
 const SAFE_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
 const GENERIC_STOCK_IMAGE_HOSTS = [
@@ -79,6 +79,9 @@ const unsafeImageMetadataPattern =
 
 const genericGeneratedImagePattern =
   /(generic|abstract background|glowing dashboard|futuristic dashboard|server room|business meeting|robot handshake|stock photo|科技感背景|抽象科技|會議室|儀表板|伺服器機房|汎用|会議|서버룸|회의실|추상 배경)/i;
+
+const sourceCoverWeakContextPattern =
+  /(generic|abstract|placeholder|wallpaper|stock|gradient|dashboard|network map|glass cube|科技感背景|抽象|漸層|占位|汎用|抽象背景|추상|그라데이션)/i;
 
 function removeNegativeImageConstraints(input: string) {
   return input
@@ -458,6 +461,9 @@ async function reviewPostImage(post: BlogPost, options: Required<BlogImageQualit
     }
     if (!sourceCoverMatchesSourceList(post)) {
       issues.push("source cover credit URL must match one of the article source links");
+    }
+    if (sourceCoverWeakContextPattern.test(imageContext(post))) {
+      issues.push("source cover metadata reads like a placeholder or generic tech visual instead of a source-backed editorial image");
     }
   }
 

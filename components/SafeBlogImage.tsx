@@ -8,6 +8,7 @@ type SafeBlogImageProps = {
   post: BlogVisualPost;
   className?: string;
   loading?: "eager" | "lazy";
+  fetchPriority?: "high" | "low" | "auto";
   compact?: boolean;
 };
 
@@ -18,7 +19,7 @@ function hasRejectedCover(post: BlogVisualPost) {
   return rejectedCoverPattern.test([post.cover, post.coverAlt, post.coverCredit, post.coverPrompt].filter(Boolean).join(" "));
 }
 
-export function SafeBlogImage({ post, className, loading = "lazy", compact }: SafeBlogImageProps) {
+export function SafeBlogImage({ post, className, loading = "lazy", fetchPriority, compact }: SafeBlogImageProps) {
   const [failed, setFailed] = useState(false);
   const shouldUseEditorialVisual =
     failed || hasRejectedCover(post) || !post.cover || (post.coverSource !== "curated" && post.coverGeneration?.provider === "local");
@@ -33,6 +34,8 @@ export function SafeBlogImage({ post, className, loading = "lazy", compact }: Sa
       src={post.cover}
       alt={post.coverAlt || `${post.title} cover`}
       loading={loading}
+      fetchPriority={fetchPriority}
+      decoding="async"
       onError={() => setFailed(true)}
     />
   );

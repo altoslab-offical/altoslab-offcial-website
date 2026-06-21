@@ -507,7 +507,7 @@ export async function BlogArticle({ post }: { post: BlogPost }) {
             <p className="hero-copy">{renderBrandText(post.excerpt)}</p>
             {post.cover ? (
               <>
-                <SafeBlogImage className="article-cover" loading="eager" post={coverPost} />
+                <SafeBlogImage className="article-cover" fetchPriority="high" loading="eager" post={coverPost} />
                 {publicCoverCredit ? (
                   <p className="article-cover-credit">
                     {coverImageLabel(post.language)}{" "}

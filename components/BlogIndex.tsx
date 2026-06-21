@@ -572,13 +572,18 @@ export async function BlogIndex({ language, tag, query, page }: BlogIndexProps) 
             <BlogAdSlot placement="index-feed" />
 
             <div className="blog-craft-grid">
-              {visiblePosts.map((post) => {
+              {visiblePosts.map((post, index) => {
                 const visualPost = toBlogVisualPost(post);
                 return (
                   <article className="blog-craft-card" key={post.id}>
                     <Link className="blog-craft-card-image" href={blogPostPath(post)}>
                       {post.cover ? (
-                        <SafeBlogImage compact post={visualPost} />
+                        <SafeBlogImage
+                          compact
+                          fetchPriority={index === 0 ? "high" : undefined}
+                          loading={index < 2 ? "eager" : "lazy"}
+                          post={visualPost}
+                        />
                       ) : (
                         <BlogEditorialVisual compact post={visualPost} />
                       )}
