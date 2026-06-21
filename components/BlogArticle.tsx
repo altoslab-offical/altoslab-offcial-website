@@ -178,7 +178,12 @@ function coverImageLabel(language: BlogPost["language"]) {
 function articleTaxonomy(post: BlogPost) {
   const seen = new Set<string>();
   const typeLabel = blogContentTypeLabel(post.contentType, post.language).toLowerCase();
-  return publicTaxonomyLabels([post.newsCategory || "", ...post.tags.slice(0, 3)], post.language)
+  const taxonomyParts = [post.newsCategory || "", ...post.tags.slice(0, 3)]
+    .flatMap((item) => item.split(/[／/]/g))
+    .map((item) => item.trim())
+    .filter(Boolean);
+
+  return publicTaxonomyLabels(taxonomyParts, post.language)
     .filter(Boolean)
     .filter((item) => {
       const key = item.toLowerCase();
