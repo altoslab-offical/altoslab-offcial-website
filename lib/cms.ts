@@ -41,6 +41,7 @@ let publicRawCmsCache: { data: CmsData; expiresAt: number } | null = null;
 let publicBlogPostsCache: { posts: BlogPost[]; expiresAt: number } | null = null;
 let publicBlogInventoryCache: { posts: BlogPost[]; expiresAt: number } | null = null;
 let publicBlogDuplicateCache: { posts: BlogPost[]; expiresAt: number } | null = null;
+const publicBlogDetailMemoryCache = new Map<string, { post: BlogPost; expiresAt: number }>();
 let publicBlogD1SchemaReady = false;
 
 function canUseInMemoryPublicCache() {
@@ -126,6 +127,7 @@ export async function writeCmsData(data: CmsData) {
   publicBlogPostsCache = null;
   publicBlogInventoryCache = null;
   publicBlogDuplicateCache = null;
+  publicBlogDetailMemoryCache.clear();
   await writeCmsDataToStorage(data);
   await writePublicBlogCacheFromData(data).catch((error) => {
     console.warn("[cms] Unable to refresh public blog cache:", error instanceof Error ? error.message : error);
@@ -351,6 +353,30 @@ function publicBlogDetailCacheKey(language: BlogLanguage, slug: string) {
   return config
     ? `${config.cmsPathname}:public-blog-detail:${PUBLIC_BLOG_DETAIL_CACHE_VERSION}:${safePublicBlogDetailCachePart(language)}:${safePublicBlogDetailCachePart(slug)}`
     : "";
+}
+
+function publicBlogDetailMemoryCacheKey(slug: string, language?: BlogLanguage) {
+  return `${language ? normalizeBlogLanguage(language) : "any"}:${decodeSlugCandidate(slug)}`;
+}
+
+function readPublicBlogDetailMemoryCache(slug: string, language?: BlogLanguage) {
+  if (!canUseInMemoryPublicCache()) return null;
+  const key = publicBlogDetailMemoryCacheKey(slug, language);
+  const cached = publicBlogDetailMemoryCache.get(key);
+  if (!cached) return null;
+  if (cached.expiresAt <= Date.now()) {
+    publicBlogDetailMemoryCache.delete(key);
+    return null;
+  }
+  return cached.post;
+}
+
+function writePublicBlogDetailMemoryCache(slug: string, language: BlogLanguage | undefined, post: BlogPost) {
+  if (!canUseInMemoryPublicCache()) return;
+  publicBlogDetailMemoryCache.set(publicBlogDetailMemoryCacheKey(slug, language), {
+    post,
+    expiresAt: Date.now() + PUBLIC_BLOG_CACHE_TTL_MS
+  });
 }
 
 async function runPublicBlogD1(database: D1DatabaseLike, query: string, ...values: unknown[]) {
@@ -1248,8 +1274,14 @@ export async function getPublishedBlogPost(slug: string, language?: BlogLanguage
   const projectedPost = await readPublicBlogD1ProjectionDetail(slug, language);
   if (projectedPost) return projectedPost;
 
+  const memoryPost = readPublicBlogDetailMemoryCache(slug, language);
+  if (memoryPost) return memoryPost;
+
   const cachedPost = await readPublicBlogDetailCache(slug, language);
-  if (cachedPost) return cachedPost;
+  if (cachedPost) {
+    writePublicBlogDetailMemoryCache(slug, language, cachedPost);
+    return cachedPost;
+  }
 
   const posts = await readPublishedBlogPostsForPublic();
   const post = posts.find(
@@ -1267,7 +1299,10 @@ export async function getPublishedBlogPost(slug: string, language?: BlogLanguage
       item.status === "published" &&
       (!language || normalizeBlogLanguage(item.language) === language)
   );
-  if (cmsPost?.body || !post) return cmsPost || null;
+  if (cmsPost?.body || !post) {
+    if (cmsPost) writePublicBlogDetailMemoryCache(slug, language, cmsPost);
+    return cmsPost || null;
+  }
 
   return post || null;
 }
