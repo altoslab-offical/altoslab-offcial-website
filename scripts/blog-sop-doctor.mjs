@@ -551,6 +551,14 @@ function checkReleaseCandidate({ date, slot, lane }, errors, warnings) {
         }
         if (post.coverSource !== "generated") addIssue(errors, `${post.language}/${post.slug}: coverSource must be generated`);
         const contentImages = Array.isArray(post.contentImages) ? post.contentImages : [];
+        const contentImageUrls = contentImages.map((image) => String(image?.url || "").trim()).filter(Boolean);
+        const contentImagePrompts = contentImages.map((image) => String(image?.prompt || "").trim()).filter(Boolean);
+        if (new Set(contentImageUrls).size < contentImageUrls.length) {
+          addIssue(errors, `${post.language}/${post.slug}: contentImages must not reuse the same URL`);
+        }
+        if (new Set(contentImagePrompts).size < contentImagePrompts.length) {
+          addIssue(errors, `${post.language}/${post.slug}: contentImages must not reuse the same prompt`);
+        }
         if (contentImages.length < 2) addIssue(errors, `${post.language}/${post.slug}: column/feature requires at least two in-article images`);
         if (contentImages.length > 3) addIssue(errors, `${post.language}/${post.slug}: column/feature should use no more than three in-article images`);
         for (const [index, image] of contentImages.entries()) {

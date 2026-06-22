@@ -103,6 +103,30 @@ Multilingual subtitle rule:
 - `fil`: natural Taglish only when the market would say it; otherwise use a
   clean Filipino sentence with one concrete point.
 
+Section heading gate:
+
+- When Tommy says `sub-title` during article review, first check whether he
+  means section headings (`H2/H3`) rather than the public excerpt/standfirst.
+- Section headings are mini headlines. They should tell the reader what the
+  next paragraph will prove, not expose the production scaffold.
+- Avoid reusable skeleton labels such as `ALTOS LAB view`, `What to watch`,
+  `Scope before scale`, `先看範圍`, `接下來看什麼`, `FAQ` as main article
+  section headings unless they are made specific to the story.
+- Strong section headings usually include one of: the named actor, what changed,
+  the operational tension, the mechanism, the risk, or the concrete decision.
+- Localized versions should not translate the zh-Hant heading literally when
+  the target language would sound like a report outline.
+
+Inline image gate:
+
+- Column and feature articles need 2-3 in-article visuals, shared across all
+  language versions for the same article set.
+- Within one article, two in-article images must not reuse the same URL,
+  localPath, or prompt. If the second visual cannot explain a different job,
+  remove it or regenerate it.
+- Market news keeps the source/official image when rights and quality are
+  acceptable; generated ALTOS LAB visuals are a fallback, not the default.
+
 Weak:
 
 - This article explains AI agent pilots and why they matter for companies.

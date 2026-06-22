@@ -232,6 +232,14 @@ function releaseCoverContractIssues(posts: Partial<BlogPost>[] = []) {
     }
     if (isColumnOrFeature(post)) {
       const contentImages = Array.isArray(post.contentImages) ? post.contentImages : [];
+      const contentImageUrls = contentImages.map((image) => image?.url?.trim()).filter(Boolean);
+      const contentImagePrompts = contentImages.map((image) => image?.prompt?.trim()).filter(Boolean);
+      if (new Set(contentImageUrls).size < contentImageUrls.length) {
+        issues.push(`${post.language || "unknown"}/${post.slug || "missing-slug"} contentImages must not reuse the same URL`);
+      }
+      if (new Set(contentImagePrompts).size < contentImagePrompts.length) {
+        issues.push(`${post.language || "unknown"}/${post.slug || "missing-slug"} contentImages must not reuse the same prompt`);
+      }
       if (contentImages.length < 2) issues.push(`${post.language || "unknown"}/${post.slug || "missing-slug"} column/feature requires at least two in-article images`);
       if (contentImages.length > 3) issues.push(`${post.language || "unknown"}/${post.slug || "missing-slug"} column/feature should use no more than three in-article images`);
       for (const [index, image] of contentImages.entries()) {

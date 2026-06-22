@@ -593,6 +593,17 @@ export function multilingualCoverConsistencyIssues(posts: MultilingualCoverPost[
         issues.push(`all language versions in an article set must share content image ${index + 1} URL (${group})`);
       }
     }
+    for (const post of groupPosts) {
+      const contentImages = post.contentImages || [];
+      const urls = contentImages.map((image) => image.url?.trim()).filter(Boolean);
+      const prompts = contentImages.map((image) => image.prompt?.trim()).filter(Boolean);
+      if (new Set(urls).size < urls.length) {
+        issues.push(`${post.language || "unknown"}/${post.slug || "missing-slug"} content images must not reuse the same URL`);
+      }
+      if (new Set(prompts).size < prompts.length) {
+        issues.push(`${post.language || "unknown"}/${post.slug || "missing-slug"} content images must not reuse the same prompt`);
+      }
+    }
   }
 
   return issues;

@@ -148,6 +148,18 @@ const weakSubtitlePatterns = [
   /(is important for|matters for|helps companies|can help businesses|對企業很重要|對企業來說很重要|企業需要關注)/i
 ];
 
+const weakSectionHeadingPatterns = [
+  /^(先看範圍|工作流怎麼切|ALTOS LAB 怎麼看|風險不是慢下來|接下來看什麼|給團隊的下一步|常見誤判|本文重點|可核對事實)$/i,
+  /^(what to watch|what this means|next steps|key takeaways|our view|common mistakes|scope before scale)$/i,
+  /^(範囲を先に決める|最初の対象業務|ALTOS LAB の見方|次に見ること|よくある誤解|今日できる次の一歩)$/i,
+  /^(범위를 먼저 정한다|Codex의 첫 위치|ALTOS LAB 관점|다음 신호|자주 생기는 오판|오늘의 다음 행동|FAQ)$/i,
+  /^(ruang lingkup dulu|tempat awal .+|cara ALTOS LAB membaca|sinyal berikutnya|kesalahan umum|langkah hari ini|FAQ)$/i,
+  /^(phạm vi trước quy mô|.+ nên vào đâu trước|góc nhìn ALTOS LAB|tín hiệu tiếp theo|những ngộ nhận phổ biến|việc có thể làm hôm nay)$/i,
+  /^(กำหนดขอบเขตก่อน|.+ควรเริ่มตรงไหน|มุมมอง ALTOS LAB|สัญญาณถัดไป|FAQ|ตัวอย่างใช้งาน)$/i,
+  /^(tetapkan skop dahulu|.+ bermula di mana|bacaan ALTOS LAB|isyarat seterusnya|salah faham biasa|langkah hari ini|FAQ)$/i,
+  /^(scope muna|saan unang ilalagay ang .+|basa ng ALTOS LAB|susunod na dapat bantayan|karaniwang maling basa|gawin ngayon)$/i
+];
+
 const subtitleEvidencePattern =
   /(OpenAI|Anthropic|Google|DeepMind|Hugging Face|IBM|Microsoft|NVIDIA|Vercel|TechCrunch|The Verge|WIRED|VentureBeat|MIT Technology Review|Reuters|Bloomberg|AI Magazine|Search Console|ChatGPT|Claude|Gemini|Perplexity|Codex|AI Mode|AI Factories|Gartner|Osmos|Fabric|Maia|Kubernetes|KubeCon|GPU|官方|報導|來源|案例|發布|launch|released|published|case|report|source|workflow|rollback|trace|eval|審核|回滾|來源|試點|採購|導入|ワークフロー|出典|検証|롤백|출처|검토)/i;
 
@@ -687,6 +699,10 @@ function markdownHeadingCount(body: string) {
   return (body.match(/^##\s+/gm) || []).length;
 }
 
+function markdownH2s(body: string) {
+  return [...body.matchAll(/^##\s+(.+)$/gm)].map((match) => match[1]?.trim()).filter(Boolean);
+}
+
 function boldEmphasisItems(body: string) {
   return [...body.matchAll(/\*\*([^*\n]{1,140})\*\*/g)].map((match) => match[1]?.trim() || "").filter(Boolean);
 }
@@ -1168,6 +1184,10 @@ function reviewSeoGeoStructure(post: BlogPost): ReviewResult {
   if (h2Count < CONTENT_TYPE_MINIMUMS[contentType].h2) {
     issues.push("H2 structure is too thin for search and AI answer extraction");
   }
+  const weakHeadings = markdownH2s(post.body).filter((heading) => weakSectionHeadingPatterns.some((pattern) => pattern.test(heading)));
+  if (contentType !== "breaking" && weakHeadings.length > 1) {
+    issues.push(`section headings feel templated; rewrite weak H2s: ${weakHeadings.slice(0, 4).join(", ")}`);
+  }
   if (post.faqs.length < CONTENT_TYPE_MINIMUMS[contentType].faqs) {
     issues.push("FAQ coverage is too thin for schema and answer-engine extraction");
   }
@@ -1330,6 +1350,10 @@ export function reviewImageFit(post: BlogPost): ReviewResult {
 
   if (post.contentType === "column" || post.contentType === "feature") {
     const contentImages = post.contentImages || [];
+    const imageUrls = contentImages.map((image) => image.url?.trim()).filter(Boolean);
+    const imagePrompts = contentImages.map((image) => image.prompt?.trim()).filter(Boolean);
+    if (new Set(imageUrls).size < imageUrls.length) issues.push("content images must not reuse the same URL inside one article");
+    if (new Set(imagePrompts).size < imagePrompts.length) issues.push("content images must not reuse the same prompt inside one article");
     if (contentImages.length < 2) {
       issues.push("column and feature posts require at least two in-article images for editorial pacing");
     }

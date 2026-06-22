@@ -434,10 +434,23 @@ function articleSetContentImageIssues(posts) {
     }
     const maxCount = Math.max(...counts, 0);
     for (let index = 0; index < maxCount; index += 1) {
-      const urls = [...new Set(groupPosts.map((post) => String(post.contentImages?.[index]?.url || "").trim()).filter(Boolean))];
-      if (urls.length > 1) {
-        issues.push(`all language versions in an article set must share content image ${index + 1} URL (${group})`);
+      const refs = [
+        ...new Set(
+          groupPosts
+            .map((post) => String(post.contentImages?.[index]?.url || post.contentImages?.[index]?.localPath || "").trim())
+            .filter(Boolean)
+        )
+      ];
+      if (refs.length > 1) {
+        issues.push(`all language versions in an article set must share content image ${index + 1} reference (${group})`);
       }
+    }
+    for (const post of groupPosts) {
+      const images = Array.isArray(post.contentImages) ? post.contentImages : [];
+      const urls = images.map((image) => String(image.url || image.localPath || "").trim()).filter(Boolean);
+      const prompts = images.map((image) => String(image.prompt || "").trim()).filter(Boolean);
+      if (new Set(urls).size < urls.length) issues.push(`${post.language || "unknown"} content images must not reuse the same URL/localPath (${group})`);
+      if (new Set(prompts).size < prompts.length) issues.push(`${post.language || "unknown"} content images must not reuse the same prompt (${group})`);
     }
   }
 
@@ -600,7 +613,7 @@ function localPreflight(payload) {
       if (contentImages.length > 3) issues.push(`${post.language || "unknown"} column/feature should use no more than three in-article images`);
       for (const [index, image] of contentImages.entries()) {
         const label = `${post.language || "unknown"} contentImages[${index}]`;
-        if (!isAllowedCoverUrl(image.url)) issues.push(`${label} must be a public https URL`);
+        if (!image.localPath && !isAllowedCoverUrl(image.url)) issues.push(`${label} must include a public https URL or a localPath ready for media upload`);
         if (!image.alt || image.alt.length < 18) issues.push(`${label}.alt is missing or too thin`);
         if (image.source !== "generated") issues.push(`${label}.source must be generated for columns/features`);
         issues.push(...generatedContentImageIssues(image, label));
