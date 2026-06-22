@@ -31,6 +31,10 @@ const BAD_PUBLIC_PATTERNS = [
   /Tóm tắt nguồn[:：]?/gi,
   /สรุปแหล่งที่มา[:：]?/gi,
   /Buod ng sanggunian[:：]?/gi,
+  /最新報導把「[^」]+」放進\s*AI\s*產業脈絡[^。.!?！？]*(?:[。.!?！？]|$)/gi,
+  /\blatest report (?:puts|places)\s+["“][^"”]{0,220}["”]\s+in (?:the )?AI industry context[^.!?]*(?:[.!?]|$)/gi,
+  /laporan terbaru [^.。!?！？]{0,240} dalam konteks industri AI[^.。!?！？]*(?:[.!?。！？]|$)/gi,
+  /รายงานล่าสุด[^.。!?！？]{0,240}บริบทอุตสาหกรรม AI[^.。!?！？]*(?:[.!?。！？]|$)/gi,
   /source[- ]translation/gi,
   /quality gate/gi,
   /pipeline/gi,
@@ -491,7 +495,11 @@ function buildGeoSummary(post) {
 function buildLead(post) {
   const language = LANGUAGES.includes(post.language) ? post.language : "en";
   const config = LANGUAGE_CONFIG[language] || LANGUAGE_CONFIG.en;
-  const facts = bestFacts(post, 4);
+  const facts = bestFacts(post, 6)
+    .map((fact) => metadataFact(post, fact, 180))
+    .filter(Boolean)
+    .filter((fact, index, array) => array.findIndex((other) => overlapLike(other, fact)) === index)
+    .slice(0, 4);
   const publisher = sourcePublisher(post);
   const title = sourceTitle(post);
   return ensureMinimum(
@@ -540,6 +548,9 @@ function repairAntiSlop(text = "") {
 function bodyNeedsNewLead(post, firstParagraph) {
   const publisher = sourcePublisher(post);
   if (!firstParagraph) return true;
+  if (publisher && new RegExp(`${escapeRegExp(publisher)}\\s+(?:報導|reports?|reported|は|が報じ|는|보도|melaporkan|đưa tin|รายงาน|iniulat)[\\s\\S]{0,220}${escapeRegExp(publisher)}\\s+(?:報導|reports?|reported|は|が報じ|는|보도|melaporkan|đưa tin|รายงาน|iniulat)`, "i").test(firstParagraph)) {
+    return true;
+  }
   if (/(本文|這篇文章|this article|in this article|この記事では|本稿では|이 글에서는|이번 글에서는)/i.test(firstParagraph)) return true;
   if (!firstParagraph.includes(publisher) && post.sourceLinks?.[0]?.publisher) return true;
   if (!/(AI|Agent|agent|OpenAI|Anthropic|Google|Microsoft|NVIDIA|Gemini|ChatGPT|Claude|Search|Cloud|自動化|搜尋|検索|검색|cloud|คลาวด์)/i.test(firstParagraph)) {
@@ -547,6 +558,18 @@ function bodyNeedsNewLead(post, firstParagraph) {
   }
   if (firstParagraph.length < 80) return true;
   return false;
+}
+
+function removeRepeatedPublisherLead(post, paragraph = "") {
+  const publisher = sourcePublisher(post);
+  if (!publisher) return paragraph;
+  const title = sourceTitle(post);
+  return cleanText(paragraph)
+    .replace(new RegExp(`^${escapeRegExp(publisher)}\\s*(?:報導|reports?|reported|は|が報じ|는|보도|melaporkan|đưa tin|รายงาน|iniulat)\\s+${escapeRegExp(publisher)}\\s*(?:發布|released|published|公開|출시|menerbitkan|công bố|เผยแพร่|inilathala)?\\s*["「]?${escapeRegExp(title)}["」]?[,，:：。.]*\\s*`, "i"), "")
+    .replace(new RegExp(`^${escapeRegExp(publisher)}\\s*(?:報導|reports?|reported|は|が報じ|는|보도|melaporkan|đưa tin|รายงาน|iniulat)[,，:：]?\\s*`, "i"), "")
+    .replace(new RegExp(`^${escapeRegExp(publisher)}\\s*(?:報導|reports?|reported|は|が報じ|는|보도|melaporkan|đưa tin|รายงาน|iniulat)\\s*${escapeRegExp(title)}[,，:：。.]*\\s*`, "i"), "")
+    .replace(/^(?:來源指出|Source says|出典によると|출처에 따르면|Sumber menyebut|Nguồn tin cho biết|แหล่งข่าวระบุว่า|Ayon sa source)[,，:：]?\\s*/i, "")
+    .trim();
 }
 
 function repairBody(post) {
@@ -558,7 +581,7 @@ function repairBody(post) {
   const nextParagraphs = paragraphs.slice(1).filter((paragraph) => {
     const compact = paragraph.toLowerCase().replace(/\s+/g, "");
     return !compact || !lead.toLowerCase().replace(/\s+/g, "").includes(compact.slice(0, Math.min(60, compact.length)));
-  });
+  }).map((paragraph) => removeRepeatedPublisherLead(post, paragraph)).filter(Boolean);
 
   const repaired = bodyNeedsNewLead(post, first) ? [lead, ...nextParagraphs] : [first, ...nextParagraphs];
   return repaired

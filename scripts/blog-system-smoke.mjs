@@ -42,6 +42,7 @@ const backfillPlanner = read("scripts/blog-backfill-planner.mjs");
 const subagentModelPolicy = read("scripts/blog-subagent-model-policy.mjs");
 const marketSourceScanner = read("scripts/blog-market-source-scanner.mjs");
 const marketSourceWorker = read("scripts/blog-market-source-worker.mjs");
+const marketAutoRepair = read("scripts/blog-market-auto-repair.mjs");
 const marketTranslationService = read("scripts/blog-market-translation-service.mjs");
 const publicMarketProjectionCleaner = read("scripts/blog-clean-public-market-news-projection.mjs");
 const sopDoctor = read("scripts/blog-sop-doctor.mjs");
@@ -290,6 +291,7 @@ assert(marketSourceScanner.includes("CONSUMER_NOISE_PATTERN"), "market source sc
 assert(marketSourceScanner.includes("google-cloud-ai-blog") && marketSourceScanner.includes("search-engine-land"), "longform market-news profile includes expanded AI infrastructure and GEO/search sources");
 assert(marketSourceScanner.includes("liveDuplicateState"), "market source scanner checks live duplicate source URLs, covers and titles");
 assert(marketSourceWorker.includes('contentType: "breaking"'), "market source worker marks every generated post as breaking so source-image QA uses market-news thresholds");
+assert(marketAutoRepair.includes("removeRepeatedPublisherLead"), "market auto-repair removes repeated publisher lead templates from body paragraphs");
 assert(!marketSourceScanner.includes("current AI coverage page for related reporting"), "market source scanner does not publish generic source index pages as article sources");
 assert(sopDoctor.includes("BLOG_DISABLE_DEEPSEEK_CRON must be true"), "SOP doctor requires the legacy DeepSeek cron to stay disabled");
 assert(sopDoctor.includes("[8, 10]") && sopDoctor.includes("[9, 0]") && sopDoctor.includes("[9, 4]"), "SOP doctor enforces prep/release launch windows in its trigger checks");
