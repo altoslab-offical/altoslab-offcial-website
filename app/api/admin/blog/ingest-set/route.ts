@@ -325,7 +325,11 @@ function normalizeIngestPosts(payload: BlogIngestRequest, slot: IngestSlot, inge
       imageQualityStatus: "held",
       releaseDecision: "held_for_review",
       generationTrace: [
-        ...(post.generationTrace || []),
+        ...(Array.isArray(post.generationTrace)
+          ? post.generationTrace
+          : post.generationTrace && typeof post.generationTrace === "object"
+            ? [post.generationTrace as NonNullable<BlogPost["generationTrace"]>[number]]
+            : []),
         {
           provider,
           task: "content-draft",

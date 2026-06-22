@@ -150,6 +150,26 @@ function groupPosts(posts) {
   return groups;
 }
 
+function trailingSampleBoundaryGroupIds(posts, groups, languages, sampleLimit = 120) {
+  if (!Array.isArray(posts) || posts.length < sampleLimit) return new Set();
+  const lastPost = posts[posts.length - 1];
+  const lastGroupId = lastPost?.translationGroupId || lastPost?.slug;
+  if (!lastGroupId) return new Set();
+  const group = groups.get(lastGroupId) || [];
+  const groupLanguages = new Set(group.map((post) => post.language).filter(Boolean));
+  if (groupLanguages.size >= languages.length) return new Set();
+
+  let index = posts.length - 1;
+  while (index >= 0) {
+    const post = posts[index];
+    const groupId = post?.translationGroupId || post?.slug;
+    if (groupId !== lastGroupId) break;
+    index -= 1;
+  }
+  const trailingCount = posts.length - 1 - index;
+  return trailingCount === group.length ? new Set([lastGroupId]) : new Set();
+}
+
 function countBy(items, selector) {
   return items.reduce((counts, item) => {
     const key = selector(item) || "unknown";
@@ -451,8 +471,11 @@ function buildInsights({ targetUrl, health, posts, qualityPosts, surface, ga4, s
   const byLanguage = countBy(posts, (post) => post.language);
   const byType = countBy(posts, (post) => post.contentType);
   const groups = groupPosts(posts);
-  const completeGroups = [...groups.values()].filter((group) => languages.every((language) => group.some((post) => post.language === language))).length;
+  const boundaryGroupIds = trailingSampleBoundaryGroupIds(posts, groups, languages);
+  const reportableGroups = [...groups.entries()].filter(([groupId]) => !boundaryGroupIds.has(groupId));
+  const completeGroups = reportableGroups.filter(([, group]) => languages.every((language) => group.some((post) => post.language === language))).length;
   const incompleteGroups = [...groups.entries()]
+    .filter(([groupId]) => !boundaryGroupIds.has(groupId))
     .filter(([, group]) => !languages.every((language) => group.some((post) => post.language === language)))
     .map(([groupId, group]) => ({
       groupId,
@@ -460,7 +483,7 @@ function buildInsights({ targetUrl, health, posts, qualityPosts, surface, ga4, s
       languages: group.map((post) => post.language).sort(),
       missingLanguages: languages.filter((language) => !group.some((post) => post.language === language))
     }));
-  const marketNewsGroups = [...groups.values()].filter((group) => group.some((post) => post.contentType === "breaking"));
+  const marketNewsGroups = reportableGroups.map(([, group]) => group).filter((group) => group.some((post) => post.contentType === "breaking"));
   const incompleteMarketNewsGroups = incompleteGroups.filter((group) => group.contentType === "breaking");
   const sourceCounts = scoredPosts.map((post) => post.sourceLinks?.length || 0);
   const faqCounts = scoredPosts.map((post) => post.faqs?.length || 0);
@@ -599,9 +622,10 @@ function buildInsights({ targetUrl, health, posts, qualityPosts, surface, ga4, s
       publishedPosts: posts.length,
       byLanguage,
       byType,
-      translationGroups: groups.size,
+      translationGroups: reportableGroups.length,
       completeGroups,
       incompleteGroups: incompleteGroups.slice(0, 10),
+      boundarySampleGroups: [...boundaryGroupIds],
       marketNewsGroups: marketNewsGroups.length,
       marketNewsCompleteGroups: marketNewsGroups.length - incompleteMarketNewsGroups.length,
       incompleteMarketNewsGroups: incompleteMarketNewsGroups.slice(0, 10),

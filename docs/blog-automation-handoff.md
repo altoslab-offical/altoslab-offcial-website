@@ -52,6 +52,9 @@
 - Chrome QA 以 Tommy 已登入的既有 Chrome 群組為準。若 Playwright locator click 或座標 click 沒有真的從 `/blog` 進入 article detail，不要改用無痕、Safari 或 DevTools session；改用 Chrome extension 的 DOM-CUA node click / in-page native anchor click，並記錄從 `/blog` 到 article URL 的 elapsed time。
 - Blog list-to-detail 慢時，先分離三件事：native anchor click path、public projection/detail cache、`/llms.txt` / `/feed.xml` read path。不要先重寫文章或換圖片。修復後必跑 `blog:performance-smoke`，並用 Chrome extension 做使用者路徑 readback。
 - Release doctor 擋住缺 browser evidence / provider metadata / translated content image shared URL 時，代表 candidate production evidence 壞掉；要修 article set / manifest normalization，不可以 bypass release doctor。
+- Production admin password/session token stale 時，不要猜密碼或 direct-write S3。若 `BLOG_INGEST_HMAC_SECRET` 已設定，正式 publish/repair 走 `scripts/blog-local-worker.mjs` 的 HMAC signed ingest/release path；release 後仍要跑 public readback、`verify-blog-release`、SOP doctor。
+- `/api/blog?fields=inventory&limit=120` 是以單篇 post 切頁，不是以 9 語 translation group 切頁。當最新 120 筆正好切在最後一組中間時，最後一個 partial group 是 sample boundary，不應被 SEO/GEO report 當成缺語言；真正缺語言要用非邊界 group 或 full inventory/admin readback 判斷。
+- Hermes/OpenClaw Codex lane 必須把 `codexEvidence.provider/runtime/model/reasoning` 寫進 manifest；不要為了通過 legacy doctor 偽造 Gemini/ChatGPT Chrome evidence。若 release verifier 看到 internal copy，例如 `SEO/GEO`，要修公開文案後重新 release/readback。
 - Market-news ALTOS LAB fallback cover 的 quality review 不應在 image review 前要求 `imageQualityStatus=passed`。可先用 `coverSource=manual|generated`、ALTOS LAB credit/license、alt text 和 shared public URL 通過 copy gate，再由 image gate 判定 `imageQualityStatus=passed`。
 - AWS deploy 使用唯一 ECR image tag 作為 production evidence；不要依賴脆弱的 `latest` tag shell interpolation。部署後以 ECS task definition、service stable、`verify:aws` 和 production performance smoke 作為完成證據。
 - 候選稿品質不合格時，流程是 repair/rewrite/re-image/re-QA 到 validate-only pass，再 publish + public readback；不是 skip，也不是把 `wouldPublish=true` 當成已發布。
