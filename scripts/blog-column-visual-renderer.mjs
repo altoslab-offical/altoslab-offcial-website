@@ -31,6 +31,7 @@ Examples:
 Options:
   --out-dir <path>   Required output directory
   --basename <name>  Output filename stem. Defaults to altos-column-visual
+  --variant <name>   Optional render set: default, agent-trust-stack
   --force           Overwrite existing files
 `);
 }
@@ -250,6 +251,71 @@ function mechanismSvg() {
   return blueprintShell("ALTOS LAB technical blueprint visual for AI delegation checkpoints", body);
 }
 
+function agentTrustStackCoverSvg() {
+  const body = `
+  <defs>
+    <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="22" stdDeviation="24" flood-color="#0d1f18" flood-opacity="0.16"/>
+    </filter>
+    <linearGradient id="agentCard" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#eaf6ef"/>
+    </linearGradient>
+    <linearGradient id="controlGlow" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#0f8d62"/>
+      <stop offset="52%" stop-color="#33b7a2"/>
+      <stop offset="100%" stop-color="#e0b650"/>
+    </linearGradient>
+  </defs>
+  <rect width="${WIDTH}" height="${HEIGHT}" fill="#f7f3ea"/>
+  <path d="M0 1035 C405 890 720 1110 1120 930 C1510 755 1870 820 2400 620 L2400 1350 L0 1350 Z" fill="#e5efe9"/>
+  <g opacity="0.22" stroke="#a9b7ad" stroke-width="2">
+    ${Array.from({ length: 17 }, (_, index) => `<path d="M${170 + index * 130} 105 V1185"/>`).join("\n    ")}
+    ${Array.from({ length: 8 }, (_, index) => `<path d="M145 ${180 + index * 125} H2260"/>`).join("\n    ")}
+  </g>
+  <g filter="url(#softShadow)">
+    <rect x="270" y="210" width="1860" height="900" rx="54" fill="#fffdf6" stroke="#1d2a24" stroke-width="8"/>
+    <path d="M360 905 C680 790 890 920 1190 790 C1490 660 1690 760 2030 650" fill="none" stroke="#dbe7df" stroke-width="34" stroke-linecap="round"/>
+    <path d="M430 515 H710 C790 515 790 415 870 415 H1080 C1160 415 1160 515 1240 515 H1500 C1580 515 1580 415 1660 415 H1965" fill="none" stroke="url(#controlGlow)" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M710 735 H920 C990 735 990 635 1060 635 H1320 C1390 635 1390 735 1460 735 H1685 C1760 735 1760 635 1835 635 H1970" fill="none" stroke="#1d4f43" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" opacity="0.78"/>
+    <g>
+      <rect x="410" y="345" width="300" height="230" rx="34" fill="url(#agentCard)" stroke="#1d2a24" stroke-width="6"/>
+      <rect x="850" y="245" width="300" height="230" rx="34" fill="url(#agentCard)" stroke="#1d2a24" stroke-width="6"/>
+      <rect x="1250" y="345" width="300" height="230" rx="34" fill="url(#agentCard)" stroke="#1d2a24" stroke-width="6"/>
+      <rect x="1660" y="245" width="300" height="230" rx="34" fill="url(#agentCard)" stroke="#1d2a24" stroke-width="6"/>
+      <rect x="500" y="675" width="300" height="230" rx="34" fill="url(#agentCard)" stroke="#1d2a24" stroke-width="6"/>
+      <rect x="1040" y="575" width="300" height="230" rx="34" fill="url(#agentCard)" stroke="#1d2a24" stroke-width="6"/>
+      <rect x="1580" y="675" width="300" height="230" rx="34" fill="url(#agentCard)" stroke="#1d2a24" stroke-width="6"/>
+    </g>
+    <g fill="none" stroke="#1d2a24" stroke-width="10" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M535 445 v-28 c0-48 70-48 70 0 v28"/>
+      <rect x="505" y="445" width="130" height="78" rx="20" fill="#dff3e6"/>
+      <path d="M955 355 l45-44 l45 44 v70 h-90 z" fill="#e8f7f0"/>
+      <path d="M1365 425 a78 78 0 1 0 0.1 0 M1365 425 l50 42" />
+      <path d="M1775 330 h72 a42 42 0 0 1 42 42 v0 a42 42 0 0 1-42 42 h-72 a42 42 0 0 1-42-42 v0 a42 42 0 0 1 42-42 z"/>
+      <path d="M615 735 h70 l35 60 l-35 60 h-70 l-35-60 z" fill="#eaf4ff"/>
+      <path d="M1150 650 h86 m-86 58 h120 m-120 58 h70" />
+      <path d="M1690 760 c70-92 180-28 150 68 c-21 68-111 76-156 30"/>
+      <path d="M1688 858 h-62 v-62" />
+    </g>
+    <g fill="#0f8d62">
+      ${token(710, 515, 30, "#0f8d62", "#fffdf6")}
+      ${token(1240, 515, 30, "#0f8d62", "#fffdf6")}
+      ${token(1685, 735, 30, "#0f8d62", "#fffdf6")}
+      ${token(1060, 635, 30, "#e0b650", "#fffdf6")}
+    </g>
+  </g>`;
+  return svgShell("ALTOS LAB enterprise agent trust stack editorial cover", body);
+}
+
+function agentTrustStackOpeningSvg() {
+  return openingSvg();
+}
+
+function agentTrustStackMechanismSvg() {
+  return mechanismSvg();
+}
+
 async function renderPng(svg, outputPath) {
   await sharp(Buffer.from(svg))
     .png({
@@ -268,12 +334,25 @@ async function main() {
   const outDir = arg("out-dir");
   if (!outDir) throw new Error("--out-dir is required");
   const basename = arg("basename", "altos-column-visual").replace(/[^a-z0-9._-]+/gi, "-");
+  const variant = arg("variant", "default");
   const force = hasFlag("force");
   await fs.mkdir(outDir, { recursive: true });
+  const renderSet =
+    variant === "agent-trust-stack"
+      ? {
+          cover: agentTrustStackCoverSvg(),
+          opening: agentTrustStackOpeningSvg(),
+          mechanism: agentTrustStackMechanismSvg()
+        }
+      : {
+          cover: coverSvg(),
+          opening: openingSvg(),
+          mechanism: mechanismSvg()
+        };
   const outputs = [
-    { key: "cover", svg: coverSvg(), file: `${basename}-cover.png` },
-    { key: "opening", svg: openingSvg(), file: `${basename}-opening.png` },
-    { key: "mechanism", svg: mechanismSvg(), file: `${basename}-mechanism.png` }
+    { key: "cover", svg: renderSet.cover, file: `${basename}-cover.png` },
+    { key: "opening", svg: renderSet.opening, file: `${basename}-opening.png` },
+    { key: "mechanism", svg: renderSet.mechanism, file: `${basename}-mechanism.png` }
   ];
   const written = [];
   for (const output of outputs) {

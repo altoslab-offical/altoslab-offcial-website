@@ -52,7 +52,8 @@ export function middleware(request: NextRequest) {
     pathname === "/api/admin/blog/ingest-set" ||
     pathname === "/api/admin/blog/release-set" ||
     pathname === "/api/admin/blog/media" ||
-    pathname === "/api/admin/blog/bulk-patch";
+    pathname === "/api/admin/blog/bulk-patch" ||
+    pathname === "/api/admin/blog/refresh-public-cache";
 
   if ((!isAdminPage && !isAdminApi) || isPublicAuthRoute || isPublicSignedIngestRoute) {
     return nextWithPathname(request);

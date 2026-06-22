@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { adminCookieName, getAdminSessionToken } from "@/lib/auth";
 import { verifyBlogIngestRequest } from "@/lib/blog-ingest-auth";
-import { mutateCmsData, normalizeBlogPostInput, publishValidationForBlogPost } from "@/lib/cms";
+import { mutateCmsData, normalizeBlogPostInput, publishValidationForBlogPost, refreshPublicBlogCacheFromStorage } from "@/lib/cms";
 import type { BlogPost } from "@/lib/types";
 
 type BlogPatch = {
@@ -66,9 +66,25 @@ export async function POST(request: Request) {
     return { updated, failures };
   });
 
+  let publicCache:
+    | Awaited<ReturnType<typeof refreshPublicBlogCacheFromStorage>>
+    | { refreshed: false; error: string; skipped?: boolean }
+    | null = null;
+  if (result.updated.length > 0) {
+    try {
+      publicCache = await refreshPublicBlogCacheFromStorage();
+    } catch (error) {
+      publicCache = {
+        refreshed: false,
+        error: error instanceof Error ? error.message : "public blog cache refresh failed"
+      };
+    }
+  }
+
   return NextResponse.json({
-    ok: result.failures.length === 0,
+    ok: result.failures.length === 0 && publicCache?.refreshed !== false,
     updated: result.updated,
-    failures: result.failures
+    failures: result.failures,
+    publicCache
   });
 }

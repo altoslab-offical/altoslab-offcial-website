@@ -83,6 +83,12 @@ const genericGeneratedImagePattern =
 const sourceCoverWeakContextPattern =
   /(generic|abstract|placeholder|wallpaper|stock|gradient|dashboard|fake dashboard|network map|glass cube|tilted|skewed|slanted|large cursor|cursor shape|pink editorial background|source-cover|科技感背景|抽象|漸層|占位|假儀表板|網路圖|玻璃方塊|斜的|歪斜|巨大游標|斜游標|汎用|抽象背景|추상|그라데이션)/i;
 
+const enterpriseAgentGovernancePattern =
+  /(enterprise|agent|trust|governance|control|permission|access|audit|rollback|trace|registry|workflow|assert|agent 365|企業|代理人|信任|治理|控制|權限|稽核|審計|回滾|復原|追蹤|登記|工作流|ระบบควบคุม|ควบคุม|audit|rollback|kontrol|kawalan|jejak|kiểm soát|truy vết|권한|감사|거버넌스|制御|監査)/i;
+
+const concreteGovernanceVisualPattern =
+  /(access card|lock|key|permission|audit trail|ledger|registry|control board|checkpoint|rollback|switch|circuit breaker|handoff|workflow lane|decision token|evidence card|安全版本|權限卡|權限|稽核|審計|操作軌跡|登記表|控制板|檢查點|回滾|復原|接管|決策節點|證據卡|คีย์|สิทธิ์|ตรวจสอบ|ย้อนกลับ|권한|감사|체크포인트|롤백|権限|監査|ロールバック)/i;
+
 function removeNegativeImageConstraints(input: string) {
   return input
     .replace(/\bno\s+(?:readable\s+)?text\s+(?:or|and)\s+(?:fake\s+)?logos?\b/gi, "")
@@ -201,6 +207,15 @@ function imageContext(post: BlogPost) {
     .filter(Boolean)
       .join("\n")
   );
+}
+
+function generatedCoverSemanticIssues(post: BlogPost) {
+  const context = imageContext(post);
+  if (!enterpriseAgentGovernancePattern.test(context)) return [];
+  if (concreteGovernanceVisualPattern.test(context)) return [];
+  return [
+    "enterprise agent governance covers must show a concrete control metaphor such as permissions, audit trail, registry, checkpoint or rollback; abstract tech visuals are not enough"
+  ];
 }
 
 function topicWords(post: BlogPost) {
@@ -484,9 +499,13 @@ async function reviewPostImage(post: BlogPost, options: Required<BlogImageQualit
   if (generatedCover && unsafeImageMetadataPattern.test(context)) {
     issues.push("cover metadata indicates text artifacts, logos, people, trademark or unsafe visual risk");
   }
+  if (generatedCover && /codex-local-editorial-renderer|svg-sharp-renderer/i.test(context)) {
+    issues.push("generated cover uses local abstract repair renderer; official covers must be ChatGPT/GPT raster images or source-safe editorial images");
+  }
   if (generatedCover && genericGeneratedImagePattern.test(context)) {
     issues.push("cover metadata reads like generic stock or abstract AI art");
   }
+  if (generatedCover) issues.push(...generatedCoverSemanticIssues(post));
   const lowerContext = context.toLowerCase();
   if (!topicWords(post).some((word) => lowerContext.includes(word))) {
     warnings.push("cover prompt or alt text should name the article topic more directly");

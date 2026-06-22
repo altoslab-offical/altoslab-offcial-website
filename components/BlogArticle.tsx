@@ -7,6 +7,7 @@ import { renderBrandText } from "@/components/BrandText";
 import { JsonLd } from "@/components/JsonLd";
 import { RichText } from "@/components/RichText";
 import { SafeBlogImage } from "@/components/SafeBlogImage";
+import { SafeBlogInlineImage } from "@/components/SafeBlogInlineImage";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { SiteHeader } from "@/components/site/SiteHeader";
 import {
@@ -304,7 +305,7 @@ function ArticleInlineImage({ image }: { image: BlogInlineImage }) {
   const credit = image.credit || (image.source === "generated" ? "ALTOS LAB editorial visual" : "");
   return (
     <figure className={`article-inline-figure is-${aspectRatio}`}>
-      <img src={image.url} alt={image.alt} loading="lazy" />
+      <SafeBlogInlineImage image={image} />
       {image.caption || credit ? (
         <figcaption>
           {image.caption ? <span>{renderBrandText(image.caption)}</span> : null}

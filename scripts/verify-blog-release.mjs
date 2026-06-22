@@ -82,6 +82,21 @@ function hasFlag(name) {
   return process.argv.includes(`--${name}`);
 }
 
+function signBody(secret, timestamp, nonce, body) {
+  return crypto.createHmac("sha256", secret).update(`${timestamp}.${nonce}.${body}`).digest("hex");
+}
+
+function signedJsonHeaders(secret, body) {
+  const timestamp = new Date().toISOString();
+  const nonce = crypto.randomBytes(16).toString("hex");
+  return {
+    "Content-Type": "application/json",
+    "X-Altos-Timestamp": timestamp,
+    "X-Altos-Nonce": nonce,
+    "X-Altos-Signature": signBody(secret, timestamp, nonce, body)
+  };
+}
+
 function usage() {
   console.log(`
 ALTOS LAB blog release verifier
@@ -757,19 +772,24 @@ async function refreshPublicBlogCache(root, cookie, warnings) {
       reason: "release writes already refresh public D1 projection; verifier skipped full cache refresh to avoid Cloudflare worker pressure"
     };
   }
-  if (!cookie) {
-    pushWarning(warnings, "public blog cache refresh skipped because no admin token or password was provided");
+  const secret = process.env.BLOG_INGEST_HMAC_SECRET || "";
+  if (!cookie && !secret) {
+    pushWarning(warnings, "public blog cache refresh skipped because no admin token/password or BLOG_INGEST_HMAC_SECRET was provided");
     return null;
   }
 
   try {
+    const body = "{}";
+    const headers = {
+      Accept: "application/json",
+      "User-Agent": "altos-blog-release-verifier/1.0",
+      ...(secret ? signedJsonHeaders(secret, body) : { "Content-Type": "application/json" }),
+      ...(cookie ? { Cookie: cookie } : {})
+    };
     const response = await fetchWithTimeout(`${root}/api/admin/blog/refresh-public-cache`, {
       method: "POST",
-      headers: {
-        Accept: "application/json",
-        Cookie: cookie,
-        "User-Agent": "altos-blog-release-verifier/1.0"
-      }
+      headers,
+      body
     });
     const json = await response.json().catch(() => null);
     if (!response.ok || json?.ok !== true) {

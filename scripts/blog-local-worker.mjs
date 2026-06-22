@@ -415,6 +415,30 @@ function articleSetCoverIssues(posts) {
     }
   }
 
+  for (const post of posts) {
+    if (post.contentType === "breaking" || post.coverSource !== "generated") continue;
+    const context = [
+      post.title,
+      post.topic,
+      post.newsCategory,
+      ...(Array.isArray(post.tags) ? post.tags : []),
+      post.coverAlt,
+      post.coverPrompt,
+      post.coverGeneration?.prompt,
+      post.coverGeneration?.visualChecks?.notes
+    ]
+      .filter(Boolean)
+      .join(" ");
+    if (
+      /(enterprise|agent|trust|governance|control|permission|access|audit|rollback|trace|registry|workflow|assert|agent 365|企業|代理人|信任|治理|控制|權限|稽核|審計|回滾|復原|追蹤|登記|工作流)/i.test(context) &&
+      !/(access card|lock|key|permission|audit trail|ledger|registry|control board|checkpoint|rollback|switch|circuit breaker|handoff|workflow lane|decision token|evidence card|權限卡|權限|稽核|審計|操作軌跡|登記表|控制板|檢查點|回滾|復原|接管|決策節點|證據卡)/i.test(context)
+    ) {
+      issues.push(
+        `${post.language || "unknown"}/${post.slug || "missing-slug"} enterprise agent governance cover must use a concrete control metaphor, not abstract tech art`
+      );
+    }
+  }
+
   return issues;
 }
 

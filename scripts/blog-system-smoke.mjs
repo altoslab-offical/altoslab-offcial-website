@@ -30,6 +30,7 @@ const ingestAuth = read("lib/blog-ingest-auth.ts");
 const ingestRoute = read("app/api/admin/blog/ingest-set/route.ts");
 const releaseRoute = read("app/api/admin/blog/release-set/route.ts");
 const adminBlogRefreshRoute = read("app/api/admin/blog/refresh-public-cache/route.ts");
+const bulkPatchRoute = read("app/api/admin/blog/bulk-patch/route.ts");
 const mediaRoute = read("app/api/admin/blog/media/route.ts");
 const generatedMediaRoute = read("app/api/blog/generated-media/[filename]/route.ts");
 const healthRoute = read("app/api/health/route.ts");
@@ -192,12 +193,19 @@ assert(mediaRoute.includes("verifyBlogIngestRequest"), "media upload route is pr
 assert(mediaRoute.includes("@vercel/blob"), "media upload route stores production images in Vercel Blob");
 assert(mediaRoute.includes("storeGcsImage"), "media upload route can store production images in GCS for Cloud Run");
 assert(mediaRoute.includes("BLOG_MEDIA_ALLOW_LOCAL_STORAGE"), "media upload route supports local-only image storage for end-to-end testing");
+assert(adminBlogRefreshRoute.includes("verifyBlogIngestRequest"), "public cache refresh route accepts the same signed request contract");
+assert(bulkPatchRoute.includes("refreshPublicBlogCacheFromStorage"), "bulk patch refreshes derived public blog caches after published content changes");
 assert(generatedMediaRoute.includes("generated-blog-media"), "local generated media can be fetched during end-to-end image QA");
 assert(generatedMediaRoute.includes("readGcsObject"), "generated media route can read GCS-backed images");
 assert(healthRoute.includes("externalBlogIngestConfigured"), "health check reports whether signed external blog ingest is configured");
 assert(healthRoute.includes("imageGcsStorageConfigured"), "health check reports whether GCS generated media is configured");
 assert(healthRoute.includes("legacyDeepSeekCronDisabled"), "health check reports whether the legacy DeepSeek cron path is disabled");
-assert(proxy.includes("isPublicSignedIngestRoute") && proxy.includes("/api/admin/blog/release-set"), "proxy lets signed ingest/release reach the route without admin cookies");
+assert(
+  proxy.includes("isPublicSignedIngestRoute") &&
+    proxy.includes("/api/admin/blog/release-set") &&
+    proxy.includes("/api/admin/blog/refresh-public-cache"),
+  "proxy lets signed ingest/release/refresh reach the route without admin cookies"
+);
 assert(proxy.includes("/sitemap.xml") && proxy.includes("/robots.txt"), "proxy canonical redirect also covers public metadata routes");
 assert(localWorker.includes("localPreflight"), "local worker performs local preflight before production ingest");
 assert(localWorker.includes("X-Altos-Signature"), "local worker signs ingest requests");

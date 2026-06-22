@@ -303,7 +303,7 @@ export function renderBlogIndexHtml(language: BlogLanguage, posts: BlogPost[], p
 function renderInlineImage(image: NonNullable<BlogPost["contentImages"]>[number]) {
   if (!image?.url) return "";
   return `<figure class="inline-figure">
-    <img src="${escapeAttribute(image.url)}" alt="${escapeAttribute(image.alt || image.caption || "")}" loading="lazy" decoding="async" />
+    <img src="${escapeAttribute(image.url)}" alt="${escapeAttribute(image.alt || image.caption || "")}" loading="lazy" decoding="async" onerror="this.closest('figure')?.remove()" />
     ${image.caption ? `<figcaption>${escapeHtml(image.caption)}</figcaption>` : ""}
   </figure>`;
 }
