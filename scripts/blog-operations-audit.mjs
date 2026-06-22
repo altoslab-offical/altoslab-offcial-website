@@ -270,12 +270,34 @@ async function headlessProviderStatus() {
   const keys = await envFileKeys();
   const hasKey = (key) => Boolean(process.env[key]) || keys.has(key);
   const geminiVersion = spawnSync("gemini", ["--version"], { encoding: "utf8" });
+  const hermesStatus = spawnSync("hermes", ["status"], { encoding: "utf8", timeout: 10000 });
+  const hermesOutput = `${hermesStatus.stdout || ""}${hermesStatus.stderr || ""}`;
+  const openclawGateway = spawnSync("openclaw", ["gateway", "health"], { encoding: "utf8", timeout: 10000 });
+  const openclawAudit = spawnSync("openclaw", ["tasks", "audit", "--json"], { encoding: "utf8", timeout: 10000 });
+  let openclawAuditClean = false;
+  try {
+    const parsed = JSON.parse(openclawAudit.stdout || "{}");
+    openclawAuditClean = parsed?.summary?.combined?.total === 0 || parsed?.count === 0;
+  } catch {
+    openclawAuditClean = false;
+  }
+  const hermesCodexConfigured =
+    hermesStatus.status === 0 &&
+    /Model:\s+gpt-5\.4/i.test(hermesOutput) &&
+    /Provider:\s+OpenAI Codex/i.test(hermesOutput) &&
+    /OpenAI Codex\s+✓ logged in/i.test(hermesOutput) &&
+    /Status:\s+✓ running/i.test(hermesOutput);
+  const openclawCodexConfigured = openclawGateway.status === 0 && /\bOK\b/i.test(openclawGateway.stdout || "") && openclawAuditClean;
   return {
     geminiCliInstalled: geminiVersion.status === 0,
     geminiAuthConfigured: hasKey("GEMINI_API_KEY") || hasKey("GOOGLE_GENAI_USE_VERTEXAI") || hasKey("GOOGLE_GENAI_USE_GCA"),
     openaiImageConfigured: hasKey("OPENAI_API_KEY"),
     uploadStorageConfigured: hasKey("BLOB_READ_WRITE_TOKEN") || hasKey("GCS_BUCKET") || hasKey("GOOGLE_CLOUD_PROJECT"),
-    blogImageProviderConfigured: hasKey("BLOG_IMAGE_PROVIDER")
+    blogImageProviderConfigured: hasKey("BLOG_IMAGE_PROVIDER"),
+    codexOperatorConfigured: hermesCodexConfigured && openclawCodexConfigured,
+    hermesCodexConfigured,
+    openclawCodexConfigured,
+    openclawAuditClean
   };
 }
 
@@ -516,13 +538,16 @@ function summarizeBottlenecks({ counts, gaps, candidates, launchAgent, n8nLocal,
     {
       lane: "headless-ai",
       status:
-        headlessProviders?.geminiCliInstalled &&
-        headlessProviders?.geminiAuthConfigured &&
-        headlessProviders?.openaiImageConfigured &&
-        headlessProviders?.uploadStorageConfigured
+        headlessProviders?.codexOperatorConfigured ||
+        (headlessProviders?.geminiCliInstalled &&
+          headlessProviders?.geminiAuthConfigured &&
+          headlessProviders?.openaiImageConfigured &&
+          headlessProviders?.uploadStorageConfigured)
           ? "stable"
           : "attention",
-      summary: `geminiCli=${headlessProviders?.geminiCliInstalled ? "installed" : "missing"}; geminiAuth=${headlessProviders?.geminiAuthConfigured ? "configured" : "missing"}; openaiImage=${headlessProviders?.openaiImageConfigured ? "configured" : "missing"}; uploadStorage=${headlessProviders?.uploadStorageConfigured ? "configured" : "missing"}`
+      summary: headlessProviders?.codexOperatorConfigured
+        ? `codexOperator=stable; hermesCodex=${headlessProviders?.hermesCodexConfigured ? "configured" : "missing"}; openclawCodex=${headlessProviders?.openclawCodexConfigured ? "configured" : "missing"}; openclawAudit=${headlessProviders?.openclawAuditClean ? "clean" : "attention"}`
+        : `geminiCli=${headlessProviders?.geminiCliInstalled ? "installed" : "missing"}; geminiAuth=${headlessProviders?.geminiAuthConfigured ? "configured" : "missing"}; openaiImage=${headlessProviders?.openaiImageConfigured ? "configured" : "missing"}; uploadStorage=${headlessProviders?.uploadStorageConfigured ? "configured" : "missing"}`
     }
   ];
 }
@@ -560,8 +585,8 @@ function nextActions({ counts, gaps, visualGap, candidates, headlessProviders, a
     const queued = blockedVisuals.map((row) => `seq${row.sequence}`).join(", ");
     actions.push(
       queued
-        ? `Keep daily column minimum at ${DAILY_COLUMN_MINIMUM} approved column sets; next queued columns (${queued}) must wait for GPT visual evidence before release.`
-        : `Keep daily column minimum at ${DAILY_COLUMN_MINIMUM} approved column sets; additional columns still require Gemini approval plus GPT visual evidence.`
+        ? `Keep daily column minimum at ${DAILY_COLUMN_MINIMUM} approved column sets; next queued columns (${queued}) must wait for Codex/Hermes production evidence and visual readback before release.`
+        : `Keep daily column minimum at ${DAILY_COLUMN_MINIMUM} approved column sets; additional columns still require Codex/Hermes production evidence plus visual readback.`
     );
   }
   return actions;
