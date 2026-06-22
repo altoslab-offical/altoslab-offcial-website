@@ -1460,11 +1460,17 @@ function chromeProfileEmail(evidence) {
     .toLowerCase();
 }
 
+function hasCodexEvidence(manifest) {
+  const evidence = manifest?.codexEvidence || manifest?.chromeEvidence?.codex || {};
+  return /codex/i.test(String(evidence.provider || evidence.runtime || "")) && /gpt-5\.4/i.test(String(evidence.model || ""));
+}
+
 function releaseGateIssues(manifest, { date, slot, articleSet }) {
   const issues = [];
   const posts = Array.isArray(articleSet?.posts) ? articleSet.posts : [];
   const isSourceTranslationMarketOnly = isMarketArticleSet(articleSet);
   const requiresGptCover = posts.some((post) => post.contentType !== "breaking");
+  const codexBacked = hasCodexEvidence(manifest);
   const retryableHeldManifest =
     manifest.status === "held" &&
     manifest.validateOnly?.wouldPublish === true &&
@@ -1480,18 +1486,18 @@ function releaseGateIssues(manifest, { date, slot, articleSet }) {
     issues.push(`expectedReleaseAt must be ${scheduledFor(date, slot)}`);
   }
   if (!manifest.articleSetPath) issues.push("articleSetPath is required");
-  if (!isSourceTranslationMarketOnly && manifest.chromeEvidence?.gemini?.usedExistingTab !== true) {
+  if (!isSourceTranslationMarketOnly && !codexBacked && manifest.chromeEvidence?.gemini?.usedExistingTab !== true) {
     issues.push("Gemini existing-tab evidence is missing");
   }
   if (!isSourceTranslationMarketOnly && manifest.chromeEvidence?.gemini?.changedModel === true) issues.push("Gemini model was changed");
-  if (!isSourceTranslationMarketOnly && chromeProfileEmail(manifest.chromeEvidence?.gemini) !== REQUIRED_CHROME_PROFILE_EMAIL) {
+  if (!isSourceTranslationMarketOnly && !codexBacked && chromeProfileEmail(manifest.chromeEvidence?.gemini) !== REQUIRED_CHROME_PROFILE_EMAIL) {
     issues.push(`Gemini Chrome profile must be ${REQUIRED_CHROME_PROFILE_EMAIL}`);
   }
-  if (requiresGptCover && manifest.chromeEvidence?.chatgpt?.usedExistingTab !== true) {
+  if (requiresGptCover && !codexBacked && manifest.chromeEvidence?.chatgpt?.usedExistingTab !== true) {
     issues.push("ChatGPT/GPT existing-tab evidence is missing for generated covers");
   }
   if (manifest.chromeEvidence?.chatgpt?.changedModel === true) issues.push("ChatGPT/GPT model was changed");
-  if (requiresGptCover && chromeProfileEmail(manifest.chromeEvidence?.chatgpt) !== REQUIRED_CHROME_PROFILE_EMAIL) {
+  if (requiresGptCover && !codexBacked && chromeProfileEmail(manifest.chromeEvidence?.chatgpt) !== REQUIRED_CHROME_PROFILE_EMAIL) {
     issues.push(`ChatGPT/GPT Chrome profile must be ${REQUIRED_CHROME_PROFILE_EMAIL}`);
   }
   if (manifest.validateOnly?.wouldPublish !== true) issues.push("validateOnly.wouldPublish is not true");

@@ -55,6 +55,7 @@
     "blog:daily-closeout": "node scripts/blog-daily-closeout.mjs",
     "blog:column-worklist": "node scripts/blog-column-production-worklist.mjs",
     "gmail:token": "node scripts/gmail-oauth-token.mjs",
+    "google:oauth-user": "node scripts/google-oauth-user-login.mjs",
     "n8n:verify-local": "scripts/verify-n8n-local-control-plane.sh"
   },
   "dependencies": {

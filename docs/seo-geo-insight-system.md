@@ -37,28 +37,28 @@ npm run seo:geo-report -- --base-url https://altoslab-ai.cc --format json --outp
 ## Credentials
 
 The script loads `~/.altoslab-blog-worker.env`, `.env.local`, and `.env` without printing secrets.
-For the local Cloudflare+n8n runner, use the project-owned service-account JSON when Google products accept it:
+ALTOS LAB production runtime is AWS/local runner; Google Cloud is not a website runtime dependency. GA/GSC readback uses Google API credentials only.
+
+Preferred local/AWS operator setup:
 
 ```txt
-GOOGLE_AUTH_MODE=service_account
+GOOGLE_AUTH_MODE=user
 GOOGLE_AUTH_ACCOUNT=altoslab.offical@gmail.com
-GOOGLE_APPLICATION_CREDENTIALS=/absolute/path/to/service-account.json
-GA4_SERVICE_ACCOUNT_JSON=/absolute/path/to/service-account.json
+GA4_GOOGLE_OAUTH_CREDENTIALS=/Users/asdc163/.altoslab-google/altoslab-ga-readback-user.json
+GOOGLE_OAUTH_CREDENTIALS=/Users/asdc163/.altoslab-google/altoslab-ga-readback-user.json
+SEARCH_CONSOLE_SERVICE_ACCOUNT_JSON=/Users/asdc163/.altoslab-google/altoslab-ga-gsc-reader.json
 ```
+
+Use `npm run google:oauth-user -- --client <oauth-client-json> --output <authorized-user-json>` to create or refresh the GA readback `authorized_user` credential. Request only the scopes needed by the report, normally `analytics.readonly` and `webmasters.readonly`.
 
 Current production state:
 
-- Search Console URL-prefix `https://altoslab-ai.cc/` is verified and readable through the service account.
+- GA4 Data API is readable through `altoslab.offical@gmail.com` user OAuth (`GA4_GOOGLE_OAUTH_CREDENTIALS`).
+- Search Console URL-prefix `https://altoslab-ai.cc/` is verified and readable through the existing service account (`SEARCH_CONSOLE_SERVICE_ACCOUNT_JSON`).
 - GA/GTM tags are installed on the live homepage through `GTM-WJ96VR7V` and `G-5VSLFNVD28`.
-- GA4 Data API is configured but still returns insufficient property permission until the GA4 property grants a usable reader to either the service account or an approved OAuth client. Do not report fake GA4 traffic while this remains blocked.
+- Do not route official-site readback through Cloud Run metadata or unmanaged GCP service-account projects. If GA and Search Console require different Google identities, keep their credential paths separate rather than forcing one identity to satisfy both products.
 
-When no service-account JSON is configured, the report can try the local `gcloud auth application-default print-access-token`
-and `gcloud auth print-access-token --account "$GOOGLE_AUTH_ACCOUNT"` fallbacks. Those fallbacks are useful for diagnostics,
-but they may still be rejected by GA4 or Search Console when the local Google login lacks Analytics/Webmaster scopes.
-Do not keep retrying Cloud SDK's default OAuth client for those scopes if Google returns `系統已封鎖這個應用程式`
-or `Request had insufficient authentication scopes`; the active operator account is already
-`altoslab.offical@gmail.com`, and the remaining fix is to use a project-owned OAuth desktop client or a
-service account that GA4 and Search Console both accept as a verified reader/owner.
+The report can try local `gcloud` tokens only as diagnostics. Do not use Cloud SDK's default OAuth client as the durable GA path: Google rejects unregistered Analytics/Search Console scopes or requires over-broad `cloud-platform` consent. Use the ALTOS desktop OAuth client plus read-only scopes instead.
 
 Optional GA4 fields:
 
@@ -80,7 +80,7 @@ GOOGLE_APPLICATION_CREDENTIALS=/absolute/path/to/service-account.json
 ```
 
 If `SEARCH_CONSOLE_SITE_URL` is omitted, the report uses the current `--base-url` as the Search Console site URL.
-For durable server-to-server auth, use `GOOGLE_APPLICATION_CREDENTIALS` or `GA4_SERVICE_ACCOUNT_JSON` and grant that service account access to the GA4 property and Search Console URL-prefix property. If access is missing, the report remains valid but marks the live metrics as unavailable. The domain-property form (`sc-domain:altoslab-ai.cc`) requires DNS-token ownership and is not the default local runner path.
+For durable server-to-server auth, a service account may still be used when the Google product accepts it and the account has been granted access. If access is missing or GA rejects the service-account identity, keep GA on user OAuth and keep Search Console on its verified service-account path. If either source is missing, the report remains valid but marks that live metric unavailable. The domain-property form (`sc-domain:altoslab-ai.cc`) requires DNS-token ownership and is not the default local runner path.
 
 If no qualified public posts are published, the report calls that out as a content-inventory gap instead of pretending
 individual posts are missing SEO or GEO fields. This is expected immediately after fail-closed removal of incomplete

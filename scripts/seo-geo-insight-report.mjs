@@ -200,6 +200,46 @@ function gcloudAccountArgs() {
   return account ? ["--account", account] : [];
 }
 
+function isUserAuthMode() {
+  return ["user", "gcloud-user", "oauth", "authorized-user"].includes(googleAuthMode());
+}
+
+function isAnalyticsScope(scope) {
+  return scope.includes("/auth/analytics");
+}
+
+function isSearchConsoleScope(scope) {
+  return scope.includes("/auth/webmasters");
+}
+
+async function authorizedUserAccessToken(credentialsPath) {
+  let credentials;
+  try {
+    credentials = JSON.parse(await fs.readFile(credentialsPath, "utf8"));
+  } catch (error) {
+    return { ok: false, reason: `cannot read Google authorized_user JSON: ${error instanceof Error ? error.message : String(error)}` };
+  }
+  if (credentials.type !== "authorized_user") return null;
+  if (!credentials.client_id || !credentials.client_secret || !credentials.refresh_token) {
+    return { ok: false, reason: "Google authorized_user JSON is missing client_id/client_secret/refresh_token" };
+  }
+  const response = await fetch("https://oauth2.googleapis.com/token", {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({
+      grant_type: "refresh_token",
+      client_id: credentials.client_id,
+      client_secret: credentials.client_secret,
+      refresh_token: credentials.refresh_token
+    })
+  });
+  const json = await response.json().catch(() => ({}));
+  if (!response.ok || !json.access_token) {
+    return { ok: false, reason: json.error_description || json.error || `authorized_user token refresh failed ${response.status}` };
+  }
+  return { ok: true, accessToken: json.access_token, provider: "authorized-user" };
+}
+
 async function googleAccessToken(scope) {
   const impersonatedServiceAccount = process.env.GOOGLE_IMPERSONATE_SERVICE_ACCOUNT;
   if (impersonatedServiceAccount && shouldUseGoogleImpersonation()) {
@@ -237,7 +277,21 @@ async function googleAccessToken(scope) {
     }
   }
 
-  const credentialsPath = process.env.GOOGLE_APPLICATION_CREDENTIALS || process.env.GA4_SERVICE_ACCOUNT_JSON;
+  const userCredentialsPath =
+    (isAnalyticsScope(scope) ? process.env.GA4_GOOGLE_OAUTH_CREDENTIALS || process.env.GOOGLE_OAUTH_CREDENTIALS || process.env.GOOGLE_AUTH_USER_CREDENTIALS : "") ||
+    (isSearchConsoleScope(scope) ? process.env.SEARCH_CONSOLE_GOOGLE_OAUTH_CREDENTIALS : "") ||
+    (!isAnalyticsScope(scope) && !isSearchConsoleScope(scope) ? process.env.GOOGLE_OAUTH_CREDENTIALS || process.env.GOOGLE_AUTH_USER_CREDENTIALS : "");
+  if (isUserAuthMode() && userCredentialsPath) {
+    const token = await authorizedUserAccessToken(userCredentialsPath);
+    if (token?.ok || isAnalyticsScope(scope)) return token;
+  }
+
+  const serviceCredentialsPath =
+    (isSearchConsoleScope(scope) ? process.env.SEARCH_CONSOLE_SERVICE_ACCOUNT_JSON : "") ||
+    (isAnalyticsScope(scope) ? process.env.GA4_SERVICE_ACCOUNT_JSON : "") ||
+    process.env.GOOGLE_APPLICATION_CREDENTIALS ||
+    (!isUserAuthMode() ? process.env.GA4_SERVICE_ACCOUNT_JSON : "");
+  const credentialsPath = serviceCredentialsPath || "";
   if (!credentialsPath) {
     const gcloudCommands = [
       ["auth", "application-default", "print-access-token"],
@@ -258,6 +312,9 @@ async function googleAccessToken(scope) {
       reason: `GOOGLE_APPLICATION_CREDENTIALS is not configured and gcloud token fallback failed: ${failures.join(" | ")}`
     };
   }
+
+  const userToken = await authorizedUserAccessToken(credentialsPath);
+  if (userToken) return userToken;
 
   let credentials;
   try {

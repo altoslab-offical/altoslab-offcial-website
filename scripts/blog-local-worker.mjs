@@ -462,6 +462,38 @@ function hasCodexEvidence(payload) {
   return /codex/i.test(String(evidence.provider || evidence.runtime || "")) && /gpt-5\.4/i.test(String(evidence.model || ""));
 }
 
+function normalizeColumnEvidence(payload) {
+  const posts = Array.isArray(payload.posts) ? payload.posts : [];
+  const codexEvidence = payload.codexEvidence || payload.chromeEvidence?.codex;
+  if (codexEvidence && !payload.codexEvidence) payload.codexEvidence = codexEvidence;
+
+  const groups = new Map();
+  for (const post of posts.filter((post) => post.contentType !== "breaking")) {
+    const group = post.translationGroupId || payload.translationGroupId || "__article_set__";
+    groups.set(group, [...(groups.get(group) || []), post]);
+  }
+
+  for (const groupPosts of groups.values()) {
+    const coverPost = groupPosts.find((post) => post.cover || post.coverLocalPath);
+    const imagePost = groupPosts.find((post) => Array.isArray(post.contentImages) && post.contentImages.length >= 2);
+    if (!coverPost && !imagePost) continue;
+    for (const post of groupPosts) {
+      if (coverPost) {
+        post.cover = coverPost.cover;
+        post.coverLocalPath = coverPost.coverLocalPath;
+        post.coverSource = coverPost.coverSource;
+        post.coverCredit = coverPost.coverCredit;
+        post.coverAlt = post.coverAlt || coverPost.coverAlt;
+        post.coverGeneration = coverPost.coverGeneration ? JSON.parse(JSON.stringify(coverPost.coverGeneration)) : post.coverGeneration;
+      }
+      if (imagePost) {
+        post.contentImages = JSON.parse(JSON.stringify(imagePost.contentImages));
+      }
+    }
+  }
+  return payload;
+}
+
 function isSourceRenderedMarketSet(payload) {
   const posts = Array.isArray(payload?.posts) ? payload.posts : [];
   if (!posts.length || !posts.every((post) => post.contentType === "breaking")) return false;
@@ -1063,7 +1095,9 @@ async function main() {
   if (!SLOT_HOURS[slot]) throw new Error("--slot must be morning, afternoon or evening");
 
   const manifestPath = arg("manifest");
-  const payload = await uploadLocalCovers(await generateMissingCovers(await readArticleSet(articleSet, slot), slot));
+  const payload = normalizeColumnEvidence(
+    await uploadLocalCovers(normalizeColumnEvidence(await generateMissingCovers(normalizeColumnEvidence(await readArticleSet(articleSet, slot)), slot)))
+  );
   if (hasFlag("approve-design-qa")) {
     payload.humanDesignQa = {
       approved: true,
