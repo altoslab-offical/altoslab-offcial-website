@@ -25,6 +25,15 @@ Use the configured `altoslab` AWS profile.
 aws login --profile altoslab
 ```
 
+Known-good local path on Tommy's Mac:
+
+- Use the existing Chrome session, not incognito and not a DevTools-owned
+  browser.
+- Choose the active AWS session for account `altoslab (4873-1682-9524)` / root
+  when the AWS sign-in page offers it.
+- Verify immediately with `aws sts get-caller-identity --profile altoslab`.
+  Expected ARN is `arn:aws:iam::487316829524:root`.
+
 If same-device browser callback does not work, use remote mode:
 
 ```bash

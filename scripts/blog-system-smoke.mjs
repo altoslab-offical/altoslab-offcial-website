@@ -201,6 +201,7 @@ assert(localWorker.includes("requestMediaUpload"), "local worker uploads generat
 assert(localWorker.includes("requestRelease") && localWorker.includes("/api/admin/blog/release-set"), "local worker publishes through the formal release-set route");
 assert(localWorker.includes("qualityManifest") && localWorker.includes("contentSha256"), "local worker writes a quality manifest with a content digest");
 assert(localWorker.includes("reuse-validated-manifest"), "local worker can reuse a signed validate-only manifest during release");
+assert(localWorker.includes('evening: "20:00"'), "local worker supports the evening daily column slot");
 assert(localWorker.includes("isSourceTranslationLane"), "local worker allows source-translation market news without Gemini tab evidence");
 assert(localWorker.includes("requiresGptCover"), "local worker only requires ChatGPT/GPT evidence when generated covers are needed");
 assert(localWorker.includes("sourceTranslatedMarketNews") && localWorker.includes("generatedBy.includes(\"codex\")"), "local worker requires Gemini/Codex provenance except source-translated market news");

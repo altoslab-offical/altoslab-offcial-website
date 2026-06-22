@@ -10,7 +10,7 @@ import { subagentModelPolicyText } from "./blog-subagent-model-policy.mjs";
 import { columnVisualStylePromptBlock } from "./blog-column-visual-style-library.mjs";
 
 const LANGUAGES = ["zh-Hant", "en", "ja", "ko", "id", "vi", "th", "ms", "fil"];
-const SLOT_HOURS = { morning: "09:00", afternoon: "16:00" };
+const SLOT_HOURS = { morning: "09:00", afternoon: "16:00", evening: "20:00" };
 const DEFAULT_BASE_URL = "https://altoslab-ai.cc";
 const LANGUAGE_LABEL = LANGUAGES.join(", ");
 const COLUMN_DAILY_LIMIT = Number(process.env.ALTOS_BLOG_COLUMN_DAILY_LIMIT || "3");

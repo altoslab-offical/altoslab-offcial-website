@@ -38,9 +38,10 @@
 - 同一組語言必須共享同一個 `translationGroupId`、sourceLinks、cover URL、coverSource、cover credit、contentImages URL set、visual metadata；只有 localized public copy 可以不同。
 - Market news 是 source-translation，不是專欄。它必須使用 verified source article 或 official announcement，並使用 credited source/official image；若來源可用但品質不合格，進入 repair/rewrite/re-image/re-QA，不把正常品質問題記成 successful skip。
 - Market news 不使用 Gemini，不使用 GPT art，不使用 Unsplash、Pexels、Pixabay、Openverse、local fallback art、generic stock image。
-- Column / feature 必須先由 Gemini 在指定 Chrome profile 產出 source-of-truth zh-Hant 文章，main-brain 審過後才可 localization。
-- Column / feature 的 cover 與 2-3 張 shared in-article images 只能透過指定 ChatGPT/GPT image workflow 或明確 human-approved editorial design QA。
+- Column / feature 必須有明確 production provenance。舊 lane 可用 Gemini + GPT；Hermes/OpenClaw 新 lane 可用 Codex `gpt-5.4`，但 candidate / article-set / manifest 必須留下 `codexEvidence`，不能用空白或口頭聲明取代。
+- Column / feature 的 cover 與 2-3 張 shared in-article images 必須共享同一組 public URL；圖片 workflow 可以是指定 ChatGPT/GPT 或 Codex image lane，但都要通過 visual metadata、topic-fit、source/rights 與 rendered review gate。
 - Release window 不產生新內容，只發布已經 `ready` 的 prepared candidate；若沒有可發布 candidate，必須產出 repair plan，直到 validate-only pass 後 publish + public readback。
+- `held`、`validateOnly.wouldPublish=false`、duplicate topic、untrusted source、H2/body merged、content image unsafe/mismatched 都是 repair/rewrite/re-image blockers；不可當成 skip 或成功發文。
 - n8n/bridge/scripts 不能自行修改 UI、Blog layout、CSS、header、sidebar、language switcher、WonDa widget placement 或任何 public design surface；這類變更必須由 Hermes 明確判斷並留下證據。
 - 任何 gate 不完整，回傳 `ok:false` / HTTP 500，讓 n8n execution 顯示 failed，不可吞掉失敗。
 

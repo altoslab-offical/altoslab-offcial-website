@@ -34,7 +34,7 @@ function repair(slot) {
   const index = readJson(indexFile);
   const manifestFile = index.manifestPath || indexFile;
   const manifest = readJson(manifestFile);
-  const articleSetFile = manifest.articleSetPath || index.articleSetPath;
+  const articleSetFile = index.articleSetPath || manifest.articleSetPath;
   const articleSet = readJson(articleSetFile);
   const posts = Array.isArray(articleSet.posts) ? articleSet.posts : [];
   const source = posts[0];
@@ -72,6 +72,8 @@ function repair(slot) {
   articleSet.chromeEvidence = { ...(articleSet.chromeEvidence || {}), codex: evidence };
   manifest.codexEvidence = evidence;
   manifest.chromeEvidence = { ...(manifest.chromeEvidence || {}), codex: manifest.codexEvidence };
+  manifest.articleSetPath = articleSetFile;
+  index.articleSetPath = articleSetFile;
   if (manifest.qualityManifest?.posts) {
     for (const row of manifest.qualityManifest.posts) {
       row.contentImages = sharedImages.map((image) => image.url).filter(Boolean);
