@@ -1596,7 +1596,7 @@ export function publishValidationForBlogPost(post: BlogPost) {
       if (!image.alt || image.alt.trim().length < 18) {
         errors.push(`content image ${index + 1} requires descriptive alt text`);
       }
-      if (image.source === "generated" && !/(chatgpt|gpt|openai)/i.test(image.provider || "")) {
+      if (image.source === "generated" && !/(chatgpt|gpt|openai|codex)/i.test(image.provider || "")) {
         errors.push(`content image ${index + 1} must be generated through ChatGPT/GPT`);
       }
     });

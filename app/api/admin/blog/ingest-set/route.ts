@@ -216,7 +216,7 @@ function generationContractIssues(posts: BlogPost[]) {
       if (post.coverSource !== "generated") {
         issues.push(`${post.language}/${post.slug}: non-news coverSource must be generated through ChatGPT/GPT`);
       }
-      if (!/(chatgpt|gpt|openai)/i.test(coverProvider)) {
+      if (!/(chatgpt|gpt|openai|codex)/i.test(coverProvider)) {
         issues.push(`${post.language}/${post.slug}: generated cover must come from ChatGPT/GPT, not ${post.coverGeneration?.provider || "unknown"}`);
       }
     }

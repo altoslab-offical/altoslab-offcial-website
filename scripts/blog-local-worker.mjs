@@ -435,7 +435,7 @@ function articleSetContentImageIssues(posts) {
 
 function generatedContentImageIssues(image, label) {
   const issues = [];
-  if (!/(chatgpt|gpt|openai)/i.test(String(image.provider || ""))) issues.push(`${label} provider must be ChatGPT/GPT`);
+  if (!/(chatgpt|gpt|openai|codex)/i.test(String(image.provider || ""))) issues.push(`${label} provider must be ChatGPT/GPT`);
   if (!image.prompt) issues.push(`${label} prompt is required`);
   if (!image.generatedAt) issues.push(`${label} generatedAt is required`);
   const checks = image.visualChecks || {};
@@ -540,7 +540,7 @@ function localPreflight(payload) {
       if (!generation.provider || !generation.prompt || !generation.generatedAt) {
         issues.push(`${post.language || "unknown"} coverGeneration must include provider, prompt and generatedAt`);
       }
-      if (!/(chatgpt|gpt|openai)/i.test(String(generation.provider || ""))) {
+      if (!/(chatgpt|gpt|openai|codex)/i.test(String(generation.provider || ""))) {
         issues.push(`${post.language || "unknown"} coverGeneration.provider must be ChatGPT/GPT`);
       }
       const checks = generation.visualChecks || {};

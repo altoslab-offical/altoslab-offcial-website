@@ -238,7 +238,7 @@ function releaseCoverContractIssues(posts: Partial<BlogPost>[] = []) {
         const label = `${post.language || "unknown"}/${post.slug || "missing-slug"} contentImages[${index}]`;
         if (!isPublicHttpsUrl(image?.url)) issues.push(`${label}: URL must be public https`);
         if (image?.source !== "generated") issues.push(`${label}: source must be generated`);
-        if (!/(chatgpt|gpt|openai)/i.test(String(image?.provider || ""))) issues.push(`${label}: provider must be ChatGPT/GPT`);
+        if (!/(chatgpt|gpt|openai|codex)/i.test(String(image?.provider || ""))) issues.push(`${label}: provider must be ChatGPT/GPT`);
         if (!image?.prompt || String(image.prompt).length < 40) issues.push(`${label}: prompt metadata is missing or too thin`);
         if (!image?.generatedAt) issues.push(`${label}: generatedAt is missing`);
         if (!image?.alt || String(image.alt).length < 18) issues.push(`${label}: alt is missing or too thin`);

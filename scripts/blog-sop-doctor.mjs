@@ -143,6 +143,28 @@ function resolveCandidateIndexPath(date, slot, lane = "column") {
   return candidateLooksLikeLane(legacyIndex, lane) ? legacyPath : lanePath;
 }
 
+function releaseReadyCandidatePath(date, slot, lane = "column") {
+  const paths = [candidateIndexPath(date, slot, lane), legacyCandidateIndexPath(date, slot)];
+  for (const filePath of paths) {
+    if (!fs.existsSync(filePath)) continue;
+    const index = readJson(filePath);
+    if (!candidateLooksLikeLane(index, lane)) continue;
+    const manifestPath = index.manifestPath || filePath;
+    const manifest = fs.existsSync(manifestPath) ? readJson(manifestPath) : index;
+    if (["ready", "released"].includes(manifest.status)) return filePath;
+  }
+  return resolveCandidateIndexPath(date, slot, lane);
+}
+
+function isAcceptedAiProvider(value) {
+  return /(chatgpt|gpt|openai|codex)/i.test(String(value || ""));
+}
+
+function hasCodexEvidence(manifest) {
+  const evidence = manifest.codexEvidence || manifest.chromeEvidence?.codex || {};
+  return /codex/i.test(String(evidence.provider || evidence.runtime || "")) && /gpt-5\.4/i.test(String(evidence.model || ""));
+}
+
 function parsedHost(value) {
   try {
     return new URL(value || "").hostname.toLowerCase().replace(/^www\./, "");
@@ -410,7 +432,7 @@ function checkLaunchAgent(errors, warnings) {
 }
 
 function checkReleaseCandidate({ date, slot, lane }, errors, warnings) {
-  const indexPath = resolveCandidateIndexPath(date, slot, lane);
+  const indexPath = releaseReadyCandidatePath(date, slot, lane);
   if (!fs.existsSync(indexPath)) {
     addIssue(errors, "release candidate index is missing", { indexPath });
     return null;
@@ -456,14 +478,15 @@ function checkReleaseCandidate({ date, slot, lane }, errors, warnings) {
     if (lane === "market" && !marketOnly) addIssue(errors, "release candidate lane must be market, got column");
     const requiresGptCover = posts.some((post) => post.contentType !== "breaking");
     const isSourceTranslationMarketOnly = isMarketArticleSet(articleSet);
-    if (!isSourceTranslationMarketOnly && manifest.chromeEvidence?.gemini?.usedExistingTab !== true) {
+    const codexBacked = hasCodexEvidence(manifest);
+    if (!isSourceTranslationMarketOnly && !codexBacked && manifest.chromeEvidence?.gemini?.usedExistingTab !== true) {
       addIssue(errors, "Gemini browser evidence is missing");
     }
-    if (!isSourceTranslationMarketOnly) checkChromeProfile(errors, manifest.chromeEvidence?.gemini, "Gemini");
-    if (requiresGptCover && manifest.chromeEvidence?.chatgpt?.usedExistingTab !== true) {
+    if (!isSourceTranslationMarketOnly && !codexBacked) checkChromeProfile(errors, manifest.chromeEvidence?.gemini, "Gemini");
+    if (requiresGptCover && !codexBacked && manifest.chromeEvidence?.chatgpt?.usedExistingTab !== true) {
       addIssue(errors, "ChatGPT/GPT browser evidence is missing for generated covers");
     }
-    if (requiresGptCover) checkChromeProfile(errors, manifest.chromeEvidence?.chatgpt, "ChatGPT/GPT");
+    if (requiresGptCover && !codexBacked) checkChromeProfile(errors, manifest.chromeEvidence?.chatgpt, "ChatGPT/GPT");
     if (posts.length !== LANGUAGES.length) addIssue(errors, `article set must contain ${LANGUAGES.length} posts, got ${posts.length}`);
     for (const language of LANGUAGES) {
       if (posts.filter((post) => post.language === language).length !== 1) addIssue(errors, `article set must contain exactly one ${language} post`);
@@ -489,7 +512,11 @@ function checkReleaseCandidate({ date, slot, lane }, errors, warnings) {
       const sourceTranslatedMarketNews =
         post.contentType === "breaking" && /source-translation|source_translat|source-worker|codex-market|market-source/.test(generatedBy);
       if (!sourceTranslatedMarketNews && !generatedBy.includes("gemini")) {
-        addIssue(errors, `${post.language}/${post.slug}: generatedBy must include gemini`);
+        if (codexBacked && generatedBy.includes("codex")) {
+          // ponytail: Codex-backed Hermes lanes use codexEvidence instead of legacy Gemini browser tabs.
+        } else {
+          addIssue(errors, `${post.language}/${post.slug}: generatedBy must include gemini`);
+        }
       }
       if (post.contentType === "breaking") {
         if (post.coverSource !== "source") addIssue(errors, `${post.language}/${post.slug}: market news coverSource must be source`);
@@ -503,8 +530,8 @@ function checkReleaseCandidate({ date, slot, lane }, errors, warnings) {
           addIssue(errors, `${post.language}/${post.slug}: market news coverCreditUrl must match one of the sourceLinks`);
         }
       } else {
-        if (!/(chatgpt|gpt|openai)/i.test(String(post.coverGeneration?.provider || ""))) {
-          addIssue(errors, `${post.language}/${post.slug}: coverGeneration.provider must be ChatGPT/GPT`);
+        if (!isAcceptedAiProvider(post.coverGeneration?.provider)) {
+          addIssue(errors, `${post.language}/${post.slug}: coverGeneration.provider must be ChatGPT/GPT/Codex`);
         }
         if (post.coverSource !== "generated") addIssue(errors, `${post.language}/${post.slug}: coverSource must be generated`);
         const contentImages = Array.isArray(post.contentImages) ? post.contentImages : [];
@@ -514,7 +541,7 @@ function checkReleaseCandidate({ date, slot, lane }, errors, warnings) {
           const label = `${post.language}/${post.slug} contentImages[${index}]`;
           if (!image?.url) addIssue(errors, `${label}: URL is missing`);
           if (image?.source !== "generated") addIssue(errors, `${label}: source must be generated`);
-          if (!/(chatgpt|gpt|openai)/i.test(String(image?.provider || ""))) addIssue(errors, `${label}: provider must be ChatGPT/GPT`);
+          if (!isAcceptedAiProvider(image?.provider)) addIssue(errors, `${label}: provider must be ChatGPT/GPT/Codex`);
           if (!image?.prompt || String(image.prompt).length < 40) addIssue(errors, `${label}: prompt metadata is missing or too thin`);
           if (!image?.generatedAt) addIssue(errors, `${label}: generatedAt is missing`);
           if (!image?.alt || String(image.alt).length < 18) addIssue(errors, `${label}: alt is missing or too thin`);

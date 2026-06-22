@@ -293,7 +293,7 @@ function isPublicImageUrl(value?: string) {
 
 function generatedImageChecksIssues(image: BlogInlineImage, label: string) {
   const issues: string[] = [];
-  if (!/(chatgpt|gpt|openai)/i.test(image.provider || "")) issues.push(`${label} must be generated through ChatGPT/GPT`);
+  if (!/(chatgpt|gpt|openai|codex)/i.test(image.provider || "")) issues.push(`${label} must be generated through ChatGPT/GPT`);
   if (!image.prompt?.trim()) issues.push(`${label} requires the stored image prompt`);
   if (!image.generatedAt?.trim()) issues.push(`${label} requires generatedAt metadata`);
   if (!image.credit?.trim()) issues.push(`${label} requires visible editorial credit`);
@@ -1436,8 +1436,8 @@ function reviewPost(post: BlogPost, multilingual: ReviewResult): PostReview {
   if (post.generatedBy && !/gemini/i.test(post.generatedBy) && !isSourceTranslatedMarketNews) {
     issues.push("production articles must be written or revised through Gemini before release");
   }
-  if (post.coverSource === "generated" && !/(chatgpt|gpt|openai)/i.test(post.coverGeneration?.provider || "")) {
-    issues.push("generated production covers must be created through ChatGPT/GPT before release");
+  if (post.coverSource === "generated" && !/(chatgpt|gpt|openai|codex)/i.test(post.coverGeneration?.provider || "")) {
+    issues.push("generated production covers must be created through ChatGPT/GPT/Codex before release");
   }
   if (post.contentType === "breaking" && post.coverSource !== "source") {
     issues.push("market news production covers must come from the source article image lane before release");

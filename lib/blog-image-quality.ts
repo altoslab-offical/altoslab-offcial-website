@@ -382,7 +382,7 @@ async function probeRemoteImage(url: string, options: ImageProbeOptions = {}): P
 
 function generatedInlineImageIssues(image: BlogInlineImage, label: string) {
   const issues: string[] = [];
-  if (!/(chatgpt|gpt|openai)/i.test(image.provider || "")) issues.push(`${label} provider must be ChatGPT/GPT`);
+  if (!/(chatgpt|gpt|openai|codex)/i.test(image.provider || "")) issues.push(`${label} provider must be ChatGPT/GPT`);
   if (!image.prompt?.trim()) issues.push(`${label} prompt is required`);
   if (!image.generatedAt?.trim()) issues.push(`${label} generatedAt is required`);
   if (!image.credit?.trim()) issues.push(`${label} credit is required`);

@@ -625,8 +625,8 @@ async function verifyPostLive(post, root, errors, warnings) {
     }
   } else {
     const coverProvider = String(publicPost.coverGeneration?.provider || post.coverGeneration?.provider || "");
-    if (!/(chatgpt|gpt|openai)/i.test(coverProvider)) {
-      pushIssue(errors, `public API coverGeneration.provider must be ChatGPT/GPT, got ${coverProvider || "missing"}`, context);
+    if (!/(chatgpt|gpt|openai|codex)/i.test(coverProvider)) {
+      pushIssue(errors, `public API coverGeneration.provider must be ChatGPT/GPT/Codex, got ${coverProvider || "missing"}`, context);
     }
     if (isColumnOrFeature(post)) {
       const publicImages = Array.isArray(publicPost.contentImages) ? publicPost.contentImages : [];
@@ -656,8 +656,8 @@ async function verifyPostLive(post, root, errors, warnings) {
           pushIssue(errors, `contentImages[${index}] must be generated for column/feature posts`, imageContext);
         }
         const provider = String(sourceImage.provider || "");
-        if (!/(chatgpt|gpt|openai)/i.test(provider)) {
-          pushIssue(errors, `contentImages[${index}] provider must be ChatGPT/GPT, got ${provider || "missing"}`, imageContext);
+        if (!/(chatgpt|gpt|openai|codex)/i.test(provider)) {
+          pushIssue(errors, `contentImages[${index}] provider must be ChatGPT/GPT/Codex, got ${provider || "missing"}`, imageContext);
         }
         if (!sourceImage.prompt || String(sourceImage.prompt).length < 40) {
           pushIssue(errors, `contentImages[${index}] prompt metadata is missing or too thin`, imageContext);
