@@ -9,6 +9,7 @@ const LANGUAGES = ["zh-Hant", "en", "ja", "ko", "id", "vi", "th", "ms", "fil"];
 const DEFAULT_BASE_URL = "https://altoslab-ai.cc";
 const DEFAULT_COLUMN_TARGET = 9;
 const DAILY_COLUMN_MINIMUM = Number(process.env.ALTOS_BLOG_COLUMN_DAILY_LIMIT || "3");
+const DAILY_PUBLICATION_MINIMUM = Number(process.env.ALTOS_BLOG_DAILY_PUBLICATION_LIMIT || "5");
 const REQUIRED_COLUMN_CONTENT_IMAGES = 2;
 const COLUMN_BASELINE_POLICY = "advisory";
 
@@ -115,10 +116,11 @@ async function liveCounts(baseUrl, date) {
     const json = await response.json().catch(() => ({}));
     const posts = Array.isArray(json.posts) ? json.posts : [];
     const breaking = posts.filter((post) => post.contentType === "breaking" || post.category === "市場快訊" || (post.tags || []).includes("市場快訊")).length;
+    const todayBreaking = posts.filter((post) => (post.contentType === "breaking" || post.category === "市場快訊" || (post.tags || []).includes("市場快訊")) && postTaiwanDate(post) === date).length;
     const columnPosts = posts.filter((post) => post.contentType === "column" || post.category === "專欄" || (post.tags || []).includes("市場專欄"));
     const column = columnPosts.length;
     const todayColumn = columnPosts.filter((post) => postTaiwanDate(post) === date).length;
-    rows.push({ language, total: posts.length, breaking, column, todayColumn });
+    rows.push({ language, total: posts.length, breaking, column, todayColumn, todayBreaking, todayPublished: todayColumn + todayBreaking });
   }
   return rows;
 }
@@ -449,6 +451,7 @@ function summarizeIssues({ counts, gaps, candidates, launchAgent, n8nLocal, visu
   const minTotal = Math.min(...counts.map((row) => row.total));
   const minColumn = Math.min(...counts.map((row) => row.column));
   const minTodayColumn = Math.min(...counts.map((row) => row.todayColumn || 0));
+  const minTodayPublished = Math.min(...counts.map((row) => row.todayPublished || 0));
   const columnTarget = targets?.column || DEFAULT_COLUMN_TARGET;
   const strictColumnBaseline = targets?.columnBaselinePolicy === "hard";
   if (minTotal === 0) {
@@ -457,6 +460,9 @@ function summarizeIssues({ counts, gaps, candidates, launchAgent, n8nLocal, visu
   if (strictColumnBaseline && gaps.some((gap) => gap.columnGap > 0)) issues.push(`columns below target: min column=${minColumn}`);
   if (minTodayColumn < DAILY_COLUMN_MINIMUM) {
     issues.push(`daily column minimum not met for ${targets?.date || "today"}: min todayColumn=${minTodayColumn}`);
+  }
+  if (minTodayPublished < DAILY_PUBLICATION_MINIMUM) {
+    issues.push(`daily publication minimum not met for ${targets?.date || "today"}: min todayPublished=${minTodayPublished}`);
   }
   const legacyMarket = candidates.find((candidate) => candidate.lane === "legacy" && /market/i.test(candidate.translationGroupId || ""));
   if (legacyMarket) issues.push(`legacy candidate index still contains market release: ${legacyMarket.path}`);
@@ -481,6 +487,7 @@ function summarizeBottlenecks({ counts, gaps, candidates, launchAgent, n8nLocal,
   const minTotal = Math.min(...counts.map((row) => row.total));
   const minColumn = Math.min(...counts.map((row) => row.column));
   const minTodayColumn = Math.min(...counts.map((row) => row.todayColumn || 0));
+  const minTodayPublished = Math.min(...counts.map((row) => row.todayPublished || 0));
   const columnTarget = targets?.column || DEFAULT_COLUMN_TARGET;
   const blockedVisuals = visualGap.checked ? visualGap.rows.filter((row) => row.sourceReady && !row.publishableVisuals) : [];
   const readyMarketCandidates = candidates.filter((candidate) => candidate.exists && candidate.lane === "market" && candidate.status === "ready");
@@ -495,10 +502,12 @@ function summarizeBottlenecks({ counts, gaps, candidates, launchAgent, n8nLocal,
   return [
     {
       lane: "market",
-      status: minTotal === 0 ? "blocked" : readyMarketCandidates.length ? "attention" : "stable",
+      status: minTotal === 0 ? "blocked" : minTodayPublished < DAILY_PUBLICATION_MINIMUM ? "attention" : readyMarketCandidates.length ? "attention" : "stable",
       summary:
         minTotal === 0
           ? "at least one configured language has zero public posts; hold market scans until the active CMS projection is multilingual-complete"
+          : minTodayPublished < DAILY_PUBLICATION_MINIMUM
+          ? `daily publication count is ${minTodayPublished}/${DAILY_PUBLICATION_MINIMUM}; keep market scans running until qualified source-backed items close the gap`
           : readyMarketCandidates.length
           ? `market news has ${readyMarketCandidates.length} ready candidate(s) waiting for release`
           : `market news count is ${minBreaking}/language; scheduled longform scans continue without a hard inventory cap`
@@ -557,6 +566,7 @@ function nextActions({ counts, gaps, visualGap, candidates, headlessProviders, a
   const minTotal = Math.min(...counts.map((row) => row.total));
   const columnGap = Math.max(...gaps.map((gap) => gap.columnGap));
   const minTodayColumn = Math.min(...counts.map((row) => row.todayColumn || 0));
+  const minTodayPublished = Math.min(...counts.map((row) => row.todayPublished || 0));
   const strictColumnBaseline = targets?.columnBaselinePolicy === "hard";
   const blockedVisuals = visualGap.checked ? visualGap.rows.filter((row) => row.sourceReady && !row.publishableVisuals) : [];
   const readyMarketCandidates = candidates.filter((candidate) => candidate.exists && candidate.lane === "market" && candidate.status === "ready");
@@ -573,7 +583,9 @@ function nextActions({ counts, gaps, visualGap, candidates, headlessProviders, a
     actions.push("Repair GA/GTM installation or /api/health analytics configuration before treating the daily operations report as clean.");
   }
   if (minTodayColumn < DAILY_COLUMN_MINIMUM) {
-    actions.push(`Produce and release today's Gemini-approved daily column sets until ${DAILY_COLUMN_MINIMUM}/language is live; do not treat the baseline column count as satisfying the daily requirement.`);
+    actions.push(`Produce and release today's Codex/Hermes-approved daily column sets until ${DAILY_COLUMN_MINIMUM}/language is live; do not treat the baseline column count as satisfying the daily requirement.`);
+  } else if (minTodayPublished < DAILY_PUBLICATION_MINIMUM) {
+    actions.push(`Keep market scans running and repair/release qualified source-backed news until ${DAILY_PUBLICATION_MINIMUM}/language is live today.`);
   } else if (strictColumnBaseline && columnGap > 0 && blockedVisuals.length) {
     actions.push(`Produce GPT cover plus 2-3 content images for ${blockedVisuals.map((row) => `seq${row.sequence}`).join(", ")} before column release.`);
     if (!headlessProviders?.openaiImageConfigured || !headlessProviders?.uploadStorageConfigured) {
@@ -598,12 +610,12 @@ function textReport(report) {
   lines.push(`Checked: ${report.checkedAt}`);
   lines.push("");
   lines.push(
-    `Targets: market news has no hard cap, published column baseline ${report.targets.column}/language (${report.targets.columnBaselinePolicy}), daily column minimum ${report.targets.dailyColumnMinimum} approved set(s)`
+    `Targets: market news has no hard cap, published column baseline ${report.targets.column}/language (${report.targets.columnBaselinePolicy}), daily column minimum ${report.targets.dailyColumnMinimum} approved set(s), daily publication minimum ${report.targets.dailyPublicationMinimum} complete set(s)`
   );
   lines.push("");
   lines.push("Live counts:");
   for (const row of report.counts) {
-    lines.push(`- ${row.language}: total ${row.total}, breaking ${row.breaking}, column ${row.column}, todayColumn ${row.todayColumn || 0}`);
+    lines.push(`- ${row.language}: total ${row.total}, breaking ${row.breaking}, column ${row.column}, todayColumn ${row.todayColumn || 0}, todayBreaking ${row.todayBreaking || 0}, todayPublished ${row.todayPublished || 0}`);
   }
   lines.push("");
   lines.push("Candidate indexes:");
@@ -666,12 +678,13 @@ async function main() {
     ok:
       gaps.every((gap) => gap.breakingGap === 0 && (columnBaselinePolicy !== "hard" || gap.columnGap === 0)) &&
       counts.every((row) => (row.todayColumn || 0) >= DAILY_COLUMN_MINIMUM) &&
+      counts.every((row) => (row.todayPublished || 0) >= DAILY_PUBLICATION_MINIMUM) &&
       n8nLocal.ok === true &&
       analytics.ok === true,
     checkedAt: new Date().toISOString(),
     date,
     baseUrl,
-    targets: { marketCap: null, column: columnTarget, columnBaselinePolicy, dailyColumnMinimum: DAILY_COLUMN_MINIMUM, date },
+    targets: { marketCap: null, column: columnTarget, columnBaselinePolicy, dailyColumnMinimum: DAILY_COLUMN_MINIMUM, dailyPublicationMinimum: DAILY_PUBLICATION_MINIMUM, date },
     counts,
     gaps,
     candidates,

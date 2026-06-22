@@ -9,6 +9,7 @@ const ROOT_DIR =
   process.env.ALTOS_BLOG_WORKER_ROOT || "/Users/asdc163/LocalProjects/altoslab-offcial-website-runtime";
 const DEFAULT_BASE_URL = process.env.ALTOS_BLOG_BASE_URL || process.env.ALTOS_BLOG_AUTOMATION_BASE_URL || "https://altoslab-ai.cc";
 const COLUMN_DAILY_TARGET = Number(process.env.ALTOS_BLOG_COLUMN_DAILY_LIMIT || "3");
+const DAILY_PUBLICATION_TARGET = Number(process.env.ALTOS_BLOG_DAILY_PUBLICATION_LIMIT || "5");
 const INVENTORY_LIMIT = Number(process.env.ALTOS_BLOG_DAILY_CLOSEOUT_INVENTORY_LIMIT || "200");
 const COLUMN_SLOTS = (process.env.ALTOS_BLOG_COLUMN_SLOTS || "morning,afternoon,evening")
   .split(",")
@@ -305,6 +306,7 @@ async function main() {
   const columnGroups = liveGroupsForDate(postsByLanguage, { date, contentType: "column" });
   const marketGroups = liveGroupsForDate(postsByLanguage, { date, contentType: "breaking" });
   const completeColumns = columnGroups.filter((group) => group.coverage.complete);
+  const completeMarketGroups = marketGroups.filter((group) => group.coverage.complete);
   const completeMarket = bestCompleteGroup(marketGroups);
 
   for (const [slot, columnCandidate] of Object.entries(columnCandidates)) {
@@ -349,6 +351,14 @@ async function main() {
     actions.push("Run /run/market-scan, then verify the published translationGroupId across all configured languages.");
   }
 
+  const completePublicationCount = completeColumns.length + completeMarketGroups.length;
+  if (completePublicationCount < DAILY_PUBLICATION_TARGET) {
+    errors.push(
+      `daily publication target not met for ${date}: ${completePublicationCount}/${DAILY_PUBLICATION_TARGET} complete 9-language groups`
+    );
+    actions.push("Continue market scans and repair/release qualified source-backed news until the daily 5-publication target is met.");
+  }
+
   if (marketCandidates.morning.status === "held" && marketCandidates.afternoon.status === "released") {
     warnings.push("morning market scan held, but afternoon market scan released a complete item");
   }
@@ -362,6 +372,8 @@ async function main() {
     live: {
       dailyColumnTarget: COLUMN_DAILY_TARGET,
       dailyColumnCount: completeColumns.length,
+      dailyPublicationTarget: DAILY_PUBLICATION_TARGET,
+      dailyPublicationCount: completePublicationCount,
       dailyColumn: completeColumns[0]
         ? {
             ok: true,
@@ -384,7 +396,8 @@ async function main() {
             slug: completeMarket.slug,
             title: completeMarket.title,
             publishedAt: completeMarket.publishedAt,
-            languages: completeMarket.coverage.present
+            languages: completeMarket.coverage.present,
+            completeGroups: summarizeGroups(completeMarketGroups)
           }
         : {
             ok: false,
