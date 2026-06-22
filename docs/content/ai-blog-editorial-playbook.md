@@ -124,6 +124,13 @@ Inline image gate:
 - Within one article, two in-article images must not reuse the same URL,
   localPath, or prompt. If the second visual cannot explain a different job,
   remove it or regenerate it.
+- Do not let generated visuals collapse into the same dark workflow-card /
+  checkpoint-arrow / lock diagram family. For each article set, rotate at least
+  two families: editorial product photo, tactile still life, scrapbook/collage,
+  poster/data map, comparison audit, documentary action scene, or clean diagram.
+- Pinterest-style inspiration is used only as compact style signals: strong
+  focal object, saveable composition, tactile material, real-world context, and
+  clear crop. Do not copy pins, artists, logos, layouts, or readable text.
 - Market news keeps the source/official image when rights and quality are
   acceptable; generated ALTOS LAB visuals are a fallback, not the default.
 

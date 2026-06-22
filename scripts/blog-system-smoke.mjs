@@ -564,6 +564,9 @@ assert(imageStyleGuide.includes("不照抄完整 prompt") && imageStyleGuide.inc
 assert(columnVisualStyleLibrary.includes("editorial-poster-signal-map"), "column visual style library includes an editorial poster case family");
 assert(columnVisualStyleLibrary.includes("interface-less-product-mockup"), "column visual style library includes a UI-mockup-inspired non-UI family");
 assert(columnVisualStyleLibrary.includes("comparison-diptych-audit"), "column visual style library includes a comparison/audit family");
+assert(columnVisualStyleLibrary.includes("pinterest-editorial-product-photo"), "column visual style library includes Pinterest-like editorial product photography");
+assert(columnVisualStyleLibrary.includes("pickDistinctStyle"), "column visual style library selects distinct visual families across article images");
+assert(columnVisualStyleLibrary.includes("Do not use the 3D workflow/checkpoint/card/arrow family for more than one image"), "column visual prompts block repeated workflow-card family");
 const gcpSmoke = read("scripts/gcp-production-smoke.mjs");
 assert(gcpSmoke.includes("publishedPosts === 0"), "GCP production smoke warns when the public blog inventory is empty");
 assert(gcpSmoke.includes("function printJson") && gcpSmoke.includes("process.stdout.write"), "GCP production smoke flushes JSON before exiting on failures");

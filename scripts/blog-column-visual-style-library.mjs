@@ -126,8 +126,65 @@ export const COLUMN_VISUAL_STYLES = [
     palette: "off-white, black ink, signal green, muted blue, one warm accent",
     avoid:
       "No copied publication cover, no readable headline, no fake sponsor logo, no template poster clutter."
+  },
+  {
+    id: "pinterest-editorial-product-photo",
+    label: "editorial product photo",
+    prompt:
+      "A Pinterest-inspired editorial product photograph built around one concrete object from the story, with real-world context, strong negative space, and a saveable magazine feel. The image should suggest something useful the reader can act on, not just decorate an AI topic.",
+    palette: "natural black, warm paper, muted steel, fresh green, one small high-contrast accent",
+    avoid:
+      "No generic AI icon, no workflow arrows, no floating cards, no logo, no readable text, no fake app screen."
+  },
+  {
+    id: "pinterest-tactile-material-still-life",
+    label: "tactile material still life",
+    prompt:
+      "A tactile still life with paper, metal, translucent material, notes, access objects, and one unusual prop that makes the article's operating tension visible. Use macro/editorial lighting and material contrast.",
+    palette: "ivory, graphite, muted green, brushed metal, one warm accent",
+    avoid:
+      "No plastic toy look, no repeated glass cube, no checkpoint-arrow map, no readable notes, no brand marks."
+  },
+  {
+    id: "pinterest-scrapbook-signal-collage",
+    label: "scrapbook signal collage",
+    prompt:
+      "A clean scrapbook-style editorial collage: cropped source-like artifacts, blank note fragments, abstract signal paths, and layered paper texture. It should feel curated and human, with one clear focal decision.",
+    palette: "off-white paper, black ink, muted teal, clay red, soft yellow",
+    avoid:
+      "No readable words, no messy wall of notes, no meme template, no fake screenshots, no dense icon clutter."
+  },
+  {
+    id: "pinterest-real-world-action-scene",
+    label: "real-world action scene",
+    prompt:
+      "A real-world action-oriented editorial scene without identifiable people: hands, tools, desks, access cards, devices, or workspace objects arranged to imply how the idea becomes operational. Use documentary lighting and a clear before/after object relationship.",
+    palette: "neutral daylight, dark green, muted blue, warm wood or paper, one orange accent",
+    avoid:
+      "No face likeness, no stock office handshake, no generic dashboard, no logo, no readable screen or document text."
   }
 ];
+
+const STYLE_FAMILY_BY_ID = {
+  "cyberpunk-neon-operations": "surreal-editorial",
+  "anime-inspired-product-lab": "illustration",
+  "satirical-prime-time-cartoon": "illustration",
+  "technical-blueprint-lab": "diagram",
+  "magazine-documentary-still-life": "photo-still-life",
+  "retro-futurist-riso": "print-collage",
+  "monochrome-manga-ink": "illustration",
+  "clay-paper-systems": "tactile-system",
+  "editorial-poster-signal-map": "poster-data",
+  "interface-less-product-mockup": "abstract-product",
+  "comparison-diptych-audit": "comparison",
+  "foresight-documentary-tech-photo": "photo-documentary",
+  "foresight-finance-object-still-life": "photo-still-life",
+  "foresight-brand-report-asset": "poster-report",
+  "pinterest-editorial-product-photo": "photo-documentary",
+  "pinterest-tactile-material-still-life": "photo-still-life",
+  "pinterest-scrapbook-signal-collage": "print-collage",
+  "pinterest-real-world-action-scene": "photo-documentary"
+};
 
 function hashText(value = "") {
   let hash = 0;
@@ -142,11 +199,28 @@ export function selectColumnVisualStyle({ date = "", slot = "", topic = "" } = {
   return COLUMN_VISUAL_STYLES[seed % COLUMN_VISUAL_STYLES.length];
 }
 
+function styleFamily(style) {
+  return STYLE_FAMILY_BY_ID[style.id] || style.id;
+}
+
+function pickDistinctStyle(seed, usedFamilies) {
+  for (let offset = 0; offset < COLUMN_VISUAL_STYLES.length; offset += 1) {
+    const style = COLUMN_VISUAL_STYLES[(seed + offset) % COLUMN_VISUAL_STYLES.length];
+    const family = styleFamily(style);
+    if (!usedFamilies.has(family)) {
+      usedFamilies.add(family);
+      return style;
+    }
+  }
+  return COLUMN_VISUAL_STYLES[seed % COLUMN_VISUAL_STYLES.length];
+}
+
 export function selectColumnVisualStyleSet({ date = "", slot = "", topic = "" } = {}) {
   const seed = hashText(`${date}|${slot}|${topic}`);
   const cover = COLUMN_VISUAL_STYLES[seed % COLUMN_VISUAL_STYLES.length];
-  const opening = COLUMN_VISUAL_STYLES[(seed + 3) % COLUMN_VISUAL_STYLES.length];
-  const mechanism = COLUMN_VISUAL_STYLES[(seed + 7) % COLUMN_VISUAL_STYLES.length];
+  const usedFamilies = new Set([styleFamily(cover)]);
+  const opening = pickDistinctStyle(seed + 3, usedFamilies);
+  const mechanism = pickDistinctStyle(seed + 7, usedFamilies);
   return { cover, opening, mechanism };
 }
 
@@ -165,7 +239,8 @@ export function columnVisualStylePromptBlock({ date = "", slot = "", topic = "" 
   Direction: ${mechanism.prompt}
   Palette: ${mechanism.palette}
   Negative constraints: ${mechanism.avoid}
-- The three generated images must not reuse the same camera angle, material palette, central object, paper-card metaphor, checkmark/arrow language, or beige workflow-board composition. Keep article identity coherent through topic and palette accents, not by repeating the same layout.
+- Pinterest-style learning: each image needs a clear focal object, story role, and saveable composition. Do not rely on abstract workflow cards as the default answer.
+- The three generated images must not reuse the same camera angle, material palette, central object, paper-card metaphor, checkmark/arrow language, or beige workflow-board composition. Do not use the 3D workflow/checkpoint/card/arrow family for more than one image in the same article set. Keep article identity coherent through topic and palette accents, not by repeating the same layout.
 - Every prompt must include subject, composition, camera/layout, material-lighting, color, crop-safe zone, and negative prompt.
 - Market-news/breaking posts must never use this generated style library; they keep source/official images only.`;
 }
