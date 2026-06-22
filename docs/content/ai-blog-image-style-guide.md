@@ -133,6 +133,49 @@ prompt demo。Hermes/OpenClaw 應先判斷 source image 是否真的提供事件
 - 圖片是否降低 AI 感，而不是更像 prompt demo；
 - alt/caption/placement 是否說得出這張圖為文章做了什麼。
 
+## 3.6) Foresight News 500 篇取樣後的圖片規則（2026-06-22）
+
+研究資料：`data/blog-research/foresight-image-style-2026-06-22/foresight-500-style-signals.json`。
+
+本次只吸收可公開取得的文章卡片、subtitle 與縮圖 URL 信號；臨時圖片下載只可放在
+`/tmp`，完成後刪除，不把第三方圖片存成素材庫。
+
+Foresight 的可學之處不是單一風格，而是**圖片家族輪替**：
+
+1. **documentary / event photo**：人物、會議、現場或產品場景，用來建立真實世界重量。
+2. **finance object still life**：手機、現金、卡片、票據、硬體、token 物件，讓抽象金融題有具體錨點。
+3. **brand/report cover asset**：乾淨的研究封面、產品封面、活動 banner，可用於來源/報告型文章。
+4. **conceptual Web3 poster / 3D object**：適合機制、基礎設施、治理或產品路線，但必須有清楚主體。
+5. **security / infrastructure diagram surrogate**：用節點、邊界、設備和流程暗示架構，不要做假 dashboard。
+6. **macro device / product-context photo**：手機、桌面、耳機、工具等真實物件，比抽象 AI 圖更容易讓讀者相信。
+
+股市折線圖、K 線截圖、每日行情表、純週報 chartboard 不納入 ALTOS LAB 圖片學習；它們可作來源資訊，
+但不應訓練成我們的主視覺。這類圖會讓官網像行情站，且和 ALTOS LAB 的 AI implementation 形象不符。
+
+Hermes 生成每張圖前必須先選一個 family，並寫清：
+
+```yaml
+topic_anchor: 文章中的具體事件、產品、流程、風險或讀者決策
+visual_family: documentary | finance_still_life | brand_report_asset | conceptual_poster | infrastructure_surrogate | macro_product_context
+composition: 主體位置、視線路徑、留白、安全裁切
+material_light_palette: 材質、光線、顏色，不可只寫「高級科技感」
+negative_constraints: no readable text, no logos, no fake UI, no chart screenshot, no slanted/tilted composition
+qa_reason: 為什麼這張圖比來源圖、抽象 AI 圖或 stock photo 更貼題
+```
+
+Prompt 不追求長，而追求可檢查：
+
+```text
+Editorial technology cover, 16:9. Subject: {topic_anchor}.
+Visual family: {selected_family}. Composition: {one focal object + secondary context + crop-safe negative space}.
+Camera/layout: {realistic editorial still life | clean poster | macro product scene | diagram surrogate}.
+Material/lighting: {specific materials + light direction + shadow quality}.
+Palette: {2 neutral colors + 1 restrained accent}.
+Hard negatives: no readable words, no logos, no fake dashboard, no chart screenshot, no people faces, no slanted layout.
+```
+
+QA 口訣：如果把文章標題換成另一篇 AI 文章，圖片仍然成立，這張圖不合格。
+
 ---
 
 ## 4) 6 套可直接丟 GPT image / ChatGPT 圖像生成的 prompt 模板

@@ -99,6 +99,33 @@ export const COLUMN_VISUAL_STYLES = [
     palette: "left side muted rust and gray, right side clean teal and ivory, shared charcoal linework",
     avoid:
       "No before/after text, no obvious checklist graphic, no cheap split-screen template, no stock office scene."
+  },
+  {
+    id: "foresight-documentary-tech-photo",
+    label: "documentary technology photo",
+    prompt:
+      "A serious documentary-style technology editorial image anchored in one real-world object or scene from the article: device, access card, source document, server detail, product surface, event artifact, or operator desk. It should feel reported and concrete, not generated as abstract AI wallpaper.",
+    palette: "natural blacks, muted steel, deep green, warm paper, one controlled highlight",
+    avoid:
+      "No stock handshake, no readable words, no brand logo, no face close-up, no slanted source-image crop, no generic AI icon."
+  },
+  {
+    id: "foresight-finance-object-still-life",
+    label: "finance object still life",
+    prompt:
+      "A finance-and-technology still life using concrete objects from the story: card, ledger, phone, custody token, compliance folder, pricing sheet, or market-access device. Make the abstract business model visible through physical props and editorial lighting.",
+    palette: "charcoal, ivory, muted gold, dark green, small cobalt accent",
+    avoid:
+      "No stock chart screenshot, no K-line display, no fake dashboard, no readable numbers, no crypto-coin cliché pile."
+  },
+  {
+    id: "foresight-brand-report-asset",
+    label: "brand report asset",
+    prompt:
+      "A clean report-cover-inspired editorial asset with one strong symbolic cover object, restrained graphic blocks, premium print texture, and clear negative space. It should resemble a commissioned research feature cover without using any real logo or readable title.",
+    palette: "off-white, black ink, signal green, muted blue, one warm accent",
+    avoid:
+      "No copied publication cover, no readable headline, no fake sponsor logo, no template poster clutter."
   }
 ];
 

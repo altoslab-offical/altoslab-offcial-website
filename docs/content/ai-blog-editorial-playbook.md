@@ -70,6 +70,39 @@ Subtitle / standfirst gate:
 - It must not start with "本文整理", "這篇文章", "This article", "learn how",
   "explore", or equivalent template language.
 
+Foresight-style subtitle lessons from the 2026-06-22 500-article sample:
+
+- The subtitle is usually one compact second beat, not a paragraph summary.
+- It should add tension, consequence or a concrete number that the title does
+  not already carry.
+- Good subtitles often combine `named entity + what changed + why the reader
+  should care`, then stop.
+- Do not use internal process words such as SEO/GEO, quality gate, prompt,
+  pipeline, language parity or Hermes in public subtitles.
+- For market news, the subtitle may simply state the news consequence; it does
+  not need to force an ALTOS LAB judgment section.
+- For columns, the subtitle should make the piece feel worth reading by naming
+  the conflict, surprise, practical promise or reader decision.
+
+Multilingual subtitle rule:
+
+- `zh-Hant`: one natural sentence or two short clauses; avoid translated
+  Mainland phrasing and avoid "本文".
+- `en`: magazine standfirst, 12-24 words; concrete noun first, no "This
+  article explores".
+- `ja`: concise editorial lead; avoid literal Chinese order and overusing
+  「〜について解説」.
+- `ko`: one clear consequence or tension; avoid mechanical 「이 글에서는」.
+- `id`: conversational but specific; name the actor/event and the practical
+  implication.
+- `vi`: direct, active, and concrete; avoid broad "bài viết này".
+- `th`: short readable setup; do not overload one sentence with imported
+  English nouns.
+- `ms`: simple, news-like sentence with one consequence; avoid generic
+  "artikel ini".
+- `fil`: natural Taglish only when the market would say it; otherwise use a
+  clean Filipino sentence with one concrete point.
+
 Weak:
 
 - This article explains AI agent pilots and why they matter for companies.
