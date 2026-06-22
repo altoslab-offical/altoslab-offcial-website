@@ -483,7 +483,10 @@ function requireChromeProfileEvidence(issues, evidence, label) {
 
 function hasCodexEvidence(payload) {
   const evidence = payload.codexEvidence || payload.chromeEvidence?.codex || {};
-  return /codex/i.test(String(evidence.provider || evidence.runtime || "")) && /gpt-5\.4/i.test(String(evidence.model || ""));
+  const generation = payload.generation || {};
+  const provider = String(evidence.provider || evidence.runtime || generation.provider || "");
+  const model = String(evidence.model || generation.model || "");
+  return /codex|hermes-owner/i.test(provider) && /gpt-5\.4/i.test(model);
 }
 
 function normalizeColumnEvidence(payload) {

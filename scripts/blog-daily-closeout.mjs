@@ -9,6 +9,7 @@ const ROOT_DIR =
   process.env.ALTOS_BLOG_WORKER_ROOT || "/Users/asdc163/LocalProjects/altoslab-offcial-website-runtime";
 const DEFAULT_BASE_URL = process.env.ALTOS_BLOG_BASE_URL || process.env.ALTOS_BLOG_AUTOMATION_BASE_URL || "https://altoslab-ai.cc";
 const COLUMN_DAILY_TARGET = Number(process.env.ALTOS_BLOG_COLUMN_DAILY_LIMIT || "3");
+const INVENTORY_LIMIT = Number(process.env.ALTOS_BLOG_DAILY_CLOSEOUT_INVENTORY_LIMIT || "200");
 const COLUMN_SLOTS = (process.env.ALTOS_BLOG_COLUMN_SLOTS || "morning,afternoon,evening")
   .split(",")
   .map((slot) => slot.trim())
@@ -83,7 +84,9 @@ async function fetchJson(url) {
 async function fetchPostsByLanguage(baseUrl) {
   const result = {};
   for (const language of REQUIRED_LANGUAGES) {
-    const payload = await fetchJson(`${baseUrl}/api/blog?language=${encodeURIComponent(language)}&fields=inventory&limit=30`);
+    const payload = await fetchJson(
+      `${baseUrl}/api/blog?language=${encodeURIComponent(language)}&fields=inventory&limit=${INVENTORY_LIMIT}`
+    );
     result[language] = Array.isArray(payload.posts) ? payload.posts : [];
   }
   return result;
