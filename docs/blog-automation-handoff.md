@@ -416,4 +416,5 @@ npm run test:homepage
 - `npm run blog:nine-language-style-corpus -- --max-per-site 50 --concurrency 4 --discover-only` found 1340 candidate articles across 36 seed sites. This is candidate discovery, not proof that 50 articles per site were absorbed.
 - `npm run blog:nine-language-style-corpus -- --max-per-site 8 --concurrency 4` absorbed 261/288 bounded article samples. 28/36 sites met the bounded target; incomplete sites are recorded in `data/blog-research/nine-language-style-corpus/latest-summary.json`.
 - `npm run blog:media-style-corpus -- --target 400` completed 400 metadata samples with 0 failures.
+- Foresight direct HTML/RSS/API can return Tencent EdgeOne 567 from this machine. Do not leave the style-training task blocked on that. Use the existing public markdown/corpus evidence in `data/blog-research/foresight-image-style-2026-06-22/foresight-500-style-signals.*`: 500/500 articles, failures 0, no persistent image download.
 - Training/handoff should learn compact style signals from `latest-summary.json`, `latest-report.md`, and `media-style-corpus.md`; do not store large raw excerpts or copy source passages.
