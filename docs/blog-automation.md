@@ -43,6 +43,7 @@
 ## Cover Image Strategy
 
 - Preferred production path: market news uses credited, non-reused source or official announcement images; when that image is weak or unusable, the candidate returns to source-image repair. Columns/features use topic-matched ALTOS LAB editorial visuals generated in the dedicated GPT/ChatGPT image tab, uploaded through the signed media route with internal provider/prompt/QA metadata.
+- Hermes visual packets are now the shared input for generated column/feature imagery. Build them from `/Users/asdc163/LocalProjects/Hermes/scripts/hermes_visual_generation_system.py`; only packets with a real generated image path/URL may be converted into this repo's `merge-column-gemini-gpt.mjs --visuals-file` schema.
 - Public generated-cover credit should read `ALTOS LAB editorial visual`; provider and prompt remain internal quality metadata.
 - Licensed third-party images are allowed only for explicit, reviewed non-market editorial use when the license, credit URL and landing page are stored and checked.
 - Do not use Pexels, Pixabay, Openverse, Unsplash, local fallback art or generic stock imagery for formal market-news publishing.
