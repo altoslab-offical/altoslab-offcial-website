@@ -33,6 +33,14 @@ const securityHeaders = [
   }
 ];
 
+const legacyRedirects = [
+  {
+    source: "/blog/agent-products-need-evidence-contracts-before-autonomy-zh-hant",
+    destination: "/blog/ai-agent-first-workflow-pilot-quality-loop-zh-hant",
+    permanent: true
+  }
+];
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   typedRoutes: false,
@@ -46,12 +54,15 @@ const nextConfig = {
     }
   },
   async redirects() {
-    return canonicalRedirectHosts.map((host) => ({
-      source: "/:path((?!api/).*)",
-      has: [{ type: "host", value: host }],
-      destination: `${siteUrl}/:path*`,
-      permanent: true
-    }));
+    return [
+      ...legacyRedirects,
+      ...canonicalRedirectHosts.map((host) => ({
+        source: "/:path((?!api/).*)",
+        has: [{ type: "host", value: host }],
+        destination: `${siteUrl}/:path*`,
+        permanent: true
+      }))
+    ];
   },
   async headers() {
     return [

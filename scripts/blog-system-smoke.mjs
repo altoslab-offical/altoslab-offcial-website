@@ -35,6 +35,7 @@ const mediaRoute = read("app/api/admin/blog/media/route.ts");
 const generatedMediaRoute = read("app/api/blog/generated-media/[filename]/route.ts");
 const healthRoute = read("app/api/health/route.ts");
 const proxy = readFirst(["middleware.ts", "proxy.ts"]);
+const nextConfig = read("next.config.mjs");
 const localWorker = read("scripts/blog-local-worker.mjs");
 const orchestrator = read("scripts/blog-antigravity-orchestrator.mjs");
 const scheduledRunner = read("scripts/blog-scheduled-runner.mjs");
@@ -207,6 +208,11 @@ assert(
   "proxy lets signed ingest/release/refresh reach the route without admin cookies"
 );
 assert(proxy.includes("/sitemap.xml") && proxy.includes("/robots.txt"), "proxy canonical redirect also covers public metadata routes");
+assert(
+  nextConfig.includes("agent-products-need-evidence-contracts-before-autonomy-zh-hant") &&
+    nextConfig.includes("ai-agent-first-workflow-pilot-quality-loop-zh-hant"),
+  "Next config redirects the stale GTM coverage blog slug to a live article"
+);
 assert(localWorker.includes("localPreflight"), "local worker performs local preflight before production ingest");
 assert(localWorker.includes("X-Altos-Signature"), "local worker signs ingest requests");
 assert(localWorker.includes("requestMediaUpload"), "local worker uploads generated cover files before ingest");
