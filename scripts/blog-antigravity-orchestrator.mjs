@@ -7,7 +7,7 @@ import { subagentModelPolicyText } from "./blog-subagent-model-policy.mjs";
 import { columnVisualStylePromptBlock } from "./blog-column-visual-style-library.mjs";
 import { spawn } from "node:child_process";
 
-const SLOT_HOURS = { morning: "09:00", afternoon: "16:00" };
+const SLOT_HOURS = { morning: "09:00", afternoon: "16:00", evening: "20:00" };
 const DEFAULT_BASE_URL = "https://altoslab-ai.cc";
 const LANGUAGES = ["zh-Hant", "en", "ja", "ko", "id", "vi", "th", "ms", "fil"];
 const LANGUAGE_LABEL = LANGUAGES.join(", ");
@@ -70,7 +70,9 @@ function taiwanStamp(input = new Date()) {
 
 function inferSlot(input = new Date()) {
   const hour = Number(taiwanParts(input).hour);
-  return hour < 12 ? "morning" : "afternoon";
+  if (hour < 12) return "morning";
+  if (hour < 18) return "afternoon";
+  return "evening";
 }
 
 function runRoot() {
@@ -256,7 +258,7 @@ async function main() {
   }
 
   const slot = arg("slot") || inferSlot();
-  if (!SLOT_HOURS[slot]) throw new Error("--slot must be morning or afternoon");
+  if (!SLOT_HOURS[slot]) throw new Error("--slot must be morning, afternoon or evening");
 
   const date = arg("date") || taiwanDate();
   const lane = arg("lane") || "column";
