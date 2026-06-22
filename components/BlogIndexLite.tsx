@@ -268,31 +268,34 @@ export async function BlogIndexLite({ language, tag, query }: BlogIndexLiteProps
             {posts.length} {dictionary.postsLabel}
           </span>
         </div>
-        {visiblePosts.map((post) => (
-          <article className="blog-lite-card" key={post.id}>
-            {post.cover ? (
-              <Link className="blog-lite-image" href={blogPostPath(post as BlogPost)} aria-label={post.title}>
-                <img src={post.cover} alt={post.coverAlt || post.title} loading="lazy" decoding="async" />
-              </Link>
-            ) : null}
-            <div className="blog-lite-card-body">
-              <div className="blog-lite-meta">
-                <span className={`blog-craft-type-badge is-${post.contentType}`}>
-                  {blogContentTypeLabel(post.contentType, post.language)}
-                </span>
-                <small>{new Date(post.updatedAt || post.publishedAt || post.createdAt).toISOString().slice(0, 10)}</small>
-                <small>{dictionary.readTime(post.readTimeMinutes)}</small>
+        {visiblePosts.map((post) => {
+          const postHref = blogPostPath(post as BlogPost);
+          return (
+            <article className="blog-lite-card" key={post.id}>
+              {post.cover ? (
+                <a className="blog-lite-image" href={postHref} aria-label={post.title}>
+                  <img src={post.cover} alt={post.coverAlt || post.title} loading="lazy" decoding="async" />
+                </a>
+              ) : null}
+              <div className="blog-lite-card-body">
+                <div className="blog-lite-meta">
+                  <span className={`blog-craft-type-badge is-${post.contentType}`}>
+                    {blogContentTypeLabel(post.contentType, post.language)}
+                  </span>
+                  <small>{new Date(post.updatedAt || post.publishedAt || post.createdAt).toISOString().slice(0, 10)}</small>
+                  <small>{dictionary.readTime(post.readTimeMinutes)}</small>
+                </div>
+                <h2>
+                  <a href={postHref}>{post.title}</a>
+                </h2>
+                <p>{post.excerpt}</p>
+                <a className="blog-lite-read" href={postHref}>
+                  {dictionary.read}
+                </a>
               </div>
-              <h2>
-                <Link href={blogPostPath(post as BlogPost)}>{post.title}</Link>
-              </h2>
-              <p>{post.excerpt}</p>
-              <Link className="blog-lite-read" href={blogPostPath(post as BlogPost)}>
-                {dictionary.read}
-              </Link>
-            </div>
-          </article>
-        ))}
+            </article>
+          );
+        })}
         {!filtered.length ? <p className="muted">{dictionary.empty}</p> : null}
       </section>
     </main>

@@ -1,4 +1,4 @@
-import { getPublishedBlogInventoryPostsForApi, getPublishedBlogPosts, getPublishedProjects } from "@/lib/cms";
+import { getPublishedBlogInventoryPostsForApi } from "@/lib/cms";
 import { BLOG_LANGUAGES, blogPostPath } from "@/lib/blog-utils";
 import { publicTaxonomyLabel } from "@/lib/public-taxonomy";
 import { siteName, siteUrl } from "@/lib/seo";
@@ -8,6 +8,7 @@ export const dynamic = "force-dynamic";
 
 const LLMS_ARTICLE_GROUP_LIMIT = Number(process.env.LLMS_ARTICLE_GROUP_LIMIT || 12);
 const CLOUDFLARE_LLMS_INVENTORY_LIMIT = 36;
+const LLMS_INVENTORY_LIMIT = Number(process.env.LLMS_INVENTORY_LIMIT || 108);
 
 function articleTimestamp(post: BlogPost) {
   return new Date(post.updatedAt || post.publishedAt || post.createdAt).getTime() || 0;
@@ -29,12 +30,10 @@ function orderedLlmsArticles(posts: BlogPost[]) {
 }
 
 export async function GET() {
-  const lightweightCloudflareRender = process.env.CLOUDFLARE_KV_ENABLED === "1";
-  const inventoryLimit = Math.min(LLMS_ARTICLE_GROUP_LIMIT * BLOG_LANGUAGES.length, CLOUDFLARE_LLMS_INVENTORY_LIMIT);
-  const [posts, projects] = await Promise.all([
-    lightweightCloudflareRender ? getPublishedBlogInventoryPostsForApi(undefined, inventoryLimit) : getPublishedBlogPosts(),
-    lightweightCloudflareRender ? Promise.resolve([]) : getPublishedProjects()
-  ]);
+  const runtimeLimit =
+    process.env.CLOUDFLARE_KV_ENABLED === "1" ? CLOUDFLARE_LLMS_INVENTORY_LIMIT : LLMS_INVENTORY_LIMIT;
+  const inventoryLimit = Math.min(LLMS_ARTICLE_GROUP_LIMIT * BLOG_LANGUAGES.length, runtimeLimit);
+  const posts = await getPublishedBlogInventoryPostsForApi(undefined, inventoryLimit);
   const articles = orderedLlmsArticles(posts);
   const lines = [
     `# ${siteName}`,
@@ -48,15 +47,10 @@ export async function GET() {
     `- [Full LLM Context](${siteUrl}/llms-full.txt): Expanded service and article context for answer engines`,
     "",
     "## Services and Products",
-    ...projects
-      .slice(0, 8)
-      .map(
-        (project) =>
-          `- [${publicTaxonomyLabel(project.title, "zh-Hant")}](${siteUrl}/projects/${project.slug}): ${publicTaxonomyLabel(
-            project.desc,
-            "zh-Hant"
-          )}`
-      ),
+    "- AI agent planning, buildout and operating-system design",
+    "- Workflow automation for marketing, CMS, analytics and internal operations",
+    "- Search-ready websites, GEO/SEO content systems and measurement loops",
+    "- Product implementation, QA gates and production release support",
     "",
     "## Articles",
     ...articles.map(
@@ -70,7 +64,7 @@ export async function GET() {
 
   return new Response(lines.join("\n"), {
     headers: {
-      "Cache-Control": "public, max-age=0, must-revalidate",
+      "Cache-Control": "public, max-age=300, s-maxage=900, stale-while-revalidate=3600",
       "Content-Type": "text/plain; charset=utf-8"
     }
   });

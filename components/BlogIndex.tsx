@@ -574,9 +574,10 @@ export async function BlogIndex({ language, tag, query, page }: BlogIndexProps) 
             <div className="blog-craft-grid">
               {visiblePosts.map((post, index) => {
                 const visualPost = toBlogVisualPost(post);
+                const postHref = blogPostPath(post);
                 return (
                   <article className="blog-craft-card" key={post.id}>
-                    <Link className="blog-craft-card-image" href={blogPostPath(post)}>
+                    <a className="blog-craft-card-image" href={postHref}>
                       {post.cover ? (
                         <SafeBlogImage
                           compact
@@ -587,10 +588,10 @@ export async function BlogIndex({ language, tag, query, page }: BlogIndexProps) 
                       ) : (
                         <BlogEditorialVisual compact post={visualPost} />
                       )}
-                    </Link>
+                    </a>
                     <div className="blog-craft-card-body">
                       <h3>
-                        <Link href={blogPostPath(post)}>{renderBrandText(post.title)}</Link>
+                        <a href={postHref}>{renderBrandText(post.title)}</a>
                       </h3>
                       <p>{renderBrandText(post.excerpt)}</p>
                       <div className="blog-craft-card-meta">

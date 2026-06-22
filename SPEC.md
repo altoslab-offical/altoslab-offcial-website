@@ -96,6 +96,10 @@ Required UI invariants:
 
 - `BlogIndex` must retain `blog-craft-index`, `blog-craft-layout`, `blog-craft-sidebar`, `blog-craft-feed`, and `blog-craft-card`.
 - The list page must keep sidebar topic navigation, search, post count, feed grid, pagination, and `SafeBlogImage` / `BlogEditorialVisual` handling.
+- Blog card image, title, and read-more links must use native document
+  navigation for article detail pages. Do not route article entry clicks through
+  client-side transitions when production evidence shows list-to-detail clicks
+  can stall; content pages should prioritize predictable, fast document loads.
 - The list page should show up to 24 cards per page, then expose the rest of the published archive through pagination. Cloudflare D1 projection reads must be chunked so the public inventory cannot silently stop at a 20-row runtime page.
 - On Cloudflare, the default blog index must use a count + paged inventory read: fetch the published total for the sidebar/page count, then fetch only the current 24-card page. Do not load every article in a language just to render `/blog`.
 - RSS, `llms.txt`, `llms-full.txt`, public blog API smoke checks, and `sitemap.xml` must use bounded or lightweight D1 reads. `sitemap.xml` should read slug/language/update columns instead of parsing every inventory JSON payload during a Worker request.

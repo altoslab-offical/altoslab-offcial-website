@@ -1,8 +1,6 @@
 import {
   getPublishedBlogInventoryPostsForApi,
-  getPublishedBlogPost,
-  getPublishedBlogPosts,
-  getPublishedProjects
+  getPublishedBlogPost
 } from "@/lib/cms";
 import { BLOG_LANGUAGES, blogPostPath, languageLabel } from "@/lib/blog-utils";
 import { publicTaxonomyLabel } from "@/lib/public-taxonomy";
@@ -13,13 +11,10 @@ export const dynamic = "force-dynamic";
 
 const LLMS_FULL_ARTICLE_GROUP_LIMIT = Number(process.env.LLMS_FULL_ARTICLE_GROUP_LIMIT || 6);
 const CLOUDFLARE_LLMS_FULL_INVENTORY_LIMIT = 36;
+const LLMS_FULL_INVENTORY_LIMIT = Number(process.env.LLMS_FULL_INVENTORY_LIMIT || 54);
 
 function normalizePlainText(value: string) {
   return value.replace(/\r/g, "").replace(/\n{3,}/g, "\n\n").trim();
-}
-
-function publicProjectText(value: string) {
-  return publicTaxonomyLabel(normalizePlainText(value), "zh-Hant");
 }
 
 function articleTimestamp(post: BlogPost) {
@@ -43,11 +38,9 @@ function latestArticleGroups(posts: BlogPost[]) {
 
 export async function GET() {
   const lightweightCloudflareRender = process.env.CLOUDFLARE_KV_ENABLED === "1";
-  const inventoryLimit = Math.min(LLMS_FULL_ARTICLE_GROUP_LIMIT * BLOG_LANGUAGES.length, CLOUDFLARE_LLMS_FULL_INVENTORY_LIMIT);
-  const [posts, projects] = await Promise.all([
-    lightweightCloudflareRender ? getPublishedBlogInventoryPostsForApi(undefined, inventoryLimit) : getPublishedBlogPosts(),
-    lightweightCloudflareRender ? Promise.resolve([]) : getPublishedProjects()
-  ]);
+  const runtimeLimit = lightweightCloudflareRender ? CLOUDFLARE_LLMS_FULL_INVENTORY_LIMIT : LLMS_FULL_INVENTORY_LIMIT;
+  const inventoryLimit = Math.min(LLMS_FULL_ARTICLE_GROUP_LIMIT * BLOG_LANGUAGES.length, runtimeLimit);
+  const posts = await getPublishedBlogInventoryPostsForApi(undefined, inventoryLimit);
   const recentPostSummaries = latestArticleGroups(posts);
   const recentPosts = lightweightCloudflareRender
     ? recentPostSummaries
@@ -73,12 +66,8 @@ export async function GET() {
     "- Measurement, GTM events and content review workflows",
     "",
     "## Published services and projects",
-    ...projects.map(
-      (project) =>
-        `### ${publicProjectText(project.title)}\nURL: ${siteUrl}/projects/${project.slug}\nCategory: ${publicProjectText(
-          project.tag
-        )}\nSummary: ${publicProjectText(project.desc)}\nDetail: ${publicProjectText(project.detail)}`
-    ),
+    `### AI implementation studio\nURL: ${siteUrl}/#services\nSummary: AI agents, workflow automation, CMS, analytics, search-ready content systems and production QA for teams that need durable implementation.`,
+    `### Product and website implementation\nURL: ${siteUrl}/projects\nSummary: Product surfaces, official websites, content operations and measurement loops designed for iteration, evidence and production stability.`,
     "",
     "## Published articles",
     ...recentPosts.map((post) => {
@@ -107,7 +96,7 @@ export async function GET() {
 
   return new Response(lines.join("\n\n"), {
     headers: {
-      "Cache-Control": "public, max-age=0, must-revalidate",
+      "Cache-Control": "public, max-age=300, s-maxage=900, stale-while-revalidate=3600",
       "Content-Type": "text/plain; charset=utf-8"
     }
   });

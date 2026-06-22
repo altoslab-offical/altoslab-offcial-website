@@ -124,6 +124,10 @@ Cards:
 - Article covers use a stable 1200:630 ratio with centered `object-fit: cover`.
 - Cover spacing should feel editorial, not poster-like: enough air after the
   subtitle, but no large blank before the summary or first body section.
+- Blog index article cards should behave like a publication archive: image,
+  title, and read-more entry points open the article with native document
+  navigation. This keeps perceived loading reliable for readers and avoids
+  client-router stalls on content-heavy pages.
 - H2 spacing should create scan rhythm without pushing body content far below
   the viewport on desktop or mobile.
 - Radius should stay at or below 8px unless preserving an existing pill CTA.

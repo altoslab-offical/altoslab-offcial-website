@@ -63,6 +63,10 @@ for (const marker of ["blog-craft-index", "blog-craft-layout", "blog-craft-sideb
   assert(blogIndex.includes(marker), `BlogIndex keeps ${marker}`);
 }
 assert(blogIndex.includes('<BlogAdSlot placement="index-feed" />'), "BlogIndex keeps the opt-in feed AdSense slot without replacing the card grid");
+assert(blogIndex.includes('const postHref = blogPostPath(post)') && blogIndex.includes('<a className="blog-craft-card-image" href={postHref}>') && blogIndex.includes("<a href={postHref}>{renderBrandText(post.title)}</a>"), "BlogIndex article cards use native document navigation for list-to-detail clicks");
+
+const blogIndexLite = read("components/BlogIndexLite.tsx");
+assert(blogIndexLite.includes('const postHref = blogPostPath(post as BlogPost)') && blogIndexLite.includes('<a className="blog-lite-image" href={postHref}') && blogIndexLite.includes('<a className="blog-lite-read" href={postHref}>'), "BlogIndexLite article cards use native document navigation for list-to-detail clicks");
 
 const blogArticle = read("components/BlogArticle.tsx");
 assert(blogArticle.includes('<BlogAdSlot placement="after-summary" />'), "BlogArticle keeps the opt-in after-summary AdSense slot");

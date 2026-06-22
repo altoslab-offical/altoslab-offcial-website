@@ -91,6 +91,13 @@ The production blog index reads compact D1 inventory projections in bounded chun
 
 On Cloudflare, the default unfiltered blog index must use a count + paged read: D1 `COUNT(*)` supplies the total archive count, while the card grid fetches only the current 24-post page. Feed, LLM metadata, public API smoke checks, and sitemap generation should also avoid full inventory JSON scans; sitemap generation uses lightweight slug/language/update columns.
 
+Blog index article entry points are publication links, not app-shell controls.
+`BlogIndex` and `BlogIndexLite` use native `<a href>` links for article image,
+title, and read-more targets so `/blog -> /blog/:slug` follows a predictable
+document navigation path. Tag filters, search, pagination, and language menus
+may remain App Router interactions, but article opening must not depend on a
+client-side transition when production user-path evidence shows stalls.
+
 Article detail rendering has a shared visual contract across Next and the direct Worker renderer:
 
 - The direct Worker article header must mirror the Blog shell `SiteHeader` structure: `site-nav`, centered main navigation, `site-nav-actions`, `site-language-toggle`, language trigger, mobile menu trigger, and labeled CTA.
