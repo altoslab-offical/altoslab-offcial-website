@@ -42,6 +42,7 @@
 - Column / feature 的 cover 與 2-3 張 shared in-article images 必須共享同一組 public URL；圖片 workflow 可以是指定 ChatGPT/GPT 或 Codex image lane，但都要通過 visual metadata、topic-fit、source/rights 與 rendered review gate。Market news 的 ALTOS LAB fallback cover 也走同一個 rendered topic-fit gate，不因為是快訊而降低標準。
 - Release window 不產生新內容，只發布已經 `ready` 的 prepared candidate；若沒有可發布 candidate，必須產出 repair plan，直到 validate-only pass 後 publish + public readback。
 - `held`、`validateOnly.wouldPublish=false`、duplicate topic、untrusted source、H2/body merged、content image unsafe/mismatched 都是 repair/rewrite/re-image blockers；不可當成 skip 或成功發文。
+- Prep 不能覆寫已存在且有 usable `articleSetPath` 的 ready/released candidate；即使用 `--force` 也只能重建空的 awaiting skeleton，若真的要替換有效候選，必須顯式使用 `--replace-valid-candidate` 並留下 rollback/evidence。避免 late prep 把可發布 evening slot 蓋成 `awaiting_browser_production`。
 - n8n/bridge/scripts 不能自行修改 UI、Blog layout、CSS、header、sidebar、language switcher、WonDa widget placement 或任何 public design surface；這類變更必須由 Hermes 明確判斷並留下證據。
 - 任何 gate 不完整，回傳 `ok:false` / HTTP 500，讓 n8n execution 顯示 failed，不可吞掉失敗。
 
@@ -52,7 +53,7 @@
 - Chrome QA 以 Tommy 已登入的既有 Chrome 群組為準。若 Playwright locator click 或座標 click 沒有真的從 `/blog` 進入 article detail，不要改用無痕、Safari 或 DevTools session；改用 Chrome extension 的 DOM-CUA node click / in-page native anchor click，並記錄從 `/blog` 到 article URL 的 elapsed time。
 - Blog list-to-detail 慢時，先分離三件事：native anchor click path、public projection/detail cache、`/llms.txt` / `/feed.xml` read path。不要先重寫文章或換圖片。修復後必跑 `blog:performance-smoke`，並用 Chrome extension 做使用者路徑 readback。
 - Release doctor 擋住缺 browser evidence / provider metadata / translated content image shared URL 時，代表 candidate production evidence 壞掉；要修 article set / manifest normalization，不可以 bypass release doctor。
-- Production admin password/session token stale 時，不要猜密碼或 direct-write S3。若 `BLOG_INGEST_HMAC_SECRET` 已設定，正式 publish/repair 走 `scripts/blog-local-worker.mjs` 的 HMAC signed ingest/release path；release 後仍要跑 public readback、`verify-blog-release`、SOP doctor。
+- Production admin password/session token stale 時，不要猜密碼或 direct-write S3。若 `BLOG_INGEST_HMAC_SECRET` 已設定，正式 publish/repair 走 `scripts/blog-local-worker.mjs` 的 HMAC signed ingest/release path；release 後仍要跑 public readback、`verify-blog-release`、SOP doctor。`verify-blog-release --admin-readback --refresh-public-cache` 要 source `~/.altoslab-aws.env`，不要只 source `~/.altoslab-blog-worker.env`，兩者是不同 control plane，後者可能沒有可用的 admin readback session。
 - 已發布文章 title/subtitle refresh 是 repair batch，不是每日 slot production。跑 `scripts/blog-local-worker.mjs` 做這類 ad-hoc repair 時要加 `--no-index` 或使用獨立 manifest 目錄，避免覆蓋 `data/blog-prepared-candidates/<date>-<slot>-column.json`，讓 SOP doctor 誤把修稿候選當成正式 slot candidate。
 - Title/subtitle 的新準則：title 先交代主體、動作與讀者關係；subtitle/excerpt 補來源、日期、數字、風險或為什麼現在要看，不重複 title，不出現 `workflow`、`content readback loop`、`decision hook`、`risk lens` 這類內部營運語氣。多語版本要各自自然，不做英文術語直譯。
 - 市場快訊封面預設使用來源文章或官方公告圖片，並保留 `coverSource:"source"`、`coverCredit`、`coverCreditUrl`、`coverLicense`。只有來源頁 403、沒有可用圖片、圖片品質/權利不合格時，才允許 ALTOS LAB editorial fallback；fallback 不能被當成快訊預設。
@@ -61,7 +62,7 @@
 - Market-news ALTOS LAB fallback cover 的 quality review 不應在 image review 前要求 `imageQualityStatus=passed`。可先用 `coverSource=manual|generated`、ALTOS LAB credit/license、alt text 和 shared public URL 通過 copy gate，再由 image gate 判定 `imageQualityStatus=passed`。
 - AWS deploy 使用唯一 ECR image tag 作為 production evidence；不要依賴脆弱的 `latest` tag shell interpolation。部署後以 ECS task definition、service stable、`verify:aws` 和 production performance smoke 作為完成證據。
 - 候選稿品質不合格時，流程是 repair/rewrite/re-image/re-QA 到 validate-only pass，再 publish + public readback；不是 skip，也不是把 `wouldPublish=true` 當成已發布。
-- 已發布文章的 copy refresh 走 `scripts/blog-copy-refresh.mjs`，可用 `ALTOS_ADMIN_SESSION_TOKEN` / `ADMIN_SESSION_TOKEN` 或 admin password。若本機 admin credential stale，這是 tooling/auth blocker；不可猜密碼、不可改用 direct storage write。
+- 已發布文章的 copy refresh 走 `scripts/blog-copy-refresh.mjs`，可用 `ALTOS_ADMIN_SESSION_TOKEN` / `ADMIN_SESSION_TOKEN` 或 admin password。若本機 admin credential stale，先確認是否 source 了 `~/.altoslab-aws.env`；若仍 stale，這是 tooling/auth blocker，不可猜密碼、不可改用 direct storage write。
 
 ## 日常排程
 

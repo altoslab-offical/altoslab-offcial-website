@@ -732,9 +732,26 @@ async function createPrep({ date, slot }) {
   }
 
   const indexPath = candidateIndexPath(date, slot);
-  if ((await exists(indexPath)) && !hasFlag("force")) {
+  if (await exists(indexPath)) {
     const existing = await readJson(indexPath);
-    if (existing.status === "ready" || existing.status === "awaiting_browser_production" || existing.status === "released") {
+    const existingManifestPath = existing.manifestPath || indexPath;
+    const existingManifest = (await exists(existingManifestPath))
+      ? await readJson(existingManifestPath).catch(() => existing)
+      : existing;
+    const existingArticleSetPath = existingManifest.articleSetPath ? path.resolve(existingManifest.articleSetPath) : "";
+    const hasUsableArticleSet = Boolean(existingArticleSetPath && (await exists(existingArticleSetPath)));
+    if ((existing.status === "ready" || existing.status === "released" || hasUsableArticleSet) && !hasFlag("replace-valid-candidate")) {
+      return {
+        ok: true,
+        skipped: true,
+        phase: "prep",
+        reason: `candidate already has usable article-set with status=${existing.status || existingManifest.status || "unknown"}`,
+        manifestPath: existing.manifestPath || indexPath,
+        articleSetPath: existingArticleSetPath,
+        doctor: compactDoctorResult(doctor)
+      };
+    }
+    if (!hasFlag("force") && (existing.status === "ready" || existing.status === "awaiting_browser_production" || existing.status === "released")) {
       return {
         ok: true,
         skipped: true,

@@ -56,7 +56,12 @@ function isCloudflarePublicRuntime() {
   return Boolean(getCloudflareD1Config() || getCloudflareKvConfig());
 }
 
+function shouldPreferAwsPublicBlogProjection() {
+  return Boolean(getAwsS3StorageConfig());
+}
+
 function shouldReadPublicBlogDirectlyFromCms() {
+  if (shouldPreferAwsPublicBlogProjection()) return false;
   return Boolean(getCloudflareD1Config()) && process.env.PUBLIC_BLOG_D1_DIRECT_READ !== "0";
 }
 
@@ -825,6 +830,12 @@ async function readPublicBlogCache() {
   const useMemoryCache = canUseInMemoryPublicCache();
   if (useMemoryCache && publicBlogPostsCache && publicBlogPostsCache.expiresAt > Date.now()) return publicBlogPostsCache.posts;
 
+  if (shouldPreferAwsPublicBlogProjection()) {
+    const awsCached = await readPublicBlogAwsCollectionCache("list");
+    if (awsCached && useMemoryCache) publicBlogPostsCache = { posts: awsCached, expiresAt: Date.now() + PUBLIC_BLOG_CACHE_TTL_MS };
+    return awsCached;
+  }
+
   const namespace = getCloudflareKvNamespace();
   const key = publicBlogCacheKey();
   if (namespace && key) {
@@ -856,6 +867,14 @@ async function readPublicBlogInventoryCache() {
   const useMemoryCache = canUseInMemoryPublicCache();
   if (useMemoryCache && publicBlogInventoryCache && publicBlogInventoryCache.expiresAt > Date.now()) {
     return publicBlogInventoryCache.posts;
+  }
+
+  if (shouldPreferAwsPublicBlogProjection()) {
+    const awsCached = await readPublicBlogAwsCollectionCache("inventory");
+    if (awsCached && useMemoryCache) {
+      publicBlogInventoryCache = { posts: awsCached, expiresAt: Date.now() + PUBLIC_BLOG_CACHE_TTL_MS };
+    }
+    return awsCached;
   }
 
   const namespace = getCloudflareKvNamespace();
@@ -890,6 +909,14 @@ async function readPublicBlogDuplicateCache() {
     return publicBlogDuplicateCache.posts;
   }
 
+  if (shouldPreferAwsPublicBlogProjection()) {
+    const awsCached = await readPublicBlogAwsCollectionCache("duplicates");
+    if (awsCached && useMemoryCache) {
+      publicBlogDuplicateCache = { posts: awsCached, expiresAt: Date.now() + PUBLIC_BLOG_CACHE_TTL_MS };
+    }
+    return awsCached;
+  }
+
   const namespace = getCloudflareKvNamespace();
   const key = publicBlogDuplicateCacheKey();
   if (namespace && key) {
@@ -917,6 +944,10 @@ async function readPublicBlogDuplicateCache() {
 }
 
 async function readPublicBlogDetailCache(slug: string, language?: BlogLanguage) {
+  if (shouldPreferAwsPublicBlogProjection()) {
+    return readPublicBlogAwsDetailCache(slug, language);
+  }
+
   const namespace = getCloudflareKvNamespace();
   const decodedSlug = decodeSlugCandidate(slug);
   const languages = language ? [normalizeBlogLanguage(language)] : BLOG_LANGUAGES;
@@ -1221,7 +1252,7 @@ async function readPublishedBlogPostsForPublic() {
   const cached = await readPublicBlogCache();
   if (cached) return mergeStaticBlogOverrides(cached);
 
-  if (getCloudflareKvConfig()) {
+  if (getCloudflareKvConfig() && !shouldPreferAwsPublicBlogProjection()) {
     console.warn("[cms] Public blog list cache is missing on Cloudflare; returning static public overrides instead of rebuilding during a public request.");
     return mergeStaticBlogOverrides([]);
   }
@@ -1314,7 +1345,7 @@ export async function getPublishedBlogInventoryPosts() {
   const cached = await readPublicBlogInventoryCache();
   if (cached) return sortedByPublicRecency(mergeStaticBlogOverrides(cached));
 
-  if (getCloudflareKvConfig()) {
+  if (getCloudflareKvConfig() && !shouldPreferAwsPublicBlogProjection()) {
     console.warn("[cms] Public blog inventory cache is missing on Cloudflare; returning static public overrides instead of rebuilding during a public request.");
     return sortedByPublicRecency(mergeStaticBlogOverrides([]));
   }
@@ -1412,7 +1443,7 @@ export async function getPublishedBlogDuplicatePosts() {
   const cached = await readPublicBlogDuplicateCache();
   if (cached) return sortedByOrder(mergeStaticBlogOverrides(cached));
 
-  if (getCloudflareKvConfig()) {
+  if (getCloudflareKvConfig() && !shouldPreferAwsPublicBlogProjection()) {
     console.warn("[cms] Public blog duplicate cache is missing on Cloudflare; returning static public overrides instead of rebuilding during validate.");
     return sortedByOrder(mergeStaticBlogOverrides([]));
   }
@@ -1438,8 +1469,10 @@ function matchesBlogSlug(postSlug: string, requestedSlug: string) {
 }
 
 export async function getPublishedBlogPost(slug: string, language?: BlogLanguage) {
-  const projectedPost = await readPublicBlogD1ProjectionDetail(slug, language);
-  if (projectedPost) return projectedPost;
+  if (!shouldPreferAwsPublicBlogProjection()) {
+    const projectedPost = await readPublicBlogD1ProjectionDetail(slug, language);
+    if (projectedPost) return projectedPost;
+  }
 
   const memoryPost = readPublicBlogDetailMemoryCache(slug, language);
   if (memoryPost) return memoryPost;

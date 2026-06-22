@@ -966,7 +966,7 @@ async function columnCadenceIssues(payload) {
       .filter(Boolean)
   );
   const newGroups = [...groups].filter((group) => !publishedToday.has(group));
-  if (publishedToday.size + newGroups.length > COLUMN_DAILY_LIMIT) {
+  if (newGroups.length > 0 && publishedToday.size + newGroups.length > COLUMN_DAILY_LIMIT) {
     issues.push(
       `column daily release limit reached for ${today}: ${publishedToday.size} already live, ${newGroups.length} new, limit ${COLUMN_DAILY_LIMIT}`
     );

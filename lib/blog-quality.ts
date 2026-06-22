@@ -126,6 +126,7 @@ const defaultTrustedHostFragments = [
   "artificialanalysis.ai",
   "cisco.com",
   "github.blog",
+  "docs.github.com",
   "nvidia.com",
   "technologyreview.com",
   "semianalysis.com",
