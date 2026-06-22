@@ -82,12 +82,12 @@ Object.assign(post, {
     "## 接下來看什麼",
     "接下來要觀察 OpenAI 是否補上更完整的企業管理能力：skill 權限、審計紀錄、團隊共享、失敗復原、跨裝置 handoff，以及管理者如何停用或更新既有 skill。若這些治理能力跟上，Record & Replay 才更接近企業可正式採用的 agent workflow 基礎。"
   ].join("\n\n"),
-  cover: "https://altoslab-ai.cc/generated-blog-media/codex-record-replay-source-cover.png",
-  coverAlt: "OpenAI logo with a large cursor shape on a pink editorial background for Codex Record and Replay",
-  coverSource: "source",
-  coverCredit: "The Decoder",
-  coverCreditUrl: "https://the-decoder.com/openais-codex-can-now-watch-you-work-once-and-repeat-the-task-forever/",
-  coverLicense: "Source article image, credited to original publisher",
+  cover: "https://altoslab-ai.cc/generated-blog-media/codex-record-replay-governance-cover.png",
+  coverAlt: "Record, policy gate, and replay workflow cards for Codex Record and Replay governance",
+  coverSource: "manual",
+  coverCredit: "ALTOS LAB editorial visual",
+  coverCreditUrl: "",
+  coverLicense: "ALTOS LAB original editorial visual",
   coverPrompt: "",
   coverGeneration: undefined,
   imageQualityStatus: "passed",
@@ -108,7 +108,7 @@ Object.assign(post, {
     hasAntiSlopReview: true,
     hasImageFit: true,
     notes:
-      "2026-06-21 production repair: upgraded cover to high-resolution source-backed editorial image, tightened copy around workflow governance, and preserved source-bounded claims."
+      "2026-06-22 production repair: replaced tilted cursor source graphic with an ALTOS LAB editorial workflow visual, tightened copy around workflow governance, and preserved source-bounded claims."
   },
   updatedAt: now
 });

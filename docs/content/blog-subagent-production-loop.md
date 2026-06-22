@@ -93,7 +93,7 @@ The prompt-card contract lives in `docs/content/blog-prompt-card-template.md`.
 3. Main brain prepares or delegates a `prompt-card.md` using `docs/content/blog-prompt-card-template.md`.
 4. Main brain approves the prompt-card. If the prompt-card does not clearly define the reader hook, source limits, image angle, tab target, user-selected model policy, and fail-closed QA rules, the run is held.
 5. If the lane is `column` or `feature`, main brain uses the dedicated Gemini tab to produce one source-of-truth article first, usually `zh-Hant`.
-6. If the lane is market news, main brain or a source-translation worker builds the source-faithful zh-Hant brief directly from the original source article and official/source image. Do not run ordinary market news through Gemini unless an editorial rewrite is explicitly needed.
+6. If the lane is market news, main brain or a source-translation worker builds the source-faithful zh-Hant brief directly from the original source article and the accepted cover path. Source/official image is preferred; an ALTOS LAB editorial fallback cover is allowed only when the source image is weak, unsafe, tilted, missing, duplicated, or off-topic and the fallback passes rendered topic-fit QA. Do not run ordinary market news through Gemini unless an editorial rewrite is explicitly needed.
 7. Main brain runs the source quality gate. If the title, subtitle, lead, source fidelity, body rhythm, public wording, or image policy is weak, columns/features go back to Gemini; market news goes back to source-translation repair.
 8. After the source draft passes, main brain spawns bounded localization workers. Use `gpt-5.3-codex-spark` first; if usage is exhausted, quota/rate-limited, `429`, `resource_exhausted`, or capacity/budget-limited, continue the same bounded task with `gpt-5.4-mini`:
    - `en-ja-ko`
@@ -101,7 +101,7 @@ The prompt-card contract lives in `docs/content/blog-prompt-card-template.md`.
    - `th-ms-fil`
    Each worker localizes from the approved source article and writes only its assigned parsed output files.
 9. Main brain merges the source post and localized posts into one `article-set.json`, keeping one `translationGroupId`, identical `sourceLinks`, identical cover/media metadata, and exactly one post per configured language.
-10. For columns/features, main brain obtains covers and 2-3 in-article visuals through the dedicated GPT image tab or a human-approved editorial design workflow. Local generated-cover fallback art cannot auto-publish. For market news, the cover remains the credited source or official announcement image.
+10. For columns/features, main brain obtains covers and 2-3 in-article visuals through the dedicated GPT image tab or a human-approved editorial design workflow. Local generated-cover fallback art cannot auto-publish. For market news, the cover remains the credited source or official announcement image unless that image fails QA; then one shared ALTOS LAB editorial fallback cover may be used with credit/license/`imageQualityStatus=passed`.
 11. Main brain runs:
 
 ```bash
@@ -137,7 +137,7 @@ Publish only when all are true:
 - `qualityManifest.contentSha256` matches the release payload
 - all configured languages are present: `zh-Hant`, `en`, `ja`, `ko`, `id`, `vi`, `th`, `ms`, `fil`
 - original column/feature covers are reachable generated media created through GPT/ChatGPT or explicit human-approved editorial design QA
-- market-news covers are reachable, credited source/official images with a reviewed usage note; do not substitute GPT art for market news
+- market-news covers are reachable credited source/official images with a reviewed usage note, or approved ALTOS LAB editorial fallback covers with rendered topic-fit evidence
 - all covers include aesthetic visual checks: brand fit, editorial specificity, visual hierarchy, thumbnail readability, no cliché, and mobile crop resilience
 - production returns published IDs
 - `scripts/verify-blog-release.mjs` passes after publication

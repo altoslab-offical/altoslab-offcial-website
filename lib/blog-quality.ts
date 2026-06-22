@@ -277,6 +277,17 @@ function hasCreditedSourceCover(post: BlogPost) {
   return post.sourceLinks.some((source) => sourceHostMatches(post.coverCreditUrl || "", source.url));
 }
 
+function hasApprovedEditorialFallbackCover(post: BlogPost) {
+  const credit = `${post.coverCredit || ""} ${post.coverLicense || ""}`;
+  return (
+    (post.coverSource === "manual" || post.coverSource === "generated") &&
+    /ALTOS LAB/i.test(credit) &&
+    Boolean(post.coverAlt?.trim()) &&
+    Boolean(post.coverLicense?.trim()) &&
+    post.imageQualityStatus === "passed"
+  );
+}
+
 function isPublicImageUrl(value?: string) {
   if (!value) return false;
   if (/^https:\/\//.test(value)) return true;
@@ -1312,8 +1323,8 @@ export function reviewImageFit(post: BlogPost): ReviewResult {
     ) {
       issues.push("cover image context is too generic for a quality SEO/GEO article");
     }
-    if (post.contentType === "breaking" && post.coverSource !== "source") {
-      issues.push("market news posts must use a credited source article or official announcement image; generated covers are held");
+    if (post.contentType === "breaking" && post.coverSource !== "source" && !hasApprovedEditorialFallbackCover(post)) {
+      issues.push("market news posts must use a credited source article image or an approved ALTOS LAB editorial fallback cover");
     }
   }
 
@@ -1439,8 +1450,8 @@ function reviewPost(post: BlogPost, multilingual: ReviewResult): PostReview {
   if (post.coverSource === "generated" && !/(chatgpt|gpt|openai|codex)/i.test(post.coverGeneration?.provider || "")) {
     issues.push("generated production covers must be created through ChatGPT/GPT/Codex before release");
   }
-  if (post.contentType === "breaking" && post.coverSource !== "source") {
-    issues.push("market news production covers must come from the source article image lane before release");
+  if (post.contentType === "breaking" && post.coverSource !== "source" && !hasApprovedEditorialFallbackCover(post)) {
+    issues.push("market news production covers must come from the source article image lane or approved ALTOS LAB editorial fallback lane before release");
   }
 
   const score = Object.values(breakdown).reduce((sum, value) => sum + value, 0);

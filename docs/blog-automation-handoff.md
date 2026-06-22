@@ -36,10 +36,10 @@
 
 - 每個正式 article set 必須剛好包含 `zh-Hant`, `en`, `ja`, `ko`, `id`, `vi`, `th`, `ms`, `fil`。
 - 同一組語言必須共享同一個 `translationGroupId`、sourceLinks、cover URL、coverSource、cover credit、contentImages URL set、visual metadata；只有 localized public copy 可以不同。
-- Market news 是 source-translation，不是專欄。它必須使用 verified source article 或 official announcement，並使用 credited source/official image；若來源可用但品質不合格，進入 repair/rewrite/re-image/re-QA，不把正常品質問題記成 successful skip。
-- Market news 不使用 Gemini，不使用 GPT art，不使用 Unsplash、Pexels、Pixabay、Openverse、local fallback art、generic stock image。
+- Market news 是 source-translation，不是專欄。它必須使用 verified source article 或 official announcement；cover 優先使用 credited source/official image。若來源圖缺失、歪斜、generic、低資訊密度、已重複或不貼題，必須進入 repair/rewrite/re-image/re-QA，並可改用通過 rendered review 的 ALTOS LAB editorial fallback cover；不可把正常品質問題記成 successful skip。
+- Market news 不使用 Gemini 寫稿，不使用 Unsplash、Pexels、Pixabay、Openverse、local fallback art、generic stock image。若使用 ALTOS LAB editorial fallback cover，必須留下 `coverSource=manual|generated`、ALTOS LAB credit/license、`imageQualityStatus=passed` 與 topic-fit evidence。
 - Column / feature 必須有明確 production provenance。舊 lane 可用 Gemini + GPT；Hermes/OpenClaw 新 lane 可用 Codex `gpt-5.4`，但 candidate / article-set / manifest 必須留下 `codexEvidence`，不能用空白或口頭聲明取代。
-- Column / feature 的 cover 與 2-3 張 shared in-article images 必須共享同一組 public URL；圖片 workflow 可以是指定 ChatGPT/GPT 或 Codex image lane，但都要通過 visual metadata、topic-fit、source/rights 與 rendered review gate。
+- Column / feature 的 cover 與 2-3 張 shared in-article images 必須共享同一組 public URL；圖片 workflow 可以是指定 ChatGPT/GPT 或 Codex image lane，但都要通過 visual metadata、topic-fit、source/rights 與 rendered review gate。Market news 的 ALTOS LAB fallback cover 也走同一個 rendered topic-fit gate，不因為是快訊而降低標準。
 - Release window 不產生新內容，只發布已經 `ready` 的 prepared candidate；若沒有可發布 candidate，必須產出 repair plan，直到 validate-only pass 後 publish + public readback。
 - `held`、`validateOnly.wouldPublish=false`、duplicate topic、untrusted source、H2/body merged、content image unsafe/mismatched 都是 repair/rewrite/re-image blockers；不可當成 skip 或成功發文。
 - n8n/bridge/scripts 不能自行修改 UI、Blog layout、CSS、header、sidebar、language switcher、WonDa widget placement 或任何 public design surface；這類變更必須由 Hermes 明確判斷並留下證據。
@@ -164,7 +164,7 @@ npm run blog:market-sources -- --date <YYYY-MM-DD> --queue-dir data/blog-backfil
 
 2. 從 source pack 挑選非重複、來源可驗、圖片可用的 longform item。
 3. Source worker 建立 source-faithful article set，普通 market news 不跑 Gemini。
-4. 保留 source article / official announcement image，所有語言共用。
+4. 優先保留 source article / official announcement image，所有語言共用；若 source image 本身不合格，改用同一張 ALTOS LAB editorial fallback cover，並保留 credit/license/QA evidence。
 5. 跑 public QA：
 
 ```bash
@@ -176,12 +176,12 @@ npm run blog:market-public-qa -- --slug <slug> --must <entity> --must <publisher
 
 ### Market news hold 條件
 
-- 沒有 usable credited source/official image
+- 沒有 usable credited source/official image，且沒有通過 QA 的 ALTOS LAB editorial fallback cover
 - source URL 重複或 cover URL 重複
 - 內容像模板、顧問清單、空泛 adoption checklist
 - public copy 出現 `SEO`, `GEO`, `AI-generated`, prompt, pipeline, quality gate 等內部詞
 - 摘要出現污染字串，例如 `報導「」`、`文中牽涉`、`這則消息可以拿來`
-- 來源圖片其實是 stock/free/fallback
+- 來源圖片其實是 stock/free/generic fallback，或 ALTOS LAB fallback cover 沒有 topic-fit/rendered review evidence
 
 ## Column / Feature Lane
 

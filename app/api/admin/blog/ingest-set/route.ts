@@ -181,6 +181,17 @@ function sourceCoverCreditMatchesSource(post: BlogPost) {
   return blogSourceLinks(post).some((source) => sourceHostMatches(post.coverCreditUrl || "", source.url));
 }
 
+function isEditorialFallbackMarketCover(post: BlogPost) {
+  const credit = `${post.coverCredit || ""} ${post.coverLicense || ""}`;
+  return (
+    (post.coverSource === "manual" || post.coverSource === "generated") &&
+    /ALTOS LAB/i.test(credit) &&
+    Boolean(post.coverAlt?.trim()) &&
+    Boolean(post.coverLicense?.trim()) &&
+    isHttpUrl(post.cover)
+  );
+}
+
 function generationContractIssues(posts: BlogPost[]) {
   return posts.flatMap((post) => {
     const issues: string[] = [];
@@ -194,22 +205,23 @@ function generationContractIssues(posts: BlogPost[]) {
       issues.push(`${post.language}/${post.slug}: article must be drafted or revised through Gemini or Codex before ingest`);
     }
     if (isMarketNews) {
-      if (post.coverSource !== "source") {
+      const editorialFallbackCover = isEditorialFallbackMarketCover(post);
+      if (post.coverSource !== "source" && !editorialFallbackCover) {
         issues.push(`${post.language}/${post.slug}: market news coverSource must be source, not ${post.coverSource || "missing"}`);
       }
       if (!post.coverCredit?.trim()) {
         issues.push(`${post.language}/${post.slug}: market news source image requires visible coverCredit`);
       }
-      if (!isHttpUrl(post.coverCreditUrl)) {
+      if (post.coverSource === "source" && !isHttpUrl(post.coverCreditUrl)) {
         issues.push(`${post.language}/${post.slug}: market news source image requires a public coverCreditUrl`);
       }
       if (!post.coverLicense?.trim()) {
         issues.push(`${post.language}/${post.slug}: market news source image requires coverLicense/source-rights metadata`);
       }
-      if (isGenericStockImageUrl(post.cover) || isGenericStockImageUrl(post.coverCreditUrl)) {
+      if (post.coverSource === "source" && (isGenericStockImageUrl(post.cover) || isGenericStockImageUrl(post.coverCreditUrl))) {
         issues.push(`${post.language}/${post.slug}: market news source image must come from the source article or official announcement, not stock/free image providers`);
       }
-      if (!sourceCoverCreditMatchesSource(post)) {
+      if (post.coverSource === "source" && !sourceCoverCreditMatchesSource(post)) {
         issues.push(`${post.language}/${post.slug}: market news coverCreditUrl must match one of the sourceLinks`);
       }
     } else {

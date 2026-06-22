@@ -196,6 +196,17 @@ function sourceCoverCreditMatchesSource(post) {
   return (post.sourceLinks || []).some((source) => sourceHostMatches(post.coverCreditUrl || "", source.url || ""));
 }
 
+function isApprovedEditorialFallbackCover(post) {
+  const credit = `${post.coverCredit || ""} ${post.coverLicense || ""}`;
+  return (
+    (post.coverSource === "manual" || post.coverSource === "generated") &&
+    /ALTOS LAB/i.test(credit) &&
+    Boolean(String(post.coverAlt || "").trim()) &&
+    Boolean(String(post.coverLicense || "").trim()) &&
+    post.imageQualityStatus === "passed"
+  );
+}
+
 function stableJson(value) {
   if (Array.isArray(value)) return `[${value.map(stableJson).join(",")}]`;
   if (value && typeof value === "object") {
@@ -611,17 +622,20 @@ async function verifyPostLive(post, root, errors, warnings) {
     if (pattern.test(publicApiText)) pushIssue(errors, `public API exposes internal copy: ${pattern}`, context);
   }
   if (post.contentType === "breaking") {
-    if (publicPost.coverSource !== "source") {
-      pushIssue(errors, `public API market news coverSource must be source, got ${publicPost.coverSource || "missing"}`, context);
+    const editorialFallbackCover = isApprovedEditorialFallbackCover(publicPost);
+    if (publicPost.coverSource !== "source" && !editorialFallbackCover) {
+      pushIssue(errors, `public API market news coverSource must be source or approved ALTOS LAB editorial fallback, got ${publicPost.coverSource || "missing"}`, context);
     }
-    if (!publicPost.coverCreditUrl || !publicPost.coverLicense) {
-      pushIssue(errors, "public API market news source image attribution is missing", context);
-    }
-    if (isGenericStockImageUrl(publicPost.cover || post.cover) || isGenericStockImageUrl(publicPost.coverCreditUrl || post.coverCreditUrl)) {
-      pushIssue(errors, "public API market news source image must come from the source article or official announcement, not stock/free image providers", context);
-    }
-    if (!sourceCoverCreditMatchesSource(publicPost)) {
-      pushIssue(errors, "public API market news coverCreditUrl does not match sourceLinks", context);
+    if (publicPost.coverSource === "source") {
+      if (!publicPost.coverCreditUrl || !publicPost.coverLicense) {
+        pushIssue(errors, "public API market news source image attribution is missing", context);
+      }
+      if (isGenericStockImageUrl(publicPost.cover || post.cover) || isGenericStockImageUrl(publicPost.coverCreditUrl || post.coverCreditUrl)) {
+        pushIssue(errors, "public API market news source image must come from the source article or official announcement, not stock/free image providers", context);
+      }
+      if (!sourceCoverCreditMatchesSource(publicPost)) {
+        pushIssue(errors, "public API market news coverCreditUrl does not match sourceLinks", context);
+      }
     }
   } else {
     const coverProvider = String(publicPost.coverGeneration?.provider || post.coverGeneration?.provider || "");

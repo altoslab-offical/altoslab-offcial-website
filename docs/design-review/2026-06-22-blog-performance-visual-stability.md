@@ -24,12 +24,16 @@ Affected URL(s): `/blog`, `/blog/openai-s-codex-can-now-watch-you-work-once-and-
 - `DESIGN.md` updated: yes
 - `docs/FRONTEND_ARCHITECTURE.md` updated: yes
 - Smoke guard updated: existing `scripts/homepage-ui-contract-smoke.mjs` / Blog UI contract remains in the changed set
-- `npm test` result: pending in this run
-- Desktop browser evidence: pending Chrome extension QA in `Official site Chrome review`
-- Mobile browser evidence: pending Chrome extension/responsive QA in `Official site Chrome review`
-- Production smoke evidence after deploy: pending AWS smoke + performance smoke
+- `npm run typecheck`: passed on 2026-06-22
+- `npm run test:blog`: passed on 2026-06-22
+- `npm run build:aws`: passed on 2026-06-22
+- `npm run verify:aws -- --base-url https://altoslab-ai.cc --expected-provider aws-s3`: passed on 2026-06-22, ECS task definition `altoslab-official-website:38`
+- `node scripts/blog-performance-smoke.mjs --base-url https://altoslab-ai.cc`: passed after cache warmup; `/blog` TTFB 81ms, article detail TTFB 96ms, `/api/blog` TTFB 67ms
+- Production HTML evidence: target article renders `codex-record-replay-governance-cover.png`; old `codex-record-replay-source-cover.png` and `large cursor shape` are absent
+- Desktop Chrome extension evidence: extension can list the existing `Official site Chrome review` tab group and confirms Codex extension/native host installed, but `claimTab` / `selected()` intermittently closes the native pipe. Treat this as Chrome-extension tooling instability, not website production evidence.
+- Mobile browser evidence: not completed in this repair pass because the Chrome extension runtime was unstable; repeat once extension tab control is stable.
 
 ## Rollback Notes
 
-- Files to revert: `app/globals.css`
-- Data or cache cleanup needed: none
+- Files to revert: public-cache/image-quality validation changes in `lib/cms.ts`, `lib/blog-quality.ts`, `lib/blog-image-quality.ts`, `components/SafeBlogImage.tsx`, release verifier/SOP/local-worker checks, and docs.
+- Data rollback: use signed bulk-patch to restore the previous cover metadata if needed, or rollback ECS to the previous task definition revision.

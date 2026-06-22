@@ -9,6 +9,7 @@ import {
 import { normalizeBlogAuthor, publicCoverCreditForPost, publicEditorialReviewNote } from "./blog-authors";
 import { getCloudflareD1Config, getCloudflareD1Database, type D1DatabaseLike } from "./cloudflare-d1";
 import { getCloudflareKvConfig, getCloudflareKvNamespace } from "./cloudflare-kv";
+import { getAwsS3StorageConfig, readAwsS3Text, writeAwsS3Object } from "./aws-s3-storage";
 import { readCmsDataFromStorage, writeCmsDataToStorage } from "./cms-storage";
 import { seedData } from "./seed";
 import staticBlogOverrides from "../data/static-blog-overrides.json";
@@ -34,6 +35,7 @@ const PUBLIC_BLOG_LIST_CACHE_VERSION = "v2";
 const PUBLIC_BLOG_DETAIL_CACHE_VERSION = "v1";
 const PUBLIC_BLOG_INVENTORY_CACHE_VERSION = "v2";
 const PUBLIC_BLOG_DUPLICATE_CACHE_VERSION = "v1";
+const PUBLIC_BLOG_AWS_CACHE_VERSION = "v1";
 const PUBLIC_BLOG_D1_PROJECTION_READ_CHUNK_SIZE = 20;
 const PUBLIC_BLOG_D1_SITEMAP_READ_LIMIT = 1000;
 
@@ -62,7 +64,7 @@ function publicBlogDetailRefreshLimitPerLanguage() {
   if (process.env.PUBLIC_BLOG_DETAIL_REFRESH_LIMIT_PER_LANGUAGE) {
     return Number(process.env.PUBLIC_BLOG_DETAIL_REFRESH_LIMIT_PER_LANGUAGE);
   }
-  return isCloudflarePublicRuntime() ? 0 : 4;
+  return isCloudflarePublicRuntime() ? 0 : 24;
 }
 
 export function nowIso() {
@@ -346,6 +348,25 @@ function publicBlogDuplicateCacheKey() {
 
 function safePublicBlogDetailCachePart(value: string) {
   return value.replace(/[^a-z0-9._:-]+/gi, "-").replace(/^-+|-+$/g, "") || "post";
+}
+
+function publicBlogAwsCacheBasePath() {
+  const config = getAwsS3StorageConfig();
+  if (!config) return "";
+  const safeCmsPath = safePublicBlogDetailCachePart(config.cmsPathname.replace(/\.json$/i, ""));
+  return `public-cache/${safeCmsPath}/blog/${PUBLIC_BLOG_AWS_CACHE_VERSION}`;
+}
+
+function publicBlogAwsCollectionCachePath(kind: "list" | "inventory" | "duplicates") {
+  const base = publicBlogAwsCacheBasePath();
+  return base ? `${base}/${kind}.json` : "";
+}
+
+function publicBlogAwsDetailCachePath(language: BlogLanguage, slug: string) {
+  const base = publicBlogAwsCacheBasePath();
+  return base
+    ? `${base}/detail/${safePublicBlogDetailCachePart(normalizeBlogLanguage(language))}/${safePublicBlogDetailCachePart(slug)}.json`
+    : "";
 }
 
 function publicBlogDetailCacheKey(language: BlogLanguage, slug: string) {
@@ -806,25 +827,29 @@ async function readPublicBlogCache() {
 
   const namespace = getCloudflareKvNamespace();
   const key = publicBlogCacheKey();
-  if (!namespace || !key) return null;
-
-  const raw = await namespace.get(key).catch(() => null);
-  if (!raw) return null;
-
-  try {
-    const parsed = JSON.parse(raw) as { posts?: BlogPost[] };
-    if (!Array.isArray(parsed.posts)) return null;
-    if (containsUnicodeReplacement(parsed.posts)) {
-      await namespace.delete(key).catch(() => undefined);
-      console.warn("[cms] Public blog cache contains replacement characters; rebuilding from CMS data.");
-      return null;
+  if (namespace && key) {
+    const raw = await namespace.get(key).catch(() => null);
+    if (raw) {
+      try {
+        const parsed = JSON.parse(raw) as { posts?: BlogPost[] };
+        if (Array.isArray(parsed.posts)) {
+          if (containsUnicodeReplacement(parsed.posts)) {
+            await namespace.delete(key).catch(() => undefined);
+            console.warn("[cms] Public blog cache contains replacement characters; rebuilding from CMS data.");
+          } else {
+            if (useMemoryCache) publicBlogPostsCache = { posts: parsed.posts, expiresAt: Date.now() + PUBLIC_BLOG_CACHE_TTL_MS };
+            return parsed.posts;
+          }
+        }
+      } catch (error) {
+        console.warn("[cms] Public blog cache is unreadable:", error instanceof Error ? error.message : error);
+      }
     }
-    if (useMemoryCache) publicBlogPostsCache = { posts: parsed.posts, expiresAt: Date.now() + PUBLIC_BLOG_CACHE_TTL_MS };
-    return parsed.posts;
-  } catch (error) {
-    console.warn("[cms] Public blog cache is unreadable:", error instanceof Error ? error.message : error);
-    return null;
   }
+
+  const awsCached = await readPublicBlogAwsCollectionCache("list");
+  if (awsCached && useMemoryCache) publicBlogPostsCache = { posts: awsCached, expiresAt: Date.now() + PUBLIC_BLOG_CACHE_TTL_MS };
+  return awsCached;
 }
 
 async function readPublicBlogInventoryCache() {
@@ -835,22 +860,28 @@ async function readPublicBlogInventoryCache() {
 
   const namespace = getCloudflareKvNamespace();
   const key = publicBlogInventoryCacheKey();
-  if (!namespace || !key) return null;
-
-  const raw = await namespace.get(key).catch(() => null);
-  if (!raw) return null;
-
-  try {
-    const parsed = JSON.parse(raw) as { posts?: BlogPost[] };
-    if (!Array.isArray(parsed.posts)) return null;
-    if (useMemoryCache) {
-      publicBlogInventoryCache = { posts: parsed.posts, expiresAt: Date.now() + PUBLIC_BLOG_CACHE_TTL_MS };
+  if (namespace && key) {
+    const raw = await namespace.get(key).catch(() => null);
+    if (raw) {
+      try {
+        const parsed = JSON.parse(raw) as { posts?: BlogPost[] };
+        if (Array.isArray(parsed.posts)) {
+          if (useMemoryCache) {
+            publicBlogInventoryCache = { posts: parsed.posts, expiresAt: Date.now() + PUBLIC_BLOG_CACHE_TTL_MS };
+          }
+          return parsed.posts;
+        }
+      } catch (error) {
+        console.warn("[cms] Public blog inventory cache is unreadable:", error instanceof Error ? error.message : error);
+      }
     }
-    return parsed.posts;
-  } catch (error) {
-    console.warn("[cms] Public blog inventory cache is unreadable:", error instanceof Error ? error.message : error);
-    return null;
   }
+
+  const awsCached = await readPublicBlogAwsCollectionCache("inventory");
+  if (awsCached && useMemoryCache) {
+    publicBlogInventoryCache = { posts: awsCached, expiresAt: Date.now() + PUBLIC_BLOG_CACHE_TTL_MS };
+  }
+  return awsCached;
 }
 
 async function readPublicBlogDuplicateCache() {
@@ -861,51 +892,161 @@ async function readPublicBlogDuplicateCache() {
 
   const namespace = getCloudflareKvNamespace();
   const key = publicBlogDuplicateCacheKey();
-  if (!namespace || !key) return null;
-
-  const raw = await namespace.get(key).catch(() => null);
-  if (!raw) return null;
-
-  try {
-    const parsed = JSON.parse(raw) as { posts?: BlogPost[] };
-    if (!Array.isArray(parsed.posts)) return null;
-    if (useMemoryCache) {
-      publicBlogDuplicateCache = { posts: parsed.posts, expiresAt: Date.now() + PUBLIC_BLOG_CACHE_TTL_MS };
+  if (namespace && key) {
+    const raw = await namespace.get(key).catch(() => null);
+    if (raw) {
+      try {
+        const parsed = JSON.parse(raw) as { posts?: BlogPost[] };
+        if (Array.isArray(parsed.posts)) {
+          if (useMemoryCache) {
+            publicBlogDuplicateCache = { posts: parsed.posts, expiresAt: Date.now() + PUBLIC_BLOG_CACHE_TTL_MS };
+          }
+          return parsed.posts;
+        }
+      } catch (error) {
+        console.warn("[cms] Public blog duplicate cache is unreadable:", error instanceof Error ? error.message : error);
+      }
     }
-    return parsed.posts;
-  } catch (error) {
-    console.warn("[cms] Public blog duplicate cache is unreadable:", error instanceof Error ? error.message : error);
-    return null;
   }
+
+  const awsCached = await readPublicBlogAwsCollectionCache("duplicates");
+  if (awsCached && useMemoryCache) {
+    publicBlogDuplicateCache = { posts: awsCached, expiresAt: Date.now() + PUBLIC_BLOG_CACHE_TTL_MS };
+  }
+  return awsCached;
 }
 
 async function readPublicBlogDetailCache(slug: string, language?: BlogLanguage) {
   const namespace = getCloudflareKvNamespace();
-  if (!namespace) return null;
-
   const decodedSlug = decodeSlugCandidate(slug);
   const languages = language ? [normalizeBlogLanguage(language)] : BLOG_LANGUAGES;
-  for (const candidateLanguage of languages) {
-    const key = publicBlogDetailCacheKey(candidateLanguage, decodedSlug);
-    if (!key) continue;
-    const raw = await namespace.get(key).catch(() => null);
-    if (!raw) continue;
-    try {
-      const parsed = JSON.parse(raw) as { post?: BlogPost };
-      const post = parsed.post;
-      if (
-        post?.status === "published" &&
-        normalizeBlogLanguage(post.language) === candidateLanguage &&
-        matchesBlogSlug(post.slug, slug)
-      ) {
-        return post;
+  if (namespace) {
+    for (const candidateLanguage of languages) {
+      const key = publicBlogDetailCacheKey(candidateLanguage, decodedSlug);
+      if (!key) continue;
+      const raw = await namespace.get(key).catch(() => null);
+      if (!raw) continue;
+      try {
+        const parsed = JSON.parse(raw) as { post?: BlogPost };
+        const post = parsed.post;
+        if (
+          post?.status === "published" &&
+          normalizeBlogLanguage(post.language) === candidateLanguage &&
+          matchesBlogSlug(post.slug, slug)
+        ) {
+          return post;
+        }
+      } catch (error) {
+        console.warn("[cms] Public blog detail cache is unreadable:", error instanceof Error ? error.message : error);
       }
-    } catch (error) {
-      console.warn("[cms] Public blog detail cache is unreadable:", error instanceof Error ? error.message : error);
     }
   }
 
+  const awsCached = await readPublicBlogAwsDetailCache(slug, language);
+  if (awsCached) return awsCached;
+
   return null;
+}
+
+async function readPublicBlogAwsJson<T>(pathname: string) {
+  const config = getAwsS3StorageConfig();
+  if (!config || !pathname) return null;
+
+  const object = await readAwsS3Text(config, pathname).catch((error) => {
+    console.warn("[cms] AWS S3 public blog cache read failed:", error instanceof Error ? error.message : error);
+    return null;
+  });
+  if (!object?.text) return null;
+
+  try {
+    return JSON.parse(object.text) as T;
+  } catch (error) {
+    console.warn("[cms] AWS S3 public blog cache is unreadable:", error instanceof Error ? error.message : error);
+    return null;
+  }
+}
+
+async function readPublicBlogAwsCollectionCache(kind: "list" | "inventory" | "duplicates") {
+  const parsed = await readPublicBlogAwsJson<{ posts?: BlogPost[] }>(publicBlogAwsCollectionCachePath(kind));
+  if (!Array.isArray(parsed?.posts)) return null;
+  if (containsUnicodeReplacement(parsed.posts)) {
+    console.warn("[cms] AWS S3 public blog cache contains replacement characters; ignoring projection.");
+    return null;
+  }
+  return parsed.posts;
+}
+
+async function readPublicBlogAwsDetailCache(slug: string, language?: BlogLanguage) {
+  const decodedSlug = decodeSlugCandidate(slug);
+  const languages = language ? [normalizeBlogLanguage(language)] : BLOG_LANGUAGES;
+  for (const candidateLanguage of languages) {
+    const parsed = await readPublicBlogAwsJson<{ post?: BlogPost }>(publicBlogAwsDetailCachePath(candidateLanguage, decodedSlug));
+    const post = parsed?.post;
+    if (
+      post?.status === "published" &&
+      normalizeBlogLanguage(post.language) === candidateLanguage &&
+      matchesBlogSlug(post.slug, slug)
+    ) {
+      return post;
+    }
+  }
+  return null;
+}
+
+async function writePublicBlogAwsCache({
+  listPosts,
+  inventoryPosts,
+  duplicatePosts,
+  detailPosts
+}: {
+  listPosts: BlogPost[];
+  inventoryPosts: BlogPost[];
+  duplicatePosts: BlogPost[];
+  detailPosts: BlogPost[];
+}) {
+  const config = getAwsS3StorageConfig();
+  if (!config) return { refreshed: false, listPosts: 0, inventoryPosts: 0, duplicatePosts: 0, detailPosts: 0 };
+
+  const updatedAt = nowIso();
+  const writes = [
+    () => writeAwsS3Object(
+      config,
+      publicBlogAwsCollectionCachePath("list"),
+      JSON.stringify({ version: PUBLIC_BLOG_AWS_CACHE_VERSION, updatedAt, posts: listPosts }),
+      "application/json"
+    ),
+    () => writeAwsS3Object(
+      config,
+      publicBlogAwsCollectionCachePath("inventory"),
+      JSON.stringify({ version: PUBLIC_BLOG_AWS_CACHE_VERSION, updatedAt, posts: inventoryPosts }),
+      "application/json"
+    ),
+    () => writeAwsS3Object(
+      config,
+      publicBlogAwsCollectionCachePath("duplicates"),
+      JSON.stringify({ version: PUBLIC_BLOG_AWS_CACHE_VERSION, updatedAt, posts: duplicatePosts }),
+      "application/json"
+    ),
+    ...detailPosts.map((post) => () => writeAwsS3Object(
+      config,
+      publicBlogAwsDetailCachePath(normalizeBlogLanguage(post.language), post.slug),
+      JSON.stringify({ version: PUBLIC_BLOG_AWS_CACHE_VERSION, updatedAt, post }),
+      "application/json"
+    ))
+  ];
+
+  const concurrency = Math.max(1, Math.min(Number(process.env.PUBLIC_BLOG_AWS_CACHE_WRITE_CONCURRENCY || 8), 16));
+  for (let index = 0; index < writes.length; index += concurrency) {
+    await Promise.all(writes.slice(index, index + concurrency).map((write) => write()));
+  }
+  return {
+    refreshed: true,
+    updatedAt,
+    listPosts: listPosts.length,
+    inventoryPosts: inventoryPosts.length,
+    duplicatePosts: duplicatePosts.length,
+    detailPosts: detailPosts.length
+  };
 }
 
 async function writePublicBlogCacheFromData(data: CmsData) {
@@ -913,6 +1054,22 @@ async function writePublicBlogCacheFromData(data: CmsData) {
   const key = publicBlogCacheKey();
   const allPosts = allPublicBlogPostsFromData(data);
   const publicCachePosts = allPosts.filter((post) => !hasPublicMarketNewsPollution(post));
+  const posts = publicBlogListPostsFromPosts(publicCachePosts);
+  const inventoryPosts = publicCachePosts.map(compactPublicBlogInventoryPost);
+  const duplicatePosts = publicCachePosts.map(compactPublicBlogDuplicatePost);
+  const detailPosts = publicBlogDetailRefreshPostsFromPosts(publicCachePosts);
+  const awsProjection = await writePublicBlogAwsCache({
+    listPosts: posts,
+    inventoryPosts,
+    duplicatePosts,
+    detailPosts
+  }).catch((error) => {
+    console.warn("[cms] Unable to refresh AWS S3 public blog projection:", error instanceof Error ? error.message : error);
+    return {
+      refreshed: false,
+      error: error instanceof Error ? error.message : "AWS S3 public blog projection refresh failed"
+    };
+  });
   const d1Projection = await writePublicBlogD1Projection(allPosts).catch((error) => {
     console.warn("[cms] Unable to refresh D1 public blog projection:", error instanceof Error ? error.message : error);
     return {
@@ -923,24 +1080,28 @@ async function writePublicBlogCacheFromData(data: CmsData) {
   });
 
   if (!namespace || !key) {
+    if (canUseInMemoryPublicCache()) {
+      publicBlogPostsCache = { posts, expiresAt: Date.now() + PUBLIC_BLOG_CACHE_TTL_MS };
+      publicBlogInventoryCache = { posts: inventoryPosts, expiresAt: Date.now() + PUBLIC_BLOG_CACHE_TTL_MS };
+      publicBlogDuplicateCache = { posts: duplicatePosts, expiresAt: Date.now() + PUBLIC_BLOG_CACHE_TTL_MS };
+      detailPosts.forEach((post) => writePublicBlogDetailMemoryCache(post.slug, normalizeBlogLanguage(post.language), post));
+    }
+
     return {
-      refreshed: Boolean(d1Projection.refreshed),
+      refreshed: Boolean(d1Projection.refreshed || awsProjection.refreshed),
       publishedPosts: allPosts.length,
-      listPosts: 0,
-      inventoryPosts: 0,
-      duplicatePosts: 0,
-      detailPosts: 0,
+      listPosts: posts.length,
+      inventoryPosts: inventoryPosts.length,
+      duplicatePosts: duplicatePosts.length,
+      detailPosts: publicCachePosts.length,
       d1Projection,
+      awsProjection,
       languages: Object.fromEntries(
         BLOG_LANGUAGES.map((language) => [language, allPosts.filter((post) => normalizeBlogLanguage(post.language) === language).length])
       )
     };
   }
 
-  const posts = publicBlogListPostsFromPosts(publicCachePosts);
-  const inventoryPosts = publicCachePosts.map(compactPublicBlogInventoryPost);
-  const duplicatePosts = publicCachePosts.map(compactPublicBlogDuplicatePost);
-  const detailPosts = publicBlogDetailRefreshPostsFromPosts(publicCachePosts);
   let kvCacheRefreshed = false;
   let kvCacheError: string | undefined;
 
@@ -1027,13 +1188,14 @@ async function writePublicBlogCacheFromData(data: CmsData) {
   }
 
   return {
-    refreshed: kvCacheRefreshed || Boolean(d1Projection.refreshed),
+    refreshed: kvCacheRefreshed || Boolean(d1Projection.refreshed || awsProjection.refreshed),
     publishedPosts: allPosts.length,
     listPosts: posts.length,
     inventoryPosts: inventoryPosts.length,
     duplicatePosts: duplicatePosts.length,
-    detailPosts: detailPosts.length,
+    detailPosts: publicCachePosts.length,
     d1Projection,
+    awsProjection,
     kvCacheRefreshed,
     kvCacheError,
     languages: Object.fromEntries(
@@ -1542,6 +1704,17 @@ export function publishValidationForProject(project: Project) {
   return errors;
 }
 
+function isEditorialFallbackCover(post: BlogPost) {
+  const credit = `${post.coverCredit || ""} ${post.coverLicense || ""}`;
+  return (
+    (post.coverSource === "manual" || post.coverSource === "generated") &&
+    /ALTOS LAB/i.test(credit) &&
+    Boolean(post.coverAlt?.trim()) &&
+    Boolean(post.coverLicense?.trim()) &&
+    post.imageQualityStatus === "passed"
+  );
+}
+
 export function publishValidationForBlogPost(post: BlogPost) {
   const errors: string[] = [];
   if (!post.slug) errors.push("slug is required");
@@ -1568,8 +1741,9 @@ export function publishValidationForBlogPost(post: BlogPost) {
   if (post.generatedBy && hasApprovedCoverSource && !post.coverCredit) {
     errors.push("generated posts require cover attribution before publishing");
   }
-  if (post.generatedBy && post.contentType === "breaking" && post.coverSource !== "source") {
-    errors.push("market news posts require a source article cover image before publishing");
+  const editorialFallbackCover = isEditorialFallbackCover(post);
+  if (post.generatedBy && post.contentType === "breaking" && post.coverSource !== "source" && !editorialFallbackCover) {
+    errors.push("market news posts require a source article cover image or approved ALTOS LAB editorial fallback cover before publishing");
   }
   if (post.generatedBy && post.coverSource === "source" && (!post.coverCreditUrl || !post.coverLicense)) {
     errors.push("source cover images require public credit URL and source-rights metadata before publishing");

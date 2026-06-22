@@ -82,7 +82,9 @@
 
 正式站 image gate 已把這些詞列為低質或疲勞風險：`placeholder`,
 `fake dashboard`, `network map`, `glass cube`, `tilted`, `skewed`, `slanted`,
-`抽象科技`, `假儀表板`, `網路圖`, `玻璃方塊`, `斜的`, `歪斜`。
+`large cursor`, `cursor shape`, `pink editorial background`, `source-cover`,
+`抽象科技`, `假儀表板`, `網路圖`, `玻璃方塊`, `斜的`, `歪斜`, `巨大游標`,
+`斜游標`。
 
 Hermes 產圖時不要把禁忌詞放進 negative prompt，因為 metadata scanner
 不推理意圖，只看風險詞是否進入 public metadata。改用正向描述：
@@ -92,6 +94,13 @@ Hermes 產圖時不要把禁忌詞放進 negative prompt，因為 metadata scann
 - clean editorial hierarchy；
 - brand-free, typography-free, human-free；
 - source/rights/credit 可回查。
+
+2026-06-22 production lesson：市場快訊不等於強迫使用來源圖。若來源圖只是大 logo、
+斜游標、粉色背景或其他與文章決策無關的 generic asset，會讓文章像自動摘要或
+prompt demo。Hermes/OpenClaw 應先判斷 source image 是否真的提供事件、產品、
+人物、流程或證據線索；不合格時，改走 ALTOS LAB editorial fallback cover，
+但必須保留 credit/license、`imageQualityStatus=passed`、rendered public-page review
+和 topic-fit 判斷。
 
 ---
 

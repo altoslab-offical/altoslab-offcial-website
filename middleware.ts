@@ -51,7 +51,8 @@ export function middleware(request: NextRequest) {
   const isPublicSignedIngestRoute =
     pathname === "/api/admin/blog/ingest-set" ||
     pathname === "/api/admin/blog/release-set" ||
-    pathname === "/api/admin/blog/media";
+    pathname === "/api/admin/blog/media" ||
+    pathname === "/api/admin/blog/bulk-patch";
 
   if ((!isAdminPage && !isAdminApi) || isPublicAuthRoute || isPublicSignedIngestRoute) {
     return nextWithPathname(request);
