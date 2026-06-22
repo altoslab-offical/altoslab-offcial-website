@@ -16,6 +16,7 @@ const COLUMN_SLOT_SETTING = (process.env.ALTOS_BLOG_COLUMN_SLOTS || "morning,aft
   .map((slot) => slot.trim())
   .filter(Boolean);
 const COLUMN_SLOTS = new Set(COLUMN_SLOT_SETTING.length ? COLUMN_SLOT_SETTING : ["morning"]);
+const COLUMN_DAILY_TARGET = Number(process.env.ALTOS_BLOG_COLUMN_DAILY_LIMIT || "3");
 const ALL_PREP_WINDOWS = {
   morning: { hour: 8, minute: 10 },
   afternoon: { hour: 15, minute: 10 },
@@ -224,6 +225,79 @@ async function fetchPublicPostsForLanguage({ baseUrl, language }) {
     }
   }
   throw new Error(lastError || `inventory fetch failed for ${language}`);
+}
+
+function postTaiwanDate(post) {
+  const raw = post?.publishedAt || post?.updatedAt || post?.createdAt || post?.date || "";
+  if (!raw) return "";
+  const date = new Date(raw);
+  if (Number.isNaN(date.getTime())) return "";
+  return taiwanDate(date);
+}
+
+function groupCoverage(postsByLanguage, translationGroupId) {
+  const present = [];
+  const missing = [];
+  for (const language of LANGUAGES) {
+    const posts = postsByLanguage[language] || [];
+    const match = posts.find((post) => post.translationGroupId === translationGroupId && post.status !== "draft");
+    if (match) present.push(language);
+    else missing.push(language);
+  }
+  return { complete: missing.length === 0, present, missing };
+}
+
+function liveGroupsForDate(postsByLanguage, { date, contentType }) {
+  const zhPosts = postsByLanguage["zh-Hant"] || [];
+  return zhPosts
+    .filter((post) => post.contentType === contentType && postTaiwanDate(post) === date && post.translationGroupId)
+    .map((post) => ({
+      translationGroupId: post.translationGroupId,
+      slug: post.slug,
+      title: post.title,
+      publishedAt: post.publishedAt || post.createdAt || "",
+      coverage: groupCoverage(postsByLanguage, post.translationGroupId)
+    }));
+}
+
+async function dailyColumnTargetStatus({ date }) {
+  if (hasFlag("skip-daily-target-gate") || hasFlag("ignore-daily-target")) {
+    return { checked: false, skipped: true, reason: "daily column target gate disabled" };
+  }
+  const baseUrl = normalizeBaseUrl(arg("base-url", process.env.ALTOS_BLOG_BASE_URL || DEFAULT_BASE_URL));
+  try {
+    const postsByLanguage = {};
+    for (const language of LANGUAGES) {
+      postsByLanguage[language] = await fetchPublicPostsForLanguage({ baseUrl, language });
+    }
+    const completeGroups = liveGroupsForDate(postsByLanguage, { date, contentType: "column" }).filter(
+      (group) => group.coverage.complete
+    );
+    return {
+      checked: true,
+      ok: true,
+      baseUrl,
+      date,
+      target: COLUMN_DAILY_TARGET,
+      completeCount: completeGroups.length,
+      completeGroups: completeGroups.map((group) => ({
+        translationGroupId: group.translationGroupId,
+        slug: group.slug,
+        title: group.title,
+        publishedAt: group.publishedAt,
+        languages: group.coverage.present
+      }))
+    };
+  } catch (error) {
+    return {
+      checked: true,
+      ok: false,
+      baseUrl,
+      date,
+      target: COLUMN_DAILY_TARGET,
+      error: error instanceof Error ? error.message : String(error)
+    };
+  }
 }
 
 async function marketInventoryStatus() {
@@ -1542,6 +1616,20 @@ function releaseWindowIssue({ date, slot }) {
 }
 
 async function release({ date, slot }) {
+  const dailyTarget = await dailyColumnTargetStatus({ date });
+  await appendLog(globalScheduleLogPath(), JSON.stringify({ phase: "daily-column-target-gate", date, slot, dailyTarget }));
+  if (dailyTarget.ok && dailyTarget.completeCount >= dailyTarget.target) {
+    return {
+      ok: true,
+      skipped: true,
+      phase: "column-release-daily-target-met",
+      reason: `daily column target already met for ${date}: ${dailyTarget.completeCount}/${dailyTarget.target} complete 9-language groups`,
+      date,
+      slot,
+      dailyTarget
+    };
+  }
+
   const indexPath = await resolveCandidateIndexPath({ date, slot, lane: "column" });
   if (!(await exists(indexPath))) {
     const repairPlan = await writeQualityRepairPlan({

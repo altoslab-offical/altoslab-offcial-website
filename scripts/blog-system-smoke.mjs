@@ -52,6 +52,8 @@ const cloudflareSmoke = read("scripts/cloudflare-smoke.mjs");
 const cloudflareDirectBlog = read("cloudflare/blog-html-direct-worker.js");
 const n8nLocalBridge = read("scripts/n8n-local-bridge.mjs");
 const n8nLocalControlPlaneVerifier = read("scripts/verify-n8n-local-control-plane.sh");
+const blogDailyCloseout = read("scripts/blog-daily-closeout.mjs");
+const blogTrafficSelfEvolution = read("scripts/blog-traffic-self-evolution.mjs");
 const cloudflareStagingConfig = read("wrangler.staging.jsonc");
 const cmsStorage = read("lib/cms-storage.ts");
 const launchAgentPlist = read("scripts/com.altoslab.blog-local-worker.plist.example");
@@ -248,6 +250,7 @@ assert(scheduledRunner.includes("awaiting_browser_production"), "scheduled prep 
 assert(scheduledRunner.includes("releaseGateIssues"), "scheduled release checks the prepared candidate manifest before publishing");
 assert(scheduledRunner.includes("releaseWindowIssue"), "scheduled release refuses to publish outside the configured release window");
 assert(scheduledRunner.includes("RELEASE_GRACE_MINUTES"), "scheduled release allows a small launchd delay but no early or stale publish");
+assert(scheduledRunner.includes("dailyColumnTargetStatus") && scheduledRunner.includes("column-release-daily-target-met"), "scheduled release checks public daily column inventory before stale held candidates can fail an already-complete day");
 assert(scheduledRunner.includes("force-release"), "scheduled release has an explicit manual override for emergency operation");
 assert(
   scheduledRunner.includes("column-quality-repair-required") && scheduledRunner.includes("quality-repair-required") && scheduledRunner.includes("publish-after-validate"),
@@ -552,6 +555,11 @@ assert(seoGeoReport.includes("SEARCH_CONSOLE_SITE_URL"), "SEO/GEO report support
 assert(seoGeoReport.includes("gcloud token fallback"), "SEO/GEO report can use local gcloud token fallback for diagnostics");
 assert(seoGeoReport.includes("No qualified public blog posts are currently published"), "SEO/GEO report explains empty fail-closed blog inventory");
 assert(seoGeoReport.includes("incompleteMarketNewsGroups"), "SEO/GEO report calls out market-news language gaps");
+assert(blogDailyCloseout.includes("writeHermesCloseout") && blogDailyCloseout.includes("hermes_official_blog_daily_closeout_v1"), "daily closeout writes a compact Hermes self-evolution learning packet when requested");
+assert(n8nLocalBridge.includes("--write-hermes"), "n8n daily closeout writes Hermes learning evidence by default");
+assert(blogTrafficSelfEvolution.includes("hermes_official_blog_traffic_self_evolution_readback_v1") && blogTrafficSelfEvolution.includes("canOptimizeTopicSelectionFromTraffic"), "traffic self-evolution runner writes GA/GSC readback into Hermes");
+assert(n8nLocalBridge.includes("scripts/blog-traffic-self-evolution.mjs"), "n8n SEO/GEO job writes traffic self-evolution evidence instead of terminal-only text");
+assert(imageQuality.includes("MIN_SOURCE_IMAGE_WIDTH = 768") && imageQuality.includes("MIN_SOURCE_IMAGE_HEIGHT = 432"), "market-news credited source images use source-preserving dimensions instead of generated-cover dimensions");
 const seoGeoReportEmails = [...seoGeoReport.matchAll(/[A-Za-z0-9._%+-]+@gmail\.com/g)].map((match) => match[0]);
 assert(
   seoGeoReport.includes("altoslab.offical@gmail.com") &&

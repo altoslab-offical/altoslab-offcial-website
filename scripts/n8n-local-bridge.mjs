@@ -95,7 +95,7 @@ const jobs = {
   },
   "seo-geo-report": {
     timeoutMs: 180_000,
-    command: () => nodeCommand("scripts/seo-geo-insight-report.mjs", ["--base-url", DEFAULT_BASE_URL, "--format", "text"])
+    command: () => nodeCommand("scripts/blog-traffic-self-evolution.mjs", ["--base-url", DEFAULT_BASE_URL])
   },
   "column-prep": {
     timeoutMs: 600_000,
@@ -144,7 +144,8 @@ const jobs = {
     command: (input) => nodeCommand("scripts/blog-daily-closeout.mjs", [
       ...dateArgs(input),
       "--base-url",
-      DEFAULT_BASE_URL
+      DEFAULT_BASE_URL,
+      "--write-hermes"
     ])
   },
   scheduled: {

@@ -13,6 +13,7 @@ const COLUMN_SLOTS = (process.env.ALTOS_BLOG_COLUMN_SLOTS || "morning,afternoon,
   .split(",")
   .map((slot) => slot.trim())
   .filter(Boolean);
+const HERMES_ROOT = process.env.HERMES_ROOT || "/Users/asdc163/LocalProjects/Hermes";
 
 function hasFlag(name) {
   return process.argv.includes(`--${name}`);
@@ -197,7 +198,65 @@ function summarizeGroups(groups) {
   }));
 }
 
-function outputAndExit(payload) {
+async function writeHermesCloseout(payload) {
+  const date = payload.date || taiwanDate();
+  const outDir = path.join(HERMES_ROOT, "artifacts/ops-profile-shadow/learning/daily-self-evolution", date);
+  const outPath = path.join(outDir, `official-blog-daily-closeout-${date}.json`);
+  const latestPath = path.join(HERMES_ROOT, "artifacts/ops-profile-shadow/learning/daily-self-evolution/latest-official-blog-daily-closeout.json");
+  const completeColumns = payload.live?.dailyColumnCount || 0;
+  const target = payload.live?.dailyColumnTarget || COLUMN_DAILY_TARGET;
+  const marketOk = payload.live?.marketNews?.ok === true;
+  const learning = {
+    schema: "hermes_official_blog_daily_closeout_v1",
+    owner: "Hermes",
+    researchDeputy: "OpenClaw",
+    coachVerifier: "Codex",
+    generatedAt: new Date().toISOString(),
+    date,
+    baseUrl: payload.baseUrl,
+    status: payload.ok ? "pass" : "action_required",
+    dailyAutomation: {
+      canClaimDailyPublishStable: payload.ok === true,
+      columnTargetMet: completeColumns >= target,
+      completeColumnGroups: completeColumns,
+      columnDailyTarget: target,
+      marketNewsComplete: marketOk,
+      rule: "Stable daily publish requires live public inventory readback, complete language coverage, and repair-forward handling for held candidates."
+    },
+    trafficSelfEvolution: {
+      canClaimTrafficOptimizedSelection: false,
+      status: "requires_ga_gsc_metric_readback",
+      rule: "Topic selection may learn from GA4/Search Console only after source readback is present; daily publish readiness must not fabricate traffic or revenue lift."
+    },
+    releaseEvidence: payload.live,
+    localCandidateState: payload.localCandidates,
+    errors: payload.errors || [],
+    warnings: payload.warnings || [],
+    actions: payload.actions || [],
+    nextHermesRules: [
+      "Before any release window, check public inventory so stale held candidates do not create false scheduler failures after the daily target is already met.",
+      "Market news source images preserve the credited source image lane; near-standard source OG dimensions are acceptable when attribution and topic fit pass.",
+      "Validated-only, held, or missing article-set candidates are repair signals, not completion."
+    ]
+  };
+  await fs.mkdir(outDir, { recursive: true });
+  await fs.writeFile(outPath, `${JSON.stringify(learning, null, 2)}\n`, "utf8");
+  await fs.mkdir(path.dirname(latestPath), { recursive: true });
+  await fs.writeFile(latestPath, `${JSON.stringify(learning, null, 2)}\n`, "utf8");
+  return { outPath, latestPath };
+}
+
+async function outputAndExit(payload) {
+  if (hasFlag("write-hermes")) {
+    try {
+      payload.hermesWriteback = await writeHermesCloseout(payload);
+    } catch (error) {
+      payload.warnings = [
+        ...(payload.warnings || []),
+        `Hermes closeout writeback failed: ${error instanceof Error ? error.message : String(error)}`
+      ];
+    }
+  }
   console.log(JSON.stringify(payload, null, 2));
   process.exit(payload.ok ? 0 : 1);
 }
@@ -219,7 +278,7 @@ async function main() {
   try {
     postsByLanguage = await fetchPostsByLanguage(baseUrl);
   } catch (error) {
-    outputAndExit({
+    await outputAndExit({
       ok: false,
       checkedAt,
       date,
@@ -291,7 +350,7 @@ async function main() {
     warnings.push("morning market scan held, but afternoon market scan released a complete item");
   }
 
-  outputAndExit({
+  await outputAndExit({
     ok: errors.length === 0,
     checkedAt,
     date,
