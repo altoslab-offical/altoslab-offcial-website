@@ -283,8 +283,7 @@ function hasApprovedEditorialFallbackCover(post: BlogPost) {
     (post.coverSource === "manual" || post.coverSource === "generated") &&
     /ALTOS LAB/i.test(credit) &&
     Boolean(post.coverAlt?.trim()) &&
-    Boolean(post.coverLicense?.trim()) &&
-    post.imageQualityStatus === "passed"
+    Boolean(post.coverLicense?.trim())
   );
 }
 
