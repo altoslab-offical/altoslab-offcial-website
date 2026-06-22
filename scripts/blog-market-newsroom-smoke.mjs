@@ -102,6 +102,7 @@ for (const fixture of fixtures) {
     const publicText = [post.title, post.excerpt, post.geoSummary, post.body, ...(post.keyTakeaways || [])].join("\n");
     assert(!LEGACY_TEMPLATE_PATTERN.test(publicText), `${fixture.name}/${language} should not use legacy market template`);
     assert(post.coverSource === "source", `${fixture.name}/${language} should keep source cover`);
+    assert(post.geoSummary && post.geoSummary.trim().length >= 50, `${fixture.name}/${language} should include a source-backed GEO summary`);
     assert(
       post.sourceLinks.length === fixture.pack.sourceLinks.length,
       `${fixture.name}/${language} should keep only verified source links supplied by the candidate`

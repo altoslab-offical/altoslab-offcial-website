@@ -99,6 +99,7 @@ function buildPost(language, pack, date, localizedPack = pack) {
   return {
     ...post,
     id: `post_${translationGroupId}_${language.toLowerCase().replace(/[^a-z0-9]+/g, "_")}`,
+    contentType: "breaking",
     status: "published",
     translationGroupId,
     sortOrder: Number(pack.sequence) || 0,

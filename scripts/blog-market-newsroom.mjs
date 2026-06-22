@@ -2153,19 +2153,25 @@ function sourceGeoSummary(language, frame, source, article, profile) {
     .slice(0, 2);
   const details = facts.length >= 2 ? facts : [...facts, ...bodyCandidates].slice(0, 3);
   const body = sentenceJoin(details, language);
-  if (!body || overlapRatio(body, standfirst) >= 0.72) return "";
+  const fallbackBody = details[0] || bodyCandidates[0] || compactFact(standfirst, language, 170) || title;
+  let summaryBody = !body || overlapRatio(body, standfirst) >= 0.72 ? fallbackBody : body;
+  if (/報導牽涉|source involves|berkaitan dengan|liên quan đến/i.test(summaryBody) || summaryBody.length < 50) {
+    summaryBody = compactFact(standfirst, language, 170) || summaryBody;
+  }
+  if (!summaryBody) return "";
   const byLanguage = {
-    "zh-Hant": `${publisher} 報導，${body}`,
-    en: `${publisher} reports: ${body}`,
-    ja: `${publisher} は次のように報じています。${body}`,
-    ko: `${publisher} 보도에 따르면 ${body}`,
-    id: `${publisher} melaporkan: ${body}`,
-    vi: `${publisher} đưa tin: ${body}`,
-    th: `${publisher} รายงานว่า ${body}`,
-    ms: `${publisher} melaporkan: ${body}`,
-    fil: `Ayon sa ${publisher}, ${body}`
+    "zh-Hant": `${publisher} 報導，${summaryBody}`,
+    en: `${publisher} reports: ${summaryBody}`,
+    ja: `${publisher} は次のように報じています。${summaryBody}`,
+    ko: `${publisher} 보도에 따르면 ${summaryBody}`,
+    id: `${publisher} melaporkan: ${summaryBody}`,
+    vi: `${publisher} đưa tin: ${summaryBody}`,
+    th: `${publisher} รายงานว่า ${summaryBody}`,
+    ms: `${publisher} melaporkan: ${summaryBody}`,
+    fil: `Ayon sa ${publisher}, ${summaryBody}`
   };
-  const summary = byLanguage[language] || byLanguage.en;
+  const alreadyNamesPublisher = publisher && summaryBody.toLowerCase().includes(publisher.toLowerCase());
+  const summary = alreadyNamesPublisher ? summaryBody : byLanguage[language] || byLanguage.en;
   return truncate(cleanMarketPublicText(summary, language), 240);
 }
 

@@ -42,6 +42,13 @@ const SOURCE_PROFILES = {
     "microsoft-azure-ai",
     "microsoft-research",
     "nvidia-blog-ai",
+    "google-cloud-ai-blog",
+    "google-research-blog",
+    "apple-machine-learning-research",
+    "engineering-at-meta",
+    "weaviate-blog",
+    "search-engine-land",
+    "ahrefs-blog",
     "channel-newsasia-ai",
     "techcrunch-ai"
   ])
