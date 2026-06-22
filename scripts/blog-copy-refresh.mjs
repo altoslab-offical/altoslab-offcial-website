@@ -24,6 +24,10 @@ function password() {
   return arg("admin-password") || process.env.ALTOS_ADMIN_PASSWORD || process.env.ADMIN_PASSWORD || "";
 }
 
+function adminSessionToken() {
+  return arg("admin-token") || process.env.ALTOS_ADMIN_SESSION_TOKEN || process.env.ADMIN_SESSION_TOKEN || "";
+}
+
 async function readJson(filePath) {
   return JSON.parse(await fs.readFile(filePath, "utf8"));
 }
@@ -47,8 +51,10 @@ async function fetchJson(url, options = {}) {
 }
 
 async function login(root) {
+  const token = adminSessionToken();
+  if (token) return `${ADMIN_COOKIE}=${encodeURIComponent(token)}`;
   const pass = password();
-  if (!pass) throw new Error("ALTOS_ADMIN_PASSWORD or ADMIN_PASSWORD is required");
+  if (!pass) throw new Error("ALTOS_ADMIN_PASSWORD, ADMIN_PASSWORD, ALTOS_ADMIN_SESSION_TOKEN, or ADMIN_SESSION_TOKEN is required");
   const { response } = await fetchJson(`${root}/api/admin/auth/login`, {
     method: "POST",
     body: JSON.stringify({ password: pass })

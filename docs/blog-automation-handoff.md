@@ -45,6 +45,18 @@
 - n8n/bridge/scripts 不能自行修改 UI、Blog layout、CSS、header、sidebar、language switcher、WonDa widget placement 或任何 public design surface；這類變更必須由 Hermes 明確判斷並留下證據。
 - 任何 gate 不完整，回傳 `ok:false` / HTTP 500，讓 n8n execution 顯示 failed，不可吞掉失敗。
 
+## 2026-06-22 Production Repair Lessons
+
+這些規則要進 Hermes / OpenClaw 的 official-blog lane，避免下次又把同樣問題當成新問題重查。
+
+- Chrome QA 以 Tommy 已登入的既有 Chrome 群組為準。若 Playwright locator click 或座標 click 沒有真的從 `/blog` 進入 article detail，不要改用無痕、Safari 或 DevTools session；改用 Chrome extension 的 DOM-CUA node click / in-page native anchor click，並記錄從 `/blog` 到 article URL 的 elapsed time。
+- Blog list-to-detail 慢時，先分離三件事：native anchor click path、public projection/detail cache、`/llms.txt` / `/feed.xml` read path。不要先重寫文章或換圖片。修復後必跑 `blog:performance-smoke`，並用 Chrome extension 做使用者路徑 readback。
+- Release doctor 擋住缺 browser evidence / provider metadata / translated content image shared URL 時，代表 candidate production evidence 壞掉；要修 article set / manifest normalization，不可以 bypass release doctor。
+- Market-news ALTOS LAB fallback cover 的 quality review 不應在 image review 前要求 `imageQualityStatus=passed`。可先用 `coverSource=manual|generated`、ALTOS LAB credit/license、alt text 和 shared public URL 通過 copy gate，再由 image gate 判定 `imageQualityStatus=passed`。
+- AWS deploy 使用唯一 ECR image tag 作為 production evidence；不要依賴脆弱的 `latest` tag shell interpolation。部署後以 ECS task definition、service stable、`verify:aws` 和 production performance smoke 作為完成證據。
+- 候選稿品質不合格時，流程是 repair/rewrite/re-image/re-QA 到 validate-only pass，再 publish + public readback；不是 skip，也不是把 `wouldPublish=true` 當成已發布。
+- 已發布文章的 copy refresh 走 `scripts/blog-copy-refresh.mjs`，可用 `ALTOS_ADMIN_SESSION_TOKEN` / `ADMIN_SESSION_TOKEN` 或 admin password。若本機 admin credential stale，這是 tooling/auth blocker；不可猜密碼、不可改用 direct storage write。
+
 ## 日常排程
 
 時區固定 Asia/Taipei。

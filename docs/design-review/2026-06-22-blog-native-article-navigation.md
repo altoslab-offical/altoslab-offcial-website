@@ -34,11 +34,13 @@ Affected URL(s): `/blog`, localized blog indexes, `/blog/:slug`
 - `DESIGN.md` updated: yes
 - `docs/FRONTEND_ARCHITECTURE.md` updated: yes
 - Smoke guard updated: `scripts/blog-ui-contract-smoke.mjs`
-- `npm test` result: pending final run
+- `npm test` result: passed on 2026-06-22 after native navigation and fallback
+  cover gate repair
 - Desktop browser evidence: Chrome extension DOM-CUA verified local click path
-  before deploy; production readback pending deploy
-- Mobile browser evidence: pending final browser sweep
-- Production smoke evidence after deploy: pending
+  before deploy; production readback must stay in the existing Chrome group
+- Mobile browser evidence: pending a separate mobile sweep
+- Production smoke evidence after deploy: `verify:aws` passed on AWS S3 runtime;
+  `blog:performance-smoke` passed on warmed public projection/detail cache
 
 ## Rollback Notes
 
