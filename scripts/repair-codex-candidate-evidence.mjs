@@ -40,9 +40,21 @@ function repair(slot) {
   const source = posts[0];
   if (!source) return { slot, repaired: false, reason: "empty posts" };
 
+  const sharedCover = {
+    cover: source.cover,
+    coverAlt: source.coverAlt,
+    coverCredit: source.coverCredit,
+    coverCreditUrl: source.coverCreditUrl,
+    coverLicense: source.coverLicense,
+    coverSource: source.coverSource,
+    coverGeneration: source.coverGeneration
+  };
   const sharedImages = Array.isArray(source.contentImages) ? source.contentImages : [];
   for (const post of posts) {
     post.generatedBy = post.generatedBy || "hermes-owner:codex-gpt-5.4";
+    for (const [key, value] of Object.entries(sharedCover)) {
+      if (value !== undefined) post[key] = value;
+    }
     if (post.coverGeneration?.provider && /codex/i.test(post.coverGeneration.provider)) {
       post.coverGeneration.provider = "codex-native-image";
     }
@@ -55,7 +67,10 @@ function repair(slot) {
     }
   }
 
-  manifest.codexEvidence = codexEvidence();
+  const evidence = codexEvidence();
+  articleSet.codexEvidence = evidence;
+  articleSet.chromeEvidence = { ...(articleSet.chromeEvidence || {}), codex: evidence };
+  manifest.codexEvidence = evidence;
   manifest.chromeEvidence = { ...(manifest.chromeEvidence || {}), codex: manifest.codexEvidence };
   if (manifest.qualityManifest?.posts) {
     for (const row of manifest.qualityManifest.posts) {

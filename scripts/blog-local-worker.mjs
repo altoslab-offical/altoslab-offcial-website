@@ -457,6 +457,11 @@ function requireChromeProfileEvidence(issues, evidence, label) {
   }
 }
 
+function hasCodexEvidence(payload) {
+  const evidence = payload.codexEvidence || payload.chromeEvidence?.codex || {};
+  return /codex/i.test(String(evidence.provider || evidence.runtime || "")) && /gpt-5\.4/i.test(String(evidence.model || ""));
+}
+
 function isSourceRenderedMarketSet(payload) {
   const posts = Array.isArray(payload?.posts) ? payload.posts : [];
   if (!posts.length || !posts.every((post) => post.contentType === "breaking")) return false;
@@ -475,15 +480,16 @@ function localPreflight(payload) {
   const isMarketNewsSet = posts.some((post) => post.contentType === "breaking");
   const isMarketOnlySet = posts.length > 0 && posts.every((post) => post.contentType === "breaking");
   const isSourceTranslationLane = isSourceRenderedMarketSet(payload);
+  const codexBacked = hasCodexEvidence(payload);
 
-  if (!isMarketOnlySet || !isSourceTranslationLane) {
+  if (!codexBacked && (!isMarketOnlySet || !isSourceTranslationLane)) {
     if (geminiEvidence.usedExistingTab !== true) issues.push("chromeEvidence.gemini.usedExistingTab must be true");
     if (geminiEvidence.changedModel === true) issues.push("chromeEvidence.gemini.changedModel must not be true");
     requireChromeProfileEvidence(issues, geminiEvidence, "gemini");
   }
-  if (requiresGptCover && chatgptEvidence.usedExistingTab !== true) issues.push("chromeEvidence.chatgpt.usedExistingTab must be true for generated covers");
+  if (requiresGptCover && !codexBacked && chatgptEvidence.usedExistingTab !== true) issues.push("chromeEvidence.chatgpt.usedExistingTab must be true for generated covers");
   if (chatgptEvidence.changedModel === true) issues.push("chromeEvidence.chatgpt.changedModel must not be true");
-  if (requiresGptCover) requireChromeProfileEvidence(issues, chatgptEvidence, "chatgpt");
+  if (requiresGptCover && !codexBacked) requireChromeProfileEvidence(issues, chatgptEvidence, "chatgpt");
   if (humanDesignQa.approved !== true) issues.push("humanDesignQa.approved must be true before validate-only can mark a candidate ready");
 
   const languages = posts.map((post) => post.language);
@@ -559,7 +565,7 @@ function localPreflight(payload) {
     }
     const generatedBy = String(post.generatedBy || "").toLowerCase();
     const sourceTranslatedMarketNews = marketNews && /source-translation|source_translat|source-worker|codex-market|market-source/.test(generatedBy);
-    if (!sourceTranslatedMarketNews && !generatedBy.includes("gemini")) {
+    if (!sourceTranslatedMarketNews && !generatedBy.includes("gemini") && !generatedBy.includes("codex")) {
       issues.push(`${post.language || "unknown"} article must be drafted or revised through Gemini`);
     }
   }
@@ -1030,7 +1036,7 @@ Return only JSON shaped for POST /api/admin/blog/ingest-set:
 
 async function makePrompt() {
   const slot = arg("slot") || inferSlot();
-  if (!SLOT_HOURS[slot]) throw new Error("--slot must be morning or afternoon");
+  if (!SLOT_HOURS[slot]) throw new Error("--slot must be morning, afternoon or evening");
   const lane = arg("lane", "column");
   if (!["column", "market"].includes(lane)) throw new Error("--lane must be column or market");
   const prompt = articlePrompt(slot, arg("topic"), lane);
@@ -1054,7 +1060,7 @@ async function main() {
   const articleSet = arg("article-set");
   const slot = arg("slot") || inferSlot();
   if (!articleSet) throw new Error("--article-set is required unless --make-prompt is used");
-  if (!SLOT_HOURS[slot]) throw new Error("--slot must be morning or afternoon");
+  if (!SLOT_HOURS[slot]) throw new Error("--slot must be morning, afternoon or evening");
 
   const manifestPath = arg("manifest");
   const payload = await uploadLocalCovers(await generateMissingCovers(await readArticleSet(articleSet, slot), slot));

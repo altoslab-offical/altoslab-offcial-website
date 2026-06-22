@@ -1433,8 +1433,8 @@ function reviewPost(post: BlogPost, multilingual: ReviewResult): PostReview {
   }
   const isSourceTranslatedMarketNews =
     post.contentType === "breaking" && /source-translation|source_translat|source-worker|codex-market|market-source/i.test(post.generatedBy || "");
-  if (post.generatedBy && !/gemini/i.test(post.generatedBy) && !isSourceTranslatedMarketNews) {
-    issues.push("production articles must be written or revised through Gemini before release");
+  if (post.generatedBy && !/(gemini|codex)/i.test(post.generatedBy) && !isSourceTranslatedMarketNews) {
+    issues.push("production articles must be written or revised through Gemini or Codex before release");
   }
   if (post.coverSource === "generated" && !/(chatgpt|gpt|openai|codex)/i.test(post.coverGeneration?.provider || "")) {
     issues.push("generated production covers must be created through ChatGPT/GPT/Codex before release");

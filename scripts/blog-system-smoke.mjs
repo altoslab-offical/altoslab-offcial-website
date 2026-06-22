@@ -141,8 +141,8 @@ assert(quality.includes("rawZhEnglishJargonPattern"), "quality gate rejects raw 
 assert(quality.includes("technicalJargonPattern"), "quality gate requires jargon-heavy paragraphs to explain terms plainly");
 assert(quality.includes('"hentai"'), "quality gate blocks obvious off-topic adult typo terms in public blog copy");
 assert(
-  quality.includes("source-translation") && quality.includes("production articles must be written or revised through Gemini before release"),
-  "quality gate requires Gemini-written/revised columns/features while allowing source-translated market news"
+  quality.includes("source-translation") && quality.includes("production articles must be written or revised through Gemini or Codex before release"),
+  "quality gate requires Gemini/Codex-written or revised columns/features while allowing source-translated market news"
 );
 assert(quality.includes("market news posts must use a credited source article or official announcement image"), "quality gate requires market-news source covers");
 assert(quality.includes("market news posts must not expose internal source-translation"), "quality gate blocks market-news template/process headings");
@@ -203,7 +203,7 @@ assert(localWorker.includes("qualityManifest") && localWorker.includes("contentS
 assert(localWorker.includes("reuse-validated-manifest"), "local worker can reuse a signed validate-only manifest during release");
 assert(localWorker.includes("isSourceTranslationLane"), "local worker allows source-translation market news without Gemini tab evidence");
 assert(localWorker.includes("requiresGptCover"), "local worker only requires ChatGPT/GPT evidence when generated covers are needed");
-assert(localWorker.includes("sourceTranslatedMarketNews") && localWorker.includes("article must be drafted or revised through Gemini"), "local worker requires Gemini provenance except source-translated market news");
+assert(localWorker.includes("sourceTranslatedMarketNews") && localWorker.includes("generatedBy.includes(\"codex\")"), "local worker requires Gemini/Codex provenance except source-translated market news");
 assert(localWorker.includes("Local fallback cover generation is disabled"), "local worker fails closed on fallback cover generation");
 assert(localWorker.includes("coverGeneration.provider must be ChatGPT/GPT"), "local worker requires GPT cover provenance");
 assert(localWorker.includes("articleSetCoverIssues"), "local worker requires one shared cover URL across translated article versions");
@@ -393,7 +393,7 @@ assert(
   releaseVerifier.includes("qualityStatus: \"passed\"") && releaseVerifier.includes("admin readback ${key} must be ${expected}"),
   "release verifier checks protected admin quality metadata"
 );
-assert(releaseVerifier.includes("source-translation provenance for market news"), "release verifier checks Gemini provenance for columns/features and source-translation provenance for market news");
+assert(releaseVerifier.includes("Gemini/Codex provenance") && releaseVerifier.includes("source-translation provenance for market news"), "release verifier checks Gemini/Codex provenance for columns/features and source-translation provenance for market news");
 assert(!releaseVerifier.includes("public API generatedBy does not show Gemini provenance"), "release verifier does not require public Gemini provenance leakage");
 assert(releaseVerifier.includes("public API market news coverSource must be source"), "release verifier checks market-news source cover metadata");
 assert(releaseVerifier.includes("not stock/free image providers"), "release verifier blocks stock/free images for market-news source covers");

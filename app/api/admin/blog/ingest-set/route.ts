@@ -190,8 +190,8 @@ function generationContractIssues(posts: BlogPost[]) {
     const isSourceTranslatedMarketNews =
       isMarketNews && /source-translation|source_translat|source-worker|codex-market|market-source/.test(generatedBy);
 
-    if (!generatedBy.includes("gemini") && !isSourceTranslatedMarketNews) {
-      issues.push(`${post.language}/${post.slug}: article must be drafted or revised through Gemini before ingest`);
+    if (!/(gemini|codex)/i.test(generatedBy) && !isSourceTranslatedMarketNews) {
+      issues.push(`${post.language}/${post.slug}: article must be drafted or revised through Gemini or Codex before ingest`);
     }
     if (isMarketNews) {
       if (post.coverSource !== "source") {
