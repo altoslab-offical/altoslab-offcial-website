@@ -32,7 +32,7 @@ const copy = {
     readTime: (minutes: number) => `${minutes} 分鐘閱讀`,
     geoSummary: "重點摘要",
     takeaways: "本文重點",
-    faq: "常見問題",
+    faq: "讀者會追問的事",
     sources: "來源與參考",
     related: "延伸閱讀",
     relatedTitle: "Keep reading",
@@ -47,7 +47,7 @@ const copy = {
     readTime: (minutes: number) => `${minutes} min read`,
     geoSummary: "TL;DR",
     takeaways: "Key Takeaways",
-    faq: "FAQ",
+    faq: "Questions readers should ask",
     sources: "Sources",
     related: "Related reading",
     relatedTitle: "Keep reading",
@@ -62,7 +62,7 @@ const copy = {
     readTime: (minutes: number) => `${minutes} 分で読めます`,
     geoSummary: "要約",
     takeaways: "要点",
-    faq: "FAQ",
+    faq: "読後に確認したいこと",
     sources: "出典",
     related: "関連記事",
     relatedTitle: "Keep reading",
@@ -77,7 +77,7 @@ const copy = {
     readTime: (minutes: number) => `${minutes}분 읽기`,
     geoSummary: "핵심 요약",
     takeaways: "핵심 포인트",
-    faq: "FAQ",
+    faq: "읽은 뒤 확인할 질문",
     sources: "출처",
     related: "관련 글",
     relatedTitle: "Keep reading",
@@ -92,7 +92,7 @@ const copy = {
     readTime: (minutes: number) => `${minutes} menit baca`,
     geoSummary: "Ringkasan",
     takeaways: "Poin Utama",
-    faq: "Pertanyaan Umum",
+    faq: "Pertanyaan sebelum bertindak",
     sources: "Sumber dan Rujukan",
     related: "Bacaan terkait",
     relatedTitle: "Keep reading",
@@ -107,7 +107,7 @@ const copy = {
     readTime: (minutes: number) => `${minutes} phút đọc`,
     geoSummary: "Tóm tắt nhanh",
     takeaways: "Ý chính",
-    faq: "Câu hỏi thường gặp",
+    faq: "Câu hỏi trước khi hành động",
     sources: "Nguồn tham khảo",
     related: "Bài liên quan",
     relatedTitle: "Keep reading",
@@ -122,7 +122,7 @@ const copy = {
     readTime: (minutes: number) => `อ่าน ${minutes} นาที`,
     geoSummary: "สรุปสั้น",
     takeaways: "ประเด็นสำคัญ",
-    faq: "คำถามที่พบบ่อย",
+    faq: "คำถามก่อนลงมือ",
     sources: "แหล่งอ้างอิง",
     related: "บทความที่เกี่ยวข้อง",
     relatedTitle: "Keep reading",
@@ -137,7 +137,7 @@ const copy = {
     readTime: (minutes: number) => `${minutes} minit bacaan`,
     geoSummary: "Ringkasan",
     takeaways: "Isi Utama",
-    faq: "Soalan Lazim",
+    faq: "Soalan sebelum bertindak",
     sources: "Sumber dan Rujukan",
     related: "Bacaan berkaitan",
     relatedTitle: "Keep reading",
@@ -152,7 +152,7 @@ const copy = {
     readTime: (minutes: number) => `${minutes} min read`,
     geoSummary: "Quick summary",
     takeaways: "Key Points",
-    faq: "FAQ",
+    faq: "Mga tanong bago kumilos",
     sources: "Sources",
     related: "Related reading",
     relatedTitle: "Keep reading",
@@ -569,7 +569,7 @@ export async function BlogArticle({ post }: { post: BlogPost }) {
 
           {post.faqs.length ? (
             <section className="article-faq-section">
-              <p className="eyebrow">FAQ</p>
+              <p className="eyebrow">Q&A</p>
               <h2>{dictionary.faq}</h2>
               <div className="faq-list">
                 {post.faqs.map((faq) => (
