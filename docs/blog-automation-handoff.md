@@ -36,10 +36,10 @@
 
 - 每個正式 article set 必須剛好包含 `zh-Hant`, `en`, `ja`, `ko`, `id`, `vi`, `th`, `ms`, `fil`。
 - 同一組語言必須共享同一個 `translationGroupId`、sourceLinks、cover URL、coverSource、cover credit、contentImages URL set、visual metadata；只有 localized public copy 可以不同。
-- Market news 是 source-translation，不是專欄。它必須使用 verified source article 或 official announcement；cover 優先使用 credited source/official image。若來源圖缺失、歪斜、generic、低資訊密度、已重複或不貼題，必須進入 repair/rewrite/re-image/re-QA，並可改用通過 rendered review 的 ALTOS LAB editorial fallback cover；不可把正常品質問題記成 successful skip。
-- Market news 不使用 Gemini 寫稿，不使用 Unsplash、Pexels、Pixabay、Openverse、local fallback art、generic stock image。若使用 ALTOS LAB editorial fallback cover，必須留下 `coverSource=manual|generated`、ALTOS LAB credit/license、`imageQualityStatus=passed` 與 topic-fit evidence。
+- Market news 是 source-translation，不是專欄。它必須使用 verified source article 或 official announcement；cover 只能使用 credited source/official image。若來源圖缺失、歪斜、generic、低資訊密度、已重複或不貼題，必須進入 source-image repair / re-QA；不可改用生成圖，也不可把正常品質問題記成 successful skip。
+- Market news 不使用 Gemini 寫稿，不使用 Unsplash、Pexels、Pixabay、Openverse、local fallback art、generic stock image，也不走 ALTOS LAB generated/manual fallback。封面只能使用來源文章或官方公告圖，否則 candidate 進 source-image repair，不 release。
 - Column / feature 必須有明確 production provenance。舊 lane 可用 Gemini + GPT；Hermes/OpenClaw 新 lane 可用 Codex `gpt-5.4`，但 candidate / article-set / manifest 必須留下 `codexEvidence`，不能用空白或口頭聲明取代。
-- Column / feature 的 cover 與 2-3 張 shared in-article images 必須共享同一組 public URL；圖片 workflow 可以是指定 ChatGPT/GPT 或 Codex image lane，但都要通過 visual metadata、topic-fit、source/rights 與 rendered review gate。Market news 的 ALTOS LAB fallback cover 也走同一個 rendered topic-fit gate，不因為是快訊而降低標準。
+- Column / feature 的 cover 與 2-3 張 shared in-article images 必須共享同一組 public URL；圖片 workflow 可以是指定 ChatGPT/GPT 或 Codex image lane，但都要通過 visual metadata、topic-fit、source/rights 與 rendered review gate。Market news 不走 ALTOS LAB fallback cover；它只接受來源文章或官方公告圖。
 - Release window 不產生新內容，只發布已經 `ready` 的 prepared candidate；若沒有可發布 candidate，必須產出 repair plan，直到 validate-only pass 後 publish + public readback。
 - `held`、`validateOnly.wouldPublish=false`、duplicate topic、untrusted source、H2/body merged、content image unsafe/mismatched 都是 repair/rewrite/re-image blockers；不可當成 skip 或成功發文。
 - Prep 不能覆寫已存在且有 usable `articleSetPath` 的 ready/released candidate；即使用 `--force` 也只能重建空的 awaiting skeleton，若真的要替換有效候選，必須顯式使用 `--replace-valid-candidate` 並留下 rollback/evidence。避免 late prep 把可發布 evening slot 蓋成 `awaiting_browser_production`。
@@ -58,12 +58,12 @@
 - Title/subtitle 的新準則：title 先交代主體、動作與讀者關係；subtitle/excerpt 補來源、日期、數字、風險或為什麼現在要看，不重複 title，不出現 `workflow`、`content readback loop`、`decision hook`、`risk lens` 這類內部營運語氣。多語版本要各自自然，不做英文術語直譯。
 - 若 Tommy 在 article QA 說 `Sub-title`，不要自動理解成 public subtitle/excerpt；先檢查是否指文章內每段的 `H2/H3`。段落小標要像 mini headline，帶出該段的主體、機制、風險或決策，不要用 `ALTOS LAB view`、`What to watch`、`先看範圍`、`接下來看什麼` 這類可複製骨架詞。
 - Column / feature 的 in-article images 必須服務不同閱讀工作，例如 workflow anchor、mechanism/evidence、review/rollback loop；同一篇內不可重複同一 URL / localPath / prompt。多語版本仍共享同一組 public image URL。
-- 市場快訊封面預設使用來源文章或官方公告圖片，並保留 `coverSource:"source"`、`coverCredit`、`coverCreditUrl`、`coverLicense`。只有來源頁 403、沒有可用圖片、圖片品質/權利不合格時，才允許 ALTOS LAB editorial fallback；fallback 不能被當成快訊預設。
+- 市場快訊封面必須使用來源文章或官方公告圖片，並保留 `coverSource:"source"`、`coverCredit`、`coverCreditUrl`、`coverLicense`。來源頁 403、沒有可用圖片、圖片品質/權利不合格時，不得自動生成或補本地圖；candidate 必須進 source-image repair，找到合格來源圖後才 release。
 - `/api/blog?fields=inventory&limit=120` 是以單篇 post 切頁，不是以 9 語 translation group 切頁。當最新 120 筆正好切在最後一組中間時，最後一個 partial group 是 sample boundary，不應被 SEO/GEO report 當成缺語言；真正缺語言要用非邊界 group 或 full inventory/admin readback 判斷。
 - AWS/S3 runtime 的 `/api/blog?fields=inventory` cap 必須足夠支援 full SEO/GEO coverage audit；預設使用 `BLOG_API_LIMIT_CAP=1000`，`seo:geo-report` 預設用 `SEO_GEO_INVENTORY_LIMIT=1000`。不要用 120 筆 sample 結論決定是否刪文、補語言或宣稱多語缺口。
 - SEO/GEO source-count gate 必須按內容類型判斷：市場快訊可以是單一可信原始來源；專欄/feature 才要求多來源平均健康度。不要為了分數替快訊硬塞不必要來源。
 - Hermes/OpenClaw Codex lane 必須把 `codexEvidence.provider/runtime/model/reasoning` 寫進 manifest；不要為了通過 legacy doctor 偽造 Gemini/ChatGPT Chrome evidence。若 release verifier 看到 internal copy，例如 `SEO/GEO`，要修公開文案後重新 release/readback。
-- Market-news ALTOS LAB fallback cover 的 quality review 不應在 image review 前要求 `imageQualityStatus=passed`。可先用 `coverSource=manual|generated`、ALTOS LAB credit/license、alt text 和 shared public URL 通過 copy gate，再由 image gate 判定 `imageQualityStatus=passed`。
+- Market-news 不再接受 ALTOS LAB fallback cover 通過 production gate；舊 fallback/generated 快訊需要回補來源圖，不能用 copy gate 繞過 image/source evidence。
 - 破圖修復不能等同於圖片品質修復。若 generated-media object 遺失，短期只允許用穩定 fallback 或恢復原始/source-safe 圖止血；不要用本地 SVG/抽象流程板硬補正式 cover。正式 column/feature cover 必須走 ChatGPT/GPT raster lane 或可授權來源圖，prompt 要指定具體主體、構圖、鏡頭/版式、材質光線、色彩與負面約束；拒絕抽象節點板、workflow card、glass cube、假 dashboard、generic network map、過度 3D SaaS 感與一眼 AI 圖。
 - AWS deploy 使用唯一 ECR image tag 作為 production evidence；不要依賴脆弱的 `latest` tag shell interpolation。部署後以 ECS task definition、service stable、`verify:aws` 和 production performance smoke 作為完成證據。
 - 候選稿品質不合格時，流程是 repair/rewrite/re-image/re-QA 到 validate-only pass，再 publish + public readback；不是 skip，也不是把 `wouldPublish=true` 當成已發布。
@@ -188,7 +188,7 @@ npm run blog:market-sources -- --date <YYYY-MM-DD> --queue-dir data/blog-backfil
 
 2. 從 source pack 挑選非重複、來源可驗、圖片可用的 longform item。
 3. Source worker 建立 source-faithful article set，普通 market news 不跑 Gemini。
-4. 優先保留 source article / official announcement image，所有語言共用；若 source image 本身不合格，改用同一張 ALTOS LAB editorial fallback cover，並保留 credit/license/QA evidence。
+4. 保留 source article / official announcement image，所有語言共用；若 source image 本身不合格，回到 source-image repair 找到合格來源圖後才 release。
 5. 跑 public QA：
 
 ```bash
@@ -200,12 +200,12 @@ npm run blog:market-public-qa -- --slug <slug> --must <entity> --must <publisher
 
 ### Market news hold 條件
 
-- 沒有 usable credited source/official image，且沒有通過 QA 的 ALTOS LAB editorial fallback cover
+- 沒有 usable credited source/official image
 - source URL 重複或 cover URL 重複
 - 內容像模板、顧問清單、空泛 adoption checklist
 - public copy 出現 `SEO`, `GEO`, `AI-generated`, prompt, pipeline, quality gate 等內部詞
 - 摘要出現污染字串，例如 `報導「」`、`文中牽涉`、`這則消息可以拿來`
-- 來源圖片其實是 stock/free/generic fallback，或 ALTOS LAB fallback cover 沒有 topic-fit/rendered review evidence
+- 來源圖片其實是 stock/free/generic fallback，或快訊使用了 ALTOS LAB generated/manual fallback cover
 
 ## Column / Feature Lane
 

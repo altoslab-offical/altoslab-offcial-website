@@ -181,17 +181,6 @@ function sourceCoverCreditMatchesSource(post: BlogPost) {
   return blogSourceLinks(post).some((source) => sourceHostMatches(post.coverCreditUrl || "", source.url));
 }
 
-function isEditorialFallbackMarketCover(post: BlogPost) {
-  const credit = `${post.coverCredit || ""} ${post.coverLicense || ""}`;
-  return (
-    (post.coverSource === "manual" || post.coverSource === "generated") &&
-    /ALTOS LAB/i.test(credit) &&
-    Boolean(post.coverAlt?.trim()) &&
-    Boolean(post.coverLicense?.trim()) &&
-    isHttpUrl(post.cover)
-  );
-}
-
 function generationContractIssues(posts: BlogPost[]) {
   return posts.flatMap((post) => {
     const issues: string[] = [];
@@ -205,8 +194,7 @@ function generationContractIssues(posts: BlogPost[]) {
       issues.push(`${post.language}/${post.slug}: article must be drafted or revised through Gemini or Codex before ingest`);
     }
     if (isMarketNews) {
-      const editorialFallbackCover = isEditorialFallbackMarketCover(post);
-      if (post.coverSource !== "source" && !editorialFallbackCover) {
+      if (post.coverSource !== "source") {
         issues.push(`${post.language}/${post.slug}: market news coverSource must be source, not ${post.coverSource || "missing"}`);
       }
       if (!post.coverCredit?.trim()) {

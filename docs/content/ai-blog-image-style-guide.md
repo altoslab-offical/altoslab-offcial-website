@@ -98,7 +98,7 @@ Hermes 產圖時不要把禁忌詞放進 negative prompt，因為 metadata scann
 2026-06-22 production lesson：市場快訊不等於強迫使用來源圖。若來源圖只是大 logo、
 斜游標、粉色背景或其他與文章決策無關的 generic asset，會讓文章像自動摘要或
 prompt demo。Hermes/OpenClaw 應先判斷 source image 是否真的提供事件、產品、
-人物、流程或證據線索；不合格時，改走 ALTOS LAB editorial fallback cover，
+人物、流程或證據線索；快訊不合格時回到 source-image repair，
 但必須保留 credit/license、`imageQualityStatus=passed`、rendered public-page review
 和 topic-fit 判斷。
 

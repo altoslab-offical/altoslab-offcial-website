@@ -1634,6 +1634,10 @@ export function normalizeBlogPostInput(input: Partial<BlogPost>, existing?: Blog
     slot: input.generationSlot ?? existing?.generationSlot,
     seed: input.translationGroupId ?? existing?.translationGroupId ?? input.slug ?? existing?.slug
   });
+  const coverGenerationInput = (input as Partial<BlogPost> & { coverGeneration?: BlogPost["coverGeneration"] | null })
+    .coverGeneration;
+  const clearCoverGeneration =
+    Object.prototype.hasOwnProperty.call(input, "coverGeneration") && coverGenerationInput === null;
   const qualityChecks = defaultQualityChecks({
     ...existing?.qualityChecks,
     ...input.qualityChecks,
@@ -1670,7 +1674,7 @@ export function normalizeBlogPostInput(input: Partial<BlogPost>, existing?: Blog
     coverAlt: input.coverAlt ?? existing?.coverAlt ?? `${title} cover image`,
     coverPrompt: input.coverPrompt ?? existing?.coverPrompt,
     coverSource: input.coverSource ?? existing?.coverSource ?? "manual",
-    coverGeneration: input.coverGeneration ?? existing?.coverGeneration,
+    coverGeneration: clearCoverGeneration ? undefined : input.coverGeneration ?? existing?.coverGeneration,
     coverCredit: input.coverCredit ?? existing?.coverCredit,
     coverCreditUrl: input.coverCreditUrl ?? existing?.coverCreditUrl,
     coverLicense: input.coverLicense ?? existing?.coverLicense,
@@ -1737,17 +1741,6 @@ export function publishValidationForProject(project: Project) {
   return errors;
 }
 
-function isEditorialFallbackCover(post: BlogPost) {
-  const credit = `${post.coverCredit || ""} ${post.coverLicense || ""}`;
-  return (
-    (post.coverSource === "manual" || post.coverSource === "generated") &&
-    /ALTOS LAB/i.test(credit) &&
-    Boolean(post.coverAlt?.trim()) &&
-    Boolean(post.coverLicense?.trim()) &&
-    post.imageQualityStatus === "passed"
-  );
-}
-
 export function publishValidationForBlogPost(post: BlogPost) {
   const errors: string[] = [];
   if (!post.slug) errors.push("slug is required");
@@ -1774,9 +1767,8 @@ export function publishValidationForBlogPost(post: BlogPost) {
   if (post.generatedBy && hasApprovedCoverSource && !post.coverCredit) {
     errors.push("generated posts require cover attribution before publishing");
   }
-  const editorialFallbackCover = isEditorialFallbackCover(post);
-  if (post.generatedBy && post.contentType === "breaking" && post.coverSource !== "source" && !editorialFallbackCover) {
-    errors.push("market news posts require a source article cover image or approved ALTOS LAB editorial fallback cover before publishing");
+  if (post.generatedBy && post.contentType === "breaking" && post.coverSource !== "source") {
+    errors.push("market news posts require a source article or official announcement cover image before publishing");
   }
   if (post.generatedBy && post.coverSource === "source" && (!post.coverCreditUrl || !post.coverLicense)) {
     errors.push("source cover images require public credit URL and source-rights metadata before publishing");

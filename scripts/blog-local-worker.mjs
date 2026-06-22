@@ -384,17 +384,6 @@ function sourceCoverCreditMatchesSource(post) {
   return sourceUrls(post).some((url) => sourceHostMatches(post.coverCreditUrl || "", url));
 }
 
-function isApprovedEditorialFallbackCover(post) {
-  const credit = `${post.coverCredit || ""} ${post.coverLicense || ""}`;
-  return (
-    (post.coverSource === "manual" || post.coverSource === "generated") &&
-    /ALTOS LAB/i.test(credit) &&
-    Boolean(String(post.coverAlt || "").trim()) &&
-    Boolean(String(post.coverLicense || "").trim()) &&
-    post.imageQualityStatus === "passed"
-  );
-}
-
 function articleSetCoverIssues(posts) {
   const issues = [];
   const groups = new Map();
@@ -605,8 +594,8 @@ function localPreflight(payload) {
       issues.push(`${post.language || "unknown"} sourceLinks differ from the multilingual set`);
     }
     const marketNews = post.contentType === "breaking";
-    if (marketNews && post.coverSource !== "source" && !isApprovedEditorialFallbackCover(post)) {
-      issues.push(`${post.language || "unknown"} market news coverSource must be source or approved ALTOS LAB editorial fallback`);
+    if (marketNews && post.coverSource !== "source") {
+      issues.push(`${post.language || "unknown"} market news coverSource must be source`);
     }
     if (!marketNews && post.coverSource !== "generated") {
       issues.push(`${post.language || "unknown"} non-news coverSource must be generated`);
@@ -1090,7 +1079,7 @@ Topic: ${topic || (marketLane ? "pick the strongest verified AI market signal fr
 Create one article set in ${LANGUAGE_LABEL}.
 
 Hard requirements:
-- ${marketLane ? "Market news uses source-translation from verified source articles. Do not use Gemini by default. Prefer the source article or official announcement image with visible source credit; if the source image is generic, tilted, off-topic, unsafe, missing, or already used, create an ALTOS LAB editorial fallback cover and store credit/license/QA evidence." : "Gemini writes/revises one zh-Hant source-of-truth column first. Main-brain QA must pass before any localization starts."}
+- ${marketLane ? "Market news uses source-translation from verified source articles. Do not use Gemini by default. Use the source article or official announcement image with visible source credit; if the source image is generic, tilted, off-topic, unsafe, missing, or already used, hold for source-image repair. Do not create generated/manual fallback covers for market news." : "Gemini writes/revises one zh-Hant source-of-truth column first. Main-brain QA must pass before any localization starts."}
 - ${marketLane ? "Translate/adapt the source facts into all configured languages with native local phrasing. Do not copy source paragraphs or article structure." : `After the zh-Hant source passes, bounded subagents localize en, ja, ko, id, vi, th, ms and fil without inventing facts or changing sources/media.\nSubagent model fallback policy:\n${subagentModelPolicyText()}`}
 - ${marketLane ? "Do not open ChatGPT/GPT for market-news images." : "For column/feature posts, generate the cover image and 2-3 in-article images through ChatGPT/GPT in the ALTOS Blog QA Chrome group."}
 - Close or release any task-owned Gemini/GPT tabs after the run so Chrome memory is not held.
@@ -1102,7 +1091,7 @@ Hard requirements:
 - Include ALTOS LAB judgment, source translation note, FAQ, SEO title/meta and GEO summary as schema/backend fields; do not expose SEO/GEO/AI-generation/process terms in public copy.
 - Column/feature cover images must be generated per article, uploaded through the signed ALTOS LAB media route, and include provider, prompt, generatedAt, coverCredit and visualChecks.
 - Column/feature contentImages must include url or localPath, alt, caption, source "generated", credit "ALTOS LAB editorial visual", aspectRatio, placement, provider, prompt, generatedAt and visualChecks.
-- Market news cover images should use coverSource "source" with coverCredit, coverCreditUrl and coverLicense when the source image is strong. If the source image is missing, unsafe, tilted, generic, already used, or visually weak, use an ALTOS LAB editorial fallback cover with coverSource "manual" or "generated", visible ALTOS LAB credit/license, and imageQualityStatus "passed".
+- Market news cover images must use coverSource "source" with coverCredit, coverCreditUrl and coverLicense from the source article or official announcement. If the source image is missing, unsafe, tilted, generic, already used, or visually weak, hold the candidate for source-image repair; do not use GPT art, stock art, local fallback art, manual fallback or generated fallback unless Tommy explicitly overrides that run.
 ${visualStyleBlock}
 
 Return only JSON shaped for POST /api/admin/blog/ingest-set:

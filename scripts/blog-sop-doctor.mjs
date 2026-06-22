@@ -192,17 +192,6 @@ function sourceCoverCreditMatchesSource(post) {
   return (post.sourceLinks || []).some((source) => sourceHostMatches(post.coverCreditUrl || "", source.url || ""));
 }
 
-function isApprovedEditorialFallbackCover(post) {
-  const credit = `${post.coverCredit || ""} ${post.coverLicense || ""}`;
-  return (
-    (post.coverSource === "manual" || post.coverSource === "generated") &&
-    /ALTOS LAB/i.test(credit) &&
-    Boolean(String(post.coverAlt || "").trim()) &&
-    Boolean(String(post.coverLicense || "").trim()) &&
-    post.imageQualityStatus === "passed"
-  );
-}
-
 function isColumnOrFeature(post) {
   return post.contentType === "column" || post.contentType === "feature";
 }
@@ -530,9 +519,8 @@ function checkReleaseCandidate({ date, slot, lane }, errors, warnings) {
         }
       }
       if (post.contentType === "breaking") {
-        const editorialFallbackCover = isApprovedEditorialFallbackCover(post);
-        if (post.coverSource !== "source" && !editorialFallbackCover) {
-          addIssue(errors, `${post.language}/${post.slug}: market news coverSource must be source or approved ALTOS LAB editorial fallback`);
+        if (post.coverSource !== "source") {
+          addIssue(errors, `${post.language}/${post.slug}: market news coverSource must be source`);
         }
         if (post.coverSource === "source") {
           if (!post.coverCredit || !post.coverCreditUrl || !post.coverLicense) {

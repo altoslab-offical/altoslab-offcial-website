@@ -9,7 +9,7 @@
 - Every generated article keeps visible `sourceLinks` for attribution and fact checking.
 - Source images, charts, screenshots and article art are not copied or rehosted just because attribution is present.
 - For news posts, each source becomes a visible source-card/dossier item: title, publisher, date, URL and a concise original summary of what the source supports.
-- Market-news cover images should be the credited source article image or an official announcement/press-kit image shared by every language version. If the source/official image is missing, generic, tilted, unsafe, already used, or visually weak, use one shared ALTOS LAB editorial fallback cover only after rendered topic-fit QA, visible ALTOS LAB credit/license, and `imageQualityStatus=passed`.
+- Market-news cover images must be the credited source article image or an official announcement/press-kit image shared by every language version. If the source/official image is missing, generic, tilted, unsafe, already used, or visually weak, hold the candidate for source-image repair; do not generate or manually substitute an ALTOS LAB fallback cover.
 - Pinterest can be used only as visual direction. It must not be used as an image source.
 
 ## Subagent Orchestration v3
@@ -17,7 +17,7 @@
 - DeepSeek is no longer part of the formal publishing path.
 - The current production loop uses the main Codex thread as the release controller. Columns/features use Gemini to write the source-of-truth article first; after Codex approves it, subagent workers localize the approved article into the remaining languages.
 - Subagent model policy: start with `gpt-5.3-codex-spark`. If Spark usage is exhausted, quota/rate-limited, returns `429`, `resource_exhausted`, or otherwise reports capacity/budget exhaustion, continue the same bounded worker task with `gpt-5.4-mini`. The fallback worker inherits the same owned files, output cap, no-publish rule and no-final-quality-decision boundary.
-- Market-news fast lane uses source-translation: Codex/source workers translate and adapt a verified source article into ALTOS LAB's reader-first brief format, with source links and one shared cover across all languages. The cover is source/official image first; approved ALTOS LAB editorial fallback is allowed when the source image fails visual or rights QA. Ordinary market news does not need Gemini.
+- Market-news fast lane uses source-translation: Codex/source workers translate and adapt a verified source article into ALTOS LAB's reader-first brief format, with source links and one shared source/official cover across all languages. Ordinary market news does not need Gemini, but it cannot release without a credited source/official image.
 - Gemini and ChatGPT/GPT are browser workbenches, not release authorities. They may help draft prose or images only inside the dedicated Chrome tabs documented in `docs/content/blog-subagent-production-loop.md`.
 - Localization is not literal translation. Subagents must rewrite naturally for local readers while preserving the same article identity, source facts, sources, cover/media set and editorial angle.
 - The main brain is the only role allowed to call `--release`.
@@ -29,7 +29,7 @@
 - Market news is the fast lane: source selection, source-faithful localization, validation and release should stay terminal-first and should not open Gemini, ChatGPT, Gmail or extra Chrome tabs.
 - Columns/features are the expensive lane: only the approved zh-Hant source article and GPT visual production may use Chrome. Localization, duplicate checks, validate-only, release verification and SEO/GEO reporting should run outside Chrome.
 - All column/Gemini/ChatGPT/Gmail browser work must use Tommy's Chrome profile signed in as `john.wu0120@gmail.com`. Do not use, claim, or switch into a `tm.studio` profile. Browser evidence for publishable column/feature candidates must record `profileEmail: "john.wu0120@gmail.com"` for every used Gemini or ChatGPT tab.
-- Published market-news repair is terminal-first and source-first: run `npm run blog:repair-copy -- --base-url https://altoslab-official-website.altoslab-ai.workers.dev --content-type breaking --language all --bulk` only after the source article, canonical URL and either a credited source image or approved ALTOS LAB editorial fallback cover are present. The repair tool must not touch columns/features; those return to the Gemini column lane.
+- Published market-news repair is terminal-first and source-first: run `npm run blog:repair-copy -- --base-url https://altoslab-official-website.altoslab-ai.workers.dev --content-type breaking --language all --bulk` only after the source article, canonical URL and credited source/official image are present. Market news must not use ALTOS LAB generated/manual fallback covers; missing or weak source images return to source-image repair. The repair tool must not touch columns/features; those return to the Gemini column lane.
 - Market-source discovery is terminal-first: run `npm run blog:market-sources -- --date <date> --queue-dir data/blog-backfill/<date>/queue --write --overwrite` to create `market-source-packs.generated.json` from current RSS/API signals, duplicate checks and source/official image extraction before any market-news copy worker starts.
 - `scripts/blog-scheduled-runner.mjs --scheduled` now fails closed outside the configured time windows instead of falling through to release mode.
 - `scripts/blog-scheduled-runner.mjs --column-status` exposes whether the daily column has an `article-set.json`, ready manifest and release-gate issues.
@@ -42,7 +42,7 @@
 
 ## Cover Image Strategy
 
-- Preferred production path: market news uses credited, non-reused source or official announcement images; when that image is weak or unusable, market news may use a shared ALTOS LAB editorial fallback cover with rendered QA evidence. Columns/features use topic-matched ALTOS LAB editorial visuals generated in the dedicated GPT/ChatGPT image tab, uploaded through the signed media route with internal provider/prompt/QA metadata.
+- Preferred production path: market news uses credited, non-reused source or official announcement images; when that image is weak or unusable, the candidate returns to source-image repair. Columns/features use topic-matched ALTOS LAB editorial visuals generated in the dedicated GPT/ChatGPT image tab, uploaded through the signed media route with internal provider/prompt/QA metadata.
 - Public generated-cover credit should read `ALTOS LAB editorial visual`; provider and prompt remain internal quality metadata.
 - Licensed third-party images are allowed only for explicit, reviewed non-market editorial use when the license, credit URL and landing page are stored and checked.
 - Do not use Pexels, Pixabay, Openverse, Unsplash, local fallback art or generic stock imagery for formal market-news publishing.
@@ -53,7 +53,7 @@
   - `BLOG_IMAGE_PROVIDER=none`
   - `AUTO_GENERATE_BLOG_COVERS=false`
   - `BLOG_IMAGE_STORE_BLOB=false`
-- The preferred path for columns/features is generated imagery, saved through the signed media upload route and served from same-origin generated media. Market-news posts use credited source or official announcement images when they are strong; otherwise they use an approved ALTOS LAB editorial fallback cover, not stock/free/local placeholder art.
+- The preferred path for columns/features is generated imagery, saved through the signed media upload route and served from same-origin generated media. Market-news posts use credited source or official announcement images only; weak or missing source images block release until source-image repair finds an acceptable public image.
 - If GPT image generation is used, it must happen only in the dedicated ChatGPT/GPT image tab and the final image still has to pass production image QA.
 - If GPT image generation is unavailable, the candidate is held; local fallback art is disabled for production publishing.
 
@@ -73,7 +73,7 @@ Auto-publishing requires:
 
 ## Column Cadence Guard
 
-- Market news and columns must stay separated. Market news can publish during market-scan windows when a source-verifiable item and source/official image or approved ALTOS LAB editorial fallback cover passes QA.
+- Market news and columns must stay separated. Market news can publish during market-scan windows only when a source-verifiable item and source/official image pass QA.
 - Columns/features are capped at three translation groups per Taipei calendar day by default.
 - `scripts/blog-local-worker.mjs --publish` enforces `ALTOS_BLOG_COLUMN_DAILY_LIMIT=3` for non-breaking article sets. It blocks release when a payload would exceed the daily limit.
 - Backfill column drafts must be rewritten and released through the normal column lane instead of being bulk-published. A local batch of nine draft columns is a backlog, not a publish queue.

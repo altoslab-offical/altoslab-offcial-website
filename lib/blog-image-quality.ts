@@ -182,16 +182,6 @@ function isBreakingNews(post: BlogPost) {
   return post.contentType === "breaking";
 }
 
-function isEditorialFallbackCover(post: BlogPost) {
-  const credit = `${post.coverCredit || ""} ${post.coverLicense || ""}`;
-  return (
-    (post.coverSource === "manual" || post.coverSource === "generated") &&
-    /ALTOS LAB/i.test(credit) &&
-    Boolean(post.coverAlt?.trim()) &&
-    Boolean(post.coverLicense?.trim())
-  );
-}
-
 function imageContext(post: BlogPost) {
   return removeNegativeImageConstraints(
     [
@@ -447,7 +437,7 @@ async function reviewPostImage(post: BlogPost, options: Required<BlogImageQualit
   if (options.requireGeneratedCoverForNonBreaking && !breakingNews && !generatedCover) {
     issues.push("non-news production covers must use coverSource generated from ChatGPT/GPT");
   }
-  if (options.requireSourceCoverForBreaking && breakingNews && !sourceCover && !isEditorialFallbackCover(post)) {
+  if (options.requireSourceCoverForBreaking && breakingNews && !sourceCover) {
     issues.push("market news cover must use coverSource source from the source article or official announcement");
   }
 
@@ -493,8 +483,8 @@ async function reviewPostImage(post: BlogPost, options: Required<BlogImageQualit
   }
 
   const context = imageContext(post);
-  if (breakingNews && isEditorialFallbackCover(post) && sourceCoverWeakContextPattern.test(context)) {
-    issues.push("editorial fallback cover metadata reads like a placeholder or generic tech visual");
+  if (breakingNews && !sourceCover && sourceCoverWeakContextPattern.test(context)) {
+    issues.push("market news without a source cover must return to source-image repair instead of using fallback art");
   }
   if (generatedCover && unsafeImageMetadataPattern.test(context)) {
     issues.push("cover metadata indicates text artifacts, logos, people, trademark or unsafe visual risk");

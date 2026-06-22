@@ -149,7 +149,7 @@ assert(
   quality.includes("source-translation") && quality.includes("production articles must be written or revised through Gemini or Codex before release"),
   "quality gate requires Gemini/Codex-written or revised columns/features while allowing source-translated market news"
 );
-assert(quality.includes("approved ALTOS LAB editorial fallback cover"), "quality gate allows market-news source covers or approved ALTOS LAB editorial fallback covers");
+assert(quality.includes("official announcement image lane before release"), "quality gate requires market-news source or official announcement covers");
 assert(quality.includes("market news posts must not expose internal source-translation"), "quality gate blocks market-news template/process headings");
 assert(quality.includes("ChatGPT/GPT"), "quality gate requires ChatGPT/GPT-generated production covers for generated-cover lanes");
 assert(covers.includes("BLOG_IMAGE_STORE_BLOB"), "image pipeline supports optional Vercel Blob persistence");
@@ -175,7 +175,7 @@ assert(
 );
 assert(ingestRoute.includes("duplicateTopicIssues"), "ingest route blocks repeated topics/source angles");
 assert(ingestRoute.includes("duplicateCoverIssues"), "ingest route blocks repeated cover images across different article groups");
-assert(ingestRoute.includes("isEditorialFallbackMarketCover"), "ingest route allows approved ALTOS LAB fallback covers for market-news posts");
+assert(ingestRoute.includes("market news coverSource must be source"), "ingest route enforces source covers for market-news posts");
 assert(ingestRoute.includes("not stock/free image providers"), "ingest route blocks stock/free images for market-news source covers");
 assert(releaseRoute.includes("verifyBlogIngestRequest"), "release-set route verifies HMAC before parsing release payloads");
 assert(releaseRoute.includes("qualityManifest") && releaseRoute.includes("contentSha256"), "release-set route requires a signed quality manifest digest");
@@ -406,7 +406,7 @@ assert(orchestrator.includes("\"profileEmail\": \"${marketLane ? \"\" : \"john.w
 assert(operations.includes("john.wu0120@gmail.com") && operations.includes("tm.studio"), "operations runbook documents the Chrome profile identity rule");
 assert(sopDoctor.includes("\"ready\", \"released\""), "SOP doctor accepts already released candidates for post-release audit");
 assert(sopDoctor.includes("releaseVerification.ok"), "SOP doctor verifies released candidates have successful post-release verification");
-assert(sopDoctor.includes("approved ALTOS LAB editorial fallback"), "SOP doctor verifies source cover provenance or approved editorial fallback in market-news candidates");
+assert(sopDoctor.includes("market news coverSource must be source"), "SOP doctor requires source covers in market-news candidates");
 assert(sopDoctor.includes("not stock/free image providers"), "SOP doctor blocks stock/free images for market-news source covers");
 assert(sopDoctor.includes("coverGeneration.provider must be ChatGPT/GPT"), "SOP doctor verifies GPT cover provenance in prepared release candidates");
 assert(sopDoctor.includes("column/feature posts require at least two in-article images"), "SOP doctor verifies columns/features carry in-article images");
@@ -418,7 +418,7 @@ assert(
 );
 assert(releaseVerifier.includes("Gemini/Codex provenance") && releaseVerifier.includes("source-translation provenance for market news"), "release verifier checks Gemini/Codex provenance for columns/features and source-translation provenance for market news");
 assert(!releaseVerifier.includes("public API generatedBy does not show Gemini provenance"), "release verifier does not require public Gemini provenance leakage");
-assert(releaseVerifier.includes("approved ALTOS LAB editorial fallback"), "release verifier checks market-news source cover metadata or approved editorial fallback");
+assert(releaseVerifier.includes("public API market news coverSource must be source"), "release verifier checks market-news source cover metadata");
 assert(releaseVerifier.includes("not stock/free image providers"), "release verifier blocks stock/free images for market-news source covers");
 assert(releaseVerifier.includes("public API column/feature contentImages must include at least two images"), "release verifier checks live column/feature in-article images");
 assert(releaseVerifier.includes("qualityManifest content image URLs do not match article set"), "release verifier checks content image URLs against the signed manifest");
