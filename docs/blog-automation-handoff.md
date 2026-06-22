@@ -60,6 +60,8 @@
 - Column / feature 的 in-article images 必須服務不同閱讀工作，例如 workflow anchor、mechanism/evidence、review/rollback loop；同一篇內不可重複同一 URL / localPath / prompt。多語版本仍共享同一組 public image URL。
 - 市場快訊封面預設使用來源文章或官方公告圖片，並保留 `coverSource:"source"`、`coverCredit`、`coverCreditUrl`、`coverLicense`。只有來源頁 403、沒有可用圖片、圖片品質/權利不合格時，才允許 ALTOS LAB editorial fallback；fallback 不能被當成快訊預設。
 - `/api/blog?fields=inventory&limit=120` 是以單篇 post 切頁，不是以 9 語 translation group 切頁。當最新 120 筆正好切在最後一組中間時，最後一個 partial group 是 sample boundary，不應被 SEO/GEO report 當成缺語言；真正缺語言要用非邊界 group 或 full inventory/admin readback 判斷。
+- AWS/S3 runtime 的 `/api/blog?fields=inventory` cap 必須足夠支援 full SEO/GEO coverage audit；預設使用 `BLOG_API_LIMIT_CAP=1000`，`seo:geo-report` 預設用 `SEO_GEO_INVENTORY_LIMIT=1000`。不要用 120 筆 sample 結論決定是否刪文、補語言或宣稱多語缺口。
+- SEO/GEO source-count gate 必須按內容類型判斷：市場快訊可以是單一可信原始來源；專欄/feature 才要求多來源平均健康度。不要為了分數替快訊硬塞不必要來源。
 - Hermes/OpenClaw Codex lane 必須把 `codexEvidence.provider/runtime/model/reasoning` 寫進 manifest；不要為了通過 legacy doctor 偽造 Gemini/ChatGPT Chrome evidence。若 release verifier 看到 internal copy，例如 `SEO/GEO`，要修公開文案後重新 release/readback。
 - Market-news ALTOS LAB fallback cover 的 quality review 不應在 image review 前要求 `imageQualityStatus=passed`。可先用 `coverSource=manual|generated`、ALTOS LAB credit/license、alt text 和 shared public URL 通過 copy gate，再由 image gate 判定 `imageQualityStatus=passed`。
 - AWS deploy 使用唯一 ECR image tag 作為 production evidence；不要依賴脆弱的 `latest` tag shell interpolation。部署後以 ECS task definition、service stable、`verify:aws` 和 production performance smoke 作為完成證據。

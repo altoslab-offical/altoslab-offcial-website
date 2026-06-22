@@ -1,0 +1,243 @@
+{
+  "status": "released",
+  "slot": "evening",
+  "expectedReleaseAt": "2026-06-22T20:00:00+08:00",
+  "createdAt": "2026-06-22T15:28:34.452Z",
+  "updatedAt": "2026-06-22T15:28:34.452Z",
+  "ingestRunId": "repair-20260622-android-17-zh-hant-gap",
+  "translationGroupId": "tg-market-2026-06-17-01-android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-f",
+  "articleSetPath": "/Users/asdc163/LocalProjects/altoslab-offcial-website/data/blog-repairs/2026-06-22-android-17-zh-hant-gap/prepared-candidate.article-set.release.json",
+  "sourceArticleSetPath": "/Users/asdc163/LocalProjects/altoslab-offcial-website/data/blog-repairs/2026-06-22-android-17-zh-hant-gap/article-set.json",
+  "manifestPath": "/Users/asdc163/LocalProjects/altoslab-offcial-website/data/blog-repairs/2026-06-22-android-17-zh-hant-gap/prepared-candidate.json",
+  "coverFiles": [],
+  "coverUrls": [
+    "https://techcrunch.com/wp-content/uploads/2026/06/gemini-app-GettyImages-2276204472.jpg?w=1024",
+    "https://techcrunch.com/wp-content/uploads/2026/06/gemini-app-GettyImages-2276204472.jpg?w=1024",
+    "https://techcrunch.com/wp-content/uploads/2026/06/gemini-app-GettyImages-2276204472.jpg?w=1024",
+    "https://techcrunch.com/wp-content/uploads/2026/06/gemini-app-GettyImages-2276204472.jpg?w=1024",
+    "https://techcrunch.com/wp-content/uploads/2026/06/gemini-app-GettyImages-2276204472.jpg?w=1024",
+    "https://techcrunch.com/wp-content/uploads/2026/06/gemini-app-GettyImages-2276204472.jpg?w=1024",
+    "https://techcrunch.com/wp-content/uploads/2026/06/gemini-app-GettyImages-2276204472.jpg?w=1024",
+    "https://techcrunch.com/wp-content/uploads/2026/06/gemini-app-GettyImages-2276204472.jpg?w=1024",
+    "https://techcrunch.com/wp-content/uploads/2026/06/gemini-app-GettyImages-2276204472.jpg?w=1024"
+  ],
+  "contentImageFiles": [],
+  "contentImageUrls": [
+    "https://techcrunch.com/wp-content/uploads/2026/06/1.-Multitask-better-with-Bubbles.png?w=680",
+    "https://techcrunch.com/wp-content/uploads/2026/06/4.-Get-peace-of-mind-with-security-and-safety-updates.png?w=680",
+    "https://techcrunch.com/wp-content/uploads/2026/06/1.-Multitask-better-with-Bubbles.png?w=680",
+    "https://techcrunch.com/wp-content/uploads/2026/06/4.-Get-peace-of-mind-with-security-and-safety-updates.png?w=680",
+    "https://techcrunch.com/wp-content/uploads/2026/06/1.-Multitask-better-with-Bubbles.png?w=680",
+    "https://techcrunch.com/wp-content/uploads/2026/06/4.-Get-peace-of-mind-with-security-and-safety-updates.png?w=680",
+    "https://techcrunch.com/wp-content/uploads/2026/06/1.-Multitask-better-with-Bubbles.png?w=680",
+    "https://techcrunch.com/wp-content/uploads/2026/06/4.-Get-peace-of-mind-with-security-and-safety-updates.png?w=680",
+    "https://techcrunch.com/wp-content/uploads/2026/06/1.-Multitask-better-with-Bubbles.png?w=680",
+    "https://techcrunch.com/wp-content/uploads/2026/06/4.-Get-peace-of-mind-with-security-and-safety-updates.png?w=680",
+    "https://techcrunch.com/wp-content/uploads/2026/06/1.-Multitask-better-with-Bubbles.png?w=680",
+    "https://techcrunch.com/wp-content/uploads/2026/06/4.-Get-peace-of-mind-with-security-and-safety-updates.png?w=680",
+    "https://techcrunch.com/wp-content/uploads/2026/06/1.-Multitask-better-with-Bubbles.png?w=680",
+    "https://techcrunch.com/wp-content/uploads/2026/06/4.-Get-peace-of-mind-with-security-and-safety-updates.png?w=680",
+    "https://techcrunch.com/wp-content/uploads/2026/06/1.-Multitask-better-with-Bubbles.png?w=680",
+    "https://techcrunch.com/wp-content/uploads/2026/06/4.-Get-peace-of-mind-with-security-and-safety-updates.png?w=680",
+    "https://techcrunch.com/wp-content/uploads/2026/06/1.-Multitask-better-with-Bubbles.png?w=680",
+    "https://techcrunch.com/wp-content/uploads/2026/06/4.-Get-peace-of-mind-with-security-and-safety-updates.png?w=680"
+  ],
+  "chromeEvidence": {},
+  "validateOnly": {
+    "status": 200,
+    "wouldPublish": true,
+    "qualityApproved": true,
+    "qualityScore": 97,
+    "qualityThreshold": 82,
+    "imageApproved": true,
+    "imageScore": 100,
+    "imageThreshold": 82,
+    "errors": [],
+    "warnings": [
+      "zh-Hant/android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-f-zh-hant: geoSummary should contain a source, citation, decision or framework cue for AI-answer retrieval",
+      "zh-Hant/android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-f-zh-hant: body should name at least one source/publisher so AI answers can trace claims",
+      "zh-Hant/android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-f-zh-hant: article has little concrete date/stat evidence; add one verifiable date or number when the source supports it",
+      "zh-Hant/android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-f-zh-hant: reader journey is missing a visible FAQ or objection-handling section",
+      "en/android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-f: seoTitle should usually stay between 24 and 72 characters for readable search snippets",
+      "en/android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-f: geoSummary should contain a source, citation, decision or framework cue for AI-answer retrieval",
+      "en/android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-f: article has little concrete date/stat evidence; add one verifiable date or number when the source supports it",
+      "en/android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-f: reader journey is missing a visible FAQ or objection-handling section",
+      "ja/android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-f: geoSummary should contain a source, citation, decision or framework cue for AI-answer retrieval",
+      "ja/android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-f: reader journey is missing a visible FAQ or objection-handling section",
+      "ko/android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-f: geoSummary should contain a source, citation, decision or framework cue for AI-answer retrieval",
+      "ko/android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-f: reader journey is missing a visible FAQ or objection-handling section",
+      "id/android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-f: geoSummary should contain a source, citation, decision or framework cue for AI-answer retrieval",
+      "id/android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-f: reader journey is missing a visible FAQ or objection-handling section",
+      "vi/android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-f: geoSummary should contain a source, citation, decision or framework cue for AI-answer retrieval",
+      "vi/android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-f: reader journey is missing a visible FAQ or objection-handling section",
+      "th/android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-f: geoSummary should contain a source, citation, decision or framework cue for AI-answer retrieval",
+      "th/android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-f: reader journey is missing a visible FAQ or objection-handling section",
+      "ms/android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-f: seoTitle should usually stay between 24 and 72 characters for readable search snippets",
+      "ms/android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-f: geoSummary should contain a source, citation, decision or framework cue for AI-answer retrieval",
+      "ms/android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-f: reader journey is missing a visible FAQ or objection-handling section",
+      "fil/android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-f: geoSummary should contain a source, citation, decision or framework cue for AI-answer retrieval",
+      "fil/android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-f: article has little concrete date/stat evidence; add one verifiable date or number when the source supports it",
+      "fil/android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-f: reader journey is missing a visible FAQ or objection-handling section"
+    ]
+  },
+  "qualityManifest": {
+    "gateVersion": "altos-blog-local-worker-v1",
+    "reviewer": "main-brain",
+    "reviewedAt": "2026-06-22T15:28:29.447Z",
+    "contentSha256": "76b9ecdd8ac8ab1920d3700834770eed99e7cbb0799bac7660c85cad5eddb66b",
+    "posts": [
+      {
+        "language": "zh-Hant",
+        "slug": "android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-f-zh-hant",
+        "bodySha256": "ceee1488e311a79b6ddb89b1755b660f93ee7e33e14351497ccc5df7f1436548",
+        "cover": "https://techcrunch.com/wp-content/uploads/2026/06/gemini-app-GettyImages-2276204472.jpg?w=1024",
+        "contentImages": [
+          "https://techcrunch.com/wp-content/uploads/2026/06/1.-Multitask-better-with-Bubbles.png?w=680",
+          "https://techcrunch.com/wp-content/uploads/2026/06/4.-Get-peace-of-mind-with-security-and-safety-updates.png?w=680"
+        ]
+      },
+      {
+        "language": "en",
+        "slug": "android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-f",
+        "bodySha256": "ddc6cb9d261db46aa28b9e2f10027a9ea0654e4fe1e882373949c0e8ad9b4d64",
+        "cover": "https://techcrunch.com/wp-content/uploads/2026/06/gemini-app-GettyImages-2276204472.jpg?w=1024",
+        "contentImages": [
+          "https://techcrunch.com/wp-content/uploads/2026/06/1.-Multitask-better-with-Bubbles.png?w=680",
+          "https://techcrunch.com/wp-content/uploads/2026/06/4.-Get-peace-of-mind-with-security-and-safety-updates.png?w=680"
+        ]
+      },
+      {
+        "language": "ja",
+        "slug": "android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-f",
+        "bodySha256": "b07fe7be86f5f7ef4e7be221ad2abf00caae58c39cc9b087ae2387f4d1b97f6d",
+        "cover": "https://techcrunch.com/wp-content/uploads/2026/06/gemini-app-GettyImages-2276204472.jpg?w=1024",
+        "contentImages": [
+          "https://techcrunch.com/wp-content/uploads/2026/06/1.-Multitask-better-with-Bubbles.png?w=680",
+          "https://techcrunch.com/wp-content/uploads/2026/06/4.-Get-peace-of-mind-with-security-and-safety-updates.png?w=680"
+        ]
+      },
+      {
+        "language": "ko",
+        "slug": "android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-f",
+        "bodySha256": "567907fc883956d7886d0c4ad6ddbcb6a7fa88ba99b59aa3f6a095be2b06cd45",
+        "cover": "https://techcrunch.com/wp-content/uploads/2026/06/gemini-app-GettyImages-2276204472.jpg?w=1024",
+        "contentImages": [
+          "https://techcrunch.com/wp-content/uploads/2026/06/1.-Multitask-better-with-Bubbles.png?w=680",
+          "https://techcrunch.com/wp-content/uploads/2026/06/4.-Get-peace-of-mind-with-security-and-safety-updates.png?w=680"
+        ]
+      },
+      {
+        "language": "id",
+        "slug": "android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-f",
+        "bodySha256": "48acc208e7cf9e3238cc22e81538368bda958030ac6eef522f64f2744371bbd9",
+        "cover": "https://techcrunch.com/wp-content/uploads/2026/06/gemini-app-GettyImages-2276204472.jpg?w=1024",
+        "contentImages": [
+          "https://techcrunch.com/wp-content/uploads/2026/06/1.-Multitask-better-with-Bubbles.png?w=680",
+          "https://techcrunch.com/wp-content/uploads/2026/06/4.-Get-peace-of-mind-with-security-and-safety-updates.png?w=680"
+        ]
+      },
+      {
+        "language": "vi",
+        "slug": "android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-f",
+        "bodySha256": "17f23fe0049d7538560852795629a0d7a720c69b777ab9bc700925ae4d367124",
+        "cover": "https://techcrunch.com/wp-content/uploads/2026/06/gemini-app-GettyImages-2276204472.jpg?w=1024",
+        "contentImages": [
+          "https://techcrunch.com/wp-content/uploads/2026/06/1.-Multitask-better-with-Bubbles.png?w=680",
+          "https://techcrunch.com/wp-content/uploads/2026/06/4.-Get-peace-of-mind-with-security-and-safety-updates.png?w=680"
+        ]
+      },
+      {
+        "language": "th",
+        "slug": "android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-f",
+        "bodySha256": "e7e7e87e8ac76508b7bfde5eecab434e5cbe2e3c9c0b8f4e326e38d8de9d1733",
+        "cover": "https://techcrunch.com/wp-content/uploads/2026/06/gemini-app-GettyImages-2276204472.jpg?w=1024",
+        "contentImages": [
+          "https://techcrunch.com/wp-content/uploads/2026/06/1.-Multitask-better-with-Bubbles.png?w=680",
+          "https://techcrunch.com/wp-content/uploads/2026/06/4.-Get-peace-of-mind-with-security-and-safety-updates.png?w=680"
+        ]
+      },
+      {
+        "language": "ms",
+        "slug": "android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-f",
+        "bodySha256": "4fb944802ebc3ce64a2cee5d58fe6bbd9f349af3a68281f3e09394039f22a0fa",
+        "cover": "https://techcrunch.com/wp-content/uploads/2026/06/gemini-app-GettyImages-2276204472.jpg?w=1024",
+        "contentImages": [
+          "https://techcrunch.com/wp-content/uploads/2026/06/1.-Multitask-better-with-Bubbles.png?w=680",
+          "https://techcrunch.com/wp-content/uploads/2026/06/4.-Get-peace-of-mind-with-security-and-safety-updates.png?w=680"
+        ]
+      },
+      {
+        "language": "fil",
+        "slug": "android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-f",
+        "bodySha256": "f95ab2eaf1bb61ac7b285bbc797fb0587bab7e08705aee4b2d5e5634f15957f1",
+        "cover": "https://techcrunch.com/wp-content/uploads/2026/06/gemini-app-GettyImages-2276204472.jpg?w=1024",
+        "contentImages": [
+          "https://techcrunch.com/wp-content/uploads/2026/06/1.-Multitask-better-with-Bubbles.png?w=680",
+          "https://techcrunch.com/wp-content/uploads/2026/06/4.-Get-peace-of-mind-with-security-and-safety-updates.png?w=680"
+        ]
+      }
+    ],
+    "qualitySummary": {
+      "approved": true,
+      "score": 97,
+      "threshold": 82,
+      "issues": [],
+      "warnings": [
+        "zh-Hant/android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-f-zh-hant: geoSummary should contain a source, citation, decision or framework cue for AI-answer retrieval",
+        "zh-Hant/android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-f-zh-hant: body should name at least one source/publisher so AI answers can trace claims",
+        "zh-Hant/android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-f-zh-hant: article has little concrete date/stat evidence; add one verifiable date or number when the source supports it",
+        "zh-Hant/android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-f-zh-hant: reader journey is missing a visible FAQ or objection-handling section",
+        "en/android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-f: seoTitle should usually stay between 24 and 72 characters for readable search snippets",
+        "en/android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-f: geoSummary should contain a source, citation, decision or framework cue for AI-answer retrieval",
+        "en/android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-f: article has little concrete date/stat evidence; add one verifiable date or number when the source supports it",
+        "en/android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-f: reader journey is missing a visible FAQ or objection-handling section",
+        "ja/android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-f: geoSummary should contain a source, citation, decision or framework cue for AI-answer retrieval",
+        "ja/android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-f: reader journey is missing a visible FAQ or objection-handling section",
+        "ko/android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-f: geoSummary should contain a source, citation, decision or framework cue for AI-answer retrieval",
+        "ko/android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-f: reader journey is missing a visible FAQ or objection-handling section",
+        "id/android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-f: geoSummary should contain a source, citation, decision or framework cue for AI-answer retrieval",
+        "id/android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-f: reader journey is missing a visible FAQ or objection-handling section",
+        "vi/android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-f: geoSummary should contain a source, citation, decision or framework cue for AI-answer retrieval",
+        "vi/android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-f: reader journey is missing a visible FAQ or objection-handling section",
+        "th/android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-f: geoSummary should contain a source, citation, decision or framework cue for AI-answer retrieval",
+        "th/android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-f: reader journey is missing a visible FAQ or objection-handling section",
+        "ms/android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-f: seoTitle should usually stay between 24 and 72 characters for readable search snippets",
+        "ms/android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-f: geoSummary should contain a source, citation, decision or framework cue for AI-answer retrieval",
+        "ms/android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-f: reader journey is missing a visible FAQ or objection-handling section",
+        "fil/android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-f: geoSummary should contain a source, citation, decision or framework cue for AI-answer retrieval",
+        "fil/android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-f: article has little concrete date/stat evidence; add one verifiable date or number when the source supports it",
+        "fil/android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-f: reader journey is missing a visible FAQ or objection-handling section"
+      ]
+    },
+    "imageQualitySummary": {
+      "approved": true,
+      "score": 100,
+      "threshold": 82,
+      "issues": [],
+      "warnings": []
+    }
+  },
+  "humanDesignQa": {
+    "approved": true,
+    "reviewedBy": "main-brain",
+    "reviewedAt": "2026-06-22T15:28:29.447Z",
+    "notes": "Approved after main-brain article and image QA."
+  },
+  "publish": {
+    "status": 201,
+    "publishedIds": [
+      "post_mqpdecoi_exhse1",
+      "post_mqpdecoi_fvonim",
+      "post_mqpdecoi_xf2ok7",
+      "post_mqpdecoi_s240za",
+      "post_mqpdecoi_ir64ga",
+      "post_mqpdecoj_56u4s9",
+      "post_mqpdecoj_86qly7",
+      "post_mqpdecoj_esanys",
+      "post_mqpdecoj_cg6a49"
+    ],
+    "heldDraftIds": [],
+    "errors": [],
+    "event": "blog_release_published"
+  }
+}

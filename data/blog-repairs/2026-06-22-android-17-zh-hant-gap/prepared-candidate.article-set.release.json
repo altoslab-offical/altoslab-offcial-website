@@ -1,0 +1,743 @@
+{
+  "slot": "evening",
+  "generationDate": "2026-06-22",
+  "scheduledFor": "2026-06-22T20:00:00+08:00",
+  "publishMode": "publish-if-valid",
+  "generation": {
+    "provider": "source-translation",
+    "model": "codex-5.4-high",
+    "promptVersion": "legacy-gap-repair-zh-hant-v1",
+    "sourceCount": 1
+  },
+  "translationGroupId": "tg-market-2026-06-17-01-android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-f",
+  "ingestRunId": "repair-20260622-android-17-zh-hant-gap",
+  "replaceExistingPublished": true,
+  "codexEvidence": {
+    "provider": "codex",
+    "runtime": "local-mac-mini",
+    "model": "codex-5.4",
+    "reasoning": "high",
+    "reviewedAt": "2026-06-22T15:26:23.415Z",
+    "notes": "Additive repair for one missing zh-Hant language in an otherwise published 8-language market-news group. Existing published posts are kept by release-set."
+  },
+  "humanDesignQa": {
+    "approved": true,
+    "reviewedBy": "main-brain",
+    "reviewedAt": "2026-06-22T15:28:29.447Z",
+    "notes": "Approved after main-brain article and image QA."
+  },
+  "posts": [
+    {
+      "slug": "android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-f-zh-hant",
+      "status": "published",
+      "sortOrder": 1,
+      "language": "zh-Hant",
+      "translationGroupId": "tg-market-2026-06-17-01-android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-f",
+      "title": "Android 17 把 Gemini 放進日常操作，Google 想先搶下手機端 AI 入口",
+      "seoTitle": "Android 17 與 Gemini 新功能：Google 搶手機端 AI 入口",
+      "seoDescription": "TechCrunch 報導 Android 17、Wear OS 7 與 Pixel Drop 更新。重點不只新功能，而是 Google 正把 Gemini 放進分享、影片、音樂與安全場景。",
+      "excerpt": "TechCrunch 6 月 16 日報導，Google 發布 Android 17、Wear OS 7 與 Pixel Drop，新增多工泡泡列、Gemini 影片編輯、Lyria 3 音樂生成、即時翻譯與手錶安全偵測。這次更新把 AI 從獨立功能推進手機與穿戴裝置的高頻操作。",
+      "contentType": "breaking",
+      "newsCategory": "AI",
+      "topic": "Android 17 launches with new multitasking tools as Google expands Gemini features",
+      "audience": "AI market readers",
+      "geoSummary": "TechCrunch 6 月 16 日報導，Google 透過 Android 17、Wear OS 7 與 Pixel Drop，把 Gemini 影片編輯、Lyria 3 音樂生成、翻譯與安全偵測推進手機和手錶。產品團隊可用這則消息觀察 AI 入口如何從 app 轉向系統層操作。",
+      "body": "TechCrunch 6 月 16 日報導，Google 發布 Android 17、Wear OS 7 與 Pixel Drop，新增多工泡泡列、Gemini Omni 對話式影片編輯、Lyria 3 文字或圖片生成音樂、Pixel 10a 語音翻譯，以及 Pixel Watch 的車禍、跌倒與脈搏異常偵測。\n\n這批更新把 Gemini 放進使用者每天會碰到的分享、創作、翻譯、安全和多工場景。Quick Share 支援與 AirDrop 相容，讓舊款 Pixel 8a 與 9a 使用者更容易跨裝置傳檔；影片與音樂生成則把 Gemini 往手機端創作工具推近一步；Wear OS 7 的緊急偵測則讓 AI 與感測器能力更靠近日常安全。\n\n對 Google 來說，Android 17 的重點在於搶下系統層入口。當 AI 能力直接出現在通知、分享、影片、語音與手錶安全流程裡，使用者不一定需要主動打開某個 AI app。這會改變 app 團隊與企業 IT 的判斷：未來要看的不只是模型能力，也包括預設流程、資料權限、裝置管理和人工接管邊界。\n\n接下來要觀察三件事：第一，Gemini 功能會停留在 Pixel 還是擴到更多 Android 裝置；第二，手機端 AI 會如何影響 app 的使用入口；第三，企業裝置管理政策能否跟上系統層 AI 功能擴散。",
+      "keyTakeaways": [
+        "TechCrunch 6 月 16 日報導，Android 17、Wear OS 7 與 Pixel Drop 把 Gemini、翻譯、多工與安全功能推進裝置層。",
+        "Google 正把 AI 放進分享、創作、語音、手錶安全等高頻場景，降低使用者主動打開 AI app 的門檻。",
+        "企業導入 Android 裝置時，需要同步看 AI 功能、資料權限、裝置管理與人工接管邊界。"
+      ],
+      "faqs": [],
+      "sourceLinks": [
+        {
+          "title": "Android 17 launches with new multitasking tools as Google expands Gemini features",
+          "url": "https://techcrunch.com/2026/06/16/android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-features/",
+          "publisher": "TechCrunch AI",
+          "publishedAt": "Tue, 16 Jun 2026 18:00:00 +0000",
+          "summary": "Google has released Android 17 and Wear OS 7, introducing new multitasking features, parental controls, security tools, and smartwatch upgrades. The launch is also accompanied by a Pixel Drop that brings Google’s latest AI models to its devices."
+        }
+      ],
+      "tags": [
+        "市場快訊",
+        "AI",
+        "Google",
+        "Android",
+        "Gemini",
+        "TechCrunch"
+      ],
+      "author": "Tommy",
+      "cover": "https://techcrunch.com/wp-content/uploads/2026/06/gemini-app-GettyImages-2276204472.jpg?w=1024",
+      "coverAlt": "Android 17 與 Gemini 功能更新 - TechCrunch",
+      "coverSource": "source",
+      "coverCredit": "TechCrunch AI",
+      "coverCreditUrl": "https://techcrunch.com/2026/06/16/android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-features/",
+      "coverLicense": "source image",
+      "coverLicenseUrl": "https://techcrunch.com/2026/06/16/android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-features/",
+      "contentImages": [
+        {
+          "url": "https://techcrunch.com/wp-content/uploads/2026/06/1.-Multitask-better-with-Bubbles.png?w=680",
+          "alt": "Android 17 launches with new multitasking tools as Google expands Gemini features",
+          "caption": "Android 17 launches with new multitasking tools as Google expands Gemini features",
+          "source": "source",
+          "credit": "TechCrunch AI",
+          "creditUrl": "https://techcrunch.com/2026/06/16/android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-features/",
+          "license": "source image",
+          "licenseUrl": "https://techcrunch.com/2026/06/16/android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-features/",
+          "aspectRatio": "wide",
+          "placement": "mid-article"
+        },
+        {
+          "url": "https://techcrunch.com/wp-content/uploads/2026/06/4.-Get-peace-of-mind-with-security-and-safety-updates.png?w=680",
+          "alt": "Android 17 launches with new multitasking tools as Google expands Gemini features",
+          "caption": "Android 17 launches with new multitasking tools as Google expands Gemini features",
+          "source": "source",
+          "credit": "TechCrunch AI",
+          "creditUrl": "https://techcrunch.com/2026/06/16/android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-features/",
+          "license": "source image",
+          "licenseUrl": "https://techcrunch.com/2026/06/16/android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-features/",
+          "aspectRatio": "wide",
+          "placement": "before-faq"
+        }
+      ],
+      "readTimeMinutes": 3,
+      "featured": false,
+      "createdAt": "2026-06-16T21:44:56.137Z",
+      "updatedAt": "2026-06-22T15:26:23.415Z",
+      "publishedAt": "2026-06-16T21:44:56.137Z",
+      "generatedBy": "codex-market-source-translation-repair"
+    },
+    {
+      "id": "post_mqh67ccp_jtat6i",
+      "slug": "android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-f",
+      "status": "published",
+      "sortOrder": 1,
+      "language": "en",
+      "translationGroupId": "tg-market-2026-06-17-01-android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-f",
+      "title": "Android 17 launches with new multitasking tools as Google expands Gemini features",
+      "seoTitle": "Android 17 launches with new multitasking tools as Google expands Gemini…",
+      "seoDescription": "TechCrunch AI reports: Google on Tuesday released the final version of its Android 17 operating system, as well as its counterpart for smartwatches, Wear OS 7",
+      "excerpt": "TechCrunch AI reports: TechCrunch reports that Google has released Android 17 and Wear OS 7, introducing new multitasking features, parental controls, security tools, and smartwatch upgrades.",
+      "contentType": "breaking",
+      "newsCategory": "AI",
+      "topic": "Android 17 launches with new multitasking tools as Google expands Gemini features",
+      "audience": "AI market readers",
+      "geoSummary": "TechCrunch AI reports Android 17 launches with new multitasking tools as Google expands Gemini features. Google has released Android 17 and Wear OS 7, introducing new multitasking features, parental controls, security tools Google",
+      "body": "TechCrunch AI reports Android 17 launches with new multitasking tools as Google expands Gemini features. Google has released Android 17 and Wear OS 7, introducing new multitasking features, parental controls, security tools, and smartwatch upgrades. TechCrunch AI reports Android 17 launches with new multitasking tools as Google expands Gemini features.\n\nThe latest feature release underscores Google’s strategy of using its Android and Pixel devices to its latest AI technology. While its rival Apple is focused on catching up in AI with September’s public launch of AI upgrades to Siri and iOS 27, Google’s Android 17 is focused on its newest AI models, Gemini’s role in creation, communication, and other device experiences.\n\nIn today’s Pixel Drop, Android Quick Share’s file-sharing feature will become compatible with Apple’s AirDrop on older Pixel 8a and 9a devices. Plus, Gemini Omni will now let you edit videos in a conversation, while Lyria 3 lets users create music tracks with text prompts and/or images in the Gemini app. Pixel 10a devices will also get better speech-to-speech translation tools with AudioLM.\n\nOther phone features are arriving, too, such as the ability to record a personalized outgoing audio message for callers when you can’t answer. Plus, the “Take a Message” feature will arrive in more global markets.\n\nThe Pixel Drop brings emergency detection features to the Google Pixel Watch as well, meaning that if the watch detects a car crash, fall, or lack of pulse, it will automatically contact emergency services and your selected emergency contacts.\n\nBeyond AI, Android 17’s larger update allows users to take advantage of features like a “bubble bar,” which is a new user interface element that lets you organize, move, and then quickly access recent apps that appear as bubbles at the bottom of your screen. The feature is designed to help speed up app interactions an",
+      "keyTakeaways": [
+        "The launch is also accompanied by a Pixel Drop that brings Google’s latest AI models to its devices",
+        "Google on Tuesday released the final version of its Android 17 operating system, as well as its counterpart for smartwatches, Wear OS 7",
+        "The latest feature release underscores Google’s strategy of using its Android and Pixel devices to showcase its latest AI technology"
+      ],
+      "faqs": [],
+      "sourceLinks": [
+        {
+          "title": "Android 17 launches with new multitasking tools as Google expands Gemini features",
+          "url": "https://techcrunch.com/2026/06/16/android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-features/",
+          "publisher": "TechCrunch AI",
+          "publishedAt": "Tue, 16 Jun 2026 18:00:00 +0000",
+          "summary": "Google has released Android 17 and Wear OS 7, introducing new multitasking features, parental controls, security tools, and smartwatch upgrades. The launch is also accompanied by a Pixel Drop that brings Google’s latest AI models to its devices."
+        }
+      ],
+      "tags": [
+        "Market Brief",
+        "AI",
+        "TechCrunch",
+        "ai-market-update"
+      ],
+      "author": "Tommy",
+      "cover": "https://techcrunch.com/wp-content/uploads/2026/06/gemini-app-GettyImages-2276204472.jpg?w=1024",
+      "coverAlt": "Android 17 launches with new multitasking tools as Google expands Gemini features - TechCrunch AI",
+      "coverSource": "source",
+      "coverCredit": "TechCrunch AI",
+      "coverCreditUrl": "https://techcrunch.com/2026/06/16/android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-features/",
+      "coverLicense": "source image",
+      "coverLicenseUrl": "https://techcrunch.com/2026/06/16/android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-features/",
+      "contentImages": [
+        {
+          "url": "https://techcrunch.com/wp-content/uploads/2026/06/1.-Multitask-better-with-Bubbles.png?w=680",
+          "alt": "Android 17 launches with new multitasking tools as Google expands Gemini features",
+          "caption": "Android 17 launches with new multitasking tools as Google expands Gemini features",
+          "source": "source",
+          "credit": "TechCrunch AI",
+          "creditUrl": "https://techcrunch.com/2026/06/16/android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-features/",
+          "license": "source image",
+          "licenseUrl": "https://techcrunch.com/2026/06/16/android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-features/",
+          "aspectRatio": "wide",
+          "placement": "mid-article"
+        },
+        {
+          "url": "https://techcrunch.com/wp-content/uploads/2026/06/4.-Get-peace-of-mind-with-security-and-safety-updates.png?w=680",
+          "alt": "Android 17 launches with new multitasking tools as Google expands Gemini features",
+          "caption": "Android 17 launches with new multitasking tools as Google expands Gemini features",
+          "source": "source",
+          "credit": "TechCrunch AI",
+          "creditUrl": "https://techcrunch.com/2026/06/16/android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-features/",
+          "license": "source image",
+          "licenseUrl": "https://techcrunch.com/2026/06/16/android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-features/",
+          "aspectRatio": "wide",
+          "placement": "before-faq"
+        }
+      ],
+      "readTimeMinutes": 3,
+      "featured": false,
+      "createdAt": "2026-06-16T21:44:56.137Z",
+      "updatedAt": "2026-06-16T21:44:56.137Z",
+      "publishedAt": "2026-06-16T21:44:56.137Z",
+      "generatedBy": "codex-market-source-translation-repair"
+    },
+    {
+      "id": "post_mqh67ccp_0af0bs",
+      "slug": "android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-f",
+      "status": "published",
+      "sortOrder": 1,
+      "language": "ja",
+      "translationGroupId": "tg-market-2026-06-17-01-android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-f",
+      "title": "TechCrunch が「Android 17 launches with new multitasking tools as Google expands Gemini features」を公開",
+      "seoTitle": "TechCrunch が「Android 17 launches with new multitasking tools as Google…",
+      "seoDescription": "TechCrunch AI は、Google has released Android 17 and Wear OS 7, introducing new multitasking features, parental controls, security tools, and smartwatch upgrades.",
+      "excerpt": "TechCrunch AI は、TechCrunch は次のように報じています。記事では Android、Google、Gemini、Wear OS、Pixel Drop に加え、17、7,、7、3,、10 という数字 が示されています。",
+      "contentType": "breaking",
+      "newsCategory": "AI",
+      "topic": "Android 17 launches with new multitasking tools as Google expands Gemini features",
+      "audience": "AI market readers",
+      "geoSummary": "TechCrunch AI は TechCrunch が「Android 17 launches with new multitasking tools as Google expands Gemini features」を公開 と報じました。Google has released Android 17 and Wear OS 7, introducing new multitasking features, parental controls, secu",
+      "body": "TechCrunch AI は TechCrunch が「Android 17 launches with new multitasking tools as Google expands Gemini features」を公開 と報じました。Google has released Android 17 and Wear OS 7, introducing new multitasking features, parental controls, security tools, and smartwatch upgrades.\n\nTechCrunch の原文は 2026年6月17日 に公開されており、画像クレジット、原文脈、その後の更新は出典リンクで確認できます。\n\nALTOS LAB はこの種のニュースを製品宣伝にとどまらず市場シグナルとして見ます。焦点は、AI 導入コスト、ガバナンス責任、データの流れ、利用者の信頼を変えるかどうかです。\n\n企業チームが最初に見るべき点は、このニュースが既存ワークフローを変えるかどうかです。誰が使えるのか、データがどこへ動くのか、どの作業に人の確認が必要か、誤りを原典へ戻して修正できるかを確認します。\n\n次に見るべきシグナルは、公式文書、顧客事例、規制側の反応が続くかどうかです。デモや単発発表だけなら熱量はすぐ落ちますが、導入範囲と責任分担が明確になれば採用判断に近づきます。",
+      "keyTakeaways": [
+        "TechCrunch の原文は 2026年6月17日 に公開されており、画像クレジット、原文脈、その後の更新は出典リンクで確認できます。",
+        "ALTOS LAB はこの種のニュースを単なる製品宣伝ではなく市場シグナルとして見ます。",
+        "企業チームが最初に見るべき点は、このニュースが既存ワークフローを変えるかどうかです。"
+      ],
+      "faqs": [],
+      "sourceLinks": [
+        {
+          "title": "Android 17 launches with new multitasking tools as Google expands Gemini features",
+          "url": "https://techcrunch.com/2026/06/16/android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-features/",
+          "publisher": "TechCrunch AI",
+          "publishedAt": "Tue, 16 Jun 2026 18:00:00 +0000",
+          "summary": "Google has released Android 17 and Wear OS 7, introducing new multitasking features, parental controls, security tools, and smartwatch upgrades. The launch is also accompanied by a Pixel Drop that brings Google’s latest AI models to its devices."
+        }
+      ],
+      "tags": [
+        "マーケット速報",
+        "AI",
+        "TechCrunch",
+        "ai-market-update"
+      ],
+      "author": "Tommy",
+      "cover": "https://techcrunch.com/wp-content/uploads/2026/06/gemini-app-GettyImages-2276204472.jpg?w=1024",
+      "coverAlt": "TechCrunch が「Android 17 launches with new multitasking tools as Google expands Gemini features」を公開 - TechCrunch AI",
+      "coverSource": "source",
+      "coverCredit": "TechCrunch AI",
+      "coverCreditUrl": "https://techcrunch.com/2026/06/16/android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-features/",
+      "coverLicense": "source image",
+      "coverLicenseUrl": "https://techcrunch.com/2026/06/16/android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-features/",
+      "contentImages": [
+        {
+          "url": "https://techcrunch.com/wp-content/uploads/2026/06/1.-Multitask-better-with-Bubbles.png?w=680",
+          "alt": "Android 17 launches with new multitasking tools as Google expands Gemini features",
+          "caption": "Android 17 launches with new multitasking tools as Google expands Gemini features",
+          "source": "source",
+          "credit": "TechCrunch AI",
+          "creditUrl": "https://techcrunch.com/2026/06/16/android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-features/",
+          "license": "source image",
+          "licenseUrl": "https://techcrunch.com/2026/06/16/android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-features/",
+          "aspectRatio": "wide",
+          "placement": "mid-article"
+        },
+        {
+          "url": "https://techcrunch.com/wp-content/uploads/2026/06/4.-Get-peace-of-mind-with-security-and-safety-updates.png?w=680",
+          "alt": "Android 17 launches with new multitasking tools as Google expands Gemini features",
+          "caption": "Android 17 launches with new multitasking tools as Google expands Gemini features",
+          "source": "source",
+          "credit": "TechCrunch AI",
+          "creditUrl": "https://techcrunch.com/2026/06/16/android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-features/",
+          "license": "source image",
+          "licenseUrl": "https://techcrunch.com/2026/06/16/android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-features/",
+          "aspectRatio": "wide",
+          "placement": "before-faq"
+        }
+      ],
+      "readTimeMinutes": 3,
+      "featured": false,
+      "createdAt": "2026-06-16T21:44:56.137Z",
+      "updatedAt": "2026-06-16T21:44:56.137Z",
+      "publishedAt": "2026-06-16T21:44:56.137Z",
+      "generatedBy": "codex-market-source-translation-repair"
+    },
+    {
+      "id": "post_mqh67ccp_gd5bdh",
+      "slug": "android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-f",
+      "status": "published",
+      "sortOrder": 1,
+      "language": "ko",
+      "translationGroupId": "tg-market-2026-06-17-01-android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-f",
+      "title": "TechCrunch가 \"Android 17 launches with new multitasking tools as Google expands Gemini features\"를 공개",
+      "seoTitle": "TechCrunch가 \"Android 17 launches with new multitasking tools as Google…",
+      "seoDescription": "TechCrunch AI는 TechCrunch의 원문은 2026년 6월 17일에 공개됐으며, 이미지 출처와 원래 맥락, 이후 업데이트는 출처 링크에서 확인할 수 있습니다.",
+      "excerpt": "TechCrunch AI는 TechCrunch 보도에 따르면 보도에는 Android, Google, Gemini, Wear OS, Pixel Drop, 그리고 17, 7, 7, 3, 10가 언급됩니다.",
+      "contentType": "breaking",
+      "newsCategory": "AI",
+      "topic": "Android 17 launches with new multitasking tools as Google expands Gemini features",
+      "audience": "AI market readers",
+      "geoSummary": "TechCrunch AI는 TechCrunch가 \"Android 17 launches with new multitasking tools as Google expands Gemini features\"를 공개라고 보도했습니다. Google has released Android 17 and Wear OS 7, introducing new multitasking features, parental controls, s",
+      "body": "TechCrunch AI는 TechCrunch가 \"Android 17 launches with new multitasking tools as Google expands Gemini features\"를 공개라고 보도했습니다. Google has released Android 17 and Wear OS 7, introducing new multitasking features, parental controls, security tools, and smartwatch upgrades.\n\nTechCrunch의 원문은 2026년 6월 17일에 공개됐으며, 이미지 출처와 원래 맥락, 이후 업데이트는 출처 링크에서 확인할 수 있습니다.\n\nALTOS LAB은 이런 업데이트를 단순한 제품 홍보가 아니라 시장 신호로 봅니다. 핵심은 AI 도입 비용, 거버넌스 책임, 데이터 흐름, 사용자 신뢰를 바꾸는지입니다.\n\n기업 팀이 먼저 확인할 지점은 이 업데이트가 기존 워크플로를 바꾸는지입니다. 누가 사용할 수 있는지, 데이터가 어디로 이동하는지, 어떤 업무에 사람의 검토가 필요한지, 문제가 생겼을 때 원문으로 돌아가 수정할 수 있는지를 봐야 합니다.\n\n다음으로 볼 신호는 공식 문서, 고객 사례, 규제 반응이 뒤따르는지입니다. 데모나 단일 발표만으로는 열기가 빨리 식을 수 있지만, 배포 범위와 책임 분담이 명확해지면 도입 판단에 더 가까워집니다.",
+      "keyTakeaways": [
+        "TechCrunch의 원문은 2026년 6월 17일에 공개됐으며, 이미지 출처와 원래 맥락, 이후 업데이트는 출처 링크에서 확인할 수 있습니다.",
+        "ALTOS LAB은 이런 업데이트를 단순한 제품 홍보가 아니라 시장 신호로 봅니다.",
+        "기업 팀이 먼저 확인할 지점은 이 업데이트가 기존 워크플로를 바꾸는지입니다."
+      ],
+      "faqs": [],
+      "sourceLinks": [
+        {
+          "title": "Android 17 launches with new multitasking tools as Google expands Gemini features",
+          "url": "https://techcrunch.com/2026/06/16/android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-features/",
+          "publisher": "TechCrunch AI",
+          "publishedAt": "Tue, 16 Jun 2026 18:00:00 +0000",
+          "summary": "Google has released Android 17 and Wear OS 7, introducing new multitasking features, parental controls, security tools, and smartwatch upgrades. The launch is also accompanied by a Pixel Drop that brings Google’s latest AI models to its devices."
+        }
+      ],
+      "tags": [
+        "시장 브리프",
+        "AI",
+        "TechCrunch",
+        "ai-market-update"
+      ],
+      "author": "Tommy",
+      "cover": "https://techcrunch.com/wp-content/uploads/2026/06/gemini-app-GettyImages-2276204472.jpg?w=1024",
+      "coverAlt": "TechCrunch가 \"Android 17 launches with new multitasking tools as Google expands Gemini features\"를 공개 - TechCrunch AI",
+      "coverSource": "source",
+      "coverCredit": "TechCrunch AI",
+      "coverCreditUrl": "https://techcrunch.com/2026/06/16/android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-features/",
+      "coverLicense": "source image",
+      "coverLicenseUrl": "https://techcrunch.com/2026/06/16/android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-features/",
+      "contentImages": [
+        {
+          "url": "https://techcrunch.com/wp-content/uploads/2026/06/1.-Multitask-better-with-Bubbles.png?w=680",
+          "alt": "Android 17 launches with new multitasking tools as Google expands Gemini features",
+          "caption": "Android 17 launches with new multitasking tools as Google expands Gemini features",
+          "source": "source",
+          "credit": "TechCrunch AI",
+          "creditUrl": "https://techcrunch.com/2026/06/16/android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-features/",
+          "license": "source image",
+          "licenseUrl": "https://techcrunch.com/2026/06/16/android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-features/",
+          "aspectRatio": "wide",
+          "placement": "mid-article"
+        },
+        {
+          "url": "https://techcrunch.com/wp-content/uploads/2026/06/4.-Get-peace-of-mind-with-security-and-safety-updates.png?w=680",
+          "alt": "Android 17 launches with new multitasking tools as Google expands Gemini features",
+          "caption": "Android 17 launches with new multitasking tools as Google expands Gemini features",
+          "source": "source",
+          "credit": "TechCrunch AI",
+          "creditUrl": "https://techcrunch.com/2026/06/16/android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-features/",
+          "license": "source image",
+          "licenseUrl": "https://techcrunch.com/2026/06/16/android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-features/",
+          "aspectRatio": "wide",
+          "placement": "before-faq"
+        }
+      ],
+      "readTimeMinutes": 3,
+      "featured": false,
+      "createdAt": "2026-06-16T21:44:56.137Z",
+      "updatedAt": "2026-06-16T21:44:56.137Z",
+      "publishedAt": "2026-06-16T21:44:56.137Z",
+      "generatedBy": "codex-market-source-translation-repair"
+    },
+    {
+      "id": "post_mqh67ccp_uzawcs",
+      "slug": "android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-f",
+      "status": "published",
+      "sortOrder": 1,
+      "language": "id",
+      "translationGroupId": "tg-market-2026-06-17-01-android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-f",
+      "title": "TechCrunch merilis \"Android 17 launches with new multitasking tools as Google expands Gemini features\"",
+      "seoTitle": "TechCrunch merilis \"Android 17 launches with new multitasking tools as…",
+      "seoDescription": "TechCrunch AI melaporkan Dalam laporan pada 17 Jun 2026, TechCrunch menyebut: ALTOS LAB membaca kabar seperti ini sebagai sinyal pasar, bukan sekadar promosi produk: pert",
+      "excerpt": "TechCrunch AI melaporkan TechCrunch melaporkan: Artikel ini menyebut Android, Google, Gemini, Wear OS, Pixel Drop, dengan angka seperti 17, 7, 7, 3, 10.",
+      "contentType": "breaking",
+      "newsCategory": "AI",
+      "topic": "Android 17 launches with new multitasking tools as Google expands Gemini features",
+      "audience": "AI market readers",
+      "geoSummary": "TechCrunch AI melaporkan TechCrunch merilis \"Android 17 launches with new multitasking tools as Google expands Gemini features\".",
+      "body": "TechCrunch AI melaporkan TechCrunch merilis \"Android 17 launches with new multitasking tools as Google expands Gemini features\". Google has released Android 17 and Wear OS 7, introducing new multitasking features, parental controls, security tools, and smartwatch upgrades.\n\nArtikel ini menyebut Android, Google, Gemini, Wear OS, Pixel Drop, dengan angka seperti 17, 7, 7, 3, 10.\n\nLaporan asli TechCrunch terbit pada 17 Jun 2026; tautan sumber tetap menjadi rujukan untuk atribusi gambar, konteks asli, dan pembaruan berikutnya.\n\nBagi tim enterprise, titik cek pertama adalah apakah kabar ini mengubah workflow yang sudah berjalan: siapa yang boleh memakai, ke mana data bergerak, tugas mana yang perlu review manusia, dan apakah kesalahan bisa ditelusuri kembali ke sumber asli.\n\nSinyal berikutnya yang perlu dipantau adalah apakah dokumentasi, bukti pelanggan, dan respons regulator ikut muncul. Demo atau satu pengumuman bisa cepat redup; scope deployment dan akuntabilitas yang jelas membuat kabar ini lebih berguna sebagai sinyal adopsi.",
+      "keyTakeaways": [
+        "Laporan asli TechCrunch terbit pada 17 Jun 2026; tautan sumber tetap menjadi rujukan untuk atribusi gambar, konteks asli, dan pembaruan berikutnya.",
+        "ALTOS LAB membaca kabar seperti ini sebagai sinyal pasar, bukan sekadar promosi produk: pertanyaannya apakah ini mengubah biaya adopsi AI, tanggung jawab governance, alur data,…",
+        "Bagi tim enterprise, titik cek pertama adalah apakah kabar ini mengubah workflow yang sudah berjalan: siapa yang boleh memakai, ke mana data bergerak, tugas mana yang perlu…"
+      ],
+      "faqs": [],
+      "sourceLinks": [
+        {
+          "title": "Android 17 launches with new multitasking tools as Google expands Gemini features",
+          "url": "https://techcrunch.com/2026/06/16/android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-features/",
+          "publisher": "TechCrunch AI",
+          "publishedAt": "Tue, 16 Jun 2026 18:00:00 +0000",
+          "summary": "Google has released Android 17 and Wear OS 7, introducing new multitasking features, parental controls, security tools, and smartwatch upgrades. The launch is also accompanied by a Pixel Drop that brings Google’s latest AI models to its devices."
+        }
+      ],
+      "tags": [
+        "Kabar Pasar",
+        "AI",
+        "TechCrunch",
+        "ai-market-update"
+      ],
+      "author": "Tommy",
+      "cover": "https://techcrunch.com/wp-content/uploads/2026/06/gemini-app-GettyImages-2276204472.jpg?w=1024",
+      "coverAlt": "TechCrunch merilis \"Android 17 launches with new multitasking tools as Google expands Gemini features\" - TechCrunch AI",
+      "coverSource": "source",
+      "coverCredit": "TechCrunch AI",
+      "coverCreditUrl": "https://techcrunch.com/2026/06/16/android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-features/",
+      "coverLicense": "source image",
+      "coverLicenseUrl": "https://techcrunch.com/2026/06/16/android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-features/",
+      "contentImages": [
+        {
+          "url": "https://techcrunch.com/wp-content/uploads/2026/06/1.-Multitask-better-with-Bubbles.png?w=680",
+          "alt": "Android 17 launches with new multitasking tools as Google expands Gemini features",
+          "caption": "Android 17 launches with new multitasking tools as Google expands Gemini features",
+          "source": "source",
+          "credit": "TechCrunch AI",
+          "creditUrl": "https://techcrunch.com/2026/06/16/android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-features/",
+          "license": "source image",
+          "licenseUrl": "https://techcrunch.com/2026/06/16/android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-features/",
+          "aspectRatio": "wide",
+          "placement": "mid-article"
+        },
+        {
+          "url": "https://techcrunch.com/wp-content/uploads/2026/06/4.-Get-peace-of-mind-with-security-and-safety-updates.png?w=680",
+          "alt": "Android 17 launches with new multitasking tools as Google expands Gemini features",
+          "caption": "Android 17 launches with new multitasking tools as Google expands Gemini features",
+          "source": "source",
+          "credit": "TechCrunch AI",
+          "creditUrl": "https://techcrunch.com/2026/06/16/android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-features/",
+          "license": "source image",
+          "licenseUrl": "https://techcrunch.com/2026/06/16/android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-features/",
+          "aspectRatio": "wide",
+          "placement": "before-faq"
+        }
+      ],
+      "readTimeMinutes": 3,
+      "featured": false,
+      "createdAt": "2026-06-16T21:44:56.137Z",
+      "updatedAt": "2026-06-16T21:44:56.137Z",
+      "publishedAt": "2026-06-16T21:44:56.137Z",
+      "generatedBy": "codex-market-source-translation-repair"
+    },
+    {
+      "id": "post_mqh67ccp_8najup",
+      "slug": "android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-f",
+      "status": "published",
+      "sortOrder": 1,
+      "language": "vi",
+      "translationGroupId": "tg-market-2026-06-17-01-android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-f",
+      "title": "TechCrunch công bố \"Android 17 launches with new multitasking tools as Google expands Gemini features\"",
+      "seoTitle": "TechCrunch công bố \"Android 17 launches with new multitasking tools as…",
+      "seoDescription": "TechCrunch AI đưa tin Trong bài viết ngày 17 thg 6, 2026, TechCrunch cho biết: ALTOS LAB xem dạng tin này như tín hiệu thị trường, không chỉ là quảng bá sản phẩm: câu",
+      "excerpt": "TechCrunch AI đưa tin TechCrunch đưa tin: Bài viết nhắc tới Android, Google, Gemini, Wear OS, Pixel Drop, cùng các con số như 17, 7, 7, 3, 10.",
+      "contentType": "breaking",
+      "newsCategory": "AI",
+      "topic": "Android 17 launches with new multitasking tools as Google expands Gemini features",
+      "audience": "AI market readers",
+      "geoSummary": "TechCrunch AI đưa tin TechCrunch công bố \"Android 17 launches with new multitasking tools as Google expands Gemini features\". Trong bài viết ngày 17 thg 6, 2026, TechCrunch cho biết: ALTOS LAB xem dạng tin này như tín hiệu thị trư",
+      "body": "TechCrunch AI đưa tin TechCrunch công bố \"Android 17 launches with new multitasking tools as Google expands Gemini features\". Google has released Android 17 and Wear OS 7, introducing new multitasking features, parental controls, security tools, and smartwatch upgrades.\n\nBài viết nhắc tới Android, Google, Gemini, Wear OS, Pixel Drop, cùng các con số như 17, 7, 7, 3, 10.\n\nBài gốc của TechCrunch được công bố ngày 17 thg 6, 2026; liên kết nguồn vẫn là điểm đối chiếu cho ghi nhận hình ảnh, bối cảnh gốc và cập nhật sau đó.\n\nVới đội ngũ doanh nghiệp, điểm kiểm tra đầu tiên là tin này có làm đổi workflow hiện có hay không: ai được dùng, dữ liệu đi qua đâu, việc nào cần con người duyệt lại, và lỗi có thể truy ngược về nguồn gốc để sửa hay không.\n\nTín hiệu cần theo dõi tiếp theo là tài liệu, bằng chứng khách hàng và phản hồi quản lý có đi kèm hay không. Một demo hoặc thông báo đơn lẻ có thể hạ nhiệt nhanh; phạm vi triển khai và trách nhiệm rõ ràng mới khiến tin này hữu ích hơn cho quyết định adoption.",
+      "keyTakeaways": [
+        "Bài gốc của TechCrunch được công bố ngày 17 thg 6, 2026; liên kết nguồn vẫn là điểm đối chiếu cho ghi nhận hình ảnh, bối cảnh gốc và cập nhật sau đó.",
+        "ALTOS LAB xem dạng tin này như tín hiệu thị trường, không chỉ là quảng bá sản phẩm: câu hỏi chính là nó có làm đổi chi phí triển khai AI, trách nhiệm quản trị, luồng dữ liệu hay…",
+        "Với đội ngũ doanh nghiệp, điểm kiểm tra đầu tiên là tin này có làm đổi workflow hiện có hay không: ai được dùng, dữ liệu đi qua đâu, việc nào cần con người duyệt lại, và lỗi có…"
+      ],
+      "faqs": [],
+      "sourceLinks": [
+        {
+          "title": "Android 17 launches with new multitasking tools as Google expands Gemini features",
+          "url": "https://techcrunch.com/2026/06/16/android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-features/",
+          "publisher": "TechCrunch AI",
+          "publishedAt": "Tue, 16 Jun 2026 18:00:00 +0000",
+          "summary": "Google has released Android 17 and Wear OS 7, introducing new multitasking features, parental controls, security tools, and smartwatch upgrades. The launch is also accompanied by a Pixel Drop that brings Google’s latest AI models to its devices."
+        }
+      ],
+      "tags": [
+        "Tin nhanh thị trường",
+        "AI",
+        "TechCrunch",
+        "ai-market-update"
+      ],
+      "author": "Tommy",
+      "cover": "https://techcrunch.com/wp-content/uploads/2026/06/gemini-app-GettyImages-2276204472.jpg?w=1024",
+      "coverAlt": "TechCrunch công bố \"Android 17 launches with new multitasking tools as Google expands Gemini features\" - TechCrunch AI",
+      "coverSource": "source",
+      "coverCredit": "TechCrunch AI",
+      "coverCreditUrl": "https://techcrunch.com/2026/06/16/android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-features/",
+      "coverLicense": "source image",
+      "coverLicenseUrl": "https://techcrunch.com/2026/06/16/android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-features/",
+      "contentImages": [
+        {
+          "url": "https://techcrunch.com/wp-content/uploads/2026/06/1.-Multitask-better-with-Bubbles.png?w=680",
+          "alt": "Android 17 launches with new multitasking tools as Google expands Gemini features",
+          "caption": "Android 17 launches with new multitasking tools as Google expands Gemini features",
+          "source": "source",
+          "credit": "TechCrunch AI",
+          "creditUrl": "https://techcrunch.com/2026/06/16/android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-features/",
+          "license": "source image",
+          "licenseUrl": "https://techcrunch.com/2026/06/16/android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-features/",
+          "aspectRatio": "wide",
+          "placement": "mid-article"
+        },
+        {
+          "url": "https://techcrunch.com/wp-content/uploads/2026/06/4.-Get-peace-of-mind-with-security-and-safety-updates.png?w=680",
+          "alt": "Android 17 launches with new multitasking tools as Google expands Gemini features",
+          "caption": "Android 17 launches with new multitasking tools as Google expands Gemini features",
+          "source": "source",
+          "credit": "TechCrunch AI",
+          "creditUrl": "https://techcrunch.com/2026/06/16/android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-features/",
+          "license": "source image",
+          "licenseUrl": "https://techcrunch.com/2026/06/16/android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-features/",
+          "aspectRatio": "wide",
+          "placement": "before-faq"
+        }
+      ],
+      "readTimeMinutes": 3,
+      "featured": false,
+      "createdAt": "2026-06-16T21:44:56.137Z",
+      "updatedAt": "2026-06-16T21:44:56.137Z",
+      "publishedAt": "2026-06-16T21:44:56.137Z",
+      "generatedBy": "codex-market-source-translation-repair"
+    },
+    {
+      "id": "post_mqh67ccp_om29m5",
+      "slug": "android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-f",
+      "status": "published",
+      "sortOrder": 1,
+      "language": "th",
+      "translationGroupId": "tg-market-2026-06-17-01-android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-f",
+      "title": "TechCrunch เผยแพร่ \"Android 17 launches with new multitasking tools as Google expands Gemini features\"",
+      "seoTitle": "TechCrunch เผยแพร่ \"Android 17 launches with new multitasking tools as…",
+      "seoDescription": "TechCrunch AI รายงานว่า Google has released Android 17 and Wear OS 7, introducing new multitasking features, parental controls, security tools, and smartwatch upgrades.",
+      "excerpt": "TechCrunch AI รายงานว่า TechCrunch รายงานว่า รายงานกล่าวถึง Android, Google, Gemini, Wear OS, Pixel Drop พร้อมตัวเลข 17, 7, 7, 3, 10.",
+      "contentType": "breaking",
+      "newsCategory": "AI",
+      "topic": "Android 17 launches with new multitasking tools as Google expands Gemini features",
+      "audience": "AI market readers",
+      "geoSummary": "TechCrunch AI รายงาน TechCrunch เผยแพร่ \"Android 17 launches with new multitasking tools as Google expands Gemini features\" Google has released Android 17 and Wear OS 7, introducing new multitasking features, parental controls, se",
+      "body": "TechCrunch AI รายงาน TechCrunch เผยแพร่ \"Android 17 launches with new multitasking tools as Google expands Gemini features\" Google has released Android 17 and Wear OS 7, introducing new multitasking features, parental controls, security tools, and smartwatch upgrades.\n\nรายงานกล่าวถึง Android, Google, Gemini, Wear OS, Pixel Drop พร้อมตัวเลข 17, 7, 7, 3, 10\n\nรายงานต้นทางของ TechCrunch เผยแพร่เมื่อ 17 มิ.ย. 2569; ลิงก์แหล่งข่าวยังเป็นจุดอ้างอิงสำหรับเครดิตภาพ บริบทต้นฉบับ และอัปเดตภายหลัง\n\nสำหรับทีมองค์กร จุดตรวจแรกคือข่าวนี้เปลี่ยน workflow เดิมหรือไม่ ใครใช้ได้ ข้อมูลไหลไปที่ไหน งานใดต้องมีมนุษย์ตรวจซ้ำ และถ้าเกิดข้อผิดพลาดจะย้อนกลับไปเทียบกับแหล่งข่าวต้นทางได้หรือไม่\n\nสัญญาณถัดไปที่ต้องดูคือมีเอกสารทางการ หลักฐานจากลูกค้า และท่าทีของหน่วยงานกำกับตามมาหรือไม่ เดโมหรือประกาศเดี่ยวอาจจางเร็ว แต่ขอบเขต deployment และ accountability ที่ชัดจะทำให้ข่าวนี้มีน้ำหนักต่อการนำไปใช้มากขึ้น",
+      "keyTakeaways": [
+        "รายงานต้นทางของ TechCrunch เผยแพร่เมื่อ 17 มิ.",
+        "ALTOS LAB มองข่าวแบบนี้เป็นสัญญาณตลาด ไม่ใช่แค่การโปรโมตสินค้า คำถามคือมันเปลี่ยนต้นทุนการนำ AI ไปใช้ ความรับผิดชอบด้าน governance ทิศทางข้อมูล หรือความเชื่อมั่นของผู้ใช้หรือไม่",
+        "สำหรับทีมองค์กร จุดตรวจแรกคือข่าวนี้เปลี่ยน workflow เดิมหรือไม่ ใครใช้ได้ ข้อมูลไหลไปที่ไหน งานใดต้องมีมนุษย์ตรวจซ้ำ…"
+      ],
+      "faqs": [],
+      "sourceLinks": [
+        {
+          "title": "Android 17 launches with new multitasking tools as Google expands Gemini features",
+          "url": "https://techcrunch.com/2026/06/16/android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-features/",
+          "publisher": "TechCrunch AI",
+          "publishedAt": "Tue, 16 Jun 2026 18:00:00 +0000",
+          "summary": "Google has released Android 17 and Wear OS 7, introducing new multitasking features, parental controls, security tools, and smartwatch upgrades. The launch is also accompanied by a Pixel Drop that brings Google’s latest AI models to its devices."
+        }
+      ],
+      "tags": [
+        "ข่าวตลาด",
+        "AI",
+        "TechCrunch",
+        "ai-market-update"
+      ],
+      "author": "Tommy",
+      "cover": "https://techcrunch.com/wp-content/uploads/2026/06/gemini-app-GettyImages-2276204472.jpg?w=1024",
+      "coverAlt": "TechCrunch เผยแพร่ \"Android 17 launches with new multitasking tools as Google expands Gemini features\" - TechCrunch AI",
+      "coverSource": "source",
+      "coverCredit": "TechCrunch AI",
+      "coverCreditUrl": "https://techcrunch.com/2026/06/16/android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-features/",
+      "coverLicense": "source image",
+      "coverLicenseUrl": "https://techcrunch.com/2026/06/16/android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-features/",
+      "contentImages": [
+        {
+          "url": "https://techcrunch.com/wp-content/uploads/2026/06/1.-Multitask-better-with-Bubbles.png?w=680",
+          "alt": "Android 17 launches with new multitasking tools as Google expands Gemini features",
+          "caption": "Android 17 launches with new multitasking tools as Google expands Gemini features",
+          "source": "source",
+          "credit": "TechCrunch AI",
+          "creditUrl": "https://techcrunch.com/2026/06/16/android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-features/",
+          "license": "source image",
+          "licenseUrl": "https://techcrunch.com/2026/06/16/android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-features/",
+          "aspectRatio": "wide",
+          "placement": "mid-article"
+        },
+        {
+          "url": "https://techcrunch.com/wp-content/uploads/2026/06/4.-Get-peace-of-mind-with-security-and-safety-updates.png?w=680",
+          "alt": "Android 17 launches with new multitasking tools as Google expands Gemini features",
+          "caption": "Android 17 launches with new multitasking tools as Google expands Gemini features",
+          "source": "source",
+          "credit": "TechCrunch AI",
+          "creditUrl": "https://techcrunch.com/2026/06/16/android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-features/",
+          "license": "source image",
+          "licenseUrl": "https://techcrunch.com/2026/06/16/android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-features/",
+          "aspectRatio": "wide",
+          "placement": "before-faq"
+        }
+      ],
+      "readTimeMinutes": 3,
+      "featured": false,
+      "createdAt": "2026-06-16T21:44:56.137Z",
+      "updatedAt": "2026-06-16T21:44:56.137Z",
+      "publishedAt": "2026-06-16T21:44:56.137Z",
+      "generatedBy": "codex-market-source-translation-repair"
+    },
+    {
+      "id": "post_mqh67ccp_yiz6b6",
+      "slug": "android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-f",
+      "status": "published",
+      "sortOrder": 1,
+      "language": "ms",
+      "translationGroupId": "tg-market-2026-06-17-01-android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-f",
+      "title": "TechCrunch menerbitkan \"Android 17 launches with new multitasking tools as Google expands Gemini features\"",
+      "seoTitle": "TechCrunch menerbitkan \"Android 17 launches with new multitasking tools as…",
+      "seoDescription": "TechCrunch AI melaporkan Dalam laporan pada 17 Jun 2026, TechCrunch menyatakan: ALTOS LAB membaca kemas kini seperti ini sebagai isyarat pasaran, bukan sekadar promosi pr",
+      "excerpt": "TechCrunch AI melaporkan TechCrunch melaporkan: Artikel ini menyebut Android, Google, Gemini, Wear OS, Pixel Drop, dengan angka seperti 17, 7, 7, 3, 10.",
+      "contentType": "breaking",
+      "newsCategory": "AI",
+      "topic": "Android 17 launches with new multitasking tools as Google expands Gemini features",
+      "audience": "AI market readers",
+      "geoSummary": "TechCrunch AI melaporkan TechCrunch menerbitkan \"Android 17 launches with new multitasking tools as Google expands Gemini features\".",
+      "body": "TechCrunch AI melaporkan TechCrunch menerbitkan \"Android 17 launches with new multitasking tools as Google expands Gemini features\". Google has released Android 17 and Wear OS 7, introducing new multitasking features, parental controls, security tools, and smartwatch upgrades.\n\nArtikel ini menyebut Android, Google, Gemini, Wear OS, Pixel Drop, dengan angka seperti 17, 7, 7, 3, 10.\n\nLaporan asal TechCrunch diterbitkan pada 17 Jun 2026; pautan sumber kekal sebagai rujukan untuk atribusi imej, konteks asal dan kemas kini selepas itu.\n\nBagi pasukan enterprise, semakan pertama ialah sama ada berita ini mengubah workflow sedia ada: siapa boleh menggunakannya, ke mana data bergerak, tugasan mana perlukan semakan manusia, dan sama ada kesilapan boleh dijejak semula kepada sumber asal.\n\nIsyarat seterusnya yang perlu dipantau ialah sama ada dokumentasi, bukti pelanggan dan respons regulator menyusul. Demo atau satu pengumuman boleh cepat pudar; skop deployment dan akauntabiliti yang jelas menjadikan berita ini lebih berguna sebagai isyarat adopsi.",
+      "keyTakeaways": [
+        "Laporan asal TechCrunch diterbitkan pada 17 Jun 2026; pautan sumber kekal sebagai rujukan untuk atribusi imej, konteks asal dan kemas kini selepas itu.",
+        "ALTOS LAB membaca kemas kini seperti ini sebagai isyarat pasaran, bukan sekadar promosi produk: soalan utamanya ialah sama ada ia mengubah kos adopsi AI, tanggungjawab…",
+        "Bagi pasukan enterprise, semakan pertama ialah sama ada berita ini mengubah workflow sedia ada: siapa boleh menggunakannya, ke mana data bergerak, tugasan mana perlukan semakan…"
+      ],
+      "faqs": [],
+      "sourceLinks": [
+        {
+          "title": "Android 17 launches with new multitasking tools as Google expands Gemini features",
+          "url": "https://techcrunch.com/2026/06/16/android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-features/",
+          "publisher": "TechCrunch AI",
+          "publishedAt": "Tue, 16 Jun 2026 18:00:00 +0000",
+          "summary": "Google has released Android 17 and Wear OS 7, introducing new multitasking features, parental controls, security tools, and smartwatch upgrades. The launch is also accompanied by a Pixel Drop that brings Google’s latest AI models to its devices."
+        }
+      ],
+      "tags": [
+        "Berita Pasaran",
+        "AI",
+        "TechCrunch",
+        "ai-market-update"
+      ],
+      "author": "Tommy",
+      "cover": "https://techcrunch.com/wp-content/uploads/2026/06/gemini-app-GettyImages-2276204472.jpg?w=1024",
+      "coverAlt": "TechCrunch menerbitkan \"Android 17 launches with new multitasking tools as Google expands Gemini features\" - TechCrunch AI",
+      "coverSource": "source",
+      "coverCredit": "TechCrunch AI",
+      "coverCreditUrl": "https://techcrunch.com/2026/06/16/android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-features/",
+      "coverLicense": "source image",
+      "coverLicenseUrl": "https://techcrunch.com/2026/06/16/android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-features/",
+      "contentImages": [
+        {
+          "url": "https://techcrunch.com/wp-content/uploads/2026/06/1.-Multitask-better-with-Bubbles.png?w=680",
+          "alt": "Android 17 launches with new multitasking tools as Google expands Gemini features",
+          "caption": "Android 17 launches with new multitasking tools as Google expands Gemini features",
+          "source": "source",
+          "credit": "TechCrunch AI",
+          "creditUrl": "https://techcrunch.com/2026/06/16/android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-features/",
+          "license": "source image",
+          "licenseUrl": "https://techcrunch.com/2026/06/16/android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-features/",
+          "aspectRatio": "wide",
+          "placement": "mid-article"
+        },
+        {
+          "url": "https://techcrunch.com/wp-content/uploads/2026/06/4.-Get-peace-of-mind-with-security-and-safety-updates.png?w=680",
+          "alt": "Android 17 launches with new multitasking tools as Google expands Gemini features",
+          "caption": "Android 17 launches with new multitasking tools as Google expands Gemini features",
+          "source": "source",
+          "credit": "TechCrunch AI",
+          "creditUrl": "https://techcrunch.com/2026/06/16/android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-features/",
+          "license": "source image",
+          "licenseUrl": "https://techcrunch.com/2026/06/16/android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-features/",
+          "aspectRatio": "wide",
+          "placement": "before-faq"
+        }
+      ],
+      "readTimeMinutes": 3,
+      "featured": false,
+      "createdAt": "2026-06-16T21:44:56.137Z",
+      "updatedAt": "2026-06-16T21:44:56.137Z",
+      "publishedAt": "2026-06-16T21:44:56.137Z",
+      "generatedBy": "codex-market-source-translation-repair"
+    },
+    {
+      "id": "post_mqh67ccp_2h0bri",
+      "slug": "android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-f",
+      "status": "published",
+      "sortOrder": 1,
+      "language": "fil",
+      "translationGroupId": "tg-market-2026-06-17-01-android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-f",
+      "title": "Inilathala ng TechCrunch ang \"Android 17 launches with new multitasking tools as Google expands Gemini features\"",
+      "seoTitle": "Inilathala ng TechCrunch ang \"Android 17 launches with new multitasking…",
+      "seoDescription": "Iniulat ng TechCrunch AI: Google has released Android 17 and Wear OS 7, introducing new multitasking features, parental controls, security tools, and smartwatch upgrades.",
+      "excerpt": "Iniulat ng TechCrunch AI: Ayon sa TechCrunch, Binanggit sa ulat ang Android, Google, Gemini, Wear OS, Pixel Drop, kasama ang mga numerong 17, 7, 7, 3, 10.",
+      "contentType": "breaking",
+      "newsCategory": "AI",
+      "topic": "Android 17 launches with new multitasking tools as Google expands Gemini features",
+      "audience": "AI market readers",
+      "geoSummary": "Iniulat ng TechCrunch AI ang Inilathala ng TechCrunch ang \"Android 17 launches with new multitasking tools as Google expands Gemini features\".",
+      "body": "Iniulat ng TechCrunch AI ang Inilathala ng TechCrunch ang \"Android 17 launches with new multitasking tools as Google expands Gemini features\". Google has released Android 17 and Wear OS 7, introducing new multitasking features, parental controls, security tools, and smartwatch upgrades.\n\nBinanggit sa ulat ang Android, Google, Gemini, Wear OS, Pixel Drop, kasama ang mga numerong 17, 7, 7, 3, 10.\n\nBinabasa ng ALTOS LAB ang ganitong update bilang market signal, hindi lang product promotion: ang tanong ay kung binabago nito ang AI adoption cost, governance responsibility, data flow, o user trust.\n\nPara sa enterprise teams, unang kailangang tingnan kung binabago nito ang kasalukuyang workflow: sino ang puwedeng gumamit, saan dumadaan ang data, aling tasks ang kailangang i-review ng tao, at kung maibabalik ba sa original source kapag may mali.\n\nAng susunod na bantayan ay kung susunod ang documentation, customer evidence, at regulatory response. Madaling kumupas ang demo o isang announcement; mas nagiging adoption signal ito kapag malinaw ang deployment scope at accountability.",
+      "keyTakeaways": [
+        "Nalathala ang orihinal na ulat ng TechCrunch noong Hun 17, 2026; ang source link pa rin ang reference para sa image attribution, orihinal na konteksto, at mga susunod na update.",
+        "Binabasa ng ALTOS LAB ang ganitong update bilang public signal, hindi lang product promotion: ang tanong ay kung binabago nito ang AI adoption cost, governance responsibility,…",
+        "Para sa enterprise teams, unang kailangang tingnan kung binabago nito ang kasalukuyang workflow: sino ang puwedeng gumamit, saan dumadaan ang data, aling tasks ang kailangang…"
+      ],
+      "faqs": [],
+      "sourceLinks": [
+        {
+          "title": "Android 17 launches with new multitasking tools as Google expands Gemini features",
+          "url": "https://techcrunch.com/2026/06/16/android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-features/",
+          "publisher": "TechCrunch AI",
+          "publishedAt": "Tue, 16 Jun 2026 18:00:00 +0000",
+          "summary": "Google has released Android 17 and Wear OS 7, introducing new multitasking features, parental controls, security tools, and smartwatch upgrades. The launch is also accompanied by a Pixel Drop that brings Google’s latest AI models to its devices."
+        }
+      ],
+      "tags": [
+        "Market Brief",
+        "AI",
+        "TechCrunch",
+        "ai-market-update"
+      ],
+      "author": "Tommy",
+      "cover": "https://techcrunch.com/wp-content/uploads/2026/06/gemini-app-GettyImages-2276204472.jpg?w=1024",
+      "coverAlt": "Inilathala ng TechCrunch ang \"Android 17 launches with new multitasking tools as Google expands Gemini features\" - TechCrunch AI",
+      "coverSource": "source",
+      "coverCredit": "TechCrunch AI",
+      "coverCreditUrl": "https://techcrunch.com/2026/06/16/android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-features/",
+      "coverLicense": "source image",
+      "coverLicenseUrl": "https://techcrunch.com/2026/06/16/android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-features/",
+      "contentImages": [
+        {
+          "url": "https://techcrunch.com/wp-content/uploads/2026/06/1.-Multitask-better-with-Bubbles.png?w=680",
+          "alt": "Android 17 launches with new multitasking tools as Google expands Gemini features",
+          "caption": "Android 17 launches with new multitasking tools as Google expands Gemini features",
+          "source": "source",
+          "credit": "TechCrunch AI",
+          "creditUrl": "https://techcrunch.com/2026/06/16/android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-features/",
+          "license": "source image",
+          "licenseUrl": "https://techcrunch.com/2026/06/16/android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-features/",
+          "aspectRatio": "wide",
+          "placement": "mid-article"
+        },
+        {
+          "url": "https://techcrunch.com/wp-content/uploads/2026/06/4.-Get-peace-of-mind-with-security-and-safety-updates.png?w=680",
+          "alt": "Android 17 launches with new multitasking tools as Google expands Gemini features",
+          "caption": "Android 17 launches with new multitasking tools as Google expands Gemini features",
+          "source": "source",
+          "credit": "TechCrunch AI",
+          "creditUrl": "https://techcrunch.com/2026/06/16/android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-features/",
+          "license": "source image",
+          "licenseUrl": "https://techcrunch.com/2026/06/16/android-17-launches-with-new-multitasking-tools-as-google-expands-gemini-features/",
+          "aspectRatio": "wide",
+          "placement": "before-faq"
+        }
+      ],
+      "readTimeMinutes": 3,
+      "featured": false,
+      "createdAt": "2026-06-16T21:44:56.137Z",
+      "updatedAt": "2026-06-16T21:44:56.137Z",
+      "publishedAt": "2026-06-16T21:44:56.137Z",
+      "generatedBy": "codex-market-source-translation-repair"
+    }
+  ]
+}

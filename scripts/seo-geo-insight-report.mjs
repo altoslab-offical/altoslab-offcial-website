@@ -11,6 +11,7 @@ const DEFAULT_BASE_URL = "https://altoslab-ai.cc";
 const DEFAULT_FROM = "altoslab.offical@gmail.com";
 const DEFAULT_TO = "altoslab.offical@gmail.com";
 const DEFAULT_LANGUAGES = ["zh-Hant", "en", "ja", "ko", "id", "vi", "th", "ms", "fil"];
+const DEFAULT_INVENTORY_LIMIT = Number(process.env.SEO_GEO_INVENTORY_LIMIT || "1000");
 const execFileAsync = promisify(execFile);
 const LANGUAGE_PREFIX = {
   "zh-Hant": "",
@@ -381,22 +382,44 @@ async function ga4Report() {
   if (!propertyId) return { configured: false, ok: false, reason: "GA4_PROPERTY_ID is not configured", propertyId: "" };
   const token = await googleAccessToken("https://www.googleapis.com/auth/analytics.readonly");
   if (!token.ok) return { configured: true, ok: false, reason: token.reason, propertyId };
-  const response = await fetch(`https://analyticsdata.googleapis.com/v1beta/properties/${propertyId}:runReport`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${token.accessToken}`,
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      dateRanges: [{ startDate: "7daysAgo", endDate: "today" }],
-      dimensions: [{ name: "sessionSource" }, { name: "sessionMedium" }, { name: "landingPagePlusQueryString" }],
-      metrics: [{ name: "sessions" }, { name: "engagedSessions" }],
-      limit: "250"
-    })
+  const runGa4Report = async (body) => {
+    const response = await fetch(`https://analyticsdata.googleapis.com/v1beta/properties/${propertyId}:runReport`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token.accessToken}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(body)
+    });
+    const json = await response.json().catch(() => ({}));
+    return { response, json };
+  };
+  const { response, json } = await runGa4Report({
+    dateRanges: [{ startDate: "7daysAgo", endDate: "today" }],
+    dimensions: [{ name: "sessionSource" }, { name: "sessionMedium" }, { name: "landingPagePlusQueryString" }],
+    metrics: [{ name: "sessions" }, { name: "engagedSessions" }],
+    limit: "250"
   });
-  const json = await response.json().catch(() => ({}));
   if (!response.ok)
     return { configured: true, ok: false, reason: json.error?.message || `GA4 runReport failed ${response.status}`, propertyId };
+  const eventResult = await runGa4Report({
+    dateRanges: [{ startDate: "7daysAgo", endDate: "today" }],
+    dimensions: [{ name: "eventName" }],
+    metrics: [{ name: "eventCount" }, { name: "totalUsers" }],
+    dimensionFilter: {
+      filter: {
+        fieldName: "eventName",
+        stringFilter: { matchType: "EXACT", value: "ai_referral_landing" }
+      }
+    },
+    limit: "10"
+  });
+  const eventRows = eventResult.response.ok && Array.isArray(eventResult.json.rows) ? eventResult.json.rows : [];
+  const aiReferralLandingEvents = eventRows.reduce((sum, row) => sum + Number(row.metricValues?.[0]?.value || 0), 0);
+  const aiReferralEventUsers = eventRows.reduce((sum, row) => sum + Number(row.metricValues?.[1]?.value || 0), 0);
+  const aiReferralEventReadback = eventResult.response.ok
+    ? "ok"
+    : eventResult.json.error?.message || `GA4 event runReport failed ${eventResult.response.status}`;
   const rows = Array.isArray(json.rows) ? json.rows : [];
   const normalizedRows = rows.map((row) => {
     const dimensions = row.dimensionValues?.map((value) => value.value || "") || [];
@@ -417,6 +440,9 @@ async function ga4Report() {
     totalSessions: normalizedRows.reduce((sum, row) => sum + row.sessions, 0),
     aiSessions: aiRows.reduce((sum, row) => sum + row.sessions, 0),
     aiEngagedSessions: aiRows.reduce((sum, row) => sum + row.engagedSessions, 0),
+    aiReferralLandingEvents,
+    aiReferralEventUsers,
+    aiReferralEventReadback,
     aiSources: countBy(aiRows, (row) => row.source),
     aiLandingPages: aiRows.slice(0, 10)
   };
@@ -485,7 +511,14 @@ function buildInsights({ targetUrl, health, posts, qualityPosts, surface, ga4, s
     }));
   const marketNewsGroups = reportableGroups.map(([, group]) => group).filter((group) => group.some((post) => post.contentType === "breaking"));
   const incompleteMarketNewsGroups = incompleteGroups.filter((group) => group.contentType === "breaking");
+  const marketNewsPosts = scoredPosts.filter((post) => post.contentType === "breaking");
+  const columnOrFeaturePosts = scoredPosts.filter((post) => post.contentType !== "breaking");
   const sourceCounts = scoredPosts.map((post) => post.sourceLinks?.length || 0);
+  const marketNewsSourceCounts = marketNewsPosts.map((post) => post.sourceLinks?.length || 0);
+  const columnOrFeatureSourceCounts = columnOrFeaturePosts.map((post) => post.sourceLinks?.length || 0);
+  const sourceCountHealthy =
+    (marketNewsPosts.length === 0 || average(marketNewsSourceCounts) >= 1) &&
+    (columnOrFeaturePosts.length === 0 || average(columnOrFeatureSourceCounts) >= 2.5);
   const faqCounts = scoredPosts.map((post) => post.faqs?.length || 0);
   const takeawayCounts = scoredPosts.map((post) => post.keyTakeaways?.length || 0);
   const sourceDomains = [
@@ -524,7 +557,7 @@ function buildInsights({ targetUrl, health, posts, qualityPosts, surface, ga4, s
       { key: "blog has at least one qualified public post", ok: posts.length > 0, weight: 8 },
       { key: "posts include GEO summaries and sources", ok: scoredPosts.length > 0 && percent(postsWithGeo, scoredPosts.length) >= 90, weight: 14 },
       { key: "source summaries support citable context", ok: scoredPosts.length > 0 && percent(sourceSummaryCoverage, scoredPosts.length) >= 80, weight: 12 },
-      { key: "average source count is healthy", ok: scoredPosts.length > 0 && average(sourceCounts) >= 2.5, weight: 12 },
+      { key: "source count matches content type", ok: scoredPosts.length > 0 && sourceCountHealthy, weight: 12 },
       { key: "FAQ and key takeaways exist", ok: scoredPosts.length > 0 && average(faqCounts) >= 1 && average(takeawayCounts) >= 2, weight: 10 },
       { key: "full language groups are ready", ok: completeGroups > 0, weight: 8 },
       { key: "market news translated to every language", ok: incompleteMarketNewsGroups.length === 0, weight: 4 }
@@ -631,6 +664,8 @@ function buildInsights({ targetUrl, health, posts, qualityPosts, surface, ga4, s
       incompleteMarketNewsGroups: incompleteMarketNewsGroups.slice(0, 10),
       qualitySamplePosts: scoredPosts.length,
       averageSources: average(sourceCounts),
+      averageMarketNewsSources: average(marketNewsSourceCounts),
+      averageColumnOrFeatureSources: average(columnOrFeatureSourceCounts),
       averageFaqs: average(faqCounts),
       averageKeyTakeaways: average(takeawayCounts),
       sourceDomains: sourceDomains.slice(0, 30)
@@ -712,8 +747,14 @@ function renderTextReport(report) {
     : report.technical.searchConsoleApiReachable
       ? `Search Console 驗證：已通過 API / DNS 驗證（${report.technical.searchConsoleSite}）`
       : "Search Console 驗證：尚未偵測到";
+  const aiReferralEventLine =
+    report.analytics.ga4.ok && report.analytics.ga4.aiReferralEventReadback === "ok"
+      ? `- 近 7 天 AI referral landing 事件：${report.analytics.ga4.aiReferralLandingEvents || 0} 次`
+      : report.analytics.ga4.ok
+        ? `- AI referral 事件讀回：未可讀（${report.analytics.ga4.aiReferralEventReadback || "未知原因"}）`
+        : "";
   const analyticsPlainLanguage = report.analytics.ga4.ok
-    ? `追蹤碼像門口的計數器，Data API 像每天把帳本拿出來看。現在兩邊都已經接上，所以日報可以用真實流量判斷文章表現。近 7 天總流量是 ${report.analytics.ga4.totalSessions} 次造訪。`
+    ? `追蹤碼像門口的計數器，Data API 像每天把帳本拿出來看。現在兩邊都已經接上，所以日報可以用真實流量判斷文章表現。近 7 天總流量是 ${report.analytics.ga4.totalSessions} 次造訪，AI 來源 session 是 ${report.analytics.ga4.aiSessions} 次，AI referral landing 事件是 ${report.analytics.ga4.aiReferralLandingEvents || 0} 次。`
     : "追蹤碼像門口的計數器，Data API 像每天把帳本拿出來看。現在門口計數器有裝，但帳本還沒接上，所以還不能用真實流量判斷文章表現。";
   const contentTypeLines = Object.entries(report.content.byType || {})
     .map(([type, count]) => `- ${typeLabel[type] || type}: ${count} 篇`)
@@ -771,6 +812,7 @@ ${incompleteLanguageLines || "- 沒有缺語言的文章組。"}
 - ${searchConsoleApiLine}
 - 近 7 天總流量：${report.analytics.ga4.ok ? `${report.analytics.ga4.totalSessions} 次造訪` : "目前讀不到"}
 - 近 7 天 AI 來源流量：${report.analytics.ga4.ok ? `${report.analytics.ga4.aiSessions} 次造訪` : "目前讀不到"}
+${aiReferralEventLine}
 ${aiSourceLines}
 
 白話說：
@@ -793,7 +835,7 @@ async function main() {
   await loadEnvFiles();
   const targetUrl = baseUrl();
   const healthResult = await fetchJson(`${targetUrl}/api/health`);
-  const inventoryResult = await fetchJson(`${targetUrl}/api/blog?fields=inventory&limit=120`);
+  const inventoryResult = await fetchJson(`${targetUrl}/api/blog?fields=inventory&limit=${DEFAULT_INVENTORY_LIMIT}`);
   const listResult = await fetchJson(`${targetUrl}/api/blog?limit=72`);
   const health = healthResult.json || {};
   const languages = health?.integrations?.blogLanguages?.length ? health.integrations.blogLanguages : DEFAULT_LANGUAGES;

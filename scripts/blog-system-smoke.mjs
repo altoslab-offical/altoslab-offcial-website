@@ -342,6 +342,7 @@ assert(
   "public D1 projection reads are chunked so Worker reads do not stop at the runtime's 20-row page"
 );
 assert(blogApiRoute.includes("cloudflareLimitCap") && blogApiRoute.includes("getPublishedBlogInventoryPostsForApi(language || undefined, limit)"), "public blog API uses bounded D1 inventory projection for list and inventory responses");
+assert(blogApiRoute.includes("BLOG_API_LIMIT_CAP || 1000"), "AWS blog inventory API cap is high enough for full SEO/GEO coverage audits");
 assert(feedRoute.includes("getPublishedBlogInventoryPostsForApi(undefined, itemLimit)"), "Cloudflare feed renders from bounded inventory cache instead of full blog bodies");
 assert(
   rssAliasRoute.includes("export const dynamic = \"force-dynamic\"") && rssAliasRoute.includes("export { GET } from \"../feed.xml/route\""),

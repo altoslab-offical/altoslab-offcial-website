@@ -65,6 +65,7 @@ function buildLearning({ date, baseUrl, reportPath, report }) {
   const searchConsole = report.analytics?.searchConsole || {};
   const apiReadable = ga4.ok === true && searchConsole.ok === true;
   const aiSessions = Number(ga4.aiSessions || 0);
+  const aiReferralLandingEvents = Number(ga4.aiReferralLandingEvents || 0);
   return {
     schema: "hermes_official_blog_traffic_self_evolution_readback_v1",
     owner: "Hermes",
@@ -81,6 +82,8 @@ function buildLearning({ date, baseUrl, reportPath, report }) {
       totalSessions7d: Number(ga4.totalSessions || 0),
       aiReferralSessions7d: aiSessions,
       aiEngagedSessions7d: Number(ga4.aiEngagedSessions || 0),
+      aiReferralLandingEvents7d: aiReferralLandingEvents,
+      aiReferralEventReadback: ga4.aiReferralEventReadback || "",
       aiSources: ga4.aiSources || {},
       aiLandingPages: ga4.aiLandingPages || [],
       reason: ga4.reason || ""
@@ -106,12 +109,12 @@ function buildLearning({ date, baseUrl, reportPath, report }) {
       incompleteGroups: Array.isArray(report.content?.incompleteGroups) ? report.content.incompleteGroups.length : 0
     },
     canOptimizeTopicSelectionFromTraffic: apiReadable,
-    canClaimAiTrafficLift: aiSessions > 0,
+    canClaimAiTrafficLift: aiSessions > 0 || aiReferralLandingEvents > 0,
     rule:
-      "Use GA4 and Search Console readback to adjust future topic selection. Keep AI traffic lift claims blocked until identifiable AI referral sessions exist.",
+      "Use GA4 and Search Console readback to adjust future topic selection. Keep AI traffic lift claims blocked until identifiable AI referral sessions or ai_referral_landing events exist.",
     nextHermesRules: [
       "Prefer topics that produce Search Console impressions/clicks or GA engaged sessions over source-only novelty.",
-      "Do not chase AI referral growth claims while AI sessions remain zero; optimize source clarity, titles, language coverage, and internal links first.",
+      "Do not chase AI referral growth claims while AI sessions and ai_referral_landing events remain zero; optimize source clarity, titles, language coverage, and internal links first.",
       "Repair incomplete multilingual groups because GEO score is capped by language gaps."
     ],
     sourceReport: reportPath
