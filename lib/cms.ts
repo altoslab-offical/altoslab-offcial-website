@@ -1559,7 +1559,7 @@ function blogSourceHosts(post: BlogPost) {
 function publicCoverKey(cover?: string) {
   if (!cover) return "";
   try {
-    const url = new URL(cover);
+    const url = new URL(cover, "https://altoslab-ai.cc");
     url.search = "";
     url.hash = "";
     return `${url.hostname}${url.pathname}`.toLowerCase();
