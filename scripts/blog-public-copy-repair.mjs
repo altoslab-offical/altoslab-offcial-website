@@ -375,14 +375,15 @@ function postFilter({ languageArg, statusArg, contentTypeArg }) {
     contentTypeMatches(post, contentTypeArg);
 }
 
-async function loadPublicPosts(root, { languageArg, statusArg, contentTypeArg, limit }) {
+async function loadPublicPosts(root, { languageArg, statusArg, contentTypeArg, limit, offset = 0 }) {
   const languages = languageArg === "all" ? BLOG_LANGUAGES : [languageArg];
   const posts = [];
+  const target = limit > 0 ? offset + limit : 0;
   for (const language of languages) {
     const { payload } = await fetchJson(`${root}/api/blog?language=${encodeURIComponent(language)}&limit=600`);
     const listed = (payload.posts || []).filter(postFilter({ languageArg: language, statusArg, contentTypeArg }));
     for (const item of listed) {
-      if (limit > 0 && posts.length >= limit) return posts;
+      if (target > 0 && posts.length >= target) return posts;
       const slug = item.slug || "";
       if (!slug) continue;
       const { payload: detailPayload } = await fetchJson(`${root}/api/blog/${encodeURIComponent(slug)}?language=${encodeURIComponent(language)}`);
@@ -405,18 +406,18 @@ async function loadRepairPosts(root, auth, filters) {
   return { posts: await loadPublicPosts(root, filters), readMode: "public-detail" };
 }
 
-function selectPosts(posts, { languageArg, statusArg, contentTypeArg, limit }) {
+function selectPosts(posts, { languageArg, statusArg, contentTypeArg, limit, offset = 0 }) {
   return posts
     .filter(postFilter({ languageArg, statusArg, contentTypeArg }))
     .map((post) => ({ post, patch: repairPost(post) }))
     .filter(({ post, patch }) => changed(post, patch))
-    .slice(0, limit > 0 ? limit : undefined);
+    .slice(offset, limit > 0 ? offset + limit : undefined);
 }
 
-async function selectPostsWithSources(posts, { languageArg, statusArg, contentTypeArg, limit }) {
+async function selectPostsWithSources(posts, { languageArg, statusArg, contentTypeArg, limit, offset = 0 }) {
   const candidates = posts
     .filter(postFilter({ languageArg, statusArg, contentTypeArg }))
-    .slice(0, limit > 0 ? limit : undefined);
+    .slice(offset, limit > 0 ? offset + limit : undefined);
   const cache = new Map();
   const selected = [];
   const held = [];
@@ -483,6 +484,7 @@ async function main() {
   const statusArg = arg("status", "published");
   const contentTypeArg = arg("content-type", "breaking");
   const limit = Number.parseInt(arg("limit", "0"), 10) || 0;
+  const offset = Number.parseInt(arg("offset", "0"), 10) || 0;
   const dryRun = hasFlag("dry-run");
   const skipPublicCheck = hasFlag("skip-public-check");
   const useBulkPatch = hasFlag("bulk");
@@ -501,7 +503,7 @@ async function main() {
 
   const root = baseUrl();
   const auth = dryRun ? { cookie: "", warning: "" } : await optionalAdminCookie(root);
-  const filters = { languageArg, statusArg, contentTypeArg, limit };
+  const filters = { languageArg, statusArg, contentTypeArg, limit, offset };
   const { posts: adminPosts, readMode } = await loadRepairPosts(root, auth, filters);
   const { selected, held } = await selectPostsWithSources(adminPosts, filters);
   const preview = selected.map(({ post, patch }) => ({
