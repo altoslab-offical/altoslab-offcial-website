@@ -1556,6 +1556,18 @@ function blogSourceHosts(post: BlogPost) {
     .filter(Boolean);
 }
 
+function publicCoverKey(cover?: string) {
+  if (!cover) return "";
+  try {
+    const url = new URL(cover);
+    url.search = "";
+    url.hash = "";
+    return `${url.hostname}${url.pathname}`.toLowerCase();
+  } catch {
+    return cover.trim().toLowerCase();
+  }
+}
+
 export async function getRelatedPublishedBlogPosts(post: BlogPost, limit = 4) {
   if (isCloudflarePublicRuntime()) return [];
 
@@ -1577,8 +1589,13 @@ export async function getRelatedPublishedBlogPosts(post: BlogPost, limit = 4) {
     })
     .filter(({ score }) => score > 0)
     .sort((a, b) => b.score - a.score || new Date(b.item.updatedAt).getTime() - new Date(a.item.updatedAt).getTime())
-    .slice(0, limit)
-    .map(({ item }) => item);
+    .reduce<BlogPost[]>((selected, { item }) => {
+      if (selected.length >= limit) return selected;
+      const coverKey = publicCoverKey(item.cover);
+      if (coverKey && selected.some((selectedPost) => publicCoverKey(selectedPost.cover) === coverKey)) return selected;
+      selected.push(item);
+      return selected;
+    }, []);
 }
 
 export function normalizePageInput(input: Partial<SitePage>): Partial<SitePage> {

@@ -15,7 +15,7 @@ type SafeBlogImageProps = {
 const rejectedCoverPattern =
   /(dead|corpse|prisoner|concentration camp|nazi|war crime|weapon|gun|blood|accident|disaster|protest|politician|minister|government|military|army|anti-aircraft|air defense|defense computer|radarno|usdagov|john lennon|austen|desire screenshot|unabridged|dead prisoners|robot arm picks up|shixart|malaria|microscopy training|nigeria)/i;
 const lowQualityGeneratedCoverPattern =
-  /(generic|placeholder|abstract background|glowing dashboard|fake dashboard|network map|glass cube|server room|robot handshake|tilted|skewed|slanted|large cursor|cursor shape|pink editorial background|source-cover|workflow card|control board|abstract module|codex-local-editorial-renderer|svg-sharp-renderer|科技感背景|抽象科技|假儀表板|網路圖|玻璃方塊|漸層背景|流程卡片|抽象模組|斜的|歪斜|巨大游標|斜游標)/i;
+  /(generic|placeholder|abstract background|glowing dashboard|fake dashboard|network map|glass cube|server room|robot handshake|tilted|skewed|slanted|large cursor|cursor shape|pink editorial background|source-cover|codex-local-editorial-renderer|svg-sharp-renderer|科技感背景|抽象科技|假儀表板|網路圖|玻璃方塊|漸層背景|斜的|歪斜|巨大游標|斜游標)/i;
 
 function hasRejectedCover(post: BlogVisualPost) {
   const metadata = [post.cover, post.coverAlt, post.coverCredit, post.coverPrompt].filter(Boolean).join(" ");
