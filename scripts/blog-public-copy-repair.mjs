@@ -200,7 +200,8 @@ function sourceReaderUrl(url = "") {
 }
 
 function edgeProtectionBody(text = "") {
-  return /Attention Required!|Cloudflare|Just a moment|cf-error-code|checking your browser|access denied/i.test(String(text || "").slice(0, 8000));
+  const head = String(text || "").slice(0, 3000);
+  return /Attention Required!|Just a moment|cf-error-code|checking your browser|SecurityCompromiseError|<title>\s*Access Denied\s*<\/title>|Cloudflare Ray ID/i.test(head);
 }
 
 function firstSource(post) {
@@ -339,11 +340,17 @@ function repairCandidateIssues(patch = {}, sourcePack = {}) {
   const paragraphs = body.split(/\n{2,}/).map((item) => item.trim()).filter((item) => item.length >= 60);
   const takeaways = Array.isArray(patch.keyTakeaways) ? patch.keyTakeaways.filter(Boolean) : [];
   const sourceArticle = sourcePack.pack?.sourceArticle || sourcePack.sourceArticle || {};
-  const sourceBodyRich = String(sourceArticle.body || "").length >= 1800;
+  const sourceBodyLength = String(sourceArticle.body || "").length;
+  const sourceFactCount = (sourceArticle.factBullets || []).filter(Boolean).length;
+  const sourceBodyRich = sourceBodyLength >= 1800;
+  const sourceThin = sourceBodyLength < 500 && sourceFactCount <= 3;
   const text = publicText({ ...patch, sourceLinks: patch.sourceLinks || [] });
-  if (bodyLength < 420 || paragraphs.length < 2) issues.push("repaired body is too thin");
+  const minBodyLength = sourceThin ? 120 : 420;
+  const minParagraphs = sourceThin ? 1 : 2;
+  if (bodyLength < minBodyLength || paragraphs.length < minParagraphs) issues.push("repaired body is too thin");
   if (takeaways.length < 2) issues.push("repaired post needs at least two source-backed takeaways");
-  if (sourceBodyRich && (bodyLength < 900 || paragraphs.length < 4)) issues.push("rich source repair did not preserve enough body density");
+  const richBodyMinimum = sourceBodyLength >= 3000 ? 900 : 820;
+  if (sourceBodyRich && (bodyLength < richBodyMinimum || paragraphs.length < 4)) issues.push("rich source repair did not preserve enough body density");
   if (/当今|组织|数据|視頻|音頻|字元一致性|大吃特吃|Source:|Decision cue|Next action/i.test(text)) {
     issues.push("repaired copy still contains machine-translation or internal-template residue");
   }

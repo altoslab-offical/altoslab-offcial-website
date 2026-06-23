@@ -50,6 +50,8 @@ export function cleanMarketPublicText(value = "", language = "") {
       .replace(/雙子座\s*3\s*號「深度思考」/g, "Gemini 3 Deep Think")
       .replace(/雙子座\s*3\s*Deep Think/g, "Gemini 3 Deep Think")
       .replace(/特工/g, "AI agent")
+      .replace(/法學碩士/g, "LLM")
+      .replace(/代理邏輯/g, "Agent Logic")
       .replace(/智能體 AI/g, "agentic AI")
       .replace(/押注需要有人監督 AI agent/g, "押注 AI agent 監控需求升溫")
       .replace(/您的/g, "使用者的")
@@ -1233,6 +1235,12 @@ function usableExistingMarketTitle(value = "") {
   return true;
 }
 
+function polishMarketTitleForQuality(value = "", language = "") {
+  const title = cleanMarketPublicText(value, language);
+  if (language === "zh-Hant") return title.replace(/\s*更新[:：]\s*/g, "：").replace(/\s*\/\s*/g, " / ");
+  return title;
+}
+
 function existingTitleFitsLanguage(value = "", language = "") {
   const text = normalizeNewsText(value);
   if (!text) return false;
@@ -1671,7 +1679,8 @@ function sourceDensityBackfill(language, source, article, existingBody = "", fac
     .map((fact) => compactFact(fact, language, 280))
     .filter(Boolean);
   const matter = sourceMatterParagraph(language, article, source);
-  const candidates = [...sourceCandidates, ...factCandidates, matter]
+  const sourceLine = sourceDateLine(language, publisher, formatDate(article.publishedAt || source.publishedAt, language));
+  const candidates = [...sourceCandidates, ...factCandidates, matter, sourceLine]
     .map((paragraph) => cleanMarketPublicText(paragraph, language))
     .filter((paragraph) => paragraph && paragraph.length >= 70);
 
@@ -1679,6 +1688,9 @@ function sourceDensityBackfill(language, source, article, existingBody = "", fac
     if (blocks.length >= 5 && stripHtml(blocks.join("\n\n")).replace(/\s+/g, " ").trim().length >= 1000) break;
     if (blocks.some((existing) => !factDiffersFromLead(candidate, existing))) continue;
     blocks.push(blocks.length === 0 ? sourceLeadWithPublisher(language, publisher, candidate) : candidate);
+  }
+  if (stripHtml(blocks.join("\n\n")).replace(/\s+/g, " ").trim().length < 900 && !blocks.some((block) => block.includes(sourceLine))) {
+    blocks.push(sourceLine);
   }
 
   return cleanMarketPublicText(blocks.join("\n\n"), language);
@@ -2208,6 +2220,10 @@ function sourceGeoSummary(language, frame, source, article, profile) {
   const body = sentenceJoin(details, language);
   const fallbackBody = details[0] || bodyCandidates[0] || compactFact(standfirst, language, 170) || title;
   let summaryBody = !body || overlapRatio(body, standfirst) >= 0.72 ? fallbackBody : body;
+  const leadSentence = splitReadableSentences(standfirst)[0] || "";
+  if (leadSentence && summaryBody.includes(leadSentence)) {
+    summaryBody = cleanMarketPublicText(summaryBody.replace(leadSentence, ""), language);
+  }
   if (/報導牽涉|source involves|berkaitan dengan|liên quan đến/i.test(summaryBody) || summaryBody.length < 50) {
     summaryBody = compactFact(standfirst, language, 170) || summaryBody;
   }
@@ -2243,9 +2259,25 @@ function marketSeoDescription(language, excerpt = "", geoSummary = "", keyTakeaw
 
 function sourceKeyTakeaways(language, frame, source, article, profile) {
   const standfirst = compactNewsDeck(language, articleTitle(language, frame, source, article, profile), articleStandfirst(language, frame, source, article, profile));
-  return localizedFactsForArticle(language, frame, source, article, profile, standfirst)
+  const takeaways = localizedFactsForArticle(language, frame, source, article, profile, standfirst)
     .map((fact) => compactFact(fact, language, 180))
     .slice(0, 4);
+  if (takeaways.length >= 2) return takeaways;
+  const fallback = [
+    ...(article.factBullets || []),
+    article.standfirst,
+    source.summary,
+    sourceMatterParagraph(language, article, source)
+  ]
+    .map((fact) => compactFact(cleanMarketPublicText(fact, language), language, 180))
+    .filter(Boolean);
+  const merged = [...takeaways];
+  for (const item of fallback) {
+    if (merged.length >= 4) break;
+    if (merged.some((existing) => !factDiffersFromLead(item, existing))) continue;
+    merged.push(item);
+  }
+  return merged;
 }
 
 function sourceFaqs(language, title, frame, source, article, profile) {
@@ -2321,7 +2353,7 @@ export function buildMarketNewsroomPost({ language, pack = {}, post = {}, frame,
   const profile = knownProfile(article, inferredFrame);
   const generatedTitle = cleanMarketPublicText(articleTitle(language, inferredFrame, source, article, profile), language);
   const existingTitle = cleanExistingMarketTitle(post.title || "", source.publisher || article.publisher);
-  const title = cleanMarketPublicText(
+  const title = polishMarketTitleForQuality(
     !profile?.title && usableExistingMarketTitle(existingTitle) && existingTitleFitsLanguage(existingTitle, language) && titleCompatibleWithArticle(existingTitle, article, inferredFrame)
       ? existingTitle
       : generatedTitle,
@@ -2335,8 +2367,13 @@ export function buildMarketNewsroomPost({ language, pack = {}, post = {}, frame,
   );
   const rawStandfirst = sourceLeadWithPublisher(language, excerptPublisher, articleStandfirst(language, inferredFrame, source, article, profile));
   const excerpt = sourceLeadWithPublisher(language, excerptPublisher, cleanMarketPublicText(compactNewsDeck(language, title, rawStandfirst), language));
-  const geoSummary = sourceGeoSummary(language, inferredFrame, source, article, profile);
   const keyTakeaways = sourceKeyTakeaways(language, inferredFrame, source, article, profile);
+  let geoSummary = sourceGeoSummary(language, inferredFrame, source, article, profile);
+  if (geoSummary && excerpt && overlapRatio(geoSummary, excerpt) >= 0.72) {
+    const alternativeFacts = keyTakeaways.filter((fact) => factDiffersFromLead(fact, excerpt)).slice(0, 2);
+    const alternative = sentenceJoin(alternativeFacts, language);
+    if (alternative) geoSummary = sourceLeadWithPublisher(language, excerptPublisher, alternative);
+  }
   const seoDescription = marketSeoDescription(language, excerpt, geoSummary, keyTakeaways, body, title);
   const coverCredit = cleanSourceCredit(post.coverCredit || pack.coverCredit || source.publisher || "");
   const coverCreditUrl = post.coverCreditUrl || pack.coverCreditUrl || source.url || "";

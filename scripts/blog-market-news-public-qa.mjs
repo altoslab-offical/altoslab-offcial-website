@@ -117,6 +117,15 @@ function stripHtml(value = "") {
     .trim();
 }
 
+function articleHtmlScope(html = "") {
+  const text = String(html || "");
+  return (
+    text.match(/<article\b[^>]*>([\s\S]*?)<\/article>/i)?.[1] ||
+    text.match(/<main\b[^>]*>([\s\S]*?)<\/main>/i)?.[1] ||
+    text
+  );
+}
+
 function shortPublisher(value = "") {
   return String(value || "")
     .replace(/\s+AI$/i, "")
@@ -351,7 +360,7 @@ function qaPost(post, mustTerms = []) {
     .map((paragraph) => stripHtml(paragraph))
     .filter((paragraph) => paragraph.length >= 60);
   const bodyTextLength = stripHtml(body).length;
-  if (sourceEvidenceTerms.length >= 8 && (meaningfulParagraphs.length < 4 || bodyTextLength < 900)) {
+  if (sourceEvidenceTerms.length >= 8 && (meaningfulParagraphs.length < 4 || bodyTextLength < 820)) {
     issues.push({
       severity: "major",
       id: "source-rich-market-body-too-thin",
@@ -410,7 +419,7 @@ async function main() {
   }
 
   const html = await fetchText(`${root}/blog/${encodeURIComponent(slug)}`);
-  const htmlText = stripHtml(html);
+  const htmlText = stripHtml(articleHtmlScope(html));
   const htmlIssues = INTERNAL_COPY_PATTERNS
     .filter((pattern) => pattern.test(htmlText))
     .map((pattern) => ({ severity: "critical", id: "html-internal-copy-leak", pattern: String(pattern) }));

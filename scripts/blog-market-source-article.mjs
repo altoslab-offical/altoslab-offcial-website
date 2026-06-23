@@ -262,6 +262,18 @@ function extractReaderMarkdownBody(value = "") {
   return paragraphs.join("\n\n");
 }
 
+function extractReaderMarkdownTitle(value = "") {
+  const title = String(value || "").match(/^Title:\s*(.+)$/im)?.[1] || "";
+  return cleanSourceTitle(title);
+}
+
+function firstReaderParagraph(value = "") {
+  return normalizeNewsText(value)
+    .split(/\n{2,}/)
+    .map((paragraph) => paragraph.trim())
+    .find((paragraph) => paragraph.length >= 60) || "";
+}
+
 function isSourceNoiseText(value = "") {
   const text = normalizeNewsText(value);
   const compact = text.replace(/\s+/g, " ");
@@ -462,12 +474,14 @@ export function sourceArticleFromPackOrPost({ pack = {}, post = {} } = {}) {
 
 export function extractSourceArticleFromHtml(candidate = {}, html = "", image = {}) {
   const jsonLd = extractJsonLdArticle(html);
-  const headline = jsonLd.headline || metaContent(html, "og:title") || metaContent(html, "twitter:title") || candidate.title || "";
+  const extractedBody = jsonLd.body || extractArticleBodyFromHtml(html);
+  const headline = jsonLd.headline || metaContent(html, "og:title") || metaContent(html, "twitter:title") || extractReaderMarkdownTitle(html) || candidate.title || "";
   const standfirst =
     jsonLd.standfirst ||
     metaContent(html, "og:description") ||
     metaContent(html, "description") ||
     metaContent(html, "twitter:description") ||
+    firstReaderParagraph(extractedBody) ||
     candidate.summary ||
     "";
   const publisher = candidate.publisher || jsonLd.publisher || metaContent(html, "article:publisher") || "";
@@ -492,7 +506,7 @@ export function extractSourceArticleFromHtml(candidate = {}, html = "", image = 
       publishedAt,
       canonicalUrl,
       standfirst,
-      body: jsonLd.body || extractArticleBodyFromHtml(html),
+      body: extractedBody,
       image: {
         url: primaryImage || candidate.imageUrl || "",
         credit: image.credit || publisher,

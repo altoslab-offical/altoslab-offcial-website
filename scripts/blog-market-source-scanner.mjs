@@ -192,7 +192,8 @@ function sourceReaderUrl(url = "") {
 }
 
 function edgeProtectionBody(text = "") {
-  return /Attention Required!|Cloudflare|Just a moment|cf-error-code|checking your browser|access denied/i.test(String(text || "").slice(0, 8000));
+  const head = String(text || "").slice(0, 3000);
+  return /Attention Required!|Just a moment|cf-error-code|checking your browser|SecurityCompromiseError|<title>\s*Access Denied\s*<\/title>|Cloudflare Ray ID/i.test(head);
 }
 
 async function fetchText(url, timeoutMs) {
