@@ -8,8 +8,8 @@ import { localizeSourcePack, packForLanguage } from "./blog-market-translation-s
 import { cleanSourceTitle } from "./blog-market-source-article.mjs";
 
 const REQUIRED_LANGUAGES = ["zh-Hant", "en", "ja", "ko", "id", "vi", "th", "ms", "fil"];
-const MIN_LONGFORM_FACTS = Number(process.env.ALTOS_BLOG_MARKET_LONGFORM_MIN_FACTS || "5");
-const MIN_LONGFORM_BODY_CHARS = Number(process.env.ALTOS_BLOG_MARKET_LONGFORM_MIN_BODY_CHARS || "700");
+const MIN_LONGFORM_FACTS = Number(process.env.ALTOS_BLOG_MARKET_LONGFORM_MIN_FACTS || "8");
+const MIN_LONGFORM_BODY_CHARS = Number(process.env.ALTOS_BLOG_MARKET_LONGFORM_MIN_BODY_CHARS || "1800");
 const FUNDING_QUICK_PATTERN =
   /\b(raises?|raised|funding|fundraise|pre-seed|seed round|series [a-f]|valuation|valued at|venture round|venture funding|capital raise|led by|participated in the round)\b/i;
 const DEFAULT_DATE = new Intl.DateTimeFormat("en-CA", {

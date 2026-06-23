@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import process from "node:process";
@@ -68,6 +69,25 @@ function password() {
   return arg("admin-password") || process.env.ALTOS_ADMIN_PASSWORD || process.env.ADMIN_PASSWORD || "";
 }
 
+function hmacSecret() {
+  return process.env.BLOG_INGEST_HMAC_SECRET || "";
+}
+
+function sign(secret, timestamp, nonce, body) {
+  return crypto.createHmac("sha256", secret).update(`${timestamp}.${nonce}.${body}`).digest("hex");
+}
+
+function signedHeaders(secret, body) {
+  const timestamp = new Date().toISOString();
+  const nonce = crypto.randomBytes(16).toString("hex");
+  return {
+    "Content-Type": "application/json",
+    "X-Altos-Timestamp": timestamp,
+    "X-Altos-Nonce": nonce,
+    "X-Altos-Signature": sign(secret, timestamp, nonce, body)
+  };
+}
+
 async function fetchJson(url, options = {}) {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), Number.parseInt(process.env.BLOG_REPAIR_TIMEOUT_MS || "25000", 10));
@@ -99,8 +119,20 @@ async function fetchText(url) {
         "User-Agent": "ALTOS-LAB-market-copy-repair/2.0; https://altoslab-ai.cc"
       }
     });
-    if (!response.ok) return { ok: false, status: response.status, text: "" };
-    return { ok: true, status: response.status, text: await response.text() };
+    const text = await response.text();
+    if (response.ok && !edgeProtectionBody(text)) return { ok: true, status: response.status, text };
+    if ([403, 429, 503].includes(response.status) || edgeProtectionBody(text)) {
+      const reader = await fetch(sourceReaderUrl(url), {
+        cache: "no-store",
+        headers: {
+          Accept: "text/plain,text/markdown",
+          "User-Agent": "ALTOS-LAB-market-copy-repair/2.0; https://altoslab-ai.cc"
+        }
+      });
+      const readerText = await reader.text();
+      if (reader.ok && readerText && !edgeProtectionBody(readerText)) return { ok: true, status: reader.status, text: readerText, via: "reader" };
+    }
+    return { ok: false, status: response.status, text: "" };
   } catch (error) {
     return { ok: false, status: 0, text: "", error: error?.message || String(error) };
   } finally {
@@ -119,6 +151,19 @@ async function login(root) {
   const match = setCookie.match(new RegExp(`(?:^|,\\s*)(${ADMIN_COOKIE}=[^;]+)`));
   if (!match?.[1]) throw new Error("Admin login did not return an altos_admin cookie");
   return match[1];
+}
+
+async function optionalAdminCookie(root) {
+  const pass = password();
+  if (!pass) return { cookie: "", warning: "admin password unavailable; using HMAC signed mutation if configured" };
+  try {
+    return { cookie: await login(root), warning: "" };
+  } catch (error) {
+    if (hmacSecret()) {
+      return { cookie: "", warning: `admin login failed; using HMAC signed mutation: ${error?.message || String(error)}` };
+    }
+    throw error;
+  }
 }
 
 function contentTypeMatches(post, contentTypeArg) {
@@ -148,6 +193,14 @@ function forbiddenLeak(post) {
   const text = publicText(post);
   const hit = FORBIDDEN_MARKET_PATTERNS.find((pattern) => pattern.test(text));
   return hit ? String(hit) : "";
+}
+
+function sourceReaderUrl(url = "") {
+  return `https://r.jina.ai/http://${url}`;
+}
+
+function edgeProtectionBody(text = "") {
+  return /Attention Required!|Cloudflare|Just a moment|cf-error-code|checking your browser|access denied/i.test(String(text || "").slice(0, 8000));
 }
 
 function firstSource(post) {
@@ -279,6 +332,24 @@ function changed(post, patch) {
   return Object.entries(patch).some(([key, value]) => JSON.stringify(post[key] ?? (Array.isArray(value) ? [] : "")) !== JSON.stringify(value));
 }
 
+function repairCandidateIssues(patch = {}, sourcePack = {}) {
+  const issues = [];
+  const body = String(patch.body || "");
+  const bodyLength = body.replace(/\s+/g, " ").trim().length;
+  const paragraphs = body.split(/\n{2,}/).map((item) => item.trim()).filter((item) => item.length >= 60);
+  const takeaways = Array.isArray(patch.keyTakeaways) ? patch.keyTakeaways.filter(Boolean) : [];
+  const sourceArticle = sourcePack.pack?.sourceArticle || sourcePack.sourceArticle || {};
+  const sourceBodyRich = String(sourceArticle.body || "").length >= 1800;
+  const text = publicText({ ...patch, sourceLinks: patch.sourceLinks || [] });
+  if (bodyLength < 420 || paragraphs.length < 2) issues.push("repaired body is too thin");
+  if (takeaways.length < 2) issues.push("repaired post needs at least two source-backed takeaways");
+  if (sourceBodyRich && (bodyLength < 900 || paragraphs.length < 4)) issues.push("rich source repair did not preserve enough body density");
+  if (/当今|组织|数据|視頻|音頻|字元一致性|大吃特吃|Source:|Decision cue|Next action/i.test(text)) {
+    issues.push("repaired copy still contains machine-translation or internal-template residue");
+  }
+  return issues;
+}
+
 async function verifyPublic(root, items) {
   const checks = [];
   for (const item of items) {
@@ -295,6 +366,36 @@ function postFilter({ languageArg, statusArg, contentTypeArg }) {
     (languageArg === "all" || post.language === languageArg) &&
     (statusArg === "all" || post.status === statusArg) &&
     contentTypeMatches(post, contentTypeArg);
+}
+
+async function loadPublicPosts(root, { languageArg, statusArg, contentTypeArg, limit }) {
+  const languages = languageArg === "all" ? BLOG_LANGUAGES : [languageArg];
+  const posts = [];
+  for (const language of languages) {
+    const { payload } = await fetchJson(`${root}/api/blog?language=${encodeURIComponent(language)}&limit=600`);
+    const listed = (payload.posts || []).filter(postFilter({ languageArg: language, statusArg, contentTypeArg }));
+    for (const item of listed) {
+      if (limit > 0 && posts.length >= limit) return posts;
+      const slug = item.slug || "";
+      if (!slug) continue;
+      const { payload: detailPayload } = await fetchJson(`${root}/api/blog/${encodeURIComponent(slug)}?language=${encodeURIComponent(language)}`);
+      const post = detailPayload.post || detailPayload;
+      if (post?.id && postFilter({ languageArg, statusArg, contentTypeArg })(post)) posts.push(post);
+    }
+  }
+  return posts;
+}
+
+async function loadRepairPosts(root, auth, filters) {
+  if (auth.cookie) {
+    try {
+      const { payload } = await fetchJson(`${root}/api/admin/blog`, { headers: { Cookie: auth.cookie } });
+      return { posts: payload.posts || [], readMode: "admin" };
+    } catch (error) {
+      if (!hmacSecret()) throw error;
+    }
+  }
+  return { posts: await loadPublicPosts(root, filters), readMode: "public-detail" };
 }
 
 function selectPosts(posts, { languageArg, statusArg, contentTypeArg, limit }) {
@@ -325,7 +426,8 @@ async function selectPostsWithSources(posts, { languageArg, statusArg, contentTy
       if (cache.has(cacheKey)) localized = cache.get(cacheKey);
       else {
         localized = await localizeSourcePack(sourcePack.pack, {
-          projectId: process.env.GCP_PROJECT_ID || process.env.GOOGLE_CLOUD_PROJECT || ""
+          projectId: process.env.GCP_PROJECT_ID || process.env.GOOGLE_CLOUD_PROJECT || "",
+          languages: post.language === "en" ? [] : [post.language]
         });
         cache.set(cacheKey, localized);
       }
@@ -335,6 +437,11 @@ async function selectPostsWithSources(posts, { languageArg, statusArg, contentTy
     }
     const localizedPack = packForLanguage(sourcePack.pack, post.language, localized);
     const patch = repairPost(post, { pack: localizedPack });
+    const candidateIssues = repairCandidateIssues(patch, sourcePack);
+    if (candidateIssues.length) {
+      held.push({ id: post.id, language: post.language, slug: post.slug, reason: candidateIssues.join("; ") });
+      continue;
+    }
     if (changed(post, patch)) selected.push({ post, patch });
   }
   return { selected, held };
@@ -386,9 +493,10 @@ async function main() {
   }
 
   const root = baseUrl();
-  const cookie = await login(root);
-  const adminPosts = (await fetchJson(`${root}/api/admin/blog`, { headers: { Cookie: cookie } })).payload.posts || [];
-  const { selected, held } = await selectPostsWithSources(adminPosts, { languageArg, statusArg, contentTypeArg, limit });
+  const auth = dryRun ? { cookie: "", warning: "" } : await optionalAdminCookie(root);
+  const filters = { languageArg, statusArg, contentTypeArg, limit };
+  const { posts: adminPosts, readMode } = await loadRepairPosts(root, auth, filters);
+  const { selected, held } = await selectPostsWithSources(adminPosts, filters);
   const preview = selected.map(({ post, patch }) => ({
     id: post.id,
     language: post.language,
@@ -402,17 +510,22 @@ async function main() {
   }));
 
   if (dryRun) {
-    console.log(JSON.stringify({ ok: true, dryRun, root, selected: selected.length, held: held.slice(0, 40), preview: preview.slice(0, 40) }, null, 2));
+    console.log(JSON.stringify({ ok: true, dryRun, root, readMode, selected: selected.length, held: held.slice(0, 40), preview: preview.slice(0, 40) }, null, 2));
     return;
   }
 
   const updated = [];
   const failures = [];
-  if (useBulkPatch) {
+  const secret = hmacSecret();
+  const mustUseSignedBulk = !auth.cookie;
+  if (mustUseSignedBulk && !secret) throw new Error("Admin login failed or unavailable and BLOG_INGEST_HMAC_SECRET is not configured");
+  if (useBulkPatch || mustUseSignedBulk) {
+    const body = JSON.stringify({ patches: selected.map(({ post, patch }) => ({ id: post.id, patch })) });
+    const headers = auth.cookie ? { Cookie: auth.cookie } : signedHeaders(secret, body);
     const { payload } = await fetchJson(`${root}/api/admin/blog/bulk-patch`, {
       method: "POST",
-      headers: { Cookie: cookie },
-      body: JSON.stringify({ patches: selected.map(({ post, patch }) => ({ id: post.id, patch })) })
+      headers,
+      body
     });
     updated.push(...(payload.updated || []));
     failures.push(...(payload.failures || []));
@@ -421,7 +534,7 @@ async function main() {
       try {
         const { payload } = await fetchJson(`${root}/api/admin/blog/${post.id}`, {
           method: "PATCH",
-          headers: { Cookie: cookie },
+          headers: { Cookie: auth.cookie },
           body: JSON.stringify(patch)
         });
         updated.push(payload.post || payload);
@@ -433,7 +546,7 @@ async function main() {
 
   const publicChecks = skipPublicCheck || !updated.length ? [] : await verifyPublic(root, updated.slice(0, 20));
   const leaks = publicChecks.filter((item) => item.leak);
-  console.log(JSON.stringify({ ok: failures.length === 0 && leaks.length === 0, root, selected: selected.length, held, updated: updated.length, failures, publicChecks }, null, 2));
+  console.log(JSON.stringify({ ok: failures.length === 0 && leaks.length === 0, root, authWarning: auth.warning, selected: selected.length, held, updated: updated.length, failures, publicChecks }, null, 2));
   if (failures.length || leaks.length) process.exit(1);
 }
 

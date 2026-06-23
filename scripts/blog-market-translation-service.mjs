@@ -18,6 +18,7 @@ const TARGET_LANGUAGES = {
 
 const LOCAL_PROVIDER_ALIASES = new Set(["local", "deterministic", "source-faithful"]);
 const HERMES_DETERMINISTIC_PROVIDER_ALIASES = new Set(["hermes-owner", "codex-gpt-5.4", "codex-gpt-5.4-subagent"]);
+const GOOGLE_WEB_PROVIDER_ALIASES = new Set(["google-web", "google-gtx", "public-google"]);
 
 function localMarketFallbackAllowed(provider = "") {
   if (LOCAL_PROVIDER_ALIASES.has(provider)) return process.env.BLOG_MARKET_ALLOW_LOCAL_TRANSLATION_FALLBACK === "1";
@@ -53,10 +54,41 @@ function cleanTranslatedText(value = "", language = "") {
       .replace(/優步/g, "Uber")
       .replace(/亞馬遜/g, "Amazon")
       .replace(/谷歌/g, "Google")
+      .replace(/当今/g, "當今")
+      .replace(/组织/g, "組織")
+      .replace(/数据/g, "資料")
+      .replace(/數據/g, "資料")
+      .replace(/无处不在/g, "無所不在")
+      .replace(/构建/g, "建構")
+      .replace(/软件/g, "軟體")
+      .replace(/协作/g, "協作")
+      .replace(/批准/g, "核准")
+      .replace(/创建/g, "建立")
+      .replace(/执行/g, "執行")
+      .replace(/后台/g, "背景")
       .replace(/擁抱臉部|擁抱臉|擁抱面孔|擁抱臉孔/g, "Hugging Face")
       .replace(/人工智慧/g, "AI")
       .replace(/AI\s*代理商/g, "AI agent")
+      .replace(/代理\s*AI/g, "agentic AI")
       .replace(/代理程式/g, "AI agent")
+      .replace(/人類代理(?:人)?(?:的)?(?:協作|合作)?模式/g, "人機協作模式")
+      .replace(/人類代理(?:人)?協作/g, "人機協作")
+      .replace(/人類與代理(?:人)?協作模式/g, "人機協作模式")
+      .replace(/人類與代理(?:人)?協作/g, "人機協作")
+      .replace(/人工代理(?:人)?協作/g, "人機協作")
+      .replace(/後台/g, "背景")
+      .replace(/視頻/g, "影片")
+      .replace(/音頻/g, "音訊")
+      .replace(/圖像到視訊/g, "影像轉影片")
+      .replace(/圖像到視頻/g, "影像轉影片")
+      .replace(/字元一致性/g, "角色一致性")
+      .replace(/照片真實感/g, "寫實度")
+      .replace(/準備好大吃特吃/g, "仍願意押注")
+      .replace(/可以看到投資者已經仍願意押注/g, "代表投資者仍願意押注")
+      .replace(/使客戶能夠/g, "讓客戶能夠")
+      .replace(/總監：你/g, "Director：你")
+      .replace(/作者：你正在製作作品，並根據需要調用 AI 來提供幫助/g, "Author：你自己產出成果，並在需要時讓 AI 協助")
+      .replace(/編輯：您設定意圖/g, "Editor：你設定意圖")
       .replace(/調試/g, "除錯")
       .replace(/Google雲端/g, "Google Cloud")
       .replace(/Google Cloud/g, "Google Cloud")
@@ -78,6 +110,7 @@ function cleanTranslatedText(value = "", language = "") {
       .replace(/存取權限/g, "使用權")
       .replace(/（在新視窗中開啟）/g, "")
       .replace(/\(在新視窗中開啟\)/g, "")
+      .replace(/[,，]{2,}/g, "，")
       .replace(/資源佔用規模/g, "用量")
       .replace(/資源佔用量/g, "用量")
       .replace(/規模擴大/g, "用量擴大")
@@ -148,7 +181,7 @@ function splitSourceBodyParagraphs(value = "") {
       seen.add(key);
       return true;
     })
-    .slice(0, 8);
+    .slice(0, 14);
 }
 
 function normalizeNewsText(value = "") {
@@ -320,16 +353,21 @@ function localFallbackTranslation(language, pack, texts) {
   };
 }
 
-function localizeSourcePackLocally(pack, texts) {
+function targetLanguageEntries(languages = []) {
+  const requested = Array.isArray(languages) && languages.length ? new Set(languages) : null;
+  return Object.entries(TARGET_LANGUAGES).filter(([language]) => !requested || requested.has(language));
+}
+
+function localizeSourcePackLocally(pack, texts, languages = []) {
   const localized = {
     en: {
       headline: cleanTranslatedTitle(texts[0], "en"),
       standfirst: cleanTranslatedText(texts[1], "en"),
-      factBullets: texts.slice(2).map((fact) => cleanTranslatedText(fact, "en")).filter(Boolean).slice(0, 6),
+      factBullets: texts.slice(2).map((fact) => cleanTranslatedText(fact, "en")).filter(Boolean).slice(0, 10),
       bodyParagraphs: splitSourceBodyParagraphs(pack.sourceArticle?.body || "").map((paragraph) => cleanTranslatedText(paragraph, "en"))
     }
   };
-  for (const language of Object.keys(TARGET_LANGUAGES)) {
+  for (const [language] of targetLanguageEntries(languages)) {
     localized[language] = localFallbackTranslation(language, pack, texts);
   }
   return localized;
@@ -383,7 +421,32 @@ async function translateTexts(texts, { target, projectId }) {
   return translated.map((item) => item.translatedText || "");
 }
 
-export async function localizeSourcePack(pack, { projectId = "", required = true } = {}) {
+async function translateTextsGoogleWeb(texts, { target }) {
+  const translated = [];
+  for (const text of texts) {
+    const url = new URL("https://translate.googleapis.com/translate_a/single");
+    url.searchParams.set("client", "gtx");
+    url.searchParams.set("sl", "en");
+    url.searchParams.set("tl", target);
+    url.searchParams.set("dt", "t");
+    url.searchParams.set("q", text);
+    const response = await fetch(url, {
+      headers: {
+        Accept: "application/json,text/plain",
+        "User-Agent": "ALTOS-LAB-market-translation/1.0"
+      }
+    });
+    const raw = await response.text();
+    if (!response.ok) throw new Error(`Google web translation failed with HTTP ${response.status}`);
+    const json = JSON.parse(raw);
+    const value = Array.isArray(json?.[0]) ? json[0].map((item) => item?.[0] || "").join("") : "";
+    if (!value) throw new Error("Google web translation returned an empty translation");
+    translated.push(value);
+  }
+  return translated;
+}
+
+export async function localizeSourcePack(pack, { projectId = "", required = true, languages = [] } = {}) {
   const provider = (process.env.BLOG_MARKET_TRANSLATION_PROVIDER || "auto").trim().toLowerCase();
   if (provider === "off") {
     if (required) throw new Error("market translation provider is off");
@@ -393,8 +456,9 @@ export async function localizeSourcePack(pack, { projectId = "", required = true
   const article = pack.sourceArticle || {};
   const source = pack.sourceLinks?.[0] || {};
   const headline = article.headline || source.title || pack.topic || "";
-  const factBullets = Array.isArray(article.factBullets) ? article.factBullets.filter(Boolean).slice(0, 6) : [];
+  const factBullets = Array.isArray(article.factBullets) ? article.factBullets.filter(Boolean).slice(0, 10) : [];
   const bodyParagraphs = splitSourceBodyParagraphs(article.body || "");
+  const richSource = String(article.body || "").length >= 1800 || factBullets.length >= 8 || bodyParagraphs.length >= 4;
   const rawStandfirst = article.standfirst || source.summary || "";
   const standfirst = genericSourceSummary(rawStandfirst) ? factBullets[0] || headline : rawStandfirst;
   const texts = [headline, standfirst, ...factBullets, ...bodyParagraphs].map((text) => String(text || "").trim());
@@ -403,9 +467,33 @@ export async function localizeSourcePack(pack, { projectId = "", required = true
   }
   const bodyOffset = 2 + factBullets.length;
 
+  if (GOOGLE_WEB_PROVIDER_ALIASES.has(provider)) {
+    const localized = {
+      en: {
+        headline: cleanTranslatedTitle(headline, "en"),
+        standfirst: cleanTranslatedText(standfirst, "en"),
+        factBullets: factBullets.map((fact) => cleanTranslatedText(fact, "en")),
+        bodyParagraphs: bodyParagraphs.map((paragraph) => cleanTranslatedText(paragraph, "en"))
+      }
+    };
+    for (const [language, target] of targetLanguageEntries(languages)) {
+      const result = await translateTextsGoogleWeb(texts, { target });
+      localized[language] = {
+        headline: cleanTranslatedTitle(result[0], language),
+        standfirst: cleanTranslatedText(result[1], language),
+        factBullets: result.slice(2, bodyOffset).map((fact) => cleanTranslatedText(fact, language)).filter(Boolean),
+        bodyParagraphs: result.slice(bodyOffset).map((paragraph) => cleanTranslatedText(paragraph, language)).filter(Boolean)
+      };
+    }
+    return localized;
+  }
+
   if (LOCAL_PROVIDER_ALIASES.has(provider) || HERMES_DETERMINISTIC_PROVIDER_ALIASES.has(provider)) {
+    if (richSource && process.env.BLOG_MARKET_ALLOW_RICH_LOCAL_TRANSLATION_FALLBACK !== "1") {
+      throw new Error("rich source market news requires a real translation provider; local deterministic fallback would compress source detail");
+    }
     if (!localMarketFallbackAllowed(provider)) throw localMarketFallbackDisabledError(provider);
-    return localizeSourcePackLocally(pack, texts);
+    return localizeSourcePackLocally(pack, texts, languages);
   }
 
   const localized = {
@@ -418,7 +506,7 @@ export async function localizeSourcePack(pack, { projectId = "", required = true
   };
 
   try {
-    for (const [language, target] of Object.entries(TARGET_LANGUAGES)) {
+    for (const [language, target] of targetLanguageEntries(languages)) {
       const result = await translateTexts(texts, { target, projectId: gcpProject });
       localized[language] = {
         headline: cleanTranslatedTitle(result[0], language),
@@ -429,9 +517,10 @@ export async function localizeSourcePack(pack, { projectId = "", required = true
     }
   } catch (error) {
     if (provider === "google-strict") throw error;
+    if (richSource && process.env.BLOG_MARKET_ALLOW_RICH_LOCAL_TRANSLATION_FALLBACK !== "1") throw error;
     if (!localMarketFallbackAllowed(provider)) throw error;
     process.stderr.write("warning: market translation provider unavailable; using local source-faithful fallback\\n");
-    return localizeSourcePackLocally(pack, texts);
+    return localizeSourcePackLocally(pack, texts, languages);
   }
 
   return localized;

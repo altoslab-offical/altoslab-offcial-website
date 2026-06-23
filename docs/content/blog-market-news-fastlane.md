@@ -13,6 +13,16 @@ ALTOS LAB market news is source-translation, not a column. The job is to bring a
 5. Run public QA before calling the article ready:
    `npm run blog:market-public-qa -- --slug <slug> --must <entity> --must <publisher>`
 
+## Source Density Contract
+
+Market news must stay source-faithful. SEO editing can change headline rhythm, subtitle clarity, paragraph order, and language-native phrasing, but it must not shrink a rich source into a thin summary.
+
+- If the source is a longform article, interview, research post, or strategy essay, keep the same material density: named entities, numbers, examples, claims, caveats, sequence of arguments, and source context.
+- Longform source extraction requires at least 8 usable source facts and 1,800 characters of source body before the worker can publish.
+- Rich-source market news should normally produce 4+ meaningful body paragraphs, not a two-paragraph brief.
+- Do not replace source detail with fixed ALTOS LAB sections. ALTOS LAB perspective is optional and only belongs after the source facts are clear.
+- If a source is thin, publish a concise brief. If a source is rich, publish a dense market report.
+
 ## Subtitle Rules
 
 - Good: `TechCrunch 報導，AethexAI 完成 300 萬美元 pre-seed 融資，正把自建語音 AI 系統推向非洲與中東；公司稱目前每天處理超過 17,000 通電話。`
@@ -26,6 +36,7 @@ Market-news subtitles should not begin with ALTOS LAB process advice, SEO/GEO te
 - No Unsplash, Pexels, Pixabay, Openverse, local fallback art, repeated covers, or generic stock images.
 - No public copy containing `Source:`, `Event:`, `Evidence:`, `Next action`, `Decision cue`, `source-attributed official announcement image`, `這則消息可以拿來`, `企業檢查`, `卡在哪個流程`, or backend QA terms.
 - No changing the source story into a consulting template.
+- No compressing a long source into a shallow recap just to keep the article short.
 
 ## Current Corpus Note
 

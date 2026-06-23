@@ -350,6 +350,16 @@ function qaPost(post, mustTerms = []) {
     .split(/\n{2,}/)
     .map((paragraph) => stripHtml(paragraph))
     .filter((paragraph) => paragraph.length >= 60);
+  const bodyTextLength = stripHtml(body).length;
+  if (sourceEvidenceTerms.length >= 8 && (meaningfulParagraphs.length < 4 || bodyTextLength < 900)) {
+    issues.push({
+      severity: "major",
+      id: "source-rich-market-body-too-thin",
+      evidenceCount: sourceEvidenceTerms.length,
+      paragraphCount: meaningfulParagraphs.length,
+      bodyLength: bodyTextLength
+    });
+  }
   if (meaningfulParagraphs[0] && overlapRatio(meaningfulParagraphs[0], post.excerpt || "") >= 0.76) {
     issues.push({
       severity: "major",
@@ -363,12 +373,12 @@ function qaPost(post, mustTerms = []) {
   if (meaningfulParagraphs.some((paragraph, index) => meaningfulParagraphs.slice(index + 1).some((other) => overlapRatio(paragraph, other) >= 0.78))) {
     issues.push({ severity: "major", id: "repeated-market-paragraph" });
   }
-  if (meaningfulParagraphs.length < 2 && stripHtml(body).length < 120) {
+  if (meaningfulParagraphs.length < 2 && bodyTextLength < 120) {
     issues.push({
       severity: "major",
       id: "market-body-too-thin",
       paragraphCount: meaningfulParagraphs.length,
-      bodyLength: stripHtml(body).length
+      bodyLength: bodyTextLength
     });
   }
   return issues;

@@ -1522,7 +1522,7 @@ function localizedFactsForArticle(language, frame, source, article, profile, lea
   return mergeContinuationFacts(combined, language)
     .filter((fact) => !lead || factDiffersFromLead(fact, lead))
     .filter((fact, index, list) => list.findIndex((candidate) => !factDiffersFromLead(fact, candidate)) === index)
-    .slice(0, 7);
+    .slice(0, 10);
 }
 
 function sourceDetailParagraph(language, publisher, date, title, article = {}, source = {}, localizedFact = "") {
@@ -1628,20 +1628,74 @@ function sourceBodyParagraphCandidates(article = {}, language = "", lead = "") {
       seen.add(key);
       return true;
     })
-    .slice(0, 7);
+    .slice(0, sourceParagraphLimit(article) + 2);
+}
+
+function sourceRichEnough(article = {}) {
+  const bodyChars = String(article.body || "")
+    .replace(/\s+/g, " ")
+    .trim().length;
+  const factCount = Array.isArray(article.factBullets) ? article.factBullets.filter(Boolean).length : 0;
+  return bodyChars >= 1800 || factCount >= 8;
+}
+
+function sourceParagraphLimit(article = {}) {
+  return sourceRichEnough(article) ? 12 : 7;
+}
+
+function sourceParagraphFloor(language = "", article = {}) {
+  const rich = sourceRichEnough(article);
+  if (["en", "id", "vi", "ms", "fil"].includes(language)) return rich ? 760 : 520;
+  if (language === "th") return rich ? 420 : 260;
+  return rich ? 520 : 260;
+}
+
+function meaningfulParagraphs(value = "") {
+  return String(value || "")
+    .split(/\n{2,}/)
+    .map((paragraph) => stripHtml(paragraph).replace(/\s+/g, " ").trim())
+    .filter((paragraph) => paragraph.length >= 80);
+}
+
+function sourceDensityBackfill(language, source, article, existingBody = "", facts = [], title = "") {
+  if (!sourceRichEnough(article)) return cleanMarketPublicText(existingBody, language);
+  const publisher = sourceArticlePublisher(article.publisher || source.publisher);
+  const blocks = meaningfulParagraphs(existingBody);
+  const already = blocks.join("\n\n");
+  const bodyLength = stripHtml(already).replace(/\s+/g, " ").trim().length;
+  if (blocks.length >= 4 && bodyLength >= 900) return cleanMarketPublicText(existingBody, language);
+
+  const sourceCandidates = sourceBodyParagraphCandidates(article, language, "")
+    .map((paragraph) => reinforceJargonParagraph(paragraph, language, title));
+  const factCandidates = facts
+    .map((fact) => compactFact(fact, language, 280))
+    .filter(Boolean);
+  const matter = sourceMatterParagraph(language, article, source);
+  const candidates = [...sourceCandidates, ...factCandidates, matter]
+    .map((paragraph) => cleanMarketPublicText(paragraph, language))
+    .filter((paragraph) => paragraph && paragraph.length >= 70);
+
+  for (const candidate of candidates) {
+    if (blocks.length >= 5 && stripHtml(blocks.join("\n\n")).replace(/\s+/g, " ").trim().length >= 1000) break;
+    if (blocks.some((existing) => !factDiffersFromLead(candidate, existing))) continue;
+    blocks.push(blocks.length === 0 ? sourceLeadWithPublisher(language, publisher, candidate) : candidate);
+  }
+
+  return cleanMarketPublicText(blocks.join("\n\n"), language);
 }
 
 function sourceBodyParagraphs(language, publisher, lead = "", article = {}) {
   const candidates = sourceBodyParagraphCandidates(article, language, lead);
   if (candidates.length < 2) return [];
   const paragraphs = [];
+  const limit = sourceParagraphLimit(article);
   for (const paragraph of candidates) {
     if (paragraphs.some((existing) => !factDiffersFromLead(paragraph, existing))) continue;
     paragraphs.push(paragraph);
-    if (paragraphs.length >= 7) break;
+    if (paragraphs.length >= limit) break;
   }
   const totalLength = paragraphs.join("").length;
-  const floor = ["en", "id", "vi", "ms", "fil"].includes(language) ? 520 : 260;
+  const floor = sourceParagraphFloor(language, article);
   return totalLength >= floor ? paragraphs : [];
 }
 
@@ -1970,30 +2024,28 @@ function sourceFactIntro(language, facts = [], sourceLine = "") {
     .map((fact) => cleanMarketPublicText(fact, language))
     .filter(Boolean)
     .filter((fact) => !/(ALTOS LAB|market signal|市場訊號|isyarat pasaran|sinyal pasar|สัญญาณตลาด|market signal)/i.test(fact))
-    .slice(0, 4);
+    .slice(0, 8);
   const joined = sentenceJoin(filtered, language);
   return cleanMarketPublicText([joined, sourceLine].filter(Boolean).join("\n\n"), language);
 }
 
 function sectionedMarketBody(language, title, source, article, paragraphs = [], sourceFacts = [], eventLead = "") {
-  const labels = marketSectionLabels(language);
   const publisher = sourceArticlePublisher(article.publisher || source.publisher);
   const date = formatDate(article.publishedAt || source.publishedAt, language);
   const sourceLine = sourceDateLine(language, publisher, date);
   const first = eventLead || paragraphs.find((paragraph) => includesPublisher(paragraph, publisher)) || sourceLeadWithPublisher(language, publisher, title);
-  const factText = sourceFactIntro(language, sourceFacts.length ? sourceFacts : paragraphs.slice(1, 4), sourceLine);
-  const boundaryTable = evidenceBoundaryTable(language, sourceFacts.length ? sourceFacts : paragraphs.slice(1, 4));
-  return cleanMarketPublicText([
-    `## ${labels.event}`,
-    first,
-    `## ${labels.facts}`,
-    factText || sourceLine,
-    boundaryTable,
-    `## ${labels.boundary}`,
-    labels.boundaryText,
-    `## ${labels.watch}`,
-    labels.watchText
-  ].filter(Boolean).join("\n\n"), language);
+  const factualParagraphs = paragraphs
+    .filter((paragraph) => factDiffersFromLead(paragraph, first))
+    .slice(0, sourceParagraphLimit(article));
+  const factText = sourceFactIntro(language, sourceFacts.length ? sourceFacts : factualParagraphs.slice(0, 6), sourceLine);
+  const blocks = [];
+  for (const paragraph of [first, ...factualParagraphs, factText || sourceLine]) {
+    const clean = cleanMarketPublicText(paragraph, language);
+    if (!clean) continue;
+    if (blocks.some((existing) => !factDiffersFromLead(clean, existing))) continue;
+    blocks.push(clean);
+  }
+  return cleanMarketPublicText(blocks.join("\n\n"), language);
 }
 
 function evidenceBoundaryTable(language, facts = []) {
@@ -2078,8 +2130,9 @@ function strengthenMarketNewsBody(language, frame, source, article, profile, bod
     paragraphs.push(paragraph);
   }
 
-  const eventLead = sourceLeadWithPublisher(language, publisher, lead);
-  return sectionedMarketBody(language, title, source, article, paragraphs.slice(0, 6), facts, eventLead);
+  const eventLead = sourceRichEnough(article) ? "" : sourceLeadWithPublisher(language, publisher, lead);
+  const sectioned = sectionedMarketBody(language, title, source, article, paragraphs.slice(0, sourceParagraphLimit(article)), facts, eventLead);
+  return sourceDensityBackfill(language, source, article, sectioned, facts, title);
 }
 
 function marketNewsContextParagraph(language, frame, source, article, firstParagraph = "", factParagraph = "") {
@@ -2276,9 +2329,12 @@ export function buildMarketNewsroomPost({ language, pack = {}, post = {}, frame,
   );
   const rawBody = cleanMarketPublicText(sourceBackedBody(language, inferredFrame, source, article, profile), language);
   const body = strengthenMarketNewsBody(language, inferredFrame, source, article, profile, rawBody, title);
-  const excerptPublisher = sourceArticlePublisher(article.publisher || source.publisher);
+  const originalSource = (post.sourceLinks || [])[0] || {};
+  const excerptPublisher = sourceArticlePublisher(
+    article.publisher || source.publisher || originalSource.publisher || post.coverCredit || pack.coverCredit
+  );
   const rawStandfirst = sourceLeadWithPublisher(language, excerptPublisher, articleStandfirst(language, inferredFrame, source, article, profile));
-  const excerpt = cleanMarketPublicText(compactNewsDeck(language, title, rawStandfirst), language);
+  const excerpt = sourceLeadWithPublisher(language, excerptPublisher, cleanMarketPublicText(compactNewsDeck(language, title, rawStandfirst), language));
   const geoSummary = sourceGeoSummary(language, inferredFrame, source, article, profile);
   const keyTakeaways = sourceKeyTakeaways(language, inferredFrame, source, article, profile);
   const seoDescription = marketSeoDescription(language, excerpt, geoSummary, keyTakeaways, body, title);

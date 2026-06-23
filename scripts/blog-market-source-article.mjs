@@ -1,5 +1,8 @@
 const ENTITY_WORD_PATTERN =
   /\b[A-Z][A-Za-z0-9&.+-]*(?:\s+[A-Z][A-Za-z0-9&.+-]*){0,4}\b/g;
+const SOURCE_FACT_SCAN_CHARS = Number(process.env.ALTOS_BLOG_MARKET_SOURCE_FACT_SCAN_CHARS || "6000");
+const SOURCE_BODY_STORE_CHARS = Number(process.env.ALTOS_BLOG_MARKET_SOURCE_BODY_STORE_CHARS || "8000");
+const SOURCE_FACT_LIMIT = Number(process.env.ALTOS_BLOG_MARKET_SOURCE_FACT_LIMIT || "10");
 
 export function decodeEntities(value = "") {
   return String(value)
@@ -202,7 +205,7 @@ function extractArticleImages(html = "", baseUrl = "", fallbackCredit = "") {
 
 function extractArticleBodyFromHtml(html = "") {
   const section = extractArticleSection(html);
-  if (!section) return "";
+  if (!section) return extractReaderMarkdownBody(html);
   const paragraphs = [];
   const seen = new Set();
   for (const match of section.matchAll(/<(p|li)\b([^>]*)>([\s\S]*?)<\/\1>/gi)) {
@@ -221,8 +224,41 @@ function extractArticleBodyFromHtml(html = "") {
     if (seen.has(key)) continue;
     seen.add(key);
     paragraphs.push(text);
-    if (paragraphs.length >= 12) break;
+    if (paragraphs.length >= 18) break;
   }
+  return paragraphs.join("\n\n");
+}
+
+function extractReaderMarkdownBody(value = "") {
+  const marker = value.search(/Markdown Content:/i);
+  if (marker < 0) return "";
+  const markdown = value
+    .slice(marker)
+    .replace(/^Markdown Content:\s*/i, "")
+    .replace(/!\[[^\]]*]\([^)]+\)/g, " ")
+    .replace(/\[([^\]]+)]\([^)]+\)/g, "$1")
+    .replace(/^\s*#{1,6}\s*/gm, "")
+    .replace(/\*\*([^*]+)\*\*/g, "$1")
+    .replace(/_([^_\n]+)_/g, "$1")
+    .trim();
+  const seen = new Set();
+  const paragraphs = markdown
+    .split(/\n{2,}/)
+    .map((paragraph) =>
+      stripHtml(paragraph)
+        .replace(/^\s*[-*]\s+/gm, "")
+        .replace(/\s+/g, " ")
+        .trim()
+    )
+    .filter((paragraph) => paragraph.length >= 44)
+    .filter((paragraph) => !isSourceNoiseText(paragraph))
+    .filter((paragraph) => {
+      const key = paragraph.toLowerCase();
+      if (!key || seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    })
+    .slice(0, 18);
   return paragraphs.join("\n\n");
 }
 
@@ -232,6 +268,7 @@ function isSourceNoiseText(value = "") {
   if (!compact) return true;
   if (/404\s*(?:-|–|not found)|that page does not exist|try again or go back to the homepage/i.test(compact)) return true;
   if (/^(Image Credits|圖片來源|作者|Tags?|Topics?|Read more|Sign up|Subscribe|Advertisement|Recommended|Related|Share this|本文獲)/i.test(compact)) return true;
+  if (/^Updated\s+[A-Z][a-z]+\s+\d{1,2},\s+\d{4}:/i.test(compact)) return true;
   if (/newsletter|sign up|subscribe|advertisement|cookie|privacy policy|terms of service/i.test(compact)) return true;
   if (/Products AI Cloud AI Gateway|Core Platform CI\/CD|Resources Company Customers|Web Application Firewall|DDoS Protection/i.test(compact)) return true;
   if (/Verge Shopping Expand|Transportation Expand|Founded in 2011, we offer our audience/i.test(compact)) return true;
@@ -332,11 +369,11 @@ export function extractEntities(...values) {
 
 function factBulletsFromText({ title = "", summary = "", publisher = "" } = {}) {
   const facts = [];
-  for (const sentence of splitSentences(summary)) facts.push(sentence);
+  for (const sentence of splitSentences(summary)) facts.push(sentence.replace(/^\s*[-*]\s+/, "").trim());
   if (facts.length < 3 && title && !/404\s*(?:-|–|not found)/i.test(title)) facts.unshift(`${shortPublisher(publisher)} reported: ${cleanSourceTitle(title)}`);
   const numbers = extractNumbers(title, summary);
   if (facts.length < 3 && numbers.length) facts.push(`The source includes these concrete figures: ${numbers.join(", ")}`);
-  return unique(facts).slice(0, 6);
+  return unique(facts).slice(0, SOURCE_FACT_LIMIT);
 }
 
 export function normalizeSourceArticle(sourceArticle = {}, fallbackSource = {}, fallbackPack = {}) {
@@ -357,14 +394,14 @@ export function normalizeSourceArticle(sourceArticle = {}, fallbackSource = {}, 
         ? []
         : factBulletsFromText({
             title: headline,
-            summary: [standfirst, bodyForFacts.slice(0, 1600)].filter(Boolean).join(" "),
+            summary: [standfirst, bodyForFacts.slice(0, SOURCE_FACT_SCAN_CHARS)].filter(Boolean).join(" "),
             publisher
           }))
     ]
       .map((fact) => normalizeNewsText(fact))
       .filter(Boolean)
       .filter((fact) => !isSourceNoiseText(fact))
-  ).slice(0, 6);
+  ).slice(0, SOURCE_FACT_LIMIT);
   const entities = unique([...(sourceArticle.entities || []), ...extractEntities(headline, standfirst, factBullets.join("\n"))]).slice(0, 12);
   const numbers = unique([...(sourceArticle.numbers || []), ...extractNumbers(headline, standfirst, factBullets.join("\n"))]).slice(0, 10);
   const image = {
@@ -410,7 +447,7 @@ export function normalizeSourceArticle(sourceArticle = {}, fallbackSource = {}, 
     factBullets,
     entities,
     numbers,
-    body: bodyForFacts.slice(0, 2000),
+    body: bodyForFacts.slice(0, SOURCE_BODY_STORE_CHARS),
     image,
     images,
     extractionConfidence

@@ -689,6 +689,28 @@ function markdownHeadingCount(body: string) {
   return (body.match(/^##\s+/gm) || []).length;
 }
 
+function meaningfulBodyParagraphs(body: string) {
+  return body
+    .split(/\n{2,}/)
+    .map((paragraph) => plainText(paragraph))
+    .filter((paragraph) => paragraph.length >= 60);
+}
+
+function richMarketSourceSignal(post: BlogPost) {
+  const sourceArticle = (post as BlogPost & {
+    sourceArticle?: { body?: string; factBullets?: string[] };
+  }).sourceArticle;
+  const sourceBodyLength = plainText(sourceArticle?.body || "").length;
+  const sourceSummaryLength = plainText(post.sourceLinks.map((source) => source.summary || "").join("\n")).length;
+  return sourceBodyLength >= 1800 || sourceSummaryLength >= 900;
+}
+
+function richMarketBodyMinimum(language: BlogLanguage) {
+  if (["en", "id", "vi", "ms", "fil"].includes(language)) return 220;
+  if (language === "th") return 320;
+  return 360;
+}
+
 function markdownH2s(body: string) {
   return [...body.matchAll(/^##\s+(.+)$/gm)].map((match) => match[1]?.trim()).filter(Boolean);
 }
@@ -915,6 +937,13 @@ export function reviewContentTypeFit(post: BlogPost): ReviewResult {
     }
     if (breakingTemplateLeakBodyPattern.test(post.body)) {
       issues.push("market news posts must read like a source-faithful news brief, not an internal translation/process note");
+    }
+    if (richMarketSourceSignal(post)) {
+      const paragraphs = meaningfulBodyParagraphs(post.body);
+      const units = wordishLength(post.body, post.language);
+      if (paragraphs.length < 4 || units < richMarketBodyMinimum(post.language)) {
+        issues.push("source-rich market news must preserve source density; do not compress a long report into a short summary");
+      }
     }
   } else if (contentType === "column") {
     const hasTable = /\|.+\|/.test(post.body);

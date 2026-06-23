@@ -159,8 +159,10 @@ SEO description formulas:
 
 Use three content types and six writing archetypes:
 
-- `breaking`: fast market brief. One sentence answer, what happened, why it
-  matters, what remains uncertain, source links.
+- `breaking`: source-faithful market brief. If the source is thin, keep it
+  fast: what happened, why it matters, what remains uncertain, source links.
+  If the source is rich, preserve the source's information density instead of
+  compressing it into a short summary.
 - `column`: operator opinion or explainer. One concrete question, tradeoffs,
   examples and readable knowledge density. ALTOS LAB point of view and next
   steps are optional tools, not mandatory sections.

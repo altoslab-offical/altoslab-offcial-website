@@ -59,8 +59,8 @@ const IMAGE_TIMEOUT_MS = 6500;
 const MIN_IMAGE_WIDTH = Number(process.env.ALTOS_BLOG_MARKET_MIN_IMAGE_WIDTH || "768");
 const MIN_IMAGE_HEIGHT = Number(process.env.ALTOS_BLOG_MARKET_MIN_IMAGE_HEIGHT || "432");
 const MIN_IMAGE_BYTES = Number(process.env.ALTOS_BLOG_MARKET_MIN_IMAGE_BYTES || "25000");
-const MIN_LONGFORM_FACTS = Number(process.env.ALTOS_BLOG_MARKET_LONGFORM_MIN_FACTS || "5");
-const MIN_LONGFORM_BODY_CHARS = Number(process.env.ALTOS_BLOG_MARKET_LONGFORM_MIN_BODY_CHARS || "700");
+const MIN_LONGFORM_FACTS = Number(process.env.ALTOS_BLOG_MARKET_LONGFORM_MIN_FACTS || "8");
+const MIN_LONGFORM_BODY_CHARS = Number(process.env.ALTOS_BLOG_MARKET_LONGFORM_MIN_BODY_CHARS || "1800");
 const GENERIC_STOCK_HOSTS = [
   "unsplash.com",
   "images.unsplash.com",
@@ -187,6 +187,14 @@ function parseRegistryEntries(registrySource) {
   return entries;
 }
 
+function sourceReaderUrl(url = "") {
+  return `https://r.jina.ai/http://${url}`;
+}
+
+function edgeProtectionBody(text = "") {
+  return /Attention Required!|Cloudflare|Just a moment|cf-error-code|checking your browser|access denied/i.test(String(text || "").slice(0, 8000));
+}
+
 async function fetchText(url, timeoutMs) {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), timeoutMs);
@@ -196,8 +204,21 @@ async function fetchText(url, timeoutMs) {
       cache: "no-store",
       headers: { "User-Agent": "ALTOS-LAB-market-source-scanner/1.0; https://altoslab-ai.cc" }
     });
-    if (!response.ok) return { ok: false, status: response.status, text: "" };
-    return { ok: true, status: response.status, text: await response.text(), contentType: response.headers.get("content-type") || "" };
+    const text = await response.text();
+    if (response.ok && !edgeProtectionBody(text)) {
+      return { ok: true, status: response.status, text, contentType: response.headers.get("content-type") || "" };
+    }
+    if ([403, 429, 503].includes(response.status) || edgeProtectionBody(text)) {
+      const reader = await fetch(sourceReaderUrl(url), {
+        cache: "no-store",
+        headers: { "User-Agent": "ALTOS-LAB-market-source-scanner/1.0; https://altoslab-ai.cc" }
+      });
+      const readerText = await reader.text();
+      if (reader.ok && readerText && !edgeProtectionBody(readerText)) {
+        return { ok: true, status: reader.status, text: readerText, contentType: reader.headers.get("content-type") || "text/markdown", via: "reader" };
+      }
+    }
+    return { ok: false, status: response.status, text: "" };
   } catch (error) {
     return { ok: false, status: 0, text: "", error: error?.message || String(error) };
   } finally {
