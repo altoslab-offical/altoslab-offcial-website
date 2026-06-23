@@ -187,6 +187,7 @@ assert(
 assert(releaseRoute.includes("releaseCoverContractIssues"), "release-set route blocks localhost/http covers and mismatched multilingual covers");
 assert(releaseRoute.includes("column/feature posts require at least two in-article images"), "release-set route blocks columns/features without required in-article images");
 assert(releaseRoute.includes("contentImages URLs do not match release payload"), "release-set route verifies signed content image URLs during publish");
+assert(releaseRoute.includes("generatedMediaReachabilityIssues"), "release-set route verifies same-origin generated-media URLs before publish");
 assert(releaseRoute.includes("applyManifestReleaseReview"), "release-set route applies the signed manifest release decision directly");
 assert(releaseRoute.includes("reviewBlogPairForAutoPublish"), "release-set route reruns full article QA during publish");
 assert(!releaseRoute.includes("reviewBlogImagesForRelease"), "release-set route does not rerun remote image QA during publish");
@@ -196,6 +197,7 @@ assert(mediaRoute.includes("storeGcsImage"), "media upload route can store produ
 assert(mediaRoute.includes("BLOG_MEDIA_ALLOW_LOCAL_STORAGE"), "media upload route supports local-only image storage for end-to-end testing");
 assert(adminBlogRefreshRoute.includes("verifyBlogIngestRequest"), "public cache refresh route accepts the same signed request contract");
 assert(bulkPatchRoute.includes("refreshPublicBlogCacheFromStorage"), "bulk patch refreshes derived public blog caches after published content changes");
+assert(bulkPatchRoute.includes("generatedMediaReachabilityIssues"), "bulk patch blocks published articles with missing same-origin generated-media URLs");
 assert(generatedMediaRoute.includes("generated-blog-media"), "local generated media can be fetched during end-to-end image QA");
 assert(generatedMediaRoute.includes("readGcsObject"), "generated media route can read GCS-backed images");
 assert(healthRoute.includes("externalBlogIngestConfigured"), "health check reports whether signed external blog ingest is configured");
@@ -228,6 +230,7 @@ assert(localWorker.includes("coverGeneration.provider must be ChatGPT/GPT"), "lo
 assert(localWorker.includes("articleSetCoverIssues"), "local worker requires one shared cover URL across translated article versions");
 assert(localWorker.includes("articleSetContentImageIssues"), "local worker requires one shared content image URL set across translated article versions");
 assert(localWorker.includes("contentImages.length < 2"), "local worker blocks columns/features without at least two in-article images");
+assert(localWorker.includes("content image caption must be localized"), "local worker blocks non-localized public image captions");
 assert(localWorker.includes("blog-content-image"), "local worker uploads GPT content images through the signed media route");
 assert(localWorker.includes("not stock/free image providers"), "local worker blocks stock/free images for market-news source covers");
 assert(localWorker.includes("market news fast lane requires translated versions for every configured language"), "local worker blocks market-news sets missing any configured language");

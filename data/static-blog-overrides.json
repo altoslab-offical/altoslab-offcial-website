@@ -57,18 +57,15 @@
       "aiDisclosure": "",
       "translationGroupId": "browser-gemini-gpt-2026-06-07-daily-column",
       "featured": false,
-      "cover": "https://altoslab-ai.cc/api/blog/generated-media/browser-gemini-gpt-2026-06-07-daily-column-ai-delivery-accountability-hq-v2-cover.png",
-      "coverAlt": "AI-assisted work delivery and accountability visual for an ALTOS LAB column",
+      "cover": "https://altoslab-ai.cc/api/blog/generated-media/legacy-cover-repair-20260623-ai-delivery-accountability-cover-20260623.png",
+      "coverAlt": "AI tools business unit accountability handoff review",
       "coverSource": "generated",
-      "coverCredit": "ALTOS LAB 編輯視覺",
+      "coverCredit": "ALTOS LAB editorial visual",
       "coverGeneration": {
-        "source": "generated",
-        "provider": "OpenAI/GPT + ALTOS LAB high-resolution render",
-        "prompt": "OpenAI/GPT visual direction refined into a high-resolution ALTOS LAB editorial render for a column about AI tools moving from individual productivity into business-unit delivery and accountability: crisp handoff cards, review checkpoints and decision ownership paths, no text, no logos, no people, no fake UI, 16:9, 2400x1350.",
-        "generatedAt": "2026-06-07T03:00:33.737Z",
-        "credit": "ALTOS LAB 編輯視覺",
-        "aspectRatio": "16:9",
-        "placement": "cover",
+        "provider": "codex-imagegen",
+        "prompt": "AI tools entering business units with delivery ownership, approval checkpoints and accountability handoff",
+        "status": "generated",
+        "generatedAt": "2026-06-23T15:46:03.308Z",
         "visualChecks": {
           "topicFit": true,
           "noTextArtifacts": true,
@@ -76,69 +73,44 @@
           "noPeople": true,
           "noTrademarkRisk": true,
           "noGenericStockLook": true,
-          "noFakeUI": true,
-          "noBluePurpleAbstract": true,
-          "highResolution": true,
-          "noBlur": true,
-          "checkedBy": "main-brain",
-          "checkedAt": "2026-06-07T03:00:33.737Z"
-        },
-        "status": "generated",
-        "storedUrl": "https://altoslab-ai.cc/api/blog/generated-media/browser-gemini-gpt-2026-06-07-daily-column-ai-delivery-accountability-hq-v2-cover.png",
-        "repairNote": "Replaced low-resolution 1280x720 visual with crisp 2400x1350 shared editorial render."
+          "checkedBy": "codex",
+          "checkedAt": "2026-06-23T15:46:03.308Z"
+        }
       },
       "contentImages": [
         {
-          "url": "https://altoslab-ai.cc/api/blog/generated-media/browser-gemini-gpt-2026-06-07-daily-column-ai-delivery-accountability-hq-v2-opening.png",
-          "alt": "AI-assisted delivery handoff cards, assumption notes and review checkpoints for business teams",
-          "caption": "當工具把草稿、分析與交付推到個人端，組織要先看懂責任如何移動。",
+          "url": "https://altoslab-ai.cc/api/blog/generated-media/legacy-inline-repair-20260623-ai-delivery-accountability-opening-20260623.png",
+          "alt": "AI tools business unit accountability handoff review",
+          "caption": "當 AI 工具進入業務單位，交付責任就要重新畫清楚。",
           "source": "generated",
-          "credit": "ALTOS LAB 編輯視覺",
-          "aspectRatio": "wide",
-          "placement": "after-lead",
-          "provider": "OpenAI/GPT + ALTOS LAB high-resolution render",
-          "prompt": "OpenAI/GPT visual direction refined into a high-resolution ALTOS LAB editorial render for AI-assisted delivery handoffs: blank handoff cards, assumption markers and review checkpoints, no text, no logos, no people, no fake UI, 16:9, 2400x1350.",
-          "generatedAt": "2026-06-07T03:00:33.737Z",
-          "visualChecks": {
-            "topicFit": true,
-            "noTextArtifacts": true,
-            "noLogos": true,
-            "noPeople": true,
-            "noTrademarkRisk": true,
-            "noGenericStockLook": true,
-            "noFakeUI": true,
-            "noBluePurpleAbstract": true,
-            "highResolution": true,
-            "noBlur": true,
-            "checkedBy": "main-brain",
-            "checkedAt": "2026-06-07T03:00:33.737Z"
-          }
+          "credit": "ALTOS LAB editorial visual",
+          "aspectRatio": "16:9",
+          "placement": "opening",
+          "provider": "codex-imagegen",
+          "prompt": "AI tools entering business units with delivery ownership, approval checkpoints and accountability handoff; opening evidence image",
+          "generatedAt": "2026-06-23T15:46:03.308Z",
+          "visualChecks": [
+            "topic anchored",
+            "not generic AI",
+            "rendered media uploaded"
+          ]
         },
         {
-          "url": "https://altoslab-ai.cc/api/blog/generated-media/browser-gemini-gpt-2026-06-07-daily-column-ai-delivery-accountability-hq-v2-mechanism.png",
-          "alt": "Review checkpoints and risk tiers for AI-assisted business delivery",
-          "caption": "不是每個產出都需要重審；真正要被設計的是高影響決策的檢查點。",
+          "url": "https://altoslab-ai.cc/api/blog/generated-media/legacy-inline-repair-20260623-ai-delivery-accountability-mechanism-20260623.png",
+          "alt": "AI tools business unit accountability handoff review",
+          "caption": "真正的控制點，是誰審核、誰核准、誰承擔影響客戶的產出。",
           "source": "generated",
-          "credit": "ALTOS LAB 編輯視覺",
-          "aspectRatio": "wide",
-          "placement": "mid-article",
-          "provider": "OpenAI/GPT + ALTOS LAB high-resolution render",
-          "prompt": "OpenAI/GPT visual direction refined into a high-resolution ALTOS LAB editorial render for AI work risk tiers and accountability checkpoints: low/medium/high impact cards, checks and fallback path, no text, no logos, no people, no fake UI, 16:9, 2400x1350.",
-          "generatedAt": "2026-06-07T03:00:33.737Z",
-          "visualChecks": {
-            "topicFit": true,
-            "noTextArtifacts": true,
-            "noLogos": true,
-            "noPeople": true,
-            "noTrademarkRisk": true,
-            "noGenericStockLook": true,
-            "noFakeUI": true,
-            "noBluePurpleAbstract": true,
-            "highResolution": true,
-            "noBlur": true,
-            "checkedBy": "main-brain",
-            "checkedAt": "2026-06-07T03:00:33.737Z"
-          }
+          "credit": "ALTOS LAB editorial visual",
+          "aspectRatio": "16:9",
+          "placement": "mechanism",
+          "provider": "codex-imagegen",
+          "prompt": "AI tools entering business units with delivery ownership, approval checkpoints and accountability handoff; mechanism image",
+          "generatedAt": "2026-06-23T15:46:03.308Z",
+          "visualChecks": [
+            "topic anchored",
+            "not generic AI",
+            "rendered media uploaded"
+          ]
         }
       ],
       "title": "組織交付的重構：當自動化工具深入基層職能",
@@ -194,7 +166,8 @@
         "seoGeoScore": 90,
         "antiSlopScore": 45,
         "notes": "Static Cloudflare rescue overlay from approved released column manifest after KV write quota was exhausted."
-      }
+      },
+      "coverPrompt": "AI tools entering business units with delivery ownership, approval checkpoints and accountability handoff"
     },
     {
       "language": "en",
@@ -253,18 +226,15 @@
       "aiDisclosure": "",
       "translationGroupId": "browser-gemini-gpt-2026-06-07-daily-column",
       "featured": false,
-      "cover": "https://altoslab-ai.cc/api/blog/generated-media/browser-gemini-gpt-2026-06-07-daily-column-ai-delivery-accountability-hq-v2-cover.png",
-      "coverAlt": "AI-assisted work delivery and accountability visual for an ALTOS LAB column",
+      "cover": "https://altoslab-ai.cc/api/blog/generated-media/legacy-cover-repair-20260623-ai-delivery-accountability-cover-20260623.png",
+      "coverAlt": "AI tools business unit accountability handoff review",
       "coverSource": "generated",
       "coverCredit": "ALTOS LAB editorial visual",
       "coverGeneration": {
-        "source": "generated",
-        "provider": "OpenAI/GPT + ALTOS LAB high-resolution render",
-        "prompt": "OpenAI/GPT visual direction refined into a high-resolution ALTOS LAB editorial render for a column about AI tools moving from individual productivity into business-unit delivery and accountability: crisp handoff cards, review checkpoints and decision ownership paths, no text, no logos, no people, no fake UI, 16:9, 2400x1350.",
-        "generatedAt": "2026-06-07T03:00:33.737Z",
-        "credit": "ALTOS LAB editorial visual",
-        "aspectRatio": "16:9",
-        "placement": "cover",
+        "provider": "codex-imagegen",
+        "prompt": "AI tools entering business units with delivery ownership, approval checkpoints and accountability handoff",
+        "status": "generated",
+        "generatedAt": "2026-06-23T15:46:03.308Z",
         "visualChecks": {
           "topicFit": true,
           "noTextArtifacts": true,
@@ -272,69 +242,44 @@
           "noPeople": true,
           "noTrademarkRisk": true,
           "noGenericStockLook": true,
-          "noFakeUI": true,
-          "noBluePurpleAbstract": true,
-          "highResolution": true,
-          "noBlur": true,
-          "checkedBy": "main-brain",
-          "checkedAt": "2026-06-07T03:00:33.737Z"
-        },
-        "status": "generated",
-        "storedUrl": "https://altoslab-ai.cc/api/blog/generated-media/browser-gemini-gpt-2026-06-07-daily-column-ai-delivery-accountability-hq-v2-cover.png",
-        "repairNote": "Replaced low-resolution 1280x720 visual with crisp 2400x1350 shared editorial render."
+          "checkedBy": "codex",
+          "checkedAt": "2026-06-23T15:46:03.308Z"
+        }
       },
       "contentImages": [
         {
-          "url": "https://altoslab-ai.cc/api/blog/generated-media/browser-gemini-gpt-2026-06-07-daily-column-ai-delivery-accountability-hq-v2-opening.png",
-          "alt": "AI-assisted delivery handoff cards, assumption notes and review checkpoints for business teams",
-          "caption": "When tools move drafts, analysis and delivery to the individual edge, the organization has to see where responsibility moves.",
+          "url": "https://altoslab-ai.cc/api/blog/generated-media/legacy-inline-repair-20260623-ai-delivery-accountability-opening-20260623.png",
+          "alt": "AI tools business unit accountability handoff review",
+          "caption": "When AI tools move into business units, delivery ownership has to be redrawn.",
           "source": "generated",
           "credit": "ALTOS LAB editorial visual",
-          "aspectRatio": "wide",
-          "placement": "after-lead",
-          "provider": "OpenAI/GPT + ALTOS LAB high-resolution render",
-          "prompt": "OpenAI/GPT visual direction refined into a high-resolution ALTOS LAB editorial render for AI-assisted delivery handoffs: blank handoff cards, assumption markers and review checkpoints, no text, no logos, no people, no fake UI, 16:9, 2400x1350.",
-          "generatedAt": "2026-06-07T03:00:33.737Z",
-          "visualChecks": {
-            "topicFit": true,
-            "noTextArtifacts": true,
-            "noLogos": true,
-            "noPeople": true,
-            "noTrademarkRisk": true,
-            "noGenericStockLook": true,
-            "noFakeUI": true,
-            "noBluePurpleAbstract": true,
-            "highResolution": true,
-            "noBlur": true,
-            "checkedBy": "main-brain",
-            "checkedAt": "2026-06-07T03:00:33.737Z"
-          }
+          "aspectRatio": "16:9",
+          "placement": "opening",
+          "provider": "codex-imagegen",
+          "prompt": "AI tools entering business units with delivery ownership, approval checkpoints and accountability handoff; opening evidence image",
+          "generatedAt": "2026-06-23T15:46:03.308Z",
+          "visualChecks": [
+            "topic anchored",
+            "not generic AI",
+            "rendered media uploaded"
+          ]
         },
         {
-          "url": "https://altoslab-ai.cc/api/blog/generated-media/browser-gemini-gpt-2026-06-07-daily-column-ai-delivery-accountability-hq-v2-mechanism.png",
-          "alt": "Review checkpoints and risk tiers for AI-assisted business delivery",
-          "caption": "Not every output deserves the same review; the real design work is around high-impact checkpoints.",
+          "url": "https://altoslab-ai.cc/api/blog/generated-media/legacy-inline-repair-20260623-ai-delivery-accountability-mechanism-20260623.png",
+          "alt": "AI tools business unit accountability handoff review",
+          "caption": "The real control point is who reviews, approves, and owns customer-impacting output.",
           "source": "generated",
           "credit": "ALTOS LAB editorial visual",
-          "aspectRatio": "wide",
-          "placement": "mid-article",
-          "provider": "OpenAI/GPT + ALTOS LAB high-resolution render",
-          "prompt": "OpenAI/GPT visual direction refined into a high-resolution ALTOS LAB editorial render for AI work risk tiers and accountability checkpoints: low/medium/high impact cards, checks and fallback path, no text, no logos, no people, no fake UI, 16:9, 2400x1350.",
-          "generatedAt": "2026-06-07T03:00:33.737Z",
-          "visualChecks": {
-            "topicFit": true,
-            "noTextArtifacts": true,
-            "noLogos": true,
-            "noPeople": true,
-            "noTrademarkRisk": true,
-            "noGenericStockLook": true,
-            "noFakeUI": true,
-            "noBluePurpleAbstract": true,
-            "highResolution": true,
-            "noBlur": true,
-            "checkedBy": "main-brain",
-            "checkedAt": "2026-06-07T03:00:33.737Z"
-          }
+          "aspectRatio": "16:9",
+          "placement": "mechanism",
+          "provider": "codex-imagegen",
+          "prompt": "AI tools entering business units with delivery ownership, approval checkpoints and accountability handoff; mechanism image",
+          "generatedAt": "2026-06-23T15:46:03.308Z",
+          "visualChecks": [
+            "topic anchored",
+            "not generic AI",
+            "rendered media uploaded"
+          ]
         }
       ],
       "title": "When AI Tools Move Into Business Units, Delivery Needs a New Accountability Model",
@@ -390,7 +335,8 @@
         "seoGeoScore": 90,
         "antiSlopScore": 45,
         "notes": "Static Cloudflare rescue overlay from approved released column manifest after KV write quota was exhausted."
-      }
+      },
+      "coverPrompt": "AI tools entering business units with delivery ownership, approval checkpoints and accountability handoff"
     },
     {
       "language": "ja",
@@ -449,18 +395,15 @@
       "aiDisclosure": "",
       "translationGroupId": "browser-gemini-gpt-2026-06-07-daily-column",
       "featured": false,
-      "cover": "https://altoslab-ai.cc/api/blog/generated-media/browser-gemini-gpt-2026-06-07-daily-column-ai-delivery-accountability-hq-v2-cover.png",
-      "coverAlt": "AI-assisted work delivery and accountability visual for an ALTOS LAB column",
+      "cover": "https://altoslab-ai.cc/api/blog/generated-media/legacy-cover-repair-20260623-ai-delivery-accountability-cover-20260623.png",
+      "coverAlt": "AI tools business unit accountability handoff review",
       "coverSource": "generated",
       "coverCredit": "ALTOS LAB editorial visual",
       "coverGeneration": {
-        "source": "generated",
-        "provider": "OpenAI/GPT + ALTOS LAB high-resolution render",
-        "prompt": "OpenAI/GPT visual direction refined into a high-resolution ALTOS LAB editorial render for a column about AI tools moving from individual productivity into business-unit delivery and accountability: crisp handoff cards, review checkpoints and decision ownership paths, no text, no logos, no people, no fake UI, 16:9, 2400x1350.",
-        "generatedAt": "2026-06-07T03:00:33.737Z",
-        "credit": "ALTOS LAB editorial visual",
-        "aspectRatio": "16:9",
-        "placement": "cover",
+        "provider": "codex-imagegen",
+        "prompt": "AI tools entering business units with delivery ownership, approval checkpoints and accountability handoff",
+        "status": "generated",
+        "generatedAt": "2026-06-23T15:46:03.308Z",
         "visualChecks": {
           "topicFit": true,
           "noTextArtifacts": true,
@@ -468,69 +411,44 @@
           "noPeople": true,
           "noTrademarkRisk": true,
           "noGenericStockLook": true,
-          "noFakeUI": true,
-          "noBluePurpleAbstract": true,
-          "highResolution": true,
-          "noBlur": true,
-          "checkedBy": "main-brain",
-          "checkedAt": "2026-06-07T03:00:33.737Z"
-        },
-        "status": "generated",
-        "storedUrl": "https://altoslab-ai.cc/api/blog/generated-media/browser-gemini-gpt-2026-06-07-daily-column-ai-delivery-accountability-hq-v2-cover.png",
-        "repairNote": "Replaced low-resolution 1280x720 visual with crisp 2400x1350 shared editorial render."
+          "checkedBy": "codex",
+          "checkedAt": "2026-06-23T15:46:03.308Z"
+        }
       },
       "contentImages": [
         {
-          "url": "https://altoslab-ai.cc/api/blog/generated-media/browser-gemini-gpt-2026-06-07-daily-column-ai-delivery-accountability-hq-v2-opening.png",
-          "alt": "AI-assisted delivery handoff cards, assumption notes and review checkpoints for business teams",
-          "caption": "ツールが草案、分析、納品を個人側へ移すと、組織は責任の移動を見える化する必要がある。",
+          "url": "https://altoslab-ai.cc/api/blog/generated-media/legacy-inline-repair-20260623-ai-delivery-accountability-opening-20260623.png",
+          "alt": "AI tools business unit accountability handoff review",
+          "caption": "AIツールが現場部門に入ると、納品責任の線引きを作り直す必要がある。",
           "source": "generated",
           "credit": "ALTOS LAB editorial visual",
-          "aspectRatio": "wide",
-          "placement": "after-lead",
-          "provider": "OpenAI/GPT + ALTOS LAB high-resolution render",
-          "prompt": "OpenAI/GPT visual direction refined into a high-resolution ALTOS LAB editorial render for AI-assisted delivery handoffs: blank handoff cards, assumption markers and review checkpoints, no text, no logos, no people, no fake UI, 16:9, 2400x1350.",
-          "generatedAt": "2026-06-07T03:00:33.737Z",
-          "visualChecks": {
-            "topicFit": true,
-            "noTextArtifacts": true,
-            "noLogos": true,
-            "noPeople": true,
-            "noTrademarkRisk": true,
-            "noGenericStockLook": true,
-            "noFakeUI": true,
-            "noBluePurpleAbstract": true,
-            "highResolution": true,
-            "noBlur": true,
-            "checkedBy": "main-brain",
-            "checkedAt": "2026-06-07T03:00:33.737Z"
-          }
+          "aspectRatio": "16:9",
+          "placement": "opening",
+          "provider": "codex-imagegen",
+          "prompt": "AI tools entering business units with delivery ownership, approval checkpoints and accountability handoff; opening evidence image",
+          "generatedAt": "2026-06-23T15:46:03.308Z",
+          "visualChecks": [
+            "topic anchored",
+            "not generic AI",
+            "rendered media uploaded"
+          ]
         },
         {
-          "url": "https://altoslab-ai.cc/api/blog/generated-media/browser-gemini-gpt-2026-06-07-daily-column-ai-delivery-accountability-hq-v2-mechanism.png",
-          "alt": "Review checkpoints and risk tiers for AI-assisted business delivery",
-          "caption": "すべてを同じように再確認するのではなく、高影響の判断点を設計することが重要になる。",
+          "url": "https://altoslab-ai.cc/api/blog/generated-media/legacy-inline-repair-20260623-ai-delivery-accountability-mechanism-20260623.png",
+          "alt": "AI tools business unit accountability handoff review",
+          "caption": "重要なのは、誰が確認し、承認し、顧客影響のある出力に責任を持つかだ。",
           "source": "generated",
           "credit": "ALTOS LAB editorial visual",
-          "aspectRatio": "wide",
-          "placement": "mid-article",
-          "provider": "OpenAI/GPT + ALTOS LAB high-resolution render",
-          "prompt": "OpenAI/GPT visual direction refined into a high-resolution ALTOS LAB editorial render for AI work risk tiers and accountability checkpoints: low/medium/high impact cards, checks and fallback path, no text, no logos, no people, no fake UI, 16:9, 2400x1350.",
-          "generatedAt": "2026-06-07T03:00:33.737Z",
-          "visualChecks": {
-            "topicFit": true,
-            "noTextArtifacts": true,
-            "noLogos": true,
-            "noPeople": true,
-            "noTrademarkRisk": true,
-            "noGenericStockLook": true,
-            "noFakeUI": true,
-            "noBluePurpleAbstract": true,
-            "highResolution": true,
-            "noBlur": true,
-            "checkedBy": "main-brain",
-            "checkedAt": "2026-06-07T03:00:33.737Z"
-          }
+          "aspectRatio": "16:9",
+          "placement": "mechanism",
+          "provider": "codex-imagegen",
+          "prompt": "AI tools entering business units with delivery ownership, approval checkpoints and accountability handoff; mechanism image",
+          "generatedAt": "2026-06-23T15:46:03.308Z",
+          "visualChecks": [
+            "topic anchored",
+            "not generic AI",
+            "rendered media uploaded"
+          ]
         }
       ],
       "title": "AI ツールが現場部門に入るとき、企業は「納品」と責任の境界を作り直す必要がある",
@@ -586,7 +504,8 @@
         "seoGeoScore": 90,
         "antiSlopScore": 45,
         "notes": "Static Cloudflare rescue overlay from approved released column manifest after KV write quota was exhausted."
-      }
+      },
+      "coverPrompt": "AI tools entering business units with delivery ownership, approval checkpoints and accountability handoff"
     },
     {
       "language": "ko",
@@ -645,18 +564,15 @@
       "aiDisclosure": "",
       "translationGroupId": "browser-gemini-gpt-2026-06-07-daily-column",
       "featured": false,
-      "cover": "https://altoslab-ai.cc/api/blog/generated-media/browser-gemini-gpt-2026-06-07-daily-column-ai-delivery-accountability-hq-v2-cover.png",
-      "coverAlt": "AI-assisted work delivery and accountability visual for an ALTOS LAB column",
+      "cover": "https://altoslab-ai.cc/api/blog/generated-media/legacy-cover-repair-20260623-ai-delivery-accountability-cover-20260623.png",
+      "coverAlt": "AI tools business unit accountability handoff review",
       "coverSource": "generated",
       "coverCredit": "ALTOS LAB editorial visual",
       "coverGeneration": {
-        "source": "generated",
-        "provider": "OpenAI/GPT + ALTOS LAB high-resolution render",
-        "prompt": "OpenAI/GPT visual direction refined into a high-resolution ALTOS LAB editorial render for a column about AI tools moving from individual productivity into business-unit delivery and accountability: crisp handoff cards, review checkpoints and decision ownership paths, no text, no logos, no people, no fake UI, 16:9, 2400x1350.",
-        "generatedAt": "2026-06-07T03:00:33.737Z",
-        "credit": "ALTOS LAB editorial visual",
-        "aspectRatio": "16:9",
-        "placement": "cover",
+        "provider": "codex-imagegen",
+        "prompt": "AI tools entering business units with delivery ownership, approval checkpoints and accountability handoff",
+        "status": "generated",
+        "generatedAt": "2026-06-23T15:46:03.308Z",
         "visualChecks": {
           "topicFit": true,
           "noTextArtifacts": true,
@@ -664,69 +580,44 @@
           "noPeople": true,
           "noTrademarkRisk": true,
           "noGenericStockLook": true,
-          "noFakeUI": true,
-          "noBluePurpleAbstract": true,
-          "highResolution": true,
-          "noBlur": true,
-          "checkedBy": "main-brain",
-          "checkedAt": "2026-06-07T03:00:33.737Z"
-        },
-        "status": "generated",
-        "storedUrl": "https://altoslab-ai.cc/api/blog/generated-media/browser-gemini-gpt-2026-06-07-daily-column-ai-delivery-accountability-hq-v2-cover.png",
-        "repairNote": "Replaced low-resolution 1280x720 visual with crisp 2400x1350 shared editorial render."
+          "checkedBy": "codex",
+          "checkedAt": "2026-06-23T15:46:03.308Z"
+        }
       },
       "contentImages": [
         {
-          "url": "https://altoslab-ai.cc/api/blog/generated-media/browser-gemini-gpt-2026-06-07-daily-column-ai-delivery-accountability-hq-v2-opening.png",
-          "alt": "AI-assisted delivery handoff cards, assumption notes and review checkpoints for business teams",
-          "caption": "도구가 초안, 분석, 전달을 개인에게 이동시키면 조직은 책임이 어디로 이동하는지 봐야 한다.",
+          "url": "https://altoslab-ai.cc/api/blog/generated-media/legacy-inline-repair-20260623-ai-delivery-accountability-opening-20260623.png",
+          "alt": "AI tools business unit accountability handoff review",
+          "caption": "AI 도구가 현업 부서로 들어오면 납품 책임의 경계를 다시 그려야 한다.",
           "source": "generated",
           "credit": "ALTOS LAB editorial visual",
-          "aspectRatio": "wide",
-          "placement": "after-lead",
-          "provider": "OpenAI/GPT + ALTOS LAB high-resolution render",
-          "prompt": "OpenAI/GPT visual direction refined into a high-resolution ALTOS LAB editorial render for AI-assisted delivery handoffs: blank handoff cards, assumption markers and review checkpoints, no text, no logos, no people, no fake UI, 16:9, 2400x1350.",
-          "generatedAt": "2026-06-07T03:00:33.737Z",
-          "visualChecks": {
-            "topicFit": true,
-            "noTextArtifacts": true,
-            "noLogos": true,
-            "noPeople": true,
-            "noTrademarkRisk": true,
-            "noGenericStockLook": true,
-            "noFakeUI": true,
-            "noBluePurpleAbstract": true,
-            "highResolution": true,
-            "noBlur": true,
-            "checkedBy": "main-brain",
-            "checkedAt": "2026-06-07T03:00:33.737Z"
-          }
+          "aspectRatio": "16:9",
+          "placement": "opening",
+          "provider": "codex-imagegen",
+          "prompt": "AI tools entering business units with delivery ownership, approval checkpoints and accountability handoff; opening evidence image",
+          "generatedAt": "2026-06-23T15:46:03.308Z",
+          "visualChecks": [
+            "topic anchored",
+            "not generic AI",
+            "rendered media uploaded"
+          ]
         },
         {
-          "url": "https://altoslab-ai.cc/api/blog/generated-media/browser-gemini-gpt-2026-06-07-daily-column-ai-delivery-accountability-hq-v2-mechanism.png",
-          "alt": "Review checkpoints and risk tiers for AI-assisted business delivery",
-          "caption": "모든 결과물을 같은 방식으로 검토할 필요는 없으며, 고영향 지점의 체크포인트가 핵심이다.",
+          "url": "https://altoslab-ai.cc/api/blog/generated-media/legacy-inline-repair-20260623-ai-delivery-accountability-mechanism-20260623.png",
+          "alt": "AI tools business unit accountability handoff review",
+          "caption": "핵심 통제점은 누가 검토하고 승인하며 고객 영향 산출물을 책임지는가다.",
           "source": "generated",
           "credit": "ALTOS LAB editorial visual",
-          "aspectRatio": "wide",
-          "placement": "mid-article",
-          "provider": "OpenAI/GPT + ALTOS LAB high-resolution render",
-          "prompt": "OpenAI/GPT visual direction refined into a high-resolution ALTOS LAB editorial render for AI work risk tiers and accountability checkpoints: low/medium/high impact cards, checks and fallback path, no text, no logos, no people, no fake UI, 16:9, 2400x1350.",
-          "generatedAt": "2026-06-07T03:00:33.737Z",
-          "visualChecks": {
-            "topicFit": true,
-            "noTextArtifacts": true,
-            "noLogos": true,
-            "noPeople": true,
-            "noTrademarkRisk": true,
-            "noGenericStockLook": true,
-            "noFakeUI": true,
-            "noBluePurpleAbstract": true,
-            "highResolution": true,
-            "noBlur": true,
-            "checkedBy": "main-brain",
-            "checkedAt": "2026-06-07T03:00:33.737Z"
-          }
+          "aspectRatio": "16:9",
+          "placement": "mechanism",
+          "provider": "codex-imagegen",
+          "prompt": "AI tools entering business units with delivery ownership, approval checkpoints and accountability handoff; mechanism image",
+          "generatedAt": "2026-06-23T15:46:03.308Z",
+          "visualChecks": [
+            "topic anchored",
+            "not generic AI",
+            "rendered media uploaded"
+          ]
         }
       ],
       "title": "AI 도구가 현업 부서로 들어오면, 기업은 납품과 책임의 경계를 다시 설계해야 한다",
@@ -782,7 +673,8 @@
         "seoGeoScore": 90,
         "antiSlopScore": 45,
         "notes": "Static Cloudflare rescue overlay from approved released column manifest after KV write quota was exhausted."
-      }
+      },
+      "coverPrompt": "AI tools entering business units with delivery ownership, approval checkpoints and accountability handoff"
     },
     {
       "language": "id",
@@ -841,18 +733,15 @@
       "aiDisclosure": "",
       "translationGroupId": "browser-gemini-gpt-2026-06-07-daily-column",
       "featured": false,
-      "cover": "https://altoslab-ai.cc/api/blog/generated-media/browser-gemini-gpt-2026-06-07-daily-column-ai-delivery-accountability-hq-v2-cover.png",
-      "coverAlt": "AI-assisted work delivery and accountability visual for an ALTOS LAB column",
+      "cover": "https://altoslab-ai.cc/api/blog/generated-media/legacy-cover-repair-20260623-ai-delivery-accountability-cover-20260623.png",
+      "coverAlt": "AI tools business unit accountability handoff review",
       "coverSource": "generated",
       "coverCredit": "ALTOS LAB editorial visual",
       "coverGeneration": {
-        "source": "generated",
-        "provider": "OpenAI/GPT + ALTOS LAB high-resolution render",
-        "prompt": "OpenAI/GPT visual direction refined into a high-resolution ALTOS LAB editorial render for a column about AI tools moving from individual productivity into business-unit delivery and accountability: crisp handoff cards, review checkpoints and decision ownership paths, no text, no logos, no people, no fake UI, 16:9, 2400x1350.",
-        "generatedAt": "2026-06-07T03:00:33.737Z",
-        "credit": "ALTOS LAB editorial visual",
-        "aspectRatio": "16:9",
-        "placement": "cover",
+        "provider": "codex-imagegen",
+        "prompt": "AI tools entering business units with delivery ownership, approval checkpoints and accountability handoff",
+        "status": "generated",
+        "generatedAt": "2026-06-23T15:46:03.308Z",
         "visualChecks": {
           "topicFit": true,
           "noTextArtifacts": true,
@@ -860,69 +749,44 @@
           "noPeople": true,
           "noTrademarkRisk": true,
           "noGenericStockLook": true,
-          "noFakeUI": true,
-          "noBluePurpleAbstract": true,
-          "highResolution": true,
-          "noBlur": true,
-          "checkedBy": "main-brain",
-          "checkedAt": "2026-06-07T03:00:33.737Z"
-        },
-        "status": "generated",
-        "storedUrl": "https://altoslab-ai.cc/api/blog/generated-media/browser-gemini-gpt-2026-06-07-daily-column-ai-delivery-accountability-hq-v2-cover.png",
-        "repairNote": "Replaced low-resolution 1280x720 visual with crisp 2400x1350 shared editorial render."
+          "checkedBy": "codex",
+          "checkedAt": "2026-06-23T15:46:03.308Z"
+        }
       },
       "contentImages": [
         {
-          "url": "https://altoslab-ai.cc/api/blog/generated-media/browser-gemini-gpt-2026-06-07-daily-column-ai-delivery-accountability-hq-v2-opening.png",
-          "alt": "AI-assisted delivery handoff cards, assumption notes and review checkpoints for business teams",
-          "caption": "Saat alat memindahkan draft, analisis, dan delivery ke level individu, organisasi harus melihat ke mana tanggung jawab bergerak.",
+          "url": "https://altoslab-ai.cc/api/blog/generated-media/legacy-inline-repair-20260623-ai-delivery-accountability-opening-20260623.png",
+          "alt": "AI tools business unit accountability handoff review",
+          "caption": "Saat alat AI masuk ke unit bisnis, kepemilikan delivery harus digambar ulang.",
           "source": "generated",
           "credit": "ALTOS LAB editorial visual",
-          "aspectRatio": "wide",
-          "placement": "after-lead",
-          "provider": "OpenAI/GPT + ALTOS LAB high-resolution render",
-          "prompt": "OpenAI/GPT visual direction refined into a high-resolution ALTOS LAB editorial render for AI-assisted delivery handoffs: blank handoff cards, assumption markers and review checkpoints, no text, no logos, no people, no fake UI, 16:9, 2400x1350.",
-          "generatedAt": "2026-06-07T03:00:33.737Z",
-          "visualChecks": {
-            "topicFit": true,
-            "noTextArtifacts": true,
-            "noLogos": true,
-            "noPeople": true,
-            "noTrademarkRisk": true,
-            "noGenericStockLook": true,
-            "noFakeUI": true,
-            "noBluePurpleAbstract": true,
-            "highResolution": true,
-            "noBlur": true,
-            "checkedBy": "main-brain",
-            "checkedAt": "2026-06-07T03:00:33.737Z"
-          }
+          "aspectRatio": "16:9",
+          "placement": "opening",
+          "provider": "codex-imagegen",
+          "prompt": "AI tools entering business units with delivery ownership, approval checkpoints and accountability handoff; opening evidence image",
+          "generatedAt": "2026-06-23T15:46:03.308Z",
+          "visualChecks": [
+            "topic anchored",
+            "not generic AI",
+            "rendered media uploaded"
+          ]
         },
         {
-          "url": "https://altoslab-ai.cc/api/blog/generated-media/browser-gemini-gpt-2026-06-07-daily-column-ai-delivery-accountability-hq-v2-mechanism.png",
-          "alt": "Review checkpoints and risk tiers for AI-assisted business delivery",
-          "caption": "Tidak semua output perlu review yang sama; desain terpenting ada pada checkpoint untuk keputusan berdampak tinggi.",
+          "url": "https://altoslab-ai.cc/api/blog/generated-media/legacy-inline-repair-20260623-ai-delivery-accountability-mechanism-20260623.png",
+          "alt": "AI tools business unit accountability handoff review",
+          "caption": "Titik kendali utama adalah siapa yang meninjau, menyetujui, dan bertanggung jawab atas keluaran yang berdampak pada pelanggan.",
           "source": "generated",
           "credit": "ALTOS LAB editorial visual",
-          "aspectRatio": "wide",
-          "placement": "mid-article",
-          "provider": "OpenAI/GPT + ALTOS LAB high-resolution render",
-          "prompt": "OpenAI/GPT visual direction refined into a high-resolution ALTOS LAB editorial render for AI work risk tiers and accountability checkpoints: low/medium/high impact cards, checks and fallback path, no text, no logos, no people, no fake UI, 16:9, 2400x1350.",
-          "generatedAt": "2026-06-07T03:00:33.737Z",
-          "visualChecks": {
-            "topicFit": true,
-            "noTextArtifacts": true,
-            "noLogos": true,
-            "noPeople": true,
-            "noTrademarkRisk": true,
-            "noGenericStockLook": true,
-            "noFakeUI": true,
-            "noBluePurpleAbstract": true,
-            "highResolution": true,
-            "noBlur": true,
-            "checkedBy": "main-brain",
-            "checkedAt": "2026-06-07T03:00:33.737Z"
-          }
+          "aspectRatio": "16:9",
+          "placement": "mechanism",
+          "provider": "codex-imagegen",
+          "prompt": "AI tools entering business units with delivery ownership, approval checkpoints and accountability handoff; mechanism image",
+          "generatedAt": "2026-06-23T15:46:03.308Z",
+          "visualChecks": [
+            "topic anchored",
+            "not generic AI",
+            "rendered media uploaded"
+          ]
         }
       ],
       "title": "Saat Alat AI Masuk ke Unit Bisnis, Perusahaan Perlu Menata Ulang Cara Kerja dan Tanggung Jawab",
@@ -978,7 +842,8 @@
         "seoGeoScore": 90,
         "antiSlopScore": 45,
         "notes": "Static Cloudflare rescue overlay from approved released column manifest after KV write quota was exhausted."
-      }
+      },
+      "coverPrompt": "AI tools entering business units with delivery ownership, approval checkpoints and accountability handoff"
     },
     {
       "language": "vi",
@@ -1037,18 +902,15 @@
       "aiDisclosure": "",
       "translationGroupId": "browser-gemini-gpt-2026-06-07-daily-column",
       "featured": false,
-      "cover": "https://altoslab-ai.cc/api/blog/generated-media/browser-gemini-gpt-2026-06-07-daily-column-ai-delivery-accountability-hq-v2-cover.png",
-      "coverAlt": "AI-assisted work delivery and accountability visual for an ALTOS LAB column",
+      "cover": "https://altoslab-ai.cc/api/blog/generated-media/legacy-cover-repair-20260623-ai-delivery-accountability-cover-20260623.png",
+      "coverAlt": "AI tools business unit accountability handoff review",
       "coverSource": "generated",
       "coverCredit": "ALTOS LAB editorial visual",
       "coverGeneration": {
-        "source": "generated",
-        "provider": "OpenAI/GPT + ALTOS LAB high-resolution render",
-        "prompt": "OpenAI/GPT visual direction refined into a high-resolution ALTOS LAB editorial render for a column about AI tools moving from individual productivity into business-unit delivery and accountability: crisp handoff cards, review checkpoints and decision ownership paths, no text, no logos, no people, no fake UI, 16:9, 2400x1350.",
-        "generatedAt": "2026-06-07T03:00:33.737Z",
-        "credit": "ALTOS LAB editorial visual",
-        "aspectRatio": "16:9",
-        "placement": "cover",
+        "provider": "codex-imagegen",
+        "prompt": "AI tools entering business units with delivery ownership, approval checkpoints and accountability handoff",
+        "status": "generated",
+        "generatedAt": "2026-06-23T15:46:03.308Z",
         "visualChecks": {
           "topicFit": true,
           "noTextArtifacts": true,
@@ -1056,69 +918,44 @@
           "noPeople": true,
           "noTrademarkRisk": true,
           "noGenericStockLook": true,
-          "noFakeUI": true,
-          "noBluePurpleAbstract": true,
-          "highResolution": true,
-          "noBlur": true,
-          "checkedBy": "main-brain",
-          "checkedAt": "2026-06-07T03:00:33.737Z"
-        },
-        "status": "generated",
-        "storedUrl": "https://altoslab-ai.cc/api/blog/generated-media/browser-gemini-gpt-2026-06-07-daily-column-ai-delivery-accountability-hq-v2-cover.png",
-        "repairNote": "Replaced low-resolution 1280x720 visual with crisp 2400x1350 shared editorial render."
+          "checkedBy": "codex",
+          "checkedAt": "2026-06-23T15:46:03.308Z"
+        }
       },
       "contentImages": [
         {
-          "url": "https://altoslab-ai.cc/api/blog/generated-media/browser-gemini-gpt-2026-06-07-daily-column-ai-delivery-accountability-hq-v2-opening.png",
-          "alt": "AI-assisted delivery handoff cards, assumption notes and review checkpoints for business teams",
-          "caption": "Khi công cụ đưa bản nháp, phân tích và delivery về phía cá nhân, tổ chức phải nhìn thấy trách nhiệm đang dịch chuyển như thế nào.",
+          "url": "https://altoslab-ai.cc/api/blog/generated-media/legacy-inline-repair-20260623-ai-delivery-accountability-opening-20260623.png",
+          "alt": "AI tools business unit accountability handoff review",
+          "caption": "Khi công cụ AI vào bộ phận kinh doanh, ranh giới trách nhiệm giao việc phải được vẽ lại.",
           "source": "generated",
           "credit": "ALTOS LAB editorial visual",
-          "aspectRatio": "wide",
-          "placement": "after-lead",
-          "provider": "OpenAI/GPT + ALTOS LAB high-resolution render",
-          "prompt": "OpenAI/GPT visual direction refined into a high-resolution ALTOS LAB editorial render for AI-assisted delivery handoffs: blank handoff cards, assumption markers and review checkpoints, no text, no logos, no people, no fake UI, 16:9, 2400x1350.",
-          "generatedAt": "2026-06-07T03:00:33.737Z",
-          "visualChecks": {
-            "topicFit": true,
-            "noTextArtifacts": true,
-            "noLogos": true,
-            "noPeople": true,
-            "noTrademarkRisk": true,
-            "noGenericStockLook": true,
-            "noFakeUI": true,
-            "noBluePurpleAbstract": true,
-            "highResolution": true,
-            "noBlur": true,
-            "checkedBy": "main-brain",
-            "checkedAt": "2026-06-07T03:00:33.737Z"
-          }
+          "aspectRatio": "16:9",
+          "placement": "opening",
+          "provider": "codex-imagegen",
+          "prompt": "AI tools entering business units with delivery ownership, approval checkpoints and accountability handoff; opening evidence image",
+          "generatedAt": "2026-06-23T15:46:03.308Z",
+          "visualChecks": [
+            "topic anchored",
+            "not generic AI",
+            "rendered media uploaded"
+          ]
         },
         {
-          "url": "https://altoslab-ai.cc/api/blog/generated-media/browser-gemini-gpt-2026-06-07-daily-column-ai-delivery-accountability-hq-v2-mechanism.png",
-          "alt": "Review checkpoints and risk tiers for AI-assisted business delivery",
-          "caption": "Không phải đầu ra nào cũng cần kiểm tra giống nhau; phần cần thiết kế kỹ là checkpoint cho quyết định tác động cao.",
+          "url": "https://altoslab-ai.cc/api/blog/generated-media/legacy-inline-repair-20260623-ai-delivery-accountability-mechanism-20260623.png",
+          "alt": "AI tools business unit accountability handoff review",
+          "caption": "Điểm kiểm soát thật là ai xem lại, ai phê duyệt, và ai chịu trách nhiệm với đầu ra ảnh hưởng khách hàng.",
           "source": "generated",
           "credit": "ALTOS LAB editorial visual",
-          "aspectRatio": "wide",
-          "placement": "mid-article",
-          "provider": "OpenAI/GPT + ALTOS LAB high-resolution render",
-          "prompt": "OpenAI/GPT visual direction refined into a high-resolution ALTOS LAB editorial render for AI work risk tiers and accountability checkpoints: low/medium/high impact cards, checks and fallback path, no text, no logos, no people, no fake UI, 16:9, 2400x1350.",
-          "generatedAt": "2026-06-07T03:00:33.737Z",
-          "visualChecks": {
-            "topicFit": true,
-            "noTextArtifacts": true,
-            "noLogos": true,
-            "noPeople": true,
-            "noTrademarkRisk": true,
-            "noGenericStockLook": true,
-            "noFakeUI": true,
-            "noBluePurpleAbstract": true,
-            "highResolution": true,
-            "noBlur": true,
-            "checkedBy": "main-brain",
-            "checkedAt": "2026-06-07T03:00:33.737Z"
-          }
+          "aspectRatio": "16:9",
+          "placement": "mechanism",
+          "provider": "codex-imagegen",
+          "prompt": "AI tools entering business units with delivery ownership, approval checkpoints and accountability handoff; mechanism image",
+          "generatedAt": "2026-06-23T15:46:03.308Z",
+          "visualChecks": [
+            "topic anchored",
+            "not generic AI",
+            "rendered media uploaded"
+          ]
         }
       ],
       "title": "Khi công cụ AI đi vào các bộ phận kinh doanh, doanh nghiệp phải thiết kế lại trách nhiệm giao việc",
@@ -1174,7 +1011,8 @@
         "seoGeoScore": 90,
         "antiSlopScore": 45,
         "notes": "Static Cloudflare rescue overlay from approved released column manifest after KV write quota was exhausted."
-      }
+      },
+      "coverPrompt": "AI tools entering business units with delivery ownership, approval checkpoints and accountability handoff"
     },
     {
       "language": "th",
@@ -1233,18 +1071,15 @@
       "aiDisclosure": "",
       "translationGroupId": "browser-gemini-gpt-2026-06-07-daily-column",
       "featured": false,
-      "cover": "https://altoslab-ai.cc/api/blog/generated-media/browser-gemini-gpt-2026-06-07-daily-column-ai-delivery-accountability-hq-v2-cover.png",
-      "coverAlt": "AI-assisted work delivery and accountability visual for an ALTOS LAB column",
+      "cover": "https://altoslab-ai.cc/api/blog/generated-media/legacy-cover-repair-20260623-ai-delivery-accountability-cover-20260623.png",
+      "coverAlt": "AI tools business unit accountability handoff review",
       "coverSource": "generated",
       "coverCredit": "ALTOS LAB editorial visual",
       "coverGeneration": {
-        "source": "generated",
-        "provider": "OpenAI/GPT + ALTOS LAB high-resolution render",
-        "prompt": "OpenAI/GPT visual direction refined into a high-resolution ALTOS LAB editorial render for a column about AI tools moving from individual productivity into business-unit delivery and accountability: crisp handoff cards, review checkpoints and decision ownership paths, no text, no logos, no people, no fake UI, 16:9, 2400x1350.",
-        "generatedAt": "2026-06-07T03:00:33.737Z",
-        "credit": "ALTOS LAB editorial visual",
-        "aspectRatio": "16:9",
-        "placement": "cover",
+        "provider": "codex-imagegen",
+        "prompt": "AI tools entering business units with delivery ownership, approval checkpoints and accountability handoff",
+        "status": "generated",
+        "generatedAt": "2026-06-23T15:46:03.308Z",
         "visualChecks": {
           "topicFit": true,
           "noTextArtifacts": true,
@@ -1252,69 +1087,44 @@
           "noPeople": true,
           "noTrademarkRisk": true,
           "noGenericStockLook": true,
-          "noFakeUI": true,
-          "noBluePurpleAbstract": true,
-          "highResolution": true,
-          "noBlur": true,
-          "checkedBy": "main-brain",
-          "checkedAt": "2026-06-07T03:00:33.737Z"
-        },
-        "status": "generated",
-        "storedUrl": "https://altoslab-ai.cc/api/blog/generated-media/browser-gemini-gpt-2026-06-07-daily-column-ai-delivery-accountability-hq-v2-cover.png",
-        "repairNote": "Replaced low-resolution 1280x720 visual with crisp 2400x1350 shared editorial render."
+          "checkedBy": "codex",
+          "checkedAt": "2026-06-23T15:46:03.308Z"
+        }
       },
       "contentImages": [
         {
-          "url": "https://altoslab-ai.cc/api/blog/generated-media/browser-gemini-gpt-2026-06-07-daily-column-ai-delivery-accountability-hq-v2-opening.png",
-          "alt": "AI-assisted delivery handoff cards, assumption notes and review checkpoints for business teams",
-          "caption": "เมื่อเครื่องมือย้าย draft, analysis และ delivery ไปอยู่ที่แต่ละคน องค์กรต้องเห็นว่าความรับผิดชอบกำลังย้ายไปไหน",
+          "url": "https://altoslab-ai.cc/api/blog/generated-media/legacy-inline-repair-20260623-ai-delivery-accountability-opening-20260623.png",
+          "alt": "AI tools business unit accountability handoff review",
+          "caption": "เมื่อ AI เข้าไปอยู่ในทีมธุรกิจ ต้องวาดเส้นความรับผิดชอบของงานใหม่",
           "source": "generated",
           "credit": "ALTOS LAB editorial visual",
-          "aspectRatio": "wide",
-          "placement": "after-lead",
-          "provider": "OpenAI/GPT + ALTOS LAB high-resolution render",
-          "prompt": "OpenAI/GPT visual direction refined into a high-resolution ALTOS LAB editorial render for AI-assisted delivery handoffs: blank handoff cards, assumption markers and review checkpoints, no text, no logos, no people, no fake UI, 16:9, 2400x1350.",
-          "generatedAt": "2026-06-07T03:00:33.737Z",
-          "visualChecks": {
-            "topicFit": true,
-            "noTextArtifacts": true,
-            "noLogos": true,
-            "noPeople": true,
-            "noTrademarkRisk": true,
-            "noGenericStockLook": true,
-            "noFakeUI": true,
-            "noBluePurpleAbstract": true,
-            "highResolution": true,
-            "noBlur": true,
-            "checkedBy": "main-brain",
-            "checkedAt": "2026-06-07T03:00:33.737Z"
-          }
+          "aspectRatio": "16:9",
+          "placement": "opening",
+          "provider": "codex-imagegen",
+          "prompt": "AI tools entering business units with delivery ownership, approval checkpoints and accountability handoff; opening evidence image",
+          "generatedAt": "2026-06-23T15:46:03.308Z",
+          "visualChecks": [
+            "topic anchored",
+            "not generic AI",
+            "rendered media uploaded"
+          ]
         },
         {
-          "url": "https://altoslab-ai.cc/api/blog/generated-media/browser-gemini-gpt-2026-06-07-daily-column-ai-delivery-accountability-hq-v2-mechanism.png",
-          "alt": "Review checkpoints and risk tiers for AI-assisted business delivery",
-          "caption": "ไม่ใช่ทุก output ต้อง review แบบเดียวกัน จุดสำคัญคือ checkpoint สำหรับการตัดสินใจที่มีผลกระทบสูง",
+          "url": "https://altoslab-ai.cc/api/blog/generated-media/legacy-inline-repair-20260623-ai-delivery-accountability-mechanism-20260623.png",
+          "alt": "AI tools business unit accountability handoff review",
+          "caption": "จุดควบคุมจริงคือใครตรวจ ใครอนุมัติ และใครรับผิดชอบผลลัพธ์ที่กระทบลูกค้า",
           "source": "generated",
           "credit": "ALTOS LAB editorial visual",
-          "aspectRatio": "wide",
-          "placement": "mid-article",
-          "provider": "OpenAI/GPT + ALTOS LAB high-resolution render",
-          "prompt": "OpenAI/GPT visual direction refined into a high-resolution ALTOS LAB editorial render for AI work risk tiers and accountability checkpoints: low/medium/high impact cards, checks and fallback path, no text, no logos, no people, no fake UI, 16:9, 2400x1350.",
-          "generatedAt": "2026-06-07T03:00:33.737Z",
-          "visualChecks": {
-            "topicFit": true,
-            "noTextArtifacts": true,
-            "noLogos": true,
-            "noPeople": true,
-            "noTrademarkRisk": true,
-            "noGenericStockLook": true,
-            "noFakeUI": true,
-            "noBluePurpleAbstract": true,
-            "highResolution": true,
-            "noBlur": true,
-            "checkedBy": "main-brain",
-            "checkedAt": "2026-06-07T03:00:33.737Z"
-          }
+          "aspectRatio": "16:9",
+          "placement": "mechanism",
+          "provider": "codex-imagegen",
+          "prompt": "AI tools entering business units with delivery ownership, approval checkpoints and accountability handoff; mechanism image",
+          "generatedAt": "2026-06-23T15:46:03.308Z",
+          "visualChecks": [
+            "topic anchored",
+            "not generic AI",
+            "rendered media uploaded"
+          ]
         }
       ],
       "title": "เมื่อเครื่องมือ AI เข้าไปอยู่ในทีมธุรกิจ บริษัทต้องออกแบบความรับผิดชอบของงานใหม่",
@@ -1370,7 +1180,8 @@
         "seoGeoScore": 90,
         "antiSlopScore": 45,
         "notes": "Static Cloudflare rescue overlay from approved released column manifest after KV write quota was exhausted."
-      }
+      },
+      "coverPrompt": "AI tools entering business units with delivery ownership, approval checkpoints and accountability handoff"
     },
     {
       "language": "ms",
@@ -1429,18 +1240,15 @@
       "aiDisclosure": "",
       "translationGroupId": "browser-gemini-gpt-2026-06-07-daily-column",
       "featured": false,
-      "cover": "https://altoslab-ai.cc/api/blog/generated-media/browser-gemini-gpt-2026-06-07-daily-column-ai-delivery-accountability-hq-v2-cover.png",
-      "coverAlt": "AI-assisted work delivery and accountability visual for an ALTOS LAB column",
+      "cover": "https://altoslab-ai.cc/api/blog/generated-media/legacy-cover-repair-20260623-ai-delivery-accountability-cover-20260623.png",
+      "coverAlt": "AI tools business unit accountability handoff review",
       "coverSource": "generated",
       "coverCredit": "ALTOS LAB editorial visual",
       "coverGeneration": {
-        "source": "generated",
-        "provider": "OpenAI/GPT + ALTOS LAB high-resolution render",
-        "prompt": "OpenAI/GPT visual direction refined into a high-resolution ALTOS LAB editorial render for a column about AI tools moving from individual productivity into business-unit delivery and accountability: crisp handoff cards, review checkpoints and decision ownership paths, no text, no logos, no people, no fake UI, 16:9, 2400x1350.",
-        "generatedAt": "2026-06-07T03:00:33.737Z",
-        "credit": "ALTOS LAB editorial visual",
-        "aspectRatio": "16:9",
-        "placement": "cover",
+        "provider": "codex-imagegen",
+        "prompt": "AI tools entering business units with delivery ownership, approval checkpoints and accountability handoff",
+        "status": "generated",
+        "generatedAt": "2026-06-23T15:46:03.308Z",
         "visualChecks": {
           "topicFit": true,
           "noTextArtifacts": true,
@@ -1448,69 +1256,44 @@
           "noPeople": true,
           "noTrademarkRisk": true,
           "noGenericStockLook": true,
-          "noFakeUI": true,
-          "noBluePurpleAbstract": true,
-          "highResolution": true,
-          "noBlur": true,
-          "checkedBy": "main-brain",
-          "checkedAt": "2026-06-07T03:00:33.737Z"
-        },
-        "status": "generated",
-        "storedUrl": "https://altoslab-ai.cc/api/blog/generated-media/browser-gemini-gpt-2026-06-07-daily-column-ai-delivery-accountability-hq-v2-cover.png",
-        "repairNote": "Replaced low-resolution 1280x720 visual with crisp 2400x1350 shared editorial render."
+          "checkedBy": "codex",
+          "checkedAt": "2026-06-23T15:46:03.308Z"
+        }
       },
       "contentImages": [
         {
-          "url": "https://altoslab-ai.cc/api/blog/generated-media/browser-gemini-gpt-2026-06-07-daily-column-ai-delivery-accountability-hq-v2-opening.png",
-          "alt": "AI-assisted delivery handoff cards, assumption notes and review checkpoints for business teams",
-          "caption": "Apabila alat memindahkan draf, analisis dan delivery ke peringkat individu, organisasi perlu melihat bagaimana tanggungjawab bergerak.",
+          "url": "https://altoslab-ai.cc/api/blog/generated-media/legacy-inline-repair-20260623-ai-delivery-accountability-opening-20260623.png",
+          "alt": "AI tools business unit accountability handoff review",
+          "caption": "Apabila alat AI masuk ke unit bisnes, pemilikan kerja mesti dilukis semula.",
           "source": "generated",
           "credit": "ALTOS LAB editorial visual",
-          "aspectRatio": "wide",
-          "placement": "after-lead",
-          "provider": "OpenAI/GPT + ALTOS LAB high-resolution render",
-          "prompt": "OpenAI/GPT visual direction refined into a high-resolution ALTOS LAB editorial render for AI-assisted delivery handoffs: blank handoff cards, assumption markers and review checkpoints, no text, no logos, no people, no fake UI, 16:9, 2400x1350.",
-          "generatedAt": "2026-06-07T03:00:33.737Z",
-          "visualChecks": {
-            "topicFit": true,
-            "noTextArtifacts": true,
-            "noLogos": true,
-            "noPeople": true,
-            "noTrademarkRisk": true,
-            "noGenericStockLook": true,
-            "noFakeUI": true,
-            "noBluePurpleAbstract": true,
-            "highResolution": true,
-            "noBlur": true,
-            "checkedBy": "main-brain",
-            "checkedAt": "2026-06-07T03:00:33.737Z"
-          }
+          "aspectRatio": "16:9",
+          "placement": "opening",
+          "provider": "codex-imagegen",
+          "prompt": "AI tools entering business units with delivery ownership, approval checkpoints and accountability handoff; opening evidence image",
+          "generatedAt": "2026-06-23T15:46:03.308Z",
+          "visualChecks": [
+            "topic anchored",
+            "not generic AI",
+            "rendered media uploaded"
+          ]
         },
         {
-          "url": "https://altoslab-ai.cc/api/blog/generated-media/browser-gemini-gpt-2026-06-07-daily-column-ai-delivery-accountability-hq-v2-mechanism.png",
-          "alt": "Review checkpoints and risk tiers for AI-assisted business delivery",
-          "caption": "Tidak semua output perlukan review yang sama; reka bentuk terpenting ialah checkpoint untuk keputusan berimpak tinggi.",
+          "url": "https://altoslab-ai.cc/api/blog/generated-media/legacy-inline-repair-20260623-ai-delivery-accountability-mechanism-20260623.png",
+          "alt": "AI tools business unit accountability handoff review",
+          "caption": "Titik kawalan sebenar ialah siapa menyemak, meluluskan dan memegang tanggungjawab output yang menjejaskan pelanggan.",
           "source": "generated",
           "credit": "ALTOS LAB editorial visual",
-          "aspectRatio": "wide",
-          "placement": "mid-article",
-          "provider": "OpenAI/GPT + ALTOS LAB high-resolution render",
-          "prompt": "OpenAI/GPT visual direction refined into a high-resolution ALTOS LAB editorial render for AI work risk tiers and accountability checkpoints: low/medium/high impact cards, checks and fallback path, no text, no logos, no people, no fake UI, 16:9, 2400x1350.",
-          "generatedAt": "2026-06-07T03:00:33.737Z",
-          "visualChecks": {
-            "topicFit": true,
-            "noTextArtifacts": true,
-            "noLogos": true,
-            "noPeople": true,
-            "noTrademarkRisk": true,
-            "noGenericStockLook": true,
-            "noFakeUI": true,
-            "noBluePurpleAbstract": true,
-            "highResolution": true,
-            "noBlur": true,
-            "checkedBy": "main-brain",
-            "checkedAt": "2026-06-07T03:00:33.737Z"
-          }
+          "aspectRatio": "16:9",
+          "placement": "mechanism",
+          "provider": "codex-imagegen",
+          "prompt": "AI tools entering business units with delivery ownership, approval checkpoints and accountability handoff; mechanism image",
+          "generatedAt": "2026-06-23T15:46:03.308Z",
+          "visualChecks": [
+            "topic anchored",
+            "not generic AI",
+            "rendered media uploaded"
+          ]
         }
       ],
       "title": "Apabila Alat AI Masuk ke Unit Bisnes, Syarikat Perlu Reka Semula Tanggungjawab Kerja",
@@ -1566,7 +1349,8 @@
         "seoGeoScore": 90,
         "antiSlopScore": 45,
         "notes": "Static Cloudflare rescue overlay from approved released column manifest after KV write quota was exhausted."
-      }
+      },
+      "coverPrompt": "AI tools entering business units with delivery ownership, approval checkpoints and accountability handoff"
     },
     {
       "language": "fil",
@@ -1625,18 +1409,15 @@
       "aiDisclosure": "",
       "translationGroupId": "browser-gemini-gpt-2026-06-07-daily-column",
       "featured": false,
-      "cover": "https://altoslab-ai.cc/api/blog/generated-media/browser-gemini-gpt-2026-06-07-daily-column-ai-delivery-accountability-hq-v2-cover.png",
-      "coverAlt": "AI-assisted work delivery and accountability visual for an ALTOS LAB column",
+      "cover": "https://altoslab-ai.cc/api/blog/generated-media/legacy-cover-repair-20260623-ai-delivery-accountability-cover-20260623.png",
+      "coverAlt": "AI tools business unit accountability handoff review",
       "coverSource": "generated",
       "coverCredit": "ALTOS LAB editorial visual",
       "coverGeneration": {
-        "source": "generated",
-        "provider": "OpenAI/GPT + ALTOS LAB high-resolution render",
-        "prompt": "OpenAI/GPT visual direction refined into a high-resolution ALTOS LAB editorial render for a column about AI tools moving from individual productivity into business-unit delivery and accountability: crisp handoff cards, review checkpoints and decision ownership paths, no text, no logos, no people, no fake UI, 16:9, 2400x1350.",
-        "generatedAt": "2026-06-07T03:00:33.737Z",
-        "credit": "ALTOS LAB editorial visual",
-        "aspectRatio": "16:9",
-        "placement": "cover",
+        "provider": "codex-imagegen",
+        "prompt": "AI tools entering business units with delivery ownership, approval checkpoints and accountability handoff",
+        "status": "generated",
+        "generatedAt": "2026-06-23T15:46:03.308Z",
         "visualChecks": {
           "topicFit": true,
           "noTextArtifacts": true,
@@ -1644,69 +1425,44 @@
           "noPeople": true,
           "noTrademarkRisk": true,
           "noGenericStockLook": true,
-          "noFakeUI": true,
-          "noBluePurpleAbstract": true,
-          "highResolution": true,
-          "noBlur": true,
-          "checkedBy": "main-brain",
-          "checkedAt": "2026-06-07T03:00:33.737Z"
-        },
-        "status": "generated",
-        "storedUrl": "https://altoslab-ai.cc/api/blog/generated-media/browser-gemini-gpt-2026-06-07-daily-column-ai-delivery-accountability-hq-v2-cover.png",
-        "repairNote": "Replaced low-resolution 1280x720 visual with crisp 2400x1350 shared editorial render."
+          "checkedBy": "codex",
+          "checkedAt": "2026-06-23T15:46:03.308Z"
+        }
       },
       "contentImages": [
         {
-          "url": "https://altoslab-ai.cc/api/blog/generated-media/browser-gemini-gpt-2026-06-07-daily-column-ai-delivery-accountability-hq-v2-opening.png",
-          "alt": "AI-assisted delivery handoff cards, assumption notes and review checkpoints for business teams",
-          "caption": "Kapag inilipat ng tools ang drafts, analysis, at delivery sa individual edge, kailangang makita ng organisasyon kung saan lumilipat ang pananagutan.",
+          "url": "https://altoslab-ai.cc/api/blog/generated-media/legacy-inline-repair-20260623-ai-delivery-accountability-opening-20260623.png",
+          "alt": "AI tools business unit accountability handoff review",
+          "caption": "Kapag pumasok ang AI tools sa business units, kailangang iguhit muli ang delivery ownership.",
           "source": "generated",
           "credit": "ALTOS LAB editorial visual",
-          "aspectRatio": "wide",
-          "placement": "after-lead",
-          "provider": "OpenAI/GPT + ALTOS LAB high-resolution render",
-          "prompt": "OpenAI/GPT visual direction refined into a high-resolution ALTOS LAB editorial render for AI-assisted delivery handoffs: blank handoff cards, assumption markers and review checkpoints, no text, no logos, no people, no fake UI, 16:9, 2400x1350.",
-          "generatedAt": "2026-06-07T03:00:33.737Z",
-          "visualChecks": {
-            "topicFit": true,
-            "noTextArtifacts": true,
-            "noLogos": true,
-            "noPeople": true,
-            "noTrademarkRisk": true,
-            "noGenericStockLook": true,
-            "noFakeUI": true,
-            "noBluePurpleAbstract": true,
-            "highResolution": true,
-            "noBlur": true,
-            "checkedBy": "main-brain",
-            "checkedAt": "2026-06-07T03:00:33.737Z"
-          }
+          "aspectRatio": "16:9",
+          "placement": "opening",
+          "provider": "codex-imagegen",
+          "prompt": "AI tools entering business units with delivery ownership, approval checkpoints and accountability handoff; opening evidence image",
+          "generatedAt": "2026-06-23T15:46:03.308Z",
+          "visualChecks": [
+            "topic anchored",
+            "not generic AI",
+            "rendered media uploaded"
+          ]
         },
         {
-          "url": "https://altoslab-ai.cc/api/blog/generated-media/browser-gemini-gpt-2026-06-07-daily-column-ai-delivery-accountability-hq-v2-mechanism.png",
-          "alt": "Review checkpoints and risk tiers for AI-assisted business delivery",
-          "caption": "Hindi lahat ng output kailangan parehong review; ang mahalaga ay checkpoints para sa high-impact decisions.",
+          "url": "https://altoslab-ai.cc/api/blog/generated-media/legacy-inline-repair-20260623-ai-delivery-accountability-mechanism-20260623.png",
+          "alt": "AI tools business unit accountability handoff review",
+          "caption": "Ang tunay na control point ay kung sino ang reviewer, approver, at may pananagutan sa output na may customer impact.",
           "source": "generated",
           "credit": "ALTOS LAB editorial visual",
-          "aspectRatio": "wide",
-          "placement": "mid-article",
-          "provider": "OpenAI/GPT + ALTOS LAB high-resolution render",
-          "prompt": "OpenAI/GPT visual direction refined into a high-resolution ALTOS LAB editorial render for AI work risk tiers and accountability checkpoints: low/medium/high impact cards, checks and fallback path, no text, no logos, no people, no fake UI, 16:9, 2400x1350.",
-          "generatedAt": "2026-06-07T03:00:33.737Z",
-          "visualChecks": {
-            "topicFit": true,
-            "noTextArtifacts": true,
-            "noLogos": true,
-            "noPeople": true,
-            "noTrademarkRisk": true,
-            "noGenericStockLook": true,
-            "noFakeUI": true,
-            "noBluePurpleAbstract": true,
-            "highResolution": true,
-            "noBlur": true,
-            "checkedBy": "main-brain",
-            "checkedAt": "2026-06-07T03:00:33.737Z"
-          }
+          "aspectRatio": "16:9",
+          "placement": "mechanism",
+          "provider": "codex-imagegen",
+          "prompt": "AI tools entering business units with delivery ownership, approval checkpoints and accountability handoff; mechanism image",
+          "generatedAt": "2026-06-23T15:46:03.308Z",
+          "visualChecks": [
+            "topic anchored",
+            "not generic AI",
+            "rendered media uploaded"
+          ]
         }
       ],
       "title": "Kapag Pumasok ang AI Tools sa Business Units, Kailangang Baguhin ang Pananagutan sa Trabaho",
@@ -1762,7 +1518,8 @@
         "seoGeoScore": 90,
         "antiSlopScore": 45,
         "notes": "Static Cloudflare rescue overlay from approved released column manifest after KV write quota was exhausted."
-      }
+      },
+      "coverPrompt": "AI tools entering business units with delivery ownership, approval checkpoints and accountability handoff"
     },
     {
       "language": "zh-Hant",

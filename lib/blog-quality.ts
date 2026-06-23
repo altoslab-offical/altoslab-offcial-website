@@ -192,6 +192,24 @@ const genericLeadPatterns = [
   /(不再只是|不只是|不是.*而是|not just|not only)/i
 ];
 
+function localizedCaptionIssue(language: BlogLanguage, caption?: string) {
+  const text = String(caption || "").trim();
+  if (!text || language === "en") return "";
+  const latinWords = text.match(/\b[A-Za-z]{4,}\b/g) || [];
+  if (latinWords.length < 5) return "";
+  const hasLocalScript =
+    language === "zh-Hant"
+      ? /[\u4e00-\u9fff]/.test(text)
+      : language === "ja"
+        ? /[\u3040-\u30ff\u4e00-\u9fff]/.test(text)
+        : language === "ko"
+          ? /[\uac00-\ud7af]/.test(text)
+          : language === "th"
+            ? /[\u0e00-\u0e7f]/.test(text)
+            : true;
+  return hasLocalScript ? "" : "content image caption must be localized for the article language";
+}
+
 function configuredSiteHosts() {
   const hosts = [
     process.env.NEXT_PUBLIC_SITE_URL,
@@ -1384,6 +1402,8 @@ export function reviewImageFit(post: BlogPost): ReviewResult {
       if (!isPublicImageUrl(image.url)) issues.push(`${label} must use a public image URL`);
       if (!image.alt || image.alt.trim().length < 18) issues.push(`${label} alt text is too thin`);
       if (!image.caption?.trim() && !image.credit?.trim()) warnings.push(`${label} should include a caption or visible credit`);
+      const captionIssue = localizedCaptionIssue(post.language, image.caption);
+      if (captionIssue) issues.push(`${label} ${captionIssue}`);
       if (image.source === "generated") {
         issues.push(...generatedImageChecksIssues(image, label));
         const context = `${image.alt || ""} ${image.caption || ""} ${image.prompt || ""}`.toLowerCase();

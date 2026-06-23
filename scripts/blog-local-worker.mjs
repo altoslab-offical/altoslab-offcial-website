@@ -482,6 +482,24 @@ function generatedContentImageIssues(image, label) {
   return issues;
 }
 
+function localizedCaptionIssue(language, caption = "") {
+  const text = String(caption || "").trim();
+  if (!text || language === "en") return "";
+  const latinWords = text.match(/\b[A-Za-z]{4,}\b/g) || [];
+  if (latinWords.length < 5) return "";
+  const hasLocalScript =
+    language === "zh-Hant"
+      ? /[\u4e00-\u9fff]/.test(text)
+      : language === "ja"
+        ? /[\u3040-\u30ff\u4e00-\u9fff]/.test(text)
+        : language === "ko"
+          ? /[\uac00-\ud7af]/.test(text)
+          : language === "th"
+            ? /[\u0e00-\u0e7f]/.test(text)
+            : true;
+  return hasLocalScript ? "" : "content image caption must be localized for the article language";
+}
+
 function chromeProfileEmail(evidence) {
   return String(evidence?.profileEmail || evidence?.chromeProfileEmail || evidence?.accountEmail || evidence?.email || "")
     .trim()
@@ -631,6 +649,8 @@ function localPreflight(payload) {
         const label = `${post.language || "unknown"} contentImages[${index}]`;
         if (!image.localPath && !isAllowedCoverUrl(image.url)) issues.push(`${label} must include a public https URL or a localPath ready for media upload`);
         if (!image.alt || image.alt.length < 18) issues.push(`${label}.alt is missing or too thin`);
+        const captionIssue = localizedCaptionIssue(post.language, image.caption);
+        if (captionIssue) issues.push(`${label} ${captionIssue}`);
         if (image.source !== "generated") issues.push(`${label}.source must be generated for columns/features`);
         issues.push(...generatedContentImageIssues(image, label));
       }

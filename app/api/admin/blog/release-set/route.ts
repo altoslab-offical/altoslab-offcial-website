@@ -2,6 +2,7 @@ import { createHash } from "crypto";
 import { NextResponse } from "next/server";
 import { normalizeBlogAuthor, publicEditorialReviewNote } from "@/lib/blog-authors";
 import { verifyBlogIngestRequest } from "@/lib/blog-ingest-auth";
+import { generatedMediaReachabilityIssues } from "@/lib/blog-image-reachability";
 import { multilingualCoverConsistencyIssues } from "@/lib/blog-image-quality";
 import { reviewBlogPairForAutoPublish } from "@/lib/blog-quality";
 import { BLOG_LANGUAGES, defaultQualityChecks, taiwanDate } from "@/lib/blog-utils";
@@ -535,6 +536,9 @@ export async function POST(request: Request) {
     inputIssues.push("generation.provider must be gemini-chatgpt, source-translation, local-antigravity, local, hermes-owner, codex-gpt-5.4, or codex-gpt-5.4-subagent");
   }
   inputIssues.push(...releaseManifestIssues(payload));
+  if (!inputIssues.length && Array.isArray(payload.posts)) {
+    inputIssues.push(...(await generatedMediaReachabilityIssues(payload.posts)));
+  }
   if (inputIssues.length || !slot || !Array.isArray(payload.posts)) {
     return json(400, { ok: false, ingestRunId, errors: inputIssues });
   }

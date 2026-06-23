@@ -1,7 +1,14 @@
 import { NextResponse } from "next/server";
 import { adminCookieName, getAdminSessionToken } from "@/lib/auth";
 import { verifyBlogIngestRequest } from "@/lib/blog-ingest-auth";
-import { mutateCmsData, normalizeBlogPostInput, publishValidationForBlogPost, refreshPublicBlogCacheFromStorage } from "@/lib/cms";
+import { generatedMediaReachabilityIssues } from "@/lib/blog-image-reachability";
+import {
+  mutateCmsData,
+  normalizeBlogPostInput,
+  publishValidationForBlogPost,
+  readCmsData,
+  refreshPublicBlogCacheFromStorage
+} from "@/lib/cms";
 import type { BlogPost } from "@/lib/types";
 
 type BlogPatch = {
@@ -37,6 +44,19 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, errors: ["patches must be a non-empty array"] }, { status: 400 });
   }
 
+  const imageIssuesById = new Map<string, string[]>();
+  const currentData = await readCmsData();
+  for (const item of patches) {
+    const id = item.id || "";
+    const patch = item.patch || {};
+    const existing = currentData.blogPosts.find((post) => post.id === id);
+    if (!existing) continue;
+    const next = normalizeBlogPostInput(patch, existing);
+    if (next.status !== "published") continue;
+    const issues = await generatedMediaReachabilityIssues([next]);
+    if (issues.length) imageIssuesById.set(id, issues);
+  }
+
   const result = await mutateCmsData((data) => {
     const updated: Array<{ id: string; language: string; slug: string; title: string }> = [];
     const failures: Array<{ id: string; reason: string }> = [];
@@ -47,6 +67,10 @@ export async function POST(request: Request) {
       const index = data.blogPosts.findIndex((post) => post.id === id);
       if (index === -1) {
         failures.push({ id, reason: "not found" });
+        continue;
+      }
+      if (imageIssuesById.has(id)) {
+        failures.push({ id, reason: imageIssuesById.get(id)?.join("; ") || "generated media reachability failed" });
         continue;
       }
 
