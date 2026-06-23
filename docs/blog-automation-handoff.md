@@ -65,6 +65,8 @@
 - Hermes/OpenClaw Codex lane 必須把 `codexEvidence.provider/runtime/model/reasoning` 寫進 manifest；不要為了通過 legacy doctor 偽造 Gemini/ChatGPT Chrome evidence。若 release verifier 看到 internal copy，例如 `SEO/GEO`，要修公開文案後重新 release/readback。
 - Market-news 不再接受 ALTOS LAB fallback cover 通過 production gate；舊 fallback/generated 快訊需要回補來源圖，不能用 copy gate 繞過 image/source evidence。
 - 破圖修復不能等同於圖片品質修復。若 generated-media object 遺失，短期只允許用穩定 fallback 或恢復原始/source-safe 圖止血；不要用本地 SVG/抽象流程板硬補正式 cover。正式 column/feature cover 必須走 ChatGPT/GPT raster lane 或可授權來源圖，prompt 要指定具體主體、構圖、鏡頭/版式、材質光線、色彩與負面約束；拒絕抽象節點板、workflow card、glass cube、假 dashboard、generic network map、過度 3D SaaS 感與一眼 AI 圖。
+- generated-media 的 public filename 也是 QA surface。若 Chrome extension 回 `ERR_BLOCKED_BY_CLIENT`，代表檔名或 URL 可能被 client blocker 擋，不可只看 `curl 200`；要複製成中性檔名、用 admin bulk-patch 更新 CMS、多語同步修正、refresh public projection，必要時 force ECS new deployment 清掉 process memory cache，最後用 Chrome rendered DOM 驗 `bad=[]`、`cardsUsingEditorialVisual=0`、`mediaUnique` 符合預期。
+- Related card 圖片去重必須用標準化 public URL，比對相對與絕對 URL 為同一張圖；`/api/blog/generated-media/x.png` 和 `https://altoslab-ai.cc/api/blog/generated-media/x.png` 不可被當成不同 cover。
 - AWS deploy 使用唯一 ECR image tag 作為 production evidence；不要依賴脆弱的 `latest` tag shell interpolation。部署後以 ECS task definition、service stable、`verify:aws` 和 production performance smoke 作為完成證據。
 - 候選稿品質不合格時，流程是 repair/rewrite/re-image/re-QA 到 validate-only pass，再 publish + public readback；不是 skip，也不是把 `wouldPublish=true` 當成已發布。
 - 已發布文章的 copy refresh 走 `scripts/blog-copy-refresh.mjs`，可用 `ALTOS_ADMIN_SESSION_TOKEN` / `ADMIN_SESSION_TOKEN` 或 admin password。若本機 admin credential stale，先確認是否 source 了 `~/.altoslab-aws.env`；若仍 stale，這是 tooling/auth blocker，不可猜密碼、不可改用 direct storage write。
