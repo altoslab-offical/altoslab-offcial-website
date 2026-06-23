@@ -160,6 +160,17 @@ const weakSectionHeadingPatterns = [
   /^(scope muna|saan unang ilalagay ang .+|basa ng ALTOS LAB|susunod na dapat bantayan|karaniwang maling basa|gawin ngayon)$/i
 ];
 
+const recycledColumnHeadingPatterns = [
+  /^(先守住這三個控制點|先從一條真實工作流開始|先拿一個場景演練|ALTOS LAB 現場筆記|來源怎麼進入決策|把判斷放進四格矩陣|接下來要看哪個訊號|本週先做一件事)$/i,
+  /^(three control points|start with one real workflow|run one scenario first|source into decision|four-box decision matrix|what signal to watch next|do one thing this week)$/i,
+  /^(decision framework|implementation checklist|operator checklist|what to watch next|field note|lab note)$/i
+];
+
+const genericRepairCaptionPattern =
+  /(第一張圖把主題拉回|第二張圖呈現|opening image|mechanism image|operating tension visible|decision can be checked|editorial visual$|把主題拉回實際營運證據|讓這個決策可以被檢查)/i;
+
+const legacyRepairMediaPattern = /\/api\/blog\/generated-media\/legacy-(?:cover|inline)-repair/i;
+
 const subtitleEvidencePattern =
   /(OpenAI|Anthropic|Google|DeepMind|Hugging Face|IBM|Microsoft|NVIDIA|Vercel|TechCrunch|The Verge|WIRED|VentureBeat|MIT Technology Review|Reuters|Bloomberg|AI Magazine|Search Console|ChatGPT|Claude|Gemini|Perplexity|Codex|AI Mode|AI Factories|Gartner|Osmos|Fabric|Maia|Kubernetes|KubeCon|GPU|官方|報導|來源|案例|發布|launch|released|published|case|report|source|workflow|rollback|trace|eval|審核|回滾|來源|試點|採購|導入|ワークフロー|出典|検証|롤백|출처|검토)/i;
 
@@ -329,6 +340,25 @@ function generatedImageChecksIssues(image: BlogInlineImage, label: string) {
   if (!image.generatedAt?.trim()) issues.push(`${label} requires generatedAt metadata`);
   if (!image.credit?.trim()) issues.push(`${label} requires visible editorial credit`);
   const checks = image.visualChecks;
+  if (!checks) {
+    issues.push(`${label} requires visualChecks from image QA`);
+  } else {
+    for (const field of ["topicFit", "noTextArtifacts", "noLogos", "noPeople", "noTrademarkRisk", "noGenericStockLook"] as const) {
+      if (checks[field] !== true) issues.push(`${label} visualChecks.${field} must be true`);
+    }
+  }
+  return issues;
+}
+
+function generatedCoverChecksIssues(post: BlogPost, label: string) {
+  const issues: string[] = [];
+  const generation = post.coverGeneration;
+  if (!/(chatgpt|gpt|openai|codex)/i.test(generation?.provider || "")) {
+    issues.push(`${label} must be generated through ChatGPT/GPT`);
+  }
+  if (!generation?.prompt?.trim()) issues.push(`${label} requires the stored image prompt`);
+  if (!generation?.generatedAt?.trim()) issues.push(`${label} requires generatedAt metadata`);
+  const checks = generation?.visualChecks;
   if (!checks) {
     issues.push(`${label} requires visualChecks from image QA`);
   } else {
@@ -703,6 +733,12 @@ function minimumBodyLength(contentType: BlogContentType, language: BlogLanguage)
   return latinLanguage ? 620 : 900;
 }
 
+function knowledgeDenseColumnMinimum(language: BlogLanguage) {
+  if (["en", "id", "vi", "ms", "fil"].includes(language)) return 900;
+  if (language === "th") return 1300;
+  return 1600;
+}
+
 function markdownHeadingCount(body: string) {
   return (body.match(/^##\s+/gm) || []).length;
 }
@@ -731,6 +767,10 @@ function richMarketBodyMinimum(language: BlogLanguage) {
 
 function markdownH2s(body: string) {
   return [...body.matchAll(/^##\s+(.+)$/gm)].map((match) => match[1]?.trim()).filter(Boolean);
+}
+
+function recycledColumnHeadings(body: string) {
+  return markdownH2s(body).filter((heading) => recycledColumnHeadingPatterns.some((pattern) => pattern.test(heading)));
 }
 
 function boldEmphasisItems(body: string) {
@@ -783,10 +823,13 @@ function isSourceReachabilityWarning(warning: string) {
   return /^source link validation warning:/i.test(warning);
 }
 
-function blockingAutoPublishWarnings(warnings: string[]) {
+function blockingAutoPublishWarnings(warnings: string[], contentType: BlogContentType) {
   return warnings.filter((warning) => {
     if (isSourceReachabilityWarning(warning)) return false;
     if (/anti-slop pattern:\s*soft hedging/i.test(warning)) return false;
+    if (contentType === "breaking") {
+      return /template|formulaic|raw English|technical jargon|market-news posts must not expose|market-news template/i.test(warning);
+    }
     return /anti-slop|market-news opening could be more concrete|repeated sentence rhythm|authenticity score|rhythm score|template|formulaic|raw English|technical jargon/i.test(
       warning
     );
@@ -969,11 +1012,18 @@ export function reviewContentTypeFit(post: BlogPost): ReviewResult {
     const hasSpecificScene = /(凌晨|會議|客服|銷售|法務|營運|主管|product manager|operator|support|sales|legal|incident|customer|meeting|現場|案例|場景|scenario|case|事故|exception|edge case)/i.test(post.body);
     const repeatedColumnTemplate =
       /ALTOS LAB 判斷[:：]\s*ALTOS LAB|先守住這三個控制點|Tatlong Control Point|Three Control Points|導入實踐|決策法則與行動清單|核心挑戰|停止按鈕|不可控的黑箱|無法掌控的夢魘/i;
+    const recycledHeadings = recycledColumnHeadings(post.body);
     if (!creativeSignals.some((signal) => body.includes(signal))) {
       issues.push("column needs a clear angle, tradeoff, operator tension or original decision lens");
     }
     if (repeatedColumnTemplate.test(post.body)) {
       issues.push("column uses repeated AI-template phrasing; rewrite with a topic-specific narrative structure");
+    }
+    if (recycledHeadings.length >= 2) {
+      issues.push(`column uses recycled section template headings; rewrite around the article's own argument: ${recycledHeadings.slice(0, 4).join(", ")}`);
+    }
+    if (length < knowledgeDenseColumnMinimum(post.language)) {
+      issues.push("column body is too thin for a professional source-backed column; expand with evidence, examples, tradeoffs and useful reader judgment");
     }
     if (!hasSpecificScene && !hasCallout && !hasTable) {
       issues.push("column needs a concrete scene, case moment, source-backed example or distinctive editorial passage");
@@ -1359,11 +1409,15 @@ export function reviewImageFit(post: BlogPost): ReviewResult {
       if (publicAiAutomationDisclosurePattern.test(post.coverCredit || "")) {
         issues.push("generated cover public credit should say ALTOS LAB editorial visual, not AI-generated");
       }
+      if (legacyRepairMediaPattern.test(post.cover)) {
+        issues.push("generated cover uses a legacy repair visual; regenerate a topic-specific editorial image before publish");
+      }
       if (!post.coverGeneration?.prompt) issues.push("generated cover images require the stored prompt");
       if (!post.coverGeneration?.provider) issues.push("generated cover images require the generation provider");
       if (post.coverGeneration?.status && post.coverGeneration.status !== "generated") {
         issues.push("generated cover image status must be generated before auto-publish");
       }
+      issues.push(...generatedCoverChecksIssues(post, "generated cover image"));
     }
     const topicWords = `${post.topic} ${post.newsCategory} ${post.tags.join(" ")}`.toLowerCase();
     const imageContext = `${post.coverAlt} ${post.coverPrompt || ""}`.toLowerCase();
@@ -1406,6 +1460,12 @@ export function reviewImageFit(post: BlogPost): ReviewResult {
       if (captionIssue) issues.push(`${label} ${captionIssue}`);
       if (image.source === "generated") {
         issues.push(...generatedImageChecksIssues(image, label));
+        if (legacyRepairMediaPattern.test(image.url)) {
+          issues.push(`${label} uses a legacy repair visual; regenerate a topic-specific in-article image before publish`);
+        }
+        if (genericRepairCaptionPattern.test(image.caption || "")) {
+          issues.push(`${label} caption is a generic repair placeholder; explain what this image adds to the argument`);
+        }
         const context = `${image.alt || ""} ${image.caption || ""} ${image.prompt || ""}`.toLowerCase();
         if (rejectedCoverWords.test(context) || genericCoverWords.test(context)) {
           issues.push(`${label} is unsafe, too generic or mismatched for editorial quality`);
@@ -1602,7 +1662,7 @@ export async function reviewBlogPairForAutoPublish(
       };
   issues.push(...sourceValidation.issues);
   warnings.push(...sourceValidation.warnings);
-  issues.push(...blockingAutoPublishWarnings(warnings).map((warning) => `blocking quality warning: ${warning}`));
+  issues.push(...blockingAutoPublishWarnings(warnings, contentType).map((warning) => `blocking quality warning: ${warning}`));
 
   const baseScore = Math.min(...postReviews.map((review) => review.score), 100);
   const antiSlopScore = Math.min(...postReviews.map((review) => review.antiSlopScore), 50);

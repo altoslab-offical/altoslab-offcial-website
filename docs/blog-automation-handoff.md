@@ -62,6 +62,8 @@
 - `/api/blog?fields=inventory&limit=120` 是以單篇 post 切頁，不是以 9 語 translation group 切頁。當最新 120 筆正好切在最後一組中間時，最後一個 partial group 是 sample boundary，不應被 SEO/GEO report 當成缺語言；真正缺語言要用非邊界 group 或 full inventory/admin readback 判斷。
 - AWS/S3 runtime 的 `/api/blog?fields=inventory` cap 必須足夠支援 full SEO/GEO coverage audit；預設使用 `BLOG_API_LIMIT_CAP=1000`，`seo:geo-report` 預設用 `SEO_GEO_INVENTORY_LIMIT=1000`。不要用 120 筆 sample 結論決定是否刪文、補語言或宣稱多語缺口。
 - SEO/GEO source-count gate 必須按內容類型判斷：市場快訊可以是單一可信原始來源；專欄/feature 才要求多來源平均健康度。不要為了分數替快訊硬塞不必要來源。
+- Market-news 的 anti-slop warning 不能直接沿用專欄 release blocker。市場快訊的核心是 source fidelity、來源圖、可追溯事實與自然在地化；`opening could be more concrete`、泛商業詞或 authenticity score 低可以作為 repair hint，但除非出現 `template/formulaic/raw English/technical jargon/market-news template` 這類 public defect，否則不可讓 source-faithful 快訊被專欄 gate 誤殺。
+- 若 market scan 有大量 candidates 但沒有 publish，先查 `BLOG_MARKET_TRANSLATION_PROVIDER`、source worker、validate-only errors 與 production ECS gate 版本，不要立刻判定來源池太少。2026-06-24 的案例是 OpenAI Partner Network candidate 有 27 個 registry feeds、245 個 candidates、source image pass，但 production admin route 尚未部署新 market gate，所以被舊 gate 擋住。
 - Hermes/OpenClaw Codex lane 必須把 `codexEvidence.provider/runtime/model/reasoning` 寫進 manifest；不要為了通過 legacy doctor 偽造 Gemini/ChatGPT Chrome evidence。若 release verifier 看到 internal copy，例如 `SEO/GEO`，要修公開文案後重新 release/readback。
 - Market-news 不再接受 ALTOS LAB fallback cover 通過 production gate；舊 fallback/generated 快訊需要回補來源圖，不能用 copy gate 繞過 image/source evidence。
 - 破圖修復不能等同於圖片品質修復。若 generated-media object 遺失，短期只允許用穩定 fallback 或恢復原始/source-safe 圖止血；不要用本地 SVG/抽象流程板硬補正式 cover。正式 column/feature cover 必須優先走 Codex built-in `$imagegen` / `gpt-image-2` raster lane 或可授權來源圖；Chrome/ChatGPT image2.0 只作 fallback，API key worker 只在明確批准的大批次情境使用。prompt 要指定具體主體、構圖、鏡頭/版式、材質光線、色彩與負面約束；拒絕抽象節點板、workflow card、glass cube、假 dashboard、generic network map、過度 3D SaaS 感與一眼 AI 圖。
@@ -74,6 +76,8 @@
 - AWS deploy 使用唯一 ECR image tag 作為 production evidence；不要依賴脆弱的 `latest` tag shell interpolation。部署後以 ECS task definition、service stable、`verify:aws` 和 production performance smoke 作為完成證據。
 - 候選稿品質不合格時，流程是 repair/rewrite/re-image/re-QA 到 validate-only pass，再 publish + public readback；不是 skip，也不是把 `wouldPublish=true` 當成已發布。
 - 已發布文章的 copy refresh 走 `scripts/blog-copy-refresh.mjs`，可用 `ALTOS_ADMIN_SESSION_TOKEN` / `ADMIN_SESSION_TOKEN` 或 admin password。若本機 admin credential stale，先確認是否 source 了 `~/.altoslab-aws.env`；若仍 stale，這是 tooling/auth blocker，不可猜密碼、不可改用 direct storage write。
+- Source repo 與 scheduled runtime mirror 是兩個不同邊界：source repo 在 `/Users/asdc163/LocalProjects/altoslab-offcial-website`，定時 runner 由 `ALTOS_BLOG_REPO_DIR=/Users/asdc163/LocalProjects/altoslab-offcial-website-runtime` 指向 runtime mirror。修完 gate / worker / release verifier 後，必須同步到 runtime mirror 並在 runtime 目錄跑 `node scripts/blog-system-smoke.mjs`，否則隔天排程仍可能使用舊規則。
+- Column / feature 不能再接受「同一組抽象圖 + 模板小標 + 低知識密度」通過。Gate 現在必須擋 recycled section headings、legacy repair visuals、generic repair captions、thin professional columns，以及沒有具體 subject / scene / visual family / caption value 的 generated cover。圖片 prompt 要先選不同 style family，再指定文章主體、場景、材質、鏡頭與負面約束；圖說要說明圖片補了哪個論點，不可寫「opening image / mechanism image / 第一張圖把主題拉回」這類內部修補話術。
 
 ## 日常排程
 

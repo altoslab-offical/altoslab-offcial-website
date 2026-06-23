@@ -242,6 +242,9 @@ export function columnVisualStylePromptBlock({ date = "", slot = "", topic = "" 
 - Pinterest-style learning: each image needs a clear focal object, story role, and saveable composition. Do not rely on abstract workflow cards as the default answer.
 - The three generated images must not reuse the same camera angle, material palette, central object, paper-card metaphor, checkmark/arrow language, or beige workflow-board composition. Do not use the 3D workflow/checkpoint/card/arrow family for more than one image in the same article set. Keep article identity coherent through topic and palette accents, not by repeating the same layout.
 - Every prompt must include subject, composition, camera/layout, material-lighting, color, crop-safe zone, and negative prompt.
+- Every prompt must name the concrete article object or scene it is visualizing. Generic "AI workflow", "dashboard", "abstract network", "glass cards", or "control board" prompts are invalid unless the story itself is about those physical objects.
+- Captions must say what the image adds to the argument. Never use generic repair wording such as "opening image", "mechanism image", "first image pulls the topic back", or "second image shows the decision".
+- If a visual idea feels safe but predictable, choose a different style family before generation. The goal is commissioned editorial art with topic memory, not reusable template decoration.
 - Market-news/breaking posts must never use this generated style library; they keep source/official images only.`;
 }
 

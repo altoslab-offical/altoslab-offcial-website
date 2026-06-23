@@ -15,6 +15,9 @@ const DEFAULT_BASE_URL = "https://altoslab-ai.cc";
 const LANGUAGE_LABEL = LANGUAGES.join(", ");
 const COLUMN_DAILY_LIMIT = Number(process.env.ALTOS_BLOG_COLUMN_DAILY_LIMIT || "3");
 const REQUIRED_CHROME_PROFILE_EMAIL = "john.wu0120@gmail.com";
+const LEGACY_REPAIR_MEDIA_PATTERN = /\/api\/blog\/generated-media\/legacy-(?:cover|inline)-repair/i;
+const GENERIC_REPAIR_CAPTION_PATTERN =
+  /(第一張圖把主題拉回|第二張圖呈現|opening image|mechanism image|operating tension visible|decision can be checked|editorial visual$|把主題拉回實際營運證據|讓這個決策可以被檢查)/i;
 
 function arg(name, fallback = "") {
   const index = process.argv.indexOf(`--${name}`);
@@ -475,6 +478,12 @@ function generatedContentImageIssues(image, label) {
   if (!/(chatgpt|gpt|openai|codex)/i.test(String(image.provider || ""))) issues.push(`${label} provider must be ChatGPT/GPT`);
   if (!image.prompt) issues.push(`${label} prompt is required`);
   if (!image.generatedAt) issues.push(`${label} generatedAt is required`);
+  if (LEGACY_REPAIR_MEDIA_PATTERN.test(String(image.url || image.localPath || ""))) {
+    issues.push(`${label} uses a legacy repair visual; regenerate through the GPT editorial image lane`);
+  }
+  if (GENERIC_REPAIR_CAPTION_PATTERN.test(String(image.caption || ""))) {
+    issues.push(`${label} caption is a generic repair placeholder; explain the specific visual argument`);
+  }
   const checks = image.visualChecks || {};
   for (const field of ["topicFit", "noTextArtifacts", "noLogos", "noPeople", "noTrademarkRisk", "noGenericStockLook"]) {
     if (checks[field] !== true) issues.push(`${label} visualChecks.${field} must be true`);
@@ -619,6 +628,9 @@ function localPreflight(payload) {
       issues.push(`${post.language || "unknown"} non-news coverSource must be generated`);
     }
     if (!isAllowedCoverUrl(post.cover)) issues.push(`${post.language || "unknown"} cover must be a public https URL`);
+    if (!marketNews && LEGACY_REPAIR_MEDIA_PATTERN.test(String(post.cover || ""))) {
+      issues.push(`${post.language || "unknown"} cover uses a legacy repair visual; regenerate through the GPT editorial image lane`);
+    }
     if (!post.coverAlt || post.coverAlt.length < 18) issues.push(`${post.language || "unknown"} coverAlt is missing or too thin`);
     const generation = post.coverGeneration || {};
     const contentImages = Array.isArray(post.contentImages) ? post.contentImages : [];
@@ -734,13 +746,18 @@ function isSourceReachabilityWarning(warning) {
   return /^source link validation warning:/i.test(String(warning || ""));
 }
 
-function blockingManifestWarnings(warnings) {
-  return (warnings || []).filter((warning) =>
-    !/anti-slop pattern:\s*soft hedging/i.test(String(warning || "")) &&
-      /anti-slop|market-news opening could be more concrete|repeated sentence rhythm|authenticity score|rhythm score|template|formulaic|raw English|technical jargon/i.test(
-        String(warning || "")
-      )
-  );
+function blockingManifestWarnings(warnings, contentType = "column") {
+  return (warnings || []).filter((warning) => {
+    const text = String(warning || "");
+    if (isSourceReachabilityWarning(text)) return false;
+    if (/anti-slop pattern:\s*soft hedging/i.test(text)) return false;
+    if (contentType === "breaking") {
+      return /template|formulaic|raw English|technical jargon|market-news posts must not expose|market-news template/i.test(text);
+    }
+    return /anti-slop|market-news opening could be more concrete|repeated sentence rhythm|authenticity score|rhythm score|template|formulaic|raw English|technical jargon/i.test(
+      text
+    );
+  });
 }
 
 async function writeJsonFile(filePath, payload) {
@@ -811,6 +828,7 @@ async function writePreparedCandidateManifest({ manifestPath, articleSetPath, re
         approved: qualitySummary.approved === true,
         score: qualitySummary.score,
         threshold: qualitySummary.threshold,
+        contentType: qualitySummary.contentType,
         issues: qualitySummary.issues || [],
         warnings: qualitySummary.warnings || []
       },
@@ -863,7 +881,8 @@ function reusableManifestIssues(manifest, payload) {
   if (Array.isArray(quality.issues) && quality.issues.length > 0) {
     issues.push(`qualityManifest quality issues must be empty: ${quality.issues.join("; ")}`);
   }
-  const blockingQualityWarnings = blockingManifestWarnings(quality.warnings);
+  const contentType = quality.contentType || (articleSetLane(payload) === "market" ? "breaking" : "column");
+  const blockingQualityWarnings = blockingManifestWarnings(quality.warnings, contentType);
   if (blockingQualityWarnings.length > 0) {
     issues.push(`qualityManifest blocking quality warnings must be empty: ${blockingQualityWarnings.join("; ")}`);
   }

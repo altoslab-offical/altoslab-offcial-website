@@ -153,6 +153,9 @@ assert(
 assert(quality.includes("official announcement image lane before release"), "quality gate requires market-news source or official announcement covers");
 assert(quality.includes("market news posts must not expose internal source-translation"), "quality gate blocks market-news template/process headings");
 assert(quality.includes("ChatGPT/GPT"), "quality gate requires ChatGPT/GPT-generated production covers for generated-cover lanes");
+assert(quality.includes("legacy repair visual"), "quality gate rejects legacy repair visuals in generated column lanes");
+assert(quality.includes("recycled section template headings"), "quality gate rejects recycled column section templates");
+assert(quality.includes("professional source-backed column"), "quality gate requires knowledge-dense professional columns");
 assert(covers.includes("BLOG_IMAGE_STORE_BLOB"), "image pipeline supports optional Vercel Blob persistence");
 assert(covers.includes("searchPexels") && covers.includes("searchPixabay"), "image pipeline supports expanded free image APIs");
 assert(covers.includes("pinterest") && covers.includes("approvedImageUrl"), "image pipeline rejects Pinterest URLs while allowing style inspiration");
@@ -218,6 +221,7 @@ assert(
 assert(localWorker.includes("localPreflight"), "local worker performs local preflight before production ingest");
 assert(localWorker.includes("X-Altos-Signature"), "local worker signs ingest requests");
 assert(localWorker.includes("requestMediaUpload"), "local worker uploads generated cover files before ingest");
+assert(localWorker.includes("legacy repair visual"), "local worker rejects legacy repair visuals before production ingest");
 assert(localWorker.includes("requestRelease") && localWorker.includes("/api/admin/blog/release-set"), "local worker publishes through the formal release-set route");
 assert(localWorker.includes("qualityManifest") && localWorker.includes("contentSha256"), "local worker writes a quality manifest with a content digest");
 assert(localWorker.includes("reuse-validated-manifest"), "local worker can reuse a signed validate-only manifest during release");
@@ -598,6 +602,7 @@ assert(columnVisualStyleLibrary.includes("comparison-diptych-audit"), "column vi
 assert(columnVisualStyleLibrary.includes("pinterest-editorial-product-photo"), "column visual style library includes Pinterest-like editorial product photography");
 assert(columnVisualStyleLibrary.includes("pickDistinctStyle"), "column visual style library selects distinct visual families across article images");
 assert(columnVisualStyleLibrary.includes("Do not use the 3D workflow/checkpoint/card/arrow family for more than one image"), "column visual prompts block repeated workflow-card family");
+assert(columnVisualStyleLibrary.includes("Captions must say what the image adds to the argument"), "column visual prompts require argument-specific captions");
 const gcpSmoke = read("scripts/gcp-production-smoke.mjs");
 assert(gcpSmoke.includes("publishedPosts === 0"), "GCP production smoke warns when the public blog inventory is empty");
 assert(gcpSmoke.includes("function printJson") && gcpSmoke.includes("process.stdout.write"), "GCP production smoke flushes JSON before exiting on failures");

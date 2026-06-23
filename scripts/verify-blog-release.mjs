@@ -151,15 +151,23 @@ function isSourceReachabilityWarning(warning) {
   return /^source link validation warning:/i.test(String(warning || ""));
 }
 
-function blockingValidateWarnings(warnings) {
+function isMarketArticleSet(articleSet) {
+  return (articleSet?.posts || []).some((post) => post.contentType === "breaking" || post.newsCategory === "市場快訊");
+}
+
+function blockingValidateWarnings(warnings, contentType = "column") {
   return (warnings || [])
     .filter((warning) => !isSourceReachabilityWarning(warning))
     .filter((warning) => !/anti-slop pattern:\s*soft hedging/i.test(String(warning || "")))
-    .filter((warning) =>
-      /anti-slop|market-news opening could be more concrete|repeated sentence rhythm|authenticity score|rhythm score|template|formulaic|raw English|technical jargon/i.test(
-        String(warning || "")
-      )
-    );
+    .filter((warning) => {
+      const text = String(warning || "");
+      if (contentType === "breaking") {
+        return /template|formulaic|raw English|technical jargon|market-news posts must not expose|market-news template/i.test(text);
+      }
+      return /anti-slop|market-news opening could be more concrete|repeated sentence rhythm|authenticity score|rhythm score|template|formulaic|raw English|technical jargon/i.test(
+        text
+      );
+    });
 }
 
 function normalizeText(value = "") {
@@ -573,7 +581,8 @@ function verifyManifest(manifest, articleSet, errors, warnings) {
   if (manifest.validateOnly?.qualityApproved !== true) pushIssue(errors, "manifest validateOnly qualityApproved must be true");
   if (manifest.validateOnly?.imageApproved !== true) pushIssue(errors, "manifest validateOnly imageApproved must be true");
   if (Array.isArray(manifest.validateOnly?.warnings) && manifest.validateOnly.warnings.length) {
-    const blockingWarnings = blockingValidateWarnings(manifest.validateOnly.warnings);
+    const contentType = manifest.qualityManifest?.qualitySummary?.contentType || (isMarketArticleSet(articleSet) ? "breaking" : "column");
+    const blockingWarnings = blockingValidateWarnings(manifest.validateOnly.warnings, contentType);
     if (blockingWarnings.length) {
       pushIssue(errors, "validate-only blocking warnings were present at release", { warnings: blockingWarnings });
     }

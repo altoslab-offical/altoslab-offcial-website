@@ -1073,6 +1073,46 @@ function sourceTextForArticle(article = {}) {
 
 function knownProfile(article = {}, frame = {}) {
   const text = `${frame?.key || ""}\n${article.canonicalUrl || ""}\n${article.url || ""}\n${sourceTextForArticle(article)}`.toLowerCase();
+  if (/introducing-openai-partner-network|openai partner network|partner network/.test(text)) {
+    return {
+      title: {
+        "zh-Hant": "OpenAI 推出 Partner Network，要把企業 AI 導入交給生態系放大",
+        en: "OpenAI launches Partner Network to scale enterprise AI deployment through partners",
+        ja: "OpenAI、Partner Network で企業 AI 導入をパートナー経由で拡大",
+        ko: "OpenAI, Partner Network로 기업 AI 도입을 파트너 생태계에 확대",
+        id: "OpenAI meluncurkan Partner Network untuk memperluas deployment AI enterprise",
+        vi: "OpenAI ra mắt Partner Network để mở rộng triển khai AI doanh nghiệp",
+        th: "OpenAI เปิดตัว Partner Network เพื่อขยายการใช้งาน AI ในองค์กรผ่านพาร์ตเนอร์",
+        ms: "OpenAI melancarkan Partner Network untuk memperluas deployment AI perusahaan",
+        fil: "Inilunsad ng OpenAI ang Partner Network para palawakin ang enterprise AI deployment"
+      },
+      standfirst: {
+        "zh-Hant": "OpenAI 表示將投入 1.5 億美元支援 Partner Network，並計畫在 2026 年底前培訓 30 萬名認證顧問；重點是把企業 AI 從模型採購推向部署、整合與變革管理。",
+        en: "OpenAI says it will invest $150 million in the Partner Network and aims to train 300,000 certified consultants by the end of 2026.",
+        ja: "OpenAI は Partner Network に 1.5 億ドルを投資し、2026 年末までに 30 万人の認定コンサルタントを育成する計画です。",
+        ko: "OpenAI는 Partner Network에 1억 5천만 달러를 투자하고 2026년 말까지 인증 컨설턴트 30만 명을 교육할 계획이라고 밝혔습니다.",
+        id: "OpenAI mengatakan akan menginvestasikan US$150 juta di Partner Network dan menargetkan 300.000 konsultan tersertifikasi pada akhir 2026.",
+        vi: "OpenAI cho biết sẽ đầu tư 150 triệu USD vào Partner Network và đặt mục tiêu đào tạo 300.000 consultant được chứng nhận trước cuối 2026.",
+        th: "OpenAI ระบุว่าจะลงทุน 150 ล้านดอลลาร์ใน Partner Network และตั้งเป้าฝึกอบรม consultant ที่ได้รับการรับรอง 300,000 คนภายในสิ้นปี 2026",
+        ms: "OpenAI berkata ia akan melabur AS$150 juta dalam Partner Network dan menyasarkan 300,000 konsultan bertauliah menjelang akhir 2026.",
+        fil: "Sabi ng OpenAI, mag-iinvest ito ng $150 milyon sa Partner Network at target na magsanay ng 300,000 certified consultants bago matapos ang 2026."
+      },
+      facts: {
+        "zh-Hant": [
+          "OpenAI 宣布 Partner Network，讓合作夥伴可以共同銷售、部署、建置，並協助客戶連接 OpenAI 技術。",
+          "OpenAI 表示將投入 1.5 億美元支援生態系，並計畫在 2026 年底前培訓 30 萬名認證顧問。",
+          "Partner Network 分成 Select、Premier、Elite 三個層級，依銷售成果、技術能力、共同銷售參與與部署經驗升級。",
+          "OpenAI 也提到 Codex、網路安全與 agent 等高影響力領域，未來會出現更深入的專業化方向。"
+        ],
+        en: [
+          "OpenAI announced the Partner Network for partners that co-sell, deploy, build, and connect customers to OpenAI technology.",
+          "OpenAI says it will invest $150 million and plans to train 300,000 certified consultants by the end of 2026.",
+          "The program has Select, Premier, and Elite tiers based on sales performance, technical capability, co-selling engagement, and deployment experience.",
+          "OpenAI also points to deeper specializations in areas such as Codex, cybersecurity, and agents."
+        ]
+      }
+    };
+  }
   if (/openai.*academy-courses-applying-ai-at-work|new openai academy courses for the next era of work|academy courses.*applying ai at work/.test(text)) {
     return {
       title: {
@@ -1761,6 +1801,11 @@ function sourceOpeningParagraphIndex(paragraphs = []) {
 
 function sourceSpecificBody(language, frame, source, article) {
   const text = `${frame?.key || ""} ${article.headline || ""} ${source.title || ""}`.toLowerCase();
+  if (/introducing-openai-partner-network|openai partner network|partner network/.test(text)) {
+    return {
+      "zh-Hant": "OpenAI News 發布 Partner Network，核心不是再推一個模型，而是把企業 AI 導入交給合作夥伴生態系放大。OpenAI 說，這個計畫讓合作夥伴更容易共同銷售、部署、建置，並協助客戶連接 OpenAI 技術。\n\n原文提到，OpenAI 將投入 1.5 億美元支援這個生態系，並計畫在 2026 年底前培訓 30 萬名認證顧問。對企業讀者來說，這代表大廠正在把 AI 採購問題往後推一層：真正難的不是能不能買到模型，而是誰能幫企業找出用例、重設工作流程、接上資料與既有系統，並完成變革管理。\n\nPartner Network 會分成 Select、Premier、Elite 三個層級。OpenAI 表示，升級標準會看銷售成果、技術能力、共同銷售參與度與部署經驗。這種分層設計會讓企業採購時更容易辨識合作夥伴能力，也會讓合作夥伴把 AI 導入做成可重複的服務，而不是一次性的顧問案。\n\nOpenAI 也提到，隨著平台發展，合作夥伴將能在 Codex、網路安全、agent 等高影響力領域取得更深入的專業化。這點值得注意，因為企業導入 AI 的問題正在從「哪個模型最強」轉向「哪個工作流能安全落地」。如果合作夥伴只會賣工具，價值有限；如果能把模型、資料、權限、流程與人員採用串起來，才會成為企業 AI 擴張的關鍵節點。\n\nOpenAI 另提到 forward deployed specialist pilot，讓合格合作夥伴在客戶需要更深入部署支援時，能更接近 OpenAI 的 forward deployed engineering 團隊。這顯示 OpenAI 想把原本高度客製化的導入經驗，逐步整理成合作夥伴可以學習與複製的手冊。\n\n這則快訊的重點是：企業 AI 的競爭正在從模型供應轉向交付能力。若企業正在評估 AI 導入，下一步不只是比較模型價格，也要檢查合作夥伴是否懂產業流程、資料整合、治理、教育訓練與導入後的維運。"
+    }[language];
+  }
   if (/openai.*lockdown[-\s]mode|lockdown[-\s]mode.*openai|prompt[-\s]injection.*sensitive data|提示注入.*敏感資料|プロンプトインジェクション.*機密データ/.test(text)) {
     return {
       "zh-Hant": "TechCrunch AI 報導，OpenAI 推出 Lockdown Mode，目標是降低 ChatGPT 在處理敏感資料時遭遇 prompt injection 後外洩資料的風險。Prompt injection 指的是惡意指令被藏在網頁、文件或其他內容來源中，讓模型在讀取資料時被帶往攻擊者想要的行為。\n\n這個模式會限制 ChatGPT 能接觸的外部內容。報導提到，Lockdown Mode 會關閉即時網頁瀏覽、網路圖片擷取與顯示、deep research，以及 agent mode；使用者仍可讀取快取內容，也仍可生成圖片。\n\nOpenAI 同時提醒，Lockdown Mode 不是完整防線。prompt injection 仍會出現在快取網頁內容或上傳檔案中，並影響回覆的行為或準確度；因此這項功能的重點不是消除所有攻擊，而是降低敏感資料被帶出系統的機率。\n\n報導指出，OpenAI 把 Lockdown Mode 定位給處理敏感資料的個人與組織，而不是一般使用者都必須開啟的模式。公司目前正把這項功能推向自助式 ChatGPT Business 帳戶與符合資格的個人帳戶。",
