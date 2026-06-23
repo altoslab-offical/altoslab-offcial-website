@@ -24,8 +24,12 @@ function hasRejectedCover(post: BlogVisualPost) {
 
 export function SafeBlogImage({ post, className, loading = "lazy", fetchPriority, compact }: SafeBlogImageProps) {
   const [failed, setFailed] = useState(false);
+  const isManagedGeneratedMedia = Boolean(post.cover && /\/api\/blog\/generated-media\//.test(post.cover));
   const shouldUseEditorialVisual =
-    failed || hasRejectedCover(post) || !post.cover || (post.coverSource !== "curated" && post.coverGeneration?.provider === "local");
+    failed ||
+    hasRejectedCover(post) ||
+    !post.cover ||
+    (post.coverSource !== "curated" && post.coverGeneration?.provider === "local" && !isManagedGeneratedMedia);
 
   if (shouldUseEditorialVisual) {
     return <BlogEditorialVisual compact={compact} post={post} />;
