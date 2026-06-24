@@ -139,6 +139,29 @@ Required behavior:
 - Manual ad slots must not replace `BlogIndex`, `SiteHeader`, article hero, source links, author card, related posts, or WonDa widget behavior.
 - `npm run test:adsense` must fail if the blog slot contract, env examples, direct renderer, or AdSense smoke coverage drift.
 
+## AdSense Site Approval Readiness Contract
+
+The site must remain reviewable as a real publication and business website, not just a feed of automated articles.
+
+Required public trust pages:
+
+- `/about` explains ALTOS LAB ownership, services, journal purpose and editorial responsibility.
+- `/contact` provides a clear way to reach ALTOS LAB for business inquiries, corrections and privacy requests.
+- `/editorial-policy` explains source standards, originality expectations, image rights, automation and human review.
+- `/privacy` includes Google advertising cookie disclosures and visitor choices.
+- `/terms` explains site use, content attribution, external links and change rules.
+
+Navigation rules:
+
+- `SiteFooter` must link to all trust pages.
+- The homepage static shell may include a small bottom trust-links strip, but it must not replace or redesign the approved homepage header, hero, CTA, portfolio, team or contact sections.
+- `sitemap.xml` must include the trust pages so Google crawlers and AdSense reviewers can discover them.
+
+Release gate:
+
+- `npm run test:adsense` must fail if the trust pages, footer links, sitemap entries, `ads.txt`, AdSense client, or privacy cookie disclosures drift.
+- `npm run test:homepage` must fail if the homepage trust-links strip is removed or grows into an unapproved homepage redesign.
+
 ## Current State
 
 The homepage is currently served from the static built artifact:

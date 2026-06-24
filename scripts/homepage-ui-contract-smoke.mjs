@@ -79,6 +79,8 @@ assert(route.includes("CLOUDFLARE_HOMEPAGE_ASSET = \"/altoslab-homepage\""), "ho
 assert(/withLaunchMetadata\(\s*(?:html|sourceHtml)\s*\)/.test(route), "homepage route wraps the original homepage HTML");
 assert(route.includes("homepageAnalyticsSnippet()"), "homepage route keeps analytics without visual replacement");
 assert(route.includes("wondaWidgetSnippet()"), "homepage route keeps WonDa widget as a script-only integration");
+assert(route.includes("altos-trust-links"), "homepage route injects only the approved trust-links footer strip for AdSense readiness");
+assert(route.includes("/about") && route.includes("/contact") && route.includes("/privacy"), "homepage trust-links strip exposes accountability and privacy pages");
 assert(route.includes("withCloudflareHomepageAssetHeaders(await readCloudflareHomepageResponse(request))"), "Cloudflare homepage returns the static asset without request-time HTML rewriting");
 
 if (publicHomepage) {

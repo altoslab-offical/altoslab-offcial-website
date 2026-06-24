@@ -10,6 +10,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     lightweightCloudflareRender ? Promise.resolve([]) : getPublishedProjects()
   ]);
   const now = new Date();
+  const trustPages = ["/about", "/contact", "/editorial-policy", "/privacy", "/terms"];
   const uniquePosts = Array.from(
     new Map(posts.map((post) => [`${siteUrl}${blogPostPath(post.slug, post.language)}`, post])).values()
   );
@@ -38,6 +39,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "monthly",
       priority: 0.8
     },
+    ...trustPages.map((page) => ({
+      url: `${siteUrl}${page}`,
+      lastModified: now,
+      changeFrequency: "monthly" as const,
+      priority: page === "/about" || page === "/contact" ? 0.7 : 0.5
+    })),
     {
       url: `${siteUrl}/feed.xml`,
       lastModified: now,

@@ -137,6 +137,17 @@ Cards:
 - Do not place cards inside cards.
 - Use one clear title, one metadata tag, and one action affordance.
 
+## Trust / Policy Pages
+
+The AdSense readiness pages are utility content surfaces, not a homepage redesign.
+
+- Use the existing dark technical brand language, `SiteHeader`, `SiteFooter`, design tokens and restrained editorial layout.
+- Keep the page focused on readability and accountability: large clear title, short intro, sticky side navigation on desktop, stacked navigation on mobile.
+- Do not add decorative cards, new hero imagery, gradients or marketing sections to policy pages.
+- The homepage may expose a small bottom trust-links strip so crawlers and reviewers can find About, Contact, Editorial Policy, Privacy and Terms from `/`, but this strip must remain visually quiet and must not change the approved homepage hero/header/footer composition.
+
+The design purpose is trust: users and reviewers should quickly understand who runs the site, why the journal exists, how sources/images are handled, how privacy and ads are disclosed, and how to contact ALTOS LAB.
+
 Product Detail:
 
 - Product detail pages and product modals should be managed through backend data, not hard-coded page copy.

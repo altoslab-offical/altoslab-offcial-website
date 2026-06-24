@@ -45,6 +45,7 @@ Allowed homepage wrapper changes:
 - JSON-LD.
 - GA/GTM snippets.
 - No-script SEO fallback.
+- A quiet bottom trust-links strip for AdSense/site-review readiness, linking to About, Contact, Editorial Policy, Privacy and Terms. This strip must stay outside the homepage hero/header/content system and must not replace the approved homepage UI.
 
 Forbidden homepage wrapper changes:
 
@@ -64,6 +65,7 @@ These areas use the normal Next App Router surfaces and global CSS:
 - Admin pages: `app/admin/*`
 - Blog pages and APIs: `app/blog/*`, `app/en/blog/*`, `app/feed.xml/route.ts`, `app/llms.txt/route.ts`, `app/api/blog/*`
 - Project pages and APIs: `app/projects/*`, `app/api/projects/*`
+- Trust and policy pages: `app/about`, `app/contact`, `app/editorial-policy`, `app/privacy`, `app/terms`
 - CMS/admin APIs: `app/api/admin/*`
 - Contact API: `app/api/contact/route.ts`
 - Blog AI automation: `app/api/admin/blog/generate/route.ts`, `app/api/cron/blog-drafts/route.ts`, `lib/blog-generation.ts`
@@ -149,6 +151,19 @@ Rules:
 - Slot ids must be numeric AdSense ad unit ids; do not hard-code them into components.
 - Manual slots may not change Blog route ownership, replace content sections, or introduce sticky/overlay formats.
 - Keep `npm run test:adsense` in the default test chain so AdSense env, `ads.txt`, Blog slots, and direct renderer support remain covered.
+
+## AdSense Review Trust Layer
+
+AdSense site approval depends on more than the ad script. The public site must expose durable trust and policy surfaces:
+
+- `components/site/TrustPage.tsx` owns the shared utility-page layout.
+- `/about`, `/contact`, `/editorial-policy`, `/privacy`, and `/terms` are App Router pages using the shared layout.
+- `components/site/SiteFooter.tsx` links to the trust pages across Blog, project and utility pages.
+- `app/route.ts` injects a small static `altos-trust-links` strip into the homepage HTML response because `/` is served from the static bundle rather than `SiteFooter`.
+- `app/sitemap.ts` includes the trust pages.
+- `scripts/adsense-smoke.mjs` guards AdSense client, `ads.txt`, slot wiring, trust pages, footer links, sitemap entries and privacy cookie disclosures.
+
+This layer should not become a marketing redesign. It exists to make ownership, editorial policy, contact path, privacy disclosures and content responsibility obvious to users, crawlers and AdSense reviewers.
 
 ## Inactive Prototype Components
 

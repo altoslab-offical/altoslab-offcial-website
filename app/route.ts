@@ -104,7 +104,19 @@ function homepageInjectionParts() {
   return {
     metadata,
     seoNoScriptFallback,
-    wondaWidget: wondaWidgetSnippet()
+    wondaWidget: wondaWidgetSnippet(),
+    trustLinks: `<style>
+      .altos-trust-links{border-top:1px solid rgba(255,255,255,.1);padding:1.25rem clamp(1.25rem,4vw,4rem);display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:.85rem 1rem;color:rgba(255,255,255,.44);background:#030403;font:500 11px/1.5 ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;letter-spacing:.08em}
+      .altos-trust-links a{color:inherit;text-decoration:none}
+      .altos-trust-links a:hover{color:rgba(255,255,255,.86)}
+    </style>
+    <nav class="altos-trust-links" aria-label="ALTOS LAB site policies">
+      <a href="/about">About</a>
+      <a href="/contact">Contact</a>
+      <a href="/editorial-policy">Editorial Policy</a>
+      <a href="/privacy">Privacy</a>
+      <a href="/terms">Terms</a>
+    </nav>`
   };
 }
 
@@ -119,7 +131,7 @@ function insertBeforeBodyClose(html: string, insertion: string) {
 }
 
 function withLaunchMetadata(html: string) {
-  const { metadata, seoNoScriptFallback, wondaWidget } = homepageInjectionParts();
+  const { metadata, seoNoScriptFallback, wondaWidget, trustLinks } = homepageInjectionParts();
   const analyticsSnippet = homepageAnalyticsSnippet();
 
   let output = html
@@ -146,6 +158,10 @@ function withLaunchMetadata(html: string) {
 
   if (wondaWidget && !output.includes("id=\"wonda-ai-widget\"")) {
     output = insertBeforeBodyClose(output, wondaWidget);
+  }
+
+  if (!output.includes("altos-trust-links")) {
+    output = insertBeforeBodyClose(output, trustLinks);
   }
 
   return output;
