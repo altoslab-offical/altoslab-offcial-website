@@ -381,6 +381,8 @@ assert(cms.includes("public-blog-duplicates") && cms.includes("getPublishedBlogD
 assert(cms.includes("sortedByPublicRecency") && cms.includes("updatedAt || post.publishedAt || post.createdAt"), "Cloudflare public blog lists are selected by release recency, not sortOrder");
 assert(cms.includes("PUBLIC_BLOG_DETAIL_REFRESH_LIMIT_PER_LANGUAGE") && cms.includes("publicBlogDetailRefreshPostsFromPosts"), "publish-time detail cache refresh is bounded per language for Cloudflare subrequest safety");
 assert(cms.includes("refreshPublicBlogCacheFromStorage") && adminBlogRefreshRoute.includes("refreshPublicBlogCacheFromStorage"), "admin can refresh derived public blog caches inside the Worker runtime");
+assert(releaseRoute.includes("revalidatePath") && releaseRoute.includes("revalidateBlogPublicRoutes"), "release-set revalidates public Next blog pages after publish");
+assert(adminBlogRefreshRoute.includes("revalidatePath") && adminBlogRefreshRoute.includes("revalidateBlogIndexes"), "admin public cache refresh revalidates public Next blog indexes");
 assert(cms.includes("return []") && cms.includes("instead of rebuilding during a public request"), "public Cloudflare blog reads fail closed instead of rebuilding large CMS data on request");
 assert(cloudflareMigratePublicBlogCache.includes("public-blog:v1") && cloudflareMigratePublicBlogCache.includes("public-blog-list:v2"), "Cloudflare public blog cache migration can split the legacy large cache");
 assert(cloudflareMigratePublicBlogCache.includes("canonicalCmsKey") && cloudflareMigratePublicBlogCache.includes("parseCmsPayload"), "Cloudflare public blog cache migration rebuilds from canonical CMS before falling back to legacy public cache");

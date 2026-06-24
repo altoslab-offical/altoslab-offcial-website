@@ -1,11 +1,12 @@
 import { createHash } from "crypto";
+import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
 import { normalizeBlogAuthor, publicEditorialReviewNote } from "@/lib/blog-authors";
 import { verifyBlogIngestRequest } from "@/lib/blog-ingest-auth";
 import { generatedMediaReachabilityIssues } from "@/lib/blog-image-reachability";
 import { multilingualCoverConsistencyIssues } from "@/lib/blog-image-quality";
 import { reviewBlogPairForAutoPublish } from "@/lib/blog-quality";
-import { BLOG_LANGUAGES, defaultQualityChecks, taiwanDate } from "@/lib/blog-utils";
+import { BLOG_LANGUAGES, blogIndexPath, blogPostPath, defaultQualityChecks, taiwanDate } from "@/lib/blog-utils";
 import { createId, mutateRawCmsData, normalizeBlogPostInput, nowIso, publishValidationForBlogPost } from "@/lib/cms";
 import { CmsLockError, withCmsStorageLock } from "@/lib/cms-storage";
 import type { BlogGenerationSlot, BlogPost } from "@/lib/types";
@@ -507,6 +508,20 @@ function responseSummary(posts: BlogPost[]) {
   }));
 }
 
+function revalidateBlogPublicRoutes(posts: BlogPost[]) {
+  const paths = new Set<string>(["/feed.xml", "/rss.xml", "/sitemap.xml", "/llms.txt", "/llms-full.txt"]);
+  for (const language of BLOG_LANGUAGES) paths.add(blogIndexPath(language));
+  for (const post of posts) paths.add(blogPostPath(post));
+
+  for (const path of paths) {
+    try {
+      revalidatePath(path);
+    } catch (error) {
+      console.warn(`[blog-release] Unable to revalidate ${path}:`, error instanceof Error ? error.message : error);
+    }
+  }
+}
+
 export async function POST(request: Request) {
   const body = await request.text();
   if (new TextEncoder().encode(body).byteLength > MAX_RELEASE_BODY_BYTES) {
@@ -649,6 +664,10 @@ export async function POST(request: Request) {
     );
 
     const writtenPosts = result.posts || [];
+    if (!result.skipped && writtenPosts.some((post) => post.status === "published")) {
+      revalidateBlogPublicRoutes(writtenPosts);
+    }
+
     return json(result.skipped ? 200 : 201, {
       ok: true,
       skipped: result.skipped,
