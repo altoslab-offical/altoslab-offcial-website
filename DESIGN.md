@@ -128,6 +128,9 @@ Cards:
   title, and read-more entry points open the article with native document
   navigation. This keeps perceived loading reliable for readers and avoids
   client-router stalls on content-heavy pages.
+- In-article editorial images should pace the argument. Use explicit image
+  markers in content when possible, and keep renderer fallback behavior from
+  stacking multiple figures after the same section.
 - H2 spacing should create scan rhythm without pushing body content far below
   the viewport on desktop or mobile.
 - Radius should stay at or below 8px unless preserving an existing pill CTA.

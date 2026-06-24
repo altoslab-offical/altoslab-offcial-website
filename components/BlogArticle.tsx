@@ -290,13 +290,20 @@ function splitArticleSections(body: string) {
   return paragraphSections.length > 1 ? paragraphSections : sections.length ? sections : [body];
 }
 
-function contentImageIndex(image: BlogInlineImage, imageIndex: number, sectionCount: number) {
+function contentImageIndex(image: BlogInlineImage, imageIndex: number, sectionCount: number, imageCount: number) {
+  const lastSectionIndex = Math.max(0, sectionCount - 1);
   if (image.placement === "after-lead") return 0;
-  if (image.placement === "before-faq") return Math.max(0, sectionCount - 1);
-  if (image.placement === "mid-article") return Math.max(0, Math.floor(sectionCount / 2));
+  if (image.placement === "before-faq") return lastSectionIndex;
+  if (image.placement === "mid-article") {
+    if (imageCount > 1 && sectionCount > 2) {
+      const ratio = (imageIndex + 1) / (imageCount + 1);
+      return Math.max(1, Math.min(lastSectionIndex, Math.round(lastSectionIndex * ratio)));
+    }
+    return Math.max(0, Math.floor(sectionCount / 2));
+  }
   if (imageIndex === 0) return 0;
   if (imageIndex === 1) return Math.max(0, Math.floor(sectionCount / 2));
-  return Math.max(0, sectionCount - 1);
+  return lastSectionIndex;
 }
 
 function ArticleInlineImage({ image }: { image: BlogInlineImage }) {
@@ -426,7 +433,7 @@ function ArticleBodyWithImages({ text, images }: { text: string; images: BlogInl
   const adAfterSectionIndex = Math.max(0, Math.floor((sections.length - 1) / 2));
   const buckets = new Map<number, BlogInlineImage[]>();
   validImages.forEach((image, index) => {
-    const sectionIndex = contentImageIndex(image, index, sections.length);
+    const sectionIndex = contentImageIndex(image, index, sections.length, validImages.length);
     buckets.set(sectionIndex, [...(buckets.get(sectionIndex) || []), image]);
   });
 

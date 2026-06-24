@@ -82,6 +82,20 @@
 - Source repo 與 scheduled runtime mirror 是兩個不同邊界：source repo 在 `/Users/asdc163/LocalProjects/altoslab-offcial-website`，定時 runner 由 `ALTOS_BLOG_REPO_DIR=/Users/asdc163/LocalProjects/altoslab-offcial-website-runtime` 指向 runtime mirror。修完 gate / worker / release verifier 後，必須同步到 runtime mirror 並在 runtime 目錄跑 `node scripts/blog-system-smoke.mjs`，否則隔天排程仍可能使用舊規則。
 - Column / feature 不能再接受「同一組抽象圖 + 模板小標 + 低知識密度」通過。Gate 現在必須擋 recycled section headings、legacy repair visuals、generic repair captions、thin professional columns，以及沒有具體 subject / scene / visual family / caption value 的 generated cover。圖片 prompt 要先選不同 style family，再指定文章主體、場景、材質、鏡頭與負面約束；圖說要說明圖片補了哪個論點，不可寫「opening image / mechanism image / 第一張圖把主題拉回」這類內部修補話術。
 
+## 2026-06-24 Column Subtitle / Layout Repair Lessons
+
+這次修復來自 `ai-multilingual-brand-consistency` 的 public QA。Tommy 說的 `sub-title` 在這個情境指的是文章內每段 `H2/H3`，不是 excerpt。未來專欄若段落小標像模板目錄，或圖片連續堆在一起，即使正文沒有事實錯誤，也不能算通過。
+
+- 專欄 title 要包含主體、張力與讀者利益；不能只是把一句正確判斷放大成標題。
+- 專欄 H2/H3 是 section headline，目標是讓讀者掃描時願意繼續讀；每篇通常保留 4-6 個強小標，過多段落會讓文章像 briefing outline。
+- 不接受 `Decision framework`、`Field Note`、`Signal to watch next`、`三個控制點`、`先看範圍`、`接下來看什麼` 這類可複製模板小標。若任何公司名替換後仍成立，代表知識密度不足。
+- H2/H3 要帶出該段的機制、衝突、證據或操作後果，例如「九種語言共享證據，不共享句子」，而不是「ALTOS LAB 判讀」。
+- SEO/GEO 不是把關鍵字塞進小標；它需要穩定實體、可引用段落、清楚問題答案、來源證據與自然語氣。
+- 內文圖片必須服務不同閱讀任務，使用 `[IMAGE:opening]`、`[IMAGE:mechanism]`、`[IMAGE:synthesis]` 等 marker 控制節奏。多張圖若沒有 marker，renderer 只可做保守分散，不能讓圖片連續黏在同一段後面。
+- Column related cards / 首頁列表要避免同型專欄一大坨集中。排程與首頁 QA 要看 topic/type/language/category 的節奏，不只看文章數。
+- 九語言 corpus 吸收只能保存 compact style signals，不保存大量全文。若平台 403、404、429、RSS 不穩或授權不適合，OpenClaw 必須記錄 blocked/partial，不可假裝已完成每站 100 篇。
+- 完成證據要包含：品質 gate、public API readback、HTML/Chrome rendered readback、H2 count、image marker/figure pacing、語言版本數，以及 Hermes/OpenClaw writeback。
+
 ## 日常排程
 
 時區固定 Asia/Taipei。

@@ -528,6 +528,7 @@ assert(cms.includes("normalizeContentImages"), "CMS normalizes structured in-art
 assert(cms.includes("column and feature posts require at least two in-article images"), "CMS publish validation blocks columns/features without content images");
 assert(blogArticle.includes("ArticleBodyWithImages"), "article renderer interleaves structured content images into the article body");
 assert(blogArticle.includes("[IMAGE:") && blogArticle.includes("imageMatchesMarker"), "article renderer supports explicit in-body content image markers");
+assert(blogArticle.includes("imageCount > 1 && sectionCount > 2"), "article renderer distributes duplicate mid-article images instead of stacking them together");
 assert(richText.includes("<blockquote") && richText.includes("/^>\\s+/"), "RichText renders markdown blockquotes instead of leaking raw > characters");
 assert(globals.includes(".article-inline-figure"), "Blog article CSS styles structured in-article images");
 assert(blogIndex.includes("市場專欄"), "Blog navigation restores the Traditional Chinese market-column lane");
@@ -562,6 +563,9 @@ assert(localWorker.includes("BLOG_MARKET_ALLOW_LOCAL_TRANSLATION_FALLBACK"), "lo
 assert(marketTranslationService.includes("BLOG_MARKET_ALLOW_LOCAL_TRANSLATION_FALLBACK=1"), "market-news translation service requires an explicit opt-in before local fallback");
 assert(!marketTranslationService.includes("文中牽涉") && !marketTranslationService.includes("放在企業採用脈絡看"), "market-news fallback no longer emits legacy extraction-template copy");
 assert(quality.includes("文中牽涉") && quality.includes("報導「」") && quality.includes("放在企業採用脈絡看"), "quality gate blocks market-news source extraction pollution");
+assert(quality.includes("columnTemplateSubtitlePatterns"), "quality gate blocks recycled multilingual column section subtitles");
+assert(quality.includes("too many H2 section subtitles"), "quality gate blocks over-fragmented column sectioning");
+assert(quality.includes("multiple in-article images share the same placement"), "quality gate blocks stacked column image placements without markers");
 assert(
   cloudflareDirectBlog.includes("--highlight:#c8ff00") &&
     cloudflareDirectBlog.includes(".article-takeaways li") &&

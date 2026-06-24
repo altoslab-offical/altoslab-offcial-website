@@ -72,6 +72,7 @@ const blogArticle = read("components/BlogArticle.tsx");
 assert(blogArticle.includes('<BlogAdSlot placement="after-summary" />'), "BlogArticle keeps the opt-in after-summary AdSense slot");
 assert(blogArticle.includes('<BlogAdSlot placement="mid-article" />'), "BlogArticle keeps the opt-in mid-article AdSense slot");
 assert(blogArticle.includes('<BlogAdSlot placement="before-related" />'), "BlogArticle keeps the opt-in before-related AdSense slot");
+assert(blogArticle.includes("imageCount > 1 && sectionCount > 2"), "BlogArticle distributes repeated mid-article figures instead of stacking them after one section");
 assert(globalCss.includes(".blog-adsense-slot") && globalCss.includes('ins.adsbygoogle[data-ad-status="unfilled"]'), "Next Blog CSS keeps neutral AdSense slot and unfilled-collapse styling");
 assert(directWorker.includes("function blogAdSlotHtml(env, placement)") && directWorker.includes('blogAdSlotHtml(env, "after-summary")'), "direct article renderer keeps the opt-in AdSense slot helper");
 

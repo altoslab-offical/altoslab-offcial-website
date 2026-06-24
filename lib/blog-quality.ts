@@ -166,6 +166,16 @@ const recycledColumnHeadingPatterns = [
   /^(decision framework|implementation checklist|operator checklist|what to watch next|field note|lab note)$/i
 ];
 
+const columnTemplateSubtitlePatterns = [
+  /^(Protect These Three Control Points First|The Signal To Watch Next|Run One Concrete Rehearsal|ALTOS LAB Field Note|How The Sources Enter The Decision|One action for this week)$/i,
+  /^(最初に守るべき三つの制御点|次に見るべきシグナル|一つの場面で先に試す|ALTOS LAB 現場メモ|出典を判断に入れる方法|今週まずやること)$/i,
+  /^(먼저 지켜야 할 세 가지 통제점|다음에 볼 신호|한 가지 장면으로 먼저 연습하기|ALTOS LAB 현장 메모|출처를 결정에 넣는 방법|이번 주 먼저 할 일)$/i,
+  /^(Tiga Titik Kontrol Yang Perlu Dijaga Dulu|Tiga Titik Kawalan Yang Perlu Dijaga Dahulu|Sinyal Yang Perlu Dipantau Berikutnya|Isyarat Seterusnya Untuk Dipantau|Coba Satu Skenario Konkret|Uji Satu Situasi Nyata Dahulu|Catatan Lapangan ALTOS LAB|Nota Lapangan ALTOS LAB|Cara Memasukkan Sumber Ke Keputusan|Cara Membawa Sumber Ke Dalam Keputusan)$/i,
+  /^(Ba Điểm Kiểm Soát Cần Giữ Trước|Tín Hiệu Cần Theo Dõi Tiếp Theo|Diễn Tập Trên Một Tình Huống Cụ Thể|Ghi Chú Hiện Trường Của ALTOS LAB|Đưa Nguồn Vào Quyết Định Như Thế Nào|Một việc nên làm trong tuần này)$/i,
+  /^(จุดควบคุมสามอย่างที่ต้องกันไว้ก่อน|สัญญาณถัดไปที่ควรดู|ซ้อมกับสถานการณ์จริงหนึ่งเรื่อง|Field Note จาก ALTOS LAB|เอาแหล่งข้อมูลเข้าไปใน decision อย่างไร|สิ่งแรกที่ควรทำในสัปดาห์นี้)$/i,
+  /^(Tatlong Control Point Na Dapat Unahin|Susunod Na Signal Na Babantayan|Mag-Rehearse Sa Isang Totoong Eksena|Field Note Ng ALTOS LAB|Paano Ipasok Ang Source Sa Decision|Isang gawain para ngayong linggo)$/i
+];
+
 const genericRepairCaptionPattern =
   /(第一張圖把主題拉回|第二張圖呈現|opening image|mechanism image|operating tension visible|decision can be checked|editorial visual$|把主題拉回實際營運證據|讓這個決策可以被檢查)/i;
 
@@ -773,6 +783,19 @@ function recycledColumnHeadings(body: string) {
   return markdownH2s(body).filter((heading) => recycledColumnHeadingPatterns.some((pattern) => pattern.test(heading)));
 }
 
+function templateColumnSubtitles(body: string) {
+  return markdownH2s(body).filter((heading) => columnTemplateSubtitlePatterns.some((pattern) => pattern.test(heading)));
+}
+
+function hasExplicitImageMarkers(body: string) {
+  return /\[IMAGE:[^\]]+\]/i.test(body);
+}
+
+function repeatedContentImagePlacement(images: BlogInlineImage[]) {
+  const placements = images.map((image) => image.placement || "").filter(Boolean);
+  return placements.length > 1 && new Set(placements).size < placements.length;
+}
+
 function boldEmphasisItems(body: string) {
   return [...body.matchAll(/\*\*([^*\n]{1,140})\*\*/g)].map((match) => match[1]?.trim() || "").filter(Boolean);
 }
@@ -1013,14 +1036,21 @@ export function reviewContentTypeFit(post: BlogPost): ReviewResult {
     const repeatedColumnTemplate =
       /ALTOS LAB 判斷[:：]\s*ALTOS LAB|先守住這三個控制點|Tatlong Control Point|Three Control Points|導入實踐|決策法則與行動清單|核心挑戰|停止按鈕|不可控的黑箱|無法掌控的夢魘/i;
     const recycledHeadings = recycledColumnHeadings(post.body);
+    const templateSubtitles = templateColumnSubtitles(post.body);
     if (!creativeSignals.some((signal) => body.includes(signal))) {
       issues.push("column needs a clear angle, tradeoff, operator tension or original decision lens");
     }
     if (repeatedColumnTemplate.test(post.body)) {
       issues.push("column uses repeated AI-template phrasing; rewrite with a topic-specific narrative structure");
     }
+    if (h2Count > 6) {
+      issues.push("column has too many H2 section subtitles; consolidate into 4-6 stronger reader-facing sections");
+    }
     if (recycledHeadings.length >= 2) {
       issues.push(`column uses recycled section template headings; rewrite around the article's own argument: ${recycledHeadings.slice(0, 4).join(", ")}`);
+    }
+    if (templateSubtitles.length >= 1) {
+      issues.push(`column section subtitles are still using production templates instead of editorial hooks: ${templateSubtitles.slice(0, 4).join(", ")}`);
     }
     if (length < knowledgeDenseColumnMinimum(post.language)) {
       issues.push("column body is too thin for a professional source-backed column; expand with evidence, examples, tradeoffs and useful reader judgment");
@@ -1450,6 +1480,9 @@ export function reviewImageFit(post: BlogPost): ReviewResult {
     }
     if (contentImages.length > 3) {
       warnings.push("column and feature posts should keep in-article images to three or fewer");
+    }
+    if (contentImages.length > 1 && repeatedContentImagePlacement(contentImages) && !hasExplicitImageMarkers(post.body)) {
+      issues.push("multiple in-article images share the same placement without explicit [IMAGE:*] markers; spread images across the argument");
     }
     contentImages.forEach((image, index) => {
       const label = `content image ${index + 1}`;

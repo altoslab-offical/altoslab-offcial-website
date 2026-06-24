@@ -131,11 +131,27 @@ function looksArticleUrl(url) {
   return /\/(blog|news|article|articles|posts|post|index|topics|tag|category|helloworld|learn|artigos|actualites|thematique|magazin|tips|tricks|products|research|reports|inteligencia|kuenstliche|artificial|ai|ia|llm|agent|agents|生成|人工智慧|智能|인공지능|블로그|記事|ニュース)/i.test(url);
 }
 
+function looksArticleDetailUrl(url) {
+  try {
+    const parsed = new URL(url);
+    const path = parsed.pathname.toLowerCase();
+    if (/\/(?:tag|tags|topic|topics|category|categories|search|rss|feed|page|archive)(?:\/|$)/i.test(path)) return false;
+    if (/\/(?:blog|news|article|articles|posts|post)\/.+/i.test(path)) return true;
+    if (/\/20\d{2}\/\d{1,2}\/\d{1,2}\//.test(path)) return true;
+    if (/\/20\d{2}\/\d{1,2}\//.test(path)) return true;
+    if (/\/news\/\d{4,}/.test(path)) return true;
+    if (/\.(?:html|htm)$/i.test(path) && path.split("/").filter(Boolean).length >= 2) return true;
+    return false;
+  } catch {
+    return false;
+  }
+}
+
 function parseLinks(html, baseUrl, site) {
   const links = [];
   for (const match of html.matchAll(/<a\b[^>]*href=["']([^"']+)["'][^>]*>([\s\S]*?)<\/a>/gi)) {
     const url = sameHostOrPath(baseUrl, match[1]);
-    if (!url || !looksArticleUrl(url)) continue;
+    if (!url || !looksArticleUrl(url) || !looksArticleDetailUrl(url)) continue;
     links.push({
       siteId: site.id,
       url,
@@ -182,18 +198,13 @@ async function discoverForSite(site, maxPerSite) {
             : parseFeed(text, site)
           : parseLinks(text, url, site);
       for (const row of rows) {
-        if (!row.url || !looksArticleUrl(row.url)) continue;
+        if (!row.url || !looksArticleUrl(row.url) || !looksArticleDetailUrl(row.url)) continue;
         candidates.set(row.url, { ...row, discoveryUrl: url });
         if (candidates.size >= maxPerSite * 2) break;
       }
     } catch (error) {
       failures.push({ url, error: error instanceof Error ? error.message : String(error) });
     }
-  }
-
-  for (const seed of site.hubUrls) {
-    const url = cleanUrl(seed);
-    if (url) candidates.set(url, { siteId: site.id, url, sourceTitle: "", discoveryUrl: "seed" });
   }
 
   return {
@@ -220,9 +231,12 @@ function countMatches(html, pattern) {
 }
 
 function extractArticle(html, site, candidate) {
+  const outline = headings(html);
+  const h1Title = outline.find((item) => item.level === "h1")?.text || "";
   const title =
-    stripHtml(html.match(/<title[^>]*>([\s\S]*?)<\/title>/i)?.[1] || "") ||
+    h1Title ||
     metaContent(html, "og:title") ||
+    stripHtml(html.match(/<title[^>]*>([\s\S]*?)<\/title>/i)?.[1] || "") ||
     candidate.sourceTitle ||
     "";
   const metaDescription =
@@ -240,7 +254,6 @@ function extractArticle(html, site, candidate) {
       html.match(/<main\b[\s\S]*?<\/main>/i)?.[0] ||
       html
   );
-  const outline = headings(html);
   const lead = truncateChars(bodyText, 420);
   const excerpt = truncateChars(bodyText, EXCERPT_CHAR_LIMIT);
   const internalLinks = [...html.matchAll(/<a\b[^>]*href=["']([^"']+)["']/gi)]

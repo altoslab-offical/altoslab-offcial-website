@@ -107,6 +107,12 @@ Article detail rendering has a shared visual contract across Next and the direct
 - Article cover media must keep a stable 1200:630 box with centered crop. This
   protects source and generated covers from causing distorted hero imagery or
   large blank gaps between hero, summary, ads and body content.
+- In-article images are pacing devices, not a gallery block. Article bodies
+  should use explicit `[IMAGE:opening]`, `[IMAGE:mechanism]`, or
+  `[IMAGE:synthesis]` markers when possible. If legacy CMS content supplies
+  repeated `mid-article` placements without markers, `BlogArticle` distributes
+  the figures across the article instead of stacking consecutive images after
+  one section.
 - `geo-summary`, `article-takeaways`, `strong`, and `blockquote` use black text plus restrained signal-lime `#c8ff00` underline or side-marker styling. Takeaway highlights should fit the text, not fill the row.
 - Cloudflare builds must clean stale Next artifacts before generating OpenNext output, and deploy preflight must inspect the built CSS chunks so the reduced article title scale and inline signal-lime takeaway treatment cannot regress during publish.
 - The retired purple article accent must not appear in direct-rendered article pages.
