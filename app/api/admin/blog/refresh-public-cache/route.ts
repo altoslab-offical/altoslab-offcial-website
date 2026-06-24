@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import { adminCookieName, getAdminSessionToken } from "@/lib/auth";
 import { verifyBlogIngestRequest } from "@/lib/blog-ingest-auth";
 import { BLOG_LANGUAGES, blogIndexPath } from "@/lib/blog-utils";
-import { refreshPublicBlogCacheFromStorage } from "@/lib/cms";
+import { getPublishedBlogInventoryPostsByLanguage, refreshPublicBlogCacheFromStorage } from "@/lib/cms";
 
 export const dynamic = "force-dynamic";
 
@@ -44,10 +44,14 @@ export async function POST(request: Request) {
   try {
     const result = await refreshPublicBlogCacheFromStorage();
     if (result.refreshed) revalidateBlogIndexes();
+    const effectiveLanguages = Object.fromEntries(
+      await Promise.all(BLOG_LANGUAGES.map(async (language) => [language, (await getPublishedBlogInventoryPostsByLanguage(language)).length]))
+    );
     return NextResponse.json({
       ok: Boolean(result.refreshed),
       phase: "admin-blog-refresh-public-cache",
       ...result,
+      effectiveLanguages,
       refreshedAt: new Date().toISOString()
     });
   } catch (error) {
