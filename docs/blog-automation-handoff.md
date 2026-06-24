@@ -452,3 +452,11 @@ npm run test:homepage
 - `npm run blog:media-style-corpus -- --target 400` completed 400 metadata samples with 0 failures.
 - Foresight direct HTML/RSS/API can return Tencent EdgeOne 567 from this machine. Do not leave the style-training task blocked on that. Use the existing public markdown/corpus evidence in `data/blog-research/foresight-image-style-2026-06-22/foresight-500-style-signals.*`: 500/500 articles, failures 0, no persistent image download.
 - Training/handoff should learn compact style signals from `latest-summary.json`, `latest-report.md`, and `media-style-corpus.md`; do not store large raw excerpts or copy source passages.
+
+## 2026-06-24 AdSense Review Readiness
+
+- AdSense rejection reason observed in Tommy's logged-in Chrome account `altoslab.offical@gmail.com`: `缺乏價值的內容`. `ads.txt` was already authorized, so the fix was not an ads.txt repair.
+- Official-site readiness now includes trust/accountability surfaces: `/about`, `/contact`, `/editorial-policy`, `/privacy`, `/terms`, footer links, homepage trust links, sitemap entries, and Google advertising-cookie disclosures in the privacy page.
+- Future AdSense or monetization review work must run `npm run test:adsense`, production `node scripts/adsense-smoke.mjs --base-url https://altoslab-ai.cc`, `npm run verify:aws -- --base-url https://altoslab-ai.cc --expected-provider aws-s3`, `npm run blog:performance-smoke -- --base-url https://altoslab-ai.cc`, and Chrome rendered readback before resubmission.
+- Hermes/OpenClaw should treat revenue approval as a content + trust product gate: unique useful content, clear navigation, no thin generated summaries, visible ownership/contact/editorial policy, privacy disclosure, crawlable sitemap, and production-rendered proof.
+- Do not claim AdSense approval from local tests or GitHub alone. Completion means the AdSense console shows the site detail moved to `正在接受審查` or a later approved state after the fix is submitted.
