@@ -507,6 +507,19 @@ export const BLOG_SOURCE_REGISTRY: BlogSourceRegistryEntry[] = [
     notes: "AI product and research news signal with a European editorial lens; validate product claims with official sources."
   },
   {
+    id: "the-rundown-ai",
+    name: "The Rundown AI",
+    url: "https://www.therundown.ai/",
+    feedUrl: "https://www.therundown.ai/",
+    tier: "trusted-media",
+    market: "global",
+    language: "en",
+    category: "AI Products",
+    authority: 76,
+    freshness: 96,
+    notes: "High-frequency AI newsletter and market-signal source. The public site is Cloudflare-protected, so the scanner uses the bounded reader-index adapter rather than assuming a normal RSS feed. Use for traffic-sensitive AI product, tool, workflow and market-news candidates; preserve The Rundown/source image attribution and verify primary linked sources when claims are material."
+  },
+  {
     id: "ars-technica-ai",
     name: "Ars Technica AI",
     url: "https://arstechnica.com/ai/",

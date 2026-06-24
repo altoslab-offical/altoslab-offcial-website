@@ -30,6 +30,7 @@ const SOURCE_PROFILES = {
     "venturebeat-ai",
     "zdnet-ai",
     "the-decoder-ai",
+    "the-rundown-ai",
     "ars-technica-ai",
     "the-register-ai",
     "infoworld-ai",
@@ -194,7 +195,13 @@ function parseRegistryEntries(registrySource) {
 }
 
 function sourceReaderUrl(url = "") {
-  return `https://r.jina.ai/http://${url}`;
+  try {
+    const parsed = new URL(url);
+    const readerPath = `${parsed.host}${parsed.pathname}${parsed.search}${parsed.hash}`;
+    return `https://r.jina.ai/http://${readerPath}`;
+  } catch {
+    return `https://r.jina.ai/http://${String(url || "").replace(/^https?:\/\//i, "")}`;
+  }
 }
 
 function edgeProtectionBody(text = "") {
@@ -202,10 +209,21 @@ function edgeProtectionBody(text = "") {
   return /Attention Required!|Just a moment|cf-error-code|checking your browser|SecurityCompromiseError|<title>\s*Access Denied\s*<\/title>|Cloudflare Ray ID/i.test(head);
 }
 
-async function fetchText(url, timeoutMs) {
+async function fetchText(url, timeoutMs, options = {}) {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), timeoutMs);
   try {
+    if (options.preferReader) {
+      const reader = await fetch(sourceReaderUrl(url), {
+        signal: controller.signal,
+        cache: "no-store",
+        headers: { "User-Agent": "ALTOS-LAB-market-source-scanner/1.0; https://altoslab-ai.cc" }
+      });
+      const readerText = await reader.text();
+      if (reader.ok && readerText && !edgeProtectionBody(readerText)) {
+        return { ok: true, status: reader.status, text: readerText, contentType: reader.headers.get("content-type") || "text/markdown", via: "reader" };
+      }
+    }
     const response = await fetch(url, {
       signal: controller.signal,
       cache: "no-store",
@@ -235,6 +253,7 @@ async function fetchText(url, timeoutMs) {
 
 function parseFeed(xml, source) {
   const items = xml.match(/<item[\s\S]*?<\/item>|<entry[\s\S]*?<\/entry>/gi) || [];
+  if (!items.length && source.id === "the-rundown-ai") return parseTheRundownReaderIndex(xml, source);
   return items.slice(0, 20).map((item) => {
     const href = firstXmlAttribute(item, [
       /<link[^>]+href=["']([^"']+)["'][^>]*>/i
@@ -261,6 +280,53 @@ function parseFeed(xml, source) {
       freshness: source.freshness || 60
     };
   }).filter((item) => item.title && /^https?:\/\//i.test(item.url));
+}
+
+function cleanTheRundownTitle(value = "") {
+  return stripTags(value)
+    .replace(/\s+PLUS:\s+[\s\S]*$/i, "")
+    .replace(/\s+Zach Mink,\s*\+\d+$/i, "")
+    .replace(/\s+Rowan Cheung(?:,\s*\+\d+)?$/i, "")
+    .replace(/\s+Shubham Sharma(?:,\s*\+\d+)?$/i, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function parseTheRundownReaderIndex(markdown, source) {
+  const publishedAt =
+    String(markdown || "").match(/^Published Time:\s*(.+)$/im)?.[1] ||
+    new Date().toISOString();
+  const seen = new Set();
+  const items = [];
+  const linkPattern = /\[!\[[^\]]*:\s*([^\]]+)]\((https?:\/\/[^)]+)\)\s*###\s*([\s\S]*?)\]\((https?:\/\/(?:www\.)?therundown\.ai\/p\/[^)]+)\)/gi;
+  for (const match of String(markdown || "").matchAll(linkPattern)) {
+    const imageAlt = cleanTheRundownTitle(match[1] || "");
+    const imageUrl = stripTags(match[2] || "");
+    const label = stripTags(match[3] || "");
+    const articleUrl = (match[4] || "").replace(/^http:\/\//i, "https://");
+    if (!articleUrl || seen.has(articleUrl)) continue;
+    seen.add(articleUrl);
+    const title = imageAlt || cleanTheRundownTitle(label);
+    if (!title || /exclusive interview|newsletter|subscribe/i.test(title)) continue;
+    const summary = cleanTheRundownTitle(label.replace(title, "")).slice(0, 260);
+    items.push({
+      title,
+      url: articleUrl,
+      publisher: source.name,
+      publishedAt,
+      summary,
+      feedImageUrl: imageUrl,
+      sourceId: source.id,
+      sourceUrl: source.url,
+      sourceFeedUrl: source.feedUrl,
+      tier: source.tier,
+      category: source.category,
+      authority: source.authority || 60,
+      freshness: source.freshness || 60
+    });
+    if (items.length >= 12) break;
+  }
+  return items;
 }
 
 function parsedHost(value) {
@@ -712,7 +778,7 @@ async function main() {
 
   const feedResults = await Promise.all(
     registry.slice(0, sourceProfile ? registry.length : 18).map(async (source) => {
-      const fetched = await fetchText(source.feedUrl, FEED_TIMEOUT_MS);
+      const fetched = await fetchText(source.feedUrl, FEED_TIMEOUT_MS, { preferReader: source.id === "the-rundown-ai" });
       return fetched.ok ? parseFeed(fetched.text, source) : [];
     })
   );
