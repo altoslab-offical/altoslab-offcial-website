@@ -44,6 +44,7 @@
     "blog:performance-smoke": "node scripts/blog-performance-smoke.mjs",
     "seo:geo-report": "node scripts/seo-geo-insight-report.mjs",
     "blog:traffic-self-evolution": "node scripts/blog-traffic-self-evolution.mjs",
+    "blog:codex-column-producer": "node scripts/blog-codex-column-producer.mjs",
     "test": "npm run review:design && npm run typecheck && npm run test:homepage && npm run test:blog && npm run test:wonda-widget && npm run test:adsense",
     "blog:market-scan": "node scripts/blog-scheduled-runner.mjs --market-scan",
     "blog:market-worker": "node scripts/blog-market-source-worker.mjs",

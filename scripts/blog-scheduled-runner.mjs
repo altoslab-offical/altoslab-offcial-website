@@ -941,7 +941,37 @@ ${await fs.readFile(orchestratorPromptPath, "utf8").catch(() => "")}
   };
   await writeJson(manifestPath, manifest);
   await writeJson(indexPath, { ...manifest, manifestPath });
-  return { ok: true, skipped: false, phase: "prep", runDir, promptPath, articleSetPath, manifestPath, indexPath, doctor: compactDoctorResult(doctor) };
+  let codexProducer = null;
+  if (process.env.ALTOS_BLOG_AUTO_CODEX_COLUMN_PRODUCER === "1") {
+    codexProducer = await runCommand(process.execPath, [
+      "scripts/blog-codex-column-producer.mjs",
+      "--date",
+      date,
+      "--slot",
+      slot,
+      "--manifest",
+      manifestPath
+    ], { cwd: process.cwd(), timeoutMs: 180000 });
+    await appendLog(globalScheduleLogPath(), JSON.stringify({
+      phase: "codex-column-producer",
+      date,
+      slot,
+      manifestPath,
+      code: codexProducer.code
+    }));
+    if (codexProducer.code !== 0) {
+      return {
+        ok: false,
+        phase: "codex-column-producer",
+        manifestPath,
+        articleSetPath,
+        stdout: codexProducer.stdout,
+        stderr: codexProducer.stderr,
+        doctor: compactDoctorResult(doctor)
+      };
+    }
+  }
+  return { ok: true, skipped: false, phase: "prep", runDir, promptPath, articleSetPath, manifestPath, indexPath, codexProducer, doctor: compactDoctorResult(doctor) };
 }
 
 async function createMarketScan({ date }) {
