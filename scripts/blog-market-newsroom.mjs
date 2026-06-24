@@ -1382,6 +1382,36 @@ function compactNewsDeck(language, title, standfirst) {
   return truncate(cleanMarketPublicText(first, language), 190);
 }
 
+function marketLeadFloor(language = "") {
+  return ["en", "id", "vi", "ms", "fil"].includes(language) ? 108 : 82;
+}
+
+function looksLikeUnlocalizedEnglish(value = "", language = "") {
+  if (!value || language === "en") return false;
+  const text = normalizeNewsText(value);
+  if (!/[a-z]{4,}\s+[a-z]{4,}/i.test(text)) return false;
+  return !/[\u4e00-\u9fff\u3040-\u30ff\uac00-\ud7af\u0e00-\u0e7f]/.test(text);
+}
+
+function concreteSourceLead(language, publisher, title, standfirst = "", facts = []) {
+  const compactedFacts = facts
+    .map((fact) => compactFact(fact, language, 165))
+    .filter(Boolean)
+    .filter((fact) => !looksLikeUnlocalizedEnglish(fact, language));
+  const localizedStandfirst = looksLikeUnlocalizedEnglish(standfirst, language) ? "" : standfirst;
+  const seed = localizedStandfirst || compactedFacts[0] || (language === "en" ? title : "");
+  const base = seed ? sourceLeadWithPublisher(language, publisher, compactNewsDeck(language, title, seed)) : "";
+  const additions = compactedFacts
+    .filter((fact) => factDiffersFromLead(fact, base))
+    .slice(0, 3);
+  const parts = base ? [base] : [];
+  for (const addition of additions) {
+    if (cleanMarketPublicText(parts.join(" "), language).length >= marketLeadFloor(language)) break;
+    parts.push(addition);
+  }
+  return truncate(cleanMarketPublicText(sentenceJoin(parts, language), language), 238);
+}
+
 function compactFact(value = "", language = "", limit = 180) {
   const sentence = splitReadableSentences(value)[0] || value;
   return truncate(cleanMarketPublicText(sentence, language), limit);
@@ -1772,19 +1802,36 @@ function sourceEventOpeningParagraph(language, publisher, date, paragraph = "", 
   const titlePrefix =
     cleanTitle &&
     !detail.toLowerCase().includes(cleanTitle.toLowerCase()) &&
+    detail.length < 120 &&
     /AI|OpenAI|Gemini|Claude|ChatGPT|agent|automation|search|model|Google|Microsoft|NVIDIA/i.test(cleanTitle)
       ? cleanTitle
       : "";
+  const needsAiWorkflowCue =
+    /\b(?:Claude|ChatGPT|Gemini|Codex|OpenAI|Anthropic)\b/i.test(`${cleanTitle} ${detail}`) &&
+    !/(AI|agent|automation|workflow|產品|流程|自動化|導入|運用|実装|도입|자동화)/i.test(detail);
+  const contextualDetail = needsAiWorkflowCue
+    ? ({
+        "zh-Hant": `這項 AI 工作流更新顯示，${detail}`,
+        en: `this AI workflow update shows that ${detail}`,
+        ja: `この AI ワークフロー更新では、${detail}`,
+        ko: `이 AI 워크플로 업데이트는 ${detail}`,
+        id: `update workflow AI ini menunjukkan bahwa ${detail}`,
+        vi: `cập nhật workflow AI này cho thấy ${detail}`,
+        th: `อัปเดต workflow AI นี้ชี้ว่า ${detail}`,
+        ms: `kemas kini workflow AI ini menunjukkan bahawa ${detail}`,
+        fil: `ipinapakita ng AI workflow update na ito na ${detail}`
+      }[language] || `this AI workflow update shows that ${detail}`)
+    : detail;
   const byLanguage = {
-    "zh-Hant": titlePrefix ? `${cleanPublisher} 在${date}報導「${titlePrefix}」，${detail}` : `${cleanPublisher} 在${date}報導，${detail}`,
-    en: titlePrefix ? `${cleanPublisher}'s ${date} report on ${titlePrefix} says: ${detail}` : `${cleanPublisher}'s ${date} report says: ${detail}`,
-    ja: titlePrefix ? `${cleanPublisher} は${date}の記事で「${titlePrefix}」について、${detail}` : `${cleanPublisher} は${date}の記事で、${detail}`,
-    ko: titlePrefix ? `${cleanPublisher}는 ${date} 보도에서 ${titlePrefix}에 대해 다음과 같이 설명했습니다. ${detail}` : `${cleanPublisher}는 ${date} 보도에서 다음과 같이 설명했습니다. ${detail}`,
-    id: titlePrefix ? `Dalam laporan pada ${date} tentang ${titlePrefix}, ${cleanPublisher} menyebut: ${detail}` : `Dalam laporan pada ${date}, ${cleanPublisher} menyebut: ${detail}`,
-    vi: titlePrefix ? `Trong bài viết ngày ${date} về ${titlePrefix}, ${cleanPublisher} cho biết: ${detail}` : `Trong bài viết ngày ${date}, ${cleanPublisher} cho biết: ${detail}`,
-    th: titlePrefix ? `ในรายงานเมื่อ ${date} เกี่ยวกับ ${titlePrefix} ${cleanPublisher} ระบุว่า ${detail}` : `ในรายงานเมื่อ ${date} ${cleanPublisher} ระบุว่า ${detail}`,
-    ms: titlePrefix ? `Dalam laporan pada ${date} tentang ${titlePrefix}, ${cleanPublisher} menyatakan: ${detail}` : `Dalam laporan pada ${date}, ${cleanPublisher} menyatakan: ${detail}`,
-    fil: titlePrefix ? `Sa ulat noong ${date} tungkol sa ${titlePrefix}, sinabi ng ${cleanPublisher}: ${detail}` : `Sa ulat noong ${date}, sinabi ng ${cleanPublisher}: ${detail}`
+    "zh-Hant": titlePrefix ? `${cleanPublisher} 在 ${date} 報導，${titlePrefix} 的重點是：${contextualDetail}` : `${cleanPublisher} 在 ${date} 報導，${contextualDetail}`,
+    en: titlePrefix ? `${cleanPublisher} reported on ${date} that ${titlePrefix} centers on this update: ${contextualDetail}` : `${cleanPublisher} reported on ${date} that ${contextualDetail}`,
+    ja: titlePrefix ? `${cleanPublisher} は ${date} の記事で、${titlePrefix} について ${contextualDetail}` : `${cleanPublisher} は ${date} の記事で、${contextualDetail}`,
+    ko: titlePrefix ? `${cleanPublisher}는 ${date} 보도에서 ${titlePrefix}에 대해 ${contextualDetail}` : `${cleanPublisher}는 ${date} 보도에서 ${contextualDetail}`,
+    id: titlePrefix ? `${cleanPublisher} melaporkan pada ${date} bahwa ${titlePrefix} berpusat pada hal ini: ${contextualDetail}` : `${cleanPublisher} melaporkan pada ${date} bahwa ${contextualDetail}`,
+    vi: titlePrefix ? `${cleanPublisher} đưa tin ngày ${date} rằng ${titlePrefix} xoay quanh điểm này: ${contextualDetail}` : `${cleanPublisher} đưa tin ngày ${date} rằng ${contextualDetail}`,
+    th: titlePrefix ? `${cleanPublisher} รายงานเมื่อ ${date} ว่า ${titlePrefix} มีประเด็นหลักคือ ${contextualDetail}` : `${cleanPublisher} รายงานเมื่อ ${date} ว่า ${contextualDetail}`,
+    ms: titlePrefix ? `${cleanPublisher} melaporkan pada ${date} bahawa ${titlePrefix} berpusat pada perkara ini: ${contextualDetail}` : `${cleanPublisher} melaporkan pada ${date} bahawa ${contextualDetail}`,
+    fil: titlePrefix ? `Iniulat ng ${cleanPublisher} noong ${date} na nakasentro ang ${titlePrefix} sa update na ito: ${contextualDetail}` : `Iniulat ng ${cleanPublisher} noong ${date} na ${contextualDetail}`
   };
   return cleanMarketPublicText(byLanguage[language] || byLanguage.en, language);
 }
@@ -2410,9 +2457,9 @@ export function buildMarketNewsroomPost({ language, pack = {}, post = {}, frame,
   const excerptPublisher = sourceArticlePublisher(
     article.publisher || source.publisher || originalSource.publisher || post.coverCredit || pack.coverCredit
   );
-  const rawStandfirst = sourceLeadWithPublisher(language, excerptPublisher, articleStandfirst(language, inferredFrame, source, article, profile));
-  const excerpt = sourceLeadWithPublisher(language, excerptPublisher, cleanMarketPublicText(compactNewsDeck(language, title, rawStandfirst), language));
   const keyTakeaways = sourceKeyTakeaways(language, inferredFrame, source, article, profile);
+  const rawStandfirst = articleStandfirst(language, inferredFrame, source, article, profile);
+  const excerpt = concreteSourceLead(language, excerptPublisher, title, rawStandfirst, keyTakeaways);
   let geoSummary = sourceGeoSummary(language, inferredFrame, source, article, profile);
   if (geoSummary && excerpt && overlapRatio(geoSummary, excerpt) >= 0.72) {
     const alternativeFacts = keyTakeaways.filter((fact) => factDiffersFromLead(fact, excerpt)).slice(0, 2);

@@ -63,7 +63,8 @@
 - AWS/S3 runtime 的 `/api/blog?fields=inventory` cap 必須足夠支援 full SEO/GEO coverage audit；預設使用 `BLOG_API_LIMIT_CAP=1000`，`seo:geo-report` 預設用 `SEO_GEO_INVENTORY_LIMIT=1000`。不要用 120 筆 sample 結論決定是否刪文、補語言或宣稱多語缺口。
 - SEO/GEO source-count gate 必須按內容類型判斷：市場快訊可以是單一可信原始來源；專欄/feature 才要求多來源平均健康度。不要為了分數替快訊硬塞不必要來源。
 - Market-news 的 anti-slop warning 不能直接沿用專欄 release blocker。市場快訊的核心是 source fidelity、來源圖、可追溯事實與自然在地化；`opening could be more concrete`、泛商業詞或 authenticity score 低可以作為 repair hint，但除非出現 `template/formulaic/raw English/technical jargon/market-news template` 這類 public defect，否則不可讓 source-faithful 快訊被專欄 gate 誤殺。
-- 若 market scan 有大量 candidates 但沒有 publish，先查 `BLOG_MARKET_TRANSLATION_PROVIDER`、source worker、validate-only errors 與 production ECS gate 版本，不要立刻判定來源池太少。2026-06-24 的案例是 OpenAI Partner Network candidate 有 27 個 registry feeds、245 個 candidates、source image pass，但 production admin route 尚未部署新 market gate，所以被舊 gate 擋住。
+- 若 market scan 有大量 candidates 但沒有 publish，先查 `BLOG_MARKET_TRANSLATION_PROVIDER`、source worker、validate-only errors、source profile 與 production ECS gate 版本，不要立刻判定來源池太少。2026-06-24 的案例先顯示 27 個 registry feeds、245 個 candidates，但 source-worker 因 translation provider/env drift 被擋；修復後 `longform-ai-news` profile 擴到 33 個 feed、312 個 candidates，並發布新的 TechCrunch/Claude Tag 多語市場快訊。
+- 非英文市場快訊的 excerpt/subtitle 不可把英文 feed title 原封不動放進去。若 source summary 尚未本地化，先用已本地化的 source facts/key takeaways 建 lead；真的沒有本地化事實時 candidate 應 hold/repair，而不是用英文標題補字數。
 - Hermes/OpenClaw Codex lane 必須把 `codexEvidence.provider/runtime/model/reasoning` 寫進 manifest；不要為了通過 legacy doctor 偽造 Gemini/ChatGPT Chrome evidence。若 release verifier 看到 internal copy，例如 `SEO/GEO`，要修公開文案後重新 release/readback。
 - Market-news 不再接受 ALTOS LAB fallback cover 通過 production gate；舊 fallback/generated 快訊需要回補來源圖，不能用 copy gate 繞過 image/source evidence。
 - 破圖修復不能等同於圖片品質修復。若 generated-media object 遺失，短期只允許用穩定 fallback 或恢復原始/source-safe 圖止血；不要用本地 SVG/抽象流程板硬補正式 cover。正式 column/feature cover 必須優先走 Codex built-in `$imagegen` / `gpt-image-2` raster lane 或可授權來源圖；Chrome/ChatGPT image2.0 只作 fallback，API key worker 只在明確批准的大批次情境使用。prompt 要指定具體主體、構圖、鏡頭/版式、材質光線、色彩與負面約束；拒絕抽象節點板、workflow card、glass cube、假 dashboard、generic network map、過度 3D SaaS 感與一眼 AI 圖。
@@ -198,17 +199,18 @@ launchctl bootstrap "gui/$(id -u)" "$HOME/Library/LaunchAgents/com.altoslab.blog
 npm run blog:market-sources -- --date <YYYY-MM-DD> --queue-dir data/blog-backfill/<YYYY-MM-DD>/queue --write --overwrite
 ```
 
-2. 從 source pack 挑選非重複、來源可驗、圖片可用的 longform item。
-3. Source worker 建立 source-faithful article set，普通 market news 不跑 Gemini。
-4. 保留 source article / official announcement image，所有語言共用；若 source image 本身不合格，回到 source-image repair 找到合格來源圖後才 release。
-5. 跑 public QA：
+2. 常規 production profile 使用 `ALTOS_BLOG_MARKET_SOURCE_PROFILE=longform-ai-news`；它應包含官方/高流量/工程長文來源，例如 OpenAI、Google AI/DeepMind/Cloud、Microsoft AI/Azure/Research、NVIDIA、AWS ML、Cloudflare AI、Apple ML、GitHub、Hugging Face、Vercel、TechCrunch、VentureBeat、The Verge、WIRED、Search Engine Land、Semrush、Ahrefs、9to5Google/9to5Mac/Android Authority 等。Anthropic/Mistral/Meta 若沒有穩定 RSS，就保留為 official verification source，不要硬塞死 feed。
+3. 從 source pack 挑選非重複、來源可驗、圖片可用的 longform item。
+4. Source worker 建立 source-faithful article set，普通 market news 不跑 Gemini。
+5. 保留 source article / official announcement image，所有語言共用；若 source image 本身不合格，回到 source-image repair 找到合格來源圖後才 release。
+6. 跑 public QA：
 
 ```bash
 npm run blog:market-public-qa -- --slug <slug> --must <entity> --must <publisher>
 ```
 
-6. 跑 validate-only / release gate。
-7. 發布後跑 release verification。
+7. 跑 validate-only / release gate。
+8. 發布後跑 release verification。
 
 ### Market news hold 條件
 

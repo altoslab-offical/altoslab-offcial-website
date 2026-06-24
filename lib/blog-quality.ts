@@ -1264,7 +1264,7 @@ function reviewSeoGeoStructure(post: BlogPost): ReviewResult {
   if (/(本文|這篇文章|in this article|this article|we will|we'll|cuts through|この記事では|本稿では|이 글에서는|이번 글에서는)/i.test(firstBlock)) {
     issues.push("opening must answer the query directly instead of introducing the article");
   }
-  if (!/(ALTOS LAB|GEO|SEO|AI|Agent|agent|automation|workflow|導入|產品|流程|自動化|実装|運用|도입|자동화)/i.test(firstBlock)) {
+  if (!/(ALTOS LAB|GEO|SEO|AI|Agent|agent|automation|workflow|OpenAI|Anthropic|Claude|ChatGPT|Gemini|Codex|Microsoft|Google|NVIDIA|Slack|導入|產品|流程|自動化|実装|運用|도입|자동화)/i.test(firstBlock)) {
     issues.push("opening answer needs concrete entities, not a generic setup paragraph");
   }
   if (firstBlock.length < 80) warnings.push("opening answer may be too thin for search intent and AI-answer extraction");
