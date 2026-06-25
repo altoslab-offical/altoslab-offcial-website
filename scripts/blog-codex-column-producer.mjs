@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 
-import { spawnSync } from "node:child_process";
 import fs from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
+import { selectColumnVisualStyleSet } from "./blog-column-visual-style-library.mjs";
 
 const LANGUAGES = ["zh-Hant", "en", "ja", "ko", "id", "vi", "th", "ms", "fil"];
 const SLOT_HOURS = { morning: "09:10", afternoon: "14:40", evening: "20:20" };
@@ -34,6 +34,13 @@ async function exists(filePath) {
   } catch {
     return false;
   }
+}
+
+async function firstExisting(paths) {
+  for (const filePath of paths.filter(Boolean)) {
+    if (await exists(filePath)) return filePath;
+  }
+  return "";
 }
 
 async function readJson(filePath) {
@@ -684,9 +691,9 @@ function excerptFor(plan, language) {
     return `${clipped}${language === "en" ? "." : "。"}`;
   };
   if (language === "zh-Hant") {
-    return limit(`${base} 用公開來源檢查一條普通工作日會遇到的真實決策。`);
+    return limit(base);
   }
-  return limit(`${base} Source-backed note for one operating decision.`);
+  return limit(base);
 }
 
 function seoDescription(plan, language) {
@@ -694,131 +701,67 @@ function seoDescription(plan, language) {
   return text.slice(0, 178);
 }
 
-function imagePrompt(plan, role) {
-  const roleText = role === "cover" ? "hero cover" : role === "evidence-desk" ? "evidence desk" : "operating loop";
-  return `Wordless GPT image 2.0 editorial ${roleText} for ${plan.topic}: one concrete source-linked scene or object that could not fit a generic AI essay; ${plan.visualFamily}; varied camera angle; tactile editorial materials; clear topic anchor; no rounded-card workflow wallpaper; no random lines; no dark grid; no fake dashboard; no visible text; no logos; no people; high information density with a publishable magazine feel.`;
+function styleForRole(plan, role, options = {}) {
+  const set = selectColumnVisualStyleSet({
+    date: options.date || "",
+    slot: options.slot || "",
+    topic: plan.topic || plan.plainTopic || plan.slugBase
+  });
+  if (role === "cover") return set.cover;
+  if (role === "evidence-desk") return set.opening;
+  return set.mechanism;
 }
 
-async function renderImage({ outputPath, seed, family, role }) {
-  const py = String.raw`
-import math, random, sys
-from PIL import Image, ImageDraw, ImageFilter
-
-out, seed, family, role = sys.argv[1], int(sys.argv[2]), sys.argv[3], sys.argv[4]
-random.seed(seed)
-w, h = 1400, 788
-palettes = {
-  "product-control-room": [(20,28,32),(73,145,126),(214,225,191),(222,145,96),(242,238,225)],
-  "source-ledger-studio": [(244,240,231),(66,93,83),(201,121,83),(92,140,181),(28,32,34)],
-  "procurement-war-room": [(237,232,219),(39,44,54),(186,80,72),(226,178,86),(79,121,112)]
-}
-base, accent, paper, warm, ink = palettes.get(family, palettes["source-ledger-studio"])
-img = Image.new("RGB", (w,h), paper if role != "operating-loop" else base)
-draw = ImageDraw.Draw(img, "RGBA")
-for y in range(h):
-    blend = y / h
-    r = int(paper[0]*(1-blend) + base[0]*blend*0.35)
-    g = int(paper[1]*(1-blend) + base[1]*blend*0.35)
-    b = int(paper[2]*(1-blend) + base[2]*blend*0.35)
-    draw.line([(0,y),(w,y)], fill=(r,g,b,255))
-for _ in range(40):
-    x=random.randint(-120,w)
-    y=random.randint(-80,h)
-    ww=random.randint(80,260)
-    hh=random.randint(40,150)
-    col=random.choice([accent,warm,base,ink])
-    a=random.randint(20,70)
-    if role == "cover":
-        draw.rounded_rectangle([x,y,x+ww,y+hh], radius=18, outline=(*col,a+30), fill=(*col,a//3), width=2)
-    elif role == "evidence-desk":
-        draw.rounded_rectangle([x,y,x+ww,y+hh], radius=8, fill=(*paper,120), outline=(*ink,40), width=1)
-        draw.line([(x+18,y+22),(x+ww-22,y+22)], fill=(*accent,110), width=3)
-    else:
-        draw.ellipse([x,y,x+ww,y+ww], outline=(*accent,a+35), width=3)
-        draw.line([(x+ww/2,y+ww/2),(random.randint(0,w),random.randint(0,h))], fill=(*warm,a+45), width=2)
-if role == "cover":
-    for i in range(9):
-        x=160+i*120+random.randint(-20,20)
-        y=170+int(math.sin(i)*45)+random.randint(-20,20)
-        draw.rounded_rectangle([x,y,x+92,y+132], radius=16, fill=(*paper,210), outline=(*ink,75), width=2)
-        if i:
-            px=160+(i-1)*120
-            draw.line([(px+92,y+64),(x,y+64)], fill=(*accent,130), width=4)
-elif role == "evidence-desk":
-    draw.polygon([(160,620),(1240,540),(1320,760),(80,760)], fill=(*base,55))
-    for i in range(7):
-        x=220+i*140
-        y=220+random.randint(-25,35)
-        draw.rounded_rectangle([x,y,x+112,y+152], radius=10, fill=(*paper,240), outline=(*ink,85), width=2)
-        draw.rectangle([x+18,y+32,x+94,y+42], fill=(*accent,130))
-        draw.rectangle([x+18,y+62,x+78,y+70], fill=(*warm,110))
-else:
-    cx, cy = w//2, h//2
-    for r in [90,170,260,350]:
-        draw.ellipse([cx-r,cy-r,cx+r,cy+r], outline=(*accent,80), width=3)
-    for i in range(14):
-        ang=2*math.pi*i/14
-        x=cx+math.cos(ang)*random.randint(120,330)
-        y=cy+math.sin(ang)*random.randint(90,260)
-        draw.rounded_rectangle([x-52,y-30,x+52,y+30], radius=12, fill=(*paper,190), outline=(*warm,120), width=2)
-        draw.line([(cx,cy),(x,y)], fill=(*warm,95), width=3)
-# Fine-grain texture keeps generated editorial images from collapsing into
-# low-byte flat PNGs, which are usually weak hero candidates in production QA.
-for _ in range(9000):
-    x=random.randrange(w)
-    y=random.randrange(h)
-    col=random.choice([accent,warm,base,ink,paper])
-    a=random.randint(10,34)
-    draw.point((x,y), fill=(*col,a))
-img = img.filter(ImageFilter.UnsharpMask(radius=1.4, percent=120, threshold=4))
-img.save(out, compress_level=1, optimize=False)
-`;
-  const result = spawnSync("python3", ["-c", py, outputPath, String(seed), family, role], { encoding: "utf8" });
-  if (result.status !== 0) {
-    throw new Error(`image render failed: ${result.stderr || result.stdout}`);
+function roleScene(plan, role) {
+  const topic = plan.plainTopic || plan.topic;
+  if (role === "cover") {
+    return `one memorable visual anchor for "${topic}" that works as a homepage thumbnail`;
   }
+  if (role === "evidence-desk") {
+    return "a first supporting image that makes the evidence, source material, or operating tension visible through concrete objects";
+  }
+  return "a second supporting image with a different medium and camera angle that shows repair, measurement, or decision tradeoffs without repeating the cover composition";
 }
 
-function planSeed(plan, slot, date) {
-  return Array.from(`${date}:${slot}:${plan.slugBase}`).reduce((sum, char) => sum + char.charCodeAt(0), 20260624);
+function imagePrompt(plan, role, options = {}) {
+  const style = styleForRole(plan, role, options);
+  const roleText = role === "cover" ? "hero cover" : role === "evidence-desk" ? "opening support image" : "mechanism support image";
+  return [
+    `Generate a 16:9 wordless GPT image 2.0 ${roleText} for an ALTOS LAB article about ${plan.topic}.`,
+    `Selected style family: ${style.id} (${style.label}).`,
+    `Style reference behavior: preserve the medium, texture, light, mood, and composition grammar from this style direction; do not preserve any old ALTOS LAB workflow-card layout.`,
+    `Style direction: ${style.prompt}`,
+    `Subject: ${roleScene(plan, role)}.`,
+    "Multi-prompt separation: subject is the business idea; style is the visual grammar. If the image starts looking like generic operations wallpaper, change the visual grammar first.",
+    "Composition: choose a distinct focal object, silhouette, or scene; do not build a reusable workflow-board template. Use one memorable subject, not a grid of cards.",
+    "Camera/layout: vary crop and viewpoint from other images in the same article; keep the main subject readable as a small blog card and Open Graph preview.",
+    `Material/lighting/color: ${style.palette}.`,
+    "Creative diversity control: Midjourney-like variation budget high, topic fit strict. Let texture, medium, lighting, crop, and composition change first, then fit the topic into it.",
+    `Negative prompt: ${style.avoid} No readable words, letters, numbers, logos, real people, UI screenshots, fake dashboards, rounded-card workflow wallpaper, node maps, random connecting lines, glass cubes, generic AI icons, or repeated paper-card/checkmark metaphors.`
+  ].join(" ");
 }
 
 async function buildImages(runDir, plan, slot, date) {
-  const visualsFile = arg("visuals-file");
+  const visualsFile =
+    arg("visuals-file") ||
+    process.env.ALTOS_BLOG_CODEX_COLUMN_VISUALS_FILE ||
+    (await firstExisting([
+      path.join(runDir, "approved-image2-visuals.json"),
+      path.join(runDir, "approved-gpt-image2-visuals.json"),
+      path.join(runDir, "approved-column-visuals.json")
+    ]));
   if (visualsFile) {
-    return loadApprovedVisuals({ visualsFile: path.resolve(visualsFile), plan, slot });
+    return loadApprovedVisuals({ visualsFile: path.resolve(visualsFile), plan, slot, date });
   }
-  if (process.env.ALTOS_BLOG_ALLOW_LOCAL_COLUMN_IMAGE_FALLBACK !== "true") {
-    throw new Error([
-      "needs_image2_column_visuals",
-      "Production column imagery must come from the approved Codex/OpenClaw GPT image2 raster workflow.",
-      "The old local Pillow fallback produced repeated abstract card-line visuals and must not be used for public columns.",
-      "Provide --visuals-file with 1 cover and 2-3 content images."
-    ].join(":"));
-  }
-  const mediaDir = path.join(runDir, "codex-generated-media");
-  await fs.mkdir(mediaDir, { recursive: true });
-  const roles = ["cover", "evidence-desk", "operating-loop"];
-  const paths = {};
-  const seedBase = planSeed(plan, slot, date);
-  for (let index = 0; index < roles.length; index += 1) {
-    const role = roles[index];
-    const outputPath = path.join(mediaDir, `${slot}-${plan.slugBase}-${role}.png`);
-    if (!(await exists(outputPath)) || hasFlag("force")) {
-      await renderImage({ outputPath, seed: seedBase + index * 97, family: plan.visualFamily, role });
-    }
-    paths[role] = {
-      localPath: outputPath,
-      provider: "local-pillow-debug-fallback",
-      prompt: imagePrompt(plan, role),
-      generatedAt: new Date().toISOString(),
-      visualChecks: visualChecks(`${role} debug-only local fallback; not valid for public production.`)
-    };
-  }
-  return paths;
+  throw new Error([
+    "needs_image2_column_visuals",
+    "Production column imagery must come from an approved Codex/OpenClaw GPT image2 raster workflow.",
+    "Local Pillow/SVG/debug fallback art is disabled because it produced repeated abstract card-line visuals.",
+    "Provide --visuals-file or place approved-image2-visuals.json in the run directory."
+  ].join(":"));
 }
 
-async function loadApprovedVisuals({ visualsFile, plan, slot }) {
+async function loadApprovedVisuals({ visualsFile, plan, slot, date }) {
   const parsed = await readJson(visualsFile);
   const candidates = Array.isArray(parsed.articles) ? parsed.articles : [parsed];
   const selected =
@@ -827,7 +770,7 @@ async function loadApprovedVisuals({ visualsFile, plan, slot }) {
     candidates.find((entry) => entry?.slot === slot) ||
     candidates[0];
   if (!selected) throw new Error(`approved visuals file has no visual set: ${visualsFile}`);
-  const cover = normalizeApprovedVisual(selected.cover, "cover", plan);
+  const cover = normalizeApprovedVisual(selected.cover, "cover", plan, { date, slot });
   const content = Array.isArray(selected.contentImages) ? selected.contentImages : [];
   if (content.length < 2) {
     throw new Error(`approved visuals file must include at least 2 contentImages for ${plan.slugBase}`);
@@ -837,13 +780,13 @@ async function loadApprovedVisuals({ visualsFile, plan, slot }) {
   }
   return {
     cover,
-    "evidence-desk": normalizeApprovedVisual(content[0], "evidence-desk", plan),
-    "operating-loop": normalizeApprovedVisual(content[1], "operating-loop", plan),
-    ...(content[2] ? { synthesis: normalizeApprovedVisual(content[2], "synthesis", plan) } : {})
+    "evidence-desk": normalizeApprovedVisual(content[0], "evidence-desk", plan, { date, slot }),
+    "operating-loop": normalizeApprovedVisual(content[1], "operating-loop", plan, { date, slot }),
+    ...(content[2] ? { synthesis: normalizeApprovedVisual(content[2], "synthesis", plan, { date, slot }) } : {})
   };
 }
 
-function normalizeApprovedVisual(image, role, plan) {
+function normalizeApprovedVisual(image, role, plan, options = {}) {
   const localPath = String(image?.localPath || "").trim();
   const url = String(image?.url || image?.publicUrl || "").trim();
   if (!localPath && !url) throw new Error(`${role} approved visual needs localPath or url`);
@@ -853,7 +796,7 @@ function normalizeApprovedVisual(image, role, plan) {
   if (/local-pillow|debug-only|fallback/i.test(`${provider} ${model}`)) {
     throw new Error(`${role} approved visual cannot be local/debug/fallback`);
   }
-  const prompt = String(image?.prompt || image?.generation?.prompt || imagePrompt(plan, role)).trim();
+  const prompt = String(image?.prompt || image?.generation?.prompt || imagePrompt(plan, role, options)).trim();
   if (prompt.length < 40) throw new Error(`${role} approved visual prompt is too thin`);
   const generatedAt = String(image?.generatedAt || image?.generation?.generatedAt || new Date().toISOString()).trim();
   const visualChecksPayload = {
@@ -882,8 +825,8 @@ function contentImages(plan, imagePaths, generatedAt) {
   return [
     {
       ...imagePathFields(first),
-      alt: `${plan.coverAlt} evidence card table, permission card and audit trail ledger`,
-      caption: "這張圖把來源卡、審核節點與責任邊界放在同一個工作桌上。",
+      alt: `${plan.coverAlt} source evidence workspace for the article decision`,
+      caption: "這張圖把來源、決策問題與可驗收的工作證據放進同一個具體場景。",
       source: "generated",
       credit: first.credit || "ALTOS LAB editorial visual",
       aspectRatio: first.aspectRatio || "16:9",
@@ -891,12 +834,12 @@ function contentImages(plan, imagePaths, generatedAt) {
       provider: first.provider,
       prompt: first.prompt,
       generatedAt: first.generatedAt || generatedAt,
-      visualChecks: first.visualChecks || visualChecks("Evidence desk has topic-specific source cards and review lanes, no text/logos/people.")
+      visualChecks: first.visualChecks || visualChecks("Image uses a concrete article-specific scene, distinct composition, no text/logos/people.")
     },
     {
       ...imagePathFields(second),
-      alt: `${plan.coverAlt} rollback switch, reviewer stamps and metric feedback loop`,
-      caption: "這張圖把發布、讀數據、修正選題與回滾接成一個可重複循環。",
+      alt: `${plan.coverAlt} measurement and repair scene for publication decisions`,
+      caption: "這張圖用另一個構圖呈現發布後如何讀數據、修正選題與保留退路。",
       source: "generated",
       credit: second.credit || "ALTOS LAB editorial visual",
       aspectRatio: second.aspectRatio || "16:9",
@@ -904,7 +847,7 @@ function contentImages(plan, imagePaths, generatedAt) {
       provider: second.provider,
       prompt: second.prompt,
       generatedAt: second.generatedAt || generatedAt,
-      visualChecks: second.visualChecks || visualChecks("Operating loop shows feedback and recovery structure, no text/logos/people.")
+      visualChecks: second.visualChecks || visualChecks("Image uses a second distinct concrete composition, no repeated card-map wallpaper, no text/logos/people.")
     }
   ];
 }
@@ -957,7 +900,7 @@ function postFor(plan, language, date, slot, imagePaths, generatedAt) {
       style: `${plan.visualFamily}, editorial still life, source evidence, operational decision system`,
       generatedAt: cover.generatedAt || generatedAt,
       status: "generated",
-      visualChecks: cover.visualChecks || visualChecks("Cover shows permission cards, audit trail ledger, reviewer stamps and return switch for the exact article topic.")
+      visualChecks: cover.visualChecks || visualChecks("Cover uses a concrete topic-specific editorial scene with distinct composition and no abstract card-map wallpaper.")
     },
     contentImages: contentImages(plan, imagePaths, generatedAt)
   };

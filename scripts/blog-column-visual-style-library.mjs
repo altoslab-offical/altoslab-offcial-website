@@ -1,6 +1,44 @@
 #!/usr/bin/env node
 
-export const COLUMN_VISUAL_STYLES = [
+import fs from "node:fs";
+
+const HERMES_STYLE_BANK =
+  process.env.HERMES_VISUAL_STYLE_BANK ||
+  "/Users/asdc163/LocalProjects/Hermes/config/visual-generation-style-bank.json";
+
+const HERMES_EXPECTED_STYLE_FAMILIES = [
+  "pixel_art",
+  "anime",
+  "meme",
+  "crypto",
+  "brutalist",
+  "noir",
+  "street_photo"
+];
+
+function loadHermesColumnStyles() {
+  try {
+    if (!fs.existsSync(HERMES_STYLE_BANK)) return [];
+    const bank = JSON.parse(fs.readFileSync(HERMES_STYLE_BANK, "utf8"));
+    const globalAvoid = Array.isArray(bank.global_negative_prompt)
+      ? bank.global_negative_prompt.join(" ")
+      : "No visible text, logos, fake dashboards, or generic AI motifs.";
+    return (Array.isArray(bank.styles) ? bank.styles : []).map((style) => ({
+      id: `hermes-${style.id}`,
+      label: String(style.id || "hermes-style").replace(/-/g, " "),
+      family: style.family || style.id,
+      prompt: style.prompt,
+      palette: style.palette,
+      avoid: globalAvoid,
+      source: "hermes-style-bank",
+      useWhen: style.use_when || ""
+    }));
+  } catch {
+    return [];
+  }
+}
+
+const LOCAL_COLUMN_VISUAL_STYLES = [
   {
     id: "cyberpunk-neon-operations",
     label: "cyberpunk operations desk",
@@ -186,6 +224,8 @@ const STYLE_FAMILY_BY_ID = {
   "pinterest-real-world-action-scene": "photo-documentary"
 };
 
+export const COLUMN_VISUAL_STYLES = [...loadHermesColumnStyles(), ...LOCAL_COLUMN_VISUAL_STYLES];
+
 function hashText(value = "") {
   let hash = 0;
   for (const char of String(value)) {
@@ -200,7 +240,7 @@ export function selectColumnVisualStyle({ date = "", slot = "", topic = "" } = {
 }
 
 function styleFamily(style) {
-  return STYLE_FAMILY_BY_ID[style.id] || style.id;
+  return style.family || STYLE_FAMILY_BY_ID[style.id] || style.id;
 }
 
 function pickDistinctStyle(seed, usedFamilies) {
@@ -230,16 +270,21 @@ export function columnVisualStylePromptBlock({ date = "", slot = "", topic = "" 
 - Cover style id: ${cover.id}
   Direction: ${cover.prompt}
   Palette: ${cover.palette}
+  Style reference role: treat this as a style-reference direction, not a reusable template. Preserve medium, mood, texture, and composition behavior; do not preserve old ALTOS LAB card layouts.
   Negative constraints: ${cover.avoid}
 - Opening image style id: ${opening.id}
   Direction: ${opening.prompt}
   Palette: ${opening.palette}
+  Style reference role: choose a different camera distance, material family, and focal object from the cover.
   Negative constraints: ${opening.avoid}
 - Mechanism/evidence image style id: ${mechanism.id}
   Direction: ${mechanism.prompt}
   Palette: ${mechanism.palette}
+  Style reference role: choose a different visual grammar again; the article set needs range, not a resized series.
   Negative constraints: ${mechanism.avoid}
 - Pinterest-style learning: each image needs a clear focal object, story role, and saveable composition. Do not rely on abstract workflow cards as the default answer.
+- Midjourney-style prompt logic: use style reference first, then subject anchor, then composition/camera, then material/light/color, then variation. The prompt must include a clear variation budget equivalent to high chaos with controlled topic fit.
+- Multi-prompt discipline: separate subject from style. The subject answers what the article is about; the style answers how the image should feel. If those conflict, keep the subject concrete and change the style, never collapse back to workflow cards.
 - The three generated images must not reuse the same camera angle, material palette, central object, paper-card metaphor, checkmark/arrow language, or beige workflow-board composition. Do not use the 3D workflow/checkpoint/card/arrow family for more than one image in the same article set. Keep article identity coherent through topic and palette accents, not by repeating the same layout.
 - Every prompt must include subject, composition, camera/layout, material-lighting, color, crop-safe zone, and negative prompt.
 - Every prompt must name the concrete article object or scene it is visualizing. Generic "AI workflow", "dashboard", "abstract network", "glass cards", or "control board" prompts are invalid unless the story itself is about those physical objects.

@@ -171,10 +171,18 @@ say approved=false and explain the concrete fix.
 ### Image is generic or weak
 
 ```text
-Keep the same article angle, but replace the generic AI aesthetic with one
-specific visual system: a risk map, workflow diagram, operating room, dashboard
-audit, or market signal board. Do not add logos, people, fake brands, or long
-text.
+Keep the same article angle, but change the visual grammar before changing
+details. Pick one style family first: documentary product photo, tactile
+material still-life, risograph/poster, manga-ink editorial panel, satirical
+cartoon tableau, cyberpunk operations scene, technical blueprint, scrapbook
+collage, data-art poster, or real-world action scene. Then rebuild the prompt
+with subject, composition, camera/layout, material-lighting, color, crop-safe
+zone, and negative prompt.
+
+Do not repair a weak image by drawing another workflow card, node map, glass
+cube, dashboard audit, generic signal board, repeated paper-card metaphor, or
+rounded rectangle diagram. Do not add logos, people, fake brands, readable
+letters/numbers, screenshots, or long text.
 ```
 
 ## 12. Main-brain Approval

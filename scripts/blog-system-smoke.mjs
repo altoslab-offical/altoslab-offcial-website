@@ -144,6 +144,7 @@ assert(quality.includes("withLlmQualityEvaluation"), "quality gate can merge LLM
 assert(quality.includes("registryTrustedHostFragments"), "quality source trust uses the source registry");
 assert(quality.includes("weakSubtitlePatterns"), "quality gate rejects weak generic subtitles");
 assert(quality.includes("subtitleEvidencePattern"), "quality gate requires subtitle evidence or operator tension");
+assert(quality.includes("recycled Codex column template"), "quality gate rejects recycled Codex column subtitle templates");
 assert(quality.includes("rawZhEnglishJargonPattern"), "quality gate rejects raw English AI-ops jargon in zh-Hant articles");
 assert(quality.includes("technicalJargonPattern"), "quality gate requires jargon-heavy paragraphs to explain terms plainly");
 assert(quality.includes('"hentai"'), "quality gate blocks obvious off-topic adult typo terms in public blog copy");
@@ -161,7 +162,14 @@ assert(covers.includes("BLOG_IMAGE_STORE_BLOB"), "image pipeline supports option
 assert(covers.includes("searchPexels") && covers.includes("searchPixabay"), "image pipeline supports expanded free image APIs");
 assert(covers.includes("pinterest") && covers.includes("approvedImageUrl"), "image pipeline rejects Pinterest URLs while allowing style inspiration");
 assert(imageQuality.includes("visualChecks"), "image QA requires visualChecks for generated covers");
+assert(imageQuality.includes("generatedTemplateArtifactPattern"), "image QA rejects repeated abstract card/node-map visual templates");
 assert(imageQuality.includes("MIN_IMAGE_WIDTH = 1200"), "image QA checks generated cover dimensions");
+assert(codexColumnProducer.includes("selectColumnVisualStyleSet"), "Codex column producer routes image prompts through the visual style rotation");
+assert(codexColumnProducer.includes("Creative diversity control"), "Codex column producer prompts require Midjourney-like style diversity before topic fitting");
+assert(!codexColumnProducer.includes("用公開來源檢查一條普通工作日會遇到的真實決策"), "Codex column producer must not append recycled subtitle templates");
+assert(imageStyleGuide.includes("HERMES_STYLE_BANK") || codexColumnProducer.includes("HERMES_VISUAL_STYLE_BANK") || read("scripts/blog-column-visual-style-library.mjs").includes("HERMES_VISUAL_STYLE_BANK"), "Column visual style routing must consume the shared Hermes style bank when available");
+assert(!codexColumnProducer.includes("from PIL import Image"), "Codex column producer must not contain the old local Pillow fallback renderer");
+assert(!codexColumnProducer.includes("local-pillow-debug-fallback"), "Codex column producer must not publish or stage local Pillow fallback visuals");
 assert(imageQuality.includes("isManagedGeneratedCoverUrl"), "image QA accepts managed generated media URLs for Cloudflare or legacy Blob storage");
 assert(imageQuality.includes("/api/blog/generated-media/"), "image QA accepts Cloudflare generated-media cover URLs");
 assert(imageQuality.includes("multilingualCoverConsistencyIssues"), "image QA requires one shared cover URL across translated article versions");
@@ -636,6 +644,7 @@ assert(columnVisualStyleLibrary.includes("editorial-poster-signal-map"), "column
 assert(columnVisualStyleLibrary.includes("interface-less-product-mockup"), "column visual style library includes a UI-mockup-inspired non-UI family");
 assert(columnVisualStyleLibrary.includes("comparison-diptych-audit"), "column visual style library includes a comparison/audit family");
 assert(columnVisualStyleLibrary.includes("pinterest-editorial-product-photo"), "column visual style library includes Pinterest-like editorial product photography");
+assert(columnVisualStyleLibrary.includes("pixel_art") && columnVisualStyleLibrary.includes("anime") && columnVisualStyleLibrary.includes("meme") && columnVisualStyleLibrary.includes("crypto"), "column visual style library can inherit high-variation Hermes style families");
 assert(columnVisualStyleLibrary.includes("pickDistinctStyle"), "column visual style library selects distinct visual families across article images");
 assert(columnVisualStyleLibrary.includes("Do not use the 3D workflow/checkpoint/card/arrow family for more than one image"), "column visual prompts block repeated workflow-card family");
 assert(columnVisualStyleLibrary.includes("Captions must say what the image adds to the argument"), "column visual prompts require argument-specific captions");

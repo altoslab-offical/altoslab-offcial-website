@@ -78,7 +78,10 @@ const unsafeImageMetadataPattern =
   /\b(?:dead|corpse|prisoner|concentration camp|nazi|war crime|weapon|gun|blood|accident|disaster|protest|politician|minister|government|military|army|logo|trademark|celebrity|real person|portrait of|screenshot|ui screenshot|fake dashboard)\b|(?:亂碼|錯字|商標|真人|肖像|政治人物|ロゴ|実在人物|초상|상표|로고)/i;
 
 const genericGeneratedImagePattern =
-  /(generic|placeholder|abstract background|glowing dashboard|futuristic dashboard|fake dashboard|network map|glass cube|server room|business meeting|robot handshake|stock photo|tilted|skewed|slanted|large cursor|cursor shape|pink editorial background|source-cover|科技感背景|抽象科技|假儀表板|網路圖|玻璃方塊|會議室|儀表板|伺服器機房|斜的|歪斜|巨大游標|斜游標|汎用|会議|傾いた|서버룸|회의실|추상 배경)/i;
+  /(generic|placeholder|abstract background|glowing dashboard|futuristic dashboard|fake dashboard|network map|glass cube|server room|business meeting|robot handshake|stock photo|tilted|skewed|slanted|large cursor|cursor shape|pink editorial background|source-cover|rounded-card workflow wallpaper|random lines|dark grid|科技感背景|抽象科技|假儀表板|網路圖|玻璃方塊|會議室|儀表板|伺服器機房|斜的|歪斜|巨大游標|斜游標|汎用|会議|傾いた|서버룸|회의실|추상 배경)/i;
+
+const generatedTemplateArtifactPattern =
+  /(permission cards?|permission boundary cards?|evidence cards?|source cards?|review cards?|reviewer stamps?|audit trail ledger|rollback switch|return switch|handoff lanes?|metric feedback loop|workflow lanes?|rounded cards?|node map|process cards?|cards and lanes|acceptance-test stack|cost folder|source citation cards?|reader questions?|citation paths?|權限卡|審核節點|審核章|證據卡|來源卡|流程卡|圓角方塊|節點圖|回滾開關|退場路線|交接泳道)/gi;
 
 const sourceCoverWeakContextPattern =
   /(generic|abstract|placeholder|wallpaper|stock|gradient|dashboard|fake dashboard|network map|glass cube|tilted|skewed|slanted|large cursor|cursor shape|pink editorial background|source-cover|科技感背景|抽象|漸層|占位|假儀表板|網路圖|玻璃方塊|斜的|歪斜|巨大游標|斜游標|汎用|抽象背景|추상|그라데이션)/i;
@@ -91,6 +94,7 @@ const concreteGovernanceVisualPattern =
 
 function removeNegativeImageConstraints(input: string) {
   return input
+    .replace(/Negative prompt:[\s\S]*$/i, "")
     .replace(/\bno\s+(?:readable\s+)?text\s+(?:or|and)\s+(?:fake\s+)?logos?\b/gi, "")
     .replace(/\bno\s+(?:fake\s+)?logos?\s+(?:or|and)\s+(?:readable\s+)?text\b/gi, "")
     .replace(/\bno\s+(?:protected\s+)?brands?\s+(?:or|and)\s+(?:trademarks?|brand\s+marks?)\b/gi, "")
@@ -205,6 +209,18 @@ function generatedCoverSemanticIssues(post: BlogPost) {
   if (concreteGovernanceVisualPattern.test(context)) return [];
   return [
     "enterprise agent governance covers must show a concrete control metaphor such as permissions, audit trail, registry, checkpoint or rollback; abstract tech visuals are not enough"
+  ];
+}
+
+function generatedTemplateArtifactHits(input: string) {
+  return Array.from(input.matchAll(generatedTemplateArtifactPattern)).length;
+}
+
+function generatedTemplateVisualIssues(context: string, label: string) {
+  const hits = generatedTemplateArtifactHits(context);
+  if (hits < 3) return [];
+  return [
+    `${label} repeats the old abstract card/node-map visual template; require a concrete scene, object, source photograph, or style-diverse GPT image2 visual instead`
   ];
 }
 
@@ -401,6 +417,13 @@ function generatedInlineImageIssues(image: BlogInlineImage, label: string) {
   if (!image.prompt?.trim()) issues.push(`${label} prompt is required`);
   if (!image.generatedAt?.trim()) issues.push(`${label} generatedAt is required`);
   if (!image.credit?.trim()) issues.push(`${label} credit is required`);
+  const context = removeNegativeImageConstraints(
+    [image.alt, image.caption, image.prompt, image.visualChecks?.notes].filter(Boolean).join("\n")
+  );
+  if (genericGeneratedImagePattern.test(context)) {
+    issues.push(`${label} metadata reads like generic abstract AI art`);
+  }
+  issues.push(...generatedTemplateVisualIssues(context, label));
   const checks = image.visualChecks;
   if (!checks) {
     issues.push(`${label} visualChecks are required`);
@@ -494,6 +517,9 @@ async function reviewPostImage(post: BlogPost, options: Required<BlogImageQualit
   }
   if (generatedCover && genericGeneratedImagePattern.test(context)) {
     issues.push("cover metadata reads like generic stock or abstract AI art");
+  }
+  if (generatedCover) {
+    issues.push(...generatedTemplateVisualIssues(context, "cover metadata"));
   }
   if (generatedCover) issues.push(...generatedCoverSemanticIssues(post));
   const lowerContext = context.toLowerCase();

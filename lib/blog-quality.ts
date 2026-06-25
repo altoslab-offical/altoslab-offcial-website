@@ -855,7 +855,6 @@ function isSourceReachabilityWarning(warning: string) {
 function blockingAutoPublishWarnings(warnings: string[], contentType: BlogContentType) {
   return warnings.filter((warning) => {
     if (isSourceReachabilityWarning(warning)) return false;
-    if (/anti-slop pattern:\s*soft hedging/i.test(warning)) return false;
     if (contentType === "breaking") {
       return /template|formulaic|raw English|technical jargon|market-news posts must not expose|market-news template/i.test(warning);
     }
@@ -1276,6 +1275,9 @@ function reviewSeoGeoStructure(post: BlogPost): ReviewResult {
   }
   if (!excerpt || excerpt.length < MIN_EXCERPT_LENGTH) issues.push("subtitle/excerpt is too thin");
   if (excerpt.length > MAX_EXCERPT_LENGTH) warnings.push("subtitle/excerpt is too long for card and hero reading");
+  if (/用公開來源檢查一條普通工作日會遇到的真實決策|source-backed note for one operating decision/i.test(excerpt)) {
+    issues.push("subtitle/excerpt contains the recycled Codex column template; rewrite it with a specific reader tension and source-backed payoff");
+  }
   if (weakSubtitlePatterns.some((pattern) => pattern.test(excerpt))) {
     issues.push("subtitle/excerpt is too generic; write a newsroom-style standfirst with tension, source/event and reader decision");
   }

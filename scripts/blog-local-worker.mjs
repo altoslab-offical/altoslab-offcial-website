@@ -429,9 +429,28 @@ function articleSetCoverIssues(posts) {
         `${post.language || "unknown"}/${post.slug || "missing-slug"} enterprise agent governance cover must use a concrete control metaphor, not abstract tech art`
       );
     }
+    const templateIssue = generatedTemplateVisualIssue(context, `${post.language || "unknown"}/${post.slug || "missing-slug"} cover`);
+    if (templateIssue) issues.push(templateIssue);
   }
 
   return issues;
+}
+
+const generatedTemplateArtifactPattern =
+  /(permission cards?|permission boundary cards?|evidence cards?|source cards?|review cards?|reviewer stamps?|audit trail ledger|rollback switch|return switch|handoff lanes?|metric feedback loop|workflow lanes?|rounded cards?|node map|process cards?|cards and lanes|acceptance-test stack|cost folder|source citation cards?|reader questions?|citation paths?|權限卡|審核節點|審核章|證據卡|來源卡|流程卡|圓角方塊|節點圖|回滾開關|退場路線|交接泳道)/gi;
+
+function stripNegativePrompt(input) {
+  return String(input || "").replace(/Negative prompt:[\s\S]*$/i, "");
+}
+
+function generatedTemplateArtifactHits(input) {
+  return Array.from(stripNegativePrompt(input).matchAll(generatedTemplateArtifactPattern)).length;
+}
+
+function generatedTemplateVisualIssue(context, label) {
+  return generatedTemplateArtifactHits(context) >= 3
+    ? `${label} repeats the old abstract card/node-map visual template; require a concrete scene, object, source photograph, or style-diverse GPT image2 visual instead`
+    : "";
 }
 
 function articleSetContentImageIssues(posts) {
@@ -478,6 +497,11 @@ function generatedContentImageIssues(image, label) {
   if (!/(chatgpt|gpt|openai|codex)/i.test(String(image.provider || ""))) issues.push(`${label} provider must be ChatGPT/GPT`);
   if (!image.prompt) issues.push(`${label} prompt is required`);
   if (!image.generatedAt) issues.push(`${label} generatedAt is required`);
+  const templateIssue = generatedTemplateVisualIssue(
+    [image.alt, image.caption, image.prompt, image.visualChecks?.notes].filter(Boolean).join(" "),
+    label
+  );
+  if (templateIssue) issues.push(templateIssue);
   if (LEGACY_REPAIR_MEDIA_PATTERN.test(String(image.url || image.localPath || ""))) {
     issues.push(`${label} uses a legacy repair visual; regenerate through the GPT editorial image lane`);
   }
@@ -750,7 +774,6 @@ function blockingManifestWarnings(warnings, contentType = "column") {
   return (warnings || []).filter((warning) => {
     const text = String(warning || "");
     if (isSourceReachabilityWarning(text)) return false;
-    if (/anti-slop pattern:\s*soft hedging/i.test(text)) return false;
     if (contentType === "breaking") {
       return /template|formulaic|raw English|technical jargon|market-news posts must not expose|market-news template/i.test(text);
     }

@@ -160,7 +160,6 @@ function isMarketArticleSet(articleSet) {
 function blockingValidateWarnings(warnings, contentType = "column") {
   return (warnings || [])
     .filter((warning) => !isSourceReachabilityWarning(warning))
-    .filter((warning) => !/anti-slop pattern:\s*soft hedging/i.test(String(warning || "")))
     .filter((warning) => {
       const text = String(warning || "");
       if (contentType === "breaking") {
