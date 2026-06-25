@@ -392,6 +392,10 @@ assert(
 assert(sitemapRoute.includes("getPublishedBlogSitemapEntries") && sitemapRoute.includes("Promise.resolve([])"), "Cloudflare sitemap avoids full project CMS reads and full blog JSON parsing during Worker requests");
 assert(cms.includes("public-blog-duplicates") && cms.includes("getPublishedBlogDuplicatePosts"), "Cloudflare validate has a lightweight duplicate-check cache");
 assert(cms.includes("sortedByPublicRecency") && cms.includes("updatedAt || post.publishedAt || post.createdAt"), "Cloudflare public blog lists are selected by release recency, not sortOrder");
+assert(
+  cms.includes("input.publishedAt ?? existing?.publishedAt ?? time"),
+  "CMS normalization preserves explicit publishedAt from release payloads"
+);
 assert(cms.includes("PUBLIC_BLOG_DETAIL_REFRESH_LIMIT_PER_LANGUAGE") && cms.includes("publicBlogDetailRefreshPostsFromPosts"), "publish-time detail cache refresh is bounded per language for Cloudflare subrequest safety");
 assert(cms.includes("refreshPublicBlogCacheFromStorage") && adminBlogRefreshRoute.includes("refreshPublicBlogCacheFromStorage"), "admin can refresh derived public blog caches inside the Worker runtime");
 assert(releaseRoute.includes("revalidatePath") && releaseRoute.includes("revalidateBlogPublicRoutes"), "release-set revalidates public Next blog pages after publish");

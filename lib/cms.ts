@@ -1715,7 +1715,7 @@ export function normalizeBlogPostInput(input: Partial<BlogPost>, existing?: Blog
     scheduledFor: input.scheduledFor ?? existing?.scheduledFor,
     createdAt: existing?.createdAt ?? time,
     updatedAt: time,
-    publishedAt: status === "published" ? existing?.publishedAt ?? time : existing?.publishedAt,
+    publishedAt: status === "published" ? input.publishedAt ?? existing?.publishedAt ?? time : input.publishedAt ?? existing?.publishedAt,
     generatedAt: input.generatedAt ?? existing?.generatedAt,
     generatedBy: input.generatedBy ?? existing?.generatedBy,
     generationTrace: input.generationTrace ?? existing?.generationTrace
