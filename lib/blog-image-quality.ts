@@ -83,6 +83,9 @@ const genericGeneratedImagePattern =
 const generatedTemplateArtifactPattern =
   /(permission cards?|permission boundary cards?|evidence cards?|source cards?|review cards?|reviewer stamps?|audit trail ledger|rollback switch|return switch|handoff lanes?|metric feedback loop|workflow lanes?|rounded cards?|node map|process cards?|cards and lanes|acceptance-test stack|cost folder|source citation cards?|reader questions?|citation paths?|權限卡|審核節點|審核章|證據卡|來源卡|流程卡|圓角方塊|節點圖|回滾開關|退場路線|交接泳道)/gi;
 
+const concreteEditorialScenePattern =
+  /(editorial photograph|still life|realistic|physical|desk|table|wooden|notebook|folder|clipboard|paper|printed|stamp|tag|thread|string|magnifying glass|pen|binder|ledger|research desk|newsroom|實體|攝影|工作桌|桌面|資料夾|清單|紙張|印刷|核章|標籤|線索|放大鏡|筆記|活頁夾|帳本)/i;
+
 const sourceCoverWeakContextPattern =
   /(generic|abstract|placeholder|wallpaper|stock|gradient|dashboard|fake dashboard|network map|glass cube|tilted|skewed|slanted|large cursor|cursor shape|pink editorial background|source-cover|科技感背景|抽象|漸層|占位|假儀表板|網路圖|玻璃方塊|斜的|歪斜|巨大游標|斜游標|汎用|抽象背景|추상|그라데이션)/i;
 
@@ -193,6 +196,7 @@ function imageContext(post: BlogPost) {
     post.topic,
     post.newsCategory,
     post.tags.join(" "),
+    post.cover,
     post.coverAlt,
     post.coverPrompt,
     post.coverGeneration?.prompt,
@@ -218,9 +222,9 @@ function generatedTemplateArtifactHits(input: string) {
 
 function generatedTemplateVisualIssues(context: string, label: string) {
   const hits = generatedTemplateArtifactHits(context);
-  if (hits < 3) return [];
+  if (hits < 2 || concreteEditorialScenePattern.test(context)) return [];
   return [
-    `${label} repeats the old abstract card/node-map visual template; require a concrete scene, object, source photograph, or style-diverse GPT image2 visual instead`
+    `${label} repeats the old abstract card/node-map visual template without a concrete editorial scene; require physical objects, a source photograph, or a style-diverse GPT image2 visual instead`
   ];
 }
 
