@@ -6,7 +6,7 @@ import process from "node:process";
 import { spawn } from "node:child_process";
 import { subagentModelPolicyText } from "./blog-subagent-model-policy.mjs";
 
-const SLOT_HOURS = { morning: "09:00", afternoon: "16:00", evening: "20:00" };
+const SLOT_HOURS = { morning: "09:10", afternoon: "14:40", evening: "20:20" };
 const LANGUAGES = ["zh-Hant", "en", "ja", "ko", "id", "vi", "th", "ms", "fil"];
 const REQUIRED_CHROME_PROFILE_EMAIL = "john.wu0120@gmail.com";
 const LANGUAGE_LABEL = LANGUAGES.join(", ");
@@ -17,15 +17,17 @@ const COLUMN_SLOT_SETTING = (process.env.ALTOS_BLOG_COLUMN_SLOTS || "morning,aft
   .filter(Boolean);
 const COLUMN_SLOTS = new Set(COLUMN_SLOT_SETTING.length ? COLUMN_SLOT_SETTING : ["morning"]);
 const COLUMN_DAILY_TARGET = Number(process.env.ALTOS_BLOG_COLUMN_DAILY_LIMIT || "3");
+const MARKET_NEWS_DAILY_MINIMUM = Number(process.env.ALTOS_BLOG_MARKET_NEWS_DAILY_MINIMUM || "8");
+const MARKET_FILL_MAX_RUNS = Number(process.env.ALTOS_BLOG_MARKET_FILL_MAX_RUNS || "16");
 const ALL_PREP_WINDOWS = {
   morning: { hour: 8, minute: 10 },
-  afternoon: { hour: 15, minute: 10 },
-  evening: { hour: 19, minute: 10 }
+  afternoon: { hour: 13, minute: 40 },
+  evening: { hour: 19, minute: 20 }
 };
 const ALL_RELEASE_WINDOWS = {
-  morning: { hour: 9, minute: 0 },
-  afternoon: { hour: 16, minute: 0 },
-  evening: { hour: 20, minute: 0 }
+  morning: { hour: 9, minute: 10 },
+  afternoon: { hour: 14, minute: 40 },
+  evening: { hour: 20, minute: 20 }
 };
 const PREP_WINDOWS = Object.fromEntries(Object.entries(ALL_PREP_WINDOWS).filter(([slot]) => COLUMN_SLOTS.has(slot)));
 const RELEASE_WINDOWS = Object.fromEntries(Object.entries(ALL_RELEASE_WINDOWS).filter(([slot]) => COLUMN_SLOTS.has(slot)));
@@ -164,13 +166,17 @@ function runRoot() {
   return path.resolve(process.env.ALTOS_BLOG_WORKER_RUN_DIR || path.join(process.cwd(), "data/blog-worker-runs"));
 }
 
+function preparedCandidateRoot() {
+  return path.join(path.dirname(runRoot()), "blog-prepared-candidates");
+}
+
 function candidateIndexPath(date, slot, lane = "column") {
   const normalizedLane = lane === "market" ? "market" : "column";
-  return path.join(process.cwd(), "data/blog-prepared-candidates", `${date}-${slot}-${normalizedLane}.json`);
+  return path.join(preparedCandidateRoot(), `${date}-${slot}-${normalizedLane}.json`);
 }
 
 function legacyCandidateIndexPath(date, slot) {
-  return path.join(process.cwd(), "data/blog-prepared-candidates", `${date}-${slot}.json`);
+  return path.join(preparedCandidateRoot(), `${date}-${slot}.json`);
 }
 
 async function exists(filePath) {
@@ -235,6 +241,12 @@ function postTaiwanDate(post) {
   return taiwanDate(date);
 }
 
+function postContentDate(post) {
+  const text = `${post?.translationGroupId || ""} ${post?.slug || ""}`;
+  const match = text.match(/\b(20\d{2}-\d{2}-\d{2})\b/);
+  return match?.[1] || postTaiwanDate(post);
+}
+
 function groupCoverage(postsByLanguage, translationGroupId) {
   const present = [];
   const missing = [];
@@ -250,7 +262,7 @@ function groupCoverage(postsByLanguage, translationGroupId) {
 function liveGroupsForDate(postsByLanguage, { date, contentType }) {
   const zhPosts = postsByLanguage["zh-Hant"] || [];
   return zhPosts
-    .filter((post) => post.contentType === contentType && postTaiwanDate(post) === date && post.translationGroupId)
+    .filter((post) => post.contentType === contentType && postContentDate(post) === date && post.translationGroupId)
     .map((post) => ({
       translationGroupId: post.translationGroupId,
       slug: post.slug,
@@ -318,6 +330,45 @@ async function marketInventoryStatus() {
     minBreaking: Math.min(...rows.map((row) => row.breaking)),
     rows
   };
+}
+
+async function marketNewsTargetStatus({ date }) {
+  const baseUrl = normalizeBaseUrl(arg("base-url", process.env.ALTOS_BLOG_BASE_URL || DEFAULT_BASE_URL));
+  try {
+    const postsByLanguage = {};
+    for (const language of LANGUAGES) {
+      postsByLanguage[language] = await fetchPublicPostsForLanguage({ baseUrl, language });
+    }
+    const completeGroups = liveGroupsForDate(postsByLanguage, { date, contentType: "breaking" }).filter(
+      (group) => group.coverage.complete
+    );
+    return {
+      checked: true,
+      ok: completeGroups.length >= MARKET_NEWS_DAILY_MINIMUM,
+      baseUrl,
+      date,
+      minimum: MARKET_NEWS_DAILY_MINIMUM,
+      upperCap: null,
+      completeCount: completeGroups.length,
+      completeGroups: completeGroups.map((group) => ({
+        translationGroupId: group.translationGroupId,
+        slug: group.slug,
+        title: group.title,
+        publishedAt: group.publishedAt,
+        languages: group.coverage.present
+      }))
+    };
+  } catch (error) {
+    return {
+      checked: true,
+      ok: false,
+      baseUrl,
+      date,
+      minimum: MARKET_NEWS_DAILY_MINIMUM,
+      upperCap: null,
+      error: error instanceof Error ? error.message : String(error)
+    };
+  }
 }
 
 async function loadEnvFileIfPresent() {
@@ -723,14 +774,18 @@ Manual checks:
   node scripts/blog-scheduled-runner.mjs --column-validate --slot morning --publish-after-validate --force-release
   node scripts/blog-scheduled-runner.mjs --release --slot afternoon
   node scripts/blog-scheduled-runner.mjs --market-scan
+  node scripts/blog-scheduled-runner.mjs --market-fill
   node scripts/blog-scheduled-runner.mjs --backfill --target-posts 40
 
 This runner never creates production content by itself. Column prep creates a
 prompt and manifest skeleton. Market scan creates a separate fast-lane source
 prompt for source-translation plus a credited source or official image.
 Market scan checks live public inventory for duplicate/source context only; it
-does not treat any post count as a hard stop. Qualified longform source-news
-items can keep publishing beyond the old recovery milestone.
+does not treat any post count as a hard stop. Market fill runs repeated market
+scans through the same source-image, validate-only, publish, and public
+readback gates until the daily floor is met or the current source pool is
+exhausted. Qualified longform source-news items can keep publishing beyond the
+daily floor; the only bounds are per-run safety limits and source quality.
 Release publishes only a ready prepared-candidate manifest produced after
 lane-specific evidence + validate-only + main-brain QA. A missing or held
 candidate is repair-required work, not a successful skip; once repaired and
@@ -746,16 +801,24 @@ function runCommand(command, args, { cwd, env = process.env, timeoutMs = DEFAULT
     let stdout = "";
     let stderr = "";
     let settled = false;
+    let killTimer = null;
     const finish = (result) => {
       if (settled) return;
       settled = true;
       if (timer) clearTimeout(timer);
+      if (killTimer) clearTimeout(killTimer);
       resolve(result);
     };
     const timer = Number.isFinite(timeoutMs) && timeoutMs > 0
       ? setTimeout(() => {
           stderr += `\ncommand timed out after ${timeoutMs}ms: ${command} ${args.join(" ")}`;
           child.kill("SIGTERM");
+          killTimer = setTimeout(() => {
+            if (child.exitCode === null && child.signalCode === null) {
+              child.kill("SIGKILL");
+            }
+          }, Number(process.env.ALTOS_BLOG_CHILD_KILL_GRACE_MS || "3000"));
+          killTimer.unref?.();
           finish({ code: 124, stdout, stderr, timedOut: true });
         }, timeoutMs)
       : null;
@@ -974,7 +1037,7 @@ ${await fs.readFile(orchestratorPromptPath, "utf8").catch(() => "")}
   return { ok: true, skipped: false, phase: "prep", runDir, promptPath, articleSetPath, manifestPath, indexPath, codexProducer, doctor: compactDoctorResult(doctor) };
 }
 
-async function createMarketScan({ date }) {
+async function createMarketScan({ date, runLabel = "" } = {}) {
   const slot = Number(taiwanParts(currentNow()).hour) < 12 ? "morning" : "afternoon";
   const { doctor, repair } = await runDoctorWithProductionRepair({ mode: "prep", date, slot, phase: "market-scan-doctor" });
   if (!doctor.ok) {
@@ -994,7 +1057,8 @@ async function createMarketScan({ date }) {
     };
   }
 
-  const runDir = path.resolve(arg("run-dir") || path.join(runRoot(), `${date}-market-scan-${taiwanStamp(currentNow())}`));
+  const runSuffix = runLabel ? `-${runLabel}` : "";
+  const runDir = path.resolve(arg("run-dir") || path.join(runRoot(), `${date}-market-scan-${taiwanStamp(currentNow())}${runSuffix}`));
   const promptPath = path.join(runDir, "market-fast-lane-prompt-card.md");
   const articleSetPath = path.join(runDir, "article-set.json");
   const repairedArticleSetPath = path.join(runDir, "article-set.source-repaired.json");
@@ -1005,7 +1069,7 @@ async function createMarketScan({ date }) {
   const mergedDir = path.join(runDir, "merged");
   const candidatePackLimit = Math.max(
     1,
-    Math.min(8, Number.parseInt(arg("candidate-packs", process.env.ALTOS_BLOG_MARKET_SCAN_CANDIDATE_PACKS || "5"), 10) || 5)
+    Math.min(30, Number.parseInt(arg("candidate-packs", process.env.ALTOS_BLOG_MARKET_SCAN_CANDIDATE_PACKS || "12"), 10) || 12)
   );
   const writeMarketIndex = async (payload) => {
     if (hasFlag("no-index")) return;
@@ -1132,7 +1196,7 @@ ${await fs.readFile(orchestratorPromptPath, "utf8").catch(() => "")}
     "--source-profile",
     arg("source-profile", process.env.ALTOS_BLOG_MARKET_SOURCE_PROFILE || "longform-ai-news"),
     "--news-depth",
-    arg("news-depth", process.env.ALTOS_BLOG_MARKET_NEWS_DEPTH || "longform"),
+    arg("news-depth", process.env.ALTOS_BLOG_MARKET_NEWS_DEPTH || "standard"),
     "--write",
     "--overwrite"
   ], { cwd: process.cwd(), timeoutMs: Number(process.env.ALTOS_BLOG_MARKET_SCAN_TIMEOUT_MS || "90000") });
@@ -1456,6 +1520,94 @@ ${await fs.readFile(orchestratorPromptPath, "utf8").catch(() => "")}
     status: held
   });
   return { ok: false, skipped: false, phase: "market-quality-repair-required", reason: "all candidates held", runDir, manifestPath, attempts, repairPlan, doctor: compactDoctorResult(doctor) };
+}
+
+async function runMarketFill({ date }) {
+  const initialStatus = await marketNewsTargetStatus({ date });
+  const runs = [];
+  let latestStatus = initialStatus;
+  let consecutiveNoPublish = 0;
+  const maxRuns = Math.max(1, Math.min(48, Number.parseInt(arg("max-runs", String(MARKET_FILL_MAX_RUNS)), 10) || MARKET_FILL_MAX_RUNS));
+
+  if ((initialStatus.completeCount || 0) >= MARKET_NEWS_DAILY_MINIMUM) {
+    return {
+      ok: true,
+      skipped: false,
+      phase: "market-fill",
+      date,
+      target: {
+        minimum: MARKET_NEWS_DAILY_MINIMUM,
+        upperCap: null,
+        initialCount: initialStatus.completeCount || 0,
+        completeCount: initialStatus.completeCount || 0,
+        met: true
+      },
+      maxRuns,
+      runs,
+      nextAction: "Minimum floor already met; keep hourly market scans active and publish additional qualified items beyond the floor."
+    };
+  }
+
+  for (let index = 1; index <= maxRuns; index += 1) {
+    const before = await marketNewsTargetStatus({ date });
+    const beforeCount = before.completeCount || 0;
+    const result = await createMarketScan({ date, runLabel: `fill-${String(index).padStart(2, "0")}` });
+    const after = await marketNewsTargetStatus({ date });
+    const afterCount = after.completeCount || 0;
+    const publishedThisRun = result.ok === true && afterCount > beforeCount;
+    runs.push({
+      index,
+      beforeCount,
+      afterCount,
+      publishedThisRun,
+      phase: result.phase,
+      status: result.status || "",
+      reason: result.reason || "",
+      manifestPath: result.manifestPath || "",
+      publishedIds: result.publishedIds || []
+    });
+    latestStatus = after;
+
+    if (publishedThisRun) {
+      consecutiveNoPublish = 0;
+      await appendLog(globalScheduleLogPath(), JSON.stringify({ phase: "market-fill-published", date, run: runs.at(-1), target: latestStatus }));
+      if ((latestStatus.completeCount || 0) >= MARKET_NEWS_DAILY_MINIMUM) {
+        await appendLog(globalScheduleLogPath(), JSON.stringify({ phase: "market-fill-target-met", date, run: runs.at(-1), target: latestStatus }));
+        break;
+      }
+      continue;
+    }
+
+    consecutiveNoPublish += 1;
+    await appendLog(globalScheduleLogPath(), JSON.stringify({ phase: "market-fill-no-publish", date, run: runs.at(-1), target: latestStatus }));
+    if (
+      consecutiveNoPublish >= 2 ||
+      result.status === "no_new_qualified_source" ||
+      result.phase === "market-quality-repair-required"
+    ) {
+      break;
+    }
+  }
+
+  const ok = latestStatus.completeCount >= MARKET_NEWS_DAILY_MINIMUM;
+  return {
+    ok,
+    skipped: false,
+    phase: "market-fill",
+    date,
+    target: {
+      minimum: MARKET_NEWS_DAILY_MINIMUM,
+      upperCap: null,
+      initialCount: initialStatus.completeCount || 0,
+      completeCount: latestStatus.completeCount || 0,
+      met: ok
+    },
+    maxRuns,
+    runs,
+    nextAction: ok
+      ? "Keep hourly market scans active; publish additional qualified source-backed items beyond the minimum floor."
+      : "OpenClaw must expand or refresh source packs, then rerun market-fill; held candidates are repair/replace work, not a healthy skip."
+  };
 }
 
 async function runBackfillPlanner({ date }) {
@@ -1895,6 +2047,7 @@ async function validateColumn({ date, slot }) {
     });
     return { ok: false, skipped: false, phase: "column-quality-repair-required", reason: "article-set is missing; Gemini/GPT browser production has not written the candidate output", status, repairPlan };
   }
+  await normalizeColumnScheduleArtifacts({ date, slot, status });
   const result = await runCommand(process.execPath, [
     "scripts/blog-local-worker.mjs",
     "--article-set",
@@ -1906,6 +2059,7 @@ async function validateColumn({ date, slot }) {
     status.manifestPath,
     "--approve-design-qa"
   ], { cwd: process.cwd() });
+  await normalizeColumnScheduleArtifacts({ date, slot, status });
   const manifest = await readJson(status.manifestPath).catch(() => null);
   await appendLog(globalScheduleLogPath(), JSON.stringify({
     phase: "column-validate",
@@ -1970,6 +2124,39 @@ async function validateColumn({ date, slot }) {
   };
 }
 
+async function normalizeColumnScheduleArtifacts({ date, slot, status }) {
+  const expectedReleaseAt = scheduledFor(date, slot);
+  const files = [status.articleSetPath, status.manifestPath, status.indexPath].filter(Boolean);
+  for (const filePath of files) {
+    if (!(await exists(filePath))) continue;
+    const data = await readJson(filePath).catch(() => null);
+    if (!data || typeof data !== "object") continue;
+    let changed = false;
+    if (data.scheduledFor && data.scheduledFor !== expectedReleaseAt) {
+      data.scheduledFor = expectedReleaseAt;
+      changed = true;
+    }
+    if (data.expectedReleaseAt !== expectedReleaseAt) {
+      data.expectedReleaseAt = expectedReleaseAt;
+      changed = true;
+    }
+    if (Array.isArray(data.posts)) {
+      for (const post of data.posts) {
+        if (!post || typeof post !== "object") continue;
+        if (post.contentType !== "column" && post.contentType !== "feature") continue;
+        if (post.publishedAt !== expectedReleaseAt) {
+          post.publishedAt = expectedReleaseAt;
+          changed = true;
+        }
+      }
+    }
+    if (changed) {
+      data.updatedAt = new Date().toISOString();
+      await writeJson(filePath, data);
+    }
+  }
+}
+
 async function main() {
   if (hasFlag("help") || hasFlag("h")) {
     usage();
@@ -1982,6 +2169,7 @@ async function main() {
   let scheduledSlot = "";
   let scheduledMatch = null;
   if (hasFlag("market-scan")) mode = "market-scan";
+  if (hasFlag("market-fill")) mode = "market-fill";
   if (hasFlag("column-status")) mode = "column-status";
   if (hasFlag("column-validate")) mode = "column-validate";
   if (hasFlag("backfill")) mode = "backfill";
@@ -1997,9 +2185,9 @@ async function main() {
     scheduledSlot = scheduled.slot || "";
     scheduledMatch = scheduled.match || null;
   }
-  if (!mode) throw new Error("Use --scheduled, --prep, --column-status, --column-validate, --release, --market-scan or --backfill");
+  if (!mode) throw new Error("Use --scheduled, --prep, --column-status, --column-validate, --release, --market-scan, --market-fill or --backfill");
   const slot = arg("slot") || scheduledSlot || slotFromClock(mode, now);
-  if (mode !== "market-scan" && !SLOT_HOURS[slot]) throw new Error("--slot must be morning, afternoon or evening");
+  if (!["market-scan", "market-fill"].includes(mode) && !SLOT_HOURS[slot]) throw new Error("--slot must be morning, afternoon or evening");
 
   const lock = await acquireRunLock({ mode, date, slot });
   if (!lock.ok) {
@@ -2031,6 +2219,8 @@ async function main() {
             ? await validateColumn({ date, slot })
         : mode === "market-scan"
           ? await createMarketScan({ date })
+          : mode === "market-fill"
+            ? await runMarketFill({ date })
           : mode === "backfill"
             ? await runBackfillPlanner({ date })
             : await release({ date, slot });

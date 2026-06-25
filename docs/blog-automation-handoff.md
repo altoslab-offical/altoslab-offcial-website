@@ -107,17 +107,35 @@
 | 時間 | 目的 | 允許行為 |
 | --- | --- | --- |
 | 08:10 | morning prep | 建立 column candidate skeleton、prompt card、狀態檢查 |
-| 09:00 | morning release | 只發布已 ready manifest |
-| 09:04 | morning follow-up | 驗證已發布 manifest，或 release grace 內重跑一次 gate |
-| 10:30 | market scan | 掃描來源、產生/更新 market source queue，不保證 publish |
-| 12:30 | market scan | 同上 |
-| 14:30 | market scan | 同上 |
-| 15:10 | afternoon prep | 同 morning prep |
-| 16:00 | afternoon release | 只發布已 ready manifest |
-| 16:04 | afternoon follow-up | 驗證已發布 manifest，或 release grace 內重跑一次 gate |
-| 18:30 | market scan | 同上 |
-| 20:30 | market scan | 同上 |
-| 23:35 | daily closeout | 正式站 public inventory 必須有同日完整 9 語 column group；market-news 依同日 source scan 判斷，有 qualified source 才必須發布，沒有則保留 no-qualified-source evidence |
+| 09:10 | morning release | 只發布已 ready manifest |
+| 09:14 | morning follow-up | 驗證已發布 manifest，或 release grace 內重跑一次 gate |
+| 10:15 | market fill | 以 source/official image + 來源驗證 + quality repair 跑到可發布 |
+| 11:15 | market scan | 同上 |
+| 12:15 | market scan | 同上 |
+| 13:15 | market scan | 同上 |
+| 13:40 | afternoon prep | 同 morning prep |
+| 14:15 | market scan | 同上 |
+| 14:40 | afternoon release | 只發布已 ready manifest |
+| 14:44 | afternoon follow-up | 驗證已發布 manifest，或 release grace 內重跑一次 gate |
+| 17:15 | market scan | 同上 |
+| 18:15 | market scan | 同上 |
+| 19:20 | evening prep | 同 morning prep |
+| 20:15 | market scan | 同上 |
+| 20:20 | evening release | 只發布已 ready manifest |
+| 20:24 | evening follow-up | 驗證已發布 manifest，或 release grace 內重跑一次 gate |
+| 21:15 | market fill | 補足當日 market-news floor，合格來源可繼續發 |
+| 23:35 | daily closeout | 正式站 public inventory 必須有同日 3 組錯開的完整 9 語 column groups，以及至少 8 組完整 9 語 market-news groups |
+
+Market-news throughput rule:
+
+- `8` complete 9-language market-news groups per Taipei date is the minimum floor, not a cap.
+- `dailyPublicationTarget=5` is not a valid health model for the official blog.
+- If a candidate fails quality/image/source gates, Hermes must repair or replace it; a held candidate is not a healthy skip.
+- `/run/market-fill` repeatedly calls the same market-source, source-image, validate-only, publish and readback path until the floor is met or the current source pool is exhausted.
+- `/run/market-fill` short-circuits when the public inventory already has at least 8 complete groups, and stops immediately after a publish brings the day to the floor. This prevents extra source scans and token spend.
+- Daily floor-filling uses `ALTOS_BLOG_MARKET_NEWS_DEPTH=standard`. Use `longform` only when explicitly enriching source depth after the floor is healthy.
+- Qualified source-backed market news can keep publishing beyond eight when sources are available.
+- Daily closeout, column cadence, and market-news floor checks use the article identity date from `translationGroupId` or slug before falling back to `publishedAt`; catch-up releases that cross midnight must not consume the next day's quota.
 
 若 heartbeat 或 n8n webhook 在非設定時間醒來，應回傳 skipped，不應猜測要跑哪條 lane。
 
@@ -161,6 +179,7 @@ local bridge 只能執行已 allowlist 的 job：
 - `/run/scheduled`
 - `/run/market-scan-validate`
 - `/run/market-scan`
+- `/run/market-fill`
 
 新增 job 前必須更新 bridge allowlist、n8n workflow、文件與 smoke check。
 
@@ -217,8 +236,8 @@ launchctl bootstrap "gui/$(id -u)" "$HOME/Library/LaunchAgents/com.altoslab.blog
 npm run blog:market-sources -- --date <YYYY-MM-DD> --queue-dir data/blog-backfill/<YYYY-MM-DD>/queue --write --overwrite
 ```
 
-2. 常規 production profile 使用 `ALTOS_BLOG_MARKET_SOURCE_PROFILE=longform-ai-news`；它應包含官方/高流量/工程長文來源，例如 OpenAI、Google AI/DeepMind/Cloud、Microsoft AI/Azure/Research、NVIDIA、AWS ML、Cloudflare AI、Apple ML、GitHub、Hugging Face、Vercel、TechCrunch、VentureBeat、The Verge、WIRED、Search Engine Land、Semrush、Ahrefs、9to5Google/9to5Mac/Android Authority 等。Anthropic/Mistral/Meta 若沒有穩定 RSS，就保留為 official verification source，不要硬塞死 feed。
-3. 從 source pack 挑選非重複、來源可驗、圖片可用的 longform item。
+2. 常規 production profile 使用 `ALTOS_BLOG_MARKET_SOURCE_PROFILE=longform-ai-news` 搭配 `ALTOS_BLOG_MARKET_NEWS_DEPTH=standard`；它應包含官方/高流量/工程長文來源，例如 OpenAI、Google AI/DeepMind/Cloud、Microsoft AI/Azure/Research、NVIDIA、AWS ML、Cloudflare AI、Apple ML、GitHub、Hugging Face、Vercel、TechCrunch、VentureBeat、The Verge、WIRED、Search Engine Land、Semrush、Ahrefs、9to5Google/9to5Mac/Android Authority 等。Anthropic/Mistral/Meta 若沒有穩定 RSS，就保留為 official verification source，不要硬塞死 feed。`longform` depth 是加深模式，不能阻塞每日快訊 floor。
+3. 從 source pack 挑選非重複、來源可驗、圖片可用的 source-backed item。
 4. Source worker 建立 source-faithful article set，普通 market news 不跑 Gemini。
 5. 保留 source article / official announcement image，所有語言共用；若 source image 本身不合格，回到 source-image repair 找到合格來源圖後才 release。
 6. 跑 public QA：

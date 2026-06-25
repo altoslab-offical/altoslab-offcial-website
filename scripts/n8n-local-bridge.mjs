@@ -163,6 +163,15 @@ const jobs = {
   "market-scan": {
     timeoutMs: 600_000,
     command: () => nodeCommand("scripts/blog-scheduled-runner.mjs", ["--market-scan", "--base-url", DEFAULT_BASE_URL])
+  },
+  "market-fill": {
+    timeoutMs: 3_600_000,
+    command: (input) => nodeCommand("scripts/blog-scheduled-runner.mjs", [
+      "--market-fill",
+      ...dateArgs(input),
+      "--base-url",
+      DEFAULT_BASE_URL
+    ])
   }
 };
 

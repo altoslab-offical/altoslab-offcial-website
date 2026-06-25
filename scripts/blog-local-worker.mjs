@@ -10,7 +10,7 @@ import { subagentModelPolicyText } from "./blog-subagent-model-policy.mjs";
 import { columnVisualStylePromptBlock } from "./blog-column-visual-style-library.mjs";
 
 const LANGUAGES = ["zh-Hant", "en", "ja", "ko", "id", "vi", "th", "ms", "fil"];
-const SLOT_HOURS = { morning: "09:00", afternoon: "16:00", evening: "20:00" };
+const SLOT_HOURS = { morning: "09:10", afternoon: "14:40", evening: "20:20" };
 const DEFAULT_BASE_URL = "https://altoslab-ai.cc";
 const LANGUAGE_LABEL = LANGUAGES.join(", ");
 const COLUMN_DAILY_LIMIT = Number(process.env.ALTOS_BLOG_COLUMN_DAILY_LIMIT || "3");
@@ -998,6 +998,14 @@ function postGroupId(post) {
   return post.translationGroupId || post.slug || post.id || "";
 }
 
+function postContentDate(post) {
+  const text = `${post?.translationGroupId || ""} ${post?.slug || ""}`;
+  const match = text.match(/\b(20\d{2}-\d{2}-\d{2})\b/);
+  if (match) return match[1];
+  const rawDate = post?.publishedAt || post?.createdAt || "";
+  return rawDate ? taiwanDate(new Date(rawDate)) : "";
+}
+
 function nonBreakingGroups(posts) {
   return new Set((posts || []).filter((post) => post.contentType !== "breaking").map(postGroupId).filter(Boolean));
 }
@@ -1026,10 +1034,7 @@ async function columnCadenceIssues(payload) {
   const publishedToday = new Set(
     published
       .filter((post) => post.contentType !== "breaking")
-      .filter((post) => {
-        const rawDate = post.publishedAt || post.createdAt || "";
-        return rawDate && taiwanDate(new Date(rawDate)) === today;
-      })
+      .filter((post) => postContentDate(post) === today)
       .map(postGroupId)
       .filter(Boolean)
   );

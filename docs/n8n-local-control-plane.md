@@ -14,7 +14,7 @@ n8n owns:
 - SEO/GEO report generation.
 - Codex-operated automatic QA/release gate execution through the local bridge.
 - Column candidate status checks, validate-only advancement, and ready-candidate release polling.
-- Daily closeout enforcement: by 23:35 Asia/Taipei, the public blog must show three complete 9-language daily column groups and one complete 9-language market-news group for the Taipei date, or n8n records a failed execution with the exact blocker.
+- Daily closeout enforcement: by 23:35 Asia/Taipei, the public blog must show three complete 9-language daily column groups, spaced release windows, and at least eight complete 9-language market-news groups for the Taipei date. Market news has no daily upper cap; if qualified source-backed items remain, Hermes/OpenClaw should keep publishing beyond eight. Any miss is an n8n failed execution with the exact blocker.
 - Future status notifications.
 - Retry visibility and execution history.
 
@@ -39,7 +39,7 @@ n8n does not own:
 - Secrets and local overrides: `~/.altoslab-n8n.env` and `~/.altoslab-blog-worker.env`, never committed.
 - Logs: `data/n8n-local-runs/*.json`.
 
-The bridge is deliberately allowlisted. n8n can call `/run/health`, `/run/worker-smoke`, `/run/custom-domain-smoke`, `/run/doctor`, `/run/ops-audit`, `/run/seo-geo-report`, `/run/column-prep`, `/run/column-status`, `/run/column-validate`, `/run/column-release`, `/run/daily-closeout`, `/run/scheduled`, `/run/market-scan-validate`, and `/run/market-scan`. It cannot execute arbitrary shell commands.
+The bridge is deliberately allowlisted. n8n can call `/run/health`, `/run/worker-smoke`, `/run/custom-domain-smoke`, `/run/doctor`, `/run/ops-audit`, `/run/seo-geo-report`, `/run/column-prep`, `/run/column-status`, `/run/column-validate`, `/run/column-release`, `/run/daily-closeout`, `/run/scheduled`, `/run/market-scan-validate`, `/run/market-scan`, and `/run/market-fill`. It cannot execute arbitrary shell commands.
 
 The default automation base URL is `https://altoslab-ai.cc`. Set `ALTOS_BLOG_AUTOMATION_BASE_URL=https://altoslab-official-website.altoslab-ai.workers.dev` in `~/.altoslab-n8n.env` only during a verified custom-domain incident.
 
@@ -114,5 +114,6 @@ npm run verify:cloudflare -- --base-url https://altoslab-ai.cc
 - `column-validate` returns `ok=false`: validation, browser evidence, language, source, image, or design QA failed. Fix the exact reported issue, then rerun `column-validate`.
 - `column-release` returns `release gate held`: the candidate is not `ready`; this is an n8n execution failure, not a harmless skip. The 15-minute release poll will not publish until validate-only, design/image QA and browser evidence pass.
 - `daily-closeout` returns `daily column is not live as a complete 9-language group`: today's column did not reach public inventory. Treat this as the primary daily automation blocker and fix the reported missing article-set or release gate before calling the day complete.
+- `daily-closeout` returns `market-news lane is below the daily floor`: run `/run/market-fill`. If it still fails, OpenClaw must expand/refresh source packs and Hermes must repair or replace held candidates until qualified source-backed items publish.
 - `market-scan-validate` returns `ready` in `validate-only`: the news item passed dry-run gates but was not published. Use the timed `market-scan` workflow or the explicit manual market-scan webhook for a release attempt.
 - `KV put() limit exceeded for the day`: do not roll back to GCP or reseed production KV. Confirm `/api/health` reports `cloudflare-d1`, run `POST /api/admin/blog/refresh-public-cache` with admin auth, then rerun release verification. KV is allowed to remain a warning while D1 projection is healthy.

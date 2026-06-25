@@ -9,7 +9,8 @@ const ROOT_DIR =
   process.env.ALTOS_BLOG_WORKER_ROOT || "/Users/asdc163/LocalProjects/altoslab-offcial-website-runtime";
 const DEFAULT_BASE_URL = process.env.ALTOS_BLOG_BASE_URL || process.env.ALTOS_BLOG_AUTOMATION_BASE_URL || "https://altoslab-ai.cc";
 const COLUMN_DAILY_TARGET = Number(process.env.ALTOS_BLOG_COLUMN_DAILY_LIMIT || "3");
-const DAILY_PUBLICATION_TARGET = Number(process.env.ALTOS_BLOG_DAILY_PUBLICATION_LIMIT || "5");
+const MARKET_NEWS_DAILY_MINIMUM = Number(process.env.ALTOS_BLOG_MARKET_NEWS_DAILY_MINIMUM || "8");
+const COLUMN_MIN_SPACING_MINUTES = Number(process.env.ALTOS_BLOG_COLUMN_MIN_SPACING_MINUTES || "120");
 const INVENTORY_LIMIT = Number(process.env.ALTOS_BLOG_DAILY_CLOSEOUT_INVENTORY_LIMIT || "200");
 const COLUMN_SLOTS = (process.env.ALTOS_BLOG_COLUMN_SLOTS || "morning,afternoon,evening")
   .split(",")
@@ -46,6 +47,31 @@ function postTaiwanDate(post) {
   const date = new Date(raw);
   if (Number.isNaN(date.getTime())) return "";
   return taiwanDate(date);
+}
+
+function postContentDate(post) {
+  const text = `${post?.translationGroupId || ""} ${post?.slug || ""}`;
+  const match = text.match(/\b(20\d{2}-\d{2}-\d{2})\b/);
+  return match?.[1] || postTaiwanDate(post);
+}
+
+function postTaiwanMinutesOfDay(post) {
+  const raw = post?.publishedAt || post?.updatedAt || post?.createdAt || post?.date || "";
+  if (!raw) return null;
+  const date = new Date(raw);
+  if (Number.isNaN(date.getTime())) return null;
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Taipei",
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23"
+  })
+    .formatToParts(date)
+    .reduce((acc, part) => {
+      if (part.type !== "literal") acc[part.type] = part.value;
+      return acc;
+    }, {});
+  return Number(parts.hour) * 60 + Number(parts.minute);
 }
 
 function normalizeBaseUrl(value) {
@@ -124,12 +150,13 @@ function liveGroupByTranslationGroupId(postsByLanguage, translationGroupId) {
 
 function liveGroupsForDate(postsByLanguage, { date, contentType }) {
   const zhPosts = postsByLanguage["zh-Hant"] || [];
-  const candidates = zhPosts.filter((post) => post.contentType === contentType && postTaiwanDate(post) === date && post.translationGroupId);
+  const candidates = zhPosts.filter((post) => post.contentType === contentType && postContentDate(post) === date && post.translationGroupId);
   return candidates.map((post) => ({
     translationGroupId: post.translationGroupId,
     slug: post.slug,
     title: post.title,
     publishedAt: post.publishedAt || post.createdAt || "",
+    taipeiMinutes: postTaiwanMinutesOfDay(post),
     coverage: groupCoverage(postsByLanguage, post.translationGroupId)
   }));
 }
@@ -197,9 +224,33 @@ function summarizeGroups(groups) {
     slug: group.slug,
     title: group.title,
     publishedAt: group.publishedAt,
+    taipeiMinutes: group.taipeiMinutes ?? null,
     languages: group.coverage.present,
     missingLanguages: group.coverage.missing
   }));
+}
+
+function columnSpacingStatus(groups) {
+  const minutes = groups
+    .map((group) => ({ slug: group.slug, title: group.title, minutes: group.taipeiMinutes }))
+    .filter((item) => Number.isFinite(item.minutes))
+    .sort((a, b) => a.minutes - b.minutes);
+  const deltas = [];
+  for (let index = 1; index < minutes.length; index += 1) {
+    deltas.push({
+      previousSlug: minutes[index - 1].slug,
+      nextSlug: minutes[index].slug,
+      minutes: minutes[index].minutes - minutes[index - 1].minutes
+    });
+  }
+  const minDelta = deltas.length ? Math.min(...deltas.map((delta) => delta.minutes)) : null;
+  return {
+    checked: minutes.length >= 2,
+    minimumRequiredMinutes: COLUMN_MIN_SPACING_MINUTES,
+    minimumObservedMinutes: minDelta,
+    ok: minutes.length < 2 || minDelta >= COLUMN_MIN_SPACING_MINUTES,
+    deltas
+  };
 }
 
 async function writeHermesCloseout(payload) {
@@ -210,6 +261,8 @@ async function writeHermesCloseout(payload) {
   const completeColumns = payload.live?.dailyColumnCount || 0;
   const target = payload.live?.dailyColumnTarget || COLUMN_DAILY_TARGET;
   const marketOk = payload.live?.marketNews?.ok === true;
+  const marketNewsDailyMinimum = payload.live?.marketNews?.dailyMinimum || MARKET_NEWS_DAILY_MINIMUM;
+  const marketNewsCompleteGroups = payload.live?.marketNews?.completeCount || 0;
   const learning = {
     schema: "hermes_official_blog_daily_closeout_v1",
     owner: "Hermes",
@@ -224,8 +277,13 @@ async function writeHermesCloseout(payload) {
       columnTargetMet: completeColumns >= target,
       completeColumnGroups: completeColumns,
       columnDailyTarget: target,
+      columnSpacingOk: payload.live?.dailyColumnSpacing?.ok === true,
       marketNewsComplete: marketOk,
-      rule: "Stable daily publish requires live public inventory readback, complete language coverage, and repair-forward handling for held candidates."
+      marketNewsMinimumMet: marketNewsCompleteGroups >= marketNewsDailyMinimum,
+      marketNewsCompleteGroups,
+      marketNewsDailyMinimum,
+      dailyPublicationUpperCap: null,
+      rule: "Stable daily publish requires live public inventory readback, complete language coverage, three spaced daily columns, at least eight complete market-news groups, no daily market-news upper cap, and repair-forward handling for held candidates."
     },
     trafficSelfEvolution: {
       canClaimTrafficOptimizedSelection: false,
@@ -239,6 +297,8 @@ async function writeHermesCloseout(payload) {
     actions: payload.actions || [],
     nextHermesRules: [
       "Before any release window, check public inventory so stale held candidates do not create false scheduler failures after the daily target is already met.",
+      "Market news has no daily upper cap. Eight complete 9-language market-news groups is the minimum floor; qualified source-backed items should keep publishing beyond that floor.",
+      "Held or low-quality market-news candidates must enter repair or source replacement until a qualified item publishes; do not treat quality hold as a healthy skip.",
       "Market news source images preserve the credited source image lane; near-standard source OG dimensions are acceptable when attribution and topic fit pass.",
       "Validated-only, held, or missing article-set candidates are repair signals, not completion."
     ]
@@ -308,6 +368,7 @@ async function main() {
   const completeColumns = columnGroups.filter((group) => group.coverage.complete);
   const completeMarketGroups = marketGroups.filter((group) => group.coverage.complete);
   const completeMarket = bestCompleteGroup(marketGroups);
+  const columnSpacing = columnSpacingStatus(completeColumns);
 
   for (const [slot, columnCandidate] of Object.entries(columnCandidates)) {
     if (columnCandidate.status !== "released" || !columnCandidate.translationGroupId) continue;
@@ -344,20 +405,23 @@ async function main() {
     }
   }
 
-  if (!completeMarket) {
+  if (completeColumns.length >= COLUMN_DAILY_TARGET && !columnSpacing.ok) {
+    errors.push(
+      `daily columns are not spaced enough for ${date}: minimum observed ${columnSpacing.minimumObservedMinutes} minutes, required ${COLUMN_MIN_SPACING_MINUTES} minutes`
+    );
+    actions.push("Keep the three daily column publish windows separated instead of clustering all columns into one traffic burst.");
+  }
+
+  if (completeMarketGroups.length < MARKET_NEWS_DAILY_MINIMUM) {
     const missingLanguages = marketGroups.flatMap((group) => group.coverage.missing);
     const languageDetail = missingLanguages.length ? `; incomplete live groups missing ${[...new Set(missingLanguages)].join(", ")}` : "";
-    errors.push(`market-news lane did not publish a complete 9-language group for ${date}${languageDetail}`);
-    actions.push("Run /run/market-scan, then verify the published translationGroupId across all configured languages.");
+    errors.push(
+      `market-news lane is below the daily floor for ${date}: ${completeMarketGroups.length}/${MARKET_NEWS_DAILY_MINIMUM} complete 9-language groups${languageDetail}`
+    );
+    actions.push("Run /run/market-fill so Hermes/OpenClaw keep scanning, repairing, or replacing sources until at least eight complete market-news groups publish.");
   }
 
   const completePublicationCount = completeColumns.length + completeMarketGroups.length;
-  if (completePublicationCount < DAILY_PUBLICATION_TARGET) {
-    errors.push(
-      `daily publication target not met for ${date}: ${completePublicationCount}/${DAILY_PUBLICATION_TARGET} complete 9-language groups`
-    );
-    actions.push("Continue market scans and repair/release qualified source-backed news until the daily 5-publication target is met.");
-  }
 
   if (marketCandidates.morning.status === "held" && marketCandidates.afternoon.status === "released") {
     warnings.push("morning market scan held, but afternoon market scan released a complete item");
@@ -372,8 +436,10 @@ async function main() {
     live: {
       dailyColumnTarget: COLUMN_DAILY_TARGET,
       dailyColumnCount: completeColumns.length,
-      dailyPublicationTarget: DAILY_PUBLICATION_TARGET,
+      dailyPublicationUpperCap: null,
       dailyPublicationCount: completePublicationCount,
+      marketNewsDailyMinimum: MARKET_NEWS_DAILY_MINIMUM,
+      dailyColumnSpacing: columnSpacing,
       dailyColumn: completeColumns[0]
         ? {
             ok: true,
@@ -391,7 +457,10 @@ async function main() {
       dailyColumns: summarizeGroups(completeColumns),
       marketNews: completeMarket
         ? {
-            ok: true,
+            ok: completeMarketGroups.length >= MARKET_NEWS_DAILY_MINIMUM,
+            dailyMinimum: MARKET_NEWS_DAILY_MINIMUM,
+            completeCount: completeMarketGroups.length,
+            noUpperCap: true,
             translationGroupId: completeMarket.translationGroupId,
             slug: completeMarket.slug,
             title: completeMarket.title,
@@ -401,6 +470,9 @@ async function main() {
           }
         : {
             ok: false,
+            dailyMinimum: MARKET_NEWS_DAILY_MINIMUM,
+            completeCount: completeMarketGroups.length,
+            noUpperCap: true,
             groups: summarizeGroups(marketGroups)
           }
     },

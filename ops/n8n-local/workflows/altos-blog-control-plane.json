@@ -82,7 +82,7 @@
             "interval": [
               {
                 "field": "cronExpression",
-                "expression": "30 10,12,14,18,20 * * *"
+                "expression": "15 10,13,16,19,21 * * *"
               }
             ]
           }
@@ -99,7 +99,7 @@
       {
         "parameters": {
           "method": "POST",
-          "url": "http://host.docker.internal:8797/run/market-scan",
+          "url": "http://host.docker.internal:8797/run/market-fill",
           "sendHeaders": true,
           "headerParameters": {
             "parameters": [
@@ -111,9 +111,9 @@
           },
           "sendBody": true,
           "specifyBody": "json",
-          "jsonBody": "={\"source\":\"n8n\",\"workflow\":\"market-scan\"}",
+          "jsonBody": "={\"source\":\"n8n\",\"workflow\":\"market-fill\"}",
           "options": {
-            "timeout": 600000
+            "timeout": 3600000
           }
         },
         "id": "market-run",
@@ -159,15 +159,23 @@
               },
               {
                 "field": "cronExpression",
-                "expression": "0,4 9 * * *"
+                "expression": "10,14 9 * * *"
               },
               {
                 "field": "cronExpression",
-                "expression": "10 15 * * *"
+                "expression": "40 13 * * *"
               },
               {
                 "field": "cronExpression",
-                "expression": "0,4 16 * * *"
+                "expression": "40,44 14 * * *"
+              },
+              {
+                "field": "cronExpression",
+                "expression": "20 19 * * *"
+              },
+              {
+                "field": "cronExpression",
+                "expression": "20,24 20 * * *"
               }
             ]
           }

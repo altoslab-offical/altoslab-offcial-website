@@ -66,9 +66,9 @@ type BlogReleaseRequest = {
 };
 
 const SLOT_CONFIG: Record<IngestSlot, { hour: string }> = {
-  morning: { hour: "09:00" },
-  afternoon: { hour: "16:00" },
-  evening: { hour: "20:00" }
+  morning: { hour: "09:10" },
+  afternoon: { hour: "14:40" },
+  evening: { hour: "20:20" }
 };
 
 const allowedGenerationProviders = new Set([
@@ -344,9 +344,11 @@ function normalizeReleasePosts(payload: BlogReleaseRequest, slot: IngestSlot, in
   }.`;
 
   return (payload.posts || []).map((post) => {
+    const isScheduledEditorial = isColumnOrFeature(post);
     const normalized = normalizeBlogPostInput({
       ...post,
       status: "draft",
+      publishedAt: isScheduledEditorial ? scheduled : post.publishedAt,
       author: normalizeBlogAuthor(post.author, { slot, seed: translationGroupId }),
       translationGroupId,
       generationDate,

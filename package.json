@@ -55,6 +55,7 @@
     "blog:repair-production": "node scripts/blog-production-repair.mjs",
     "blog:ops-audit": "node scripts/blog-operations-audit.mjs",
     "blog:daily-closeout": "node scripts/blog-daily-closeout.mjs",
+    "blog:market-fill": "node scripts/blog-scheduled-runner.mjs --market-fill",
     "blog:column-worklist": "node scripts/blog-column-production-worklist.mjs",
     "gmail:token": "node scripts/gmail-oauth-token.mjs",
     "google:oauth-user": "node scripts/google-oauth-user-login.mjs",

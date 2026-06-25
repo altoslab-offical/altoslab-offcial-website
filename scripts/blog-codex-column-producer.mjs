@@ -6,7 +6,7 @@ import path from "node:path";
 import process from "node:process";
 
 const LANGUAGES = ["zh-Hant", "en", "ja", "ko", "id", "vi", "th", "ms", "fil"];
-const SLOT_HOURS = { morning: "09:00", afternoon: "16:00", evening: "20:00" };
+const SLOT_HOURS = { morning: "09:10", afternoon: "14:40", evening: "20:20" };
 const RUNTIME_ROOT = process.env.ALTOS_BLOG_RUNTIME_ROOT || "/Users/asdc163/LocalProjects/altoslab-offcial-website-runtime";
 
 function arg(name, fallback = "") {

@@ -45,10 +45,10 @@ Local n8n is the primary scheduler for this workflow. The Codex app heartbeat re
 
 - Automation id: `altos-blog-subagent-production-loop`
 - Target: current main-brain thread
-- Times: `08:10`, `09:00`, `09:04`, `10:30`, `12:30`, `14:30`, `15:10`, `16:00`, `16:04`, `18:30`, `20:30`, and `23:35` Asia/Taipei
-- Prep windows: `08:10` and `15:10`
-- Release windows: `09:00` and `16:00`
-- Market-scan windows: `10:30`, `12:30`, `14:30`, `18:30`, and `20:30`
+- Times: `08:10`, `09:10`, `09:14`, `10:15`, `11:15`, `12:15`, `13:15`, `13:40`, `14:15`, `14:40`, `14:44`, `17:15`, `18:15`, `19:20`, `20:15`, `20:20`, `20:24`, `21:15`, and `23:35` Asia/Taipei
+- Prep windows: `08:10`, `13:40`, and `19:20`
+- Release windows: `09:10`, `14:40`, and `20:20`
+- Market-scan/fill windows: hourly market checks plus `market-fill` runs that keep market news above the daily floor.
 - Post-release follow-up windows: `09:04` and `16:04`
 - Daily closeout window: `23:35`
 
@@ -58,7 +58,7 @@ The local n8n control plane is the deterministic safety runner. It wakes at the 
 - release windows: publish only an already `ready` manifest.
 - market-scan windows: refresh source-fast-lane prompts/manifests for source-translation production;
 - daytime poll windows: recheck the morning column release gate every 15 minutes so a browser-produced candidate can publish after late validate-only completion.
-- daily closeout window: verify the public blog inventory across all nine languages and fail the n8n execution if the Taipei date does not contain three complete column groups and one complete market-news group.
+- daily closeout window: verify the public blog inventory across all nine languages and fail the n8n execution if the Taipei date does not contain three spaced complete column groups and at least eight complete market-news groups.
 
 The runner is intentionally narrow:
 
@@ -81,7 +81,7 @@ It does not pretend to operate Gemini or ChatGPT. Column/feature Gemini/GPT prod
 
 At prep time, the main brain must prepare a publishable candidate manifest before the release window.
 At release time, the main brain must not start fresh generation. If no prepared, validate-only-passed, design-approved candidate exists, hold publishing and return `ok:false`. n8n keeps polling `column-release`; it must remain a no-publish gate until the manifest is `ready`.
-At market-scan windows, the runner never publishes. It only creates/updates `awaiting_source_translation_production` manifests and keeps fail-closed gate coverage unchanged for the same-day 09:00 / 16:00 publish windows.
+At market-scan/fill windows, market news may publish immediately only after source/official image, source translation, validate-only, publish, and public readback all pass. A held market-news candidate is repair/replace work, not a healthy skip. Eight complete 9-language market-news groups is the daily floor, not a cap.
 At post-release follow-up time, the main brain must not start fresh generation. It verifies a released manifest or reruns the release gate once if the manifest is still ready and the five-minute release grace window is still open.
 The manifest contract lives in `docs/content/blog-prepared-candidate-manifest.md`.
 The prompt-card contract lives in `docs/content/blog-prompt-card-template.md`.

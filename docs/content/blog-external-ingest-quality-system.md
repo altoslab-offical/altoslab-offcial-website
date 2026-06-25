@@ -51,10 +51,10 @@ Use release only after the main-brain quality gate has approved the same article
 ## Scheduler
 
 The active production scheduler is the Codex app heartbeat automation documented in
-`docs/content/blog-subagent-production-loop.md`. It wakes the main-brain thread at `08:10`, `09:00`, `09:04`,
-`10:30`, `12:30`, `14:30`, `15:10`, `16:00`, `16:04`, `18:30`, and `20:30` Asia/Taipei.
-- `09:00` and `16:00` are publish checkpoints; `09:04` and `16:04` are in-window post-release follow-ups.
-- `08:10` and `15:10` are prep windows. `10:30`, `12:30`, `14:30`, `18:30`, and `20:30` are market-scan checkpoints only and do not publish.
+`docs/content/blog-subagent-production-loop.md`. It wakes the main-brain thread at the spaced column windows and
+hourly market-news windows documented there.
+- `09:10`, `14:40`, and `20:20` are publish checkpoints; `09:14`, `14:44`, and `20:24` are in-window post-release follow-ups.
+- `08:10`, `13:40`, and `19:20` are prep windows. Market-news checkpoints may publish immediately only after source/official image, source translation, validate-only, publish, and public readback all pass. The daily floor is eight complete 9-language market-news groups with no upper cap.
 Prep windows use Gemini for column/feature source writing, source-translation and source images for
 market news, and ChatGPT/GPT for column/feature covers, then run production `validateOnly`. Release windows publish only an already-ready
 candidate after all quality gates pass.

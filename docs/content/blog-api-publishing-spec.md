@@ -203,7 +203,7 @@ Required top-level fields:
 Rules:
 
 - `slot` must be `morning` or `afternoon`.
-- Default scheduled time is `09:00 +08:00` for morning and `16:00 +08:00` for afternoon.
+- Default scheduled time is `09:10 +08:00` for morning, `14:40 +08:00` for afternoon, and `20:20 +08:00` for evening.
 - `generation.provider` must be `gemini-chatgpt` or `source-translation`.
 - `publishMode` should be `publish-if-valid` for production candidates.
 - `posts` must contain exactly one post for each language:

@@ -73,6 +73,8 @@ const PUBLIC_INTERNAL_COPY_PATTERNS = [
   /rubric/i
 ];
 
+const AUTHOR_OR_AVATAR_IMAGE_PATTERN = /(?:author|avatar|profile|headshot|tommy|ken|logo-mark|article-author|altoslabofficial)/i;
+
 function arg(name, fallback = "") {
   const index = process.argv.indexOf(`--${name}`);
   return index >= 0 ? process.argv[index + 1] || fallback : fallback;
@@ -618,10 +620,16 @@ async function verifyPostLive(post, root, errors, warnings) {
     if (!twitterImage) pushIssue(errors, "live article page is missing twitter:image", context);
     const expectedCover = absoluteUrl(publicPost?.cover || post.cover, root);
     if (ogImage && expectedCover && absoluteUrl(ogImage, root) !== expectedCover) {
-      pushWarning(warnings, "og:image does not exactly match the public cover URL", { ...context, ogImage, expectedCover });
+      pushIssue(errors, "og:image must exactly match the public article cover URL for social previews", { ...context, ogImage, expectedCover });
     }
     if (twitterImage && expectedCover && absoluteUrl(twitterImage, root) !== expectedCover) {
-      pushWarning(warnings, "twitter:image does not exactly match the public cover URL", { ...context, twitterImage, expectedCover });
+      pushIssue(errors, "twitter:image must exactly match the public article cover URL for social previews", { ...context, twitterImage, expectedCover });
+    }
+    if (ogImage && AUTHOR_OR_AVATAR_IMAGE_PATTERN.test(ogImage)) {
+      pushIssue(errors, "og:image appears to be an author/avatar/logo image instead of the article cover", { ...context, ogImage });
+    }
+    if (twitterImage && AUTHOR_OR_AVATAR_IMAGE_PATTERN.test(twitterImage)) {
+      pushIssue(errors, "twitter:image appears to be an author/avatar/logo image instead of the article cover", { ...context, twitterImage });
     }
   }
 

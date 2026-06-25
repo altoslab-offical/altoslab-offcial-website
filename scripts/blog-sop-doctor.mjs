@@ -23,24 +23,24 @@ const GENERIC_STOCK_IMAGE_HOSTS = [
 ];
 const LAUNCH_AGENT_TRIGGERS = [
   [8, 10],
-  [9, 0],
-  [9, 4],
+  [9, 10],
+  [9, 14],
   [10, 15],
   [11, 15],
   [12, 15],
   [13, 15],
+  [13, 40],
   [14, 15],
-  [15, 10],
+  [14, 40],
+  [14, 44],
   [15, 15],
-  [16, 0],
-  [16, 4],
   [17, 15],
   [18, 15],
-  [19, 10],
   [19, 15],
-  [20, 0],
-  [20, 4],
+  [19, 20],
   [20, 15],
+  [20, 20],
+  [20, 24],
   [21, 15]
 ];
 const LAUNCH_AGENT_PLIST = path.join(process.env.HOME || "", "Library/LaunchAgents/com.altoslab.blog-local-worker.plist");
@@ -49,9 +49,9 @@ const N8N_BRIDGE_HEALTH_URL = "http://127.0.0.1:8797/health";
 const EXPECTED_WORKER_ROOT =
   process.env.ALTOS_BLOG_WORKER_ROOT || "/Users/asdc163/LocalProjects/altoslab-offcial-website-runtime";
 const SLOTS = {
-  morning: "09:00",
-  afternoon: "16:00",
-  evening: "20:00"
+  morning: "09:10",
+  afternoon: "14:40",
+  evening: "20:20"
 };
 
 function arg(name, fallback = "") {

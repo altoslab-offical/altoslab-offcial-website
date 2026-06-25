@@ -63,6 +63,7 @@ const SOURCE_PROFILES = {
 const FEED_TIMEOUT_MS = 8000;
 const PAGE_TIMEOUT_MS = 12000;
 const IMAGE_TIMEOUT_MS = 6500;
+const ENRICH_CONCURRENCY = Math.max(1, Math.min(12, Number(process.env.ALTOS_BLOG_MARKET_SCAN_CONCURRENCY || "6")));
 const MIN_IMAGE_WIDTH = Number(process.env.ALTOS_BLOG_MARKET_MIN_IMAGE_WIDTH || "768");
 const MIN_IMAGE_HEIGHT = Number(process.env.ALTOS_BLOG_MARKET_MIN_IMAGE_HEIGHT || "432");
 const MIN_IMAGE_BYTES = Number(process.env.ALTOS_BLOG_MARKET_MIN_IMAGE_BYTES || "25000");
@@ -500,7 +501,7 @@ async function liveDuplicateState(baseUrl) {
 async function queueMarketSequences(queueDir, maxPacks) {
   const names = (await fs.readdir(queueDir).catch(() => []))
     .filter((name) => /^\d+-market\.json$/.test(name))
-    .sort();
+    .sort((a, b) => Number(a.split("-")[0]) - Number(b.split("-")[0]));
   const sequences = [];
   for (const name of names) {
     const item = await readJson(path.join(queueDir, name)).catch(() => null);
@@ -546,6 +547,14 @@ async function enrichCandidate(candidate) {
     imageProbe,
     sourceArticle
   };
+}
+
+function candidateBatches(candidates, size) {
+  const batches = [];
+  for (let index = 0; index < candidates.length; index += size) {
+    batches.push(candidates.slice(index, index + size));
+  }
+  return batches;
 }
 
 function readUInt24LE(buffer, offset) {
@@ -802,54 +811,57 @@ async function main() {
   const skipped = [];
   const sourceCounts = new Map();
   const topicKeys = new Set();
-  const candidateWindow = sourceProfile ? maxPacks * 12 : maxPacks * 4;
-  for (const candidate of candidates.slice(0, candidateWindow)) {
+  const candidateWindow = sourceProfile ? maxPacks * 8 : maxPacks * 4;
+  for (const batch of candidateBatches(candidates.slice(0, candidateWindow), ENRICH_CONCURRENCY)) {
     if (packs.length >= sequences.length) break;
-    const sourceCount = sourceCounts.get(candidate.sourceId) || 0;
-    if (sourceProfile && sourceCount >= 2) {
-      skipped.push({ title: candidate.title, url: candidate.url, reason: "source diversity cap" });
-      continue;
-    }
-    const topicKey = coarseTopicKey(candidate);
-    if (sourceProfile && topicKeys.has(topicKey)) {
-      skipped.push({ title: candidate.title, url: candidate.url, reason: "same event already selected in batch" });
-      continue;
-    }
-    const enriched = await enrichCandidate(candidate);
-    if (enriched.sourceFetchFailed) {
-      skipped.push({ title: candidate.title, url: candidate.url, reason: `source page fetch failed ${enriched.pageStatus || ""}`.trim() });
-      continue;
-    }
-    if (!enriched.imageUrl) {
-      skipped.push({ title: candidate.title, url: candidate.url, reason: "missing og/twitter/source image" });
-      continue;
-    }
-    if (!enriched.imageProbe?.ok) {
-      skipped.push({ title: candidate.title, url: candidate.url, reason: enriched.imageProbe?.reason || "source image failed preflight" });
-      continue;
-    }
-    if (isGenericStockUrl(enriched.imageUrl)) {
-      skipped.push({ title: candidate.title, url: candidate.url, reason: "generic stock image host" });
-      continue;
-    }
-    if (live.coverUrls.has(enriched.imageUrl) || live.coverKeys.has(normalizeCoverKey(enriched.imageUrl))) {
-      skipped.push({ title: candidate.title, url: candidate.url, reason: "cover image already used live" });
-      continue;
-    }
-    if (!enriched.sourceArticle?.canonicalUrl || enriched.sourceArticle.extractionConfidence < 0.6 || enriched.sourceArticle.factBullets.length < 3) {
-      skipped.push({ title: candidate.title, url: candidate.url, reason: "source article facts below market-news threshold" });
-      continue;
-    }
-    if (newsDepth === "longform") {
-      const issues = longformIssues(enriched);
-      if (issues.length) {
-        skipped.push({ title: candidate.title, url: candidate.url, reason: `longform gate: ${issues.join("; ")}` });
+    const enrichedBatch = await Promise.all(batch.map((candidate) => enrichCandidate(candidate)));
+    for (const enriched of enrichedBatch) {
+      if (packs.length >= sequences.length) break;
+      const sourceCount = sourceCounts.get(enriched.sourceId) || 0;
+      if (sourceProfile && sourceCount >= 2) {
+        skipped.push({ title: enriched.title, url: enriched.url, reason: "source diversity cap" });
         continue;
       }
+      const topicKey = coarseTopicKey(enriched);
+      if (sourceProfile && topicKeys.has(topicKey)) {
+        skipped.push({ title: enriched.title, url: enriched.url, reason: "same event already selected in batch" });
+        continue;
+      }
+      if (enriched.sourceFetchFailed) {
+        skipped.push({ title: enriched.title, url: enriched.url, reason: `source page fetch failed ${enriched.pageStatus || ""}`.trim() });
+        continue;
+      }
+      if (!enriched.imageUrl) {
+        skipped.push({ title: enriched.title, url: enriched.url, reason: "missing og/twitter/source image" });
+        continue;
+      }
+      if (!enriched.imageProbe?.ok) {
+        skipped.push({ title: enriched.title, url: enriched.url, reason: enriched.imageProbe?.reason || "source image failed preflight" });
+        continue;
+      }
+      if (isGenericStockUrl(enriched.imageUrl)) {
+        skipped.push({ title: enriched.title, url: enriched.url, reason: "generic stock image host" });
+        continue;
+      }
+      if (live.coverUrls.has(enriched.imageUrl) || live.coverKeys.has(normalizeCoverKey(enriched.imageUrl))) {
+        skipped.push({ title: enriched.title, url: enriched.url, reason: "cover image already used live" });
+        continue;
+      }
+      if (!enriched.sourceArticle?.canonicalUrl || enriched.sourceArticle.extractionConfidence < 0.6 || enriched.sourceArticle.factBullets.length < 3) {
+        skipped.push({ title: enriched.title, url: enriched.url, reason: "source article facts below market-news threshold" });
+        continue;
+      }
+      if (newsDepth === "longform") {
+        const issues = longformIssues(enriched);
+        if (issues.length) {
+          skipped.push({ title: enriched.title, url: enriched.url, reason: `longform gate: ${issues.join("; ")}` });
+          continue;
+        }
+      }
+      packs.push(sourcePackFromCandidate(sequences[packs.length], enriched, { newsDepth }));
+      sourceCounts.set(enriched.sourceId, sourceCount + 1);
+      topicKeys.add(topicKey);
     }
-    packs.push(sourcePackFromCandidate(sequences[packs.length], enriched, { newsDepth }));
-    sourceCounts.set(candidate.sourceId, sourceCount + 1);
-    topicKeys.add(topicKey);
   }
 
   const overwrite = hasFlag("overwrite");

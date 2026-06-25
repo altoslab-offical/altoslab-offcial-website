@@ -7,7 +7,7 @@ import { subagentModelPolicyText } from "./blog-subagent-model-policy.mjs";
 import { columnVisualStylePromptBlock } from "./blog-column-visual-style-library.mjs";
 import { spawn } from "node:child_process";
 
-const SLOT_HOURS = { morning: "09:00", afternoon: "16:00", evening: "20:00" };
+const SLOT_HOURS = { morning: "09:10", afternoon: "14:40", evening: "20:20" };
 const DEFAULT_BASE_URL = "https://altoslab-ai.cc";
 const LANGUAGES = ["zh-Hant", "en", "ja", "ko", "id", "vi", "th", "ms", "fil"];
 const LANGUAGE_LABEL = LANGUAGES.join(", ");

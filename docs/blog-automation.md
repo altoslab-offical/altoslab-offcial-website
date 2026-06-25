@@ -3,7 +3,7 @@
 ## Legal Source Strategy
 
 - The cron job reads a source registry of official RSS/API/docs, trusted media and licensed image sources as research signals.
-- The old 40-post recovery number is only a backfill milestone, not a production cap. Routine production is three Gemini-approved columns per Taipei day, with the remaining capacity going to source-verified longform market news whenever qualified items arrive.
+- The old 40-post recovery number is only a backfill milestone, not a production cap. Routine production is three Gemini-approved columns per Taipei day plus source-verified market news whenever qualified items arrive. Market news has no daily upper cap; eight complete 9-language market-news groups per Taipei day is the minimum floor, not the target ceiling.
 - It does not scrape or republish full articles.
 - The production path must write original ALTOS LAB synthesis in its own words.
 - Every generated article keeps visible `sourceLinks` for attribution and fact checking.
@@ -17,7 +17,7 @@
 - DeepSeek is no longer part of the formal publishing path.
 - The current production loop uses the main Codex thread as the release controller. Columns/features use Gemini to write the source-of-truth article first; after Codex approves it, subagent workers localize the approved article into the remaining languages.
 - Subagent model policy: start with `gpt-5.3-codex-spark`. If Spark usage is exhausted, quota/rate-limited, returns `429`, `resource_exhausted`, or otherwise reports capacity/budget exhaustion, continue the same bounded worker task with `gpt-5.4-mini`. The fallback worker inherits the same owned files, output cap, no-publish rule and no-final-quality-decision boundary.
-- Market-news fast lane uses source-translation: Codex/source workers translate and adapt a verified source article into ALTOS LAB's reader-first brief format, with source links and one shared source/official cover across all languages. Ordinary market news does not need Gemini, but it cannot release without a credited source/official image.
+- Market-news fast lane uses source-translation: Codex/source workers translate and adapt a verified source article into ALTOS LAB's reader-first brief format, with source links and one shared source/official cover across all languages. Daily floor-filling uses `ALTOS_BLOG_MARKET_NEWS_DEPTH=standard`; `longform` is an enrichment mode, not the default throughput lane. Ordinary market news does not need Gemini, but it cannot release without a credited source/official image.
 - Gemini and ChatGPT/GPT are browser workbenches, not release authorities. They may help draft prose or images only inside the dedicated Chrome tabs documented in `docs/content/blog-subagent-production-loop.md`.
 - Localization is not literal translation. Subagents must rewrite naturally for local readers while preserving the same article identity, source facts, sources, cover/media set and editorial angle.
 - The main brain is the only role allowed to call `--release`.
@@ -37,7 +37,7 @@
 - If a column prep would otherwise stop at `awaiting_browser_production` with no `article-set.json`, enable the durable Codex fallback with `ALTOS_BLOG_AUTO_CODEX_COLUMN_PRODUCER=1`. The runner then calls `scripts/blog-codex-column-producer.mjs` to create a 9-language source-backed column set with `codexEvidence`, generated media metadata, visual QA, and release-compatible local images. This is a repair lane, not a gate bypass: the candidate still must pass `--column-validate`, `--release`, public readback, daily closeout, and performance smoke.
 - Generated column media must be large enough for both image QA and generated-media reachability. The Codex producer writes detailed low-compression PNGs so content images do not fail production release with `generated media is too small`.
 - The n8n column release poll calls the release gate every 15 minutes during the day. It publishes only a `ready` manifest. Missing candidates, missing article sets and held release gates return `ok:false`, so n8n records execution failure instead of silently passing.
-- The daily closeout gate runs at 23:35 Asia/Taipei and verifies public inventory, not just local files: the same Taipei date must have a complete 9-language column group and a complete 9-language market-news group on `https://altoslab-ai.cc`.
+- The daily closeout gate runs at 23:35 Asia/Taipei and verifies public inventory, not just local files: the same Taipei date must have three spaced complete 9-language column groups and at least eight complete 9-language market-news groups on `https://altoslab-ai.cc`.
 - The scheduled runner uses a single local lock so overlapping heartbeat/LaunchAgent wakes cannot stack production jobs.
 - Column prep checks Chrome Memory Kit before creating a new browser-production candidate. Default guardrails are `ALTOS_BLOG_CHROME_TOTAL_RSS_MB=5200` and `ALTOS_BLOG_CHROME_RENDERER_RSS_MB=1200`; if either is exceeded, the column is held and the reason is logged.
 - Backfill planning is tied to prep windows by default. Market-scan windows focus on current news; set `ALTOS_BLOG_BACKFILL_ON_MARKET_SCAN=true` only for a deliberate catch-up burst.
@@ -76,7 +76,7 @@ Auto-publishing requires:
 
 ## Column Cadence Guard
 
-- Market news and columns must stay separated. Market news can publish during market-scan windows only when a source-verifiable item and source/official image pass QA.
+- Market news and columns must stay separated. Market news can publish during market-scan/fill windows only when a source-verifiable item and source/official image pass QA. A held market-news candidate is repair/replace work, not a healthy skip.
 - Columns/features are capped at three translation groups per Taipei calendar day by default.
 - `scripts/blog-local-worker.mjs --publish` enforces `ALTOS_BLOG_COLUMN_DAILY_LIMIT=3` for non-breaking article sets. It blocks release when a payload would exceed the daily limit.
 - Backfill column drafts must be rewritten and released through the normal column lane instead of being bulk-published. A local batch of nine draft columns is a backlog, not a publish queue.
@@ -87,6 +87,6 @@ Auto-publishing requires:
 - Public production is `https://altoslab-ai.cc` on AWS ECS/Fargate with AWS S3-backed CMS storage. Cloudflare Worker/KV/D1 paths are legacy diagnostics and must not be treated as production truth.
 - Market-news inventory has no hard upper cap; each configured language grows together through complete 9-language translation groups.
 - Column inventory grows at the daily cadence guard: three Gemini-produced columns per Taipei calendar day, each released only after the same quality, visual and public readback gates pass.
-- Routine cadence: three Gemini-produced columns per Taipei calendar day; market news publishes opportunistically during scheduled scan windows when a verified source item, accepted cover path, and multilingual source-faithful copy pass release checks.
+- Routine cadence: three Gemini-produced columns per Taipei calendar day; market news publishes during scheduled scan/fill windows whenever a verified source item, accepted cover path, and multilingual source-faithful copy pass release checks. Keep publishing beyond eight if qualified source-backed items remain.
 - Bulk column backfills stay staged and are released over time; do not publish nine columns in one burst unless Tommy explicitly approves a burst.
 - Market news must preserve the source article's news style: natural headline, clear subtitle, source facts in readable paragraphs, no fixed H2 template, no generic adoption checklist, no internal QA or automation language.

@@ -192,6 +192,10 @@ assert(releaseRoute.includes("column/feature posts require at least two in-artic
 assert(releaseRoute.includes("contentImages URLs do not match release payload"), "release-set route verifies signed content image URLs during publish");
 assert(releaseRoute.includes("generatedMediaReachabilityIssues"), "release-set route verifies same-origin generated-media URLs before publish");
 assert(releaseRoute.includes("applyManifestReleaseReview"), "release-set route applies the signed manifest release decision directly");
+assert(
+  releaseRoute.includes("publishedAt: isScheduledEditorial ? scheduled : post.publishedAt"),
+  "release-set route normalizes column/feature publishedAt to the scheduled slot instead of catch-up time"
+);
 assert(releaseRoute.includes("reviewBlogPairForAutoPublish"), "release-set route reruns full article QA during publish");
 assert(!releaseRoute.includes("reviewBlogImagesForRelease"), "release-set route does not rerun remote image QA during publish");
 assert(mediaRoute.includes("verifyBlogIngestRequest"), "media upload route is protected by the same signed request contract");
@@ -225,7 +229,7 @@ assert(localWorker.includes("legacy repair visual"), "local worker rejects legac
 assert(localWorker.includes("requestRelease") && localWorker.includes("/api/admin/blog/release-set"), "local worker publishes through the formal release-set route");
 assert(localWorker.includes("qualityManifest") && localWorker.includes("contentSha256"), "local worker writes a quality manifest with a content digest");
 assert(localWorker.includes("reuse-validated-manifest"), "local worker can reuse a signed validate-only manifest during release");
-assert(localWorker.includes('evening: "20:00"'), "local worker supports the evening daily column slot");
+assert(localWorker.includes('evening: "20:20"'), "local worker supports the evening daily column slot");
 assert(localWorker.includes("isSourceTranslationLane"), "local worker allows source-translation market news without Gemini tab evidence");
 assert(localWorker.includes("requiresGptCover"), "local worker only requires ChatGPT/GPT evidence when generated covers are needed");
 assert(localWorker.includes("sourceTranslatedMarketNews") && localWorker.includes("generatedBy.includes(\"codex\")"), "local worker requires Gemini/Codex provenance except source-translated market news");
@@ -261,6 +265,10 @@ assert(!orchestrator.includes("--generate-missing-covers"), "orchestrator does n
 assert(scheduledRunner.includes("PREP_WINDOWS") && scheduledRunner.includes("RELEASE_WINDOWS"), "scheduled runner separates prep and release windows");
 assert(scheduledRunner.includes("MARKET_SCAN_WINDOWS"), "scheduled runner has a separate market-news scan cadence");
 assert(scheduledRunner.includes("--market-scan"), "scheduled runner can create market-news fast-lane scan prompts");
+assert(scheduledRunner.includes("--market-fill") && scheduledRunner.includes("runMarketFill"), "scheduled runner can fill market-news through repeated gated scans");
+assert(scheduledRunner.includes("MARKET_NEWS_DAILY_MINIMUM") && scheduledRunner.includes("upperCap: null"), "scheduled runner treats the market-news daily target as a floor with no upper cap");
+assert(scheduledRunner.includes("initialStatus.completeCount") && scheduledRunner.includes("Minimum floor already met"), "market-fill short-circuits when the daily floor is already met");
+assert(scheduledRunner.includes('ALTOS_BLOG_MARKET_NEWS_DEPTH || "standard"'), "market-fill defaults daily source depth to standard, not longform");
 assert(
   scheduledRunner.includes("Array.from({ length: 12 }") && scheduledRunner.includes("hour: index + 10, minute: 15"),
   "scheduled runner scans market fastlane hourly during the active website window"
@@ -274,6 +282,10 @@ assert(scheduledRunner.includes("releaseGateIssues"), "scheduled release checks 
 assert(scheduledRunner.includes("releaseWindowIssue"), "scheduled release refuses to publish outside the configured release window");
 assert(scheduledRunner.includes("RELEASE_GRACE_MINUTES"), "scheduled release allows a small launchd delay but no early or stale publish");
 assert(scheduledRunner.includes("dailyColumnTargetStatus") && scheduledRunner.includes("column-release-daily-target-met"), "scheduled release checks public daily column inventory before stale held candidates can fail an already-complete day");
+assert(
+  scheduledRunner.includes("post.publishedAt = expectedReleaseAt"),
+  "scheduled runner writes slot publishedAt into column article sets before release"
+);
 assert(scheduledRunner.includes("force-release"), "scheduled release has an explicit manual override for emergency operation");
 assert(
   scheduledRunner.includes("column-quality-repair-required") && scheduledRunner.includes("quality-repair-required") && scheduledRunner.includes("publish-after-validate"),
@@ -311,14 +323,15 @@ assert(marketSourceScanner.includes("GDELT") || sourceRegistry.includes("GDELT D
 assert(marketSourceScanner.includes("CONSUMER_NOISE_PATTERN"), "market source scanner filters irrelevant consumer-news noise");
 assert(marketSourceScanner.includes("google-cloud-ai-blog") && marketSourceScanner.includes("search-engine-land"), "longform market-news profile includes expanded AI infrastructure and GEO/search sources");
 assert(marketSourceScanner.includes("liveDuplicateState"), "market source scanner checks live duplicate source URLs, covers and titles");
+assert(marketSourceScanner.includes("ENRICH_CONCURRENCY") && marketSourceScanner.includes("candidateBatches"), "market source scanner enriches candidates with bounded concurrency instead of timing out serially");
 assert(marketSourceWorker.includes('contentType: "breaking"'), "market source worker marks every generated post as breaking so source-image QA uses market-news thresholds");
 assert(marketAutoRepair.includes("removeRepeatedPublisherLead"), "market auto-repair removes repeated publisher lead templates from body paragraphs");
 assert(!marketSourceScanner.includes("current AI coverage page for related reporting"), "market source scanner does not publish generic source index pages as article sources");
 assert(sopDoctor.includes("BLOG_DISABLE_DEEPSEEK_CRON must be true"), "SOP doctor requires the legacy DeepSeek cron to stay disabled");
-assert(sopDoctor.includes("[8, 10]") && sopDoctor.includes("[9, 0]") && sopDoctor.includes("[9, 4]"), "SOP doctor enforces prep/release launch windows in its trigger checks");
+assert(sopDoctor.includes("[8, 10]") && sopDoctor.includes("[9, 10]") && sopDoctor.includes("[9, 14]"), "SOP doctor enforces morning prep/release launch windows in its trigger checks");
 assert(sopDoctor.includes("[10, 15]") && sopDoctor.includes("[11, 15]") && sopDoctor.includes("[14, 15]"), "SOP doctor enforces hourly market-scan launch windows");
-assert(sopDoctor.includes("[15, 10]") && sopDoctor.includes("[16, 0]") && sopDoctor.includes("[16, 4]"), "SOP doctor enforces late-day prep/release launch windows");
-assert(sopDoctor.includes("[19, 10]") && sopDoctor.includes("[20, 0]") && sopDoctor.includes("[21, 15]"), "SOP doctor enforces evening release and late market-scan launch windows");
+assert(sopDoctor.includes("[13, 40]") && sopDoctor.includes("[14, 40]") && sopDoctor.includes("[14, 44]"), "SOP doctor enforces afternoon prep/release launch windows");
+assert(sopDoctor.includes("[19, 20]") && sopDoctor.includes("[20, 20]") && sopDoctor.includes("[21, 15]"), "SOP doctor enforces evening release and late market-scan launch windows");
 assert(sopDoctor.includes("production cmsStorage.provider must be cloudflare-d1, cloudflare-kv, gcs or aws-s3"), "SOP doctor verifies a durable production CMS store");
 assert(cmsStorage.includes('provider: "cloudflare-d1"') || cmsStorage.includes("provider: \"cloudflare-d1\""), "CMS storage can use Cloudflare D1 as the primary durable store");
 assert(cmsStorage.includes('provider: "aws-s3"') || cmsStorage.includes("provider: \"aws-s3\""), "CMS storage can use AWS S3 as the migration durable store");
@@ -446,12 +459,18 @@ assert(releaseVerifier.includes("ALTOS_ADMIN_PASSWORD") && releaseVerifier.inclu
 assert(releaseVerifier.includes("/api/admin/blog?fields=release-readback"), "release verifier uses compact admin readback on Cloudflare");
 assert(releaseVerifier.includes("/api/admin/blog/refresh-public-cache"), "release verifier refreshes derived public blog caches before metadata checks");
 assert(releaseVerifier.includes("og:image") && releaseVerifier.includes("twitter:image"), "release verifier checks social preview images");
+assert(releaseVerifier.includes("must exactly match the public article cover URL"), "release verifier blocks social previews that resolve to author/avatar images instead of article covers");
 assert(releaseVerifier.includes("/feed.xml") && releaseVerifier.includes("/sitemap.xml") && releaseVerifier.includes("/llms.txt"), "release verifier checks public metadata surfaces");
 assert(releaseVerifier.includes("AI-generated") && releaseVerifier.includes("SEO\\s*\\/\\s*GEO"), "release verifier blocks public leakage of internal production copy");
 assert(launchAgentPlist.includes("blog-scheduled-runner.mjs --scheduled"), "LaunchAgent runs the scheduled prep/release runner");
 assert(launchAgentPlist.includes("<integer>8</integer>") && launchAgentPlist.includes("<integer>15</integer>"), "LaunchAgent includes prep windows");
 assert(launchAgentPlist.includes("<integer>10</integer>") && launchAgentPlist.includes("<integer>20</integer>"), "LaunchAgent includes market scan windows");
-assert(launchAgentPlist.includes("<integer>4</integer>"), "LaunchAgent includes post-release follow-up minutes");
+assert(
+  launchAgentPlist.includes("<integer>14</integer>") &&
+    launchAgentPlist.includes("<integer>44</integer>") &&
+    launchAgentPlist.includes("<integer>24</integer>"),
+  "LaunchAgent includes post-release follow-up minutes for spaced column slots"
+);
 assert(launchAgentInstaller.includes("replace-with|test-secret"), "LaunchAgent installer refuses placeholder or test ingest secrets");
 assert(launchAgentInstaller.includes("launchctl bootstrap"), "LaunchAgent installer can bootstrap the scheduled local worker");
 assert(
@@ -550,7 +569,7 @@ assert(!globals.includes("site-language-toggle button:nth-child"), "mobile CSS n
 assert(cron.includes("pickEditorialBrief"), "cron uses editorial brief and content mix");
 assert(cron.includes("reviewBlogPairWithDeepSeek"), "cron runs LLM-as-judge before publish when configured");
 assert(cron.includes("BLOG_DISABLE_DEEPSEEK_CRON"), "legacy DeepSeek cron is disabled by default");
-assert(cron.includes("hour: \"16:00\""), "afternoon slot is aligned to 16:00 Asia/Taipei");
+assert(cron.includes("hour: \"16:00\""), "legacy DeepSeek cron keeps its disabled default afternoon slot");
 assert(!vercel.crons?.length, "Vercel no longer runs DeepSeek blog generation crons");
 assert(envExample.includes("BLOG_INGEST_HMAC_SECRET"), "env example documents the signed ingest secret");
 assert(envExample.includes("ALTOS_BLOG_NODE_BIN"), "env example documents the explicit Node binary for launchd");
