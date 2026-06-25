@@ -1609,14 +1609,14 @@
       "translationGroupId": "browser-gemini-gpt-2026-06-11-morning-ai-agent-delegation",
       "coverSource": "generated",
       "coverCredit": "ALTOS LAB 編輯視覺",
-      "coverAlt": "三張交辦流程卡片以審核節點串起 AI 代理任務制度",
+      "coverAlt": "AI 代理任務交辦制度的實體化工作桌，包含空白任務卡、權限節點與回滾路線",
       "coverGeneration": {
         "source": "generated",
-        "provider": "ChatGPT/GPT",
-        "prompt": "Cyberpunk operations desk for an AI delegation column: three translucent task panels floating over a dark grid, neon cyan amber and coral decision paths, human-scale editorial atmosphere, no readable text, no logos, no people, 16:9 crop-safe composition.",
-        "generatedAt": "2026-06-11T03:33:26.313Z",
+        "provider": "Codex imagegen / GPT image2",
+        "prompt": "Premium editorial product photography for enterprise AI agent delegation: blank task cards, approval tokens, permission marker, handoff tray and rollback route thread on a warm operations desk, no readable text, no logos, no UI, natural daylight, 16:9.",
+        "generatedAt": "2026-06-25T05:21:00.000Z",
         "status": "generated",
-        "styleId": "cyberpunk-neon-operations",
+        "styleId": "editorial-operations-desk",
         "visualChecks": {
           "topicFit": true,
           "noTextArtifacts": true,
@@ -1626,20 +1626,20 @@
           "noGenericStockLook": true,
           "distinctFromSiblingImages": true,
           "checkedBy": "codex-main-brain-image-qa",
-          "checkedAt": "2026-06-11T03:34:51.666Z"
+          "checkedAt": "2026-06-25T05:21:00.000Z"
         }
       },
       "contentImages": [
         {
           "source": "generated",
-          "provider": "ChatGPT/GPT",
-          "prompt": "Anime-inspired product lab still for AI task handoff: tilted paper-like task cards, warm studio light, clean cel-shaded linework, soft teal and coral checkpoints, no characters, no readable text, no logos, 16:9 editorial crop.",
-          "generatedAt": "2026-06-11T03:33:26.313Z",
+          "provider": "Codex imagegen / GPT image2",
+          "prompt": "Documentary product still life for AI task handoff: three blank cards moving through intake, review and recovery trays with physical tokens for permission, evidence and human approval, no readable text, no logos, 16:9.",
+          "generatedAt": "2026-06-25T05:21:00.000Z",
           "status": "generated",
           "credit": "ALTOS LAB 編輯視覺",
           "aspectRatio": "16:9",
           "placement": "after-lead",
-          "alt": "AI 代理從聊天請求轉成可審核交辦卡片的流程示意",
+          "alt": "AI 代理任務從接收、審核到回復的三段式交辦卡片",
           "caption": "把一次聊天變成一張可追蹤的交辦卡，管理者才看得見權限、狀態與責任。",
           "visualChecks": {
             "topicFit": true,
@@ -1650,21 +1650,21 @@
             "noGenericStockLook": true,
             "distinctFromSiblingImages": true,
             "checkedBy": "codex-main-brain-image-qa",
-            "checkedAt": "2026-06-11T03:34:51.666Z"
+            "checkedAt": "2026-06-25T05:21:00.000Z"
           },
-          "url": "https://altoslab-ai.cc/api/blog/generated-media/browser-gemini-gpt-2026-06-11-morning-ai-agent-delegation-ai-agent-delegation-system-opening.png",
-          "styleId": "anime-inspired-product-lab"
+          "url": "https://altoslab-ai.cc/api/blog/generated-media/codex-static-legacy-image-refresh-20260625-agent-delegation-ai-agent-delegation-opening-20260625.png",
+          "styleId": "editorial-handoff-trays"
         },
         {
           "source": "generated",
-          "provider": "ChatGPT/GPT",
-          "prompt": "Technical blueprint visual for AI delegation checkpoints: navy grid background, schematic boxes, review nodes, rollback route, cream blueprint linework with amber and coral accents, no readable text, no logos, no fake UI, 16:9 crop-safe.",
-          "generatedAt": "2026-06-11T03:33:26.313Z",
+          "provider": "Codex imagegen / GPT image2",
+          "prompt": "Premium tabletop service blueprint for AI agent governance and rollback: blank cards, stop token, return loop thread, review checkpoints, muted green ivory charcoal and restrained orange accent, no readable text, no logos, 16:9.",
+          "generatedAt": "2026-06-25T05:21:00.000Z",
           "status": "generated",
           "credit": "ALTOS LAB 編輯視覺",
           "aspectRatio": "16:9",
           "placement": "mid-article",
-          "alt": "AI 代理任務的接收執行審核與回復節點被拆成制度地圖",
+          "alt": "AI 代理治理與回滾流程的實體化服務藍圖",
           "caption": "真正能上線的代理，不在於一次跑到底，而在於每個節點都能查、能退、能交回人工。",
           "visualChecks": {
             "topicFit": true,
@@ -1675,10 +1675,10 @@
             "noGenericStockLook": true,
             "distinctFromSiblingImages": true,
             "checkedBy": "codex-main-brain-image-qa",
-            "checkedAt": "2026-06-11T03:34:51.666Z"
+            "checkedAt": "2026-06-25T05:21:00.000Z"
           },
-          "url": "https://altoslab-ai.cc/api/blog/generated-media/browser-gemini-gpt-2026-06-11-morning-ai-agent-delegation-ai-agent-delegation-system-mechanism.png",
-          "styleId": "technical-blueprint-lab"
+          "url": "https://altoslab-ai.cc/api/blog/generated-media/codex-static-legacy-image-refresh-20260625-agent-delegation-ai-agent-delegation-mechanism-20260625.png",
+          "styleId": "editorial-rollback-service-blueprint"
         }
       ],
       "generatedBy": "gemini-chatgpt",
@@ -1686,12 +1686,12 @@
       "reviewStatus": "approved",
       "qualityIssues": [],
       "aiDisclosure": "",
-      "updatedAt": "2026-06-11T03:34:51.666Z",
+      "updatedAt": "2026-06-25T05:21:00.000Z",
       "publishedAt": "2026-06-11T03:15:19.373Z",
       "slot": "morning",
       "id": "static-browser-gemini-gpt-2026-06-11-morning-ai-agent-delegation-zh-Hant",
       "sortOrder": 100,
-      "cover": "https://altoslab-ai.cc/api/blog/generated-media/browser-gemini-gpt-2026-06-11-morning-ai-agent-delegation-ai-agent-delegation-system-cover.png",
+      "cover": "https://altoslab-ai.cc/api/blog/generated-media/codex-static-legacy-image-refresh-20260625-agent-delegation-ai-agent-delegation-cover-20260625.png",
       "qualityStatus": "passed",
       "imageQualityStatus": "passed",
       "releaseDecision": "published",
@@ -1809,14 +1809,14 @@
       "translationGroupId": "browser-gemini-gpt-2026-06-11-morning-ai-agent-delegation",
       "coverSource": "generated",
       "coverCredit": "ALTOS LAB 編輯視覺",
-      "coverAlt": "三張交辦流程卡片以審核節點串起 AI 代理任務制度",
+      "coverAlt": "Enterprise AI agent delegation desk with blank task cards, permission checkpoints and rollback route",
       "coverGeneration": {
         "source": "generated",
-        "provider": "ChatGPT/GPT",
-        "prompt": "Cyberpunk operations desk for an AI delegation column: three translucent task panels floating over a dark grid, neon cyan amber and coral decision paths, human-scale editorial atmosphere, no readable text, no logos, no people, 16:9 crop-safe composition.",
-        "generatedAt": "2026-06-11T03:33:26.313Z",
+        "provider": "Codex imagegen / GPT image2",
+        "prompt": "Premium editorial product photography for enterprise AI agent delegation: blank task cards, approval tokens, permission marker, handoff tray and rollback route thread on a warm operations desk, no readable text, no logos, no UI, natural daylight, 16:9.",
+        "generatedAt": "2026-06-25T05:21:00.000Z",
         "status": "generated",
-        "styleId": "cyberpunk-neon-operations",
+        "styleId": "editorial-operations-desk",
         "visualChecks": {
           "topicFit": true,
           "noTextArtifacts": true,
@@ -1826,20 +1826,20 @@
           "noGenericStockLook": true,
           "distinctFromSiblingImages": true,
           "checkedBy": "codex-main-brain-image-qa",
-          "checkedAt": "2026-06-11T03:34:51.666Z"
+          "checkedAt": "2026-06-25T05:21:00.000Z"
         }
       },
       "contentImages": [
         {
           "source": "generated",
-          "provider": "ChatGPT/GPT",
-          "prompt": "Anime-inspired product lab still for AI task handoff: tilted paper-like task cards, warm studio light, clean cel-shaded linework, soft teal and coral checkpoints, no characters, no readable text, no logos, 16:9 editorial crop.",
-          "generatedAt": "2026-06-11T03:33:26.313Z",
+          "provider": "Codex imagegen / GPT image2",
+          "prompt": "Documentary product still life for AI task handoff: three blank cards moving through intake, review and recovery trays with physical tokens for permission, evidence and human approval, no readable text, no logos, 16:9.",
+          "generatedAt": "2026-06-25T05:21:00.000Z",
           "status": "generated",
           "credit": "ALTOS LAB editorial visual",
           "aspectRatio": "16:9",
           "placement": "after-lead",
-          "alt": "AI 代理從聊天請求轉成可審核交辦卡片的流程示意",
+          "alt": "AI agent task handoff cards moving from intake to review to recovery",
           "caption": "把一次聊天變成一張可追蹤的交辦卡，管理者才看得見權限、狀態與責任。",
           "visualChecks": {
             "topicFit": true,
@@ -1850,21 +1850,21 @@
             "noGenericStockLook": true,
             "distinctFromSiblingImages": true,
             "checkedBy": "codex-main-brain-image-qa",
-            "checkedAt": "2026-06-11T03:34:51.666Z"
+            "checkedAt": "2026-06-25T05:21:00.000Z"
           },
-          "url": "https://altoslab-ai.cc/api/blog/generated-media/browser-gemini-gpt-2026-06-11-morning-ai-agent-delegation-ai-agent-delegation-system-opening.png",
-          "styleId": "anime-inspired-product-lab"
+          "url": "https://altoslab-ai.cc/api/blog/generated-media/codex-static-legacy-image-refresh-20260625-agent-delegation-ai-agent-delegation-opening-20260625.png",
+          "styleId": "editorial-handoff-trays"
         },
         {
           "source": "generated",
-          "provider": "ChatGPT/GPT",
-          "prompt": "Technical blueprint visual for AI delegation checkpoints: navy grid background, schematic boxes, review nodes, rollback route, cream blueprint linework with amber and coral accents, no readable text, no logos, no fake UI, 16:9 crop-safe.",
-          "generatedAt": "2026-06-11T03:33:26.313Z",
+          "provider": "Codex imagegen / GPT image2",
+          "prompt": "Premium tabletop service blueprint for AI agent governance and rollback: blank cards, stop token, return loop thread, review checkpoints, muted green ivory charcoal and restrained orange accent, no readable text, no logos, 16:9.",
+          "generatedAt": "2026-06-25T05:21:00.000Z",
           "status": "generated",
           "credit": "ALTOS LAB editorial visual",
           "aspectRatio": "16:9",
           "placement": "mid-article",
-          "alt": "AI 代理任務的接收執行審核與回復節點被拆成制度地圖",
+          "alt": "Physical service blueprint for AI agent governance and rollback",
           "caption": "真正能上線的代理，不在於一次跑到底，而在於每個節點都能查、能退、能交回人工。",
           "visualChecks": {
             "topicFit": true,
@@ -1875,10 +1875,10 @@
             "noGenericStockLook": true,
             "distinctFromSiblingImages": true,
             "checkedBy": "codex-main-brain-image-qa",
-            "checkedAt": "2026-06-11T03:34:51.666Z"
+            "checkedAt": "2026-06-25T05:21:00.000Z"
           },
-          "url": "https://altoslab-ai.cc/api/blog/generated-media/browser-gemini-gpt-2026-06-11-morning-ai-agent-delegation-ai-agent-delegation-system-mechanism.png",
-          "styleId": "technical-blueprint-lab"
+          "url": "https://altoslab-ai.cc/api/blog/generated-media/codex-static-legacy-image-refresh-20260625-agent-delegation-ai-agent-delegation-mechanism-20260625.png",
+          "styleId": "editorial-rollback-service-blueprint"
         }
       ],
       "generatedBy": "gemini-chatgpt",
@@ -1886,12 +1886,12 @@
       "reviewStatus": "approved",
       "qualityIssues": [],
       "aiDisclosure": "",
-      "updatedAt": "2026-06-11T03:34:51.666Z",
+      "updatedAt": "2026-06-25T05:21:00.000Z",
       "publishedAt": "2026-06-11T03:15:19.373Z",
       "slot": "morning",
       "id": "static-browser-gemini-gpt-2026-06-11-morning-ai-agent-delegation-en",
       "sortOrder": 101,
-      "cover": "https://altoslab-ai.cc/api/blog/generated-media/browser-gemini-gpt-2026-06-11-morning-ai-agent-delegation-ai-agent-delegation-system-cover.png",
+      "cover": "https://altoslab-ai.cc/api/blog/generated-media/codex-static-legacy-image-refresh-20260625-agent-delegation-ai-agent-delegation-cover-20260625.png",
       "qualityStatus": "passed",
       "imageQualityStatus": "passed",
       "releaseDecision": "published",
@@ -2009,14 +2009,14 @@
       "translationGroupId": "browser-gemini-gpt-2026-06-11-morning-ai-agent-delegation",
       "coverSource": "generated",
       "coverCredit": "ALTOS LAB 編輯視覺",
-      "coverAlt": "三張交辦流程卡片以審核節點串起 AI 代理任務制度",
+      "coverAlt": "Enterprise AI agent delegation desk with blank task cards, permission checkpoints and rollback route",
       "coverGeneration": {
         "source": "generated",
-        "provider": "ChatGPT/GPT",
-        "prompt": "Cyberpunk operations desk for an AI delegation column: three translucent task panels floating over a dark grid, neon cyan amber and coral decision paths, human-scale editorial atmosphere, no readable text, no logos, no people, 16:9 crop-safe composition.",
-        "generatedAt": "2026-06-11T03:33:26.313Z",
+        "provider": "Codex imagegen / GPT image2",
+        "prompt": "Premium editorial product photography for enterprise AI agent delegation: blank task cards, approval tokens, permission marker, handoff tray and rollback route thread on a warm operations desk, no readable text, no logos, no UI, natural daylight, 16:9.",
+        "generatedAt": "2026-06-25T05:21:00.000Z",
         "status": "generated",
-        "styleId": "cyberpunk-neon-operations",
+        "styleId": "editorial-operations-desk",
         "visualChecks": {
           "topicFit": true,
           "noTextArtifacts": true,
@@ -2026,20 +2026,20 @@
           "noGenericStockLook": true,
           "distinctFromSiblingImages": true,
           "checkedBy": "codex-main-brain-image-qa",
-          "checkedAt": "2026-06-11T03:34:51.666Z"
+          "checkedAt": "2026-06-25T05:21:00.000Z"
         }
       },
       "contentImages": [
         {
           "source": "generated",
-          "provider": "ChatGPT/GPT",
-          "prompt": "Anime-inspired product lab still for AI task handoff: tilted paper-like task cards, warm studio light, clean cel-shaded linework, soft teal and coral checkpoints, no characters, no readable text, no logos, 16:9 editorial crop.",
-          "generatedAt": "2026-06-11T03:33:26.313Z",
+          "provider": "Codex imagegen / GPT image2",
+          "prompt": "Documentary product still life for AI task handoff: three blank cards moving through intake, review and recovery trays with physical tokens for permission, evidence and human approval, no readable text, no logos, 16:9.",
+          "generatedAt": "2026-06-25T05:21:00.000Z",
           "status": "generated",
           "credit": "ALTOS LAB editorial visual",
           "aspectRatio": "16:9",
           "placement": "after-lead",
-          "alt": "AI 代理從聊天請求轉成可審核交辦卡片的流程示意",
+          "alt": "AI agent task handoff cards moving from intake to review to recovery",
           "caption": "把一次聊天變成一張可追蹤的交辦卡，管理者才看得見權限、狀態與責任。",
           "visualChecks": {
             "topicFit": true,
@@ -2050,21 +2050,21 @@
             "noGenericStockLook": true,
             "distinctFromSiblingImages": true,
             "checkedBy": "codex-main-brain-image-qa",
-            "checkedAt": "2026-06-11T03:34:51.666Z"
+            "checkedAt": "2026-06-25T05:21:00.000Z"
           },
-          "url": "https://altoslab-ai.cc/api/blog/generated-media/browser-gemini-gpt-2026-06-11-morning-ai-agent-delegation-ai-agent-delegation-system-opening.png",
-          "styleId": "anime-inspired-product-lab"
+          "url": "https://altoslab-ai.cc/api/blog/generated-media/codex-static-legacy-image-refresh-20260625-agent-delegation-ai-agent-delegation-opening-20260625.png",
+          "styleId": "editorial-handoff-trays"
         },
         {
           "source": "generated",
-          "provider": "ChatGPT/GPT",
-          "prompt": "Technical blueprint visual for AI delegation checkpoints: navy grid background, schematic boxes, review nodes, rollback route, cream blueprint linework with amber and coral accents, no readable text, no logos, no fake UI, 16:9 crop-safe.",
-          "generatedAt": "2026-06-11T03:33:26.313Z",
+          "provider": "Codex imagegen / GPT image2",
+          "prompt": "Premium tabletop service blueprint for AI agent governance and rollback: blank cards, stop token, return loop thread, review checkpoints, muted green ivory charcoal and restrained orange accent, no readable text, no logos, 16:9.",
+          "generatedAt": "2026-06-25T05:21:00.000Z",
           "status": "generated",
           "credit": "ALTOS LAB editorial visual",
           "aspectRatio": "16:9",
           "placement": "mid-article",
-          "alt": "AI 代理任務的接收執行審核與回復節點被拆成制度地圖",
+          "alt": "Physical service blueprint for AI agent governance and rollback",
           "caption": "真正能上線的代理，不在於一次跑到底，而在於每個節點都能查、能退、能交回人工。",
           "visualChecks": {
             "topicFit": true,
@@ -2075,10 +2075,10 @@
             "noGenericStockLook": true,
             "distinctFromSiblingImages": true,
             "checkedBy": "codex-main-brain-image-qa",
-            "checkedAt": "2026-06-11T03:34:51.666Z"
+            "checkedAt": "2026-06-25T05:21:00.000Z"
           },
-          "url": "https://altoslab-ai.cc/api/blog/generated-media/browser-gemini-gpt-2026-06-11-morning-ai-agent-delegation-ai-agent-delegation-system-mechanism.png",
-          "styleId": "technical-blueprint-lab"
+          "url": "https://altoslab-ai.cc/api/blog/generated-media/codex-static-legacy-image-refresh-20260625-agent-delegation-ai-agent-delegation-mechanism-20260625.png",
+          "styleId": "editorial-rollback-service-blueprint"
         }
       ],
       "generatedBy": "gemini-chatgpt",
@@ -2086,12 +2086,12 @@
       "reviewStatus": "approved",
       "qualityIssues": [],
       "aiDisclosure": "",
-      "updatedAt": "2026-06-11T03:34:51.666Z",
+      "updatedAt": "2026-06-25T05:21:00.000Z",
       "publishedAt": "2026-06-11T03:15:19.373Z",
       "slot": "morning",
       "id": "static-browser-gemini-gpt-2026-06-11-morning-ai-agent-delegation-ja",
       "sortOrder": 102,
-      "cover": "https://altoslab-ai.cc/api/blog/generated-media/browser-gemini-gpt-2026-06-11-morning-ai-agent-delegation-ai-agent-delegation-system-cover.png",
+      "cover": "https://altoslab-ai.cc/api/blog/generated-media/codex-static-legacy-image-refresh-20260625-agent-delegation-ai-agent-delegation-cover-20260625.png",
       "qualityStatus": "passed",
       "imageQualityStatus": "passed",
       "releaseDecision": "published",
@@ -2209,14 +2209,14 @@
       "translationGroupId": "browser-gemini-gpt-2026-06-11-morning-ai-agent-delegation",
       "coverSource": "generated",
       "coverCredit": "ALTOS LAB 編輯視覺",
-      "coverAlt": "三張交辦流程卡片以審核節點串起 AI 代理任務制度",
+      "coverAlt": "Enterprise AI agent delegation desk with blank task cards, permission checkpoints and rollback route",
       "coverGeneration": {
         "source": "generated",
-        "provider": "ChatGPT/GPT",
-        "prompt": "Cyberpunk operations desk for an AI delegation column: three translucent task panels floating over a dark grid, neon cyan amber and coral decision paths, human-scale editorial atmosphere, no readable text, no logos, no people, 16:9 crop-safe composition.",
-        "generatedAt": "2026-06-11T03:33:26.313Z",
+        "provider": "Codex imagegen / GPT image2",
+        "prompt": "Premium editorial product photography for enterprise AI agent delegation: blank task cards, approval tokens, permission marker, handoff tray and rollback route thread on a warm operations desk, no readable text, no logos, no UI, natural daylight, 16:9.",
+        "generatedAt": "2026-06-25T05:21:00.000Z",
         "status": "generated",
-        "styleId": "cyberpunk-neon-operations",
+        "styleId": "editorial-operations-desk",
         "visualChecks": {
           "topicFit": true,
           "noTextArtifacts": true,
@@ -2226,20 +2226,20 @@
           "noGenericStockLook": true,
           "distinctFromSiblingImages": true,
           "checkedBy": "codex-main-brain-image-qa",
-          "checkedAt": "2026-06-11T03:34:51.666Z"
+          "checkedAt": "2026-06-25T05:21:00.000Z"
         }
       },
       "contentImages": [
         {
           "source": "generated",
-          "provider": "ChatGPT/GPT",
-          "prompt": "Anime-inspired product lab still for AI task handoff: tilted paper-like task cards, warm studio light, clean cel-shaded linework, soft teal and coral checkpoints, no characters, no readable text, no logos, 16:9 editorial crop.",
-          "generatedAt": "2026-06-11T03:33:26.313Z",
+          "provider": "Codex imagegen / GPT image2",
+          "prompt": "Documentary product still life for AI task handoff: three blank cards moving through intake, review and recovery trays with physical tokens for permission, evidence and human approval, no readable text, no logos, 16:9.",
+          "generatedAt": "2026-06-25T05:21:00.000Z",
           "status": "generated",
           "credit": "ALTOS LAB editorial visual",
           "aspectRatio": "16:9",
           "placement": "after-lead",
-          "alt": "AI 代理從聊天請求轉成可審核交辦卡片的流程示意",
+          "alt": "AI agent task handoff cards moving from intake to review to recovery",
           "caption": "把一次聊天變成一張可追蹤的交辦卡，管理者才看得見權限、狀態與責任。",
           "visualChecks": {
             "topicFit": true,
@@ -2250,21 +2250,21 @@
             "noGenericStockLook": true,
             "distinctFromSiblingImages": true,
             "checkedBy": "codex-main-brain-image-qa",
-            "checkedAt": "2026-06-11T03:34:51.666Z"
+            "checkedAt": "2026-06-25T05:21:00.000Z"
           },
-          "url": "https://altoslab-ai.cc/api/blog/generated-media/browser-gemini-gpt-2026-06-11-morning-ai-agent-delegation-ai-agent-delegation-system-opening.png",
-          "styleId": "anime-inspired-product-lab"
+          "url": "https://altoslab-ai.cc/api/blog/generated-media/codex-static-legacy-image-refresh-20260625-agent-delegation-ai-agent-delegation-opening-20260625.png",
+          "styleId": "editorial-handoff-trays"
         },
         {
           "source": "generated",
-          "provider": "ChatGPT/GPT",
-          "prompt": "Technical blueprint visual for AI delegation checkpoints: navy grid background, schematic boxes, review nodes, rollback route, cream blueprint linework with amber and coral accents, no readable text, no logos, no fake UI, 16:9 crop-safe.",
-          "generatedAt": "2026-06-11T03:33:26.313Z",
+          "provider": "Codex imagegen / GPT image2",
+          "prompt": "Premium tabletop service blueprint for AI agent governance and rollback: blank cards, stop token, return loop thread, review checkpoints, muted green ivory charcoal and restrained orange accent, no readable text, no logos, 16:9.",
+          "generatedAt": "2026-06-25T05:21:00.000Z",
           "status": "generated",
           "credit": "ALTOS LAB editorial visual",
           "aspectRatio": "16:9",
           "placement": "mid-article",
-          "alt": "AI 代理任務的接收執行審核與回復節點被拆成制度地圖",
+          "alt": "Physical service blueprint for AI agent governance and rollback",
           "caption": "真正能上線的代理，不在於一次跑到底，而在於每個節點都能查、能退、能交回人工。",
           "visualChecks": {
             "topicFit": true,
@@ -2275,10 +2275,10 @@
             "noGenericStockLook": true,
             "distinctFromSiblingImages": true,
             "checkedBy": "codex-main-brain-image-qa",
-            "checkedAt": "2026-06-11T03:34:51.666Z"
+            "checkedAt": "2026-06-25T05:21:00.000Z"
           },
-          "url": "https://altoslab-ai.cc/api/blog/generated-media/browser-gemini-gpt-2026-06-11-morning-ai-agent-delegation-ai-agent-delegation-system-mechanism.png",
-          "styleId": "technical-blueprint-lab"
+          "url": "https://altoslab-ai.cc/api/blog/generated-media/codex-static-legacy-image-refresh-20260625-agent-delegation-ai-agent-delegation-mechanism-20260625.png",
+          "styleId": "editorial-rollback-service-blueprint"
         }
       ],
       "generatedBy": "gemini-chatgpt",
@@ -2286,12 +2286,12 @@
       "reviewStatus": "approved",
       "qualityIssues": [],
       "aiDisclosure": "",
-      "updatedAt": "2026-06-11T03:34:51.666Z",
+      "updatedAt": "2026-06-25T05:21:00.000Z",
       "publishedAt": "2026-06-11T03:15:19.373Z",
       "slot": "morning",
       "id": "static-browser-gemini-gpt-2026-06-11-morning-ai-agent-delegation-ko",
       "sortOrder": 103,
-      "cover": "https://altoslab-ai.cc/api/blog/generated-media/browser-gemini-gpt-2026-06-11-morning-ai-agent-delegation-ai-agent-delegation-system-cover.png",
+      "cover": "https://altoslab-ai.cc/api/blog/generated-media/codex-static-legacy-image-refresh-20260625-agent-delegation-ai-agent-delegation-cover-20260625.png",
       "qualityStatus": "passed",
       "imageQualityStatus": "passed",
       "releaseDecision": "published",
@@ -2409,14 +2409,14 @@
       "translationGroupId": "browser-gemini-gpt-2026-06-11-morning-ai-agent-delegation",
       "coverSource": "generated",
       "coverCredit": "ALTOS LAB 編輯視覺",
-      "coverAlt": "三張交辦流程卡片以審核節點串起 AI 代理任務制度",
+      "coverAlt": "Enterprise AI agent delegation desk with blank task cards, permission checkpoints and rollback route",
       "coverGeneration": {
         "source": "generated",
-        "provider": "ChatGPT/GPT",
-        "prompt": "Cyberpunk operations desk for an AI delegation column: three translucent task panels floating over a dark grid, neon cyan amber and coral decision paths, human-scale editorial atmosphere, no readable text, no logos, no people, 16:9 crop-safe composition.",
-        "generatedAt": "2026-06-11T03:33:26.313Z",
+        "provider": "Codex imagegen / GPT image2",
+        "prompt": "Premium editorial product photography for enterprise AI agent delegation: blank task cards, approval tokens, permission marker, handoff tray and rollback route thread on a warm operations desk, no readable text, no logos, no UI, natural daylight, 16:9.",
+        "generatedAt": "2026-06-25T05:21:00.000Z",
         "status": "generated",
-        "styleId": "cyberpunk-neon-operations",
+        "styleId": "editorial-operations-desk",
         "visualChecks": {
           "topicFit": true,
           "noTextArtifacts": true,
@@ -2426,20 +2426,20 @@
           "noGenericStockLook": true,
           "distinctFromSiblingImages": true,
           "checkedBy": "codex-main-brain-image-qa",
-          "checkedAt": "2026-06-11T03:34:51.666Z"
+          "checkedAt": "2026-06-25T05:21:00.000Z"
         }
       },
       "contentImages": [
         {
           "source": "generated",
-          "provider": "ChatGPT/GPT",
-          "prompt": "Anime-inspired product lab still for AI task handoff: tilted paper-like task cards, warm studio light, clean cel-shaded linework, soft teal and coral checkpoints, no characters, no readable text, no logos, 16:9 editorial crop.",
-          "generatedAt": "2026-06-11T03:33:26.313Z",
+          "provider": "Codex imagegen / GPT image2",
+          "prompt": "Documentary product still life for AI task handoff: three blank cards moving through intake, review and recovery trays with physical tokens for permission, evidence and human approval, no readable text, no logos, 16:9.",
+          "generatedAt": "2026-06-25T05:21:00.000Z",
           "status": "generated",
           "credit": "ALTOS LAB editorial visual",
           "aspectRatio": "16:9",
           "placement": "after-lead",
-          "alt": "AI 代理從聊天請求轉成可審核交辦卡片的流程示意",
+          "alt": "AI agent task handoff cards moving from intake to review to recovery",
           "caption": "把一次聊天變成一張可追蹤的交辦卡，管理者才看得見權限、狀態與責任。",
           "visualChecks": {
             "topicFit": true,
@@ -2450,21 +2450,21 @@
             "noGenericStockLook": true,
             "distinctFromSiblingImages": true,
             "checkedBy": "codex-main-brain-image-qa",
-            "checkedAt": "2026-06-11T03:34:51.666Z"
+            "checkedAt": "2026-06-25T05:21:00.000Z"
           },
-          "url": "https://altoslab-ai.cc/api/blog/generated-media/browser-gemini-gpt-2026-06-11-morning-ai-agent-delegation-ai-agent-delegation-system-opening.png",
-          "styleId": "anime-inspired-product-lab"
+          "url": "https://altoslab-ai.cc/api/blog/generated-media/codex-static-legacy-image-refresh-20260625-agent-delegation-ai-agent-delegation-opening-20260625.png",
+          "styleId": "editorial-handoff-trays"
         },
         {
           "source": "generated",
-          "provider": "ChatGPT/GPT",
-          "prompt": "Technical blueprint visual for AI delegation checkpoints: navy grid background, schematic boxes, review nodes, rollback route, cream blueprint linework with amber and coral accents, no readable text, no logos, no fake UI, 16:9 crop-safe.",
-          "generatedAt": "2026-06-11T03:33:26.313Z",
+          "provider": "Codex imagegen / GPT image2",
+          "prompt": "Premium tabletop service blueprint for AI agent governance and rollback: blank cards, stop token, return loop thread, review checkpoints, muted green ivory charcoal and restrained orange accent, no readable text, no logos, 16:9.",
+          "generatedAt": "2026-06-25T05:21:00.000Z",
           "status": "generated",
           "credit": "ALTOS LAB editorial visual",
           "aspectRatio": "16:9",
           "placement": "mid-article",
-          "alt": "AI 代理任務的接收執行審核與回復節點被拆成制度地圖",
+          "alt": "Physical service blueprint for AI agent governance and rollback",
           "caption": "真正能上線的代理，不在於一次跑到底，而在於每個節點都能查、能退、能交回人工。",
           "visualChecks": {
             "topicFit": true,
@@ -2475,10 +2475,10 @@
             "noGenericStockLook": true,
             "distinctFromSiblingImages": true,
             "checkedBy": "codex-main-brain-image-qa",
-            "checkedAt": "2026-06-11T03:34:51.666Z"
+            "checkedAt": "2026-06-25T05:21:00.000Z"
           },
-          "url": "https://altoslab-ai.cc/api/blog/generated-media/browser-gemini-gpt-2026-06-11-morning-ai-agent-delegation-ai-agent-delegation-system-mechanism.png",
-          "styleId": "technical-blueprint-lab"
+          "url": "https://altoslab-ai.cc/api/blog/generated-media/codex-static-legacy-image-refresh-20260625-agent-delegation-ai-agent-delegation-mechanism-20260625.png",
+          "styleId": "editorial-rollback-service-blueprint"
         }
       ],
       "generatedBy": "gemini-chatgpt",
@@ -2486,12 +2486,12 @@
       "reviewStatus": "approved",
       "qualityIssues": [],
       "aiDisclosure": "",
-      "updatedAt": "2026-06-11T03:34:51.666Z",
+      "updatedAt": "2026-06-25T05:21:00.000Z",
       "publishedAt": "2026-06-11T03:15:19.373Z",
       "slot": "morning",
       "id": "static-browser-gemini-gpt-2026-06-11-morning-ai-agent-delegation-id",
       "sortOrder": 104,
-      "cover": "https://altoslab-ai.cc/api/blog/generated-media/browser-gemini-gpt-2026-06-11-morning-ai-agent-delegation-ai-agent-delegation-system-cover.png",
+      "cover": "https://altoslab-ai.cc/api/blog/generated-media/codex-static-legacy-image-refresh-20260625-agent-delegation-ai-agent-delegation-cover-20260625.png",
       "qualityStatus": "passed",
       "imageQualityStatus": "passed",
       "releaseDecision": "published",
@@ -2609,14 +2609,14 @@
       "translationGroupId": "browser-gemini-gpt-2026-06-11-morning-ai-agent-delegation",
       "coverSource": "generated",
       "coverCredit": "ALTOS LAB 編輯視覺",
-      "coverAlt": "三張交辦流程卡片以審核節點串起 AI 代理任務制度",
+      "coverAlt": "Enterprise AI agent delegation desk with blank task cards, permission checkpoints and rollback route",
       "coverGeneration": {
         "source": "generated",
-        "provider": "ChatGPT/GPT",
-        "prompt": "Cyberpunk operations desk for an AI delegation column: three translucent task panels floating over a dark grid, neon cyan amber and coral decision paths, human-scale editorial atmosphere, no readable text, no logos, no people, 16:9 crop-safe composition.",
-        "generatedAt": "2026-06-11T03:33:26.313Z",
+        "provider": "Codex imagegen / GPT image2",
+        "prompt": "Premium editorial product photography for enterprise AI agent delegation: blank task cards, approval tokens, permission marker, handoff tray and rollback route thread on a warm operations desk, no readable text, no logos, no UI, natural daylight, 16:9.",
+        "generatedAt": "2026-06-25T05:21:00.000Z",
         "status": "generated",
-        "styleId": "cyberpunk-neon-operations",
+        "styleId": "editorial-operations-desk",
         "visualChecks": {
           "topicFit": true,
           "noTextArtifacts": true,
@@ -2626,20 +2626,20 @@
           "noGenericStockLook": true,
           "distinctFromSiblingImages": true,
           "checkedBy": "codex-main-brain-image-qa",
-          "checkedAt": "2026-06-11T03:34:51.666Z"
+          "checkedAt": "2026-06-25T05:21:00.000Z"
         }
       },
       "contentImages": [
         {
           "source": "generated",
-          "provider": "ChatGPT/GPT",
-          "prompt": "Anime-inspired product lab still for AI task handoff: tilted paper-like task cards, warm studio light, clean cel-shaded linework, soft teal and coral checkpoints, no characters, no readable text, no logos, 16:9 editorial crop.",
-          "generatedAt": "2026-06-11T03:33:26.313Z",
+          "provider": "Codex imagegen / GPT image2",
+          "prompt": "Documentary product still life for AI task handoff: three blank cards moving through intake, review and recovery trays with physical tokens for permission, evidence and human approval, no readable text, no logos, 16:9.",
+          "generatedAt": "2026-06-25T05:21:00.000Z",
           "status": "generated",
           "credit": "ALTOS LAB editorial visual",
           "aspectRatio": "16:9",
           "placement": "after-lead",
-          "alt": "AI 代理從聊天請求轉成可審核交辦卡片的流程示意",
+          "alt": "AI agent task handoff cards moving from intake to review to recovery",
           "caption": "把一次聊天變成一張可追蹤的交辦卡，管理者才看得見權限、狀態與責任。",
           "visualChecks": {
             "topicFit": true,
@@ -2650,21 +2650,21 @@
             "noGenericStockLook": true,
             "distinctFromSiblingImages": true,
             "checkedBy": "codex-main-brain-image-qa",
-            "checkedAt": "2026-06-11T03:34:51.666Z"
+            "checkedAt": "2026-06-25T05:21:00.000Z"
           },
-          "url": "https://altoslab-ai.cc/api/blog/generated-media/browser-gemini-gpt-2026-06-11-morning-ai-agent-delegation-ai-agent-delegation-system-opening.png",
-          "styleId": "anime-inspired-product-lab"
+          "url": "https://altoslab-ai.cc/api/blog/generated-media/codex-static-legacy-image-refresh-20260625-agent-delegation-ai-agent-delegation-opening-20260625.png",
+          "styleId": "editorial-handoff-trays"
         },
         {
           "source": "generated",
-          "provider": "ChatGPT/GPT",
-          "prompt": "Technical blueprint visual for AI delegation checkpoints: navy grid background, schematic boxes, review nodes, rollback route, cream blueprint linework with amber and coral accents, no readable text, no logos, no fake UI, 16:9 crop-safe.",
-          "generatedAt": "2026-06-11T03:33:26.313Z",
+          "provider": "Codex imagegen / GPT image2",
+          "prompt": "Premium tabletop service blueprint for AI agent governance and rollback: blank cards, stop token, return loop thread, review checkpoints, muted green ivory charcoal and restrained orange accent, no readable text, no logos, 16:9.",
+          "generatedAt": "2026-06-25T05:21:00.000Z",
           "status": "generated",
           "credit": "ALTOS LAB editorial visual",
           "aspectRatio": "16:9",
           "placement": "mid-article",
-          "alt": "AI 代理任務的接收執行審核與回復節點被拆成制度地圖",
+          "alt": "Physical service blueprint for AI agent governance and rollback",
           "caption": "真正能上線的代理，不在於一次跑到底，而在於每個節點都能查、能退、能交回人工。",
           "visualChecks": {
             "topicFit": true,
@@ -2675,10 +2675,10 @@
             "noGenericStockLook": true,
             "distinctFromSiblingImages": true,
             "checkedBy": "codex-main-brain-image-qa",
-            "checkedAt": "2026-06-11T03:34:51.666Z"
+            "checkedAt": "2026-06-25T05:21:00.000Z"
           },
-          "url": "https://altoslab-ai.cc/api/blog/generated-media/browser-gemini-gpt-2026-06-11-morning-ai-agent-delegation-ai-agent-delegation-system-mechanism.png",
-          "styleId": "technical-blueprint-lab"
+          "url": "https://altoslab-ai.cc/api/blog/generated-media/codex-static-legacy-image-refresh-20260625-agent-delegation-ai-agent-delegation-mechanism-20260625.png",
+          "styleId": "editorial-rollback-service-blueprint"
         }
       ],
       "generatedBy": "gemini-chatgpt",
@@ -2686,12 +2686,12 @@
       "reviewStatus": "approved",
       "qualityIssues": [],
       "aiDisclosure": "",
-      "updatedAt": "2026-06-11T03:34:51.666Z",
+      "updatedAt": "2026-06-25T05:21:00.000Z",
       "publishedAt": "2026-06-11T03:15:19.373Z",
       "slot": "morning",
       "id": "static-browser-gemini-gpt-2026-06-11-morning-ai-agent-delegation-vi",
       "sortOrder": 105,
-      "cover": "https://altoslab-ai.cc/api/blog/generated-media/browser-gemini-gpt-2026-06-11-morning-ai-agent-delegation-ai-agent-delegation-system-cover.png",
+      "cover": "https://altoslab-ai.cc/api/blog/generated-media/codex-static-legacy-image-refresh-20260625-agent-delegation-ai-agent-delegation-cover-20260625.png",
       "qualityStatus": "passed",
       "imageQualityStatus": "passed",
       "releaseDecision": "published",
@@ -2809,14 +2809,14 @@
       "translationGroupId": "browser-gemini-gpt-2026-06-11-morning-ai-agent-delegation",
       "coverSource": "generated",
       "coverCredit": "ALTOS LAB 編輯視覺",
-      "coverAlt": "三張交辦流程卡片以審核節點串起 AI 代理任務制度",
+      "coverAlt": "Enterprise AI agent delegation desk with blank task cards, permission checkpoints and rollback route",
       "coverGeneration": {
         "source": "generated",
-        "provider": "ChatGPT/GPT",
-        "prompt": "Cyberpunk operations desk for an AI delegation column: three translucent task panels floating over a dark grid, neon cyan amber and coral decision paths, human-scale editorial atmosphere, no readable text, no logos, no people, 16:9 crop-safe composition.",
-        "generatedAt": "2026-06-11T03:33:26.313Z",
+        "provider": "Codex imagegen / GPT image2",
+        "prompt": "Premium editorial product photography for enterprise AI agent delegation: blank task cards, approval tokens, permission marker, handoff tray and rollback route thread on a warm operations desk, no readable text, no logos, no UI, natural daylight, 16:9.",
+        "generatedAt": "2026-06-25T05:21:00.000Z",
         "status": "generated",
-        "styleId": "cyberpunk-neon-operations",
+        "styleId": "editorial-operations-desk",
         "visualChecks": {
           "topicFit": true,
           "noTextArtifacts": true,
@@ -2826,20 +2826,20 @@
           "noGenericStockLook": true,
           "distinctFromSiblingImages": true,
           "checkedBy": "codex-main-brain-image-qa",
-          "checkedAt": "2026-06-11T03:34:51.666Z"
+          "checkedAt": "2026-06-25T05:21:00.000Z"
         }
       },
       "contentImages": [
         {
           "source": "generated",
-          "provider": "ChatGPT/GPT",
-          "prompt": "Anime-inspired product lab still for AI task handoff: tilted paper-like task cards, warm studio light, clean cel-shaded linework, soft teal and coral checkpoints, no characters, no readable text, no logos, 16:9 editorial crop.",
-          "generatedAt": "2026-06-11T03:33:26.313Z",
+          "provider": "Codex imagegen / GPT image2",
+          "prompt": "Documentary product still life for AI task handoff: three blank cards moving through intake, review and recovery trays with physical tokens for permission, evidence and human approval, no readable text, no logos, 16:9.",
+          "generatedAt": "2026-06-25T05:21:00.000Z",
           "status": "generated",
           "credit": "ALTOS LAB editorial visual",
           "aspectRatio": "16:9",
           "placement": "after-lead",
-          "alt": "AI 代理從聊天請求轉成可審核交辦卡片的流程示意",
+          "alt": "AI agent task handoff cards moving from intake to review to recovery",
           "caption": "把一次聊天變成一張可追蹤的交辦卡，管理者才看得見權限、狀態與責任。",
           "visualChecks": {
             "topicFit": true,
@@ -2850,21 +2850,21 @@
             "noGenericStockLook": true,
             "distinctFromSiblingImages": true,
             "checkedBy": "codex-main-brain-image-qa",
-            "checkedAt": "2026-06-11T03:34:51.666Z"
+            "checkedAt": "2026-06-25T05:21:00.000Z"
           },
-          "url": "https://altoslab-ai.cc/api/blog/generated-media/browser-gemini-gpt-2026-06-11-morning-ai-agent-delegation-ai-agent-delegation-system-opening.png",
-          "styleId": "anime-inspired-product-lab"
+          "url": "https://altoslab-ai.cc/api/blog/generated-media/codex-static-legacy-image-refresh-20260625-agent-delegation-ai-agent-delegation-opening-20260625.png",
+          "styleId": "editorial-handoff-trays"
         },
         {
           "source": "generated",
-          "provider": "ChatGPT/GPT",
-          "prompt": "Technical blueprint visual for AI delegation checkpoints: navy grid background, schematic boxes, review nodes, rollback route, cream blueprint linework with amber and coral accents, no readable text, no logos, no fake UI, 16:9 crop-safe.",
-          "generatedAt": "2026-06-11T03:33:26.313Z",
+          "provider": "Codex imagegen / GPT image2",
+          "prompt": "Premium tabletop service blueprint for AI agent governance and rollback: blank cards, stop token, return loop thread, review checkpoints, muted green ivory charcoal and restrained orange accent, no readable text, no logos, 16:9.",
+          "generatedAt": "2026-06-25T05:21:00.000Z",
           "status": "generated",
           "credit": "ALTOS LAB editorial visual",
           "aspectRatio": "16:9",
           "placement": "mid-article",
-          "alt": "AI 代理任務的接收執行審核與回復節點被拆成制度地圖",
+          "alt": "Physical service blueprint for AI agent governance and rollback",
           "caption": "真正能上線的代理，不在於一次跑到底，而在於每個節點都能查、能退、能交回人工。",
           "visualChecks": {
             "topicFit": true,
@@ -2875,10 +2875,10 @@
             "noGenericStockLook": true,
             "distinctFromSiblingImages": true,
             "checkedBy": "codex-main-brain-image-qa",
-            "checkedAt": "2026-06-11T03:34:51.666Z"
+            "checkedAt": "2026-06-25T05:21:00.000Z"
           },
-          "url": "https://altoslab-ai.cc/api/blog/generated-media/browser-gemini-gpt-2026-06-11-morning-ai-agent-delegation-ai-agent-delegation-system-mechanism.png",
-          "styleId": "technical-blueprint-lab"
+          "url": "https://altoslab-ai.cc/api/blog/generated-media/codex-static-legacy-image-refresh-20260625-agent-delegation-ai-agent-delegation-mechanism-20260625.png",
+          "styleId": "editorial-rollback-service-blueprint"
         }
       ],
       "generatedBy": "gemini-chatgpt",
@@ -2886,12 +2886,12 @@
       "reviewStatus": "approved",
       "qualityIssues": [],
       "aiDisclosure": "",
-      "updatedAt": "2026-06-11T03:34:51.666Z",
+      "updatedAt": "2026-06-25T05:21:00.000Z",
       "publishedAt": "2026-06-11T03:15:19.373Z",
       "slot": "morning",
       "id": "static-browser-gemini-gpt-2026-06-11-morning-ai-agent-delegation-th",
       "sortOrder": 106,
-      "cover": "https://altoslab-ai.cc/api/blog/generated-media/browser-gemini-gpt-2026-06-11-morning-ai-agent-delegation-ai-agent-delegation-system-cover.png",
+      "cover": "https://altoslab-ai.cc/api/blog/generated-media/codex-static-legacy-image-refresh-20260625-agent-delegation-ai-agent-delegation-cover-20260625.png",
       "qualityStatus": "passed",
       "imageQualityStatus": "passed",
       "releaseDecision": "published",
@@ -3009,14 +3009,14 @@
       "translationGroupId": "browser-gemini-gpt-2026-06-11-morning-ai-agent-delegation",
       "coverSource": "generated",
       "coverCredit": "ALTOS LAB 編輯視覺",
-      "coverAlt": "三張交辦流程卡片以審核節點串起 AI 代理任務制度",
+      "coverAlt": "Enterprise AI agent delegation desk with blank task cards, permission checkpoints and rollback route",
       "coverGeneration": {
         "source": "generated",
-        "provider": "ChatGPT/GPT",
-        "prompt": "Cyberpunk operations desk for an AI delegation column: three translucent task panels floating over a dark grid, neon cyan amber and coral decision paths, human-scale editorial atmosphere, no readable text, no logos, no people, 16:9 crop-safe composition.",
-        "generatedAt": "2026-06-11T03:33:26.313Z",
+        "provider": "Codex imagegen / GPT image2",
+        "prompt": "Premium editorial product photography for enterprise AI agent delegation: blank task cards, approval tokens, permission marker, handoff tray and rollback route thread on a warm operations desk, no readable text, no logos, no UI, natural daylight, 16:9.",
+        "generatedAt": "2026-06-25T05:21:00.000Z",
         "status": "generated",
-        "styleId": "cyberpunk-neon-operations",
+        "styleId": "editorial-operations-desk",
         "visualChecks": {
           "topicFit": true,
           "noTextArtifacts": true,
@@ -3026,20 +3026,20 @@
           "noGenericStockLook": true,
           "distinctFromSiblingImages": true,
           "checkedBy": "codex-main-brain-image-qa",
-          "checkedAt": "2026-06-11T03:34:51.666Z"
+          "checkedAt": "2026-06-25T05:21:00.000Z"
         }
       },
       "contentImages": [
         {
           "source": "generated",
-          "provider": "ChatGPT/GPT",
-          "prompt": "Anime-inspired product lab still for AI task handoff: tilted paper-like task cards, warm studio light, clean cel-shaded linework, soft teal and coral checkpoints, no characters, no readable text, no logos, 16:9 editorial crop.",
-          "generatedAt": "2026-06-11T03:33:26.313Z",
+          "provider": "Codex imagegen / GPT image2",
+          "prompt": "Documentary product still life for AI task handoff: three blank cards moving through intake, review and recovery trays with physical tokens for permission, evidence and human approval, no readable text, no logos, 16:9.",
+          "generatedAt": "2026-06-25T05:21:00.000Z",
           "status": "generated",
           "credit": "ALTOS LAB editorial visual",
           "aspectRatio": "16:9",
           "placement": "after-lead",
-          "alt": "AI 代理從聊天請求轉成可審核交辦卡片的流程示意",
+          "alt": "AI agent task handoff cards moving from intake to review to recovery",
           "caption": "把一次聊天變成一張可追蹤的交辦卡，管理者才看得見權限、狀態與責任。",
           "visualChecks": {
             "topicFit": true,
@@ -3050,21 +3050,21 @@
             "noGenericStockLook": true,
             "distinctFromSiblingImages": true,
             "checkedBy": "codex-main-brain-image-qa",
-            "checkedAt": "2026-06-11T03:34:51.666Z"
+            "checkedAt": "2026-06-25T05:21:00.000Z"
           },
-          "url": "https://altoslab-ai.cc/api/blog/generated-media/browser-gemini-gpt-2026-06-11-morning-ai-agent-delegation-ai-agent-delegation-system-opening.png",
-          "styleId": "anime-inspired-product-lab"
+          "url": "https://altoslab-ai.cc/api/blog/generated-media/codex-static-legacy-image-refresh-20260625-agent-delegation-ai-agent-delegation-opening-20260625.png",
+          "styleId": "editorial-handoff-trays"
         },
         {
           "source": "generated",
-          "provider": "ChatGPT/GPT",
-          "prompt": "Technical blueprint visual for AI delegation checkpoints: navy grid background, schematic boxes, review nodes, rollback route, cream blueprint linework with amber and coral accents, no readable text, no logos, no fake UI, 16:9 crop-safe.",
-          "generatedAt": "2026-06-11T03:33:26.313Z",
+          "provider": "Codex imagegen / GPT image2",
+          "prompt": "Premium tabletop service blueprint for AI agent governance and rollback: blank cards, stop token, return loop thread, review checkpoints, muted green ivory charcoal and restrained orange accent, no readable text, no logos, 16:9.",
+          "generatedAt": "2026-06-25T05:21:00.000Z",
           "status": "generated",
           "credit": "ALTOS LAB editorial visual",
           "aspectRatio": "16:9",
           "placement": "mid-article",
-          "alt": "AI 代理任務的接收執行審核與回復節點被拆成制度地圖",
+          "alt": "Physical service blueprint for AI agent governance and rollback",
           "caption": "真正能上線的代理，不在於一次跑到底，而在於每個節點都能查、能退、能交回人工。",
           "visualChecks": {
             "topicFit": true,
@@ -3075,10 +3075,10 @@
             "noGenericStockLook": true,
             "distinctFromSiblingImages": true,
             "checkedBy": "codex-main-brain-image-qa",
-            "checkedAt": "2026-06-11T03:34:51.666Z"
+            "checkedAt": "2026-06-25T05:21:00.000Z"
           },
-          "url": "https://altoslab-ai.cc/api/blog/generated-media/browser-gemini-gpt-2026-06-11-morning-ai-agent-delegation-ai-agent-delegation-system-mechanism.png",
-          "styleId": "technical-blueprint-lab"
+          "url": "https://altoslab-ai.cc/api/blog/generated-media/codex-static-legacy-image-refresh-20260625-agent-delegation-ai-agent-delegation-mechanism-20260625.png",
+          "styleId": "editorial-rollback-service-blueprint"
         }
       ],
       "generatedBy": "gemini-chatgpt",
@@ -3086,12 +3086,12 @@
       "reviewStatus": "approved",
       "qualityIssues": [],
       "aiDisclosure": "",
-      "updatedAt": "2026-06-11T03:34:51.666Z",
+      "updatedAt": "2026-06-25T05:21:00.000Z",
       "publishedAt": "2026-06-11T03:15:19.373Z",
       "slot": "morning",
       "id": "static-browser-gemini-gpt-2026-06-11-morning-ai-agent-delegation-ms",
       "sortOrder": 107,
-      "cover": "https://altoslab-ai.cc/api/blog/generated-media/browser-gemini-gpt-2026-06-11-morning-ai-agent-delegation-ai-agent-delegation-system-cover.png",
+      "cover": "https://altoslab-ai.cc/api/blog/generated-media/codex-static-legacy-image-refresh-20260625-agent-delegation-ai-agent-delegation-cover-20260625.png",
       "qualityStatus": "passed",
       "imageQualityStatus": "passed",
       "releaseDecision": "published",
@@ -3209,14 +3209,14 @@
       "translationGroupId": "browser-gemini-gpt-2026-06-11-morning-ai-agent-delegation",
       "coverSource": "generated",
       "coverCredit": "ALTOS LAB 編輯視覺",
-      "coverAlt": "三張交辦流程卡片以審核節點串起 AI 代理任務制度",
+      "coverAlt": "Enterprise AI agent delegation desk with blank task cards, permission checkpoints and rollback route",
       "coverGeneration": {
         "source": "generated",
-        "provider": "ChatGPT/GPT",
-        "prompt": "Cyberpunk operations desk for an AI delegation column: three translucent task panels floating over a dark grid, neon cyan amber and coral decision paths, human-scale editorial atmosphere, no readable text, no logos, no people, 16:9 crop-safe composition.",
-        "generatedAt": "2026-06-11T03:33:26.313Z",
+        "provider": "Codex imagegen / GPT image2",
+        "prompt": "Premium editorial product photography for enterprise AI agent delegation: blank task cards, approval tokens, permission marker, handoff tray and rollback route thread on a warm operations desk, no readable text, no logos, no UI, natural daylight, 16:9.",
+        "generatedAt": "2026-06-25T05:21:00.000Z",
         "status": "generated",
-        "styleId": "cyberpunk-neon-operations",
+        "styleId": "editorial-operations-desk",
         "visualChecks": {
           "topicFit": true,
           "noTextArtifacts": true,
@@ -3226,20 +3226,20 @@
           "noGenericStockLook": true,
           "distinctFromSiblingImages": true,
           "checkedBy": "codex-main-brain-image-qa",
-          "checkedAt": "2026-06-11T03:34:51.666Z"
+          "checkedAt": "2026-06-25T05:21:00.000Z"
         }
       },
       "contentImages": [
         {
           "source": "generated",
-          "provider": "ChatGPT/GPT",
-          "prompt": "Anime-inspired product lab still for AI task handoff: tilted paper-like task cards, warm studio light, clean cel-shaded linework, soft teal and coral checkpoints, no characters, no readable text, no logos, 16:9 editorial crop.",
-          "generatedAt": "2026-06-11T03:33:26.313Z",
+          "provider": "Codex imagegen / GPT image2",
+          "prompt": "Documentary product still life for AI task handoff: three blank cards moving through intake, review and recovery trays with physical tokens for permission, evidence and human approval, no readable text, no logos, 16:9.",
+          "generatedAt": "2026-06-25T05:21:00.000Z",
           "status": "generated",
           "credit": "ALTOS LAB editorial visual",
           "aspectRatio": "16:9",
           "placement": "after-lead",
-          "alt": "AI 代理從聊天請求轉成可審核交辦卡片的流程示意",
+          "alt": "AI agent task handoff cards moving from intake to review to recovery",
           "caption": "把一次聊天變成一張可追蹤的交辦卡，管理者才看得見權限、狀態與責任。",
           "visualChecks": {
             "topicFit": true,
@@ -3250,21 +3250,21 @@
             "noGenericStockLook": true,
             "distinctFromSiblingImages": true,
             "checkedBy": "codex-main-brain-image-qa",
-            "checkedAt": "2026-06-11T03:34:51.666Z"
+            "checkedAt": "2026-06-25T05:21:00.000Z"
           },
-          "url": "https://altoslab-ai.cc/api/blog/generated-media/browser-gemini-gpt-2026-06-11-morning-ai-agent-delegation-ai-agent-delegation-system-opening.png",
-          "styleId": "anime-inspired-product-lab"
+          "url": "https://altoslab-ai.cc/api/blog/generated-media/codex-static-legacy-image-refresh-20260625-agent-delegation-ai-agent-delegation-opening-20260625.png",
+          "styleId": "editorial-handoff-trays"
         },
         {
           "source": "generated",
-          "provider": "ChatGPT/GPT",
-          "prompt": "Technical blueprint visual for AI delegation checkpoints: navy grid background, schematic boxes, review nodes, rollback route, cream blueprint linework with amber and coral accents, no readable text, no logos, no fake UI, 16:9 crop-safe.",
-          "generatedAt": "2026-06-11T03:33:26.313Z",
+          "provider": "Codex imagegen / GPT image2",
+          "prompt": "Premium tabletop service blueprint for AI agent governance and rollback: blank cards, stop token, return loop thread, review checkpoints, muted green ivory charcoal and restrained orange accent, no readable text, no logos, 16:9.",
+          "generatedAt": "2026-06-25T05:21:00.000Z",
           "status": "generated",
           "credit": "ALTOS LAB editorial visual",
           "aspectRatio": "16:9",
           "placement": "mid-article",
-          "alt": "AI 代理任務的接收執行審核與回復節點被拆成制度地圖",
+          "alt": "Physical service blueprint for AI agent governance and rollback",
           "caption": "真正能上線的代理，不在於一次跑到底，而在於每個節點都能查、能退、能交回人工。",
           "visualChecks": {
             "topicFit": true,
@@ -3275,10 +3275,10 @@
             "noGenericStockLook": true,
             "distinctFromSiblingImages": true,
             "checkedBy": "codex-main-brain-image-qa",
-            "checkedAt": "2026-06-11T03:34:51.666Z"
+            "checkedAt": "2026-06-25T05:21:00.000Z"
           },
-          "url": "https://altoslab-ai.cc/api/blog/generated-media/browser-gemini-gpt-2026-06-11-morning-ai-agent-delegation-ai-agent-delegation-system-mechanism.png",
-          "styleId": "technical-blueprint-lab"
+          "url": "https://altoslab-ai.cc/api/blog/generated-media/codex-static-legacy-image-refresh-20260625-agent-delegation-ai-agent-delegation-mechanism-20260625.png",
+          "styleId": "editorial-rollback-service-blueprint"
         }
       ],
       "generatedBy": "gemini-chatgpt",
@@ -3286,12 +3286,12 @@
       "reviewStatus": "approved",
       "qualityIssues": [],
       "aiDisclosure": "",
-      "updatedAt": "2026-06-11T03:34:51.666Z",
+      "updatedAt": "2026-06-25T05:21:00.000Z",
       "publishedAt": "2026-06-11T03:15:19.373Z",
       "slot": "morning",
       "id": "static-browser-gemini-gpt-2026-06-11-morning-ai-agent-delegation-fil",
       "sortOrder": 108,
-      "cover": "https://altoslab-ai.cc/api/blog/generated-media/browser-gemini-gpt-2026-06-11-morning-ai-agent-delegation-ai-agent-delegation-system-cover.png",
+      "cover": "https://altoslab-ai.cc/api/blog/generated-media/codex-static-legacy-image-refresh-20260625-agent-delegation-ai-agent-delegation-cover-20260625.png",
       "qualityStatus": "passed",
       "imageQualityStatus": "passed",
       "releaseDecision": "published",

@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { adminCookieName, getAdminSessionToken } from "@/lib/auth";
 import { verifyBlogIngestRequest } from "@/lib/blog-ingest-auth";
 import { generatedMediaReachabilityIssues } from "@/lib/blog-image-reachability";
+import { BLOG_LANGUAGES, blogIndexPath, blogPostPath } from "@/lib/blog-utils";
 import {
   mutateCmsData,
   normalizeBlogPostInput,
@@ -15,6 +17,20 @@ type BlogPatch = {
   id?: string;
   patch?: Partial<BlogPost>;
 };
+
+function revalidateBlogPatchRoutes(posts: Array<{ language: string; slug: string }>) {
+  const paths = new Set<string>(["/feed.xml", "/rss.xml", "/sitemap.xml", "/llms.txt", "/llms-full.txt"]);
+  for (const language of BLOG_LANGUAGES) paths.add(blogIndexPath(language));
+  for (const post of posts) paths.add(blogPostPath(post.slug, post.language as BlogPost["language"]));
+
+  for (const path of paths) {
+    try {
+      revalidatePath(path);
+    } catch (error) {
+      console.warn(`[blog-bulk-patch] Unable to revalidate ${path}:`, error instanceof Error ? error.message : error);
+    }
+  }
+}
 
 function cookieValue(request: Request, name: string) {
   const cookie = request.headers.get("cookie") || "";
@@ -97,6 +113,7 @@ export async function POST(request: Request) {
   if (result.updated.length > 0) {
     try {
       publicCache = await refreshPublicBlogCacheFromStorage();
+      if (publicCache.refreshed) revalidateBlogPatchRoutes(result.updated);
     } catch (error) {
       publicCache = {
         refreshed: false,

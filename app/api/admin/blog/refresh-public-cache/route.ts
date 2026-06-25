@@ -2,7 +2,7 @@ import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
 import { adminCookieName, getAdminSessionToken } from "@/lib/auth";
 import { verifyBlogIngestRequest } from "@/lib/blog-ingest-auth";
-import { BLOG_LANGUAGES, blogIndexPath } from "@/lib/blog-utils";
+import { BLOG_LANGUAGES, blogIndexPath, blogPostPath } from "@/lib/blog-utils";
 import { getPublishedBlogInventoryPostsByLanguage, refreshPublicBlogCacheFromStorage } from "@/lib/cms";
 
 export const dynamic = "force-dynamic";
@@ -21,9 +21,14 @@ function hasAdminSession(request: Request) {
   return Boolean(expected && cookieValue(request, adminCookieName) === expected);
 }
 
-function revalidateBlogIndexes() {
+async function revalidateBlogPublicRoutes() {
   const paths = new Set<string>(["/feed.xml", "/rss.xml", "/sitemap.xml", "/llms.txt", "/llms-full.txt"]);
   for (const language of BLOG_LANGUAGES) paths.add(blogIndexPath(language));
+  for (const language of BLOG_LANGUAGES) {
+    for (const post of await getPublishedBlogInventoryPostsByLanguage(language)) {
+      paths.add(blogPostPath(post.slug, post.language));
+    }
+  }
 
   for (const path of paths) {
     try {
@@ -43,7 +48,7 @@ export async function POST(request: Request) {
 
   try {
     const result = await refreshPublicBlogCacheFromStorage();
-    if (result.refreshed) revalidateBlogIndexes();
+    if (result.refreshed) await revalidateBlogPublicRoutes();
     const effectiveLanguages = Object.fromEntries(
       await Promise.all(BLOG_LANGUAGES.map(async (language) => [language, (await getPublishedBlogInventoryPostsByLanguage(language)).length]))
     );
