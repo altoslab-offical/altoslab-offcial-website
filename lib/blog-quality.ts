@@ -346,6 +346,9 @@ function isPublicImageUrl(value?: string) {
 function generatedImageChecksIssues(image: BlogInlineImage, label: string) {
   const issues: string[] = [];
   if (!/(chatgpt|gpt|openai|codex)/i.test(image.provider || "")) issues.push(`${label} must be generated through ChatGPT/GPT`);
+  if (/local-pillow|debug-only-local-raster|fallback/i.test(`${image.provider || ""} ${image.prompt || ""}`)) {
+    issues.push(`${label} uses a debug/local fallback visual; production columns require approved GPT image2 raster output`);
+  }
   if (!image.prompt?.trim()) issues.push(`${label} requires the stored image prompt`);
   if (!image.generatedAt?.trim()) issues.push(`${label} requires generatedAt metadata`);
   if (!image.credit?.trim()) issues.push(`${label} requires visible editorial credit`);
@@ -365,6 +368,9 @@ function generatedCoverChecksIssues(post: BlogPost, label: string) {
   const generation = post.coverGeneration;
   if (!/(chatgpt|gpt|openai|codex)/i.test(generation?.provider || "")) {
     issues.push(`${label} must be generated through ChatGPT/GPT`);
+  }
+  if (/local-pillow|debug-only-local-raster|fallback/i.test(`${generation?.provider || ""} ${generation?.model || ""} ${generation?.prompt || ""}`)) {
+    issues.push(`${label} uses a debug/local fallback visual; production columns require approved GPT image2 raster output`);
   }
   if (!generation?.prompt?.trim()) issues.push(`${label} requires the stored image prompt`);
   if (!generation?.generatedAt?.trim()) issues.push(`${label} requires generatedAt metadata`);

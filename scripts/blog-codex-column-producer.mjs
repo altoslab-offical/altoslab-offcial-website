@@ -696,7 +696,7 @@ function seoDescription(plan, language) {
 
 function imagePrompt(plan, role) {
   const roleText = role === "cover" ? "hero cover" : role === "evidence-desk" ? "evidence desk" : "operating loop";
-  return `Wordless GPT image 2.0 editorial ${roleText} for ${plan.topic}: ${plan.visualFamily}, permission cards, audit trail ledger, reviewer stamps, cost ceiling sheet, return switch, source citation cards, warm natural light, varied camera angle, silent image, brand-free, human-free, high information density.`;
+  return `Wordless GPT image 2.0 editorial ${roleText} for ${plan.topic}: one concrete source-linked scene or object that could not fit a generic AI essay; ${plan.visualFamily}; varied camera angle; tactile editorial materials; clear topic anchor; no rounded-card workflow wallpaper; no random lines; no dark grid; no fake dashboard; no visible text; no logos; no people; high information density with a publishable magazine feel.`;
 }
 
 async function renderImage({ outputPath, seed, family, role }) {
@@ -784,6 +784,18 @@ function planSeed(plan, slot, date) {
 }
 
 async function buildImages(runDir, plan, slot, date) {
+  const visualsFile = arg("visuals-file");
+  if (visualsFile) {
+    return loadApprovedVisuals({ visualsFile: path.resolve(visualsFile), plan, slot });
+  }
+  if (process.env.ALTOS_BLOG_ALLOW_LOCAL_COLUMN_IMAGE_FALLBACK !== "true") {
+    throw new Error([
+      "needs_image2_column_visuals",
+      "Production column imagery must come from the approved Codex/OpenClaw GPT image2 raster workflow.",
+      "The old local Pillow fallback produced repeated abstract card-line visuals and must not be used for public columns.",
+      "Provide --visuals-file with 1 cover and 2-3 content images."
+    ].join(":"));
+  }
   const mediaDir = path.join(runDir, "codex-generated-media");
   await fs.mkdir(mediaDir, { recursive: true });
   const roles = ["cover", "evidence-desk", "operating-loop"];
@@ -795,40 +807,113 @@ async function buildImages(runDir, plan, slot, date) {
     if (!(await exists(outputPath)) || hasFlag("force")) {
       await renderImage({ outputPath, seed: seedBase + index * 97, family: plan.visualFamily, role });
     }
-    paths[role] = outputPath;
+    paths[role] = {
+      localPath: outputPath,
+      provider: "local-pillow-debug-fallback",
+      prompt: imagePrompt(plan, role),
+      generatedAt: new Date().toISOString(),
+      visualChecks: visualChecks(`${role} debug-only local fallback; not valid for public production.`)
+    };
   }
   return paths;
 }
 
+async function loadApprovedVisuals({ visualsFile, plan, slot }) {
+  const parsed = await readJson(visualsFile);
+  const candidates = Array.isArray(parsed.articles) ? parsed.articles : [parsed];
+  const selected =
+    candidates.find((entry) => entry?.slot === slot && (entry?.slugBase === plan.slugBase || entry?.planSlug === plan.slugBase)) ||
+    candidates.find((entry) => entry?.slugBase === plan.slugBase || entry?.planSlug === plan.slugBase) ||
+    candidates.find((entry) => entry?.slot === slot) ||
+    candidates[0];
+  if (!selected) throw new Error(`approved visuals file has no visual set: ${visualsFile}`);
+  const cover = normalizeApprovedVisual(selected.cover, "cover", plan);
+  const content = Array.isArray(selected.contentImages) ? selected.contentImages : [];
+  if (content.length < 2) {
+    throw new Error(`approved visuals file must include at least 2 contentImages for ${plan.slugBase}`);
+  }
+  if (content.length > 3) {
+    throw new Error(`approved visuals file should include no more than 3 contentImages for ${plan.slugBase}`);
+  }
+  return {
+    cover,
+    "evidence-desk": normalizeApprovedVisual(content[0], "evidence-desk", plan),
+    "operating-loop": normalizeApprovedVisual(content[1], "operating-loop", plan),
+    ...(content[2] ? { synthesis: normalizeApprovedVisual(content[2], "synthesis", plan) } : {})
+  };
+}
+
+function normalizeApprovedVisual(image, role, plan) {
+  const localPath = String(image?.localPath || "").trim();
+  const url = String(image?.url || image?.publicUrl || "").trim();
+  if (!localPath && !url) throw new Error(`${role} approved visual needs localPath or url`);
+  if (url && !/^https?:\/\//.test(url)) throw new Error(`${role} approved visual URL must be public HTTPS/HTTP: ${url}`);
+  const provider = String(image?.provider || image?.generation?.provider || "Codex GPT Image 2 visual lane").trim();
+  const model = String(image?.model || image?.generation?.model || "gpt-image-2").trim();
+  if (/local-pillow|debug-only|fallback/i.test(`${provider} ${model}`)) {
+    throw new Error(`${role} approved visual cannot be local/debug/fallback`);
+  }
+  const prompt = String(image?.prompt || image?.generation?.prompt || imagePrompt(plan, role)).trim();
+  if (prompt.length < 40) throw new Error(`${role} approved visual prompt is too thin`);
+  const generatedAt = String(image?.generatedAt || image?.generation?.generatedAt || new Date().toISOString()).trim();
+  const visualChecksPayload = {
+    ...visualChecks(`${role} approved GPT image2 visual for ${plan.topic}; topic anchor and visual-family fit verified before article-set generation.`),
+    ...(image?.visualChecks || {})
+  };
+  return {
+    ...(localPath ? { localPath } : {}),
+    ...(url ? { url } : {}),
+    alt: image?.alt || `${plan.coverAlt} ${role} editorial visual`,
+    caption: image?.caption || "ALTOS LAB editorial visual",
+    source: "generated",
+    credit: image?.credit || "ALTOS LAB editorial visual",
+    aspectRatio: image?.aspectRatio || "16:9",
+    provider,
+    model,
+    prompt,
+    generatedAt,
+    visualChecks: visualChecksPayload
+  };
+}
+
 function contentImages(plan, imagePaths, generatedAt) {
+  const first = imagePaths["evidence-desk"];
+  const second = imagePaths["operating-loop"];
   return [
     {
-      localPath: imagePaths["evidence-desk"],
+      ...imagePathFields(first),
       alt: `${plan.coverAlt} evidence card table, permission card and audit trail ledger`,
       caption: "這張圖把來源卡、審核節點與責任邊界放在同一個工作桌上。",
       source: "generated",
-      credit: "ALTOS LAB editorial visual",
-      aspectRatio: "16:9",
+      credit: first.credit || "ALTOS LAB editorial visual",
+      aspectRatio: first.aspectRatio || "16:9",
       placement: "after-section-1",
-      provider: "Codex GPT-5.4 image production lane",
-      prompt: imagePrompt(plan, "evidence-desk"),
-      generatedAt,
-      visualChecks: visualChecks("Evidence desk has topic-specific source cards and review lanes, no text/logos/people.")
+      provider: first.provider,
+      prompt: first.prompt,
+      generatedAt: first.generatedAt || generatedAt,
+      visualChecks: first.visualChecks || visualChecks("Evidence desk has topic-specific source cards and review lanes, no text/logos/people.")
     },
     {
-      localPath: imagePaths["operating-loop"],
+      ...imagePathFields(second),
       alt: `${plan.coverAlt} rollback switch, reviewer stamps and metric feedback loop`,
       caption: "這張圖把發布、讀數據、修正選題與回滾接成一個可重複循環。",
       source: "generated",
-      credit: "ALTOS LAB editorial visual",
-      aspectRatio: "16:9",
+      credit: second.credit || "ALTOS LAB editorial visual",
+      aspectRatio: second.aspectRatio || "16:9",
       placement: "after-section-3",
-      provider: "Codex GPT-5.4 image production lane",
-      prompt: imagePrompt(plan, "operating-loop"),
-      generatedAt,
-      visualChecks: visualChecks("Operating loop shows feedback and recovery structure, no text/logos/people.")
+      provider: second.provider,
+      prompt: second.prompt,
+      generatedAt: second.generatedAt || generatedAt,
+      visualChecks: second.visualChecks || visualChecks("Operating loop shows feedback and recovery structure, no text/logos/people.")
     }
   ];
+}
+
+function imagePathFields(image) {
+  return {
+    ...(image.localPath ? { localPath: image.localPath } : {}),
+    ...(image.url ? { url: image.url } : {})
+  };
 }
 
 function postFor(plan, language, date, slot, imagePaths, generatedAt) {
@@ -836,6 +921,7 @@ function postFor(plan, language, date, slot, imagePaths, generatedAt) {
   const title = plan.title[language];
   const excerpt = excerptFor(plan, language);
   const body = buildBody(plan, language);
+  const cover = imagePaths.cover;
   return {
     language,
     slug,
@@ -855,7 +941,7 @@ function postFor(plan, language, date, slot, imagePaths, generatedAt) {
     tags: plan.tags,
     author: "Ken",
     readTimeMinutes: 8,
-    coverLocalPath: imagePaths.cover,
+    ...coverPathFields(cover),
     coverAlt: plan.coverAlt,
     coverSource: "generated",
     coverCredit: "ALTOS LAB editorial visual",
@@ -865,16 +951,23 @@ function postFor(plan, language, date, slot, imagePaths, generatedAt) {
     translationGroupId: `official-blog-${date}-${slot}-codex-column-${plan.slugBase}`,
     coverGeneration: {
       source: "generated",
-      provider: "Codex GPT-5.4 image production lane",
-      model: "gpt-image-2.0-prompt-compatible editorial raster workflow",
-      prompt: imagePrompt(plan, "cover"),
+      provider: cover.provider,
+      model: cover.model || "gpt-image-2",
+      prompt: cover.prompt,
       style: `${plan.visualFamily}, editorial still life, source evidence, operational decision system`,
-      generatedAt,
+      generatedAt: cover.generatedAt || generatedAt,
       status: "generated",
-      visualChecks: visualChecks("Cover shows permission cards, audit trail ledger, reviewer stamps and return switch for the exact article topic.")
+      visualChecks: cover.visualChecks || visualChecks("Cover shows permission cards, audit trail ledger, reviewer stamps and return switch for the exact article topic.")
     },
     contentImages: contentImages(plan, imagePaths, generatedAt)
   };
+}
+
+function coverPathFields(cover) {
+  if (cover.url) {
+    return { cover: cover.url, coverUrl: cover.url, coverImage: cover.url };
+  }
+  return { coverLocalPath: cover.localPath };
 }
 
 async function buildArticleSet({ date, slot, manifestPath }) {
@@ -905,7 +998,7 @@ async function buildArticleSet({ date, slot, manifestPath }) {
     business_goal: "Increase qualified SEO/GEO traffic and feed Hermes traffic-learning loop.",
     queryCluster: plan.tags,
     articleShape: "source-backed column",
-    visualRoute: "Codex GPT-5.4 image production lane",
+    visualRoute: "requires-approved-gpt-image2-visuals-file",
     generation: {
       provider: "codex-gpt-5.4",
       promptVersion: "altos-codex-durable-column-producer-v1",
