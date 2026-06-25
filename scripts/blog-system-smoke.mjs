@@ -46,6 +46,7 @@ const marketSourceScanner = read("scripts/blog-market-source-scanner.mjs");
 const marketSourceWorker = read("scripts/blog-market-source-worker.mjs");
 const marketAutoRepair = read("scripts/blog-market-auto-repair.mjs");
 const marketTranslationService = read("scripts/blog-market-translation-service.mjs");
+const codexColumnProducer = read("scripts/blog-codex-column-producer.mjs");
 const publicMarketProjectionCleaner = read("scripts/blog-clean-public-market-news-projection.mjs");
 const sopDoctor = read("scripts/blog-sop-doctor.mjs");
 const releaseVerifier = read("scripts/verify-blog-release.mjs");
@@ -617,6 +618,7 @@ assert(seoGeoReport.includes("gcloud token fallback"), "SEO/GEO report can use l
 assert(seoGeoReport.includes("No qualified public blog posts are currently published"), "SEO/GEO report explains empty fail-closed blog inventory");
 assert(seoGeoReport.includes("incompleteMarketNewsGroups"), "SEO/GEO report calls out market-news language gaps");
 assert(blogDailyCloseout.includes("writeHermesCloseout") && blogDailyCloseout.includes("hermes_official_blog_daily_closeout_v1"), "daily closeout writes a compact Hermes self-evolution learning packet when requested");
+assert(codexColumnProducer.includes("path.join(RUNTIME_ROOT, \"data/blog-prepared-candidates\""), "Codex column producer writes candidate evidence to the runtime root used by closeout and scheduler");
 assert(n8nLocalBridge.includes("--write-hermes"), "n8n daily closeout writes Hermes learning evidence by default");
 assert(blogTrafficSelfEvolution.includes("hermes_official_blog_traffic_self_evolution_readback_v1") && blogTrafficSelfEvolution.includes("canOptimizeTopicSelectionFromTraffic"), "traffic self-evolution runner writes GA/GSC readback into Hermes");
 assert(n8nLocalBridge.includes("scripts/blog-traffic-self-evolution.mjs"), "n8n SEO/GEO job writes traffic self-evolution evidence instead of terminal-only text");

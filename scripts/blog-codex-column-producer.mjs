@@ -46,7 +46,7 @@ async function writeJson(filePath, value) {
 }
 
 function candidateIndexPath(date, slot) {
-  return path.join(process.cwd(), "data/blog-prepared-candidates", `${date}-${slot}-column.json`);
+  return path.join(RUNTIME_ROOT, "data/blog-prepared-candidates", `${date}-${slot}-column.json`);
 }
 
 function slugify(input) {
