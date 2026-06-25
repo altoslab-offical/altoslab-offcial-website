@@ -55,6 +55,15 @@ function firstSource(pack = {}) {
   return Array.isArray(pack.sourceLinks) ? pack.sourceLinks[0] || {} : {};
 }
 
+function compactText(value = "", limit = 220) {
+  const text = String(value || "")
+    .replace(/<[^>]*>/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+  if (text.length <= limit) return text;
+  return `${text.slice(0, limit - 1).replace(/\s+\S*$/, "")}…`;
+}
+
 function validatePack(pack = {}) {
   const source = firstSource(pack);
   const article = pack.sourceArticle || {};
@@ -96,8 +105,16 @@ function buildPost(language, pack, date, localizedPack = pack) {
     author,
     readTimeMinutes: 3
   });
+  const fallbackTitle = post.title || localizedPack.sourceArticle?.headline || source.title || pack.topic || "AI market update";
+  const fallbackBody = post.body || localizedPack.sourceArticle?.body || localizedPack.sourceArticle?.standfirst || source.summary || fallbackTitle;
+  const fallbackExcerpt = post.excerpt || compactText(localizedPack.sourceArticle?.standfirst || post.geoSummary || fallbackBody, 220);
+  const fallbackGeoSummary = post.geoSummary || compactText(fallbackBody, 260);
   return {
     ...post,
+    title: fallbackTitle,
+    body: fallbackBody,
+    excerpt: fallbackExcerpt,
+    geoSummary: fallbackGeoSummary,
     id: `post_${translationGroupId}_${language.toLowerCase().replace(/[^a-z0-9]+/g, "_")}`,
     contentType: "breaking",
     status: "published",

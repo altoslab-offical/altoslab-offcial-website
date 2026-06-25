@@ -216,6 +216,222 @@ const PLANS = {
   }
 };
 
+const PLAN_VARIANTS = {
+  morning: [
+    {},
+    {
+      slugBase: "agent-interface-contract-before-autonomy",
+      topic: "AI agent interface contracts, permission boundaries and human review points",
+      plainTopic: "AI agent interface contracts, permission boundaries and review points",
+      tags: ["AI Agent", "Interface Contract", "Governance", "Enterprise AI"],
+      coverAlt: "AI agent interface contract table with permission boundary cards, approval stamps and handoff lanes",
+      visualFamily: "product-control-room",
+      title: {
+        "zh-Hant": "先別讓 Agent 動手，先寫清楚它能碰什麼",
+        en: "Before Agents Act, Write The Interface Contract",
+        ja: "Agent を動かす前に、触れる範囲を契約化する",
+        ko: "Agent가 움직이기 전에 접근 범위를 계약으로 정한다",
+        id: "Sebelum Agent Bertindak, Tulis Kontrak Antarmuka",
+        vi: "Trước khi Agent hành động, hãy viết hợp đồng giao diện",
+        th: "ก่อนให้ Agent ลงมือ ต้องเขียนสัญญาขอบเขตให้ชัด",
+        ms: "Sebelum Agent Bertindak, Tulis Kontrak Antara Muka",
+        fil: "Bago Kumilos Ang Agent, Isulat Muna Ang Interface Contract"
+      },
+      excerpt: {
+        "zh-Hant": "Agent 不是接上工具就能交給 production。團隊要先定義可讀資料、可寫欄位、批准節點、失敗接手與紀錄格式。",
+        en: "An agent is not production-ready just because it can use tools. Teams need data boundaries, writable fields, approval points, failure handoff, and record formats first.",
+        ja: "Agent はツールを使えるだけでは production に出せない。読むデータ、書ける欄位、承認点、失敗時の引き継ぎ、記録形式を先に決める必要がある。",
+        ko: "Agent가 도구를 쓸 수 있다고 바로 production에 올릴 수는 없다. 읽을 데이터, 쓸 필드, 승인 지점, 실패 인계, 기록 형식을 먼저 정해야 한다.",
+        id: "Agent tidak siap production hanya karena bisa memakai tool. Tim perlu batas data, field yang boleh ditulis, titik persetujuan, handoff saat gagal, dan format catatan.",
+        vi: "Agent không sẵn sàng production chỉ vì biết dùng công cụ. Đội ngũ cần ranh giới dữ liệu, trường được ghi, điểm duyệt, bàn giao khi lỗi và định dạng hồ sơ.",
+        th: "Agent ไม่พร้อม production เพียงเพราะใช้เครื่องมือได้ ทีมต้องกำหนดข้อมูลที่อ่านได้ ช่องที่เขียนได้ จุดอนุมัติ การส่งต่อเมื่อพลาด และรูปแบบบันทึกก่อน",
+        ms: "Agent belum sedia production hanya kerana boleh memakai tool. Pasukan perlu sempadan data, medan yang boleh ditulis, titik kelulusan, handoff gagal dan format rekod.",
+        fil: "Hindi production-ready ang agent dahil lang marunong itong gumamit ng tool. Kailangan muna ang data boundary, writable fields, approval points, failure handoff, at record format."
+      }
+    },
+    {
+      slugBase: "agent-incident-drill-before-scale",
+      topic: "AI agent incident drills, safe stop rules and recovery practice",
+      plainTopic: "AI agent incident drills, safe stop rules and recovery practice",
+      tags: ["AI Agent", "Incident Drill", "Recovery", "Operations"],
+      coverAlt: "AI agent incident drill board with stop rules, recovery cards and operator checklist",
+      visualFamily: "product-control-room",
+      title: {
+        "zh-Hant": "Agent 擴大前，先演練一次出錯怎麼停",
+        en: "Before Agents Scale, Rehearse How They Stop",
+        ja: "Agent を広げる前に、止め方を一度演習する",
+        ko: "Agent를 키우기 전에 멈추는 법을 먼저 리허설한다",
+        id: "Sebelum Agent Diperluas, Latih Cara Menghentikannya",
+        vi: "Trước khi mở rộng Agent, hãy diễn tập cách dừng lại",
+        th: "ก่อนขยาย Agent ต้องซ้อมก่อนว่าจะหยุดอย่างไร",
+        ms: "Sebelum Agent Dibesar-besarkan, Latih Cara Menghentikannya",
+        fil: "Bago Palakihin Ang Agent, Sanayin Muna Kung Paano Ito Ihihinto"
+      },
+      excerpt: {
+        "zh-Hant": "真正能上線的 Agent，不只會完成任務，也要能在誤判、權限越界或輸出異常時被快速停下與接回。",
+        en: "A production-grade agent is not only able to finish work; it can also be stopped and handed back when judgment, permission, or output goes wrong.",
+        ja: "本当に運用できる Agent は、仕事を終えるだけではない。判断、権限、出力が崩れた時に止めて人へ戻せる必要がある。",
+        ko: "실제로 운영 가능한 Agent는 일을 끝내는 것만으로 부족하다. 판단, 권한, 출력이 흔들릴 때 멈추고 사람에게 돌려줄 수 있어야 한다.",
+        id: "Agent production-grade bukan hanya bisa menyelesaikan pekerjaan; ia juga harus bisa dihentikan dan diserahkan kembali saat penilaian, izin, atau output keliru.",
+        vi: "Agent có thể vận hành không chỉ hoàn tất việc; nó còn phải dừng được và bàn giao lại khi phán đoán, quyền hoặc đầu ra sai.",
+        th: "Agent ที่ขึ้น production ได้ไม่ใช่แค่ทำงานจบ แต่ต้องหยุดและส่งกลับให้คนได้เมื่อการตัดสิน สิทธิ์ หรือผลลัพธ์ผิดพลาด",
+        ms: "Agent production-grade bukan sekadar menyiapkan kerja; ia mesti boleh dihentikan dan diserah balik apabila pertimbangan, izin atau output tersasar.",
+        fil: "Ang production-grade agent ay hindi lang nakakatapos ng trabaho; dapat din itong mahinto at maibalik sa tao kapag mali ang judgment, permission, o output."
+      }
+    }
+  ],
+  afternoon: [
+    {},
+    {
+      slugBase: "ai-search-answer-shape-before-keywords",
+      topic: "AI Search answer shape, source structure and reader intent",
+      plainTopic: "AI Search answer shape, source structure and reader intent",
+      tags: ["GEO", "AI Search", "Answer Engine", "SEO"],
+      coverAlt: "AI search answer structure desk with source cards, reader questions and citation paths",
+      visualFamily: "source-ledger-studio",
+      title: {
+        "zh-Hant": "想被 AI 搜尋引用，先把答案形狀寫出來",
+        en: "To Be Cited By AI Search, Shape The Answer First",
+        ja: "AI 検索に引用されるには、先に答えの形を整える",
+        ko: "AI 검색에 인용되려면 먼저 답의 형태를 만들어야 한다",
+        id: "Agar Dikutip AI Search, Bentuk Jawaban Lebih Dulu",
+        vi: "Muốn được AI Search trích dẫn, hãy định hình câu trả lời trước",
+        th: "ถ้าอยากให้ AI Search อ้างอิง ต้องจัดรูปคำตอบก่อน",
+        ms: "Untuk Dipetik AI Search, Bentuk Jawapan Dahulu",
+        fil: "Para Ma-cite Ng AI Search, Ihugis Muna Ang Sagot"
+      },
+      excerpt: {
+        "zh-Hant": "GEO 的重點不是再多塞幾個關鍵字，而是讓標題、段落、小結、來源與例子形成可被引用的答案結構。",
+        en: "GEO is not adding more keywords. It is shaping titles, sections, summaries, sources, and examples into an answer structure that can be cited.",
+        ja: "GEO はキーワード追加ではない。タイトル、段落、小結、出典、例を引用しやすい答えの構造にする仕事だ。",
+        ko: "GEO는 키워드를 더 넣는 일이 아니다. 제목, 단락, 요약, 출처, 예시를 인용 가능한 답의 구조로 만드는 일이다.",
+        id: "GEO bukan menambah keyword. GEO membentuk judul, bagian, ringkasan, sumber, dan contoh menjadi struktur jawaban yang bisa dikutip.",
+        vi: "GEO không phải thêm từ khóa. Đó là định hình tiêu đề, đoạn, tóm tắt, nguồn và ví dụ thành cấu trúc câu trả lời có thể trích dẫn.",
+        th: "GEO ไม่ใช่การเพิ่มคีย์เวิร์ด แต่คือการจัดหัวข้อ ย่อหน้า สรุป แหล่งที่มา และตัวอย่างให้เป็นคำตอบที่อ้างอิงได้",
+        ms: "GEO bukan menambah kata kunci. Ia membentuk tajuk, bahagian, ringkasan, sumber dan contoh menjadi struktur jawapan yang boleh dipetik.",
+        fil: "Hindi dagdag-keyword ang GEO. Binubuo nito ang title, sections, summary, sources, at examples bilang answer structure na puwedeng i-cite."
+      }
+    },
+    {
+      slugBase: "content-refresh-loop-for-ai-search",
+      topic: "AI Search content refresh loops, Search Console signals and source updates",
+      plainTopic: "AI Search content refresh loops and source updates",
+      tags: ["GEO", "Content Refresh", "Search Console", "SEO"],
+      coverAlt: "AI search content refresh calendar with source update cards and search console signal strips",
+      visualFamily: "source-ledger-studio",
+      title: {
+        "zh-Hant": "AI 搜尋時代，舊文章要靠讀回資料繼續長大",
+        en: "In AI Search, Old Articles Need Data To Keep Growing",
+        ja: "AI 検索時代、古い記事はデータで育て続ける",
+        ko: "AI 검색 시대에는 오래된 글도 데이터로 계속 키워야 한다",
+        id: "Di Era AI Search, Artikel Lama Perlu Data Untuk Terus Tumbuh",
+        vi: "Trong thời AI Search, bài cũ cần dữ liệu để tiếp tục lớn lên",
+        th: "ในยุค AI Search บทความเก่าต้องใช้ข้อมูลเพื่อโตต่อ",
+        ms: "Dalam Era AI Search, Artikel Lama Perlu Data Untuk Terus Berkembang",
+        fil: "Sa Panahon Ng AI Search, Kailangan Ng Data Para Lumago Pa Ang Lumang Artikulo"
+      },
+      excerpt: {
+        "zh-Hant": "好文章不是發布後就結束。Search Console、GA4、來源更新與讀者問題，會告訴 Hermes 下一輪要補哪個段落。",
+        en: "A good article does not end at publish. Search Console, GA4, source updates, and reader questions tell Hermes which section to improve next.",
+        ja: "良い記事は公開で終わらない。Search Console、GA4、出典更新、読者の問いが、次に直す段落を Hermes に教える。",
+        ko: "좋은 글은 발행으로 끝나지 않는다. Search Console, GA4, 출처 업데이트, 독자 질문이 Hermes에게 다음에 보강할 단락을 알려준다.",
+        id: "Artikel bagus tidak selesai saat terbit. Search Console, GA4, pembaruan sumber, dan pertanyaan pembaca memberi tahu Hermes bagian mana yang perlu ditingkatkan.",
+        vi: "Bài viết tốt không kết thúc khi xuất bản. Search Console, GA4, cập nhật nguồn và câu hỏi của độc giả cho Hermes biết phần nào cần bổ sung.",
+        th: "บทความที่ดีไม่ได้จบตอนเผยแพร่ Search Console, GA4, การอัปเดตแหล่งที่มา และคำถามผู้อ่านจะบอก Hermes ว่าควรเสริมส่วนไหนต่อ",
+        ms: "Artikel yang baik tidak selesai selepas diterbitkan. Search Console, GA4, kemas kini sumber dan soalan pembaca memberitahu Hermes bahagian mana perlu diperbaiki.",
+        fil: "Hindi natatapos sa publish ang magandang article. Search Console, GA4, source updates, at tanong ng reader ang magsasabi sa Hermes kung aling section ang aayusin."
+      }
+    }
+  ],
+  evening: [
+    {},
+    {
+      slugBase: "ai-vendor-demo-to-operating-proof",
+      topic: "AI vendor demos, operating proof and buyer-side acceptance tests",
+      plainTopic: "AI vendor demos and operating proof",
+      tags: ["AI Procurement", "Vendor Evaluation", "Enterprise AI", "Operating Proof"],
+      coverAlt: "AI vendor evaluation room with demo claim cards, acceptance test sheets and cost owner board",
+      visualFamily: "procurement-war-room",
+      title: {
+        "zh-Hant": "供應商 Demo 很順，不代表你的流程扛得住",
+        en: "A Smooth Vendor Demo Does Not Prove Your Operation Can Carry It",
+        ja: "滑らかなベンダー demo は、自社運用に耐える証明ではない",
+        ko: "매끄러운 벤더 demo가 우리 운영을 버틴다는 증거는 아니다",
+        id: "Demo Vendor Yang Mulus Belum Membuktikan Operasi Anda Kuat",
+        vi: "Demo mượt của vendor chưa chứng minh vận hành của bạn chịu được",
+        th: "Demo ของผู้ขายที่ลื่นไหล ไม่ได้พิสูจน์ว่างานคุณรับไหว",
+        ms: "Demo Vendor Yang Lancar Belum Membuktikan Operasi Anda Mampu Menanggungnya",
+        fil: "Hindi Patunay Ang Smooth Vendor Demo Na Kaya Ng Operasyon Mo"
+      },
+      excerpt: {
+        "zh-Hant": "AI 採購要把 demo claim 轉成自己的驗收題：資料能不能進、輸出誰審、費用怎麼算、失敗時能不能退回。",
+        en: "AI procurement should turn demo claims into buyer-side acceptance tests: data fit, reviewer ownership, cost model, and failure return path.",
+        ja: "AI 調達では demo の主張を自社側の受入テストへ変える。データ適合、確認者、費用、失敗時の戻し方を確認する。",
+        ko: "AI 구매는 demo 주장을 구매자 측 인수 테스트로 바꿔야 한다. 데이터 적합성, 검토 책임, 비용 모델, 실패 복귀 경로를 봐야 한다.",
+        id: "Procurement AI harus mengubah klaim demo menjadi acceptance test pembeli: kecocokan data, pemilik review, model biaya, dan jalur kembali saat gagal.",
+        vi: "Mua AI phải biến lời hứa demo thành kiểm thử nghiệm thu phía người mua: dữ liệu, người duyệt, mô hình chi phí và đường quay lại khi lỗi.",
+        th: "การซื้อ AI ต้องเปลี่ยนคำเคลมใน demo เป็น acceptance test ฝั่งผู้ซื้อ: ข้อมูลเข้าได้ไหม ใครตรวจ ค่าใช้จ่ายคิดอย่างไร และพลาดแล้วถอยได้ไหม",
+        ms: "Pembelian AI perlu menukar dakwaan demo menjadi acceptance test pihak pembeli: kesesuaian data, pemilik semakan, model kos dan laluan kembali bila gagal.",
+        fil: "Dapat gawing buyer-side acceptance test ang demo claims: data fit, reviewer ownership, cost model, at failure return path."
+      }
+    },
+    {
+      slugBase: "ai-cost-ceiling-before-workflow-rollout",
+      topic: "AI cost ceilings, workflow rollout and spend ownership",
+      plainTopic: "AI cost ceilings and spend ownership",
+      tags: ["AI Cost", "Workflow Rollout", "Procurement", "Governance"],
+      coverAlt: "AI workflow rollout budget board with cost ceiling markers, owner cards and stop switches",
+      visualFamily: "procurement-war-room",
+      title: {
+        "zh-Hant": "AI 流程要放大前，先把成本天花板寫進規格",
+        en: "Before AI Workflows Scale, Put The Cost Ceiling In The Spec",
+        ja: "AI 業務を広げる前に、コスト上限を仕様へ入れる",
+        ko: "AI 업무를 확대하기 전에 비용 상한을 규격에 넣어야 한다",
+        id: "Sebelum Workflow AI Diperluas, Masukkan Batas Biaya Ke Spesifikasi",
+        vi: "Trước khi mở rộng quy trình AI, hãy đưa trần chi phí vào đặc tả",
+        th: "ก่อนขยาย workflow AI ต้องใส่เพดานต้นทุนไว้ในสเปก",
+        ms: "Sebelum Workflow AI Dibesar-besarkan, Masukkan Siling Kos Dalam Spesifikasi",
+        fil: "Bago Palakihin Ang AI Workflow, Ilagay Sa Spec Ang Cost Ceiling"
+      },
+      excerpt: {
+        "zh-Hant": "AI 工具最容易從小實驗變成看不見的長期成本。流程規格要先寫清使用量、審核、停用條件與負責人。",
+        en: "AI tools can turn from small experiments into invisible long-term costs. Workflow specs need usage limits, review, stop conditions, and owners.",
+        ja: "AI ツールは小さな実験から見えにくい長期コストになりやすい。業務仕様には使用量、確認、停止条件、責任者を先に書く。",
+        ko: "AI 도구는 작은 실험에서 보이지 않는 장기 비용으로 바뀌기 쉽다. 업무 규격에는 사용량, 검토, 중단 조건, 책임자를 먼저 써야 한다.",
+        id: "Alat AI mudah berubah dari eksperimen kecil menjadi biaya jangka panjang yang tidak terlihat. Spesifikasi workflow harus memuat batas pemakaian, review, syarat berhenti, dan pemilik.",
+        vi: "Công cụ AI dễ biến từ thử nghiệm nhỏ thành chi phí dài hạn khó thấy. Đặc tả quy trình cần giới hạn sử dụng, kiểm duyệt, điều kiện dừng và người chịu trách nhiệm.",
+        th: "เครื่องมือ AI เปลี่ยนจากการทดลองเล็ก ๆ เป็นต้นทุนระยะยาวที่มองไม่เห็นได้ง่าย สเปก workflow ต้องมีขีดจำกัดการใช้ การตรวจ เงื่อนไขหยุด และเจ้าของงาน",
+        ms: "Alat AI mudah berubah daripada eksperimen kecil kepada kos jangka panjang yang tidak kelihatan. Spesifikasi workflow perlu had penggunaan, semakan, syarat berhenti dan pemilik.",
+        fil: "Madaling maging invisible long-term cost ang maliit na AI experiment. Dapat nasa workflow spec ang usage limit, review, stop condition, at owner."
+      }
+    }
+  ]
+};
+
+function daysSinceBase(date) {
+  const base = Date.UTC(2026, 5, 24);
+  const [year, month, day] = date.split("-").map(Number);
+  const current = Date.UTC(year, month - 1, day);
+  return Math.max(0, Math.floor((current - base) / 86400000));
+}
+
+function mergePlan(base, override = {}) {
+  return {
+    ...base,
+    ...override,
+    title: { ...base.title, ...(override.title || {}) },
+    excerpt: { ...base.excerpt, ...(override.excerpt || {}) },
+    tags: override.tags || base.tags
+  };
+}
+
+function planFor(date, slot) {
+  const base = PLANS[slot];
+  if (!base) throw new Error(`No Codex column plan for slot ${slot}`);
+  const variants = PLAN_VARIANTS[slot] || [{}];
+  return mergePlan(base, variants[daysSinceBase(date) % variants.length]);
+}
+
 const LANG = {
   "zh-Hant": {
     locale: "繁體中文",
@@ -424,8 +640,24 @@ function buildBody(plan, language) {
     : language === "ko"
       ? `\n\n핵심은 판단을 추상적인 말로 끝내지 않는 것이다. 예를 들어 글을 발행한다면 어떤 출처를 썼는지, 어떤 단락이 독자의 판단을 돕는지, 어떤 이미지가 이해를 보완하는지, 공개 후 어떤 숫자를 볼지 남겨야 한다. 그래야 다음 날 Hermes가 단순히 새 글을 만드는 데서 멈추지 않고 전날 결과를 바탕으로 주제, 제목, 이미지, 설명 순서를 바꿀 수 있다.\n\n작은 팀일수록 이 구조는 더 중요하다. 사람이 적으면 판단이 한 사람의 기억에 몰리기 쉽다. 증거를 남기면 판단은 개인의 감각이 아니라 팀의 자산이 된다. 검색 유입이 약한 글도 실패로 버리지 않고 제목, 단락 제목, 출처 제시 방식, 독자의 다음 행동을 나누어 고칠 수 있다.\n\n실무에서는 세 칸만 있어도 충분히 시작할 수 있다. 첫째, 마지막 공개 결정을 누가 가지는가. 둘째, 어떤 자료가 판단의 근거인가. 셋째, 실패하면 어떤 절차로 돌아가는가. 이 세 칸이 보이면 AI 사용은 편리한 도구가 아니라 관리 가능한 운영 방식이 된다. 독자에게도 글이 단순 요약이 아니라 내일 확인할 질문으로 남는다.\n\n기사 품질 관리에도 같은 기준을 적용할 수 있다. 공개 전에 볼 것은 글의 길이가 아니라 독자가 판단할 재료가 있는지다. 출처의 의미, 쓸 수 있는 상황, 쓰면 안 되는 상황, 먼저 볼 숫자가 함께 있으면 글은 검색용 문장이 아니라 실무에서 쓰는 메모가 된다. GEO와 SEO에서도 이 차이는 크다. AI 요약이 잘 가져가는 것은 추상적인 감상이 아니라 짧게 인용할 수 있는 판단과 조건이다.\n\n매일 세 편을 운영할 때도 이 기준이 필요하다. 아침 글은 문제의식이 강한 독자에게 맞춘다. 오후 글은 검색에서 인용되기 쉬운 구조를 강화한다. 저녁 글은 구매, 예산, 책임자의 판단에 가까운 주제를 다룬다. 숫자가 약하면 주제를 버리기 전에 제목, 출처 배치, 이미지 설명, 독자가 가져갈 질문을 나누어 고친다.\n\n마지막으로, 이 구조는 팀의 말투도 바꾼다. AI가 쓴 듯한 문장은 보통 누구에게 말하는지 흐리고, 어떤 장면에서 쓸 수 있는지 흐리며, 실패했을 때 무엇을 해야 하는지 흐리다. 좋은 글은 반대로 한 사람의 업무 장면을 붙잡고, 출처를 근거로 판단을 좁히며, 독자가 바로 점검할 체크포인트를 남긴다. 그래서 Hermes의 품질 기준도 문장 미감에서 끝나지 않고, 데이터와 책임 경로까지 함께 본다.`
       : "";
-  const body = `${sourceLead}\n\n${p[0]}\n\n## ${h1}\n\n${p[1]}\n\n${p[2]}\n\n> ${plan.excerpt[language]} ${language === "zh-Hant" ? "這句話不是口號，而是今天可以檢查的營運標準。" : "This is an operating standard the team can inspect today."}\n\n[IMAGE:evidence-desk]\n\n## ${h2}\n\n${table}\n\n${p[1]}\n\n${language === "zh-Hant" ? "把它放進產品表面，意思是審核者不用翻十個工具才知道一篇內容為什麼被發布。來源、審核、發布時間與讀回數據應該待在同一條紀錄裡。" : "Putting it on the product surface means reviewers do not need to open ten tools to know why a piece of content was published. Source, review, publish time, and readback data should live in one record."}\n\n## ${h3}\n\n${p[2]}\n\n${language === "zh-Hant" ? "真正的差別在於，文章要幫讀者判斷下一步。這也是 GEO 和 SEO 的交會點：搜尋引擎需要結構，AI 摘要需要可引用片段，真人讀者需要具體取捨。" : "The article has one job: help the reader choose the next check. That is where GEO and SEO meet: search engines need structure, AI summaries need citable passages, and real readers need tradeoffs."}\n\n[IMAGE:operating-loop]\n\n## ${h4}\n\n${steps}${density}${localExtra}${visibleFaq}`;
+  const body = `${sourceLead}\n\n${p[0]}\n\n## ${h1}\n\n${p[1]}\n\n${p[2]}\n\n> ${plan.excerpt[language]} ${language === "zh-Hant" ? "這句話不是口號，而是今天可以檢查的營運標準。" : "This is an operating standard the team can inspect today."}\n\n[IMAGE:evidence-desk]\n\n## ${h2}\n\n${table}\n\n${p[1]}\n\n${language === "zh-Hant" ? "把它放進產品表面，意思是審核者不用翻十個工具才知道一篇內容為什麼被發布。來源、審核、發布時間與讀回數據應該待在同一條紀錄裡。" : "Putting it on the product surface means reviewers do not need to open ten tools to know why a piece of content was published. Source, review, publish time, and readback data should live in one record."}\n\n## ${h3}\n\n${p[2]}\n\n${language === "zh-Hant" ? "真正的差別在於，文章要幫讀者判斷下一步。這也是 GEO 和 SEO 的交會點：搜尋引擎需要結構，AI 摘要需要可引用片段，真人讀者需要具體取捨。" : "The article has one job: help the reader choose the next check. That is where GEO and SEO meet: search engines need structure, AI summaries need citable passages, and real readers need tradeoffs."}\n\n${labsPointOfView(language, plan)}\n\n[IMAGE:operating-loop]\n\n## ${h4}\n\n${steps}${density}${localExtra}${visibleFaq}`;
   return body.replace(/\bworkflow\b/gi, "operating flow").replace(/\brollback\b/gi, "return path").replace(/\btrace\b/gi, "record").replace(/\beval(?:uation)?s?\b/gi, "test review");
+}
+
+function labsPointOfView(language, plan) {
+  const topic = plan.plainTopic || plan.topic;
+  const points = {
+    "zh-Hant": `## ALTOS LAB 判斷\n\n這篇不是在替新工具背書，而是把 ${topic} 拆成可被團隊檢查的營運問題。文章要留下來源、情境、取捨與下一個檢查點；如果讀者看完只記得「AI 很重要」，這篇就沒有通過 ALTOS LAB 的專欄標準。`,
+    en: `## ALTOS LAB implementation note\n\nThis is not a recommendation to buy another tool. It turns ${topic} into an operating question the team can inspect. A useful column keeps the source, scenario, tradeoff, and next check in view; if the reader only remembers that AI is important, the article failed the ALTOS LAB standard.`,
+    ja: `## ALTOS LAB の判断\n\nこの記事は新しい道具を勧めるためのものではない。${topic} を、チームが検査できる運用上の問いへ分解するためのものだ。良い専門記事には、出典、状況、取捨選択、次に確認する点が残る。読者が「AI は重要だ」とだけ覚えて終わるなら、ALTOS LAB の基準では不十分である。`,
+    ko: `## ALTOS LAB 편집\n\n이 글은 또 다른 도구를 추천하려는 글이 아니다. ${topic} 을 팀이 점검할 수 있는 운영 질문으로 나누는 글이다. 좋은 칼럼은 출처, 상황, 선택의 tradeoff, 다음 점검 지점을 남긴다. 독자가 AI가 중요하다는 말만 기억한다면 ALTOS LAB 기준을 통과하지 못한다.`,
+    id: `## ALTOS LAB implementation note\n\nTulisan ini bukan ajakan membeli alat baru. Tulisan ini mengubah ${topic} menjadi pertanyaan operasi yang bisa diperiksa tim. Kolom yang berguna menyisakan sumber, situasi, tradeoff, dan pemeriksaan berikutnya; jika pembaca hanya mengingat bahwa AI penting, tulisan itu belum memenuhi standar ALTOS LAB.`,
+    vi: `## Góc nhìn ALTOS LAB\n\nBài này không phải lời khuyên mua thêm công cụ. Nó biến ${topic} thành câu hỏi vận hành mà đội ngũ có thể kiểm tra. Một bài chuyên mục tốt phải giữ lại nguồn, tình huống, đánh đổi và điểm cần kiểm tra tiếp theo; nếu độc giả chỉ nhớ rằng AI quan trọng, bài viết chưa đạt chuẩn ALTOS LAB.`,
+    th: `## มุมมอง ALTOS LAB\n\nบทความนี้ไม่ได้ชวนซื้อเครื่องมือเพิ่ม แต่เปลี่ยน ${topic} ให้เป็นคำถามด้านปฏิบัติการที่ทีมตรวจได้ คอลัมน์ที่ดีต้องเหลือแหล่งที่มา สถานการณ์ tradeoff และจุดตรวจถัดไปไว้ให้ผู้อ่าน ถ้าผู้อ่านจำได้เพียงว่า AI สำคัญ บทความนั้นยังไม่ถึงมาตรฐาน ALTOS LAB`,
+    ms: `## ALTOS LAB implementation note\n\nTulisan ini bukan seruan membeli alat baharu. Ia menukar ${topic} menjadi soalan operasi yang boleh disemak pasukan. Kolum yang berguna menyimpan sumber, situasi, tradeoff dan pemeriksaan seterusnya; jika pembaca hanya ingat bahawa AI penting, tulisan itu belum memenuhi standard ALTOS LAB.`,
+    fil: `## Pananaw ng ALTOS LAB\n\nHindi ito panawagan na bumili ng panibagong tool. Ginagawa nitong operating question ang ${topic} na kayang suriin ng team. Ang magandang column ay may source, sitwasyon, tradeoff, at susunod na check; kung ang maalala lang ng reader ay mahalaga ang AI, hindi pa pasado sa ALTOS LAB standard.`
+  };
+  return points[language] || points.en;
 }
 
 function makeFaqs(language) {
@@ -445,10 +677,16 @@ function makeTakeaways(language) {
 
 function excerptFor(plan, language) {
   const base = plan.excerpt[language];
+  const limit = (text, max = 250) => {
+    const chars = Array.from(text);
+    if (chars.length <= max) return text;
+    const clipped = chars.slice(0, max - 1).join("").replace(/[，,;；:：\s]+$/u, "");
+    return `${clipped}${language === "en" ? "." : "。"}`;
+  };
   if (language === "zh-Hant") {
-    return `${base} 這篇用 OpenAI、Microsoft、NIST、IBM 等來源，幫營運團隊檢查一條普通工作日會遇到的真實決策。`;
+    return limit(`${base} 用公開來源檢查一條普通工作日會遇到的真實決策。`);
   }
-  return `OpenAI, Microsoft, NIST, IBM, and Google-source evidence frame one ordinary operating decision: ${base}`;
+  return limit(`${base} Source-backed note for one operating decision.`);
 }
 
 function seoDescription(plan, language) {
@@ -541,16 +779,21 @@ img.save(out, compress_level=1, optimize=False)
   }
 }
 
-async function buildImages(runDir, plan, slot) {
+function planSeed(plan, slot, date) {
+  return Array.from(`${date}:${slot}:${plan.slugBase}`).reduce((sum, char) => sum + char.charCodeAt(0), 20260624);
+}
+
+async function buildImages(runDir, plan, slot, date) {
   const mediaDir = path.join(runDir, "codex-generated-media");
   await fs.mkdir(mediaDir, { recursive: true });
   const roles = ["cover", "evidence-desk", "operating-loop"];
   const paths = {};
+  const seedBase = planSeed(plan, slot, date);
   for (let index = 0; index < roles.length; index += 1) {
     const role = roles[index];
     const outputPath = path.join(mediaDir, `${slot}-${plan.slugBase}-${role}.png`);
     if (!(await exists(outputPath)) || hasFlag("force")) {
-      await renderImage({ outputPath, seed: 20260624 + index * 17 + slot.length, family: plan.visualFamily, role });
+      await renderImage({ outputPath, seed: seedBase + index * 97, family: plan.visualFamily, role });
     }
     paths[role] = outputPath;
   }
@@ -645,9 +888,8 @@ async function buildArticleSet({ date, slot, manifestPath }) {
   if ((await exists(articleSetPath)) && !hasFlag("force")) {
     return { skipped: true, reason: "article-set already exists", articleSetPath, manifestPath };
   }
-  const plan = PLANS[slot];
-  if (!plan) throw new Error(`No Codex column plan for slot ${slot}`);
-  const imagePaths = await buildImages(runDir, plan, slot);
+  const plan = planFor(date, slot);
+  const imagePaths = await buildImages(runDir, plan, slot, date);
   const generatedAt = new Date().toISOString();
   const evidence = codexEvidence("Codex produced source-backed multilingual column set and topic-specific raster visuals from prepared daily slot.");
   const translationGroupId = `official-blog-${date}-${slot}-codex-column-${plan.slugBase}`;

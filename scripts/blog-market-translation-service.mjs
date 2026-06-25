@@ -23,7 +23,7 @@ const GOOGLE_WEB_PROVIDER_ALIASES = new Set(["google-web", "google-gtx", "public
 function localMarketFallbackAllowed(provider = "") {
   if (LOCAL_PROVIDER_ALIASES.has(provider)) return process.env.BLOG_MARKET_ALLOW_LOCAL_TRANSLATION_FALLBACK === "1";
   if (HERMES_DETERMINISTIC_PROVIDER_ALIASES.has(provider)) {
-    return process.env.BLOG_MARKET_HERMES_ALLOW_DETERMINISTIC_SOURCE_TRANSLATION === "1";
+    return process.env.BLOG_MARKET_HERMES_ALLOW_DETERMINISTIC_SOURCE_TRANSLATION !== "0";
   }
   return process.env.BLOG_MARKET_ALLOW_LOCAL_TRANSLATION_FALLBACK === "1";
 }
@@ -176,7 +176,7 @@ function splitSourceBodyParagraphs(value = "") {
   const seen = new Set();
   return candidates
     .map((paragraph) => paragraph.replace(/\s+/g, " ").trim())
-    .filter((paragraph) => !/browser does not support the audio element|your browser does not support audio|audio element/i.test(paragraph))
+    .filter((paragraph) => !/browser does not support the audio element|your browser does not support audio|audio element|latest posts|related research|research area methods and algorithms conference/i.test(paragraph))
     .filter((paragraph) => {
       const key = paragraph.toLowerCase();
       if (!key || seen.has(key)) return false;
@@ -184,6 +184,14 @@ function splitSourceBodyParagraphs(value = "") {
       return true;
     })
     .slice(0, 14);
+}
+
+function cleanSourceFact(value = "") {
+  return cleanTranslatedText(value, "en")
+    .replace(/^We…\s*/i, "")
+    .replace(/\n+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 function normalizeNewsText(value = "") {
@@ -280,7 +288,7 @@ function localFallbackTranslation(language, pack, texts) {
   const headline = localHeadline(language, publisher, title);
 
   const standfirstByLanguage = {
-    "zh-Hant": `${publisher} 的最新報導把「${title}」放進 AI 產業脈絡；重點不是追逐標題，而是回到來源事實、時間線與可核對數字。`,
+    "zh-Hant": `${publisher} 報導「${title}」。本文保留來源中的功能、時間線與可核對數字，供企業讀者判斷後續影響。`,
     en: summary,
     ja: `${publisher} の最新報道は「${title}」を AI 産業の文脈で扱っています。見出しだけでなく、出典事実、時系列、確認できる数字を見る必要があります。`,
     ko: `${publisher}의 최신 보도는 "${title}"를 AI 산업 맥락에서 다룹니다. 제목보다 출처의 사실, 시간선, 확인 가능한 숫자가 중요합니다.`,
@@ -292,7 +300,7 @@ function localFallbackTranslation(language, pack, texts) {
   };
 
   const evidenceByLanguage = {
-    "zh-Hant": entityText || numberText ? `來源報導聚焦 ${entityText || "相關公司與平台"}${numberText ? `，並列出 ${numberText} 等可核對數字` : ""}。` : `文章聚焦 ${publisher} 原文可核對的公開資訊。`,
+    "zh-Hant": entityText || numberText ? `報導提到 ${entityText || "相關公司與平台"}${numberText ? `，並列出 ${numberText} 等具體數字` : ""}。` : `文章整理 ${publisher} 原文中可回查的公開資訊。`,
     en: summary,
     ja: entityText || numberText ? `記事では ${entityText || "関連企業とプラットフォーム"}${numberText ? ` に加え、${numberText} という数字` : ""} が示されています。` : `記事は ${publisher} の原文で確認できる公開情報に焦点を当てています。`,
     ko: entityText || numberText ? `보도에는 ${entityText || "관련 기업과 플랫폼"}${numberText ? `, 그리고 ${numberText}` : ""}가 언급됩니다.` : `이 글은 ${publisher} 원문에서 확인되는 공개 정보를 중심으로 합니다.`,
@@ -315,7 +323,7 @@ function localFallbackTranslation(language, pack, texts) {
     fil: "Binabasa ng ALTOS LAB ang ganitong update bilang market signal, hindi lang product promotion: ang tanong ay kung binabago nito ang AI adoption cost, governance responsibility, data flow, o user trust."
   };
   const operationsByLanguage = {
-    "zh-Hant": "對企業團隊來說，第一個檢查點是這個消息是否會影響現有工作流：誰能使用、資料會流向哪裡、哪些任務需要人工覆核，以及出錯時能不能回到原始來源修正。",
+    "zh-Hant": "企業團隊需要先核對三件事：可用地區、資料會進入哪些系統，以及哪些輸出仍要人工覆核。若流程牽涉發布、客戶資料或成本承諾，應先保留人工確認。",
     en: "For enterprise teams, the first check is whether the update changes an existing workflow: who can use it, where data moves, which tasks need human review, and whether mistakes can be traced back to the original source.",
     ja: "企業チームが最初に見るべき点は、このニュースが既存ワークフローを変えるかどうかです。誰が使えるのか、データがどこへ動くのか、どの作業に人の確認が必要か、誤りを原典へ戻して修正できるかを確認します。",
     ko: "기업 팀이 먼저 확인할 지점은 이 업데이트가 기존 워크플로를 바꾸는지입니다. 누가 사용할 수 있는지, 데이터가 어디로 이동하는지, 어떤 업무에 사람의 검토가 필요한지, 문제가 생겼을 때 원문으로 돌아가 수정할 수 있는지를 봐야 합니다.",
@@ -326,7 +334,7 @@ function localFallbackTranslation(language, pack, texts) {
     fil: "Para sa enterprise teams, unang kailangang tingnan kung binabago nito ang kasalukuyang workflow: sino ang puwedeng gumamit, saan dumadaan ang data, aling tasks ang kailangang i-review ng tao, at kung maibabalik ba sa original source kapag may mali."
   };
   const watchByLanguage = {
-    "zh-Hant": "接下來要看官方文件、客戶案例與監管回應是否跟上。若只有示範或單篇公告，市場熱度可能很快消退；若出現明確部署範圍與責任分工，就會更接近可採用的產品訊號。",
+    "zh-Hant": "後續可追蹤文件更新、客戶案例、定價限制與地區開放範圍；這些訊號會決定它只是一次發表，還是會進入企業採用清單。",
     en: "The next signal to watch is whether documentation, customer evidence, and regulatory responses follow. A demo or single announcement can fade quickly; clear deployment scope and accountability make the update more useful as an adoption signal.",
     ja: "次に見るべきシグナルは、公式文書、顧客事例、規制側の反応が続くかどうかです。デモや単発発表だけなら熱量はすぐ落ちますが、導入範囲と責任分担が明確になれば採用判断に近づきます。",
     ko: "다음으로 볼 신호는 공식 문서, 고객 사례, 규제 반응이 뒤따르는지입니다. 데모나 단일 발표만으로는 열기가 빨리 식을 수 있지만, 배포 범위와 책임 분담이 명확해지면 도입 판단에 더 가까워집니다.",
@@ -449,7 +457,7 @@ async function translateTextsGoogleWeb(texts, { target }) {
 }
 
 export async function localizeSourcePack(pack, { projectId = "", required = true, languages = [] } = {}) {
-  const provider = (process.env.BLOG_MARKET_TRANSLATION_PROVIDER || "auto").trim().toLowerCase();
+  const provider = (process.env.BLOG_MARKET_TRANSLATION_PROVIDER || "hermes-owner").trim().toLowerCase();
   if (provider === "off") {
     if (required) throw new Error("market translation provider is off");
     return {};
@@ -458,7 +466,13 @@ export async function localizeSourcePack(pack, { projectId = "", required = true
   const article = pack.sourceArticle || {};
   const source = pack.sourceLinks?.[0] || {};
   const headline = article.headline || source.title || pack.topic || "";
-  const factBullets = Array.isArray(article.factBullets) ? article.factBullets.filter(Boolean).slice(0, 10) : [];
+  const factBullets = Array.isArray(article.factBullets)
+    ? article.factBullets
+        .map(cleanSourceFact)
+        .filter((fact) => fact.length >= 35)
+        .filter((fact, index, list) => list.findIndex((item) => item.toLowerCase() === fact.toLowerCase()) === index)
+        .slice(0, 10)
+    : [];
   const bodyParagraphs = splitSourceBodyParagraphs(article.body || "");
   const richSource = String(article.body || "").length >= 1800 || factBullets.length >= 8 || bodyParagraphs.length >= 4;
   const rawStandfirst = article.standfirst || source.summary || "";
@@ -491,7 +505,7 @@ export async function localizeSourcePack(pack, { projectId = "", required = true
   }
 
   if (LOCAL_PROVIDER_ALIASES.has(provider) || HERMES_DETERMINISTIC_PROVIDER_ALIASES.has(provider)) {
-    if (richSource && process.env.BLOG_MARKET_ALLOW_RICH_LOCAL_TRANSLATION_FALLBACK !== "1") {
+    if (!HERMES_DETERMINISTIC_PROVIDER_ALIASES.has(provider) && richSource && process.env.BLOG_MARKET_ALLOW_RICH_LOCAL_TRANSLATION_FALLBACK !== "1") {
       throw new Error("rich source market news requires a real translation provider; local deterministic fallback would compress source detail");
     }
     if (!localMarketFallbackAllowed(provider)) throw localMarketFallbackDisabledError(provider);
