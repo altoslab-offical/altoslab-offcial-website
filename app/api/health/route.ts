@@ -44,20 +44,7 @@ export async function GET() {
       blogLanguages: BLOG_LANGUAGES,
       dailyBlogSlots: ["morning", "afternoon", "evening"],
       dailyColumnTarget: Number(process.env.ALTOS_BLOG_COLUMN_DAILY_LIMIT || "3"),
-      marketScanWindows: [
-        "10:15",
-        "11:15",
-        "12:15",
-        "13:15",
-        "14:15",
-        "15:15",
-        "16:15",
-        "17:15",
-        "18:15",
-        "19:15",
-        "20:15",
-        "21:15"
-      ],
+      marketScanWindows: Array.from({ length: 24 }, (_, hour) => `${String(hour).padStart(2, "0")}:15`),
       blogNewsMix: BLOG_NEWS_MIX,
       searchVerificationConfigured: hasSearchVerificationConfigured()
     },
