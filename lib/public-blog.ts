@@ -3,7 +3,7 @@ import {
   publicCoverCreditForPost
 } from "./blog-authors";
 import { publicTaxonomyLabel, publicTaxonomyLabels } from "./public-taxonomy";
-import type { BlogPost } from "./types";
+import type { BlogInlineImage, BlogPost } from "./types";
 
 export type PublicBlogPost = Pick<
   BlogPost,
@@ -43,6 +43,21 @@ export type PublicBlogPost = Pick<
   | "publishedAt"
 >;
 
+function publicContentImages(images?: BlogInlineImage[]) {
+  return (images || []).map(({ url, alt, caption, source, credit, creditUrl, license, licenseUrl, aspectRatio, placement }) => ({
+    url,
+    alt,
+    caption,
+    source,
+    credit,
+    creditUrl,
+    license,
+    licenseUrl,
+    aspectRatio,
+    placement
+  }));
+}
+
 export function toPublicBlogPost(post: BlogPost): PublicBlogPost {
   const publicCoverCredit = publicCoverCreditForPost(post);
   const canExposeCoverAttribution = Boolean(publicCoverCredit && publicCoverCredit === post.coverCredit);
@@ -76,7 +91,7 @@ export function toPublicBlogPost(post: BlogPost): PublicBlogPost {
     coverCreditUrl: canExposeCoverAttribution ? post.coverCreditUrl : undefined,
     coverLicense: canExposeCoverAttribution ? post.coverLicense : undefined,
     coverLicenseUrl: canExposeCoverAttribution ? post.coverLicenseUrl : undefined,
-    contentImages: post.contentImages || [],
+    contentImages: publicContentImages(post.contentImages),
     readTimeMinutes: post.readTimeMinutes,
     featured: post.featured,
     createdAt: post.createdAt,

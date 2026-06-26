@@ -8,6 +8,12 @@ export type BlogVisualPost = Pick<
   coverGeneration?: Pick<NonNullable<BlogPost["coverGeneration"]>, "provider">;
 };
 
+function publicCoverGeneration(post: BlogPost): BlogVisualPost["coverGeneration"] {
+  // The public UI only needs to know about local, unsafe fallback media. Keep
+  // production provider names out of rendered HTML and social preview payloads.
+  return post.coverGeneration?.provider === "local" ? { provider: "local" } : undefined;
+}
+
 export function toBlogVisualPost(post: BlogPost): BlogVisualPost {
   return {
     id: post.id,
@@ -18,8 +24,8 @@ export function toBlogVisualPost(post: BlogPost): BlogVisualPost {
     cover: post.cover ? absoluteUrl(post.cover) : post.cover,
     coverAlt: post.coverAlt,
     coverCredit: post.coverCredit,
-    coverPrompt: post.coverPrompt,
+    coverPrompt: undefined,
     coverSource: post.coverSource,
-    coverGeneration: post.coverGeneration ? { provider: post.coverGeneration.provider } : undefined
+    coverGeneration: publicCoverGeneration(post)
   };
 }

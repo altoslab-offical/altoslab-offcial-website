@@ -73,6 +73,8 @@ const adminShell = read("components/AdminShell.tsx");
 const blogAuthors = read("lib/blog-authors.ts");
 const blogTypes = read("lib/types.ts");
 const cms = read("lib/cms.ts");
+const blogVisual = read("lib/blog-visual.ts");
+const publicBlog = read("lib/public-blog.ts");
 const blogArticle = read("components/BlogArticle.tsx");
 const blogIndex = read("components/BlogIndex.tsx");
 const blogApiRoute = read("app/api/blog/route.ts");
@@ -234,6 +236,8 @@ assert(quality.includes("repeatedColumnTakeawayPatterns"), "blog quality gate bl
 assert(quality.includes("publicOperatorLeakPattern"), "blog quality gate blocks Hermes/OpenClaw internal operator leakage in public copy");
 assert(aiFeelingAudit.includes("recycled-column-takeaways"), "public AI-feeling audit detects recycled column takeaways");
 assert(aiFeelingAudit.includes("source-backed AI operations column"), "public AI-feeling audit detects recycled English SEO/GEO column templates");
+assert(blogVisual.includes('provider === "local"') && blogVisual.includes("coverPrompt: undefined"), "public visual DTO hides cover prompts and production provider names");
+assert(publicBlog.includes("function publicContentImages") && publicBlog.includes("contentImages: publicContentImages"), "public blog serializer strips generated-image prompt/provider metadata");
 assert(generatedMediaRoute.includes("generated-blog-media"), "local generated media can be fetched during end-to-end image QA");
 assert(generatedMediaRoute.includes("readGcsObject"), "generated media route can read GCS-backed images");
 assert(healthRoute.includes("externalBlogIngestConfigured"), "health check reports whether signed external blog ingest is configured");
