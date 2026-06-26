@@ -102,8 +102,8 @@ function zhLength(value = "") {
 
 const repairs = {
   "agent-incident-drill-before-scale-20260626-zh-hant": {
-    title: "別等 Agent 出事才找煞車：上線前先演練失敗",
-    seoTitle: "AI Agent 上線前，先演練失敗與回滾流程",
+    title: "Agent 上線前先摔一次：沒有故障演練，就別談規模化",
+    seoTitle: "AI Agent 上線前，先做失敗演練與回滾流程",
     excerpt: "Agent 會做事不代表能上線。真正要先驗的是：它誤判、越權、輸出異常時，誰看見、誰按停、誰把流程接回來。",
     seoDescription:
       "AI Agent 上線前要先做 incident drill，測誤判、權限越界、輸出異常、人工接手與回滾流程，確認每個失敗點都有 owner。",
@@ -179,8 +179,8 @@ Agent 越像同事，越需要像正式流程一樣被管理。新同事做錯�
     ]
   },
   "content-refresh-loop-for-ai-search-20260626-zh-hant": {
-    title: "AI 搜尋不缺文章，缺的是能被引用的答案",
-    seoTitle: "AI 搜尋內容更新：讓舊文章變成可引用答案",
+    title: "AI 搜尋正在淘汰薄內容：能被引用的答案才會留下",
+    seoTitle: "AI 搜尋內容更新：讓舊文章變成可引用證據",
     excerpt: "舊文章不是發完就放著。標題、段落、來源、FAQ 和例子，都要靠讀回資料持續修，才會越來越像可引用的答案。",
     seoDescription:
       "AI 搜尋時代，內容更新要看 Search Console、GA4、來源更新與讀者問題，持續修標題、段落、FAQ 與可引用答案結構。",
@@ -257,8 +257,8 @@ Agent 越像同事，越需要像正式流程一樣被管理。新同事做錯�
     ]
   },
   "ai-cost-ceiling-before-workflow-rollout-20260626-zh-hant": {
-    title: "AI 工具最怕不是貴，是沒人知道什麼時候該停",
-    seoTitle: "AI 成本控管：流程放大前先寫成本天花板",
+    title: "AI 成本失控前夜：吞預算的不是模型，是沒人踩煞車的流程",
+    seoTitle: "AI 成本控管：工作流放大前先寫成本停止線",
     excerpt: "AI 成本失控通常不是因為單次呼叫太貴，而是流程越跑越多、越跑越長，卻沒有人設定警戒線、停止線和負責人。",
     seoDescription:
       "AI 流程放大前要先定義成本天花板、用量單位、預警門檻、停止條件、人工覆核成本與 owner，避免小實驗變成長期帳單。",

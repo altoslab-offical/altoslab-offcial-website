@@ -13,7 +13,8 @@ const DEFAULT_TARGET_DATE = new Intl.DateTimeFormat("en-CA", {
   month: "2-digit",
   day: "2-digit"
 }).format(new Date());
-const DEFAULT_MAX_PACKS = 24;
+const DEFAULT_MAX_PACKS = 40;
+const DEFAULT_SOURCE_SCAN_LIMIT = Math.max(24, Number.parseInt(process.env.ALTOS_BLOG_MARKET_SOURCE_SCAN_LIMIT || "72", 10) || 72);
 const SOURCE_PROFILES = {
   "mainstream-ai-us": new Set([
     "techcrunch-ai",
@@ -149,8 +150,10 @@ Options:
   --queue-dir <path>     Defaults to data/blog-backfill/<date>/queue
   --out <path>           Defaults to data/blog-backfill/<date>/market-source-packs.generated.json
   --max-packs <n>        Defaults to ${DEFAULT_MAX_PACKS}. This is a per-run work budget, not a daily publication cap.
+  --source-limit <n>     Defaults to ${DEFAULT_SOURCE_SCAN_LIMIT}. Scans a broad source pool before quality gates.
   --source-profile <id>  Use a bounded source pool. Current: mainstream-ai-us, longform-ai-news.
   --news-depth <mode>    standard or longform. Longform rejects thin/funding-quick items. Defaults to ALTOS_BLOG_MARKET_NEWS_DEPTH or standard.
+  --auto-sequences       QA/manual scouting only: use 1..max-packs when queue-dir has no sequence files.
   --write                Write the source-pack file. Without it, prints dry-run output.
   --overwrite            Replace existing source-pack entries for selected sequences.
 `);
@@ -803,6 +806,7 @@ async function main() {
   }
   const date = arg("date", DEFAULT_TARGET_DATE);
   const maxPacks = Number.parseInt(arg("max-packs", String(DEFAULT_MAX_PACKS)), 10) || DEFAULT_MAX_PACKS;
+  const sourceLimit = Math.max(1, Number.parseInt(arg("source-limit", String(DEFAULT_SOURCE_SCAN_LIMIT)), 10) || DEFAULT_SOURCE_SCAN_LIMIT);
   const baseUrl = arg("base-url", DEFAULT_BASE_URL);
   const sourceProfile = arg("source-profile", "");
   const newsDepth = newsDepthMode();
@@ -818,7 +822,12 @@ async function main() {
     throw new Error(`source profile ${sourceProfile} is missing registry ids: ${missing.join(", ")}`);
   }
   const live = await liveDuplicateState(baseUrl);
-  const sequences = await queueMarketSequences(queueDir, maxPacks);
+  const queuedSequences = await queueMarketSequences(queueDir, maxPacks);
+  const sequences = queuedSequences.length
+    ? queuedSequences
+    : hasFlag("auto-sequences")
+      ? Array.from({ length: maxPacks }, (_, index) => index + 1)
+      : [];
   if (!sequences.length) throw new Error(`no market queue sequences found in ${queueDir}`);
   const existing = await readJson(outPath).catch(() => []);
   const excludedSourceUrls = csvArgSet("exclude-source-urls");
@@ -833,7 +842,7 @@ async function main() {
   );
 
   const feedResults = await Promise.all(
-    registry.slice(0, sourceProfile ? registry.length : 18).map(async (source) => {
+    registry.slice(0, sourceProfile ? registry.length : sourceLimit).map(async (source) => {
       const fetched = await fetchText(source.feedUrl, FEED_TIMEOUT_MS, { preferReader: source.id === "the-rundown-ai" });
       return fetched.ok ? parseFeed(fetched.text, source) : [];
     })
@@ -867,12 +876,12 @@ async function main() {
     for (const enriched of enrichedBatch) {
       if (packs.length >= sequences.length) break;
       const sourceCount = sourceCounts.get(enriched.sourceId) || 0;
-      if (sourceProfile && sourceCount >= PER_SOURCE_SCAN_CAP) {
+      if (sourceCount >= PER_SOURCE_SCAN_CAP) {
         skipped.push({ title: enriched.title, url: enriched.url, reason: "source diversity cap" });
         continue;
       }
       const topicKey = coarseTopicKey(enriched);
-      if (sourceProfile && topicKeys.has(topicKey)) {
+      if (topicKeys.has(topicKey)) {
         skipped.push({ title: enriched.title, url: enriched.url, reason: "same event already selected in batch" });
         continue;
       }
@@ -934,6 +943,7 @@ async function main() {
         ok: true,
         dryRun: !hasFlag("write"),
         registryFeeds: registry.length,
+        sourceScanLimit: sourceProfile ? registry.length : sourceLimit,
         queueSequences: sequences,
         newsDepth,
         perSourceScanCap: PER_SOURCE_SCAN_CAP,

@@ -992,6 +992,162 @@ export const BLOG_SOURCE_REGISTRY: BlogSourceRegistryEntry[] = [
     notes: "Japan AI safety, evaluation and governance source. Use as APAC policy context when English/Japanese source facts are accessible."
   },
   {
+    id: "intercom-blog",
+    name: "Intercom Blog",
+    url: "https://www.intercom.com/blog/",
+    feedUrl: "https://www.intercom.com/blog/feed",
+    tier: "trusted-media",
+    market: "global",
+    language: "en",
+    category: "Industry Workflow",
+    authority: 78,
+    freshness: 86,
+    notes: "Customer support, AI agent, SaaS workflow and product-led operations signal. Use for AI customer-service, automation and product workflow briefs with source-faithful copy."
+  },
+  {
+    id: "zapier-blog",
+    name: "Zapier Blog",
+    url: "https://zapier.com/blog/",
+    feedUrl: "https://zapier.com/blog/feeds/latest/",
+    tier: "trusted-media",
+    market: "global",
+    language: "en",
+    category: "Agents & Automation",
+    authority: 76,
+    freshness: 88,
+    notes: "Automation, AI workflow, app integration and productivity-tool signal. Strong fit for traffic-oriented AI operations and automation market briefs."
+  },
+  {
+    id: "lennys-newsletter",
+    name: "Lenny's Newsletter",
+    url: "https://www.lennysnewsletter.com/",
+    feedUrl: "https://www.lennysnewsletter.com/feed",
+    tier: "trusted-media",
+    market: "us",
+    language: "en",
+    category: "Industry Workflow",
+    authority: 82,
+    freshness: 80,
+    notes: "High-signal product, growth, PM and AI product strategy source. Use only when the item is public, source-readable and relevant to AI/product workflows."
+  },
+  {
+    id: "nngroup-articles",
+    name: "Nielsen Norman Group Articles",
+    url: "https://www.nngroup.com/articles/",
+    feedUrl: "https://www.nngroup.com/feed/rss/",
+    tier: "trusted-media",
+    market: "global",
+    language: "en",
+    category: "Industry Workflow",
+    authority: 84,
+    freshness: 74,
+    notes: "UX, AI UX, research and product usability source. Use for AI product-quality, interface and human-centered workflow stories."
+  },
+  {
+    id: "ux-collective",
+    name: "UX Collective",
+    url: "https://uxdesign.cc/",
+    feedUrl: "https://uxdesign.cc/feed",
+    tier: "trusted-media",
+    market: "global",
+    language: "en",
+    category: "Industry Workflow",
+    authority: 72,
+    freshness: 82,
+    notes: "Design, product and AI-interface commentary. Use as traffic-sensitive design/product signal, and verify claims with primary product or official sources."
+  },
+  {
+    id: "smashing-magazine",
+    name: "Smashing Magazine",
+    url: "https://www.smashingmagazine.com/",
+    feedUrl: "https://www.smashingmagazine.com/feed/",
+    tier: "trusted-media",
+    market: "global",
+    language: "en",
+    category: "Build Notes",
+    authority: 76,
+    freshness: 78,
+    notes: "Frontend, UX, design systems and web implementation source. Use for AI-assisted design/dev workflow, UX and performance stories."
+  },
+  {
+    id: "product-hunt-feed",
+    name: "Product Hunt",
+    url: "https://www.producthunt.com/",
+    feedUrl: "https://www.producthunt.com/feed",
+    tier: "community-signal",
+    market: "global",
+    language: "en",
+    category: "AI Products",
+    authority: 66,
+    freshness: 96,
+    notes: "High-velocity product launch discovery feed. Discovery only: publish from the original product/source page or trusted reporting when the tool is relevant to AI workflows."
+  },
+  {
+    id: "buffer-resources",
+    name: "Buffer Resources",
+    url: "https://buffer.com/resources/",
+    feedUrl: "https://buffer.com/resources/feed/",
+    tier: "trusted-media",
+    market: "global",
+    language: "en",
+    category: "Industry Workflow",
+    authority: 70,
+    freshness: 84,
+    notes: "Social, creator, AI content operations and growth workflow signal. Use for AI/social operations and platform-growth stories with concrete source facts."
+  },
+  {
+    id: "svpg-blog",
+    name: "SVPG Blog",
+    url: "https://www.svpg.com/",
+    feedUrl: "https://www.svpg.com/feed/",
+    tier: "trusted-media",
+    market: "global",
+    language: "en",
+    category: "Industry Workflow",
+    authority: 82,
+    freshness: 72,
+    notes: "Product management, product operating model and team decision source. Use for AI product-management columns and market briefs when a current item connects to AI/product operations."
+  },
+  {
+    id: "every-chain-of-thought",
+    name: "Every - Chain of Thought",
+    url: "https://every.to/chain-of-thought",
+    feedUrl: "https://every.to/chain-of-thought/feed.xml",
+    tier: "trusted-media",
+    market: "us",
+    language: "en",
+    category: "AI Products",
+    authority: 76,
+    freshness: 84,
+    notes: "AI tools, product strategy, operator workflows and market narrative source. Use for source-faithful briefs only when the article exposes enough public facts."
+  },
+  {
+    id: "ben-evans",
+    name: "Benedict Evans",
+    url: "https://www.ben-evans.com/",
+    feedUrl: "https://www.ben-evans.com/benedictevans?format=rss",
+    tier: "trusted-media",
+    market: "global",
+    language: "en",
+    category: "AI Products",
+    authority: 82,
+    freshness: 72,
+    notes: "Technology strategy and AI market narrative source. Use for high-level platform shifts and pair with primary links for factual claims."
+  },
+  {
+    id: "stratechery",
+    name: "Stratechery",
+    url: "https://stratechery.com/",
+    feedUrl: "https://stratechery.com/feed/",
+    tier: "trusted-media",
+    market: "us",
+    language: "en",
+    category: "AI Products",
+    authority: 84,
+    freshness: 70,
+    notes: "Technology strategy source. Many articles are paywalled; use only public excerpts/links and never over-expand beyond accessible source facts."
+  },
+  {
     id: "openverse-images",
     name: "Openverse",
     url: "https://openverse.org/",
@@ -1051,13 +1207,14 @@ export function registryFeedsFromEnv() {
     .split(",")
     .map((source) => source.trim())
     .filter(Boolean);
-  if (configured.length) return configured.slice(0, 18);
+  const defaultLimit = Math.max(24, Number.parseInt(process.env.BLOG_TREND_SOURCE_LIMIT || "72", 10) || 72);
+  if (configured.length) return configured.slice(0, defaultLimit);
 
   return BLOG_SOURCE_REGISTRY
     .filter((source) => source.feedUrl && source.tier !== "licensed-image")
     .sort((a, b) => b.freshness - a.freshness || b.authority - a.authority)
     .map((source) => source.feedUrl as string)
-    .slice(0, 18);
+    .slice(0, defaultLimit);
 }
 
 export function registryTrustedHostFragments() {

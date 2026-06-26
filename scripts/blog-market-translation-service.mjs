@@ -591,8 +591,8 @@ export async function localizeSourcePack(pack, { projectId = "", required = true
   }
 
   if (LOCAL_PROVIDER_ALIASES.has(provider) || HERMES_DETERMINISTIC_PROVIDER_ALIASES.has(provider)) {
-    if (!HERMES_DETERMINISTIC_PROVIDER_ALIASES.has(provider) && richSource && process.env.BLOG_MARKET_ALLOW_RICH_LOCAL_TRANSLATION_FALLBACK !== "1") {
-      throw new Error("rich source market news requires a real translation provider; local deterministic fallback would compress source detail");
+    if (richSource && process.env.BLOG_MARKET_ALLOW_RICH_LOCAL_TRANSLATION_FALLBACK !== "1") {
+      throw new Error("rich source market news requires a real translation provider; deterministic fallback would compress source detail and drift from the original article");
     }
     if (!localMarketFallbackAllowed(provider)) throw localMarketFallbackDisabledError(provider);
     return localizeSourcePackLocally(pack, texts, languages);

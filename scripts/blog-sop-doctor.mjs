@@ -51,28 +51,19 @@ const WEAK_MARKET_SOURCE_SUMMARY_PATTERNS = [
   /current AI coverage/i,
   /related reporting/i
 ];
-const LAUNCH_AGENT_TRIGGERS = [
+const COLUMN_LAUNCH_AGENT_TRIGGERS = [
   [8, 10],
   [9, 10],
   [9, 14],
-  [10, 15],
-  [11, 15],
-  [12, 15],
-  [13, 15],
   [13, 40],
-  [14, 15],
   [14, 40],
   [14, 44],
-  [15, 15],
-  [17, 15],
-  [18, 15],
-  [19, 15],
   [19, 20],
-  [20, 15],
   [20, 20],
-  [20, 24],
-  [21, 15]
+  [20, 24]
 ];
+const MARKET_LAUNCH_AGENT_TRIGGERS = Array.from({ length: 24 }, (_, hour) => [hour, 15]);
+const LAUNCH_AGENT_TRIGGERS = [...COLUMN_LAUNCH_AGENT_TRIGGERS, ...MARKET_LAUNCH_AGENT_TRIGGERS];
 const LAUNCH_AGENT_PLIST = path.join(process.env.HOME || "", "Library/LaunchAgents/com.altoslab.blog-local-worker.plist");
 const N8N_BRIDGE_PLIST = path.join(process.env.HOME || "", "Library/LaunchAgents/com.altoslab.n8n-bridge.plist");
 const N8N_BRIDGE_HEALTH_URL = "http://127.0.0.1:8797/health";

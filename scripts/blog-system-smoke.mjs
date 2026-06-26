@@ -313,8 +313,8 @@ assert(
 );
 assert(scheduledRunner.includes('ALTOS_BLOG_MARKET_NEWS_DEPTH || "standard"'), "market-fill defaults daily source depth to standard, not longform");
 assert(
-  scheduledRunner.includes("Array.from({ length: 12 }") && scheduledRunner.includes("hour: index + 10, minute: 15"),
-  "scheduled runner scans market fastlane hourly during the active website window"
+  scheduledRunner.includes("Array.from({ length: 24 }") && scheduledRunner.includes("hour: index, minute: 15"),
+  "scheduled runner scans market fastlane hourly across the full day"
 );
 assert(
   scheduledRunner.includes("skipped remote source reachability probe in bounded Worker validate path"),
@@ -374,9 +374,9 @@ assert(marketAutoRepair.includes("removeRepeatedPublisherLead"), "market auto-re
 assert(!marketSourceScanner.includes("current AI coverage page for related reporting"), "market source scanner does not publish generic source index pages as article sources");
 assert(sopDoctor.includes("BLOG_DISABLE_DEEPSEEK_CRON must be true"), "SOP doctor requires the legacy DeepSeek cron to stay disabled");
 assert(sopDoctor.includes("[8, 10]") && sopDoctor.includes("[9, 10]") && sopDoctor.includes("[9, 14]"), "SOP doctor enforces morning prep/release launch windows in its trigger checks");
-assert(sopDoctor.includes("[10, 15]") && sopDoctor.includes("[11, 15]") && sopDoctor.includes("[14, 15]"), "SOP doctor enforces hourly market-scan launch windows");
+assert(sopDoctor.includes("MARKET_LAUNCH_AGENT_TRIGGERS = Array.from({ length: 24 }") && sopDoctor.includes("[...COLUMN_LAUNCH_AGENT_TRIGGERS, ...MARKET_LAUNCH_AGENT_TRIGGERS]"), "SOP doctor enforces full-day hourly market-scan launch windows");
 assert(sopDoctor.includes("[13, 40]") && sopDoctor.includes("[14, 40]") && sopDoctor.includes("[14, 44]"), "SOP doctor enforces afternoon prep/release launch windows");
-assert(sopDoctor.includes("[19, 20]") && sopDoctor.includes("[20, 20]") && sopDoctor.includes("[21, 15]"), "SOP doctor enforces evening release and late market-scan launch windows");
+assert(sopDoctor.includes("[19, 20]") && sopDoctor.includes("[20, 20]") && sopDoctor.includes("[20, 24]"), "SOP doctor enforces evening release launch windows");
 assert(sopDoctor.includes("production cmsStorage.provider must be ${PRODUCTION_CMS_PROVIDER}") && sopDoctor.includes("DEFAULT_AWS_S3_BUCKET"), "SOP doctor verifies the active AWS S3 production CMS store");
 assert(cmsStorage.includes('provider: "cloudflare-d1"') || cmsStorage.includes("provider: \"cloudflare-d1\""), "CMS storage can use Cloudflare D1 as the primary durable store");
 assert(cmsStorage.includes('provider: "aws-s3"') || cmsStorage.includes("provider: \"aws-s3\""), "CMS storage can use AWS S3 as the migration durable store");

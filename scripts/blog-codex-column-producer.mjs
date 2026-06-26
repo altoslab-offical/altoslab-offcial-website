@@ -280,7 +280,7 @@ const PLAN_VARIANTS = {
       coverAlt: "AI agent interface contract table with permission boundary cards, approval stamps and handoff lanes",
       visualFamily: "product-control-room",
       title: {
-        "zh-Hant": "先別讓 Agent 動手，先寫清楚它能碰什麼",
+        "zh-Hant": "Agent 一碰資料就該立約：權限、接手、回滾先寫清楚",
         en: "Before Agents Act, Write The Interface Contract",
         ja: "Agent を動かす前に、触れる範囲を契約化する",
         ko: "Agent가 움직이기 전에 접근 범위를 계약으로 정한다",
@@ -310,7 +310,7 @@ const PLAN_VARIANTS = {
       coverAlt: "AI agent incident drill board with stop rules, recovery cards and operator checklist",
       visualFamily: "product-control-room",
       title: {
-        "zh-Hant": "Agent 擴大前，先演練一次出錯怎麼停",
+        "zh-Hant": "Agent 上線前先摔一次：沒有故障演練，就別談規模化",
         en: "Before Agents Scale, Rehearse How They Stop",
         ja: "Agent を広げる前に、止め方を一度演習する",
         ko: "Agent를 키우기 전에 멈추는 법을 먼저 리허설한다",
@@ -343,7 +343,7 @@ const PLAN_VARIANTS = {
       coverAlt: "AI search answer structure desk with source cards, reader questions and citation paths",
       visualFamily: "source-ledger-studio",
       title: {
-        "zh-Hant": "想被 AI 搜尋引用，先把答案形狀寫出來",
+        "zh-Hant": "想被 AI 搜尋引用，先把答案寫成可轉述的形狀",
         en: "To Be Cited By AI Search, Shape The Answer First",
         ja: "AI 検索に引用されるには、先に答えの形を整える",
         ko: "AI 검색에 인용되려면 먼저 답의 형태를 만들어야 한다",
@@ -373,7 +373,7 @@ const PLAN_VARIANTS = {
       coverAlt: "AI search content refresh calendar with source update cards and search console signal strips",
       visualFamily: "source-ledger-studio",
       title: {
-        "zh-Hant": "AI 搜尋時代，舊文章要靠讀回資料繼續長大",
+        "zh-Hant": "AI 搜尋正在淘汰薄內容：能被引用的答案才會留下",
         en: "In AI Search, Old Articles Need Data To Keep Growing",
         ja: "AI 検索時代、古い記事はデータで育て続ける",
         ko: "AI 검색 시대에는 오래된 글도 데이터로 계속 키워야 한다",
@@ -406,7 +406,7 @@ const PLAN_VARIANTS = {
       coverAlt: "AI vendor evaluation room with demo claim cards, acceptance test sheets and cost owner board",
       visualFamily: "procurement-war-room",
       title: {
-        "zh-Hant": "供應商 Demo 很順，不代表你的流程扛得住",
+        "zh-Hant": "供應商 Demo 越順，越要拿髒資料壓測它",
         en: "A Smooth Vendor Demo Does Not Prove Your Operation Can Carry It",
         ja: "滑らかなベンダー demo は、自社運用に耐える証明ではない",
         ko: "매끄러운 벤더 demo가 우리 운영을 버틴다는 증거는 아니다",
@@ -436,7 +436,7 @@ const PLAN_VARIANTS = {
       coverAlt: "AI workflow rollout budget board with cost ceiling markers, owner cards and stop switches",
       visualFamily: "procurement-war-room",
       title: {
-        "zh-Hant": "AI 流程要放大前，先把成本天花板寫進規格",
+        "zh-Hant": "AI 成本失控前夜：吞預算的不是模型，是沒人踩煞車的流程",
         en: "Before AI Workflows Scale, Put The Cost Ceiling In The Spec",
         ja: "AI 業務を広げる前に、コスト上限を仕様へ入れる",
         ko: "AI 업무를 확대하기 전에 비용 상한을 규격에 넣어야 한다",
@@ -578,6 +578,139 @@ const LANG = {
   }
 };
 
+const PLAN_HEADINGS = {
+  "agent-interface-contract-before-autonomy": {
+    "zh-Hant": [
+      "先把可讀資料和可改欄位寫成邊界，不要交給默契",
+      "權限問題不是資安文件，而是每一次動作的責任分工",
+      "介面合約要留下證據：誰批准、誰覆核、誰接回人工",
+      "本週先挑一條流程，把 Agent 的紅線畫出來"
+    ],
+    en: [
+      "Define readable data and writable fields before the agent touches work",
+      "Permission is not a policy PDF; it is ownership for every action",
+      "The interface contract needs evidence: approver, reviewer, human fallback",
+      "This week, choose one workflow and draw the agent's red lines"
+    ]
+  },
+  "agent-incident-drill-before-scale": {
+    "zh-Hant": [
+      "先製造一次小失敗，才知道真正的煞車在哪裡",
+      "Agent 出錯時，第一個問題不是模型，而是誰看見",
+      "回復流程要能演練：停止、接手、查紀錄、還原資料",
+      "本週先做一場 30 分鐘事故桌演"
+    ],
+    en: [
+      "Create one small failure before scale so the team can find the brake",
+      "When an agent fails, the first question is not model quality but visibility",
+      "Recovery must be rehearsed: stop, hand off, inspect records, restore data",
+      "This week, run a 30-minute incident tabletop"
+    ]
+  },
+  "ai-search-answer-shape-before-keywords": {
+    "zh-Hant": [
+      "AI 摘要不缺關鍵字，缺能直接引用的答案段落",
+      "每個小標都要像一個可被搜尋引用的判斷",
+      "來源、例子與限制條件，要放在同一個段落裡",
+      "本週先重寫三篇舊文的答案形狀"
+    ],
+    en: [
+      "AI summaries do not need more keywords; they need citable answer blocks",
+      "Every H2 should carry a judgment an answer engine can quote",
+      "Source, example, and limitation belong in the same paragraph",
+      "This week, rewrite the answer shape of three older posts"
+    ]
+  },
+  "content-refresh-loop-for-ai-search": {
+    "zh-Hant": [
+      "舊文章不是失敗品，而是下一輪 GEO 實驗素材",
+      "Search Console 告訴你缺曝光，讀者問題告訴你缺答案",
+      "更新不是改日期，而是補來源、案例、限制與下一步",
+      "本週先建立一張內容回補清單"
+    ],
+    en: [
+      "Old articles are not failed assets; they are the next GEO experiment",
+      "Search Console shows missing exposure; reader questions show missing answers",
+      "A refresh is not a new date; it adds sources, cases, limits, and next steps",
+      "This week, build one content repair queue"
+    ]
+  },
+  "ai-vendor-demo-to-operating-proof": {
+    "zh-Hant": [
+      "供應商展示最好的一天，你要測最普通的一週",
+      "驗收題要用髒資料、權限邊界和成本上限來寫",
+      "真正能買的工具，失敗時也說得清楚誰接手",
+      "本週先把 demo claim 轉成五個 buyer-side test"
+    ],
+    en: [
+      "The vendor shows the best day; buyers need to test an ordinary week",
+      "Acceptance tests need messy data, permission boundaries, and cost ceilings",
+      "A tool worth buying explains who takes over when it fails",
+      "This week, turn demo claims into five buyer-side tests"
+    ]
+  },
+  "ai-cost-ceiling-before-workflow-rollout": {
+    "zh-Hant": [
+      "月費不是第一個洞，沒人設定停損才是",
+      "把每一次 AI 呼叫都接回負責人與預算線",
+      "從一條普通流程算起，不要從供應商 demo 算起",
+      "本週先補三欄：上限、審核者、退場路徑"
+    ],
+    en: [
+      "The subscription is not the first leak; missing stop rules are",
+      "Tie every AI call back to an owner and a budget line",
+      "Calculate from one ordinary workflow, not from the vendor demo",
+      "This week, add three fields: ceiling, reviewer, exit route"
+    ]
+  },
+  "ai-procurement-cost-ownership-map": {
+    "zh-Hant": [
+      "採購不是比模型，而是先把誰付錢、誰負責攤開",
+      "成本表要包含使用情境，不只寫每月訂閱費",
+      "退場路線是採購規格，不是上線後再補的備案",
+      "本週先用一個真實部門做採購紅隊"
+    ],
+    en: [
+      "Procurement is not a model contest; first map who pays and who owns risk",
+      "The cost sheet needs usage scenarios, not only monthly subscription fees",
+      "Exit routes are procurement specs, not after-launch backup plans",
+      "This week, red-team one real department's AI purchase"
+    ]
+  },
+  "agent-observability-before-autonomy": {
+    "zh-Hant": [
+      "Agent 不是黑盒同事：它每一步都要留下可讀紀錄",
+      "觀測不是工程師專用 log，而是主管能判斷的證據",
+      "看得見工具呼叫，才知道什麼時候該讓人接手",
+      "本週先補一張 Agent 行動證據表"
+    ],
+    en: [
+      "An agent is not a black-box colleague; each step needs a readable record",
+      "Observability is not engineer-only logs; it is evidence managers can judge",
+      "Tool-call visibility tells the team when a human should take over",
+      "This week, create one agent action evidence sheet"
+    ]
+  },
+  "ai-search-source-ledger-content-moat": {
+    "zh-Hant": [
+      "薄內容會被 AI 摘要跳過，來源帳本才會留下來",
+      "每個判斷都要能追到來源、日期與限制條件",
+      "內容護城河不是文章數，而是可查證的答案密度",
+      "本週先把三篇文章補成來源帳本"
+    ],
+    en: [
+      "Thin content gets skipped by AI summaries; source ledgers stay useful",
+      "Each judgment needs a source, date, and limitation readers can inspect",
+      "The content moat is not article count; it is verifiable answer density",
+      "This week, turn three posts into source ledgers"
+    ]
+  }
+};
+
+function headingsForPlan(plan, language) {
+  return PLAN_HEADINGS[plan.slugBase]?.[language] || PLAN_HEADINGS[plan.slugBase]?.en || LANG[language]?.headings || LANG.en.headings;
+}
+
 function sectionParagraphs(plan, language) {
   const l = LANG[language];
   const topicByLanguage = {
@@ -665,7 +798,7 @@ function sectionParagraphs(plan, language) {
 function buildBody(plan, language) {
   const l = LANG[language];
   const p = sectionParagraphs(plan, language);
-  const [h1, h2, h3, h4] = l.headings;
+  const [h1, h2, h3, h4] = headingsForPlan(plan, language);
   const sourceLeadByLanguage = {
     "zh-Hant": `團隊準備讓 AI 接手一段真實工作時，真正要檢查的是四件事：它讀了哪些資料、改了什麼輸出、誰看過、出事時怎麼先回到人工做法。OpenAI、Microsoft、NIST、OWASP 與 IBM 的公開資料放在一起看，答案都指向同一件事：重要動作要留下主管看得懂的紀錄。`,
     en: `When a team lets AI touch a real operating flow, the question is not whether it can run; the question is what it read, what it changed, who reviewed it, and how the team returns to a human process if it fails. OpenAI, Microsoft, NIST, OWASP, and IBM point to the same lesson: important actions need records a manager can inspect.`,

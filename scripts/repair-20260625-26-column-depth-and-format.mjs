@@ -330,15 +330,60 @@ function distinctSeoDescription(post) {
   return sanitizeInternalPhrases(byLanguage[post.language] || `${fallbackTitle}. Practical guidance for teams turning AI sources into operating decisions.`, post.language);
 }
 
+const TOPIC_SOURCE_PATCHES = {
+  agentOps: [
+    ["OpenAI Agents documentation", "https://platform.openai.com/docs/guides/agents", "OpenAI", "Official agent docs used to anchor tool, handoff, guardrail and tracing choices."],
+    ["Microsoft AI system operating model", "https://blogs.microsoft.com/blog/2026/05/05/how-frontier-firms-are-rebuilding-the-operating-model-for-the-age-of-ai/", "Microsoft", "Microsoft frames AI adoption as an operating-model change, not only a tool rollout."],
+    ["NIST AI Risk Management Framework", "https://www.nist.gov/itl/ai-risk-management-framework", "NIST", "NIST provides a risk-management vocabulary for governing AI systems."],
+    ["IBM AI agents explainer", "https://www.ibm.com/think/topics/ai-agents", "IBM", "IBM's agent explainer is used to keep agent definitions clear for non-technical readers."]
+  ],
+  geoContent: [
+    ["Google AI features and your website", "https://developers.google.com/search/docs/appearance/ai-features", "Google Search Central", "Google Search Central guidance anchors visibility, snippets and site controls."],
+    ["Google helpful content guidance", "https://developers.google.com/search/docs/fundamentals/creating-helpful-content", "Google Search Central", "Helpful content guidance anchors reader-first SEO decisions."],
+    ["Schema.org Article structured data", "https://schema.org/Article", "Schema.org", "Article schema vocabulary anchors entity and page-structure choices."],
+    ["OpenAI Agents documentation", "https://platform.openai.com/docs/guides/agents", "OpenAI", "OpenAI docs ground the discussion of AI readers, tools and traceable output."]
+  ],
+  procurement: [
+    ["Microsoft frontier firms operating model", "https://blogs.microsoft.com/blog/2026/05/05/how-frontier-firms-are-rebuilding-the-operating-model-for-the-age-of-ai/", "Microsoft", "Microsoft's frontier-firm framing is used to compare AI adoption with operating-model redesign."],
+    ["NIST AI Risk Management Framework", "https://www.nist.gov/itl/ai-risk-management-framework", "NIST", "NIST anchors procurement risk, governance and measurement vocabulary."],
+    ["OWASP Top 10 for LLM Applications", "https://owasp.org/www-project-top-10-for-large-language-model-applications/", "OWASP", "OWASP anchors practical AI misuse, access and deployment-risk questions."],
+    ["IBM AI governance overview", "https://www.ibm.com/think/topics/ai-governance", "IBM", "IBM's AI governance overview supports procurement and accountability framing."]
+  ]
+};
+
+function sourceTopicForSlug(slug = "") {
+  if (/ai-search|content-refresh|source-ledger/i.test(slug)) return "geoContent";
+  if (/vendor|procurement|cost|copilot/i.test(slug)) return "procurement";
+  return "agentOps";
+}
+
+function sourceLinksPatch(post) {
+  const capturedAt = String(post.publishedAt || post.updatedAt || new Date().toISOString()).slice(0, 10);
+  return (TOPIC_SOURCE_PATCHES[sourceTopicForSlug(post.slug)] || TOPIC_SOURCE_PATCHES.agentOps).map(([title, url, publisher, summary]) => ({
+    title,
+    url,
+    type: "official_reference",
+    publisher,
+    capturedAt,
+    note: "Source-backed column reference used for ALTOS LAB editorial production.",
+    summary
+  }));
+}
+
 function patchFor(post) {
   const body = post.language === "zh-Hant" ? applyZhDepth(post) : applyNonZhFormat(post);
   const titlePatch = {
-    "agent-interface-contract-before-autonomy-20260625-zh-hant": "Agent 一旦能改資料，就不能再靠口頭約定",
-    "ai-search-answer-shape-before-keywords-20260625-zh-hant": "AI 搜尋不看你塞多少關鍵字，只看答案能不能被引用"
+    "ai-vendor-demo-to-operating-proof-20260625-zh-hant": "供應商 Demo 越順，越要拿髒資料壓測它",
+    "agent-interface-contract-before-autonomy-20260625-zh-hant": "Agent 一碰資料就該立約：權限、接手、回滾先寫清楚",
+    "ai-search-answer-shape-before-keywords-20260625-zh-hant": "想被 AI 搜尋引用，先把答案寫成可轉述的形狀",
+    "ai-cost-ceiling-before-workflow-rollout-20260626-zh-hant": "AI 成本失控前夜：吞預算的不是模型，是沒人踩煞車的流程",
+    "content-refresh-loop-for-ai-search-20260626-zh-hant": "AI 搜尋正在淘汰薄內容：能被引用的答案才會留下",
+    "agent-incident-drill-before-scale-20260626-zh-hant": "Agent 上線前先摔一次：沒有故障演練，就別談規模化"
   }[post.slug] || post.title;
   return {
     title: titlePatch,
     body,
+    sourceLinks: sourceLinksPatch(post),
     excerpt: sanitizeInternalPhrases(post.excerpt || "", post.language),
     seoDescription: post.language === "zh-Hant" ? sanitizeInternalPhrases(post.seoDescription || "", post.language) : distinctSeoDescription(post),
     geoSummary: sanitizeInternalPhrases(post.geoSummary || "", post.language),

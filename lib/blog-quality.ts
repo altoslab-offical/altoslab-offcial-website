@@ -201,6 +201,17 @@ const repeatedColumnFaqPatterns = [
   /先從一條高頻流程、一個負責人、一個回滾方法開始/i
 ];
 
+const weakColumnTitleHookPatterns = [
+  /^AI\s*工具最怕不是貴/i,
+  /^AI\s*搜尋不缺文章/i,
+  /^別等\s*Agent\s*出事才找煞車/i,
+  /^供應商\s*Demo\s*很順，不代表/i,
+  /^Agent\s*一旦能改資料/i,
+  /^AI\s*成本黑洞不是月費/i,
+  /^舊文章別放到過期/i,
+  /^Agent\s*失控不是意外/i
+];
+
 const publicOperatorLeakPattern = /\b(Hermes|OpenClaw)\b/i;
 
 const genericRepairCaptionPattern =
@@ -532,7 +543,9 @@ const genericTitlePatterns = [
   /AI 平台趨勢.*搜尋能見度.*高階主管/i,
   /AI Platform Trends.*Search Visibility.*Executive Implementation Decisions/i,
   /What Business Leaders Need to Know Now/i,
-  /不可忽視|必須關注|關鍵轉變|latest AI trends|business leaders need to know/i
+  /不可忽視|必須關注|關鍵轉變|latest AI trends|business leaders need to know/i,
+  /^AI (工具|搜尋|內容|流程|自動化).{0,8}(最怕|不缺|不是|要)/i,
+  /^Agent (要|一旦|擴大|上線|出事)/i
 ];
 
 const publicAiAutomationDisclosurePattern =
@@ -847,6 +860,62 @@ function knowledgeDenseColumnMinimum(language: BlogLanguage) {
   if (language === "th") return 2200;
   if (language === "ja" || language === "ko") return 1650;
   return 2000;
+}
+
+function columnTitleHookIssues(post: BlogPost) {
+  if ((post.contentType || "column") !== "column") return [];
+  const issues: string[] = [];
+  const title = post.title?.trim() || "";
+  const text = `${post.title}\n${post.excerpt}\n${post.seoDescription}\n${post.geoSummary}\n${post.body}`;
+  const hasConcreteObject =
+    /(供應商|Demo|採購|成本|停止線|退場|權限|審核|來源|引用|Search Console|GA4|工單|客服|發票|事故|回滾|OpenAI|Microsoft|NIST|IBM|Google|Anthropic|Claude|ChatGPT|Gemini|vendor|procurement|cost|source|citation|permission|incident|rollback|invoice|support ticket)/i.test(
+      title
+    );
+  const hasReaderTension =
+    /(最怕|不代表|不是|缺的|不能|誰|哪個|先別|別等|一旦|扛不住|黑洞|煞車|代價|風險|盲點|before|why|without|risk|cost|fail|trap|who|what breaks)/i.test(
+      title
+    );
+  const tooBroadAiTitle =
+    /^(AI|Agent|GEO|SEO|自動化|模型|內容|工具)(搜尋|工具|內容|要|不|最怕|時代|上線|流程|一旦|擴大)/i.test(title.replace(/\s+/g, "")) &&
+    !/(供應商|採購|來源|引用|成本|停止|權限|事故|回滾|SearchConsole|GA4|OpenAI|Microsoft|NIST|IBM|Anthropic|Claude|ChatGPT)/i.test(title);
+  const zhLength = Array.from(title).length;
+
+  if (post.language === "zh-Hant") {
+    if (zhLength < 18 || zhLength > 42) issues.push("column title should be 18-42 zh-Hant characters with one clear hook");
+    if (weakColumnTitleHookPatterns.some((pattern) => pattern.test(title))) {
+      issues.push("column title uses a recently rejected homepage hook; rewrite with sharper reader tension, concrete stakes, and SEO terms");
+    }
+    if (tooBroadAiTitle || !hasConcreteObject || !hasReaderTension) {
+      issues.push("column title is a flat AI declaration; add a concrete object, reader tension, and decision consequence");
+    }
+  } else if (title.length < 34 || title.length > 92 || !hasConcreteObject || !hasReaderTension) {
+    issues.push("column title needs a concrete object, tension and decision consequence in the target language");
+  }
+
+  const evidenceHits = (text.match(/(OpenAI|Microsoft|NIST|IBM|Google|Anthropic|Claude|ChatGPT|Gemini|NVIDIA|Reuters|TechCrunch|The Verge|WIRED|\d{4}|\d+%|\d+\s*(?:萬|億|million|billion))/gi) || []).length;
+  if (evidenceHits < 5) {
+    issues.push("column needs visible evidence density in title/subtitle/body: named sources, dates, numbers or concrete cases");
+  }
+
+  return issues;
+}
+
+function columnSectionHookIssues(post: BlogPost) {
+  if ((post.contentType || "column") !== "column") return [];
+  const h2Titles = markdownH2s(post.body);
+  const issues: string[] = [];
+  const weak = h2Titles.filter((heading) => {
+    const normalized = heading.trim();
+    if (!normalized) return true;
+    if (/^(背景|Overview|Introduction|結論|Summary|本文重點|下一步|FAQ|ALTOS LAB|常見問題|What this means|Next steps|Key takeaways|Our view)$/i.test(normalized)) return true;
+    return !/(為什麼|怎麼|誰|哪個|先|不是|才|風險|證據|來源|成本|權限|失敗|回滾|引用|判斷|why|how|who|before|risk|evidence|source|cost|permission|failure|decision|引用|証拠|リスク|판단|증거|risiko|bukti|quyết|bằng chứng)/i.test(
+      normalized
+    );
+  });
+  if (weak.length) {
+    issues.push(`column H2s need article-specific promises, not reusable labels: ${weak.slice(0, 4).join(", ")}`);
+  }
+  return issues;
 }
 
 function markdownHeadingCount(body: string) {
@@ -1188,6 +1257,8 @@ export function reviewContentTypeFit(post: BlogPost): ReviewResult {
       /ALTOS LAB 判斷[:：]\s*ALTOS LAB|先守住這三個控制點|Tatlong Control Point|Three Control Points|導入實踐|決策法則與行動清單|核心挑戰|停止按鈕|不可控的黑箱|無法掌控的夢魘/i;
     const recycledHeadings = recycledColumnHeadings(post.body);
     const templateSubtitles = templateColumnSubtitles(post.body);
+    issues.push(...columnTitleHookIssues(post));
+    issues.push(...columnSectionHookIssues(post));
     if (!creativeSignals.some((signal) => body.includes(signal))) {
       issues.push("column needs a clear angle, tradeoff, operator tension or original decision lens");
     }

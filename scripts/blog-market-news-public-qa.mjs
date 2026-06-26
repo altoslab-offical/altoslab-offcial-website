@@ -338,7 +338,7 @@ function qaPost(post, mustTerms = []) {
     ...sourceNumbers
   ]
     .filter((term) => String(term).length >= 2)
-    .filter((term) => !/^(TechCrunch|OpenAI|Google|AI|LLM)$/i.test(term))
+    .filter((term) => !/^(TechCrunch|OpenAI|Google|AI|LLM|We|It|They|This|That|The|A|An)$/i.test(term))
     .slice(0, 6);
   const evidenceCovered = (term) => {
     const raw = String(term || "").trim();

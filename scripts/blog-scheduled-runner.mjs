@@ -18,7 +18,7 @@ const COLUMN_SLOT_SETTING = (process.env.ALTOS_BLOG_COLUMN_SLOTS || "morning,aft
 const COLUMN_SLOTS = new Set(COLUMN_SLOT_SETTING.length ? COLUMN_SLOT_SETTING : ["morning"]);
 const COLUMN_DAILY_TARGET = Number(process.env.ALTOS_BLOG_COLUMN_DAILY_LIMIT || "3");
 const MARKET_NEWS_DAILY_MINIMUM = Number(process.env.ALTOS_BLOG_MARKET_NEWS_DAILY_MINIMUM || "8");
-const MARKET_FILL_MAX_RUNS = Number(process.env.ALTOS_BLOG_MARKET_FILL_MAX_RUNS || "16");
+const MARKET_FILL_MAX_RUNS = Number(process.env.ALTOS_BLOG_MARKET_FILL_MAX_RUNS || "48");
 const ALL_PREP_WINDOWS = {
   morning: { hour: 8, minute: 10 },
   afternoon: { hour: 13, minute: 40 },
@@ -31,7 +31,7 @@ const ALL_RELEASE_WINDOWS = {
 };
 const PREP_WINDOWS = Object.fromEntries(Object.entries(ALL_PREP_WINDOWS).filter(([slot]) => COLUMN_SLOTS.has(slot)));
 const RELEASE_WINDOWS = Object.fromEntries(Object.entries(ALL_RELEASE_WINDOWS).filter(([slot]) => COLUMN_SLOTS.has(slot)));
-const MARKET_SCAN_WINDOWS = Array.from({ length: 12 }, (_, index) => ({ hour: index + 10, minute: 15 }));
+const MARKET_SCAN_WINDOWS = Array.from({ length: 24 }, (_, index) => ({ hour: index, minute: 15 }));
 const RELEASE_GRACE_MINUTES = 5;
 const PREP_GRACE_MINUTES = Number(process.env.ALTOS_BLOG_PREP_GRACE_MINUTES || "2");
 const MARKET_SCAN_GRACE_MINUTES = Number(process.env.ALTOS_BLOG_MARKET_SCAN_GRACE_MINUTES || "2");
@@ -1190,13 +1190,15 @@ ${await fs.readFile(orchestratorPromptPath, "utf8").catch(() => "")}
     sourcePacksPath,
     "--max-packs",
     String(candidatePackLimit),
-    "--source-profile",
-    arg("source-profile", process.env.ALTOS_BLOG_MARKET_SOURCE_PROFILE || "longform-ai-news"),
+    "--source-limit",
+    arg("source-limit", process.env.ALTOS_BLOG_MARKET_SOURCE_SCAN_LIMIT || "72"),
     "--news-depth",
     arg("news-depth", process.env.ALTOS_BLOG_MARKET_NEWS_DEPTH || "standard"),
     "--write",
     "--overwrite"
   ];
+  const sourceProfile = arg("source-profile", process.env.ALTOS_BLOG_MARKET_SOURCE_PROFILE || "");
+  if (sourceProfile) scannerArgs.push("--source-profile", sourceProfile);
   const excludeList = [...new Set((excludeSourceUrls || []).map((url) => String(url || "").trim()).filter(Boolean))];
   if (excludeList.length) scannerArgs.push("--exclude-source-urls", excludeList.join(","));
   const scanner = await runCommand(process.execPath, scannerArgs, { cwd: process.cwd(), timeoutMs: Number(process.env.ALTOS_BLOG_MARKET_SCAN_TIMEOUT_MS || "90000") });
@@ -1546,7 +1548,7 @@ async function runMarketFill({ date }) {
   let latestStatus = initialStatus;
   let consecutiveNoPublish = 0;
   const attemptedSourceUrls = new Set();
-  const maxRuns = Math.max(1, Math.min(48, Number.parseInt(arg("max-runs", String(MARKET_FILL_MAX_RUNS)), 10) || MARKET_FILL_MAX_RUNS));
+  const maxRuns = Math.max(1, Math.min(96, Number.parseInt(arg("max-runs", String(MARKET_FILL_MAX_RUNS)), 10) || MARKET_FILL_MAX_RUNS));
 
   const minimumAlreadyMet = (initialStatus.completeCount || 0) >= MARKET_NEWS_DAILY_MINIMUM;
 
