@@ -207,6 +207,20 @@ assert(
 );
 assert(releaseRoute.includes("reviewBlogPairForAutoPublish"), "release-set route reruns full article QA during publish");
 assert(!releaseRoute.includes("reviewBlogImagesForRelease"), "release-set route does not rerun remote image QA during publish");
+assert(releaseRoute.includes("BLOG_ALLOW_PUBLISHED_REPLACE"), "release-set route requires an explicit env flag before replacing published articles");
+assert(
+  releaseRoute.includes("payload.replaceExistingPublished === true"),
+  "release-set route also requires the payload replace flag before replacing published articles"
+);
+assert(
+  releaseRoute.includes("!post.qualityChecks.hasHumanReview"),
+  "release-set route never replaces human-reviewed published articles"
+);
+assert(
+  releaseRoute.includes("duplicateReleaseIdentityIssues") &&
+    releaseRoute.includes("Incoming article set would collide with existing blog articles"),
+  "release-set route rejects slug collisions with existing article groups"
+);
 assert(mediaRoute.includes("verifyBlogIngestRequest"), "media upload route is protected by the same signed request contract");
 assert(mediaRoute.includes("@vercel/blob"), "media upload route stores production images in Vercel Blob");
 assert(mediaRoute.includes("storeGcsImage"), "media upload route can store production images in GCS for Cloud Run");
@@ -276,7 +290,12 @@ assert(scheduledRunner.includes("MARKET_SCAN_WINDOWS"), "scheduled runner has a 
 assert(scheduledRunner.includes("--market-scan"), "scheduled runner can create market-news fast-lane scan prompts");
 assert(scheduledRunner.includes("--market-fill") && scheduledRunner.includes("runMarketFill"), "scheduled runner can fill market-news through repeated gated scans");
 assert(scheduledRunner.includes("MARKET_NEWS_DAILY_MINIMUM") && scheduledRunner.includes("upperCap: null"), "scheduled runner treats the market-news daily target as a floor with no upper cap");
-assert(scheduledRunner.includes("initialStatus.completeCount") && scheduledRunner.includes("Minimum floor already met"), "market-fill short-circuits when the daily floor is already met");
+assert(
+  scheduledRunner.includes("market-fill-floor-met-continuing") &&
+    scheduledRunner.includes("Continue hourly market scans") &&
+    !scheduledRunner.includes("Minimum floor already met"),
+  "market-fill continues source scans beyond the daily floor instead of treating the floor as a cap"
+);
 assert(scheduledRunner.includes('ALTOS_BLOG_MARKET_NEWS_DEPTH || "standard"'), "market-fill defaults daily source depth to standard, not longform");
 assert(
   scheduledRunner.includes("Array.from({ length: 12 }") && scheduledRunner.includes("hour: index + 10, minute: 15"),
@@ -630,6 +649,7 @@ assert(codexColumnProducer.includes("path.join(RUNTIME_ROOT, \"data/blog-prepare
 assert(n8nLocalBridge.includes("--write-hermes"), "n8n daily closeout writes Hermes learning evidence by default");
 assert(blogTrafficSelfEvolution.includes("hermes_official_blog_traffic_self_evolution_readback_v1") && blogTrafficSelfEvolution.includes("canOptimizeTopicSelectionFromTraffic"), "traffic self-evolution runner writes GA/GSC readback into Hermes");
 assert(n8nLocalBridge.includes("scripts/blog-traffic-self-evolution.mjs"), "n8n SEO/GEO job writes traffic self-evolution evidence instead of terminal-only text");
+assert(n8nLocalBridge.includes('"market-fill"') && n8nLocalBridge.includes("--market-fill"), "n8n bridge exposes the market-fill repair loop instead of only one-off market scans");
 assert(imageQuality.includes("MIN_SOURCE_IMAGE_WIDTH = 768") && imageQuality.includes("MIN_SOURCE_IMAGE_HEIGHT = 432"), "market-news credited source images use source-preserving dimensions instead of generated-cover dimensions");
 const seoGeoReportEmails = [...seoGeoReport.matchAll(/[A-Za-z0-9._%+-]+@gmail\.com/g)].map((match) => match[0]);
 assert(

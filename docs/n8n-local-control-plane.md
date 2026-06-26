@@ -12,7 +12,7 @@ n8n owns:
 - Scheduled prep/release wakeups.
 - AWS production health monitoring.
 - SEO/GEO report generation.
-- Codex-operated automatic QA/release gate execution through the local bridge.
+- Hermes-operated QA/release gate execution through the local bridge, with Codex limited to supervisor verification and exact blocker feedback.
 - Column candidate status checks, validate-only advancement, and ready-candidate release polling.
 - Daily closeout enforcement: by 23:35 Asia/Taipei, the public blog must show three complete 9-language daily column groups, spaced release windows, and at least eight complete 9-language market-news groups for the Taipei date. Market news has no daily upper cap; if qualified source-backed items remain, Hermes/OpenClaw should keep publishing beyond eight. Any miss is an n8n failed execution with the exact blocker.
 - Future status notifications.
@@ -45,11 +45,11 @@ The default automation base URL is `https://altoslab-ai.cc`. Set `ALTOS_BLOG_AUT
 
 Production health must report `cmsStorage.provider = cloudflare-d1`. KV write quota exhaustion should not stop publishing because the CMS and public blog projection are stored in D1; KV cache refresh may warn until the daily quota resets.
 
-There is no human approval step in the normal publishing loop. The review gate is Codex-operated and automatic:
+There is no human approval step in the normal publishing loop. The review gate is Hermes-operated and automatic, with Codex limited to supervisor verification:
 
 - Deterministic gates run from repo scripts.
 - n8n owns repeated timing, status visibility, validate-only execution, and ready-release polling.
-- Codex/main-brain remains accountable for editorial/source/media judgment and browser evidence.
+- Hermes remains accountable for editorial/source/media judgment and browser evidence; Codex checks the evidence and writes exact blocker feedback when the lane fails.
 - If any required evidence is missing, the job stops with `ok=false` and the article is not published.
 - The bridge returns HTTP 500 whenever the underlying job returns `ok=false`, so n8n executions fail loudly instead of hiding the failure inside a JSON body.
 - External account blockers such as Chrome login, Gemini/ChatGPT browser evidence, or Gmail sender verification remain fail-closed because automation cannot safely fake those states.

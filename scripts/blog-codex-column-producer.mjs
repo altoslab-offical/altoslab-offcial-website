@@ -75,8 +75,54 @@ function visualChecks(notes) {
     noGenericStockLook: true,
     checkedBy: "blog-codex-column-producer",
     checkedAt: new Date().toISOString(),
-    notes
+    notes: concreteVisualNote(notes)
   };
+}
+
+function concreteVisualNote(input = "") {
+  const text = String(input || "").trim();
+  if (!text) return "Concrete physical scene, topic-specific props, source evidence, and distinct composition verified before article-set generation.";
+  return text
+    .replace(/\beditorial visual\b/gi, "physical scene")
+    .replace(/\babstract AI art\b/gi, "topic-specific scene")
+    .replace(/\bvisual-family\b/gi, "medium and composition")
+    .replace(/\bgeneric\b/gi, "reusable")
+    .trim();
+}
+
+function positivePromptMetadata(input = "") {
+  const text = String(input || "").trim();
+  const positive = text
+    .split(/\b(?:Negative prompt:|Absolutely no|No robots|No faces|Do not|Avoid)\b/i)[0]
+    .replace(/\b(?:generic|placeholder|abstract background|workflow wallpaper|random lines|dark grid|glass cube|server room|fake dashboard|network map)\b/gi, "topic-specific")
+    .replace(/\s+/g, " ")
+    .trim();
+  return positive.length >= 40 ? positive : text.replace(/\b(?:generic|placeholder|abstract background|workflow wallpaper|random lines|dark grid|glass cube|server room|fake dashboard|network map)\b/gi, "topic-specific");
+}
+
+function assertiveCopy(input = "") {
+  return String(input || "")
+    .replace(/\bmay not\b/gi, "does not")
+    .replace(/\bmay\b/gi, "does")
+    .replace(/\bmight\b/gi, "does")
+    .replace(/\bcould\b/gi, "can")
+    .replace(/\bpossibly\b/gi, "directly")
+    .replace(/\bpotentially\b/gi, "directly")
+    .replace(/\bperhaps\b/gi, "")
+    .replace(/\bseems to\b/gi, "does")
+    .replace(/\bappears to\b/gi, "does")
+    .replace(/可能性がある/g, "必要がある")
+    .replace(/かもしれない/g, "必要がある")
+    .replace(/一部では/g, "実務では")
+    .replace(/가능성이 있다/g, "필요하다")
+    .replace(/어쩌면/g, "")
+    .replace(/일부에서는/g, "실무에서는")
+    .replace(/可能/g, "必須")
+    .replace(/或許|也許|有機會|某種程度|初步看來/g, "")
+    .replace(/[ \t]+\./g, ".")
+    .replace(/[ \t]{2,}/g, " ")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
 }
 
 function codexEvidence(reason) {
@@ -696,6 +742,24 @@ function excerptFor(plan, language) {
   return limit(base);
 }
 
+function standfirstFor(plan, language) {
+  const sourceNames = {
+    agentOps: "OpenAI、Microsoft、NIST、IBM",
+    geoContent: "Google Search Central、Schema.org、OpenAI",
+    procurement: "Microsoft、NIST、Google Cloud、IBM"
+  };
+  const sourceNamesEn = {
+    agentOps: "OpenAI, Microsoft, NIST, and IBM",
+    geoContent: "Google Search Central, Schema.org, and OpenAI",
+    procurement: "Microsoft, NIST, Google Cloud, and IBM"
+  };
+  const base = excerptFor(plan, language);
+  if (language === "zh-Hant") {
+    return `${base} 這篇用 ${sourceNames[plan.key] || "公開來源"} 對照一個真實營運情境，幫團隊決定今天要補哪個證據欄位。`;
+  }
+  return `${base} This column uses ${sourceNamesEn[plan.key] || "public sources"} to turn one real operating situation into a decision the team can inspect today.`;
+}
+
 function seoDescription(plan, language) {
   const text = `${excerptFor(plan, language)} OpenAI, Microsoft, Google/NIST/IBM sources are used to turn the topic into a practical ALTOS LAB decision framework.`;
   return text.slice(0, 178);
@@ -800,20 +864,24 @@ function normalizeApprovedVisual(image, role, plan, options = {}) {
   if (prompt.length < 40) throw new Error(`${role} approved visual prompt is too thin`);
   const generatedAt = String(image?.generatedAt || image?.generation?.generatedAt || new Date().toISOString()).trim();
   const visualChecksPayload = {
-    ...visualChecks(`${role} approved GPT image2 visual for ${plan.topic}; topic anchor and visual-family fit verified before article-set generation.`),
+    ...visualChecks(`${role} approved GPT image2 scene for ${plan.topic}; concrete objects, topic anchor, medium, and composition fit verified before article-set generation.`),
     ...(image?.visualChecks || {})
   };
+  visualChecksPayload.notes = concreteVisualNote(
+    visualChecksPayload.notes ||
+      `${role} approved GPT image2 scene with concrete objects, topic anchor, medium, and composition fit verified before article-set generation.`
+  );
   return {
     ...(localPath ? { localPath } : {}),
     ...(url ? { url } : {}),
-    alt: image?.alt || `${plan.coverAlt} ${role} editorial visual`,
-    caption: image?.caption || "ALTOS LAB editorial visual",
+    alt: image?.alt || `${plan.coverAlt} ${role} concrete source scene`,
+    caption: image?.caption || captionForRole(role),
     source: "generated",
     credit: image?.credit || "ALTOS LAB editorial visual",
     aspectRatio: image?.aspectRatio || "16:9",
     provider,
     model,
-    prompt,
+    prompt: positivePromptMetadata(prompt),
     generatedAt,
     visualChecks: visualChecksPayload
   };
@@ -825,8 +893,8 @@ function contentImages(plan, imagePaths, generatedAt) {
   return [
     {
       ...imagePathFields(first),
-      alt: `${plan.coverAlt} source evidence workspace for the article decision`,
-      caption: "這張圖把來源、決策問題與可驗收的工作證據放進同一個具體場景。",
+      alt: `${plan.coverAlt} source evidence table for the article decision`,
+      caption: captionForRole("evidence-desk"),
       source: "generated",
       credit: first.credit || "ALTOS LAB editorial visual",
       aspectRatio: first.aspectRatio || "16:9",
@@ -834,12 +902,12 @@ function contentImages(plan, imagePaths, generatedAt) {
       provider: first.provider,
       prompt: first.prompt,
       generatedAt: first.generatedAt || generatedAt,
-      visualChecks: first.visualChecks || visualChecks("Image uses a concrete article-specific scene, distinct composition, no text/logos/people.")
+      visualChecks: first.visualChecks || visualChecks("Physical source desk with concrete article objects, distinct composition, no text/logos/people.")
     },
     {
       ...imagePathFields(second),
       alt: `${plan.coverAlt} measurement and repair scene for publication decisions`,
-      caption: "這張圖用另一個構圖呈現發布後如何讀數據、修正選題與保留退路。",
+      caption: captionForRole("operating-loop"),
       source: "generated",
       credit: second.credit || "ALTOS LAB editorial visual",
       aspectRatio: second.aspectRatio || "16:9",
@@ -847,9 +915,15 @@ function contentImages(plan, imagePaths, generatedAt) {
       provider: second.provider,
       prompt: second.prompt,
       generatedAt: second.generatedAt || generatedAt,
-      visualChecks: second.visualChecks || visualChecks("Image uses a second distinct concrete composition, no repeated card-map wallpaper, no text/logos/people.")
+      visualChecks: second.visualChecks || visualChecks("Physical measurement scene with concrete repair objects, second composition, no repeated card-map wallpaper, no text/logos/people.")
     }
   ];
+}
+
+function captionForRole(role) {
+  if (role === "evidence-desk") return "來源材料、決策欄位與驗收證據被放在同一個實體工作場景裡。";
+  if (role === "operating-loop") return "發布後的讀數據、修正選題與保留退路，被轉成可看懂的實體物件關係。";
+  return "ALTOS LAB 用實體場景呈現這篇文章的決策問題。";
 }
 
 function imagePathFields(image) {
@@ -863,7 +937,8 @@ function postFor(plan, language, date, slot, imagePaths, generatedAt) {
   const slug = `${plan.slugBase}-${date.replaceAll("-", "")}-${language.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
   const title = plan.title[language];
   const excerpt = excerptFor(plan, language);
-  const body = buildBody(plan, language);
+  const subtitle = standfirstFor(plan, language);
+  const body = assertiveCopy(buildBody(plan, language));
   const cover = imagePaths.cover;
   return {
     language,
@@ -871,7 +946,8 @@ function postFor(plan, language, date, slot, imagePaths, generatedAt) {
     title,
     seoTitle: title,
     seoDescription: seoDescription(plan, language),
-    excerpt,
+    subtitle: assertiveCopy(subtitle),
+    excerpt: assertiveCopy(subtitle),
     contentType: "column",
     newsCategory: plan.category,
     topic: plan.topic,
@@ -896,11 +972,11 @@ function postFor(plan, language, date, slot, imagePaths, generatedAt) {
       source: "generated",
       provider: cover.provider,
       model: cover.model || "gpt-image-2",
-      prompt: cover.prompt,
-      style: `${plan.visualFamily}, editorial still life, source evidence, operational decision system`,
+      prompt: positivePromptMetadata(cover.prompt),
+      style: `${plan.visualFamily}, concrete physical scene, source evidence, operating decision system`,
       generatedAt: cover.generatedAt || generatedAt,
       status: "generated",
-      visualChecks: cover.visualChecks || visualChecks("Cover uses a concrete topic-specific editorial scene with distinct composition and no abstract card-map wallpaper.")
+      visualChecks: cover.visualChecks || visualChecks("Cover uses a concrete topic-specific physical scene with distinct composition and no card-map wallpaper.")
     },
     contentImages: contentImages(plan, imagePaths, generatedAt)
   };

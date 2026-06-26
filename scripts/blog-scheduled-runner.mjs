@@ -1069,7 +1069,7 @@ async function createMarketScan({ date, runLabel = "" } = {}) {
   const mergedDir = path.join(runDir, "merged");
   const candidatePackLimit = Math.max(
     1,
-    Math.min(30, Number.parseInt(arg("candidate-packs", process.env.ALTOS_BLOG_MARKET_SCAN_CANDIDATE_PACKS || "12"), 10) || 12)
+    Math.min(72, Number.parseInt(arg("candidate-packs", process.env.ALTOS_BLOG_MARKET_SCAN_CANDIDATE_PACKS || "24"), 10) || 24)
   );
   const writeMarketIndex = async (payload) => {
     if (hasFlag("no-index")) return;
@@ -1284,7 +1284,22 @@ ${await fs.readFile(orchestratorPromptPath, "utf8").catch(() => "")}
       attemptArticleSetPath,
       "--write",
       "--overwrite"
-    ], { cwd: process.cwd(), timeoutMs: Number(process.env.ALTOS_BLOG_MARKET_SCAN_TIMEOUT_MS || "90000") });
+    ], {
+      cwd: process.cwd(),
+      env: {
+        ...process.env,
+        BLOG_MARKET_TRANSLATION_PROVIDER:
+          process.env.ALTOS_BLOG_MARKET_SOURCE_WORKER_PROVIDER ||
+          process.env.BLOG_MARKET_TRANSLATION_PROVIDER_OVERRIDE ||
+          "hermes-owner",
+        BLOG_MARKET_HERMES_ALLOW_DETERMINISTIC_SOURCE_TRANSLATION:
+          process.env.BLOG_MARKET_HERMES_ALLOW_DETERMINISTIC_SOURCE_TRANSLATION || "1"
+      },
+      timeoutMs: Math.min(
+        Number(process.env.ALTOS_BLOG_MARKET_SOURCE_WORKER_TIMEOUT_MS || "30000") || 30000,
+        Number(process.env.ALTOS_BLOG_MARKET_SCAN_TIMEOUT_MS || "90000") || 90000
+      )
+    });
     attempt.sourceWorker = { code: sourceWorker.code, stdout: sourceWorker.stdout.trim(), stderr: sourceWorker.stderr.trim() };
     if (sourceWorker.code !== 0) {
       attempt.result = "source-worker-held";
@@ -1529,24 +1544,7 @@ async function runMarketFill({ date }) {
   let consecutiveNoPublish = 0;
   const maxRuns = Math.max(1, Math.min(48, Number.parseInt(arg("max-runs", String(MARKET_FILL_MAX_RUNS)), 10) || MARKET_FILL_MAX_RUNS));
 
-  if ((initialStatus.completeCount || 0) >= MARKET_NEWS_DAILY_MINIMUM) {
-    return {
-      ok: true,
-      skipped: false,
-      phase: "market-fill",
-      date,
-      target: {
-        minimum: MARKET_NEWS_DAILY_MINIMUM,
-        upperCap: null,
-        initialCount: initialStatus.completeCount || 0,
-        completeCount: initialStatus.completeCount || 0,
-        met: true
-      },
-      maxRuns,
-      runs,
-      nextAction: "Minimum floor already met; keep hourly market scans active and publish additional qualified items beyond the floor."
-    };
-  }
+  const minimumAlreadyMet = (initialStatus.completeCount || 0) >= MARKET_NEWS_DAILY_MINIMUM;
 
   for (let index = 1; index <= maxRuns; index += 1) {
     const before = await marketNewsTargetStatus({ date });
@@ -1571,9 +1569,8 @@ async function runMarketFill({ date }) {
     if (publishedThisRun) {
       consecutiveNoPublish = 0;
       await appendLog(globalScheduleLogPath(), JSON.stringify({ phase: "market-fill-published", date, run: runs.at(-1), target: latestStatus }));
-      if ((latestStatus.completeCount || 0) >= MARKET_NEWS_DAILY_MINIMUM) {
-        await appendLog(globalScheduleLogPath(), JSON.stringify({ phase: "market-fill-target-met", date, run: runs.at(-1), target: latestStatus }));
-        break;
+      if (!minimumAlreadyMet && (latestStatus.completeCount || 0) >= MARKET_NEWS_DAILY_MINIMUM) {
+        await appendLog(globalScheduleLogPath(), JSON.stringify({ phase: "market-fill-floor-met-continuing", date, run: runs.at(-1), target: latestStatus }));
       }
       continue;
     }
@@ -1605,7 +1602,7 @@ async function runMarketFill({ date }) {
     maxRuns,
     runs,
     nextAction: ok
-      ? "Keep hourly market scans active; publish additional qualified source-backed items beyond the minimum floor."
+      ? "The daily minimum is met. Continue hourly market scans; if a qualified source-backed item appears, publish it rather than stopping at the floor."
       : "OpenClaw must expand or refresh source packs, then rerun market-fill; held candidates are repair/replace work, not a healthy skip."
   };
 }

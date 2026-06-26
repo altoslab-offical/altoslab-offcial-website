@@ -478,6 +478,10 @@ function releasePost(post: BlogPost, publish: boolean) {
   } satisfies BlogPost;
 }
 
+function publishedReplaceEnabled(payload: BlogReleaseRequest) {
+  return process.env.BLOG_ALLOW_PUBLISHED_REPLACE === "1" && payload.replaceExistingPublished === true;
+}
+
 function isReplaceableIngestDraft(post: BlogPost) {
   return (
     post.status === "draft" &&
@@ -489,13 +493,29 @@ function isReplaceableIngestDraft(post: BlogPost) {
 
 function isReplaceablePublishedQualityRefresh(post: BlogPost, payload: BlogReleaseRequest) {
   return (
-    payload.replaceExistingPublished === true &&
-    post.status === "published"
+    publishedReplaceEnabled(payload) &&
+    post.status === "published" &&
+    !post.qualityChecks.hasHumanReview
   );
 }
 
 function isReplaceableExistingPost(post: BlogPost, payload: BlogReleaseRequest) {
   return isReplaceableIngestDraft(post) || isReplaceablePublishedQualityRefresh(post, payload);
+}
+
+function duplicateReleaseIdentityIssues(existingPosts: BlogPost[], incomingPosts: BlogPost[], ingestRunId: string, translationGroupId?: string) {
+  const issues: string[] = [];
+  const incomingSlugs = new Set(incomingPosts.map((post) => post.slug).filter(Boolean));
+  const incomingLanguageSlugs = new Set(incomingPosts.map((post) => `${post.language}:${post.slug}`).filter(Boolean));
+
+  for (const post of existingPosts) {
+    const sameReleaseGroup = post.ingestRunId === ingestRunId || (translationGroupId && post.translationGroupId === translationGroupId);
+    if (sameReleaseGroup) continue;
+    if (incomingSlugs.has(post.slug) || incomingLanguageSlugs.has(`${post.language}:${post.slug}`)) {
+      issues.push(`${post.language}/${post.slug} already exists in another article group`);
+    }
+  }
+  return issues;
 }
 
 function responseSummary(posts: BlogPost[]) {
@@ -612,6 +632,16 @@ export async function POST(request: Request) {
     const result = await withCmsStorageLock(`blog-release-${finalPosts[0]?.translationGroupId || ingestRunId}`, async () =>
       mutateRawCmsData((data) => {
         const translationGroupId = finalPosts[0]?.translationGroupId;
+        const collisionIssues = duplicateReleaseIdentityIssues(data.blogPosts, finalPosts, ingestRunId, translationGroupId);
+        if (collisionIssues.length) {
+          return {
+            ok: false,
+            skipped: true,
+            reason: "Incoming article set would collide with existing blog articles",
+            errors: collisionIssues,
+            posts: []
+          };
+        }
         const existing = data.blogPosts.filter(
           (post) => post.ingestRunId === ingestRunId || (translationGroupId && post.translationGroupId === translationGroupId)
         );
@@ -664,6 +694,16 @@ export async function POST(request: Request) {
         };
       })
     );
+
+    if (result.ok === false) {
+      return json(409, {
+        ok: false,
+        skipped: true,
+        reason: result.reason || "Incoming article set would collide with existing blog articles",
+        ingestRunId,
+        errors: result.errors || []
+      });
+    }
 
     const writtenPosts = result.posts || [];
     if (!result.skipped && writtenPosts.some((post) => post.status === "published")) {

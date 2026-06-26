@@ -96,7 +96,13 @@ async function exists(filePath) {
 }
 
 async function fetchJson(url) {
-  const response = await fetch(url, { headers: { accept: "application/json" } });
+  const response = await fetch(url, {
+    headers: {
+      accept: "application/json",
+      "cache-control": "no-cache",
+      pragma: "no-cache"
+    }
+  });
   const text = await response.text();
   if (!response.ok) {
     throw new Error(`${response.status} ${response.statusText}: ${text.slice(0, 500)}`);
@@ -111,8 +117,9 @@ async function fetchJson(url) {
 async function fetchPostsByLanguage(baseUrl) {
   const result = {};
   for (const language of REQUIRED_LANGUAGES) {
+    const cacheBust = `daily-closeout-${Date.now()}-${language}`;
     const payload = await fetchJson(
-      `${baseUrl}/api/blog?language=${encodeURIComponent(language)}&fields=inventory&limit=${INVENTORY_LIMIT}`
+      `${baseUrl}/api/blog?language=${encodeURIComponent(language)}&fields=inventory&limit=${INVENTORY_LIMIT}&_=${encodeURIComponent(cacheBust)}`
     );
     result[language] = Array.isArray(payload.posts) ? payload.posts : [];
   }

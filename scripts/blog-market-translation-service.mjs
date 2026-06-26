@@ -19,6 +19,10 @@ const TARGET_LANGUAGES = {
 const LOCAL_PROVIDER_ALIASES = new Set(["local", "deterministic", "source-faithful"]);
 const HERMES_DETERMINISTIC_PROVIDER_ALIASES = new Set(["hermes-owner", "codex-gpt-5.4", "codex-gpt-5.4-subagent"]);
 const GOOGLE_WEB_PROVIDER_ALIASES = new Set(["google-web", "google-gtx", "public-google"]);
+const TRANSLATION_FETCH_TIMEOUT_MS = Math.max(
+  2_000,
+  Number.parseInt(process.env.BLOG_MARKET_TRANSLATION_FETCH_TIMEOUT_MS || "8000", 10) || 8_000
+);
 
 function localMarketFallbackAllowed(provider = "") {
   if (LOCAL_PROVIDER_ALIASES.has(provider)) return process.env.BLOG_MARKET_ALLOW_LOCAL_TRANSLATION_FALLBACK === "1";
@@ -408,8 +412,11 @@ async function gcloudAccessToken() {
 
 async function translateTexts(texts, { target, projectId }) {
   const token = await gcloudAccessToken();
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), TRANSLATION_FETCH_TIMEOUT_MS);
   const response = await fetch("https://translation.googleapis.com/language/translate/v2", {
     method: "POST",
+    signal: controller.signal,
     headers: {
       Authorization: `Bearer ${token}`,
       "Content-Type": "application/json",
@@ -421,7 +428,7 @@ async function translateTexts(texts, { target, projectId }) {
       target,
       format: "text"
     })
-  });
+  }).finally(() => clearTimeout(timer));
   const json = await response.json().catch(() => ({}));
   if (!response.ok) {
     throw new Error(json?.error?.message || `Cloud Translation failed with HTTP ${response.status}`);
@@ -440,12 +447,15 @@ async function translateTextsGoogleWeb(texts, { target }) {
     url.searchParams.set("tl", target);
     url.searchParams.set("dt", "t");
     url.searchParams.set("q", text);
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), TRANSLATION_FETCH_TIMEOUT_MS);
     const response = await fetch(url, {
+      signal: controller.signal,
       headers: {
         Accept: "application/json,text/plain",
         "User-Agent": "ALTOS-LAB-market-translation/1.0"
       }
-    });
+    }).finally(() => clearTimeout(timer));
     const raw = await response.text();
     if (!response.ok) throw new Error(`Google web translation failed with HTTP ${response.status}`);
     const json = JSON.parse(raw);

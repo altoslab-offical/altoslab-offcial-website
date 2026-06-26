@@ -132,7 +132,7 @@ Market-news throughput rule:
 - `dailyPublicationTarget=5` is not a valid health model for the official blog.
 - If a candidate fails quality/image/source gates, Hermes must repair or replace it; a held candidate is not a healthy skip.
 - `/run/market-fill` repeatedly calls the same market-source, source-image, validate-only, publish and readback path until the floor is met or the current source pool is exhausted.
-- `/run/market-fill` short-circuits when the public inventory already has at least 8 complete groups, and stops immediately after a publish brings the day to the floor. This prevents extra source scans and token spend.
+- `/run/market-fill` does not short-circuit just because the public inventory already has at least 8 complete groups. The floor is a health threshold; qualified source-backed items should continue publishing beyond it. Token discipline comes from per-run source budgets, dedupe, and compact source packets.
 - Daily floor-filling uses `ALTOS_BLOG_MARKET_NEWS_DEPTH=standard`. Use `longform` only when explicitly enriching source depth after the floor is healthy.
 - Qualified source-backed market news can keep publishing beyond eight when sources are available.
 - Daily closeout, column cadence, and market-news floor checks use the article identity date from `translationGroupId` or slug before falling back to `publishedAt`; catch-up releases that cross midnight must not consume the next day's quota.

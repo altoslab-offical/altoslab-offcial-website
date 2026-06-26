@@ -13,7 +13,7 @@ const DEFAULT_TARGET_DATE = new Intl.DateTimeFormat("en-CA", {
   month: "2-digit",
   day: "2-digit"
 }).format(new Date());
-const DEFAULT_MAX_PACKS = 10;
+const DEFAULT_MAX_PACKS = 24;
 const SOURCE_PROFILES = {
   "mainstream-ai-us": new Set([
     "techcrunch-ai",
@@ -36,6 +36,19 @@ const SOURCE_PROFILES = {
     "infoworld-ai",
     "ieee-spectrum-ai",
     "the-new-stack-ai",
+    "siliconangle-ai",
+    "ai-business",
+    "artificial-intelligence-news",
+    "synced-review",
+    "the-gradient",
+    "towards-ai",
+    "analytics-vidhya-ai",
+    "towards-data-science",
+    "latent-space",
+    "sebastian-raschka",
+    "lilian-weng",
+    "data-center-dynamics-ai",
+    "computerworld-ai",
     "openai-news",
     "google-ai-blog",
     "google-deepmind",
@@ -64,11 +77,14 @@ const FEED_TIMEOUT_MS = 8000;
 const PAGE_TIMEOUT_MS = 12000;
 const IMAGE_TIMEOUT_MS = 6500;
 const ENRICH_CONCURRENCY = Math.max(1, Math.min(12, Number(process.env.ALTOS_BLOG_MARKET_SCAN_CONCURRENCY || "6")));
+const PER_SOURCE_SCAN_CAP = Math.max(1, Math.min(10, Number(process.env.ALTOS_BLOG_MARKET_PER_SOURCE_SCAN_CAP || "4")));
 const MIN_IMAGE_WIDTH = Number(process.env.ALTOS_BLOG_MARKET_MIN_IMAGE_WIDTH || "768");
 const MIN_IMAGE_HEIGHT = Number(process.env.ALTOS_BLOG_MARKET_MIN_IMAGE_HEIGHT || "432");
 const MIN_IMAGE_BYTES = Number(process.env.ALTOS_BLOG_MARKET_MIN_IMAGE_BYTES || "25000");
 const MIN_LONGFORM_FACTS = Number(process.env.ALTOS_BLOG_MARKET_LONGFORM_MIN_FACTS || "8");
 const MIN_LONGFORM_BODY_CHARS = Number(process.env.ALTOS_BLOG_MARKET_LONGFORM_MIN_BODY_CHARS || "1800");
+const MAX_STANDARD_MARKET_NEWS_AGE_HOURS = Number(process.env.ALTOS_BLOG_MARKET_MAX_AGE_HOURS || "72");
+const ALLOW_EVERGREEN_BACKFILL = process.env.ALTOS_BLOG_MARKET_ALLOW_EVERGREEN_BACKFILL === "1";
 const GENERIC_STOCK_HOSTS = [
   "unsplash.com",
   "images.unsplash.com",
@@ -123,7 +139,7 @@ Options:
   --date <yyyy-mm-dd>    Defaults to today in Asia/Taipei
   --queue-dir <path>     Defaults to data/blog-backfill/<date>/queue
   --out <path>           Defaults to data/blog-backfill/<date>/market-source-packs.generated.json
-  --max-packs <n>        Defaults to ${DEFAULT_MAX_PACKS}
+  --max-packs <n>        Defaults to ${DEFAULT_MAX_PACKS}. This is a per-run work budget, not a daily publication cap.
   --source-profile <id>  Use a bounded source pool. Current: mainstream-ai-us, longform-ai-news.
   --news-depth <mode>    standard or longform. Longform rejects thin/funding-quick items. Defaults to ALTOS_BLOG_MARKET_NEWS_DEPTH or standard.
   --write                Write the source-pack file. Without it, prints dry-run output.
@@ -413,12 +429,32 @@ function normalizeCoverKey(value = "") {
 function recencyScore(value) {
   const parsed = Date.parse(value || "");
   if (!Number.isFinite(parsed)) return 35;
-  const hours = Math.max(0, (Date.now() - parsed) / 3_600_000);
+  const hours = candidateAgeHours(value);
   if (hours <= 24) return 100;
   if (hours <= 72) return 88;
   if (hours <= 168) return 72;
   if (hours <= 720) return 45;
   return 20;
+}
+
+function candidateAgeHours(value) {
+  const parsed = Date.parse(value || "");
+  if (!Number.isFinite(parsed)) return Number.POSITIVE_INFINITY;
+  return Math.max(0, (Date.now() - parsed) / 3_600_000);
+}
+
+function evergreenBackfillEligible(candidate = {}) {
+  if (!ALLOW_EVERGREEN_BACKFILL) return false;
+  const haystack = `${candidate.title || ""}\n${candidate.summary || ""}\n${candidate.url || ""}`;
+  return /\b(guide|handbook|framework|benchmark|research|report|paper|standard|specification|documentation|case study)\b/i.test(haystack);
+}
+
+function freshnessIssue(candidate = {}) {
+  const ageHours = candidateAgeHours(candidate.publishedAt);
+  if (!Number.isFinite(ageHours)) return "missing or unparsable publishedAt";
+  if (ageHours <= MAX_STANDARD_MARKET_NEWS_AGE_HOURS) return "";
+  if (evergreenBackfillEligible(candidate)) return "";
+  return `publishedAt age ${Math.round(ageHours)}h exceeds market-news freshness window ${MAX_STANDARD_MARKET_NEWS_AGE_HOURS}h`;
 }
 
 function candidateScore(candidate) {
@@ -802,6 +838,7 @@ async function main() {
       if (live.titleKeys.has(normalizeTitle(candidate.title))) return false;
       if (live.topicKeys.has(coarseTopicKey(candidate))) return false;
       if (!isRelevantMarketCandidate(candidate)) return false;
+      if (freshnessIssue(candidate)) return false;
       if (newsDepth === "longform" && isFundingQuickCandidate(candidate)) return false;
       return true;
     })
@@ -818,7 +855,7 @@ async function main() {
     for (const enriched of enrichedBatch) {
       if (packs.length >= sequences.length) break;
       const sourceCount = sourceCounts.get(enriched.sourceId) || 0;
-      if (sourceProfile && sourceCount >= 2) {
+      if (sourceProfile && sourceCount >= PER_SOURCE_SCAN_CAP) {
         skipped.push({ title: enriched.title, url: enriched.url, reason: "source diversity cap" });
         continue;
       }
@@ -829,6 +866,11 @@ async function main() {
       }
       if (enriched.sourceFetchFailed) {
         skipped.push({ title: enriched.title, url: enriched.url, reason: `source page fetch failed ${enriched.pageStatus || ""}`.trim() });
+        continue;
+      }
+      const freshnessBlocker = freshnessIssue(enriched);
+      if (freshnessBlocker) {
+        skipped.push({ title: enriched.title, url: enriched.url, reason: freshnessBlocker });
         continue;
       }
       if (!enriched.imageUrl) {
@@ -882,6 +924,8 @@ async function main() {
         registryFeeds: registry.length,
         queueSequences: sequences,
         newsDepth,
+        perSourceScanCap: PER_SOURCE_SCAN_CAP,
+        policy: "publish every qualified, source-backed market item; daily minimum is a floor, not a cap",
         candidates: candidates.length,
         packsGenerated: packs.length,
         outPath,
