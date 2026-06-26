@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { BlogEditorialVisual } from "@/components/BlogEditorialVisual";
 import type { BlogVisualPost } from "@/lib/blog-visual";
 
@@ -24,6 +24,7 @@ function hasRejectedCover(post: BlogVisualPost) {
 
 export function SafeBlogImage({ post, className, loading = "lazy", fetchPriority, compact }: SafeBlogImageProps) {
   const [failed, setFailed] = useState(false);
+  const imageRef = useRef<HTMLImageElement | null>(null);
   const isManagedGeneratedMedia = Boolean(post.cover && /\/api\/blog\/generated-media\//.test(post.cover));
   const shouldUseEditorialVisual =
     failed ||
@@ -31,18 +32,36 @@ export function SafeBlogImage({ post, className, loading = "lazy", fetchPriority
     !post.cover ||
     (post.coverSource !== "curated" && post.coverGeneration?.provider === "local" && !isManagedGeneratedMedia);
 
+  useEffect(() => {
+    if (shouldUseEditorialVisual) return;
+    const image = imageRef.current;
+    if (!image) return;
+
+    const verifyRenderedImage = () => {
+      if (image.complete && image.naturalWidth === 0) setFailed(true);
+    };
+
+    verifyRenderedImage();
+    const timeout = window.setTimeout(verifyRenderedImage, 1500);
+    return () => window.clearTimeout(timeout);
+  }, [post.cover, shouldUseEditorialVisual]);
+
   if (shouldUseEditorialVisual) {
     return <BlogEditorialVisual compact={compact} post={post} />;
   }
 
   return (
     <img
+      ref={imageRef}
       className={className}
       src={post.cover}
       alt={post.coverAlt || `${post.title} cover`}
       loading={loading}
       fetchPriority={fetchPriority}
       decoding="async"
+      onLoad={(event) => {
+        if (event.currentTarget.naturalWidth === 0) setFailed(true);
+      }}
       onError={() => setFailed(true)}
     />
   );
