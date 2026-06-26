@@ -1322,7 +1322,12 @@ function reviewSeoGeoStructure(post: BlogPost): ReviewResult {
   if (contentType !== "breaking" && recycledColumnBodyPatterns.some((pattern) => pattern.test(`${post.seoDescription}\n${post.geoSummary}`))) {
     issues.push("SEO/GEO metadata contains recycled internal column template text; rewrite public metadata for this article's actual reader job");
   }
-  if (contentType !== "breaking" && publicOperatorLeakPattern.test(`${post.excerpt}\n${post.seoDescription}\n${post.geoSummary}\n${post.body}`)) {
+  if (
+    contentType !== "breaking" &&
+    publicOperatorLeakPattern.test(
+      `${post.excerpt}\n${post.seoDescription}\n${post.geoSummary}\n${post.body}\n${post.coverAlt || ""}\n${post.coverCredit || ""}\n${post.coverPrompt || ""}\n${JSON.stringify(post.coverGeneration || {})}`
+    )
+  ) {
     issues.push("public column copy must not expose Hermes/OpenClaw operator names; keep agent training language out of reader-facing articles");
   }
   if (weakSubtitlePatterns.some((pattern) => pattern.test(excerpt))) {

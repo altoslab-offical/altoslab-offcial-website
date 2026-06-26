@@ -287,6 +287,14 @@ const forbidden = [
   /\bHermes\b|\bOpenClaw\b/i
 ];
 
+function sanitizedCoverGeneration(post) {
+  if (!post.coverGeneration) return post.coverGeneration;
+  return {
+    ...post.coverGeneration,
+    provider: "OpenAI image generation (ALTOS LAB editorial system)"
+  };
+}
+
 function assertClean(post) {
   const combined = [
     post.title,
@@ -294,6 +302,10 @@ function assertClean(post) {
     post.seoTitle,
     post.seoDescription,
     post.geoSummary,
+    post.coverAlt,
+    post.coverCredit,
+    post.coverPrompt,
+    JSON.stringify(post.coverGeneration || {}),
     post.body,
     ...(post.keyTakeaways || []),
     ...(post.faqs || []).flatMap((faq) => [faq.question, faq.answer])
@@ -354,6 +366,7 @@ async function main() {
         keyTakeaways: repair.keyTakeaways,
         body: repair.body,
         faqs: repair.faqs,
+        coverGeneration: sanitizedCoverGeneration(post),
         qualityStatus: "passed",
         qualityIssues: [],
         qualityChecks: next.qualityChecks

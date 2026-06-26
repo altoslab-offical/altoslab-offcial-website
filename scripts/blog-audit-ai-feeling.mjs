@@ -166,6 +166,10 @@ function publicText(post) {
     post.seoDescription,
     post.excerpt,
     post.geoSummary,
+    post.coverAlt,
+    post.coverCredit,
+    post.coverPrompt,
+    JSON.stringify(post.coverGeneration || {}),
     post.body,
     ...(post.keyTakeaways || []),
     ...(post.faqs || []).flatMap((faq) => [faq.question, faq.answer])
