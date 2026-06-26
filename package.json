@@ -81,6 +81,6 @@
     "@types/react": "latest",
     "@types/react-dom": "latest",
     "typescript": "latest",
-    "wrangler": "^4.95.0"
+    "wrangler": "^4.105.0"
   }
 }
