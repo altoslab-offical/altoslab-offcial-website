@@ -347,7 +347,11 @@ function normalizeImageMarker(value: string | undefined) {
 const markerPlacementAliases: Record<string, string[]> = {
   opening: ["opening", "after-lead", "lead", "intro"],
   mechanism: ["mechanism", "mid-article", "middle", "evidence"],
-  synthesis: ["synthesis", "before-faq", "closing", "close"]
+  synthesis: ["synthesis", "before-faq", "closing", "close"],
+  "evidence-desk": ["evidence-desk", "opening", "after-lead", "lead", "intro"],
+  "source-desk": ["source-desk", "evidence-desk", "opening", "after-lead", "lead"],
+  "operating-loop": ["operating-loop", "mechanism", "mid-article", "middle", "evidence"],
+  "repair-scene": ["repair-scene", "operating-loop", "mechanism", "mid-article", "middle"]
 };
 
 function stripImageMarkers(text: string) {
@@ -360,7 +364,9 @@ function imageMatchesMarker(image: BlogInlineImage, imageIndex: number, marker: 
   const candidates = new Set([normalizedMarker, ...(markerPlacementAliases[normalizedMarker] || [])]);
   if (placement && candidates.has(placement)) return true;
   if (normalizedMarker === "opening" && imageIndex === 0) return true;
+  if ((normalizedMarker === "evidence-desk" || normalizedMarker === "source-desk") && imageIndex === 0) return true;
   if (normalizedMarker === "mechanism" && imageIndex === 1) return true;
+  if ((normalizedMarker === "operating-loop" || normalizedMarker === "repair-scene") && imageIndex === 1) return true;
   if (normalizedMarker === "synthesis" && imageIndex === 2) return true;
   return false;
 }

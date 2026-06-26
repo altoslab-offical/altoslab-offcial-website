@@ -53,6 +53,7 @@ assert(apiHtmlRenderer.includes('blogAdSlotHtml("index-feed")'), "API blog HTML 
 assert(apiHtmlRenderer.includes('blogAdSlotHtml("after-summary")'), "API blog HTML renderer keeps the opt-in article after-summary AdSense slot");
 assert(apiHtmlRenderer.includes('blogAdSlotHtml("mid-article")'), "API blog HTML renderer keeps the opt-in article mid-article AdSense slot");
 assert(apiHtmlRenderer.includes('blogAdSlotHtml("before-related")'), "API blog HTML renderer keeps the opt-in article before-related AdSense slot");
+assert(apiHtmlRenderer.includes('"evidence-desk"') && apiHtmlRenderer.includes('"operating-loop"'), "API blog HTML renderer maps legacy article image markers to current figure slots");
 
 const cloudflarePatch = read("scripts/patch-cloudflare-worker-blog-html.mjs");
 assert(cloudflarePatch.includes('ALTOS_ENABLE_DIRECT_BLOG_HTML === "1"'), "Cloudflare direct article HTML is opt-in only");
@@ -73,6 +74,7 @@ assert(blogArticle.includes('<BlogAdSlot placement="after-summary" />'), "BlogAr
 assert(blogArticle.includes('<BlogAdSlot placement="mid-article" />'), "BlogArticle keeps the opt-in mid-article AdSense slot");
 assert(blogArticle.includes('<BlogAdSlot placement="before-related" />'), "BlogArticle keeps the opt-in before-related AdSense slot");
 assert(blogArticle.includes("imageCount > 1 && sectionCount > 2"), "BlogArticle distributes repeated mid-article figures instead of stacking them after one section");
+assert(blogArticle.includes('"evidence-desk"') && blogArticle.includes('"operating-loop"'), "BlogArticle maps legacy article image markers to current figure slots");
 assert(globalCss.includes(".blog-adsense-slot") && globalCss.includes('ins.adsbygoogle[data-ad-status="unfilled"]'), "Next Blog CSS keeps neutral AdSense slot and unfilled-collapse styling");
 assert(directWorker.includes("function blogAdSlotHtml(env, placement)") && directWorker.includes('blogAdSlotHtml(env, "after-summary")'), "direct article renderer keeps the opt-in AdSense slot helper");
 

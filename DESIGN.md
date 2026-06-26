@@ -119,6 +119,18 @@ Cards:
 
 - Portfolio cards may use image-first composition.
 
+## Blog Editorial Figure Rhythm
+
+- Blog article figures are part of the reading rhythm, not decorative gallery
+  blocks. The first support image should clarify the opening situation or
+  evidence table; the second should appear after enough argument has developed
+  and clarify the mechanism, loop, or operational tradeoff.
+- Consecutive support images without substantial text between them are a design
+  defect because they make articles feel assembled rather than edited.
+- Legacy marker labels may remain render-compatible, but new and repaired
+  articles should use `[IMAGE:opening]` and `[IMAGE:mechanism]` so Hermes,
+  OpenClaw, and QA scripts share the same visual pacing language.
+
 ## Blog Article Visual Stability
 
 - Article covers use a stable 1200:630 ratio with centered `object-fit: cover`.

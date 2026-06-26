@@ -384,15 +384,15 @@ const PLAN_VARIANTS = {
         fil: "Sa Panahon Ng AI Search, Kailangan Ng Data Para Lumago Pa Ang Lumang Artikulo"
       },
       excerpt: {
-        "zh-Hant": "好文章不是發布後就結束。Search Console、GA4、來源更新與讀者問題，會告訴 Hermes 下一輪要補哪個段落。",
-        en: "A good article does not end at publish. Search Console, GA4, source updates, and reader questions tell Hermes which section to improve next.",
-        ja: "良い記事は公開で終わらない。Search Console、GA4、出典更新、読者の問いが、次に直す段落を Hermes に教える。",
-        ko: "좋은 글은 발행으로 끝나지 않는다. Search Console, GA4, 출처 업데이트, 독자 질문이 Hermes에게 다음에 보강할 단락을 알려준다.",
-        id: "Artikel bagus tidak selesai saat terbit. Search Console, GA4, pembaruan sumber, dan pertanyaan pembaca memberi tahu Hermes bagian mana yang perlu ditingkatkan.",
-        vi: "Bài viết tốt không kết thúc khi xuất bản. Search Console, GA4, cập nhật nguồn và câu hỏi của độc giả cho Hermes biết phần nào cần bổ sung.",
-        th: "บทความที่ดีไม่ได้จบตอนเผยแพร่ Search Console, GA4, การอัปเดตแหล่งที่มา และคำถามผู้อ่านจะบอก Hermes ว่าควรเสริมส่วนไหนต่อ",
-        ms: "Artikel yang baik tidak selesai selepas diterbitkan. Search Console, GA4, kemas kini sumber dan soalan pembaca memberitahu Hermes bahagian mana perlu diperbaiki.",
-        fil: "Hindi natatapos sa publish ang magandang article. Search Console, GA4, source updates, at tanong ng reader ang magsasabi sa Hermes kung aling section ang aayusin."
+        "zh-Hant": "好文章不是發布後就結束。Search Console、GA4、來源更新與讀者問題，會告訴內容團隊 下一輪要補哪個段落。",
+        en: "A good article does not end at publish. Search Console, GA4, source updates, and reader questions tell the content team which section to improve next.",
+        ja: "良い記事は公開で終わらない。Search Console、GA4、出典更新、読者の問いが、次に直す段落を チームに教える。",
+        ko: "좋은 글은 발행으로 끝나지 않는다. Search Console, GA4, 출처 업데이트, 독자 질문이 콘텐츠 팀에게 다음에 보강할 단락을 알려준다.",
+        id: "Artikel bagus tidak selesai saat terbit. Search Console, GA4, pembaruan sumber, dan pertanyaan pembaca memberi tahu tim konten bagian mana yang perlu ditingkatkan.",
+        vi: "Bài viết tốt không kết thúc khi xuất bản. Search Console, GA4, cập nhật nguồn và câu hỏi của độc giả hệ thống nội dung biết phần nào cần bổ sung.",
+        th: "บทความที่ดีไม่ได้จบตอนเผยแพร่ Search Console, GA4, การอัปเดตแหล่งที่มา และคำถามผู้อ่านจะบอกทีมคอนเทนต์ ว่าควรเสริมส่วนไหนต่อ",
+        ms: "Artikel yang baik tidak selesai selepas diterbitkan. Search Console, GA4, kemas kini sumber dan soalan pembaca memberitahu pasukan kandungan bahagian mana perlu diperbaiki.",
+        fil: "Hindi natatapos sa publish ang magandang article. Search Console, GA4, source updates, at tanong ng reader ang magsasabi sa content system kung aling section ang aayusin."
       }
     }
   ],
@@ -604,59 +604,59 @@ function sectionParagraphs(plan, language) {
     "zh-Hant": [
       `${l.scene} 討論焦點從「要不要再買一套 ${topic} 相關工具」轉到更硬的問題：當系統真的開始影響內容、客戶承諾或工作交付時，誰能看見它做了什麼，誰能判斷它是否應該停下來。這也是 ${brand} 會把這題放進 ${productWord} 規格，而非只放進採購簡報的原因。`,
       `真正值得投資的是一條能回到來源、權限、成本和責任的證據鏈，漂亮的展示流程只能當參考。Google、OpenAI、Microsoft、NIST 和 IBM 的公開資料雖然各自談不同層面，但共同訊號很清楚：AI 系統進入日常營運後，團隊需要能回答資料從哪裡來、輸出誰審過、錯誤怎麼復原、成效如何回讀。`,
-      `反直覺的是，這種設計不是讓團隊變慢。它讓好內容、好工具和好流程能被放大。沒有證據鏈的自動化，只能靠負責人盯著；有證據鏈的自動化，才讓 Hermes 這類營運系統每天讀數據、調選題、修文案、換角度，避免把同一套話術重複發出去。`
+      `反直覺的是，這種設計不是讓團隊變慢。它讓好內容、好工具和好流程能被放大。沒有證據鏈的自動化，只能靠負責人盯著；有證據鏈的自動化，才讓 內容營運系統每天讀數據、調選題、修文案、換角度，避免把同一套話術重複發出去。`
     ],
     en: [
       `${l.scene} They are not debating whether to buy one more ${topic} tool. They are asking a harder question: when the system starts touching content, customer promises, or work delivery, who can see what happened and who can decide whether it should stop. That is why ${brand} treats this as a ${productWord} specification, not a slide in a procurement deck.`,
       `The durable investment is not a polished demo flow. It is an evidence chain that connects sources, permissions, cost, and ownership. Google, OpenAI, Microsoft, NIST, and IBM each describe different layers, but the shared signal is clear: once AI systems enter daily operations, teams must answer where the data came from, who reviewed the output, how mistakes recover, and how results are read back.`,
-      `The counterintuitive part is that this does not slow a serious team down. It lets good content, tools, and operating flows scale. Automation without an evidence chain needs a person watching every move; automation with an evidence chain lets Hermes read metrics, adjust topics, repair copy, and change angles without repeating the same flat voice every day.`
+      `The counterintuitive part is that this does not slow a serious team down. It lets good content, tools, and operating flows scale. Automation without an evidence chain needs a person watching every move; automation with an evidence chain lets the content system read metrics, adjust topics, repair copy, and change angles without repeating the same flat voice every day.`
     ]
   };
   const base = paragraphs[language] || [
     `${l.scene} ${brand} membaca topik ${topic} sebagai keputusan operasi, bukan sekadar alat baru. Pertanyaannya sederhana tetapi berat: ketika sistem memengaruhi konten, janji kepada pelanggan, atau pekerjaan harian, siapa yang melihat bukti dan siapa yang berhak menghentikannya.`,
     `Investasi yang tahan lama bukan demo yang rapi, melainkan rantai bukti yang menghubungkan sumber, izin, biaya, dan pemilik keputusan. Sinyal dari Google, OpenAI, Microsoft, NIST, dan IBM mengarah ke pola yang sama: setelah AI masuk ke operasi harian, tim harus tahu data berasal dari mana, siapa meninjau output, bagaimana kesalahan dipulihkan, dan metrik mana yang dibaca kembali.`,
-    `Hal yang berlawanan dengan intuisi adalah struktur ini tidak memperlambat tim yang serius. Struktur ini membuat konten, alat, dan alur operasi yang baik bisa diperbesar tanpa mengulang suara datar. Dengan bahasa sederhana, Hermes dapat membaca metrik, menyesuaikan topik, memperbaiki copy, dan mengganti sudut dengan bukti, bukan dengan perasaan.`
+    `Hal yang berlawanan dengan intuisi adalah struktur ini tidak memperlambat tim yang serius. Struktur ini membuat konten, alat, dan alur operasi yang baik bisa diperbesar tanpa mengulang suara datar. Dengan bahasa sederhana, sistem konten dapat membaca metrik, menyesuaikan topik, memperbaiki copy, dan mengganti sudut dengan bukti, bukan dengan perasaan.`
   ];
   if (language === "ja") {
     return [
       `${l.scene} 議題の中心は ${topic} の新しい道具探しから、システムがコンテンツ、顧客への約束、日々の作業に触れ始めた時、誰が証拠を見て、誰が止める判断をするのかへ移る。${brand} がこれを調達資料ではなくプロダクト仕様として扱う理由もそこにある。`,
       `長く効く投資は、きれいな demo ではなく、出典、権限、コスト、責任をつなぐ証拠の連鎖である。Google、OpenAI、Microsoft、NIST、IBM の公開資料は別々の層を語るが、共通する合図は明確だ。AI が日常運用に入ると、データの出所、出力の確認者、失敗時の復旧、成果の読み戻しを説明できなければならない。`,
-      `反直覺に見えるが、この構造は真剣なチームを遅くしない。つまり、良いコンテンツ、良い道具、良い運用手順を安全に広げるための条件になる。証拠の連鎖がなければ人が見張るしかない。証拠があれば Hermes は指標を読み、題材を変え、文章を直し、同じ一般論に戻らず角度を更新できる。`
+      `反直覺に見えるが、この構造は真剣なチームを遅くしない。つまり、良いコンテンツ、良い道具、良い運用手順を安全に広げるための条件になる。証拠の連鎖がなければ人が見張るしかない。証拠があれば チームは指標を読み、題材を変え、文章を直し、同じ一般論に戻らず角度を更新できる。`
     ];
   }
   if (language === "ko") {
     return [
       `${l.scene} 논의의 중심은 ${topic} 도구를 하나 더 사는 일에서 시스템이 콘텐츠, 고객 약속, 일상 업무를 건드릴 때 누가 증거를 보고 누가 멈출 권한을 가지는가로 옮겨간다. ${brand} 가 이 주제를 구매 자료가 아니라 제품 규격으로 보는 이유도 여기에 있다.`,
       `오래 남는 투자는 멋진 demo가 아니라 출처, 권한, 비용, 책임을 잇는 증거 사슬이다. Google, OpenAI, Microsoft, NIST, IBM의 공개 자료는 서로 다른 층을 설명하지만 공통 신호는 분명하다. AI가 운영에 들어오면 데이터 출처, 출력 검토자, 오류 복구, 성과 읽기 방법을 설명할 수 있어야 한다.`,
-      `반직관적으로 보이지만 이 구조는 진지한 팀을 느리게 만들지 않는다. 쉽게 말해, 좋은 콘텐츠와 도구, 운영 절차를 안전하게 키우는 조건이 된다. 증거 사슬이 없으면 사람이 계속 감시해야 한다. 증거가 있으면 Hermes는 지표를 읽고 주제를 조정하며 문안을 고치고 같은 일반론을 반복하지 않을 수 있다.`
+      `반직관적으로 보이지만 이 구조는 진지한 팀을 느리게 만들지 않는다. 쉽게 말해, 좋은 콘텐츠와 도구, 운영 절차를 안전하게 키우는 조건이 된다. 증거 사슬이 없으면 사람이 계속 감시해야 한다. 증거가 있으면 콘텐츠 시스템은 지표를 읽고 주제를 조정하며 문안을 고치고 같은 일반론을 반복하지 않을 수 있다.`
     ];
   }
   if (language === "vi") {
     return [
       `${l.scene} Họ không chỉ bàn có nên mua thêm một công cụ cho ${topic} hay không. Câu hỏi khó hơn là khi hệ thống bắt đầu chạm vào nội dung, cam kết với khách hàng hoặc công việc hằng ngày, ai nhìn thấy bằng chứng và ai có quyền dừng lại. Đó là lý do ${brand} đặt vấn đề này vào đặc tả sản phẩm, không chỉ vào slide mua sắm.`,
       `Khoản đầu tư bền hơn không phải demo đẹp, mà là chuỗi bằng chứng nối nguồn, quyền truy cập, chi phí và trách nhiệm. Google, OpenAI, Microsoft, NIST và IBM nói về các lớp khác nhau, nhưng tín hiệu chung rất rõ: khi AI đi vào vận hành, đội ngũ phải giải thích dữ liệu đến từ đâu, ai duyệt đầu ra, lỗi được phục hồi thế nào và kết quả được đọc lại bằng số liệu nào.`,
-      `Điều có vẻ ngược đời là cấu trúc này không làm đội nghiêm túc chậm đi. Nói đơn giản, nó giúp nội dung, công cụ và quy trình vận hành tốt được mở rộng an toàn. Không có chuỗi bằng chứng thì phải có người canh từng bước; có chuỗi bằng chứng thì Hermes có thể đọc số liệu, đổi chủ đề, sửa copy và đổi góc nhìn mà không lặp lại giọng văn chung chung.`
+      `Điều có vẻ ngược đời là cấu trúc này không làm đội nghiêm túc chậm đi. Nói đơn giản, nó giúp nội dung, công cụ và quy trình vận hành tốt được mở rộng an toàn. Không có chuỗi bằng chứng thì phải có người canh từng bước; có chuỗi bằng chứng thì hệ thống nội dung có thể đọc số liệu, đổi chủ đề, sửa copy và đổi góc nhìn mà không lặp lại giọng văn chung chung.`
     ];
   }
   if (language === "th") {
     return [
       `${l.scene} ประเด็นไม่ใช่แค่ว่าจะซื้อเครื่องมือสำหรับ ${topic} เพิ่มหรือไม่ แต่คือเมื่อระบบเริ่มแตะคอนเทนต์ คำมั่นกับลูกค้า หรือการส่งมอบงานประจำ ใครเห็นหลักฐาน และใครมีสิทธิหยุดมัน นี่คือเหตุผลที่ ${brand} มองเรื่องนี้เป็นข้อกำหนดผลิตภัณฑ์ ไม่ใช่แค่สไลด์จัดซื้อ`,
       `สิ่งที่ควรลงทุนไม่ใช่ demo ที่ดูดี แต่คือห่วงโซ่หลักฐานที่เชื่อมแหล่งข้อมูล สิทธิ์ ต้นทุน และเจ้าของงาน ข้อมูลสาธารณะจาก Google, OpenAI, Microsoft, NIST และ IBM พูดคนละชั้น แต่สัญญาณร่วมชัดเจน: เมื่อ AI เข้าไปในงานประจำ ทีมต้องอธิบายได้ว่าข้อมูลมาจากไหน ใครตรวจผลลัพธ์ ข้อผิดพลาดกู้คืนอย่างไร และผลลัพธ์ถูกอ่านกลับด้วยตัวเลขใด`,
-      `สิ่งที่ดูสวนทางคือโครงสร้างนี้ไม่ได้ทำให้ทีมจริงจังช้าลง พูดให้ง่ายคือมันทำให้คอนเทนต์ เครื่องมือ และขั้นตอนปฏิบัติการที่ดีขยายได้อย่างปลอดภัย ถ้าไม่มีหลักฐานต้องใช้คนเฝ้าทุกขั้น ถ้ามีหลักฐาน Hermes จึงอ่านตัวเลข ปรับหัวข้อ แก้ copy และเปลี่ยนมุมได้โดยไม่กลับไปใช้เสียงทั่วไปซ้ำ ๆ`
+      `สิ่งที่ดูสวนทางคือโครงสร้างนี้ไม่ได้ทำให้ทีมจริงจังช้าลง พูดให้ง่ายคือมันทำให้คอนเทนต์ เครื่องมือ และขั้นตอนปฏิบัติการที่ดีขยายได้อย่างปลอดภัย ถ้าไม่มีหลักฐานต้องใช้คนเฝ้าทุกขั้น ถ้ามีหลักฐาน ระบบเนื้อหาจึงอ่านตัวเลข ปรับหัวข้อ แก้ copy และเปลี่ยนมุมได้โดยไม่กลับไปใช้เสียงทั่วไปซ้ำ ๆ`
     ];
   }
   if (language === "ms") {
     return [
       `${l.scene} Mereka bukan sekadar membincangkan sama ada mahu membeli satu lagi alat untuk ${topic}. Soalan yang lebih berat ialah apabila sistem mula menyentuh kandungan, janji kepada pelanggan atau kerja harian, siapa nampak bukti dan siapa boleh menghentikannya. Sebab itu ${brand} meletakkan isu ini sebagai spesifikasi produk, bukan hanya slaid pembelian.`,
       `Pelaburan yang tahan lama bukan demo yang kemas, tetapi rantaian bukti yang menghubungkan sumber, izin, kos dan pemilik keputusan. Google, OpenAI, Microsoft, NIST dan IBM menerangkan lapisan berbeza, namun isyaratnya sama: apabila AI masuk ke operasi harian, pasukan mesti tahu data datang dari mana, siapa menyemak output, bagaimana ralat dipulihkan dan metrik apa yang dibaca semula.`,
-      `Bahagian yang nampak berlawanan intuisi ialah struktur ini tidak memperlahankan pasukan serius. Dalam bahasa mudah, ia membolehkan kandungan, alat dan aliran operasi yang baik dibesarkan dengan selamat. Tanpa rantaian bukti, manusia perlu menjaga setiap langkah; dengan bukti, Hermes boleh membaca metrik, menukar topik, membaiki copy dan mengubah sudut tanpa mengulang suara datar.`
+      `Bahagian yang nampak berlawanan intuisi ialah struktur ini tidak memperlahankan pasukan serius. Dalam bahasa mudah, ia membolehkan kandungan, alat dan aliran operasi yang baik dibesarkan dengan selamat. Tanpa rantaian bukti, manusia perlu menjaga setiap langkah; dengan bukti, sistem kandungan boleh membaca metrik, menukar topik, membaiki copy dan mengubah sudut tanpa mengulang suara datar.`
     ];
   }
   if (language === "fil") {
     return [
       `${l.scene} Hindi lang nila pinag-uusapan kung bibili pa ng tool para sa ${topic}. Mas mabigat ang tanong: kapag ang sistema ay humahawak na ng content, pangako sa customer, o araw-araw na delivery, sino ang nakakakita ng ebidensya at sino ang puwedeng magpahinto. Ito ang dahilan kung bakit itinuturing ito ng ${brand} bilang product specification, hindi lang procurement slide.`,
       `Ang mas matibay na investment ay hindi magandang demo, kundi evidence chain na nag-uugnay ng source, permission, cost, at ownership. Magkaiba ang layer na tinatalakay ng Google, OpenAI, Microsoft, NIST, at IBM, pero iisa ang signal: kapag pumasok ang AI sa araw-araw na operasyon, dapat masagot kung saan galing ang data, sino ang nag-review, paano babawi sa mali, at aling metrics ang babalikan.`,
-      `Parang kontra sa instinct, pero hindi nito pinapabagal ang seryosong team. Sa simpleng salita, pinapalaki nito nang mas ligtas ang mahusay na content, tool, at operating flow. Kapag walang evidence chain, kailangang bantayan ng tao ang bawat galaw; kapag mayroon, kayang magbasa ng metrics ang Hermes, magpalit ng topic, mag-ayos ng copy, at umiwas sa paulit-ulit na flat na tono.`
+      `Parang kontra sa instinct, pero hindi nito pinapabagal ang seryosong team. Sa simpleng salita, pinapalaki nito nang mas ligtas ang mahusay na content, tool, at operating flow. Kapag walang evidence chain, kailangang bantayan ng tao ang bawat galaw; kapag mayroon, kayang magbasa ng metrics ang content system, magpalit ng topic, mag-ayos ng copy, at umiwas sa paulit-ulit na flat na tono.`
     ];
   }
   return base;
@@ -683,17 +683,17 @@ function buildBody(plan, language) {
     ? "1. 選一條真實流程，不選最漂亮的展示案例。\n2. 寫下資料來源、審核者、停止條件與退回舊流程的方法；退回舊流程的意思是出事時先回到人工做法。\n3. 發布後用 GA4、Search Console 和實際讀者行為回頭修正選題。"
     : "1. Pick one real operating flow, not the prettiest demo case.\n2. Write down source, reviewer, stop condition, and the path back to the old safe process.\n3. After publishing, use GA4, Search Console, and reader behavior to revise topic selection.";
   const density = language === "zh-Hant"
-    ? `\n\n**決策要能被追問，才值得自動化。** 例如「誰可以按下發布」、「誰能改客戶可見的內容」、「哪一個數字超標就停止」這三欄，比一句導入願景更有價值。這些欄位也讓後續自動化能被測試，因為系統知道哪些行為需要留下截圖、來源、時間戳與審核者。這裡說的操作紀錄，應該是一張主管能看懂的責任表，而不是只留在工程師的 log 裡。\n\n**退回舊流程就是出事時先回到人工做法。** 這是一種讓團隊放心試新東西的安全設計。沒有退路，任何新功能都會變成一次豪賭；有退路，團隊可以小步測試、讀數據、修提示、換素材，然後再把通過的做法放大。這一段尤其適合放進採購、內容排程與客戶溝通流程，因為這三種情境都會直接影響外部信任。\n\n對內容營運來說，這套邏輯也會改變選題。Hermes 不該只看今天哪個題目熱，而要看哪個題目能留下來源證據、讀者意圖與後續數據。當一篇文章沒有帶來搜尋曝光，團隊要分開看四件事：標題有沒有像讀者會問的問題、段落標題能不能被引用、圖片有沒有幫助理解、內文有沒有具體案例。這些都能被記錄，下一輪就不需要靠感覺猜。\n\nALTOS LAB 會把品質審查放在發布前，把發完再修留給例外狀況。好的自動化會每天把候選稿修到能被人讀、能被搜尋理解、能被數據回饋，再送進 production。今天的標準很簡單：讀者看完要知道自己下一步該查哪個流程、問誰、看哪個數字。\n\n從 2026 年的公開文件看，AI 導入已經從模型能力題轉成營運系統題。OpenAI 談工具、交接與安全邊界；Microsoft 談企業營運模型；NIST 談風險管理；IBM 談治理。四組來源放在一起，對中小型團隊的提醒反而很務實：不要先追求全自動，先讓每一次重要動作留下可檢查證據。\n\n這個做法也能直接套到官網每日發文。三篇專欄代表三次小型市場實驗：早上測高意圖題、下午測搜尋可引用題、晚上測採購或決策題。每一篇都要能回讀曝光、點擊、停留與來源引用。當數據不好，Hermes 要修的是角度、下標、段落密度與圖片理解力，而不是把同樣模板再跑一次。`
-    : `\n\n**Make the decision inspectable.** Ownership fields such as who can publish, who can change customer-visible output, and which metric stops the run matter more than an adoption slogan. They make automation testable, because the system knows which actions require screenshots, sources, timestamps, and reviewers. In plain terms, an operating log is not an engineer-only file; it is a responsibility table a manager can read.\n\n**Return to the old safe process means a human fallback.** It is the condition that lets a team test new tools without turning every launch into a bet. With no fallback, a new capability becomes a fragile promise. With a fallback, the team tests in smaller steps, reads data, revises prompts, changes visuals, and scales only the patterns that passed. This matters most in procurement, content scheduling, and customer communication because those flows touch external trust.\n\nFor content operations, this changes topic selection. Hermes should ask more than which subject is hot today. It should ask which subject can hold source evidence, reader intent, and later performance data. When an article earns little search visibility, the topic is not always wrong. The title may not sound like a reader question, section headings may not be citable, images may not clarify the argument, or the body may lack a concrete case. Those signals can be recorded and used in the following run.\n\nALTOS LAB keeps quality review before publication instead of treating repair as an afterthought. Good automation does not force three weak posts per day. It repairs candidates until a human can read them, search can parse them, and metrics can improve the following round. The practical test is simple: after reading, the reader knows which process to inspect, who to ask, and which number to watch.\n\nThe 2026 public-source pattern is clear. OpenAI discusses tools, handoffs, and guardrails. Microsoft discusses the operating model of frontier firms. NIST gives a risk-management language. IBM explains governance. Put together, the useful lesson for a small team is not full autonomy first. The lesson is to make every important action leave inspectable evidence before scale.`;
+    ? `\n\n**決策要能被追問，才值得自動化。** 例如「誰可以按下發布」、「誰能改客戶可見的內容」、「哪一個數字超標就停止」這三欄，比一句導入願景更有價值。這些欄位也讓後續自動化能被測試，因為系統知道哪些行為需要留下截圖、來源、時間戳與審核者。這裡說的操作紀錄，應該是一張主管能看懂的責任表，而不是只留在工程師的 log 裡。\n\n**退回舊流程就是出事時先回到人工做法。** 這是一種讓團隊放心試新東西的安全設計。沒有退路，任何新功能都會變成一次豪賭；有退路，團隊可以小步測試、讀數據、修提示、換素材，然後再把通過的做法放大。這一段尤其適合放進採購、內容排程與客戶溝通流程，因為這三種情境都會直接影響外部信任。\n\n對內容營運來說，這套邏輯也會改變選題。內容系統不該只看今天哪個題目熱，而要看哪個題目能留下來源證據、讀者意圖與後續數據。當一篇文章沒有帶來搜尋曝光，團隊要分開看四件事：標題有沒有像讀者會問的問題、段落標題能不能被引用、圖片有沒有幫助理解、內文有沒有具體案例。這些都能被記錄，下一輪就不需要靠感覺猜。\n\nALTOS LAB 會把品質審查放在發布前，把發完再修留給例外狀況。好的自動化會每天把候選稿修到能被人讀、能被搜尋理解、能被數據回饋，再送進 production。今天的標準很簡單：讀者看完要知道自己下一步該查哪個流程、問誰、看哪個數字。\n\n從 2026 年的公開文件看，AI 導入已經從模型能力題轉成營運系統題。OpenAI 談工具、交接與安全邊界；Microsoft 談企業營運模型；NIST 談風險管理；IBM 談治理。四組來源放在一起，對中小型團隊的提醒反而很務實：不要先追求全自動，先讓每一次重要動作留下可檢查證據。\n\n這個做法也能直接套到官網每日發文。三篇專欄代表三次小型市場實驗：早上測高意圖題、下午測搜尋可引用題、晚上測採購或決策題。每一篇都要能回讀曝光、點擊、停留與來源引用。當數據不好，團隊要修的是角度、下標、段落密度與圖片理解力，而不是把同樣模板再跑一次。`
+    : `\n\n**Make the decision inspectable.** Ownership fields such as who can publish, who can change customer-visible output, and which metric stops the run matter more than an adoption slogan. They make automation testable, because the system knows which actions require screenshots, sources, timestamps, and reviewers. In plain terms, an operating log is not an engineer-only file; it is a responsibility table a manager can read.\n\n**Return to the old safe process means a human fallback.** It is the condition that lets a team test new tools without turning every launch into a bet. With no fallback, a new capability becomes a fragile promise. With a fallback, the team tests in smaller steps, reads data, revises prompts, changes visuals, and scales only the patterns that passed. This matters most in procurement, content scheduling, and customer communication because those flows touch external trust.\n\nFor content operations, this changes topic selection. the content system should ask more than which subject is hot today. It should ask which subject can hold source evidence, reader intent, and later performance data. When an article earns little search visibility, the topic is not always wrong. The title may not sound like a reader question, section headings may not be citable, images may not clarify the argument, or the body may lack a concrete case. Those signals can be recorded and used in the following run.\n\nALTOS LAB keeps quality review before publication instead of treating repair as an afterthought. Good automation does not force three weak posts per day. It repairs candidates until a human can read them, search can parse them, and metrics can improve the following round. The practical test is simple: after reading, the reader knows which process to inspect, who to ask, and which number to watch.\n\nThe 2026 public-source pattern is clear. OpenAI discusses tools, handoffs, and guardrails. Microsoft discusses the operating model of frontier firms. NIST gives a risk-management language. IBM explains governance. Put together, the useful lesson for a small team is not full autonomy first. The lesson is to make every important action leave inspectable evidence before scale.`;
   const visibleFaq = language === "zh-Hant"
     ? `\n\n## FAQ：讀者會追問的兩件事\n\n**${l.faq1}** ${l.faqA1}\n\n**${l.faq2}** ${l.faqA2}`
     : `\n\n## FAQ: Reader Objections Worth Answering\n\n**${l.faq1}** ${l.faqA1}\n\n**${l.faq2}** ${l.faqA2}`;
   const localExtra = language === "ja"
-    ? `\n\nここで大事なのは、判断を抽象論で終わらせないことだ。たとえば記事制作なら、どの出典を使ったか、どの段落が読者の判断を助けるか、どの画像が理解を補うか、公開後にどの数値を見るかを一つずつ残す。これにより、次の日の Hermes は単に新しい記事を作るのではなく、前日の結果を材料にして題材、見出し、画像、説明の順番を変えられる。\n\n小さなチームほど、この仕組みは効く。人数が少ない時は、暗黙の判断が一人に集中しやすい。証拠を残せば、判断が個人の記憶からチームの資産に変わる。検索流入が弱かった記事も、失敗として捨てるのではなく、タイトル、段落見出し、出典の見せ方、読者の次の行動を分けて直せる。\n\n実務では、三つの欄だけでも効果がある。第一に、誰が最後の公開判断を持つのか。第二に、どの資料が判断の根拠になったのか。第三に、失敗した時どの手順へ戻るのか。この三つが見えるだけで、AI の利用は「便利な道具」から「管理できる運用」に変わる。読者にとっても、記事が単なる要約で終わらず、明日確認すべき問いとして残る。\n\nさらに、記事の品質管理にも同じ考え方を使える。公開前に見るのは、文章が長いか短いかではなく、読者が判断できる材料があるかである。出典の意味、使える場面、使えない場面、最初に確認する数字がそろうと、記事は検索向けの文字列ではなく、読者が仕事で使えるメモになる。GEO でも SEO でも、この差は大きい。AI 要約が拾いやすいのは、抽象的な感想ではなく、短く引用できる判断と条件である。\n\n毎日の三本運用では、この考え方がさらに効く。朝の一本は課題意識の強い読者に向ける。午後の一本は検索で引用されやすい構造を強める。夜の一本は採用、予算、責任者の判断に寄せる。数字が弱い時は、テーマそのものを捨てる前に、見出し、出典の置き方、画像の説明、読者が持ち帰る問いを分けて直す。`
+    ? `\n\nここで大事なのは、判断を抽象論で終わらせないことだ。たとえば記事制作なら、どの出典を使ったか、どの段落が読者の判断を助けるか、どの画像が理解を補うか、公開後にどの数値を見るかを一つずつ残す。これにより、次の日の チームは単に新しい記事を作るのではなく、前日の結果を材料にして題材、見出し、画像、説明の順番を変えられる。\n\n小さなチームほど、この仕組みは効く。人数が少ない時は、暗黙の判断が一人に集中しやすい。証拠を残せば、判断が個人の記憶からチームの資産に変わる。検索流入が弱かった記事も、失敗として捨てるのではなく、タイトル、段落見出し、出典の見せ方、読者の次の行動を分けて直せる。\n\n実務では、三つの欄だけでも効果がある。第一に、誰が最後の公開判断を持つのか。第二に、どの資料が判断の根拠になったのか。第三に、失敗した時どの手順へ戻るのか。この三つが見えるだけで、AI の利用は「便利な道具」から「管理できる運用」に変わる。読者にとっても、記事が単なる要約で終わらず、明日確認すべき問いとして残る。\n\nさらに、記事の品質管理にも同じ考え方を使える。公開前に見るのは、文章が長いか短いかではなく、読者が判断できる材料があるかである。出典の意味、使える場面、使えない場面、最初に確認する数字がそろうと、記事は検索向けの文字列ではなく、読者が仕事で使えるメモになる。GEO でも SEO でも、この差は大きい。AI 要約が拾いやすいのは、抽象的な感想ではなく、短く引用できる判断と条件である。\n\n毎日の三本運用では、この考え方がさらに効く。朝の一本は課題意識の強い読者に向ける。午後の一本は検索で引用されやすい構造を強める。夜の一本は採用、予算、責任者の判断に寄せる。数字が弱い時は、テーマそのものを捨てる前に、見出し、出典の置き方、画像の説明、読者が持ち帰る問いを分けて直す。`
     : language === "ko"
-      ? `\n\n핵심은 판단을 추상적인 말로 끝내지 않는 것이다. 예를 들어 글을 발행한다면 어떤 출처를 썼는지, 어떤 단락이 독자의 판단을 돕는지, 어떤 이미지가 이해를 보완하는지, 공개 후 어떤 숫자를 볼지 남겨야 한다. 그래야 다음 날 Hermes가 단순히 새 글을 만드는 데서 멈추지 않고 전날 결과를 바탕으로 주제, 제목, 이미지, 설명 순서를 바꿀 수 있다.\n\n작은 팀일수록 이 구조는 더 중요하다. 사람이 적으면 판단이 한 사람의 기억에 몰리기 쉽다. 증거를 남기면 판단은 개인의 감각이 아니라 팀의 자산이 된다. 검색 유입이 약한 글도 실패로 버리지 않고 제목, 단락 제목, 출처 제시 방식, 독자의 다음 행동을 나누어 고칠 수 있다.\n\n실무에서는 세 칸만 있어도 충분히 시작할 수 있다. 첫째, 마지막 공개 결정을 누가 가지는가. 둘째, 어떤 자료가 판단의 근거인가. 셋째, 실패하면 어떤 절차로 돌아가는가. 이 세 칸이 보이면 AI 사용은 편리한 도구가 아니라 관리 가능한 운영 방식이 된다. 독자에게도 글이 단순 요약이 아니라 내일 확인할 질문으로 남는다.\n\n기사 품질 관리에도 같은 기준을 적용할 수 있다. 공개 전에 볼 것은 글의 길이가 아니라 독자가 판단할 재료가 있는지다. 출처의 의미, 쓸 수 있는 상황, 쓰면 안 되는 상황, 먼저 볼 숫자가 함께 있으면 글은 검색용 문장이 아니라 실무에서 쓰는 메모가 된다. GEO와 SEO에서도 이 차이는 크다. AI 요약이 잘 가져가는 것은 추상적인 감상이 아니라 짧게 인용할 수 있는 판단과 조건이다.\n\n매일 세 편을 운영할 때도 이 기준이 필요하다. 아침 글은 문제의식이 강한 독자에게 맞춘다. 오후 글은 검색에서 인용되기 쉬운 구조를 강화한다. 저녁 글은 구매, 예산, 책임자의 판단에 가까운 주제를 다룬다. 숫자가 약하면 주제를 버리기 전에 제목, 출처 배치, 이미지 설명, 독자가 가져갈 질문을 나누어 고친다.\n\n마지막으로, 이 구조는 팀의 말투도 바꾼다. AI가 쓴 듯한 문장은 보통 누구에게 말하는지 흐리고, 어떤 장면에서 쓸 수 있는지 흐리며, 실패했을 때 무엇을 해야 하는지 흐리다. 좋은 글은 반대로 한 사람의 업무 장면을 붙잡고, 출처를 근거로 판단을 좁히며, 독자가 바로 점검할 체크포인트를 남긴다. 그래서 Hermes의 품질 기준도 문장 미감에서 끝나지 않고, 데이터와 책임 경로까지 함께 본다.`
+      ? `\n\n핵심은 판단을 추상적인 말로 끝내지 않는 것이다. 예를 들어 글을 발행한다면 어떤 출처를 썼는지, 어떤 단락이 독자의 판단을 돕는지, 어떤 이미지가 이해를 보완하는지, 공개 후 어떤 숫자를 볼지 남겨야 한다. 그래야 다음 날 콘텐츠 시스템이 단순히 새 글을 만드는 데서 멈추지 않고 전날 결과를 바탕으로 주제, 제목, 이미지, 설명 순서를 바꿀 수 있다.\n\n작은 팀일수록 이 구조는 더 중요하다. 사람이 적으면 판단이 한 사람의 기억에 몰리기 쉽다. 증거를 남기면 판단은 개인의 감각이 아니라 팀의 자산이 된다. 검색 유입이 약한 글도 실패로 버리지 않고 제목, 단락 제목, 출처 제시 방식, 독자의 다음 행동을 나누어 고칠 수 있다.\n\n실무에서는 세 칸만 있어도 충분히 시작할 수 있다. 첫째, 마지막 공개 결정을 누가 가지는가. 둘째, 어떤 자료가 판단의 근거인가. 셋째, 실패하면 어떤 절차로 돌아가는가. 이 세 칸이 보이면 AI 사용은 편리한 도구가 아니라 관리 가능한 운영 방식이 된다. 독자에게도 글이 단순 요약이 아니라 내일 확인할 질문으로 남는다.\n\n기사 품질 관리에도 같은 기준을 적용할 수 있다. 공개 전에 볼 것은 글의 길이가 아니라 독자가 판단할 재료가 있는지다. 출처의 의미, 쓸 수 있는 상황, 쓰면 안 되는 상황, 먼저 볼 숫자가 함께 있으면 글은 검색용 문장이 아니라 실무에서 쓰는 메모가 된다. GEO와 SEO에서도 이 차이는 크다. AI 요약이 잘 가져가는 것은 추상적인 감상이 아니라 짧게 인용할 수 있는 판단과 조건이다.\n\n매일 세 편을 운영할 때도 이 기준이 필요하다. 아침 글은 문제의식이 강한 독자에게 맞춘다. 오후 글은 검색에서 인용되기 쉬운 구조를 강화한다. 저녁 글은 구매, 예산, 책임자의 판단에 가까운 주제를 다룬다. 숫자가 약하면 주제를 버리기 전에 제목, 출처 배치, 이미지 설명, 독자가 가져갈 질문을 나누어 고친다.\n\n마지막으로, 이 구조는 팀의 말투도 바꾼다. AI가 쓴 듯한 문장은 보통 누구에게 말하는지 흐리고, 어떤 장면에서 쓸 수 있는지 흐리며, 실패했을 때 무엇을 해야 하는지 흐리다. 좋은 글은 반대로 한 사람의 업무 장면을 붙잡고, 출처를 근거로 판단을 좁히며, 독자가 바로 점검할 체크포인트를 남긴다. 그래서 콘텐츠 품질 품질 기준도 문장 미감에서 끝나지 않고, 데이터와 책임 경로까지 함께 본다.`
       : "";
-  const body = `${sourceLead}\n\n${p[0]}\n\n## ${h1}\n\n${p[1]}\n\n${p[2]}\n\n> ${plan.excerpt[language]} ${language === "zh-Hant" ? "這句話不是口號，而是今天可以檢查的營運標準。" : "This is an operating standard the team can inspect today."}\n\n[IMAGE:evidence-desk]\n\n## ${h2}\n\n${table}\n\n${p[1]}\n\n${language === "zh-Hant" ? "把它放進產品表面，意思是審核者不用翻十個工具才知道一篇內容為什麼被發布。來源、審核、發布時間與讀回數據應該待在同一條紀錄裡。" : "Putting it on the product surface means reviewers do not need to open ten tools to know why a piece of content was published. Source, review, publish time, and readback data should live in one record."}\n\n## ${h3}\n\n${p[2]}\n\n${language === "zh-Hant" ? "真正的差別在於，文章要幫讀者判斷下一步。這也是 GEO 和 SEO 的交會點：搜尋引擎需要結構，AI 摘要需要可引用片段，真人讀者需要具體取捨。" : "The article has one job: help the reader choose the next check. That is where GEO and SEO meet: search engines need structure, AI summaries need citable passages, and real readers need tradeoffs."}\n\n${labsPointOfView(language, plan)}\n\n[IMAGE:operating-loop]\n\n## ${h4}\n\n${steps}${density}${localExtra}${visibleFaq}`;
+  const body = `${sourceLead}\n\n${p[0]}\n\n## ${h1}\n\n${p[1]}\n\n${p[2]}\n\n> ${plan.excerpt[language]} ${language === "zh-Hant" ? "這句話不是口號，而是今天可以檢查的營運標準。" : "This is an operating standard the team can inspect today."}\n\n[IMAGE:opening]\n\n## ${h2}\n\n${table}\n\n${p[1]}\n\n${language === "zh-Hant" ? "把它放進產品表面，意思是審核者不用翻十個工具才知道一篇內容為什麼被發布。來源、審核、發布時間與讀回數據應該待在同一條紀錄裡。" : "Putting it on the product surface means reviewers do not need to open ten tools to know why a piece of content was published. Source, review, publish time, and readback data should live in one record."}\n\n## ${h3}\n\n${p[2]}\n\n${language === "zh-Hant" ? "真正的差別在於，文章要幫讀者判斷下一步。這也是 GEO 和 SEO 的交會點：搜尋引擎需要結構，AI 摘要需要可引用片段，真人讀者需要具體取捨。" : "The article has one job: help the reader choose the next check. That is where GEO and SEO meet: search engines need structure, AI summaries need citable passages, and real readers need tradeoffs."}\n\n${labsPointOfView(language, plan)}\n\n[IMAGE:mechanism]\n\n## ${h4}\n\n${steps}${density}${localExtra}${visibleFaq}`;
   return body.replace(/\bworkflow\b/gi, "operating flow").replace(/\brollback\b/gi, "return path").replace(/\btrace\b/gi, "record").replace(/\beval(?:uation)?s?\b/gi, "test review");
 }
 
@@ -898,7 +898,7 @@ function contentImages(plan, imagePaths, generatedAt) {
       source: "generated",
       credit: first.credit || "ALTOS LAB editorial visual",
       aspectRatio: first.aspectRatio || "16:9",
-      placement: "after-section-1",
+      placement: "after-lead",
       provider: first.provider,
       prompt: first.prompt,
       generatedAt: first.generatedAt || generatedAt,
@@ -911,7 +911,7 @@ function contentImages(plan, imagePaths, generatedAt) {
       source: "generated",
       credit: second.credit || "ALTOS LAB editorial visual",
       aspectRatio: second.aspectRatio || "16:9",
-      placement: "after-section-3",
+      placement: "mid-article",
       provider: second.provider,
       prompt: second.prompt,
       generatedAt: second.generatedAt || generatedAt,
@@ -952,14 +952,14 @@ function postFor(plan, language, date, slot, imagePaths, generatedAt) {
     newsCategory: plan.category,
     topic: plan.topic,
     audience: "founders, operators, marketing leads and AI implementation teams",
-    geoSummary: `${title}: source-backed AI operations column for readers comparing implementation, governance, SEO and GEO decisions.`,
+    geoSummary: `${title}: ${excerpt}`,
     body,
     keyTakeaways: makeTakeaways(language),
     faqs: makeFaqs(language),
     sourceLinks: sourceLinks(plan.key, date),
     tags: plan.tags,
     author: "Ken",
-    readTimeMinutes: 8,
+    readTimeMinutes: 0,
     ...coverPathFields(cover),
     coverAlt: plan.coverAlt,
     coverSource: "generated",

@@ -594,7 +594,12 @@ assert(cms.includes("normalizeContentImages"), "CMS normalizes structured in-art
 assert(cms.includes("column and feature posts require at least two in-article images"), "CMS publish validation blocks columns/features without content images");
 assert(blogArticle.includes("ArticleBodyWithImages"), "article renderer interleaves structured content images into the article body");
 assert(blogArticle.includes("[IMAGE:") && blogArticle.includes("imageMatchesMarker"), "article renderer supports explicit in-body content image markers");
+assert(blogArticle.includes('"evidence-desk"') && blogArticle.includes('"operating-loop"'), "article renderer maps legacy evidence/operating markers to real content images");
 assert(blogArticle.includes("imageCount > 1 && sectionCount > 2"), "article renderer distributes duplicate mid-article images instead of stacking them together");
+assert(cms.includes("normalizedReadTimeMinutes") && cms.includes("estimatedReadTime + 1"), "CMS clamps generated read-time metadata to the final body estimate");
+assert(quality.includes("imageMarkerPacingIssues") && quality.includes("in-article images are too close together"), "quality gate blocks content images that would render too close together");
+assert(quality.includes("column read time is inflated relative to article density"), "quality gate blocks inflated column read-time metadata");
+assert(aiFeelingAudit.includes("column-depth-too-thin") && aiFeelingAudit.includes("content-images-too-close"), "public audit checks column depth and in-article image pacing");
 assert(richText.includes("<blockquote") && richText.includes("/^>\\s+/"), "RichText renders markdown blockquotes instead of leaking raw > characters");
 assert(globals.includes(".article-inline-figure"), "Blog article CSS styles structured in-article images");
 assert(blogIndex.includes("市場專欄"), "Blog navigation restores the Traditional Chinese market-column lane");

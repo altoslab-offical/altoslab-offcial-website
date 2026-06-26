@@ -119,6 +119,7 @@ async function hydrateAuditPosts(root, posts) {
   const queue = posts
     .map((post, index) => ({ post, index }))
     .filter(({ post }) => {
+      if (post.contentType === "column" || post.contentType === "feature") return true;
       if (post.contentType !== "breaking") return false;
       if (!Array.isArray(post.sourceLinks) || post.sourceLinks.length < 1) return true;
       if (!Array.isArray(post.keyTakeaways) || post.keyTakeaways.length < 2) return true;
@@ -210,6 +211,58 @@ function overlapRatio(a = "", b = "") {
   return shared / Math.min(leftGrams.size, rightGrams.size);
 }
 
+function wordishLength(markdown = "", language = "zh-Hant") {
+  const text = stripHtml(markdown)
+    .replace(/```[\s\S]*?```/g, " ")
+    .replace(/[#>*_`[\]()!-]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+  if (["en", "id", "vi", "ms", "fil"].includes(language)) return text.split(/\s+/).filter(Boolean).length;
+  if (language === "zh-Hant") return (text.match(/[\u4e00-\u9fff]/g) || []).length;
+  if (language === "ja") return (text.match(/[\u3040-\u30ff\u4e00-\u9fff]/g) || []).length;
+  if (language === "th") return (text.match(/[\u0e00-\u0e7f]/g) || []).length;
+  return (text.match(/[\uac00-\ud7af]/g) || []).length;
+}
+
+function columnDensityMinimum(language = "zh-Hant") {
+  if (["en", "id", "vi", "ms", "fil"].includes(language)) return 950;
+  if (language === "th") return 2200;
+  if (language === "ja" || language === "ko") return 1650;
+  return 2000;
+}
+
+function imageMarkers(body = "") {
+  return [...String(body).matchAll(/\[IMAGE:([^\]]+)\]/gi)].map((match) => ({
+    name: String(match[1] || "").trim().toLowerCase().replace(/_/g, "-"),
+    index: Number(match.index || 0)
+  }));
+}
+
+const ALLOWED_IMAGE_MARKERS = new Set(["opening", "mechanism", "synthesis", "evidence-desk", "source-desk", "operating-loop", "repair-scene"]);
+
+function imagePacingIssues(post) {
+  const contentImages = Array.isArray(post.contentImages) ? post.contentImages : [];
+  const markers = imageMarkers(post.body || "");
+  const issues = [];
+  if (contentImages.length > 1 && markers.length < contentImages.length) {
+    issues.push({ severity: "critical", id: "content-images-can-stack-without-markers" });
+  }
+  for (const marker of markers) {
+    if (!ALLOWED_IMAGE_MARKERS.has(marker.name)) issues.push({ severity: "critical", id: "unknown-image-marker", marker: marker.name });
+  }
+  if (markers.length >= 2) {
+    for (let index = 1; index < markers.length; index += 1) {
+      const between = String(post.body || "").slice(markers[index - 1].index, markers[index].index);
+      const minimumGap = ["en", "id", "vi", "ms", "fil"].includes(post.language) ? 250 : 650;
+      if (wordishLength(between, post.language) < minimumGap) {
+        issues.push({ severity: "critical", id: "content-images-too-close" });
+        break;
+      }
+    }
+  }
+  return issues;
+}
+
 function auditPost(post) {
   const text = publicText(post);
   const isMarket = post.contentType === "breaking";
@@ -232,6 +285,14 @@ function auditPost(post) {
     issues.push({ severity: "critical", id: "market-takeaways-too-thin" });
   }
   if (!isMarket) {
+    const density = wordishLength(post.body || "", post.language);
+    if (density < columnDensityMinimum(post.language)) {
+      issues.push({ severity: "critical", id: "column-depth-too-thin", density, minimum: columnDensityMinimum(post.language) });
+    }
+    if (Number(post.readTimeMinutes || 0) >= 6 && density < columnDensityMinimum(post.language)) {
+      issues.push({ severity: "critical", id: "readtime-inflated-vs-density", density, readTimeMinutes: post.readTimeMinutes });
+    }
+    issues.push(...imagePacingIssues(post));
     const recycledTakeaways = (post.keyTakeaways || []).filter((item) => RECYCLED_COLUMN_TAKEAWAYS.some((pattern) => pattern.test(String(item).trim())));
     if (recycledTakeaways.length >= 2) issues.push({ severity: "critical", id: "recycled-column-takeaways" });
     const recycledFaqs = (post.faqs || []).filter((faq) => RECYCLED_COLUMN_FAQS.some((pattern) => pattern.test(`${faq.question || ""}\n${faq.answer || ""}`)));

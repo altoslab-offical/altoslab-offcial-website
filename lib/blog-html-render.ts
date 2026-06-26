@@ -321,7 +321,9 @@ function imageMatchesPlaceholder(image: NonNullable<BlogPost["contentImages"]>[n
   if (url.includes(`-${normalizedKey}.`) || url.includes(`/${normalizedKey}.`)) return true;
   if (styleId.includes(normalizedKey)) return true;
   if (normalizedKey === "opening" && placement === "after-lead") return true;
+  if ((normalizedKey === "evidence-desk" || normalizedKey === "source-desk") && (placement === "after-lead" || index === 0)) return true;
   if (normalizedKey === "mechanism" && placement === "mid-article") return true;
+  if ((normalizedKey === "operating-loop" || normalizedKey === "repair-scene") && (placement === "mid-article" || index === 1)) return true;
   if (normalizedKey === "image" && index === 0) return true;
   return false;
 }

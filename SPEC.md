@@ -103,6 +103,10 @@ Required UI invariants:
   image markers or a distributed fallback. Consecutive in-article image blocks
   are treated as a content-quality defect because they break reading rhythm and
   make columns feel machine-assembled.
+- Blog article renderers must keep a compatibility layer for older production
+  marker names such as `[IMAGE:evidence-desk]` and `[IMAGE:operating-loop]`,
+  but production repair should normalize released copy to `[IMAGE:opening]`
+  and `[IMAGE:mechanism]` so future QA can reason about image pacing.
 - The list page should show up to 24 cards per page, then expose the rest of the published archive through pagination. Cloudflare D1 projection reads must be chunked so the public inventory cannot silently stop at a 20-row runtime page.
 - On Cloudflare, the default blog index must use a count + paged inventory read: fetch the published total for the sidebar/page count, then fetch only the current 24-card page. Do not load every article in a language just to render `/blog`.
 - RSS, `llms.txt`, `llms-full.txt`, public blog API smoke checks, and `sitemap.xml` must use bounded or lightweight D1 reads. `sitemap.xml` should read slug/language/update columns instead of parsing every inventory JSON payload during a Worker request.

@@ -256,6 +256,15 @@ function stripInlineFaqSection(body: string, hasStructuredFaqs: boolean) {
   return [...before, ...after].join("\n").replace(/\n{3,}/g, "\n\n").trim();
 }
 
+function normalizedReadTimeMinutes(estimatedReadTime: number, providedReadTime: unknown) {
+  const provided = Number(providedReadTime || 0);
+  if (!Number.isFinite(provided) || provided <= 0) return estimatedReadTime;
+
+  // Editors can round up slightly, but generated drafts cannot inflate a thin
+  // article into a long read and bypass professional-density review.
+  return Math.max(estimatedReadTime, Math.min(provided, estimatedReadTime + 1));
+}
+
 function hydrateBlogPost(post: BlogPost): BlogPost {
   const language = normalizeBlogLanguage(post.language);
   const body = stripInlineFaqSection(post.body || "", Boolean(post.faqs?.length));
@@ -284,7 +293,7 @@ function hydrateBlogPost(post: BlogPost): BlogPost {
     author,
     translationGroupId: post.translationGroupId || `seed-${post.slug}`,
     sourceLinks,
-    readTimeMinutes: Math.max(estimatedReadTime, Number(post.readTimeMinutes || 0) || 0),
+    readTimeMinutes: normalizedReadTimeMinutes(estimatedReadTime, post.readTimeMinutes),
     featured: Boolean(post.featured),
     reviewStatus: post.reviewStatus || (post.generatedBy ? "ai-draft" : "approved"),
     qualityChecks: defaultQualityChecks({
@@ -1697,7 +1706,7 @@ export function normalizeBlogPostInput(input: Partial<BlogPost>, existing?: Blog
     coverLicense: input.coverLicense ?? existing?.coverLicense,
     coverLicenseUrl: input.coverLicenseUrl ?? existing?.coverLicenseUrl,
     contentImages,
-    readTimeMinutes: Math.max(estimatedReadTime, Number(input.readTimeMinutes ?? existing?.readTimeMinutes ?? 0) || 0),
+    readTimeMinutes: normalizedReadTimeMinutes(estimatedReadTime, input.readTimeMinutes ?? existing?.readTimeMinutes),
     featured: Boolean(input.featured ?? existing?.featured ?? false),
     reviewStatus: input.reviewStatus ?? existing?.reviewStatus ?? "ai-draft",
     qualityChecks,

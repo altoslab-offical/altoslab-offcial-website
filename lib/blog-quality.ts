@@ -204,7 +204,7 @@ const repeatedColumnFaqPatterns = [
 const publicOperatorLeakPattern = /\b(Hermes|OpenClaw)\b/i;
 
 const genericRepairCaptionPattern =
-  /(第一張圖把主題拉回|第二張圖呈現|opening image|mechanism image|operating tension visible|decision can be checked|editorial visual$|把主題拉回實際營運證據|讓這個決策可以被檢查)/i;
+  /(第一張圖把主題拉回|第二張圖呈現|opening image|mechanism image|operating tension visible|decision can be checked|editorial visual$|把主題拉回實際營運證據|讓這個決策可以被檢查|來源材料、決策欄位|發布後的讀數據|source evidence table|measurement and repair scene|physical source desk|physical measurement scene)/i;
 
 const legacyRepairMediaPattern = /\/api\/blog\/generated-media\/legacy-(?:cover|inline)-repair/i;
 
@@ -771,15 +771,16 @@ function minimumBodyLength(contentType: BlogContentType, language: BlogLanguage)
     return latinLanguage ? 100 : 150;
   }
   if (contentType === "feature") {
-    return latinLanguage ? 900 : 1300;
+    return latinLanguage ? 1100 : 1700;
   }
-  return latinLanguage ? 620 : 900;
+  return latinLanguage ? 900 : 1500;
 }
 
 function knowledgeDenseColumnMinimum(language: BlogLanguage) {
-  if (["en", "id", "vi", "ms", "fil"].includes(language)) return 900;
-  if (language === "th") return 1300;
-  return 1600;
+  if (["en", "id", "vi", "ms", "fil"].includes(language)) return 950;
+  if (language === "th") return 2200;
+  if (language === "ja" || language === "ko") return 1650;
+  return 2000;
 }
 
 function markdownHeadingCount(body: string) {
@@ -827,6 +828,57 @@ function hasExplicitImageMarkers(body: string) {
 function repeatedContentImagePlacement(images: BlogInlineImage[]) {
   const placements = images.map((image) => image.placement || "").filter(Boolean);
   return placements.length > 1 && new Set(placements).size < placements.length;
+}
+
+function imageMarkers(body: string) {
+  return [...body.matchAll(/\[IMAGE:([^\]]+)\]/gi)].map((match) => ({
+    name: String(match[1] || "").trim().toLowerCase().replace(/_/g, "-"),
+    index: Number(match.index || 0)
+  }));
+}
+
+const allowedImageMarkers = new Set([
+  "opening",
+  "mechanism",
+  "synthesis",
+  "evidence-desk",
+  "source-desk",
+  "operating-loop",
+  "repair-scene"
+]);
+
+function imageMarkerPacingIssues(post: BlogPost) {
+  if (post.contentType !== "column" && post.contentType !== "feature") return [];
+  const markers = imageMarkers(post.body);
+  if (!markers.length) return [];
+
+  const issues: string[] = [];
+  const contentImages = post.contentImages || [];
+  if (contentImages.length > markers.length) {
+    issues.push("in-article images need explicit [IMAGE:*] markers for each image so figures do not stack at the end");
+  }
+
+  const unknownMarkers = markers.filter((marker) => !allowedImageMarkers.has(marker.name)).map((marker) => marker.name);
+  if (unknownMarkers.length) {
+    issues.push(`article uses unknown image markers that may not render in place: ${[...new Set(unknownMarkers)].join(", ")}`);
+  }
+
+  if (markers.length >= 2) {
+    const body = post.body || "";
+    for (let index = 1; index < markers.length; index += 1) {
+      const previous = markers[index - 1];
+      const current = markers[index];
+      const between = body.slice(previous.index, current.index);
+      const betweenUnits = wordishLength(between, post.language);
+      const minimumGap = ["en", "id", "vi", "ms", "fil"].includes(post.language) ? 250 : 650;
+      if (betweenUnits < minimumGap) {
+        issues.push("in-article images are too close together; separate figures with substantial argument, evidence or reader guidance");
+        break;
+      }
+    }
+  }
+
+  return issues;
 }
 
 function boldEmphasisItems(body: string) {
@@ -1100,6 +1152,9 @@ export function reviewContentTypeFit(post: BlogPost): ReviewResult {
     }
     if (length < knowledgeDenseColumnMinimum(post.language)) {
       issues.push("column body is too thin for a professional source-backed column; expand with evidence, examples, tradeoffs and useful reader judgment");
+    }
+    if (post.readTimeMinutes >= 6 && length < knowledgeDenseColumnMinimum(post.language)) {
+      issues.push("column read time is inflated relative to article density; estimate read time from the final body instead of trusting generator metadata");
     }
     if (!hasSpecificScene && !hasCallout && !hasTable) {
       issues.push("column needs a concrete scene, case moment, source-backed example or distinctive editorial passage");
@@ -1531,6 +1586,7 @@ export function reviewImageFit(post: BlogPost): ReviewResult {
 
   if (post.contentType === "column" || post.contentType === "feature") {
     const contentImages = post.contentImages || [];
+    issues.push(...imageMarkerPacingIssues(post));
     const imageUrls = contentImages.map((image) => image.url?.trim()).filter(Boolean);
     const imagePrompts = contentImages.map((image) => image.prompt?.trim()).filter(Boolean);
     if (new Set(imageUrls).size < imageUrls.length) issues.push("content images must not reuse the same URL inside one article");

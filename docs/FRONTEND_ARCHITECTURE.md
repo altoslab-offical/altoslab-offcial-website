@@ -115,6 +115,11 @@ Article detail rendering has a shared visual contract across Next and the direct
   repeated `mid-article` placements without markers, `BlogArticle` distributes
   the figures across the article instead of stacking consecutive images after
   one section.
+- Legacy marker names from older production writers, including
+  `[IMAGE:evidence-desk]`, `[IMAGE:source-desk]`, `[IMAGE:operating-loop]`,
+  and `[IMAGE:repair-scene]`, are renderer aliases for the current opening and
+  mechanism figure slots. Quality repair must normalize those markers back to
+  `[IMAGE:opening]` and `[IMAGE:mechanism]` before release.
 - `geo-summary`, `article-takeaways`, `strong`, and `blockquote` use black text plus restrained signal-lime `#c8ff00` underline or side-marker styling. Takeaway highlights should fit the text, not fill the row.
 - Cloudflare builds must clean stale Next artifacts before generating OpenNext output, and deploy preflight must inspect the built CSS chunks so the reduced article title scale and inline signal-lime takeaway treatment cannot regress during publish.
 - The retired purple article accent must not appear in direct-rendered article pages.
