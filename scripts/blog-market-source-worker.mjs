@@ -122,7 +122,7 @@ function buildPost(language, pack, date, localizedPack = pack) {
     sortOrder: Number(pack.sequence) || 0,
     updatedAt: new Date().toISOString(),
     publishedAt: source.publishedAt || new Date().toISOString(),
-    generatedBy: `hermes-owner:market-source-worker:${marketGenerationProvider()}`,
+    generatedBy: `source-translation:market-source-worker:${marketTranslationProvider()}`,
     generationTrace: [
       {
         lane: "market-news",
@@ -137,9 +137,23 @@ function buildPost(language, pack, date, localizedPack = pack) {
 }
 
 function marketGenerationProvider() {
-  const provider = String(process.env.BLOG_MARKET_TRANSLATION_PROVIDER || "hermes-owner").trim().toLowerCase();
-  const allowed = new Set(["gemini-chatgpt", "local-antigravity", "local", "hermes-owner", "codex-gpt-5.4", "codex-gpt-5.4-subagent"]);
-  return allowed.has(provider) ? provider : "hermes-owner";
+  return "source-translation";
+}
+
+function marketTranslationProvider() {
+  const provider = String(process.env.BLOG_MARKET_TRANSLATION_PROVIDER || "google-web").trim().toLowerCase();
+  const allowed = new Set([
+    "gemini-chatgpt",
+    "local-antigravity",
+    "local",
+    "hermes-owner",
+    "codex-gpt-5.4",
+    "codex-gpt-5.4-subagent",
+    "google-web",
+    "google-gtx",
+    "public-google"
+  ]);
+  return allowed.has(provider) ? provider : "google-web";
 }
 
 async function main() {
@@ -192,6 +206,7 @@ async function main() {
       generatedAt: new Date().toISOString(),
       generation: {
         provider: marketGenerationProvider(),
+        translationProvider: marketTranslationProvider(),
         promptVersion: "altos-market-source-worker-v2",
         model: "Codex source article extractor + source-faithful localization worker",
         lane: "source-translation"

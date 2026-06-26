@@ -121,6 +121,15 @@ function hasFlag(name) {
   return process.argv.includes(`--${name}`);
 }
 
+function csvArgSet(name) {
+  return new Set(
+    arg(name, "")
+      .split(",")
+      .map((item) => item.trim())
+      .filter(Boolean)
+  );
+}
+
 function usage() {
   console.log(`
 ALTOS LAB market-news source scanner
@@ -812,6 +821,8 @@ async function main() {
   const sequences = await queueMarketSequences(queueDir, maxPacks);
   if (!sequences.length) throw new Error(`no market queue sequences found in ${queueDir}`);
   const existing = await readJson(outPath).catch(() => []);
+  const excludedSourceUrls = csvArgSet("exclude-source-urls");
+  const excludedSourceUrlKeys = new Set([...excludedSourceUrls, ...[...excludedSourceUrls].map(normalizeUrlForDuplicate)]);
   const reservedSourceUrls = new Set(
     Array.isArray(existing)
       ? existing
@@ -833,6 +844,7 @@ async function main() {
     .filter((candidate) => {
       if (seenCandidateUrls.has(candidate.url)) return false;
       seenCandidateUrls.add(candidate.url);
+      if (excludedSourceUrls.has(candidate.url) || excludedSourceUrlKeys.has(normalizeUrlForDuplicate(candidate.url))) return false;
       if (reservedSourceUrls.has(candidate.url) || reservedSourceUrls.has(normalizeUrlForDuplicate(candidate.url))) return false;
       if (live.sourceUrls.has(candidate.url) || live.sourceUrls.has(normalizeUrlForDuplicate(candidate.url))) return false;
       if (live.titleKeys.has(normalizeTitle(candidate.title))) return false;
@@ -925,6 +937,7 @@ async function main() {
         queueSequences: sequences,
         newsDepth,
         perSourceScanCap: PER_SOURCE_SCAN_CAP,
+        excludedSourceUrls: excludedSourceUrls.size,
         policy: "publish every qualified, source-backed market item; daily minimum is a floor, not a cap",
         candidates: candidates.length,
         packsGenerated: packs.length,

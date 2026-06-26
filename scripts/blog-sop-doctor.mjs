@@ -23,6 +23,34 @@ const GENERIC_STOCK_IMAGE_HOSTS = [
   "api.openverse.org",
   "api.openverse.engineering"
 ];
+const WEAK_MARKET_TITLE_PATTERNS = [
+  /更新：/i,
+  /市場訊號/i,
+  /可以拿來/i,
+  /工作流/i,
+  /流程/i,
+  /^[^「"\n]{2,90}\s*(?:發布|發佈|公開|報導|報道)「[^」]*[A-Za-z]{4,}\s+[A-Za-z]{4,}[^」]*」/i
+];
+const GENERIC_MARKET_BODY_PATTERNS = [
+  /企業讀者應先判斷/i,
+  /企業團隊需要先核對/i,
+  /來源連結可回查圖片出處、原始脈絡與後來更新/i,
+  /後續可追蹤文件更新/i,
+  /這則新聞的重點不是抽象評論/i,
+  /不是同類工具會不會更多，而是/i,
+  /接下來要看(?:的是)?/i,
+  /後續要看/i,
+  /兩週內先跑/i,
+  /選一個高頻但風險可控/i,
+  /進入下一輪預算與部署討論/i
+];
+const WEAK_MARKET_SOURCE_SUMMARY_PATTERNS = [
+  /報導提到\s+[A-Za-z][^。]{0,80}(?:、U|,\s*U)/i,
+  /報導牽涉/i,
+  /source involves/i,
+  /current AI coverage/i,
+  /related reporting/i
+];
 const LAUNCH_AGENT_TRIGGERS = [
   [8, 10],
   [9, 10],
@@ -222,6 +250,64 @@ function addIssue(errors, message, context = {}) {
 
 function addWarning(warnings, message, context = {}) {
   warnings.push({ message, ...context });
+}
+
+const NON_LATIN_MARKET_LANGUAGES = new Set(["zh-Hant", "ja", "ko", "th"]);
+
+function containsLongEnglishQuote(text = "", language = "") {
+  if (!NON_LATIN_MARKET_LANGUAGES.has(language)) return false;
+  const quotes = String(text || "").match(/[「"][^」"]{28,}[^」"]*[」"]/g) || [];
+  return quotes.some((quote) => {
+    const asciiWords = quote.match(/\b[A-Za-z][A-Za-z'’-]{3,}\b/g) || [];
+    const asciiChars = (quote.match(/[A-Za-z]/g) || []).length;
+    return asciiWords.length >= 6 && asciiChars / Math.max(quote.length, 1) > 0.45;
+  });
+}
+
+function marketNewsCopyGateIssues(post = {}) {
+  const issues = [];
+  const source = Array.isArray(post.sourceLinks) ? post.sourceLinks[0] || {} : {};
+  const sourceTitle = String(source.title || "").trim();
+  const sourcePublisher = String(source.publisher || "").trim();
+  const text = [
+    post.title,
+    post.seoTitle,
+    post.seoDescription,
+    post.excerpt,
+    post.geoSummary,
+    post.body,
+    ...(post.keyTakeaways || [])
+  ]
+    .filter(Boolean)
+    .join("\n");
+
+  for (const pattern of WEAK_MARKET_TITLE_PATTERNS) {
+    if (pattern.test(post.title || "")) issues.push("market news title is weak, template-like, or leaks the raw source title");
+  }
+  for (const pattern of GENERIC_MARKET_BODY_PATTERNS) {
+    if (pattern.test(text)) issues.push("market news copy contains generic advice filler instead of source-faithful facts");
+  }
+  for (const pattern of WEAK_MARKET_SOURCE_SUMMARY_PATTERNS) {
+    if (pattern.test(text)) issues.push("market news copy is too vague about the source article's concrete claims");
+  }
+  if (
+    post.language !== "en" &&
+    sourceTitle.length > 30 &&
+    /[A-Za-z]{4,}\s+[A-Za-z]{4,}/.test(sourceTitle) &&
+    text.includes(sourceTitle)
+  ) {
+    issues.push("non-English market news must not paste the full English source title into public copy");
+  }
+  if (containsLongEnglishQuote(text, post.language)) {
+    issues.push("non-English market news contains long quoted English source text");
+  }
+  if (
+    sourcePublisher &&
+    new RegExp(`^${sourcePublisher.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\s+(?:發布|發佈|公開|報導|報道)`, "i").test(post.title || "")
+  ) {
+    issues.push("market news title should lead with the source event, not a publisher-announcement template");
+  }
+  return [...new Set(issues)];
 }
 
 function chromeProfileEmail(evidence) {
@@ -518,6 +604,9 @@ function checkReleaseCandidate({ date, slot, lane }, errors, warnings) {
         }
       }
       if (post.contentType === "breaking") {
+        for (const issue of marketNewsCopyGateIssues(post)) {
+          addIssue(errors, `${post.language}/${post.slug}: ${issue}`);
+        }
         if (post.coverSource !== "source") {
           addIssue(errors, `${post.language}/${post.slug}: market news coverSource must be source`);
         }

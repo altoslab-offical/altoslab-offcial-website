@@ -27,7 +27,7 @@ const TRANSLATION_FETCH_TIMEOUT_MS = Math.max(
 function localMarketFallbackAllowed(provider = "") {
   if (LOCAL_PROVIDER_ALIASES.has(provider)) return process.env.BLOG_MARKET_ALLOW_LOCAL_TRANSLATION_FALLBACK === "1";
   if (HERMES_DETERMINISTIC_PROVIDER_ALIASES.has(provider)) {
-    return process.env.BLOG_MARKET_HERMES_ALLOW_DETERMINISTIC_SOURCE_TRANSLATION !== "0";
+    return process.env.BLOG_MARKET_HERMES_ALLOW_DETERMINISTIC_SOURCE_TRANSLATION === "1";
   }
   return process.env.BLOG_MARKET_ALLOW_LOCAL_TRANSLATION_FALLBACK === "1";
 }
@@ -44,6 +44,7 @@ function decodeHtmlEntities(value = "") {
     .replace(/&amp;/g, "&")
     .replace(/&quot;/g, "\"")
     .replace(/&#039;/g, "'")
+    .replace(/&nbsp;/g, " ")
     .replace(/&lt;/g, "<")
     .replace(/&gt;/g, ">");
 }
@@ -51,6 +52,7 @@ function decodeHtmlEntities(value = "") {
 function cleanTranslatedText(value = "", language = "") {
   let text = decodeHtmlEntities(value)
     .replace(/[—–]/g, ",")
+    .replace(/\bnot only\s+([^.!?;,]{8,160}),?\s+but also\s+/gi, "$1 and ")
     .replace(/\s+/g, " ")
     .trim();
   if (language === "zh-Hant") {
@@ -429,7 +431,7 @@ async function gcloudAccessToken() {
 
 async function translateTexts(texts, { target, projectId }) {
   if (process.env.BLOG_MARKET_ENABLE_GCP_TRANSLATION !== "1") {
-    throw new Error("GCP Cloud Translation is disabled for ALTOS LAB production; use BLOG_MARKET_TRANSLATION_PROVIDER=google-web or hermes-owner");
+    throw new Error("GCP Cloud Translation is disabled for ALTOS LAB production; use BLOG_MARKET_TRANSLATION_PROVIDER=google-web, or explicitly opt in before using hermes-owner deterministic fallback");
   }
   if (!projectId) {
     throw new Error("GCP Cloud Translation requires an explicit projectId when BLOG_MARKET_ENABLE_GCP_TRANSLATION=1");
@@ -541,7 +543,7 @@ async function translateTextsGoogleWeb(texts, { target }) {
 }
 
 export async function localizeSourcePack(pack, { projectId = "", required = true, languages = [] } = {}) {
-  const provider = (process.env.BLOG_MARKET_TRANSLATION_PROVIDER || "hermes-owner").trim().toLowerCase();
+  const provider = (process.env.BLOG_MARKET_TRANSLATION_PROVIDER || "google-web").trim().toLowerCase();
   if (provider === "off") {
     if (required) throw new Error("market translation provider is off");
     return {};

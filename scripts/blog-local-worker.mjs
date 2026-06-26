@@ -18,6 +18,34 @@ const REQUIRED_CHROME_PROFILE_EMAIL = "john.wu0120@gmail.com";
 const LEGACY_REPAIR_MEDIA_PATTERN = /\/api\/blog\/generated-media\/legacy-(?:cover|inline)-repair/i;
 const GENERIC_REPAIR_CAPTION_PATTERN =
   /(第一張圖把主題拉回|第二張圖呈現|opening image|mechanism image|operating tension visible|decision can be checked|editorial visual$|把主題拉回實際營運證據|讓這個決策可以被檢查)/i;
+const WEAK_MARKET_TITLE_PATTERNS = [
+  /更新：/i,
+  /市場訊號/i,
+  /可以拿來/i,
+  /工作流/i,
+  /流程/i,
+  /^[^「"\n]{2,90}\s*(?:發布|發佈|公開|報導|報道)「[^」]*[A-Za-z]{4,}\s+[A-Za-z]{4,}[^」]*」/i
+];
+const GENERIC_MARKET_BODY_PATTERNS = [
+  /企業讀者應先判斷/i,
+  /企業團隊需要先核對/i,
+  /來源連結可回查圖片出處、原始脈絡與後來更新/i,
+  /後續可追蹤文件更新/i,
+  /這則新聞的重點不是抽象評論/i,
+  /不是同類工具會不會更多，而是/i,
+  /接下來要看(?:的是)?/i,
+  /後續要看/i,
+  /兩週內先跑/i,
+  /選一個高頻但風險可控/i,
+  /進入下一輪預算與部署討論/i
+];
+const WEAK_MARKET_SOURCE_SUMMARY_PATTERNS = [
+  /報導提到\s+[A-Za-z][^。]{0,80}(?:、U|,\s*U)/i,
+  /報導牽涉/i,
+  /source involves/i,
+  /current AI coverage/i,
+  /related reporting/i
+];
 
 function arg(name, fallback = "") {
   const index = process.argv.indexOf(`--${name}`);
@@ -86,6 +114,64 @@ function signedHeaders(secret, body) {
 
 function sourceUrls(post) {
   return (post.sourceLinks || []).map((source) => source.url).sort();
+}
+
+const NON_LATIN_MARKET_LANGUAGES = new Set(["zh-Hant", "ja", "ko", "th"]);
+
+function containsLongEnglishQuote(text = "", language = "") {
+  if (!NON_LATIN_MARKET_LANGUAGES.has(language)) return false;
+  const quotes = String(text || "").match(/[「"][^」"]{28,}[^」"]*[」"]/g) || [];
+  return quotes.some((quote) => {
+    const asciiWords = quote.match(/\b[A-Za-z][A-Za-z'’-]{3,}\b/g) || [];
+    const asciiChars = (quote.match(/[A-Za-z]/g) || []).length;
+    return asciiWords.length >= 6 && asciiChars / Math.max(quote.length, 1) > 0.45;
+  });
+}
+
+function marketNewsCopyGateIssues(post = {}) {
+  const issues = [];
+  const source = Array.isArray(post.sourceLinks) ? post.sourceLinks[0] || {} : {};
+  const sourceTitle = String(source.title || "").trim();
+  const sourcePublisher = String(source.publisher || "").trim();
+  const text = [
+    post.title,
+    post.seoTitle,
+    post.seoDescription,
+    post.excerpt,
+    post.geoSummary,
+    post.body,
+    ...(post.keyTakeaways || [])
+  ]
+    .filter(Boolean)
+    .join("\n");
+
+  for (const pattern of WEAK_MARKET_TITLE_PATTERNS) {
+    if (pattern.test(post.title || "")) issues.push("market news title is weak, template-like, or leaks the raw source title");
+  }
+  for (const pattern of GENERIC_MARKET_BODY_PATTERNS) {
+    if (pattern.test(text)) issues.push("market news copy contains generic advice filler instead of source-faithful facts");
+  }
+  for (const pattern of WEAK_MARKET_SOURCE_SUMMARY_PATTERNS) {
+    if (pattern.test(text)) issues.push("market news copy is too vague about the source article's concrete claims");
+  }
+  if (
+    post.language !== "en" &&
+    sourceTitle.length > 30 &&
+    /[A-Za-z]{4,}\s+[A-Za-z]{4,}/.test(sourceTitle) &&
+    text.includes(sourceTitle)
+  ) {
+    issues.push("non-English market news must not paste the full English source title into public copy");
+  }
+  if (containsLongEnglishQuote(text, post.language)) {
+    issues.push("non-English market news contains long quoted English source text");
+  }
+  if (
+    sourcePublisher &&
+    new RegExp(`^${sourcePublisher.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\s+(?:發布|發佈|公開|報導|報道)`, "i").test(post.title || "")
+  ) {
+    issues.push("market news title should lead with the source event, not a publisher-announcement template");
+  }
+  return [...new Set(issues)];
 }
 
 function hashString(input) {
@@ -659,6 +745,9 @@ function localPreflight(payload) {
     const generation = post.coverGeneration || {};
     const contentImages = Array.isArray(post.contentImages) ? post.contentImages : [];
     if (marketNews) {
+      for (const issue of marketNewsCopyGateIssues(post)) {
+        issues.push(`${post.language || "unknown"} ${issue}`);
+      }
       if (!post.coverCredit || !post.coverCreditUrl || !post.coverLicense) {
         issues.push(`${post.language || "unknown"} source cover must include coverCredit, coverCreditUrl and coverLicense`);
       }

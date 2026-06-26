@@ -222,6 +222,27 @@ const breakingTemplateLeakHeadingPattern =
 const breakingTemplateLeakBodyPattern =
   /(本文包含海外來源轉譯|本文沒有逐字翻譯|不是把國外新聞翻成中文|我們不只是把國外新聞翻成中文|市場快訊時，會把海外新聞轉成|本週請列出三個流程|總分不到\s*\d+\s*分|先買工具再找場景|source\s*brief|source\s*index|reader\s*note|Decision\s*cue|Next\s*action|Event:\s|Evidence:\s|來源摘要|可引用事實|讀者怎麼看|這則消息可以拿來|卡在哪個流程|原因是企業決策問題|事件重點|關鍵事實|後續觀察|這則快訊的重點是什麼|這篇文章是否代表市場已經成熟|這則新聞的重點不是抽象評論|不是同類工具會不會更多，而是|兩週內先跑|選一個高頻但風險可控|進入下一輪預算與部署討論|文中牽涉|報導「」|放在企業採用脈絡看|重點不只是哪家公司發布新功能|重點哪家公司發布新功能|接下來要看官方文件、客戶案例與監管回應是否跟上|OpenAI News's current AI coverage|current AI coverage page for related reporting|Frame \(4\)|Oracle partnership|PRC-linked|Confidential submission of draft S-1|Built for broad benefit|Economic research forum|choose one workflow|one owner|stop condition|article claims should remain anchored)/i;
 
+const weakMarketTitlePattern =
+  /(?:^[\w &/.-]{2,90}\s*(?:發布|發佈|公開|報導|報道|merilis|menerbitkan|công bố|เผยแพร่|inilathala|공개|公開)[「"][^」"]{20,}[」"]|^[^「"\n]{2,90}\s*(?:發布|發佈|公開|報導|報道)「[^」]*[A-Za-z]{4,}\s+[A-Za-z]{4,}[^」]*」|更新：|市場訊號|可以拿來|工作流|流程)/i;
+
+const genericMarketAdvicePattern =
+  /(企業讀者應先判斷|企業團隊需要先核對|後續可追蹤文件更新|這則新聞的重點不是抽象評論|不是同類工具會不會更多，而是|接下來要看(?:的是)?|後續要看|兩週內先跑|選一個高頻但風險可控|採購、產品、工程與營運|進入下一輪預算與部署討論|speed.*stable workflow|choose one workflow|one owner|stop condition|來源連結可回查圖片出處、原始脈絡與後來更新|企業讀者應先判斷這項消息是否改變採購成本、治理責任、資料流向或使用者信任)/i;
+
+const weakSourceSummaryPattern =
+  /(報導提到\s+[A-Za-z][^。]{0,80}(?:、U|,\s*U)|報導牽涉|source involves|current AI coverage|related reporting|主要提到\s+[A-Za-z][^。]{0,90})/i;
+
+const nonLatinMarketLanguages = new Set<BlogLanguage>(["zh-Hant", "ja", "ko", "th"]);
+
+function containsLongEnglishQuote(text: string, language: BlogLanguage) {
+  if (!nonLatinMarketLanguages.has(language)) return false;
+  const quotes = String(text || "").match(/[「"][^」"]{28,}[^」"]*[」"]/g) || [];
+  return quotes.some((quote) => {
+    const asciiWords = quote.match(/\b[A-Za-z][A-Za-z'’-]{3,}\b/g) || [];
+    const asciiChars = (quote.match(/[A-Za-z]/g) || []).length;
+    return asciiWords.length >= 6 && asciiChars / Math.max(quote.length, 1) > 0.45;
+  });
+}
+
 const plainLanguageCuePattern =
   /(意思是|也就是|換成(?:企業)?語言|白話|可以理解成|翻成|先問|要回答|操作紀錄|固定測試題|測試題|人工審核|退回舊流程|回滾|what this means|in plain terms|put simply|for an operator|operation logs|test questions|human review|rollback path|つまり|言い換えると|쉽게 말해|운영 언어로|dengan bahasa sederhana|secara sederhana|nói đơn giản|hiểu đơn giản|พูดให้ง่าย|อธิบายง่าย|dalam bahasa mudah|sa simpleng salita)/i;
 
@@ -239,6 +260,51 @@ const genericLeadPatterns = [
   /^(隨著|在.+時代|近年來|如今|現在|當前|近年|Today|Nowadays|As AI|In the age of)/i,
   /(不再只是|不只是|不是.*而是|not just|not only)/i
 ];
+
+function marketNewsCopyIssues(post: BlogPost) {
+  const issues: string[] = [];
+  const sourceTitle = String(post.sourceLinks?.[0]?.title || "").trim();
+  const sourcePublisher = String(post.sourceLinks?.[0]?.publisher || "").trim();
+  const publicText = [
+    post.title,
+    post.seoTitle,
+    post.seoDescription,
+    post.excerpt,
+    post.geoSummary,
+    post.body,
+    ...(post.keyTakeaways || [])
+  ]
+    .filter(Boolean)
+    .join("\n");
+
+  if (weakMarketTitlePattern.test(post.title || "")) {
+    issues.push("market news title is weak, template-like, or leaks the raw source title instead of a localized reader-facing headline");
+  }
+  if (genericMarketAdvicePattern.test(publicText)) {
+    issues.push("market news copy contains generic ALTOS LAB advice filler; preserve the source article's concrete facts instead");
+  }
+  if (weakSourceSummaryPattern.test(publicText)) {
+    issues.push("market news copy is too vague about source content; include concrete source facts, numbers, entities and claims");
+  }
+  if (
+    post.language !== "en" &&
+    sourceTitle.length > 30 &&
+    /[A-Za-z]{4,}\s+[A-Za-z]{4,}/.test(sourceTitle) &&
+    publicText.includes(sourceTitle)
+  ) {
+    issues.push("non-English market news must not paste the full English source title into public copy");
+  }
+  if (containsLongEnglishQuote(publicText, post.language)) {
+    issues.push("non-English market news still contains long quoted English source text; localize or paraphrase it");
+  }
+  if (
+    sourcePublisher &&
+    new RegExp(`^${sourcePublisher.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\s+(?:發布|發佈|公開|報導|報道)`, "i").test(post.title || "")
+  ) {
+    issues.push("market news title should lead with the source event, not a publisher-announcement template");
+  }
+  return issues;
+}
 
 function localizedCaptionIssue(language: BlogLanguage, caption?: string) {
   const text = String(caption || "").trim();
@@ -1099,6 +1165,7 @@ export function reviewContentTypeFit(post: BlogPost): ReviewResult {
 
   if (contentType === "breaking") {
     if (body.length > 3600) warnings.push("breaking article may be too long for a fast news format");
+    issues.push(...marketNewsCopyIssues(post));
     const h2Titles = [...post.body.matchAll(/^##\s+(.+)$/gm)].map((match) => match[1]?.trim() || "");
     if (h2Titles.some((title) => breakingTemplateLeakHeadingPattern.test(title))) {
       issues.push("market news posts must not expose internal source-translation, scorecard, lab-note or editorial-process headings");

@@ -1034,7 +1034,7 @@ ${await fs.readFile(orchestratorPromptPath, "utf8").catch(() => "")}
   return { ok: true, skipped: false, phase: "prep", runDir, promptPath, articleSetPath, manifestPath, indexPath, codexProducer, doctor: compactDoctorResult(doctor) };
 }
 
-async function createMarketScan({ date, runLabel = "" } = {}) {
+async function createMarketScan({ date, runLabel = "", excludeSourceUrls = [] } = {}) {
   const slot = Number(taiwanParts(currentNow()).hour) < 12 ? "morning" : "afternoon";
   const { doctor, repair } = await runDoctorWithProductionRepair({ mode: "prep", date, slot, phase: "market-scan-doctor" });
   if (!doctor.ok) {
@@ -1180,7 +1180,7 @@ ${await fs.readFile(orchestratorPromptPath, "utf8").catch(() => "")}
     return { ok: true, skipped: false, phase: "market-scan", mode: "prompt-only", runDir, promptPath, articleSetPath, manifestPath, doctor: compactDoctorResult(doctor) };
   }
 
-  const scanner = await runCommand(process.execPath, [
+  const scannerArgs = [
     "scripts/blog-market-source-scanner.mjs",
     "--date",
     date,
@@ -1196,7 +1196,10 @@ ${await fs.readFile(orchestratorPromptPath, "utf8").catch(() => "")}
     arg("news-depth", process.env.ALTOS_BLOG_MARKET_NEWS_DEPTH || "standard"),
     "--write",
     "--overwrite"
-  ], { cwd: process.cwd(), timeoutMs: Number(process.env.ALTOS_BLOG_MARKET_SCAN_TIMEOUT_MS || "90000") });
+  ];
+  const excludeList = [...new Set((excludeSourceUrls || []).map((url) => String(url || "").trim()).filter(Boolean))];
+  if (excludeList.length) scannerArgs.push("--exclude-source-urls", excludeList.join(","));
+  const scanner = await runCommand(process.execPath, scannerArgs, { cwd: process.cwd(), timeoutMs: Number(process.env.ALTOS_BLOG_MARKET_SCAN_TIMEOUT_MS || "90000") });
   if (scanner.code !== 0) {
     const held = {
       ...manifest,
@@ -1254,6 +1257,7 @@ ${await fs.readFile(orchestratorPromptPath, "utf8").catch(() => "")}
 
   const attempts = [];
   const scannerPipeline = { code: scanner.code, stdout: scanner.stdout.trim(), stderr: scanner.stderr.trim() };
+  const attemptedSourceUrls = () => [...new Set(attempts.map((attempt) => attempt.sourceUrl).filter(Boolean))];
   let lastManifest = manifest;
 
   for (const sequence of availableSequences) {
@@ -1288,9 +1292,9 @@ ${await fs.readFile(orchestratorPromptPath, "utf8").catch(() => "")}
         BLOG_MARKET_TRANSLATION_PROVIDER:
           process.env.ALTOS_BLOG_MARKET_SOURCE_WORKER_PROVIDER ||
           process.env.BLOG_MARKET_TRANSLATION_PROVIDER_OVERRIDE ||
-          "hermes-owner",
+          "google-web",
         BLOG_MARKET_HERMES_ALLOW_DETERMINISTIC_SOURCE_TRANSLATION:
-          process.env.BLOG_MARKET_HERMES_ALLOW_DETERMINISTIC_SOURCE_TRANSLATION || "1"
+          process.env.BLOG_MARKET_HERMES_ALLOW_DETERMINISTIC_SOURCE_TRANSLATION || "0"
       },
       timeoutMs: Math.min(
         Number(process.env.ALTOS_BLOG_MARKET_SOURCE_WORKER_TIMEOUT_MS || "30000") || 30000,
@@ -1425,6 +1429,7 @@ ${await fs.readFile(orchestratorPromptPath, "utf8").catch(() => "")}
         runDir,
         articleSetPath: selectedArticleSetPath,
         manifestPath,
+        attemptedSourceUrls: attemptedSourceUrls(),
         validate: readyWithPipeline.pipeline.validate,
         doctor: compactDoctorResult(doctor)
       };
@@ -1461,7 +1466,7 @@ ${await fs.readFile(orchestratorPromptPath, "utf8").catch(() => "")}
       };
       await writeJson(manifestPath, held);
       await writeMarketIndex({ ...held, manifestPath });
-      return { ok: false, skipped: false, phase: "market-scan", reason: "publish failed", runDir, manifestPath, publish: held.pipeline.publish, doctor: compactDoctorResult(doctor) };
+      return { ok: false, skipped: false, phase: "market-scan", reason: "publish failed", runDir, manifestPath, attemptedSourceUrls: attemptedSourceUrls(), publish: held.pipeline.publish, doctor: compactDoctorResult(doctor) };
     }
 
     const verification = await runReleaseVerification(manifestPath, {
@@ -1496,6 +1501,7 @@ ${await fs.readFile(orchestratorPromptPath, "utf8").catch(() => "")}
       runDir,
       articleSetPath: selectedArticleSetPath,
       manifestPath,
+      attemptedSourceUrls: attemptedSourceUrls(),
       publishedIds: releasedWithPipeline.publish?.publishedIds || [],
       verification: releasedWithPipeline.pipeline.verification,
       doctor: compactDoctorResult(doctor)
@@ -1531,7 +1537,7 @@ ${await fs.readFile(orchestratorPromptPath, "utf8").catch(() => "")}
     articleSetPath,
     status: held
   });
-  return { ok: false, skipped: false, phase: "market-quality-repair-required", reason: "all candidates held", runDir, manifestPath, attempts, repairPlan, doctor: compactDoctorResult(doctor) };
+  return { ok: false, skipped: false, phase: "market-quality-repair-required", reason: "all candidates held", runDir, manifestPath, attempts, attemptedSourceUrls: attemptedSourceUrls(), repairPlan, doctor: compactDoctorResult(doctor) };
 }
 
 async function runMarketFill({ date }) {
@@ -1539,6 +1545,7 @@ async function runMarketFill({ date }) {
   const runs = [];
   let latestStatus = initialStatus;
   let consecutiveNoPublish = 0;
+  const attemptedSourceUrls = new Set();
   const maxRuns = Math.max(1, Math.min(48, Number.parseInt(arg("max-runs", String(MARKET_FILL_MAX_RUNS)), 10) || MARKET_FILL_MAX_RUNS));
 
   const minimumAlreadyMet = (initialStatus.completeCount || 0) >= MARKET_NEWS_DAILY_MINIMUM;
@@ -1546,7 +1553,8 @@ async function runMarketFill({ date }) {
   for (let index = 1; index <= maxRuns; index += 1) {
     const before = await marketNewsTargetStatus({ date });
     const beforeCount = before.completeCount || 0;
-    const result = await createMarketScan({ date, runLabel: `fill-${String(index).padStart(2, "0")}` });
+    const result = await createMarketScan({ date, runLabel: `fill-${String(index).padStart(2, "0")}`, excludeSourceUrls: [...attemptedSourceUrls] });
+    for (const url of result.attemptedSourceUrls || []) attemptedSourceUrls.add(url);
     const after = await marketNewsTargetStatus({ date });
     const afterCount = after.completeCount || 0;
     const publishedThisRun = result.ok === true && afterCount > beforeCount;
