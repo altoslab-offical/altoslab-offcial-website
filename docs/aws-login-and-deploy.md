@@ -126,6 +126,20 @@ docker buildx build \
   --push .
 ```
 
+If `docker login` hangs on macOS with `error saving credentials`, keep the
+existing Docker buildx state but bypass the desktop credential helper for this
+deploy only:
+
+```bash
+export DOCKER_CONFIG="$(mktemp -d /tmp/altoslab-docker-config.XXXXXX)"
+trap 'rm -rf "$DOCKER_CONFIG"' EXIT
+cp -R "$HOME/.docker/." "$DOCKER_CONFIG/" 2>/dev/null || true
+node -e 'const fs=require("fs"); const p=process.env.DOCKER_CONFIG+"/config.json"; const j=fs.existsSync(p)?JSON.parse(fs.readFileSync(p,"utf8")):{}; delete j.credsStore; delete j.credHelpers; j.auths=j.auths||{}; fs.writeFileSync(p, JSON.stringify(j,null,2));'
+```
+
+Do not use an empty `DOCKER_CONFIG`; Docker Desktop stores the buildx state under
+`~/.docker/buildx`, and an empty config can make `docker buildx` disappear.
+
 ## 5. Register A New ECS Task Definition
 
 Start from the currently active task definition, replace only the image, and

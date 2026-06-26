@@ -11,7 +11,7 @@ const DEFAULT_BASE_URL = "https://altoslab-ai.cc";
 const DEFAULT_FROM = "altoslab.offical@gmail.com";
 const DEFAULT_TO = "altoslab.offical@gmail.com";
 const DEFAULT_LANGUAGES = ["zh-Hant", "en", "ja", "ko", "id", "vi", "th", "ms", "fil"];
-const DEFAULT_INVENTORY_LIMIT = Number(process.env.SEO_GEO_INVENTORY_LIMIT || "1000");
+const DEFAULT_INVENTORY_LIMIT = Number(process.env.SEO_GEO_INVENTORY_LIMIT || "5000");
 const execFileAsync = promisify(execFile);
 const LANGUAGE_PREFIX = {
   "zh-Hant": "",
