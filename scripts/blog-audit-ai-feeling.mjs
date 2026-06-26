@@ -65,6 +65,15 @@ const COLUMN_FORBIDDEN_PATTERNS = [
   /\bTL\s*;?\s*DR\b/i,
   /###/i,
   /SEO\s*\/\s*GEO/i,
+  /source-backed AI operations column/i,
+  /for readers comparing implementation, governance, SEO and GEO decisions/i,
+  /OpenAI,\s*Microsoft,\s*Google\/NIST\/IBM sources are used to turn the topic/i,
+  /週三下午，團隊準備讓 AI 接手一段真實工作/i,
+  /週三下午，行銷主管、營運負責人和工程窗口坐在同一張會議桌前/i,
+  /要不要再買一套\s+.{8,90}\s+相關工具/i,
+  /真正值得投資的是一條能回到來源、權限、成本和責任的證據鏈/i,
+  /這篇不是在替新工具背書，而是把\s+.{8,110}\s+拆成可被團隊檢查的營運問題/i,
+  /\bHermes\b|\bOpenClaw\b/i,
   /prompt card/i,
   /quality gate/i,
   /quality\s+pipeline|backend\s+pipeline|pipeline\s+gate|publishing\s+pipeline|automation\s+pipeline/i,
@@ -75,6 +84,12 @@ const COLUMN_FORBIDDEN_PATTERNS = [
 
 const WEAK_MARKET_TITLE_PATTERNS = [/更新：/i, /市場訊號/i, /可以拿來/i, /工作流/i, /流程/i];
 const WEAK_COLUMN_TITLE_PATTERNS = [/基礎設施$/i, /完整指南$/i, /最佳實踐$/i, /深度解析$/i];
+const RECYCLED_COLUMN_TAKEAWAYS = [
+  /^先看普通工作日，不要只看 demo。?$/i,
+  /^來源、權限、成本、責任要串成證據鏈。?$/i,
+  /^發布後要用 GA4、Search Console 與讀者行為回頭修正。?$/i
+];
+const RECYCLED_COLUMN_FAQS = [/^這是不是會讓導入變慢？?$/i, /^小團隊也需要這麼做嗎？?$/i, /先從一條高頻流程、一個負責人、一個回滾方法開始/i];
 
 function arg(name, fallback = "") {
   const index = process.argv.indexOf(`--${name}`);
@@ -211,6 +226,12 @@ function auditPost(post) {
   }
   if (isMarket && (!Array.isArray(post.keyTakeaways) || post.keyTakeaways.length < 2)) {
     issues.push({ severity: "critical", id: "market-takeaways-too-thin" });
+  }
+  if (!isMarket) {
+    const recycledTakeaways = (post.keyTakeaways || []).filter((item) => RECYCLED_COLUMN_TAKEAWAYS.some((pattern) => pattern.test(String(item).trim())));
+    if (recycledTakeaways.length >= 2) issues.push({ severity: "critical", id: "recycled-column-takeaways" });
+    const recycledFaqs = (post.faqs || []).filter((faq) => RECYCLED_COLUMN_FAQS.some((pattern) => pattern.test(`${faq.question || ""}\n${faq.answer || ""}`)));
+    if (recycledFaqs.length >= 1) issues.push({ severity: "critical", id: "recycled-column-faq" });
   }
   if (!post.excerpt && !post.seoDescription) issues.push({ severity: "warning", id: "subtitle-missing" });
   return {

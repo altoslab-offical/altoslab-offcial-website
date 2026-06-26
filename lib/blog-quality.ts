@@ -176,6 +176,33 @@ const columnTemplateSubtitlePatterns = [
   /^(Tatlong Control Point Na Dapat Unahin|Susunod Na Signal Na Babantayan|Mag-Rehearse Sa Isang Totoong Eksena|Field Note Ng ALTOS LAB|Paano Ipasok Ang Source Sa Decision|Isang gawain para ngayong linggo)$/i
 ];
 
+const recycledColumnBodyPatterns = [
+  /週三下午，團隊準備讓 AI 接手一段真實工作/i,
+  /週三下午，行銷主管、營運負責人和工程窗口坐在同一張會議桌前/i,
+  /要不要再買一套\s+[^。]{8,90}\s+相關工具/i,
+  /真正值得投資的是一條能回到來源、權限、成本和責任的證據鏈/i,
+  /這篇不是在替新工具背書，而是把\s+[^。]{8,110}\s+拆成可被團隊檢查的營運問題/i,
+  /Hermes\s+這類營運系統/i,
+  /用公開來源檢查一條普通工作日會遇到的真實決策/i,
+  /source-backed AI operations column/i,
+  /for readers comparing implementation, governance, SEO and GEO decisions/i,
+  /OpenAI,\s*Microsoft,\s*Google\/NIST\/IBM sources are used to turn the topic/i
+];
+
+const repeatedColumnTakeawayPatterns = [
+  /^先看普通工作日，不要只看 demo。?$/i,
+  /^來源、權限、成本、責任要串成證據鏈。?$/i,
+  /^發布後要用 GA4、Search Console 與讀者行為回頭修正。?$/i
+];
+
+const repeatedColumnFaqPatterns = [
+  /^這是不是會讓導入變慢？?$/i,
+  /^小團隊也需要這麼做嗎？?$/i,
+  /先從一條高頻流程、一個負責人、一個回滾方法開始/i
+];
+
+const publicOperatorLeakPattern = /\b(Hermes|OpenClaw)\b/i;
+
 const genericRepairCaptionPattern =
   /(第一張圖把主題拉回|第二張圖呈現|opening image|mechanism image|operating tension visible|decision can be checked|editorial visual$|把主題拉回實際營運證據|讓這個決策可以被檢查)/i;
 
@@ -1057,6 +1084,20 @@ export function reviewContentTypeFit(post: BlogPost): ReviewResult {
     if (templateSubtitles.length >= 1) {
       issues.push(`column section subtitles are still using production templates instead of editorial hooks: ${templateSubtitles.slice(0, 4).join(", ")}`);
     }
+    const recycledBodyHits = recycledColumnBodyPatterns.filter((pattern) => pattern.test(`${post.title}\n${post.excerpt}\n${post.geoSummary}\n${post.body}`));
+    if (recycledBodyHits.length) {
+      issues.push("column uses recycled Codex/Hermes body scaffolding; rebuild the article around its own reader job, evidence and argument");
+    }
+    const repeatedTakeaways = post.keyTakeaways.filter((item) => repeatedColumnTakeawayPatterns.some((pattern) => pattern.test(item.trim())));
+    if (repeatedTakeaways.length >= 2) {
+      issues.push("column key takeaways reuse the generic operating-proof template instead of this article's own claims");
+    }
+    const repeatedFaqs = post.faqs.filter((faq) =>
+      repeatedColumnFaqPatterns.some((pattern) => pattern.test(`${faq.question || ""}\n${faq.answer || ""}`.trim()))
+    );
+    if (repeatedFaqs.length >= 1) {
+      issues.push("column FAQ reuses the generic implementation template; write objections specific to this topic");
+    }
     if (length < knowledgeDenseColumnMinimum(post.language)) {
       issues.push("column body is too thin for a professional source-backed column; expand with evidence, examples, tradeoffs and useful reader judgment");
     }
@@ -1277,6 +1318,12 @@ function reviewSeoGeoStructure(post: BlogPost): ReviewResult {
   if (excerpt.length > MAX_EXCERPT_LENGTH) warnings.push("subtitle/excerpt is too long for card and hero reading");
   if (/用公開來源檢查一條普通工作日會遇到的真實決策|source-backed note for one operating decision/i.test(excerpt)) {
     issues.push("subtitle/excerpt contains the recycled Codex column template; rewrite it with a specific reader tension and source-backed payoff");
+  }
+  if (contentType !== "breaking" && recycledColumnBodyPatterns.some((pattern) => pattern.test(`${post.seoDescription}\n${post.geoSummary}`))) {
+    issues.push("SEO/GEO metadata contains recycled internal column template text; rewrite public metadata for this article's actual reader job");
+  }
+  if (contentType !== "breaking" && publicOperatorLeakPattern.test(`${post.excerpt}\n${post.seoDescription}\n${post.geoSummary}\n${post.body}`)) {
+    issues.push("public column copy must not expose Hermes/OpenClaw operator names; keep agent training language out of reader-facing articles");
   }
   if (weakSubtitlePatterns.some((pattern) => pattern.test(excerpt))) {
     issues.push("subtitle/excerpt is too generic; write a newsroom-style standfirst with tension, source/event and reader decision");
