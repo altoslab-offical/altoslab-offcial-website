@@ -18,7 +18,7 @@ const lowQualityGeneratedCoverPattern =
   /(generic|placeholder|abstract background|glowing dashboard|fake dashboard|network map|glass cube|server room|robot handshake|tilted|skewed|slanted|large cursor|cursor shape|pink editorial background|source-cover|codex-local-editorial-renderer|svg-sharp-renderer|科技感背景|抽象科技|假儀表板|網路圖|玻璃方塊|漸層背景|斜的|歪斜|巨大游標|斜游標)/i;
 
 function hasRejectedCover(post: BlogVisualPost) {
-  const metadata = [post.cover, post.coverAlt, post.coverCredit, post.coverPrompt].filter(Boolean).join(" ");
+  const metadata = [post.cover, post.coverAlt, post.coverCredit].filter(Boolean).join(" ");
   return rejectedCoverPattern.test(metadata) || lowQualityGeneratedCoverPattern.test(metadata);
 }
 

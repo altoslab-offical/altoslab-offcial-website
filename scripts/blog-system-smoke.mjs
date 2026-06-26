@@ -236,7 +236,7 @@ assert(quality.includes("repeatedColumnTakeawayPatterns"), "blog quality gate bl
 assert(quality.includes("publicOperatorLeakPattern"), "blog quality gate blocks Hermes/OpenClaw internal operator leakage in public copy");
 assert(aiFeelingAudit.includes("recycled-column-takeaways"), "public AI-feeling audit detects recycled column takeaways");
 assert(aiFeelingAudit.includes("source-backed AI operations column"), "public AI-feeling audit detects recycled English SEO/GEO column templates");
-assert(blogVisual.includes('provider === "local"') && blogVisual.includes("coverPrompt: undefined"), "public visual DTO hides cover prompts and production provider names");
+assert(blogVisual.includes('provider === "local"') && !blogVisual.includes("coverPrompt"), "public visual DTO hides cover prompts and production provider names");
 assert(publicBlog.includes("function publicContentImages") && publicBlog.includes("contentImages: publicContentImages"), "public blog serializer strips generated-image prompt/provider metadata");
 assert(generatedMediaRoute.includes("generated-blog-media"), "local generated media can be fetched during end-to-end image QA");
 assert(generatedMediaRoute.includes("readGcsObject"), "generated media route can read GCS-backed images");

@@ -3,7 +3,7 @@ import { absoluteUrl } from "./seo";
 
 export type BlogVisualPost = Pick<
   BlogPost,
-  "id" | "slug" | "title" | "language" | "contentType" | "cover" | "coverAlt" | "coverCredit" | "coverPrompt" | "coverSource"
+  "id" | "slug" | "title" | "language" | "contentType" | "cover" | "coverAlt" | "coverCredit" | "coverSource"
 > & {
   coverGeneration?: Pick<NonNullable<BlogPost["coverGeneration"]>, "provider">;
 };
@@ -15,6 +15,7 @@ function publicCoverGeneration(post: BlogPost): BlogVisualPost["coverGeneration"
 }
 
 export function toBlogVisualPost(post: BlogPost): BlogVisualPost {
+  const coverGeneration = publicCoverGeneration(post);
   return {
     id: post.id,
     slug: post.slug,
@@ -24,8 +25,7 @@ export function toBlogVisualPost(post: BlogPost): BlogVisualPost {
     cover: post.cover ? absoluteUrl(post.cover) : post.cover,
     coverAlt: post.coverAlt,
     coverCredit: post.coverCredit,
-    coverPrompt: undefined,
     coverSource: post.coverSource,
-    coverGeneration: publicCoverGeneration(post)
+    ...(coverGeneration ? { coverGeneration } : {})
   };
 }
