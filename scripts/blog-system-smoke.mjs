@@ -226,7 +226,7 @@ assert(
 );
 assert(mediaRoute.includes("verifyBlogIngestRequest"), "media upload route is protected by the same signed request contract");
 assert(mediaRoute.includes("@vercel/blob"), "media upload route stores production images in Vercel Blob");
-assert(mediaRoute.includes("storeGcsImage"), "media upload route can store production images in GCS for Cloud Run");
+assert(mediaRoute.includes("storeAwsS3Image"), "media upload route stores production generated media in AWS S3 for the active production lane");
 assert(mediaRoute.includes("BLOG_MEDIA_ALLOW_LOCAL_STORAGE"), "media upload route supports local-only image storage for end-to-end testing");
 assert(adminBlogRefreshRoute.includes("verifyBlogIngestRequest"), "public cache refresh route accepts the same signed request contract");
 assert(bulkPatchRoute.includes("refreshPublicBlogCacheFromStorage"), "bulk patch refreshes derived public blog caches after published content changes");
@@ -239,9 +239,9 @@ assert(aiFeelingAudit.includes("source-backed AI operations column"), "public AI
 assert(blogVisual.includes('provider === "local"') && !blogVisual.includes("coverPrompt"), "public visual DTO hides cover prompts and production provider names");
 assert(publicBlog.includes("function publicContentImages") && publicBlog.includes("contentImages: publicContentImages"), "public blog serializer strips generated-image prompt/provider metadata");
 assert(generatedMediaRoute.includes("generated-blog-media"), "local generated media can be fetched during end-to-end image QA");
-assert(generatedMediaRoute.includes("readGcsObject"), "generated media route can read GCS-backed images");
+assert(generatedMediaRoute.includes("readAwsS3Object"), "generated media route can read AWS S3-backed images");
 assert(healthRoute.includes("externalBlogIngestConfigured"), "health check reports whether signed external blog ingest is configured");
-assert(healthRoute.includes("imageGcsStorageConfigured"), "health check reports whether GCS generated media is configured");
+assert(healthRoute.includes("imageAwsS3StorageConfigured"), "health check reports whether AWS S3 generated media is configured");
 assert(healthRoute.includes("legacyDeepSeekCronDisabled"), "health check reports whether the legacy DeepSeek cron path is disabled");
 assert(
   proxy.includes("isPublicSignedIngestRoute") &&
@@ -332,8 +332,8 @@ assert(
 assert(scheduledRunner.includes("articleSetPath file is missing"), "scheduled release checks that the ready article set still exists");
 assert(scheduledRunner.includes("scripts/blog-sop-doctor.mjs"), "scheduled prep/release runs the SOP doctor before continuing");
 assert(scheduledRunner.includes("compactDoctorResult") && scheduledRunner.includes("scheduled-runner.log"), "scheduled runner records compact doctor evidence in output and logs");
-assert(scheduledRunner.includes("scripts/blog-production-repair.mjs"), "scheduled runner attempts bounded production CMS/GCS repair before holding on doctor failure");
-assert(scheduledRunner.includes("ALTOS_BLOG_PRODUCTION_AUTO_REPAIR"), "scheduled runner can disable production repair explicitly during maintenance");
+assert(scheduledRunner.includes("ALTOS_BLOG_LEGACY_GCP_REPAIR"), "scheduled runner keeps legacy GCP repair disabled unless explicitly requested");
+assert(scheduledRunner.includes("AWS ECS/S3 deploy/readback path"), "scheduled runner routes production doctor failures to AWS ECS/S3 deploy/readback instead of GCP repair");
 assert(scheduledRunner.includes("production-repair"), "scheduled runner records production repair evidence in the schedule log");
 assert(scheduledRunner.includes("scripts/verify-blog-release.mjs"), "scheduled release runs post-release verification before reporting success");
 assert(scheduledRunner.includes("reuse-validated-manifest"), "scheduled release reuses the already approved signed manifest instead of running duplicate QA");
@@ -370,7 +370,7 @@ assert(sopDoctor.includes("[8, 10]") && sopDoctor.includes("[9, 10]") && sopDoct
 assert(sopDoctor.includes("[10, 15]") && sopDoctor.includes("[11, 15]") && sopDoctor.includes("[14, 15]"), "SOP doctor enforces hourly market-scan launch windows");
 assert(sopDoctor.includes("[13, 40]") && sopDoctor.includes("[14, 40]") && sopDoctor.includes("[14, 44]"), "SOP doctor enforces afternoon prep/release launch windows");
 assert(sopDoctor.includes("[19, 20]") && sopDoctor.includes("[20, 20]") && sopDoctor.includes("[21, 15]"), "SOP doctor enforces evening release and late market-scan launch windows");
-assert(sopDoctor.includes("production cmsStorage.provider must be cloudflare-d1, cloudflare-kv, gcs or aws-s3"), "SOP doctor verifies a durable production CMS store");
+assert(sopDoctor.includes("production cmsStorage.provider must be ${PRODUCTION_CMS_PROVIDER}") && sopDoctor.includes("DEFAULT_AWS_S3_BUCKET"), "SOP doctor verifies the active AWS S3 production CMS store");
 assert(cmsStorage.includes('provider: "cloudflare-d1"') || cmsStorage.includes("provider: \"cloudflare-d1\""), "CMS storage can use Cloudflare D1 as the primary durable store");
 assert(cmsStorage.includes('provider: "aws-s3"') || cmsStorage.includes("provider: \"aws-s3\""), "CMS storage can use AWS S3 as the migration durable store");
 assert(
@@ -379,15 +379,9 @@ assert(
     read("scripts/migrate-d1-cms-to-aws-s3.mjs").includes("public-projection"),
   "AWS migration can copy the chunked D1 CMS payload into S3 or rebuild from public projection"
 );
-assert(productionRepair.includes("altoslab-official-cms-934551798702"), "production repair targets the canonical GCS CMS bucket");
-assert(productionRepair.includes("gcloud") && productionRepair.includes("run") && productionRepair.includes("services") && productionRepair.includes("update"), "production repair can update the existing Cloud Run service env");
-assert(productionRepair.includes("--update-env-vars"), "production repair updates only runtime env vars instead of rebuilding or publishing content");
-assert(productionRepair.includes("CLOUDSDK_CORE_ACCOUNT"), "production repair tests available gcloud accounts without changing global account state");
-assert(productionRepair.includes("DEFAULT_GCLOUD_ACCOUNT = \"altoslab.offical@gmail.com\""), "production repair defaults to the official production GCP account");
-assert(productionRepair.includes("ALTOS_GOOGLE_OPERATOR_ACCOUNT"), "production repair can inherit the unified Google operator account");
-assert(!productionRepair.includes("process.env.CLOUDSDK_CORE_ACCOUNT || DEFAULT_GCLOUD_ACCOUNT"), "production repair is not redirected by ambient CLOUDSDK_CORE_ACCOUNT");
-assert(productionRepair.includes("It never generates") && productionRepair.includes("publishes blog content"), "production repair documents its no-content-generation boundary");
-assert(productionRepair.includes("data/blog-repair"), "production repair writes a durable repair report");
+assert(read("scripts/aws-production-smoke.mjs").includes("aws-s3"), "AWS production smoke verifies the active aws-s3 CMS provider");
+assert(operations.includes("AWS ECS/Fargate") && operations.includes("AWS S3"), "operations docs name AWS ECS/Fargate and AWS S3 as production truth");
+assert(automationHandoff.includes("AWS ECS/Fargate") && automationHandoff.includes("AWS S3"), "handoff docs name AWS ECS/Fargate and AWS S3 as production truth");
 assert(cloudflareSetup.includes("ALTOS_CLOUDFLARE_WRANGLER_CONFIG"), "Cloudflare setup can target staging or production Wrangler configs");
 assert(cloudflareSetup.includes("secret put \"$name\" --config \"$WRANGLER_CONFIG\""), "Cloudflare setup syncs secrets to the selected Worker config without printing values");
 assert(cloudflareSeed.includes("cms:${safeStorageKey") && cloudflareSeed.includes("\"kv\"") && cloudflareSeed.includes("\"key\"") && cloudflareSeed.includes("\"put\""), "Cloudflare seed writes the CMS snapshot into the configured KV namespace");
@@ -629,10 +623,12 @@ assert(envExample.includes("BLOG_IMAGE_ALLOW_NON_BLOB"), "env example documents 
 assert(envExample.includes("BLOG_MEDIA_ALLOW_LOCAL_STORAGE"), "env example documents local-only media upload mode");
 assert(envExample.includes("BLOG_ALLOW_LOCAL_FALLBACK_COVERS=0"), "env example keeps local fallback covers disabled");
 assert(envExample.includes("ALTOS_BLOG_BASE_URL=https://altoslab-ai.cc"), "env example defaults local workers to the Cloudflare-live production domain");
-assert(envExample.includes("CLOUDFLARE_KV_ENABLED=1"), "env example documents active Cloudflare KV storage");
+assert(envExample.includes("AWS_S3_STORAGE_ENABLED=1"), "env example documents active AWS S3 storage");
+assert(envExample.includes("AWS_REGION=ap-northeast-1"), "env example documents AWS production region");
+assert(envExample.includes("CLOUDFLARE_KV_ENABLED=0"), "env example keeps Cloudflare KV disabled for the AWS production lane");
 assert(envExample.includes("GCS_STORAGE_ENABLED=0"), "env example keeps legacy GCP/GCS storage disabled by default");
 assert(envExample.includes("ALTOS_BLOG_PRODUCTION_AUTO_REPAIR=0"), "env example keeps blind GCP repair disabled by default");
-assert(envExample.includes("BLOG_MARKET_TRANSLATION_PROVIDER=google-strict"), "env example keeps market-news translation on a strict provider by default");
+assert(envExample.includes("BLOG_MARKET_TRANSLATION_PROVIDER=hermes-owner"), "env example keeps market-news translation on the Hermes-owned provider by default");
 assert(envExample.includes("BLOG_MARKET_ALLOW_LOCAL_TRANSLATION_FALLBACK=0"), "env example keeps local market-news fallback disabled for production publishing");
 assert(localWorker.includes("BLOG_MARKET_ALLOW_LOCAL_TRANSLATION_FALLBACK"), "local worker documents the explicit local market-news fallback switch");
 assert(marketTranslationService.includes("BLOG_MARKET_ALLOW_LOCAL_TRANSLATION_FALLBACK=1"), "market-news translation service requires an explicit opt-in before local fallback");
@@ -687,13 +683,13 @@ assert(columnVisualStyleLibrary.includes("pixel_art") && columnVisualStyleLibrar
 assert(columnVisualStyleLibrary.includes("pickDistinctStyle"), "column visual style library selects distinct visual families across article images");
 assert(columnVisualStyleLibrary.includes("Do not use the 3D workflow/checkpoint/card/arrow family for more than one image"), "column visual prompts block repeated workflow-card family");
 assert(columnVisualStyleLibrary.includes("Captions must say what the image adds to the argument"), "column visual prompts require argument-specific captions");
-const gcpSmoke = read("scripts/gcp-production-smoke.mjs");
-assert(gcpSmoke.includes("publishedPosts === 0"), "GCP production smoke warns when the public blog inventory is empty");
-assert(gcpSmoke.includes("function printJson") && gcpSmoke.includes("process.stdout.write"), "GCP production smoke flushes JSON before exiting on failures");
+const awsSmoke = read("scripts/aws-production-smoke.mjs");
+assert(awsSmoke.includes("publishedPosts === 0"), "AWS production smoke warns when the public blog inventory is empty");
+assert(awsSmoke.includes("console.log(JSON.stringify(result, null, 2))"), "AWS production smoke prints JSON evidence before exiting");
 assert(operations.includes("Legacy Production CMS/GCS Drift Repair"), "operations runbook documents the legacy Cloud Run CMS/GCS repair path");
-assert(operations.includes("Cloudflare Active Lane"), "operations runbook documents the active Cloudflare lane");
-assert(operations.includes("wrangler.staging.jsonc") && operations.includes("has no custom-domain routes"), "operations runbook makes Cloudflare staging-first deployment explicit");
-assert(operations.includes("npm run verify:cloudflare"), "operations runbook requires Cloudflare smoke before cutover");
+assert(operations.includes("AWS Active Lane"), "operations runbook documents the active AWS lane");
+assert(operations.includes("docs/aws-login-and-deploy.md") && operations.includes("update `altoslab-web-service`"), "operations runbook makes AWS ECS deploy/readback explicit");
+assert(operations.includes("npm run verify:aws"), "operations runbook requires AWS smoke before completion");
 
 assert(seedPosts.length === 0, "blog seed archive stays empty so old template-written articles cannot rehydrate local or fallback CMS data");
 

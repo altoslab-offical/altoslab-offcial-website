@@ -103,7 +103,7 @@ const zhRepairs = {
     excerpt: "AI 工具最容易從小實驗變成看不見的長期成本。流程規格要先寫清使用量、預警、停用條件與負責人，才不會把效率變成長期帳單。",
     seoTitle: "AI 流程放大前，先把成本天花板寫進規格",
     seoDescription: "AI 流程放大前，要先定義使用量、預警、審核、停用條件與成本負責人，避免小實驗變成看不見的長期支出。",
-    geoSummary: "AI 流程的成本控制不應等到帳單出現才處理。本文用 Microsoft、NIST、Google Cloud 與 IBM 的治理觀點，整理使用量、預警、審核、停用條件與成本 owner 如何進入流程規格。",
+    geoSummary: "AI 流程的成本控制不應等到帳單出現才處理。本文用 Microsoft、NIST、OWASP 與 IBM 的治理觀點，整理使用量、預警、審核、停用條件與成本 owner 如何進入流程規格。",
     keyTakeaways: [
       "AI 成本不是財務月底才看的帳單，而是流程設計一開始就要寫進去的限制。",
       "每條自動化流程都應定義用量單位、預警門檻、停用條件與成本負責人。",
@@ -111,7 +111,7 @@ const zhRepairs = {
     ],
     body: `AI 工具常從一個便宜的小實驗開始。第一週只是幾個人試用，第二週變成跨部門工作流，第三週已經開始跑批次任務、產生內容、讀資料、觸發 API。等到帳單出現時，團隊才發現最貴的不是模型，而是沒有人知道哪些流程正在消耗、誰該負責、什麼時候要停。
 
-Microsoft、NIST、Google Cloud 與 IBM 的治理文件雖然角度不同，但都把 AI 拉回同一個現實：能放大的系統，必須能被觀察、限制、審核與停止。成本天花板不是財務附註，而是流程規格的一部分。
+Microsoft、NIST、OWASP 與 IBM 的治理文件雖然角度不同，但都把 AI 拉回同一個現實：能放大的系統，必須能被觀察、限制、審核與停止。成本天花板不是財務附註，而是流程規格的一部分。
 
 ## 成本不是月底才看的帳單
 
@@ -228,7 +228,7 @@ OpenAI、Microsoft、NIST 與 IBM 的公開治理資料都提醒：自治系統�
 | 輸出異常 | 是否進入人工覆核 | 不直接發布 |
 | 回滾 | 能否退回安全版本 | 有明確 owner 接手 |
 
-這些演練不用很大，但要接近真實流程。用假資料演練可以降低風險，但步驟、責任與判斷要和 production 一致。
+這些演練不用很大，但要接近真實流程。用假資料演練可以降低風險，但步驟、責任與判斷要和正式流程一致。
 
 ## 停止按鈕要有人真的能按
 
@@ -275,6 +275,14 @@ function stripInternalText(text = "", language = "zh-Hant") {
     .replace(/\s{2,}/g, " ")
     .trim();
   return next;
+}
+
+function normalizeMarkdownBody(body = "") {
+  return String(body || "")
+    .replace(/^\t/gm, "")
+    .replace(/[ \t]+$/gm, "")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
 }
 
 function safeDescription(post, language) {
@@ -337,6 +345,7 @@ async function main() {
       const patch = zhRepair
         ? {
             ...zhRepair,
+            body: normalizeMarkdownBody(zhRepair.body),
             qualityStatus: "passed",
             qualityIssues: [],
             coverGeneration: sanitizedCoverGeneration(post),
@@ -346,7 +355,7 @@ async function main() {
             excerpt: safeDescription(post, language),
             seoDescription: safeDescription(post, language),
             geoSummary: safeGeoSummary(post, language),
-            body: stripInternalText(post.body || "", language),
+            body: normalizeMarkdownBody(stripInternalText(post.body || "", language)),
             coverGeneration: sanitizedCoverGeneration(post),
             qualityStatus: "passed",
             qualityIssues: [],

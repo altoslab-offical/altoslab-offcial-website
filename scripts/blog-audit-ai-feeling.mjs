@@ -83,13 +83,62 @@ const COLUMN_FORBIDDEN_PATTERNS = [
 ];
 
 const WEAK_MARKET_TITLE_PATTERNS = [/更新：/i, /市場訊號/i, /可以拿來/i, /工作流/i, /流程/i];
-const WEAK_COLUMN_TITLE_PATTERNS = [/基礎設施$/i, /完整指南$/i, /最佳實踐$/i, /深度解析$/i];
+const WEAK_COLUMN_TITLE_PATTERNS = [
+  /基礎設施$/i,
+  /完整指南$/i,
+  /最佳實踐$/i,
+  /深度解析$/i,
+  /^AI\s*(流程|工具|搜尋|Agent).{0,8}(前|時代|要)/i,
+  /^想被 AI 搜尋引用/i,
+  /^先別讓 Agent/i,
+  /先把.{0,10}寫(出來|進規格|清楚)/i
+];
 const RECYCLED_COLUMN_TAKEAWAYS = [
   /^先看普通工作日，不要只看 demo。?$/i,
   /^來源、權限、成本、責任要串成證據鏈。?$/i,
   /^發布後要用 GA4、Search Console 與讀者行為回頭修正。?$/i
 ];
 const RECYCLED_COLUMN_FAQS = [/^這是不是會讓導入變慢？?$/i, /^小團隊也需要這麼做嗎？?$/i, /先從一條高頻流程、一個負責人、一個回滾方法開始/i];
+const INTERNAL_SEARCH_WORD_PATTERNS = [/\bSEO\b/i, /\bGEO\b/i, /AI\s*referral/i, /Search Console/i, /GA4/i];
+const COLUMN_SOURCE_BASKET_PATTERNS = [
+  /OpenAI、Microsoft、NIST、IBM/i,
+  /Microsoft、NIST、Google Cloud、IBM/i,
+  /OpenAI,\s*Microsoft,\s*NIST,\s*and\s*IBM/i,
+  /Microsoft,\s*NIST,\s*Google Cloud,\s*and\s*IBM/i
+];
+const GENERIC_COLUMN_HEADING_PATTERNS = [
+  /^ALTOS LAB\s*(判斷|觀點|implementation note)$/i,
+  /^下一步$/i,
+  /^接下來看什麼$/i,
+  /^FAQ[:：]/i,
+  /^讀者會追問/i,
+  /^小團隊也可以做/i,
+  /^好工具要能留下決策證據/i,
+  /^介面合約不是工程文件，是責任邊界$/i
+];
+const EDITORIAL_BRIDGE_LEAK_PATTERNS = [
+  /在(?:進入|第二張圖|這張圖)之前/i,
+  /第二張圖(?:應該|不應)/i,
+  /接下來的視覺/i,
+  /圖像接下來呈現/i,
+  /這段文字存在的目的/i,
+  /不是裝飾，而是/i
+];
+const BLAND_TITLE_VERBS = /(放大|擴大|優化|導入|更新|處理|進行|建立|提升|改善|寫清楚|寫出來)/i;
+const TITLE_TENSION_PATTERNS = [
+  /不是.+而是/,
+  /不代表/,
+  /最怕/,
+  /別等/,
+  /為什麼/,
+  /真正/,
+  /缺的是/,
+  /先.+再/,
+  /該.+不是/,
+  /會吃掉/,
+  /撐得住/,
+  /停/
+];
 
 function arg(name, fallback = "") {
   const index = process.argv.indexOf(`--${name}`);
@@ -238,6 +287,23 @@ function imageMarkers(body = "") {
   }));
 }
 
+function markdownHeadings(body = "") {
+  return [...String(body || "").matchAll(/^##\s+(.+)$/gm)]
+    .map((match) => stripHtml(match[1] || "").trim())
+    .filter(Boolean);
+}
+
+function looksLikeSearchVisibilityTopic(post) {
+  return /GEO|SEO|AI Search|AI 搜尋|Search Console|搜尋|answer engine|content refresh/i.test(
+    `${post.title || ""}\n${post.topic || ""}\n${post.newsCategory || ""}\n${(post.tags || []).join("\n")}`
+  );
+}
+
+function uniqueRatio(items) {
+  if (!items.length) return 1;
+  return new Set(items.map((item) => comparableText(item))).size / items.length;
+}
+
 const ALLOWED_IMAGE_MARKERS = new Set(["opening", "mechanism", "synthesis", "evidence-desk", "source-desk", "operating-loop", "repair-scene"]);
 
 function imagePacingIssues(post) {
@@ -263,6 +329,55 @@ function imagePacingIssues(post) {
   return issues;
 }
 
+function repeatedSentenceIssues(post) {
+  const text = stripHtml(post.body || "")
+    .replace(/\s+/g, " ")
+    .trim();
+  if (!text) return [];
+  const sentences = text
+    .split(/(?<=[。！？.!?])\s*/)
+    .map((sentence) => sentence.trim())
+    .filter((sentence) => sentence.length >= 18);
+  const counts = new Map();
+  for (const sentence of sentences) {
+    const key = comparableText(sentence);
+    if (!key || key.length < 14) continue;
+    counts.set(key, (counts.get(key) || 0) + 1);
+  }
+  const repeated = [...counts.entries()].filter(([, count]) => count >= 3);
+  return repeated.length ? [{ severity: "critical", id: "repeated-sentence-block", repeats: repeated.slice(0, 3).map(([key, count]) => ({ key: key.slice(0, 80), count })) }] : [];
+}
+
+function titleCraftIssues(post, isMarket) {
+  const issues = [];
+  const title = stripHtml(post.title || "");
+  if (!title) {
+    issues.push({ severity: "critical", id: "title-missing" });
+    return issues;
+  }
+  if (isMarket) {
+    if (/發布[「"]|reported|launches with|here.?s how|如何.+新 AI|在新更新中新增/i.test(title)) {
+      issues.push({ severity: "critical", id: "raw-source-title-or-machine-translation", title });
+    }
+    if (!/[A-Za-z0-9\u4e00-\u9fff]/.test(title) || title.length < 10) {
+      issues.push({ severity: "critical", id: "market-title-too-thin", title });
+    }
+    return issues;
+  }
+  const hasTension = TITLE_TENSION_PATTERNS.some((pattern) => pattern.test(title));
+  const hasConcreteSubject = /Agent|AI|搜尋|內容|成本|Copilot|供應商|資料|流程|模型|自動化|採購|回滾|權限/i.test(title);
+  if (!hasTension && BLAND_TITLE_VERBS.test(title)) {
+    issues.push({ severity: "critical", id: "column-title-lacks-editorial-tension", title });
+  }
+  if (!hasConcreteSubject) {
+    issues.push({ severity: "warning", id: "column-title-lacks-concrete-subject", title });
+  }
+  if (title.length > 34 && post.language === "zh-Hant") {
+    issues.push({ severity: "warning", id: "column-title-too-long-for-card", title });
+  }
+  return issues;
+}
+
 function auditPost(post) {
   const text = publicText(post);
   const isMarket = post.contentType === "breaking";
@@ -273,6 +388,7 @@ function auditPost(post) {
   for (const pattern of criticalPatterns) issues.push({ severity: "critical", id: "public-copy-pattern", pattern });
   for (const pattern of genericAdvicePatterns) issues.push({ severity: "critical", id: "generic-market-advice-filler", pattern });
   for (const pattern of weakTitlePatterns) issues.push({ severity: "warning", id: "weak-title-pattern", pattern });
+  issues.push(...titleCraftIssues(post, isMarket));
   if (isMarket && (post.sourceLinks || []).length < 1) issues.push({ severity: "critical", id: "market-source-missing" });
   if (isMarket && !post.cover) issues.push({ severity: "critical", id: "market-cover-missing" });
   if (isMarket && post.geoSummary && post.excerpt && overlapRatio(post.geoSummary, post.excerpt) >= 0.72) {
@@ -292,11 +408,33 @@ function auditPost(post) {
     if (Number(post.readTimeMinutes || 0) >= 6 && density < columnDensityMinimum(post.language)) {
       issues.push({ severity: "critical", id: "readtime-inflated-vs-density", density, readTimeMinutes: post.readTimeMinutes });
     }
+    for (const pattern of patternHits(post.body || "", EDITORIAL_BRIDGE_LEAK_PATTERNS)) {
+      issues.push({ severity: "critical", id: "editorial-image-bridge-leaked-to-body", pattern });
+    }
+    issues.push(...repeatedSentenceIssues(post));
     issues.push(...imagePacingIssues(post));
     const recycledTakeaways = (post.keyTakeaways || []).filter((item) => RECYCLED_COLUMN_TAKEAWAYS.some((pattern) => pattern.test(String(item).trim())));
     if (recycledTakeaways.length >= 2) issues.push({ severity: "critical", id: "recycled-column-takeaways" });
     const recycledFaqs = (post.faqs || []).filter((faq) => RECYCLED_COLUMN_FAQS.some((pattern) => pattern.test(`${faq.question || ""}\n${faq.answer || ""}`)));
     if (recycledFaqs.length >= 1) issues.push({ severity: "critical", id: "recycled-column-faq" });
+    const headings = markdownHeadings(post.body || "");
+    if (headings.length < 3) issues.push({ severity: "critical", id: "column-section-headings-too-few", headings: headings.length });
+    if (headings.length > 6) issues.push({ severity: "warning", id: "column-section-headings-too-many", headings: headings.length });
+    if (uniqueRatio(headings) < 1) issues.push({ severity: "critical", id: "duplicate-column-section-heading" });
+    const genericHeadings = headings.filter((heading) => GENERIC_COLUMN_HEADING_PATTERNS.some((pattern) => pattern.test(heading)));
+    if (genericHeadings.length >= 1) issues.push({ severity: "warning", id: "generic-column-section-heading", headings: genericHeadings.slice(0, 4) });
+    if (!looksLikeSearchVisibilityTopic(post)) {
+      const publicSearchWords = patternHits(`${post.title || ""}\n${post.excerpt || ""}\n${post.seoDescription || ""}\n${post.geoSummary || ""}\n${post.body || ""}`, INTERNAL_SEARCH_WORD_PATTERNS);
+      if (publicSearchWords.length) issues.push({ severity: "critical", id: "internal-search-optimization-language", patterns: publicSearchWords });
+    }
+    const sourceBasketHits = patternHits(`${post.excerpt || ""}\n${post.seoDescription || ""}\n${post.geoSummary || ""}\n${post.body || ""}`, COLUMN_SOURCE_BASKET_PATTERNS);
+    if (sourceBasketHits.length >= 2) issues.push({ severity: "warning", id: "repeated-source-basket-copy", patterns: sourceBasketHits });
+    if (post.geoSummary && post.excerpt && overlapRatio(post.geoSummary, post.excerpt) >= 0.72) {
+      issues.push({ severity: "warning", id: "column-summary-repeats-excerpt" });
+    }
+    if (post.seoDescription && post.excerpt && overlapRatio(post.seoDescription, post.excerpt) >= 0.86) {
+      issues.push({ severity: "warning", id: "column-seo-description-repeats-excerpt" });
+    }
   }
   if (!post.excerpt && !post.seoDescription) issues.push({ severity: "warning", id: "subtitle-missing" });
   return {

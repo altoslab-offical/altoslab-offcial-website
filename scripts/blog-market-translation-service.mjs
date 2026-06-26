@@ -85,6 +85,24 @@ function cleanTranslatedText(value = "", language = "") {
       .replace(/後台/g, "背景")
       .replace(/視頻/g, "影片")
       .replace(/音頻/g, "音訊")
+      .replace(/取得瞭/g, "已經有")
+      .replace(/已經已經有/g, "已有")
+      .replace(/有報道稱/g, "報導稱")
+      .replace(/美國 Pickle 抄寫員 Simon Rich/g, "《An American Pickle》編劇 Simon Rich")
+      .replace(/美國 Pickle/g, "An American Pickle")
+      .replace(/關註/g, "關注")
+      .replace(/聯合創始人/g, "共同創辦人")
+      .replace(/首席執行官/g, "執行長")
+      .replace(/華納兄弟的《Clockwork》/g, "Warner Bros. 旗下 Clockwork")
+      .replace(/Netflix、A24、Focus Features 和 Warner Bros[。.]?/g, "Netflix、A24、Focus Features 與 Warner Bros. 旗下 Clockwork")
+      .replace(/報導指出，?《Clockwork》都決定不再接手/g, "報導指出，Netflix、A24、Focus Features 與 Warner Bros. 旗下 Clockwork 都決定不再接手")
+      .replace(/不再選擇([^，。]+)作為發行協議/g, "不再接手$1的發行")
+      .replace(/進行發行交易/g, "洽談發行")
+      .replace(/大型科技的批評故事/g, "大型科技公司的批評故事")
+      .replace(/《人工》/g, "《Artificial》")
+      .replace(/人工(?=的後期|還計劃|感覺|》)/g, "Artificial")
+      .replace(/Amazon 米高梅/g, "Amazon MGM")
+      .replace(/Amazon\s*米高梅/g, "Amazon MGM")
       .replace(/圖像到視訊/g, "影像轉影片")
       .replace(/圖像到視頻/g, "影像轉影片")
       .replace(/字元一致性/g, "角色一致性")
@@ -171,12 +189,35 @@ function splitSourceBodyParagraphs(value = "") {
     .split(/\n{2,}/)
     .map((paragraph) => paragraph.trim())
     .filter((paragraph) => paragraph.length >= 60);
-  const candidates = paragraphSplits.length
+  const sentenceSplits =
+    normalized
+      .match(/[^.!?]+[.!?]+(?:\s+|$)/g)
+      ?.map((sentence) => sentence.trim())
+      .filter((sentence) => sentence.length >= 60) || [];
+  const groupedSentences = [];
+  let currentGroup = "";
+  for (const sentence of sentenceSplits) {
+    const next = currentGroup ? `${currentGroup} ${sentence}` : sentence;
+    if (next.length <= 420) {
+      currentGroup = next;
+      continue;
+    }
+    if (currentGroup) groupedSentences.push(currentGroup);
+    currentGroup = sentence;
+  }
+  if (currentGroup) groupedSentences.push(currentGroup);
+  const readableSentenceParagraphs = groupedSentences
+    .map((paragraph) => paragraph.trim())
+    .filter((paragraph) => paragraph.length >= 120);
+  const candidates = paragraphSplits.length === 1 && paragraphSplits[0].length >= 1200
+    ? readableSentenceParagraphs.length
+      ? readableSentenceParagraphs
+      : sentenceSplits
+    : paragraphSplits.length
     ? paragraphSplits
-    : normalized
-        .match(/[^.!?]+[.!?]+(?:\s+|$)/g)
-        ?.map((sentence) => sentence.trim())
-        .filter((sentence) => sentence.length >= 60) || [];
+    : readableSentenceParagraphs.length
+    ? readableSentenceParagraphs
+    : sentenceSplits;
   const seen = new Set();
   return candidates
     .map((paragraph) => paragraph.replace(/\s+/g, " ").trim())
@@ -315,52 +356,28 @@ function localFallbackTranslation(language, pack, texts) {
     fil: entityText || numberText ? `Binanggit sa ulat ang ${entityText || "kaugnay na kumpanya at platform"}${numberText ? `, kasama ang mga numerong ${numberText}` : ""}.` : `Nakatuon ang artikulo sa public information na maaaring i-check sa ulat ng ${publisher}.`
   };
 
-  const analysisByLanguage = {
-    "zh-Hant": "企業讀者應先判斷這項消息是否改變採購成本、治理責任、資料流向或使用者信任，而不只是看發布聲量。",
-    en: "ALTOS LAB treats this kind of update as a market signal, not just product promotion: the key question is whether it changes AI adoption cost, governance responsibility, data flow, or user trust.",
-    ja: "ALTOS LAB はこの種のニュースを単なる製品宣伝ではなく市場シグナルとして見ます。焦点は、AI 導入コスト、ガバナンス責任、データの流れ、利用者の信頼を変えるかどうかです。",
-    ko: "ALTOS LAB은 이런 업데이트를 단순한 제품 홍보가 아니라 시장 신호로 봅니다. 핵심은 AI 도입 비용, 거버넌스 책임, 데이터 흐름, 사용자 신뢰를 바꾸는지입니다.",
-    id: "ALTOS LAB membaca kabar seperti ini sebagai sinyal pasar, bukan sekadar promosi produk: pertanyaannya apakah ini mengubah biaya adopsi AI, tanggung jawab governance, alur data, atau trust pengguna.",
-    vi: "ALTOS LAB xem dạng tin này như tín hiệu thị trường, không chỉ là quảng bá sản phẩm: câu hỏi chính là nó có làm đổi chi phí triển khai AI, trách nhiệm quản trị, luồng dữ liệu hay niềm tin người dùng hay không.",
-    th: "ALTOS LAB มองข่าวแบบนี้เป็นสัญญาณตลาด ไม่ใช่แค่การโปรโมตสินค้า คำถามคือมันเปลี่ยนต้นทุนการนำ AI ไปใช้ ความรับผิดชอบด้าน governance ทิศทางข้อมูล หรือความเชื่อมั่นของผู้ใช้หรือไม่",
-    ms: "ALTOS LAB membaca kemas kini seperti ini sebagai isyarat pasaran, bukan sekadar promosi produk: soalan utamanya ialah sama ada ia mengubah kos adopsi AI, tanggungjawab governance, aliran data atau kepercayaan pengguna.",
-    fil: "Binabasa ng ALTOS LAB ang ganitong update bilang market signal, hindi lang product promotion: ang tanong ay kung binabago nito ang AI adoption cost, governance responsibility, data flow, o user trust."
-  };
-  const operationsByLanguage = {
-    "zh-Hant": "企業團隊需要先核對三件事：可用地區、資料會進入哪些系統，以及哪些輸出仍要人工覆核。若流程牽涉發布、客戶資料或成本承諾，應先保留人工確認。",
-    en: "For enterprise teams, the first check is whether the update changes an existing workflow: who can use it, where data moves, which tasks need human review, and whether mistakes can be traced back to the original source.",
-    ja: "企業チームが最初に見るべき点は、このニュースが既存ワークフローを変えるかどうかです。誰が使えるのか、データがどこへ動くのか、どの作業に人の確認が必要か、誤りを原典へ戻して修正できるかを確認します。",
-    ko: "기업 팀이 먼저 확인할 지점은 이 업데이트가 기존 워크플로를 바꾸는지입니다. 누가 사용할 수 있는지, 데이터가 어디로 이동하는지, 어떤 업무에 사람의 검토가 필요한지, 문제가 생겼을 때 원문으로 돌아가 수정할 수 있는지를 봐야 합니다.",
-    id: "Bagi tim enterprise, titik cek pertama adalah apakah kabar ini mengubah workflow yang sudah berjalan: siapa yang boleh memakai, ke mana data bergerak, tugas mana yang perlu review manusia, dan apakah kesalahan bisa ditelusuri kembali ke sumber asli.",
-    vi: "Với đội ngũ doanh nghiệp, điểm kiểm tra đầu tiên là tin này có làm đổi workflow hiện có hay không: ai được dùng, dữ liệu đi qua đâu, việc nào cần con người duyệt lại, và lỗi có thể truy ngược về nguồn gốc để sửa hay không.",
-    th: "สำหรับทีมองค์กร จุดตรวจแรกคือข่าวนี้เปลี่ยน workflow เดิมหรือไม่ ใครใช้ได้ ข้อมูลไหลไปที่ไหน งานใดต้องมีมนุษย์ตรวจซ้ำ และถ้าเกิดข้อผิดพลาดจะย้อนกลับไปเทียบกับแหล่งข่าวต้นทางได้หรือไม่",
-    ms: "Bagi pasukan enterprise, semakan pertama ialah sama ada berita ini mengubah workflow sedia ada: siapa boleh menggunakannya, ke mana data bergerak, tugasan mana perlukan semakan manusia, dan sama ada kesilapan boleh dijejak semula kepada sumber asal.",
-    fil: "Para sa enterprise teams, unang kailangang tingnan kung binabago nito ang kasalukuyang workflow: sino ang puwedeng gumamit, saan dumadaan ang data, aling tasks ang kailangang i-review ng tao, at kung maibabalik ba sa original source kapag may mali."
-  };
-  const watchByLanguage = {
-    "zh-Hant": "後續可追蹤文件更新、客戶案例、定價限制與地區開放範圍；這些訊號會決定它只是一次發表，還是會進入企業採用清單。",
-    en: "The next signal to watch is whether documentation, customer evidence, and regulatory responses follow. A demo or single announcement can fade quickly; clear deployment scope and accountability make the update more useful as an adoption signal.",
-    ja: "次に見るべきシグナルは、公式文書、顧客事例、規制側の反応が続くかどうかです。デモや単発発表だけなら熱量はすぐ落ちますが、導入範囲と責任分担が明確になれば採用判断に近づきます。",
-    ko: "다음으로 볼 신호는 공식 문서, 고객 사례, 규제 반응이 뒤따르는지입니다. 데모나 단일 발표만으로는 열기가 빨리 식을 수 있지만, 배포 범위와 책임 분담이 명확해지면 도입 판단에 더 가까워집니다.",
-    id: "Sinyal berikutnya yang perlu dipantau adalah apakah dokumentasi, bukti pelanggan, dan respons regulator ikut muncul. Demo atau satu pengumuman bisa cepat redup; scope deployment dan akuntabilitas yang jelas membuat kabar ini lebih berguna sebagai sinyal adopsi.",
-    vi: "Tín hiệu cần theo dõi tiếp theo là tài liệu, bằng chứng khách hàng và phản hồi quản lý có đi kèm hay không. Một demo hoặc thông báo đơn lẻ có thể hạ nhiệt nhanh; phạm vi triển khai và trách nhiệm rõ ràng mới khiến tin này hữu ích hơn cho quyết định adoption.",
-    th: "สัญญาณถัดไปที่ต้องดูคือมีเอกสารทางการ หลักฐานจากลูกค้า และท่าทีของหน่วยงานกำกับตามมาหรือไม่ เดโมหรือประกาศเดี่ยวอาจจางเร็ว แต่ขอบเขต deployment และ accountability ที่ชัดจะทำให้ข่าวนี้มีน้ำหนักต่อการนำไปใช้มากขึ้น",
-    ms: "Isyarat seterusnya yang perlu dipantau ialah sama ada dokumentasi, bukti pelanggan dan respons regulator menyusul. Demo atau satu pengumuman boleh cepat pudar; skop deployment dan akauntabiliti yang jelas menjadikan berita ini lebih berguna sebagai isyarat adopsi.",
-    fil: "Ang susunod na bantayan ay kung susunod ang documentation, customer evidence, at regulatory response. Madaling kumupas ang demo o isang announcement; mas nagiging adoption signal ito kapag malinaw ang deployment scope at accountability."
+  const sourceOnlyBoundaryByLanguage = {
+    "zh-Hant": "這篇快訊只保留來源已寫出的事件、功能、時間、公司與數字；尚未由來源證明的採用速度、商業結果或後續影響，不在本文擴寫。",
+    en: "This brief stays with the event, product details, dates, companies, and numbers stated by the source; adoption speed, business impact, and follow-up outcomes are not expanded beyond the source.",
+    ja: "この速報は、出典に書かれた出来事、機能、時期、企業、数字に限定します。導入速度、事業影響、後続結果は出典を超えて広げません。",
+    ko: "이 브리프는 출처가 쓴 사건, 기능, 시점, 기업, 숫자에 머뭅니다. 도입 속도, 사업 영향, 후속 결과는 출처 밖으로 확장하지 않습니다.",
+    id: "Brief ini hanya mempertahankan peristiwa, detail produk, tanggal, perusahaan, dan angka yang ditulis sumber; kecepatan adopsi, dampak bisnis, dan hasil lanjutan tidak diperluas di luar sumber.",
+    vi: "Bản tin này chỉ giữ lại sự kiện, chi tiết sản phẩm, thời điểm, công ty và số liệu mà nguồn đã nêu; tốc độ adoption, tác động kinh doanh và kết quả tiếp theo không được mở rộng ngoài nguồn.",
+    th: "ข่าวสั้นนี้ยึดเฉพาะเหตุการณ์ รายละเอียดผลิตภัณฑ์ วันที่ บริษัท และตัวเลขที่แหล่งข่าวระบุไว้ ไม่ขยายความเรื่อง adoption speed ผลทางธุรกิจ หรือผลลัพธ์ต่อเนื่องนอกเหนือจากแหล่งข่าว",
+    ms: "Brief ini hanya mengekalkan peristiwa, butiran produk, tarikh, syarikat dan angka yang dinyatakan sumber; kelajuan adopsi, impak perniagaan dan hasil susulan tidak diperluas melebihi sumber.",
+    fil: "Nananatili ang brief na ito sa event, product details, petsa, kumpanya, at numerong nakasaad sa source; hindi nito palalawakin ang adoption speed, business impact, o follow-up outcomes lampas sa source."
   };
 
   return {
     headline,
     standfirst: cleanTranslatedText(standfirstByLanguage[language] || summary || headline, language),
-    factBullets: [evidenceByLanguage[language], sourceNote, analysisByLanguage[language], operationsByLanguage[language], watchByLanguage[language]]
+    factBullets: [evidenceByLanguage[language], sourceNote, sourceOnlyBoundaryByLanguage[language]]
       .map((fact) => cleanTranslatedText(fact, language))
       .filter(Boolean),
     bodyParagraphs: [
       evidenceByLanguage[language],
       sourceNote,
-      analysisByLanguage[language],
-      operationsByLanguage[language],
-      watchByLanguage[language]
+      sourceOnlyBoundaryByLanguage[language]
     ]
       .map((paragraph) => cleanTranslatedText(paragraph, language))
       .filter(Boolean)
@@ -411,6 +428,12 @@ async function gcloudAccessToken() {
 }
 
 async function translateTexts(texts, { target, projectId }) {
+  if (process.env.BLOG_MARKET_ENABLE_GCP_TRANSLATION !== "1") {
+    throw new Error("GCP Cloud Translation is disabled for ALTOS LAB production; use BLOG_MARKET_TRANSLATION_PROVIDER=google-web or hermes-owner");
+  }
+  if (!projectId) {
+    throw new Error("GCP Cloud Translation requires an explicit projectId when BLOG_MARKET_ENABLE_GCP_TRANSLATION=1");
+  }
   const token = await gcloudAccessToken();
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), TRANSLATION_FETCH_TIMEOUT_MS);
@@ -438,30 +461,81 @@ async function translateTexts(texts, { target, projectId }) {
   return translated.map((item) => item.translatedText || "");
 }
 
+const GOOGLE_WEB_TRANSLATION_CHARS = Math.max(
+  350,
+  Number.parseInt(process.env.BLOG_MARKET_GOOGLE_WEB_CHUNK_CHARS || "850", 10) || 850
+);
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function splitTranslationText(value = "", limit = GOOGLE_WEB_TRANSLATION_CHARS) {
+  const text = String(value || "").replace(/\s+/g, " ").trim();
+  if (text.length <= limit) return [text].filter(Boolean);
+  const sentences = text.match(/[^.!?。！？]+[.!?。！？]+(?:\s+|$)|[^.!?。！？]+$/g)?.map((item) => item.trim()).filter(Boolean) || [text];
+  const chunks = [];
+  let current = "";
+  for (const sentence of sentences) {
+    if (!current) {
+      current = sentence;
+      continue;
+    }
+    if (`${current} ${sentence}`.length <= limit) current = `${current} ${sentence}`;
+    else {
+      chunks.push(current);
+      current = sentence;
+    }
+  }
+  if (current) chunks.push(current);
+  return chunks.flatMap((chunk) => {
+    if (chunk.length <= limit) return [chunk];
+    const parts = [];
+    for (let index = 0; index < chunk.length; index += limit) parts.push(chunk.slice(index, index + limit));
+    return parts;
+  });
+}
+
+async function translateGoogleWebChunk(text, { target, attempt = 1 }) {
+  const url = new URL("https://translate.googleapis.com/translate_a/single");
+  url.searchParams.set("client", "gtx");
+  url.searchParams.set("sl", "en");
+  url.searchParams.set("tl", target);
+  url.searchParams.set("dt", "t");
+  url.searchParams.set("q", text);
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), TRANSLATION_FETCH_TIMEOUT_MS);
+  const response = await fetch(url, {
+    signal: controller.signal,
+    headers: {
+      Accept: "application/json,text/plain",
+      "User-Agent": "ALTOS-LAB-market-translation/1.0"
+    }
+  }).finally(() => clearTimeout(timer));
+  const raw = await response.text();
+  if (!response.ok) {
+    if (attempt < 3) {
+      await sleep(250 * attempt);
+      return translateGoogleWebChunk(text, { target, attempt: attempt + 1 });
+    }
+    throw new Error(`Google web translation failed with HTTP ${response.status}`);
+  }
+  const json = JSON.parse(raw);
+  const value = Array.isArray(json?.[0]) ? json[0].map((item) => item?.[0] || "").join("") : "";
+  if (!value) throw new Error("Google web translation returned an empty translation");
+  return value;
+}
+
 async function translateTextsGoogleWeb(texts, { target }) {
   const translated = [];
   for (const text of texts) {
-    const url = new URL("https://translate.googleapis.com/translate_a/single");
-    url.searchParams.set("client", "gtx");
-    url.searchParams.set("sl", "en");
-    url.searchParams.set("tl", target);
-    url.searchParams.set("dt", "t");
-    url.searchParams.set("q", text);
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), TRANSLATION_FETCH_TIMEOUT_MS);
-    const response = await fetch(url, {
-      signal: controller.signal,
-      headers: {
-        Accept: "application/json,text/plain",
-        "User-Agent": "ALTOS-LAB-market-translation/1.0"
-      }
-    }).finally(() => clearTimeout(timer));
-    const raw = await response.text();
-    if (!response.ok) throw new Error(`Google web translation failed with HTTP ${response.status}`);
-    const json = JSON.parse(raw);
-    const value = Array.isArray(json?.[0]) ? json[0].map((item) => item?.[0] || "").join("") : "";
-    if (!value) throw new Error("Google web translation returned an empty translation");
-    translated.push(value);
+    const chunks = splitTranslationText(text);
+    const parts = [];
+    for (const chunk of chunks) {
+      parts.push(await translateGoogleWebChunk(chunk, { target }));
+      await sleep(80);
+    }
+    translated.push(parts.join(" "));
   }
   return translated;
 }
@@ -472,7 +546,7 @@ export async function localizeSourcePack(pack, { projectId = "", required = true
     if (required) throw new Error("market translation provider is off");
     return {};
   }
-  const gcpProject = projectId || process.env.GCP_PROJECT_ID || process.env.GOOGLE_CLOUD_PROJECT || "project-e688c018-aec3-4815-891";
+  const gcpProject = projectId || process.env.GCP_PROJECT_ID || process.env.GOOGLE_CLOUD_PROJECT || "";
   const article = pack.sourceArticle || {};
   const source = pack.sourceLinks?.[0] || {};
   const headline = article.headline || source.title || pack.topic || "";

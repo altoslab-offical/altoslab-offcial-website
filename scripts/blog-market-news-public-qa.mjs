@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import process from "node:process";
-import { cleanSourceTitle, extractEntities, extractNumbers } from "./blog-market-source-article.mjs";
+import { cleanSourceTitle, extractEntities, extractNumbers, extractSourceArticleFromHtml } from "./blog-market-source-article.mjs";
 
 const DEFAULT_BASE_URL = "https://altoslab-ai.cc";
 const LANGUAGES = ["zh-Hant", "en", "ja", "ko", "id", "vi", "th", "ms", "fil"];
@@ -53,6 +53,9 @@ const INTERNAL_COPY_PATTERNS = [
 ];
 
 const WEAK_MARKET_TITLE_PATTERNS = [/更新：/i, /市場訊號/i, /可以拿來/i, /工作流/i, /流程/i];
+const SOURCE_RICH_BODY_MINIMUM = Number.parseInt(process.env.ALTOS_MARKET_QA_SOURCE_RICH_BODY_MIN || "780", 10);
+const SOURCE_RICH_PARAGRAPH_MINIMUM = Number.parseInt(process.env.ALTOS_MARKET_QA_SOURCE_RICH_PARAGRAPH_MIN || "4", 10);
+const SOURCE_RICH_COVERAGE_MINIMUM = Number.parseInt(process.env.ALTOS_MARKET_QA_SOURCE_RICH_COVERAGE_MIN || "4", 10);
 const LEGACY_MARKET_TEMPLATE_PATTERNS = [
   /事件重點/i,
   /關鍵事實/i,
@@ -74,6 +77,9 @@ const LEGACY_MARKET_TEMPLATE_PATTERNS = [
   /real usage, paid adoption, and service stability/i
 ];
 const GENERIC_MARKET_BODY_PATTERNS = [
+  /企業讀者應先判斷/i,
+  /企業團隊需要先核對/i,
+  /後續可追蹤文件更新/i,
   /這則新聞的重點不是抽象評論/i,
   /不是同類工具會不會更多，而是/i,
   /接下來要看(?:的是)?/i,
@@ -393,6 +399,116 @@ function qaPost(post, mustTerms = []) {
   return issues;
 }
 
+function sourceReaderUrl(url = "") {
+  try {
+    const parsed = new URL(url);
+    return `https://r.jina.ai/http://${parsed.host}${parsed.pathname}${parsed.search}`;
+  } catch {
+    return `https://r.jina.ai/http://${String(url || "").replace(/^https?:\/\//i, "")}`;
+  }
+}
+
+function edgeProtectionBody(text = "") {
+  return /Attention Required!|Just a moment|cf-error-code|checking your browser|SecurityCompromiseError|<title>\s*Access Denied\s*<\/title>|Cloudflare Ray ID/i.test(
+    String(text || "").slice(0, 3000)
+  );
+}
+
+async function fetchSourceArticle(source = {}, cache) {
+  const url = source.url || "";
+  if (!url) return { ok: false, reason: "missing-source-url" };
+  if (cache.has(url)) return cache.get(url);
+  const read = async (target) => {
+    try {
+      const text = await fetchText(target);
+      if (!text || edgeProtectionBody(text)) return null;
+      return text;
+    } catch {
+      return null;
+    }
+  };
+  const html = (await read(url)) || (await read(sourceReaderUrl(url)));
+  if (!html) {
+    const result = { ok: false, reason: "source-fetch-failed" };
+    cache.set(url, result);
+    return result;
+  }
+  const article = extractSourceArticleFromHtml(source, html, {});
+  const facts = Array.isArray(article.factBullets) ? article.factBullets.filter(Boolean) : [];
+  const bodyLength = stripHtml(article.body || "").length;
+  const result =
+    article.canonicalUrl && (facts.length >= 3 || bodyLength >= 900)
+      ? { ok: true, article, bodyLength, factCount: facts.length }
+      : { ok: false, reason: "source-extraction-too-thin", bodyLength, factCount: facts.length };
+  cache.set(url, result);
+  return result;
+}
+
+function sourceEvidenceAnchors(article = {}, source = {}) {
+  const facts = Array.isArray(article.factBullets) ? article.factBullets : [];
+  const anchors = [
+    ...extractEntities(article.headline || "", article.standfirst || "", ...facts.slice(0, 8)),
+    ...extractNumbers(article.headline || "", article.standfirst || "", ...facts.slice(0, 8))
+  ]
+    .map((term) => String(term || "").trim())
+    .filter((term) => term.length >= 2)
+    .filter((term) => !/^(The|This|That|How|Why|What|AI|Google|OpenAI|TechCrunch|The Verge|WIRED)$/i.test(term));
+  const seen = new Set();
+  return anchors.filter((term) => {
+    const key = term.toLowerCase();
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  }).slice(0, 14);
+}
+
+function sourceRichLiveIssues(post, sourceArticleResult = null) {
+  const issues = [];
+  if (!sourceArticleResult?.ok) return issues;
+  const article = sourceArticleResult.article || {};
+  const source = post.sourceLinks?.[0] || {};
+  const bodyLength = stripHtml(article.body || "").length;
+  const factCount = (article.factBullets || []).filter(Boolean).length;
+  const sourceRich = bodyLength >= 1800 || factCount >= 8;
+  if (!sourceRich) return issues;
+  const body = String(post.body || "");
+  const paragraphs = body
+    .split(/\n{2,}/)
+    .map((paragraph) => stripHtml(paragraph).replace(/\s+/g, " ").trim())
+    .filter((paragraph) => paragraph.length >= 60);
+  const postBodyLength = stripHtml(body).length;
+  if (postBodyLength < SOURCE_RICH_BODY_MINIMUM || paragraphs.length < SOURCE_RICH_PARAGRAPH_MINIMUM) {
+    issues.push({
+      severity: "critical",
+      id: "live-source-rich-body-too-thin",
+      sourceBodyLength: bodyLength,
+      sourceFactCount: factCount,
+      postBodyLength,
+      paragraphCount: paragraphs.length
+    });
+  }
+  const text = publicText(post).toLowerCase();
+  const anchors = sourceEvidenceAnchors(article, source);
+  const covered = anchors.filter((term) => {
+    const lower = term.toLowerCase();
+    if (text.includes(lower)) return true;
+    const numeric = lower.match(/\d[\d,.]*/)?.[0]?.replace(/[,.]/g, "");
+    return numeric && numeric.length >= 2 && text.replace(/[,.]/g, "").includes(numeric);
+  });
+  if (anchors.length >= 6 && covered.length < SOURCE_RICH_COVERAGE_MINIMUM) {
+    issues.push({
+      severity: "critical",
+      id: "live-source-fact-coverage-too-low",
+      sourceAnchors: anchors.slice(0, 10),
+      coveredAnchors: covered
+    });
+  }
+  if (/發布「/.test(post.title || "") || /published\s+["“]/i.test(post.title || "")) {
+    issues.push({ severity: "major", id: "source-headline-wrapper-title" });
+  }
+  return issues;
+}
+
 async function main() {
   const slug = arg("slug");
   if (!slug) throw new Error("--slug is required");
@@ -401,6 +517,7 @@ async function main() {
   const mustTerms = repeatedArgs("must");
   const results = [];
   const postCache = {};
+  const sourceArticleCache = new Map();
 
   for (const language of languages) {
     const post = await fetchPostForLanguage(root, slug, language, postCache);
@@ -408,12 +525,21 @@ async function main() {
       results.push({ language, ok: false, issues: [{ severity: "critical", id: "missing-post" }] });
       continue;
     }
-    const issues = qaPost(post, mustTerms);
+    const sourceArticle = await fetchSourceArticle(post.sourceLinks?.[0] || {}, sourceArticleCache);
+    const issues = [...qaPost(post, mustTerms), ...sourceRichLiveIssues(post, sourceArticle)];
     results.push({
       language,
       ok: issues.length === 0,
       title: post.title,
       excerpt: post.excerpt,
+      liveSource: sourceArticle.ok
+        ? {
+            bodyLength: sourceArticle.bodyLength,
+            factCount: sourceArticle.factCount,
+            headline: sourceArticle.article?.headline,
+            canonicalUrl: sourceArticle.article?.canonicalUrl
+          }
+        : sourceArticle,
       issues
     });
   }

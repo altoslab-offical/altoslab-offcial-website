@@ -83,13 +83,13 @@ async function adminCookie(root) {
 
 const repairs = {
   "ai-vendor-demo-to-operating-proof-20260625-zh-hant": {
-    title: "買 AI 工具前，先把 Demo 變成驗收題",
-    excerpt: "供應商展示只會出現最順的一天；採購前要用自己的資料、權限、成本上限與退場路線，測一遍普通工作日會不會出事。",
-    seoTitle: "買 AI 工具前，先把供應商 Demo 變成驗收題",
+    title: "供應商 Demo 很順，不代表你的流程扛得住",
+    excerpt: "採購 AI 工具前，先用一個普通工作日驗收：髒資料、權限、覆核、成本與退場路線，哪一個撐不住就先別擴大。",
+    seoTitle: "供應商 Demo 很順，不代表你的 AI 流程扛得住",
     seoDescription:
       "AI 採購不能只看供應商 Demo。用資料邊界、權限、事實性、人工覆核、成本上限與退場路線，建立一週採購驗收測試。",
     geoSummary:
-      "AI 採購應把供應商展示轉成自己的驗收題。本文用 Microsoft AI operating model、NIST AI RMF、Google Cloud 與 IBM 的治理文件，整理資料邊界、權限、事實性、人工覆核、成本與退場路線六項檢查。",
+      "AI 採購應把供應商展示轉成自己的驗收題。本文用 Microsoft AI operating model、NIST AI RMF、OWASP LLM 風險與 IBM 治理文件，整理資料邊界、權限、事實性、人工覆核、成本與退場路線六項檢查。",
     keyTakeaways: [
       "供應商 Demo 只能證明理想場景，不能證明你的資料、權限與流程承受得住。",
       "採購前先跑一週驗收：用真資料、真審核者、真成本上限與真退場條件測試。",
@@ -97,9 +97,9 @@ const repairs = {
     ],
     body: `供應商 Demo 通常都很順：資料乾淨、權限剛好、使用者配合，問題也被設計成模型容易回答的樣子。真正的採購風險不在展示當下，而是在導入後第一個普通工作日：資料格式不一致、權限不知道誰開、輸出需要人改、費用突然膨脹，最後沒有人說得清楚要不要繼續用。
 
-所以採購 AI 工具前，重點不是再多看一次功能展示，而是把展示裡的承諾改寫成自己的驗收題。Microsoft 近年談 AI operating model，NIST AI RMF 強調治理與風險管理，Google Cloud 與 IBM 的企業 AI 文件也都回到同一件事：AI 能不能進 production，不只看能力，還要看責任、紀錄、監控與退場。
+所以採購 AI 工具前，重點不是再多看一次功能展示，而是把展示裡的承諾改寫成自己的驗收題。Microsoft 近年談 AI operating model，NIST AI RMF 強調治理與風險管理，OWASP LLM 風險清單與 IBM 的企業 AI 文件也都回到同一件事：AI 能不能進正式流程，不只看能力，還要看責任、紀錄、監控與退場。
 
-## Demo 看起來很順，通常是因為現場被整理過
+	## Demo 最會藏起來的，是第一天上線的髒資料
 
 展示環境裡最常被省略的，是企業真正會遇到的雜訊。客戶資料可能缺欄位，內部文件版本可能互相矛盾，主管要的不是單一答案，而是可以被審核、轉交、修改、追溯的工作結果。供應商把這些都整理好再展示，並不代表工具進到你的公司也會自然成立。
 
@@ -107,7 +107,7 @@ const repairs = {
 
 [IMAGE:evidence-desk]
 
-## 一週驗收比一場 Demo 更接近真相
+	## 一週壓力測試，要故意挑普通工作日
 
 比較務實的做法，是先定一週採購驗收。不要測所有功能，只挑一條高頻、低到中風險、但足以暴露問題的流程。把它拆成六個面向：
 
@@ -122,7 +122,7 @@ const repairs = {
 
 這張表不是為了拖慢採購，而是把採購討論從「它好像很厲害」拉回「它能不能在我們公司安全地運作」。
 
-## 好工具要能留下決策證據
+	## 先別看輸出多漂亮，先看誰能關掉它
 
 企業買 AI 工具，最後買的不是一個聊天視窗，而是一組可營運的能力。好的工具會讓團隊看得見：它用了哪些資料、做了哪些判斷、哪一步需要人批准、結果被誰採用、失敗時怎麼還原。這些證據越清楚，導入速度反而越快，因為資安、法務、營運與業務不用每次重新吵一次。
 
@@ -130,7 +130,7 @@ const repairs = {
 
 [IMAGE:operating-loop]
 
-## 小團隊也可以做，只是範圍要小
+	## 小團隊不是不用驗收，是更不能承擔返工
 
 這套驗收不只適合大企業。小團隊更需要它，因為沒有多餘人力替 AI 補洞。做法可以很輕：一份資料清單、一張權限表、一個人工審核者、一個成本上限、一條回復路線。只要這五件事說不清楚，就先不要把 AI 接到會影響客戶承諾、付款、公開內容或正式資料的流程。
 
@@ -149,9 +149,9 @@ const repairs = {
     ]
   },
   "ai-search-answer-shape-before-keywords-20260625-zh-hant": {
-    title: "AI 搜尋不是吃關鍵字，是吃可引用的答案",
-    excerpt: "想被 AI 摘要引用，文章要先回答一個清楚問題：結論、來源、例子與限制能不能被單獨摘出來，仍然不走樣。",
-    seoTitle: "AI 搜尋不是吃關鍵字，是吃可引用的答案",
+    title: "想被 AI 搜尋引用，先把答案寫成能被摘走的段落",
+    excerpt: "AI 摘要不缺關鍵字，缺的是可以獨立成立的段落：一句結論、一個來源、一個例子，加上一個不被誤用的限制。",
+    seoTitle: "想被 AI 搜尋引用，先把答案寫成可引用段落",
     seoDescription:
       "想提升 AI 搜尋引用機會，內容要有清楚問題、短結論、可信來源、例子與限制。本文整理 GEO 寫作的答案結構。",
     geoSummary:
@@ -165,7 +165,7 @@ const repairs = {
 
 Google Search Central 一直強調有用內容與可理解的頁面結構；OpenAI Structured Outputs 讓我們看到機器讀取資訊時需要穩定欄位；Microsoft 的 responsible AI 文件也提醒，答案要能被追溯與檢查。把這些放在內容工作流裡，GEO 不是神秘技巧，而是把文章寫成可被引用、也可被人讀懂的知識單元。
 
-## 先問：這段話被單獨引用時會不會失真
+	## 先問：這段話被摘出去，意思還會不會完整
 
 好的 AI 搜尋段落，離開全文後仍然能站得住。它不會只說「這很重要」，而會說清楚重要在哪裡；不會只說「根據研究」，而會指出來源脈絡；不會只給結論，而會保留限制，避免 AI 摘要把假設講成事實。
 
@@ -173,7 +173,7 @@ Google Search Central 一直強調有用內容與可理解的頁面結構；Open
 
 [IMAGE:evidence-desk]
 
-## 可引用答案通常有四個零件
+	## 一個能被引用的段落，通常有四個零件
 
 一個穩定的答案段落，至少要包含四個零件：
 
@@ -186,7 +186,7 @@ Google Search Central 一直強調有用內容與可理解的頁面結構；Open
 
 這四個零件不必每段都完整出現，但每個主要小節都應該至少能交代「我在回答哪個問題」。
 
-## 標題要像入口，小標要像路標
+	## 標題負責拉人進來，小標負責讓答案被找到
 
 AI 搜尋與真人讀者都需要路標。標題負責讓人知道這篇值不值得進來，小標負責讓人知道每段要解決什麼。壞小標像「下一步」或「深入分析」；好小標會讓讀者不用讀全文，也能抓到文章骨架。
 
@@ -194,7 +194,7 @@ AI 搜尋與真人讀者都需要路標。標題負責讓人知道這篇值不�
 
 [IMAGE:operating-loop]
 
-## FAQ 不該補字數，而是補搜尋者的下一個疑問
+	## FAQ 不是補字數，是回收讀者真的會問的問題
 
 FAQ 最常見的失敗，是把文章小標再問一次。真正有用的 FAQ 應該處理讀者接下來會卡住的問題：這和 SEO 差在哪裡？沒有數據能不能宣稱有效？文章要不要為 AI 摘要而改短？這些問題能補足搜尋意圖，也能讓 AI 系統更容易抓到邊界。
 
@@ -213,15 +213,15 @@ FAQ 最常見的失敗，是把文章小標再問一次。真正有用的 FAQ �
     ]
   },
   "agent-interface-contract-before-autonomy-20260625-zh-hant": {
-    title: "Agent 要動手前，先寫一份介面合約",
-    excerpt: "Agent 接上工具以前，團隊要先說清楚它能讀什麼、能改什麼、什麼時候必須停下來，否則自動化只會把責任推給下一個人。",
-    seoTitle: "AI Agent 要動手前，先寫一份介面合約",
+    title: "先別讓 Agent 動手，先寫清楚它能碰哪裡",
+    excerpt: "Agent 接上工具以前，團隊要先說清楚它能讀什麼、能改什麼、何時必須停下來；邊界沒寫好，自動化只是在轉嫁責任。",
+    seoTitle: "AI Agent 動手前，先寫清楚資料、權限與回滾邊界",
     seoDescription:
       "企業導入 AI Agent 前，要先定義資料讀取、寫入權限、批准節點、證據格式與回滾條件，避免自動化放大責任缺口。",
     geoSummary:
       "AI Agent 的介面合約應定義可讀資料、可寫欄位、批准節點、證據紀錄與停損回滾。OpenAI、Microsoft、NIST 與 IBM 的 agent 與 AI governance 文件共同提醒：自治之前，要先有可審核的邊界。",
     keyTakeaways: [
-      "Agent 不是接上工具就能進 production，必須先定義它和企業系統的介面合約。",
+      "Agent 不是接上工具就能進正式流程，必須先定義它和企業系統的介面合約。",
       "介面合約至少要包含可讀資料、可寫欄位、批准節點、證據紀錄與回滾條件。",
       "第一個 Agent 試點應從低風險、高頻、可人工接回的流程開始。"
     ],
@@ -229,7 +229,7 @@ FAQ 最常見的失敗，是把文章小標再問一次。真正有用的 FAQ �
 
 OpenAI 的 agent 與 Codex 案例、Microsoft 的 Agent 365 與控制規範、NIST AI RMF、IBM 的 AI governance 文件都指向同一件事：自動化要進企業，不只需要能力，也需要可審核的邊界。介面合約就是把這個邊界寫成團隊看得懂、系統也能執行的規格。
 
-## 介面合約不是工程文件，是責任邊界
+	## 介面合約不是文件格式，是責任邊界
 
 傳統 API contract 會定義輸入、輸出和錯誤碼；Agent interface contract 還要多定義責任。它要說清楚 Agent 可以讀哪些資料、可以呼叫哪些工具、可以改哪些欄位、哪些動作要人批准、執行過程留下哪些紀錄，以及失敗時如何停止或回復。
 
@@ -237,7 +237,7 @@ OpenAI 的 agent 與 Codex 案例、Microsoft 的 Agent 365 與控制規範、NI
 
 [IMAGE:evidence-desk]
 
-## 先寫五個欄位，再談自治
+	## 五個欄位沒寫完，Agent 就還不能接正式任務
 
 第一版介面合約不需要很厚，但至少要有五個欄位：
 
@@ -251,7 +251,7 @@ OpenAI 的 agent 與 Codex 案例、Microsoft 的 Agent 365 與控制規範、NI
 
 只要這五欄還空著，就不應該把 Agent 接到會影響客戶資料、付款、對外承諾或正式發布的流程。
 
-## 好的 Agent 試點應該能被接回來
+	## 第一個試點要挑能被人接回來的任務
 
 第一個試點不要挑最混亂、最關鍵、最難回復的流程。比較好的起點，是高頻、規則清楚、輸出可審核、失敗能人工接回的任務。例如整理內部資料、生成草稿、比對文件、準備會議摘要，都比直接回覆客戶或改動正式資料更適合。
 
@@ -259,7 +259,7 @@ OpenAI 的 agent 與 Codex 案例、Microsoft 的 Agent 365 與控制規範、NI
 
 [IMAGE:operating-loop]
 
-## 介面合約要進入日常維運
+	## 權限一變，介面合約就要跟著更新
 
 介面合約不是上線前寫一次就結束。每次資料來源改變、工具權限擴大、模型版本更新、任務範圍增加，都應該回頭檢查合約。否則一開始安全的 Agent，幾週後可能已經被加到完全不同的流程裡。
 
@@ -312,12 +312,20 @@ function assertClean(post) {
   ].join("\n");
   const bad = forbidden.find((pattern) => pattern.test(combined));
   if (bad) throw new Error(`${post.slug} still contains forbidden recycled/operator text: ${bad}`);
-  const h2Count = (post.body.match(/^##\s+/gm) || []).length;
+  const h2Count = (post.body.match(/^\s*##\s+/gm) || []).length;
   if (h2Count < 4) throw new Error(`${post.slug} needs at least 4 section subtitles; found ${h2Count}`);
   const markers = [...post.body.matchAll(/\[IMAGE:([^\]]+)\]/g)].map((match) => match[1]);
   if (markers.length < 2) throw new Error(`${post.slug} needs two image markers; found ${markers.length}`);
   if ((post.keyTakeaways || []).length < 3) throw new Error(`${post.slug} needs 3 takeaways`);
   if ((post.faqs || []).length < 2) throw new Error(`${post.slug} needs 2 FAQs`);
+}
+
+function normalizeMarkdownBody(body = "") {
+  return String(body || "")
+    .replace(/^\t/gm, "")
+    .replace(/[ \t]+$/gm, "")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
 }
 
 async function currentPost(root, slug) {
@@ -340,10 +348,11 @@ async function main() {
   const patches = posts.map((post) => {
     const repair = repairs[post.slug];
     if (!repair) throw new Error(`Missing repair payload for ${post.slug}`);
-    const next = {
-      ...post,
-      ...repair,
-      status: "published",
+      const next = {
+        ...post,
+        ...repair,
+        body: normalizeMarkdownBody(repair.body),
+        status: "published",
       language: "zh-Hant",
       qualityStatus: "passed",
       qualityIssues: [],
@@ -364,7 +373,7 @@ async function main() {
         seoDescription: repair.seoDescription,
         geoSummary: repair.geoSummary,
         keyTakeaways: repair.keyTakeaways,
-        body: repair.body,
+            body: normalizeMarkdownBody(repair.body),
         faqs: repair.faqs,
         coverGeneration: sanitizedCoverGeneration(post),
         qualityStatus: "passed",

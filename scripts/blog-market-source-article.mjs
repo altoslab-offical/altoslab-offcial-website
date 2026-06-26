@@ -282,6 +282,8 @@ function isSourceNoiseText(value = "") {
   if (/^(Image Credits|圖片來源|作者|Tags?|Topics?|Read more|Sign up|Subscribe|Advertisement|Recommended|Related|Share this|本文獲)/i.test(compact)) return true;
   if (/^Updated\s+[A-Z][a-z]+\s+\d{1,2},\s+\d{4}:/i.test(compact)) return true;
   if (/newsletter|sign up|subscribe|advertisement|cookie|privacy policy|terms of service/i.test(compact)) return true;
+  if (/^(?:Sr\.\s*)?Director,\s*Engineering,\s*Google Cloud$/i.test(compact)) return true;
+  if (/For inquiries regarding security,\s*please contact us/i.test(compact)) return true;
   if (/Products AI Cloud AI Gateway|Core Platform CI\/CD|Resources Company Customers|Web Application Firewall|DDoS Protection/i.test(compact)) return true;
   if (/Verge Shopping Expand|Transportation Expand|Founded in 2011, we offer our audience/i.test(compact)) return true;
   if (/We’re on a journey to advance and democratize artificial intelligence/i.test(compact)) return true;

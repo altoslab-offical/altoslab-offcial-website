@@ -643,12 +643,8 @@ function doctorErrors(doctor = {}) {
   return Array.isArray(parsed?.errors) ? parsed.errors.map((item) => String(item?.message || item || "")) : [];
 }
 
-function doctorHasCustomDomainDnsBlocker(doctor = {}) {
-  return doctorErrors(doctor).some((message) => /custom domain.*Google Frontend|Cloudflare Worker route is not cut over/i.test(message));
-}
-
-function doctorLooksGcsRepairable(doctor = {}) {
-  if (doctorHasCustomDomainDnsBlocker(doctor)) return false;
+function doctorLooksLegacyGcsRepairable(doctor = {}) {
+  if (process.env.ALTOS_BLOG_LEGACY_GCP_REPAIR !== "1") return false;
   const parsed = doctor.json || parseJsonObject(doctor.stdout);
   const provider = parsed?.summary?.production?.health?.cmsStorage?.provider || "";
   const errors = doctorErrors(doctor).join("\n");
@@ -656,6 +652,9 @@ function doctorLooksGcsRepairable(doctor = {}) {
 }
 
 async function runProductionRepair({ date, slot, mode }) {
+  if (process.env.ALTOS_BLOG_LEGACY_GCP_REPAIR !== "1") {
+    return { ok: false, skipped: true, reason: "legacy GCP repair disabled; production repair is AWS ECS/S3 deploy/readback only" };
+  }
   if (hasFlag("skip-production-repair") || process.env.ALTOS_BLOG_PRODUCTION_AUTO_REPAIR === "0") {
     return { ok: false, skipped: true, reason: "production repair disabled" };
   }
@@ -692,13 +691,11 @@ async function runDoctorWithProductionRepair({ mode, date, slot, phase }) {
   await appendLog(globalScheduleLogPath(), JSON.stringify({ phase, date, slot, doctor: compactDoctorResult(doctor) }));
   if (doctor.ok || hasFlag("skip-doctor")) return { doctor, repair: null };
 
-  if (!doctorLooksGcsRepairable(doctor)) {
+  if (!doctorLooksLegacyGcsRepairable(doctor)) {
     const repair = {
       ok: false,
       skipped: true,
-      reason: doctorHasCustomDomainDnsBlocker(doctor)
-        ? "custom-domain-dns-blocked; skip GCP repair and verify Cloudflare Worker rescue URL"
-        : "doctor failure is not a GCS production-repair target"
+      reason: "doctor failure is not eligible for legacy GCP repair; use AWS ECS/S3 deploy/readback path"
     };
     await appendLog(
       globalScheduleLogPath(),

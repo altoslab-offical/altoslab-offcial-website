@@ -8,7 +8,9 @@ import { spawnSync } from "node:child_process";
 const DEFAULT_BASE_URL = "https://altoslab-ai.cc";
 const LANGUAGES = ["zh-Hant", "en", "ja", "ko", "id", "vi", "th", "ms", "fil"];
 const REQUIRED_CHROME_PROFILE_EMAIL = "john.wu0120@gmail.com";
-const PRODUCTION_CMS_PROVIDERS = new Set(["cloudflare-d1", "cloudflare-kv", "gcs", "aws-s3"]);
+const PRODUCTION_CMS_PROVIDER = "aws-s3";
+const DEFAULT_AWS_S3_BUCKET = "altoslab-official-cms-487316829524";
+const DEFAULT_AWS_REGION = "ap-northeast-1";
 const GENERIC_STOCK_IMAGE_HOSTS = [
   "unsplash.com",
   "images.unsplash.com",
@@ -284,22 +286,19 @@ async function checkProductionHealth(errors, warnings) {
       return { root, health: null };
     }
     const integrations = json.integrations || {};
-    if (!PRODUCTION_CMS_PROVIDERS.has(json.cmsStorage?.provider)) {
-      addIssue(errors, "production cmsStorage.provider must be cloudflare-d1, cloudflare-kv, gcs or aws-s3");
+    if (json.cmsStorage?.provider !== PRODUCTION_CMS_PROVIDER) {
+      addIssue(errors, `production cmsStorage.provider must be ${PRODUCTION_CMS_PROVIDER}; got ${json.cmsStorage?.provider || "missing"}`);
     }
     for (const field of ["durable", "writable", "configured"]) {
       if (json.cmsStorage?.[field] !== true) addIssue(errors, `production cmsStorage.${field} must be true`);
     }
-    const expectedGcsBucket = process.env.GCS_BUCKET || "altoslab-official-cms-934551798702";
-    if (json.cmsStorage?.provider === "gcs" && json.cmsStorage?.bucket !== expectedGcsBucket) {
-      addIssue(errors, `production GCS bucket must be ${expectedGcsBucket}; got ${json.cmsStorage?.bucket || "missing"}`);
+    const expectedAwsBucket = process.env.AWS_S3_BUCKET || DEFAULT_AWS_S3_BUCKET;
+    if (json.cmsStorage?.provider === PRODUCTION_CMS_PROVIDER && json.cmsStorage?.bucket !== expectedAwsBucket) {
+      addIssue(errors, `production AWS S3 bucket must be ${expectedAwsBucket}; got ${json.cmsStorage?.bucket || "missing"}`);
     }
-    const host = new URL(root).hostname.replace(/^www\./, "");
-    if (host === "altoslab-ai.cc" && /google frontend/i.test(serverHeader)) {
-      addIssue(
-        errors,
-        "custom domain is still served by Google Frontend; Cloudflare Worker route is not cut over"
-      );
+    const expectedAwsRegion = process.env.AWS_REGION || DEFAULT_AWS_REGION;
+    if (json.cmsStorage?.provider === PRODUCTION_CMS_PROVIDER && json.cmsStorage?.region && json.cmsStorage.region !== expectedAwsRegion) {
+      addIssue(errors, `production AWS region must be ${expectedAwsRegion}; got ${json.cmsStorage.region}`);
     }
     if (integrations.externalBlogIngestConfigured !== true) addIssue(errors, "production externalBlogIngestConfigured must be true");
     if (integrations.legacyDeepSeekCronDisabled !== true) addIssue(errors, "production legacyDeepSeekCronDisabled must be true");

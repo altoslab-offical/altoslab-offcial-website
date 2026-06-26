@@ -1,10 +1,26 @@
 import { NextResponse } from "next/server";
+import { adminCookieName, getAdminSessionToken } from "@/lib/auth";
 import { mutateCmsData, normalizeBlogPostInput, publishValidationForBlogPost } from "@/lib/cms";
 import type { BlogPost } from "@/lib/types";
 
 type Params = { params: Promise<{ id: string }> | { id: string } };
 
+function cookieValue(request: Request, name: string) {
+  const cookie = request.headers.get("cookie") || "";
+  const match = cookie
+    .split(";")
+    .map((item) => item.trim())
+    .find((item) => item.startsWith(`${name}=`));
+  return match ? decodeURIComponent(match.slice(name.length + 1)) : "";
+}
+
+function hasAdminSession(request: Request) {
+  const expected = getAdminSessionToken();
+  return Boolean(expected && cookieValue(request, adminCookieName) === expected);
+}
+
 export async function PATCH(request: Request, context: Params) {
+  if (!hasAdminSession(request)) return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
   const { id } = await context.params;
   const input = (await request.json()) as Partial<BlogPost>;
 
@@ -25,7 +41,8 @@ export async function PATCH(request: Request, context: Params) {
   return NextResponse.json(result);
 }
 
-export async function DELETE(_: Request, context: Params) {
+export async function DELETE(request: Request, context: Params) {
+  if (!hasAdminSession(request)) return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
   const { id } = await context.params;
 
   const post = await mutateCmsData((data) => {
