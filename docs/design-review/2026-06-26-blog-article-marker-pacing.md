@@ -35,10 +35,15 @@ Affected URL(s):
 - `DESIGN.md` updated: yes
 - `docs/FRONTEND_ARCHITECTURE.md` updated: yes
 - Smoke guard updated: yes, `scripts/blog-system-smoke.mjs`
-- `npm test` result: pending rerun after this record
-- Desktop browser evidence: pending production QA
-- Mobile browser evidence: pending production QA
-- Production smoke evidence after deploy: pending deploy/readback
+- `npm test` result: passed on 2026-06-26
+- Desktop browser evidence: local Google Chrome rendered QA via Playwright,
+  screenshots under `/tmp/altoslab-*-postdeploy.png`
+- Mobile browser evidence: not rerun in this change; desktop public article
+  spacing and metadata were the reported regression
+- Production smoke evidence after deploy: AWS ECS task definition `:79`,
+  `npm run verify:aws -- --base-url https://altoslab-ai.cc --expected-provider aws-s3`
+  passed, warm `npm run blog:performance-smoke -- --base-url https://altoslab-ai.cc`
+  passed, public AI-feeling audit returned 0 critical / 0 warning
 
 ## Rollback Notes
 
