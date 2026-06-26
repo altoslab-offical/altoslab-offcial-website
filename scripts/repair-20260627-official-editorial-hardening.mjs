@@ -455,6 +455,7 @@ Agent 越像同事，越需要像正式流程一樣被管理。新同事做錯�
   "powering-the-next-era-of-confidential-ai-google-cloud-blog": {
     title: "Apple PCC 擴大到 Google Cloud，機密 AI 推理走向可驗證基礎設施",
     seoTitle: "Apple PCC 與 Google Cloud：Confidential AI 推理基礎設施",
+    tags: ["市場快訊", "AI", "Google Cloud", "Apple PCC", "Confidential AI"],
     excerpt:
       "Google Cloud AI & Machine Learning Blog 6 月 12 日表示，Apple 在 WWDC 2026 擴大 Private Cloud Compute，雙方合作建置符合安全、保密與透明度目標的 AI serving platform。",
     seoDescription:
@@ -476,6 +477,7 @@ Google Cloud 在文章中表示，這些技術一起讓 Apple PCC on Google Clou
   "hollywood-is-bending-the-knee-to-openai": {
     title: "Amazon MGM 放手《Artificial》：OpenAI 電影成了好萊塢與 Big Tech 的壓力測試",
     seoTitle: "Amazon MGM 放手 OpenAI 電影 Artificial，好萊塢與 Big Tech 壓力升高",
+    tags: ["市場快訊", "AI", "The Verge", "OpenAI", "Hollywood"],
     excerpt:
       "The Verge 報導，Amazon MGM 放棄發行 Luca Guadagnino 的 OpenAI 題材電影《Artificial》；Netflix、A24、Focus Features 與 Warner Bros. 旗下 Clockwork 也暫不接手。",
     seoDescription:
