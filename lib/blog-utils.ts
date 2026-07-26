@@ -1,6 +1,6 @@
 import type { BlogContentType, BlogLanguage, BlogPost, BlogQualityChecks, BlogSourceLink } from "./types";
 
-export const BLOG_LANGUAGES: BlogLanguage[] = ["zh-Hant", "en", "ja", "ko", "id", "vi", "th", "ms", "fil"];
+export const BLOG_LANGUAGES: BlogLanguage[] = ["zh-Hant", "zh-Hans", "en"];
 export const SITE_LANGUAGES: BlogLanguage[] = ["zh-Hant", "en"];
 
 const BLOG_LANGUAGE_CONFIG: Record<
@@ -15,6 +15,15 @@ const BLOG_LANGUAGE_CONFIG: Record<
     shortLabel: "中文",
     cover: "/blog-cover-zh-hant.png",
     ogLocale: "zh_TW"
+  },
+  "zh-Hans": {
+    indexPath: "/zh-hans/blog",
+    html: "zh-Hans",
+    metadata: "zh-Hans",
+    label: "简体中文",
+    shortLabel: "简中",
+    cover: "/blog-cover-zh-hant.png",
+    ogLocale: "zh_CN"
   },
   en: {
     indexPath: "/en/blog",
@@ -95,6 +104,11 @@ const BLOG_CONTENT_TYPE_LABELS: Record<BlogLanguage, Record<BlogContentType, str
     breaking: "市場快訊",
     column: "專欄",
     feature: "專題"
+  },
+  "zh-Hans": {
+    breaking: "市场快讯",
+    column: "专栏",
+    feature: "专题"
   },
   en: {
     breaking: "Brief",

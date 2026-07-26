@@ -324,6 +324,10 @@ Remaining risks:
 5. Replace remaining hard-coded `#C8FF00`, `#FF5500`, black, white, and translucent grays only during controlled section-level migration.
 6. Keep `docs/FRONTEND_ARCHITECTURE.md` updated when changing route/component boundaries.
 
+## Three-locale Blog parity
+
+`/blog`, `/zh-hans/blog`, and `/en/blog` use the same approved `blog-craft` layout, spacing, typography, cards, header, mobile behavior, and signal-lime emphasis. The simplified-Chinese route changes localized copy only; it must not introduce a separate visual treatment or alter the protected Blog markers.
+
 ## Central References Used
 
 - `/Users/kenhuang/Desktop/DesignAI/DESIGN-BRAIN.md`

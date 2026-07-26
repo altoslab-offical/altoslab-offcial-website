@@ -46,6 +46,21 @@ const copy: Record<
     readTime: (minutes) => `${minutes || 3} 分鐘閱讀`,
     topics: ["Latest", "市場快訊", "市場專欄", "AI 趨勢", "Agents", "Automation", "GEO"]
   },
+  "zh-Hans": {
+    eyebrow: "ALTOS LAB Journal",
+    title: "AI 实验室笔记",
+    description: "AI 产品、Agent、自动化、搜索可见度、案例与市场观察。",
+    latest: "最新文章",
+    categories: "文章分类",
+    postsLabel: "篇文章",
+    searchLabel: "搜索文章",
+    searchPlaceholder: "搜索 AI、Agent、GEO...",
+    searchSubmit: "搜索",
+    read: "阅读文章",
+    empty: "目前没有符合条件的文章。",
+    readTime: (minutes) => `${minutes || 3} 分钟阅读`,
+    topics: ["Latest", "市场快讯", "市场专栏", "AI 趋势", "Agents", "Automation", "GEO"]
+  },
   en: {
     eyebrow: "ALTOS LAB Journal",
     title: "AI Lab Notes",

@@ -41,7 +41,11 @@ assert(component.includes("next/script"), "WonDa widget uses next/script");
 assert(component.includes("pathname.startsWith(\"/admin\")"), "WonDa widget is excluded from admin routes");
 assert(component.includes("pathname.startsWith(\"/api\")"), "WonDa widget is excluded from API routes");
 
-for (const source of [component, route, sync, directBlog, homepage]) {
+// `public/altoslab-homepage.html` is a generated Cloudflare artifact and is
+// intentionally absent in a clean checkout. Validate it only when a build has
+// materialized it; the tracked generator remains mandatory in every run.
+const renderSurfaces = [component, route, sync, directBlog, ...(homepage ? [homepage] : [])];
+for (const source of renderSurfaces) {
   assert(source.includes(EXPECTED_SCRIPT), "WonDa widget script src is present in every render surface");
   assert(source.includes(EXPECTED_CHANNEL), "WonDa widget channel id is present in every render surface");
   assert(source.includes(EXPECTED_API), "WonDa widget API base is present in every render surface");
