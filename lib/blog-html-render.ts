@@ -32,6 +32,14 @@ const INDEX_COPY: Record<BlogLanguage, IndexCopy> = {
     searchPlaceholder: "搜尋 AI、Agent、GEO...",
     empty: "目前沒有符合條件的文章。"
   },
+  "zh-Hans": {
+    title: "AI 实验室笔记",
+    description: "AI 产品、Agent、自动化、搜索可见度、案例与市场观察。",
+    latest: "最新文章",
+    read: "阅读文章",
+    searchPlaceholder: "搜索 AI、Agent、GEO...",
+    empty: "目前没有符合条件的文章。"
+  },
   en: {
     title: "AI Lab Notes",
     description: "AI products, agents, automation, search visibility, case studies and market signals.",

@@ -2,6 +2,7 @@ import type { BlogLanguage } from "./types";
 
 const SEARCH_CITATION_LABELS: Record<BlogLanguage, string> = {
   "zh-Hant": "AI 搜尋引用",
+  "zh-Hans": "AI 搜索引用",
   en: "AI search visibility",
   ja: "AI検索での引用",
   ko: "AI 검색 인용",
@@ -14,6 +15,7 @@ const SEARCH_CITATION_LABELS: Record<BlogLanguage, string> = {
 
 const SEARCH_CONTENT_LABELS: Record<BlogLanguage, string> = {
   "zh-Hant": "搜尋可見度",
+  "zh-Hans": "搜索可见度",
   en: "search visibility",
   ja: "検索での見え方",
   ko: "검색 가시성",

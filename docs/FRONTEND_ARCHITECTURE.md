@@ -197,13 +197,15 @@ The current CMS helpers remain useful for admin and future dynamic pages:
 - `lib/cms-storage.ts`
 - `lib/seed.ts`
 
-Blog posts now include bilingual and AI-review fields:
+Blog posts now include three native publishing lanes and AI-review fields:
 
-- `language`: `zh-Hant` or `en`
-- `translationGroupId`: connects bilingual pairs for hreflang
+- `language`: Olympus releases use `zh-Hant`, `zh-Hans`, or `en`; historical language values remain readable for compatibility
+- `translationGroupId`: connects the three native variants for hreflang
 - `sourceLinks`: visible sources for SEO/GEO and AI-generated drafts
 - `reviewStatus`, `qualityChecks`, `aiDisclosure`: human review and trust controls
 - `generationDate`: Taiwan-date idempotency for daily cron drafts
+
+Route ownership stays on the shared Blog components: `/blog` is `zh-Hant`, `/zh-hans/blog` is `zh-Hans`, and `/en/blog` is `en`. No locale owns a separate layout.
 
 ## Design Tokens
 

@@ -1,7 +1,7 @@
 export type PublishStatus = "draft" | "published" | "archived" | "deleted";
 export type ProjectStatus = "draft" | "published" | "archived";
 export type ContactLeadStatus = "new" | "contacted" | "qualified" | "closed" | "spam";
-export type BlogLanguage = "zh-Hant" | "en" | "ja" | "ko" | "id" | "vi" | "th" | "ms" | "fil";
+export type BlogLanguage = "zh-Hant" | "zh-Hans" | "en" | "ja" | "ko" | "id" | "vi" | "th" | "ms" | "fil";
 export type BlogReviewStatus = "ai-draft" | "human-review" | "approved" | "needs-revision";
 export type BlogGenerationSlot = "manual" | "morning" | "afternoon" | "evening";
 export type BlogContentType = "breaking" | "column" | "feature";
@@ -338,6 +338,30 @@ export type CmsData = {
   projects: Project[];
   blogPosts: BlogPost[];
   contactLeads: ContactLead[];
+  /** Private idempotency receipts for the HMAC-authenticated Olympus release bridge. */
+  olympusReleaseLedger?: Array<{
+    schema: "olympus_website_release_ledger_v1";
+    idempotencyKey: string;
+    requestSha256: string;
+    receipt: {
+      schema: "olympus_website_release_receipt_v1";
+      status: "published";
+      id: string;
+      idempotencyKey: string;
+      releaseContentSha256: string;
+      posts: Array<{
+        id: string;
+        language: string;
+        slug: string;
+        canonicalUrl: string;
+        bodySha256: string;
+        publishedAt: string;
+      }>;
+      publishedAt: string;
+    };
+    createdAt: string;
+    updatedAt: string;
+  }>;
   assets: Array<{
     id: string;
     url: string;

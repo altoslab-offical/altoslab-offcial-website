@@ -27,6 +27,9 @@ for (const pathname of indexPaths) {
 }
 
 const directWorker = read("cloudflare/blog-html-direct-worker.js");
+const blogUtils = read("lib/blog-utils.ts");
+const simplifiedIndex = read("app/zh-hans/blog/page.tsx");
+const simplifiedArticle = read("app/zh-hans/blog/[slug]/page.tsx");
 for (const forbidden of ["function renderIndex", "readIndexPosts", "BLOG_INDEX_PAGE_SIZE =", "cloudflare-d1-index"]) {
   assert(!directWorker.includes(forbidden), `Cloudflare direct renderer must not contain ${forbidden}`);
 }
@@ -48,6 +51,9 @@ assert(!globalCss.includes("#6f3ff5"), "Next article page does not reintroduce t
 const apiHtmlRenderer = read("lib/blog-html-render.ts");
 assert(apiHtmlRenderer.includes("function siteHeaderHtml(language: BlogLanguage)"), "API blog HTML renderer has the Blog shell header helper");
 assert(apiHtmlRenderer.includes("siteHeaderHtml(post.language)") && apiHtmlRenderer.includes("siteHeaderHtml(language)"), "API blog HTML renderer uses the Blog shell header helper for article and index HTML");
+assert(blogUtils.includes('export const BLOG_LANGUAGES: BlogLanguage[] = ["zh-Hant", "zh-Hans", "en"];'), "new Blog releases use the three native Olympus locale lanes");
+assert(simplifiedIndex.includes('<BlogIndex language="zh-Hans"'), "simplified-Chinese Blog index uses the shared BlogIndex component");
+assert(simplifiedArticle.includes('getPublishedBlogPost(slug, "zh-Hans")') && simplifiedArticle.includes("<BlogArticle post={post} />"), "simplified-Chinese articles use the shared BlogArticle component");
 assert(!apiHtmlRenderer.includes('class="nav"') && !apiHtmlRenderer.includes('class="langs"'), "API blog HTML renderer does not ship the old alternate header bar");
 assert(apiHtmlRenderer.includes('blogAdSlotHtml("index-feed")'), "API blog HTML renderer keeps the opt-in index AdSense slot");
 assert(apiHtmlRenderer.includes('blogAdSlotHtml("after-summary")'), "API blog HTML renderer keeps the opt-in article after-summary AdSense slot");

@@ -1484,3 +1484,9 @@ Do not maintain three separate built HTML copies long term. Keep one source app 
 - Who manages image storage and CDN?
 - Should admins be email/password only, or Google login?
 - Should updates require preview approval before publish?
+
+## 2026-07-26 Olympus three-locale release contract
+
+- New Olympus website release sets contain exactly `zh-Hant`, `zh-Hans`, and `en`; all three native drafts must pass the existing release and media gates together.
+- Historical language URLs remain readable for compatibility, but they are not accepted as new Olympus release lanes.
+- Simplified Chinese articles use `/zh-hans/blog` and share the approved Blog index/article layout without new visual tokens or component structure.

@@ -23,6 +23,8 @@
     "cloudflare:types": "wrangler types --env-interface CloudflareEnv",
     "verify:gcp": "node scripts/gcp-production-smoke.mjs",
     "verify:aws": "node scripts/aws-production-smoke.mjs",
+    "test:olympus-integration": "node scripts/olympus-release-integration-smoke.mjs",
+    "verify:olympus-health": "node scripts/olympus-health-live-smoke.mjs",
     "aws:migrate-cms": "node scripts/migrate-d1-cms-to-aws-s3.mjs",
     "verify:cloudflare": "node scripts/cloudflare-smoke.mjs",
     "typecheck": "tsc --noEmit",

@@ -246,7 +246,7 @@ const nonLatinMarketLanguages = new Set<BlogLanguage>(["zh-Hant", "ja", "ko", "t
 
 function containsLongEnglishQuote(text: string, language: BlogLanguage) {
   if (!nonLatinMarketLanguages.has(language)) return false;
-  const quotes = String(text || "").match(/[「"][^」"]{28,}[^」"]*[」"]/g) || [];
+  const quotes: string[] = String(text || "").match(/[「"][^」"]{28,}[^」"]*[」"]/g) ?? [];
   return quotes.some((quote) => {
     const asciiWords = quote.match(/\b[A-Za-z][A-Za-z'’-]{3,}\b/g) || [];
     const asciiChars = (quote.match(/[A-Za-z]/g) || []).length;

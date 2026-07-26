@@ -41,6 +41,8 @@ export function blogAuthorProfile(author: PublicBlogAuthor, language: BlogLangua
     Tommy: {
       "zh-Hant":
         "ALTOS LAB 產品與 AI 導入編輯，關注企業流程、生成式搜尋與能真正落地的決策框架。",
+      "zh-Hans":
+        "ALTOS LAB 产品与 AI 导入编辑，关注企业流程、生成式搜索与真正可以落地的决策框架。",
       en: "ALTOS LAB product and AI implementation editor, focused on enterprise workflows, generative search and practical decision frameworks.",
       ja: "ALTOS LAB のプロダクト／AI導入編集者。企業ワークフロー、生成型検索、実装できる判断軸を扱います。",
       ko: "ALTOS LAB 제품 및 AI 도입 에디터. 기업 워크플로, 생성형 검색, 실행 가능한 의사결정 프레임을 다룹니다.",
@@ -53,6 +55,8 @@ export function blogAuthorProfile(author: PublicBlogAuthor, language: BlogLangua
     Ken: {
       "zh-Hant":
         "ALTOS LAB 研究與工程編輯，聚焦 AI Agent、資料流程、審核機制與產品化風險。",
+      "zh-Hans":
+        "ALTOS LAB 研究与工程编辑，聚焦 AI Agent、数据流程、审核机制与产品化风险。",
       en: "ALTOS LAB research and engineering editor, focused on AI agents, data workflows, review systems and productization risk.",
       ja: "ALTOS LAB のリサーチ／エンジニアリング編集者。AIエージェント、データフロー、レビュー設計、プロダクト化リスクを追います。",
       ko: "ALTOS LAB 리서치 및 엔지니어링 에디터. AI Agent, 데이터 흐름, 리뷰 설계, 제품화 리스크를 봅니다.",
@@ -72,6 +76,9 @@ export function blogAuthorProfile(author: PublicBlogAuthor, language: BlogLangua
 }
 
 export function publicEditorialReviewNote(language: BlogLanguage) {
+  if (language === "zh-Hans") {
+    return "本文由 ALTOS LAB 编辑团队审校，已确认来源脉络、可读性、事实一致性与实际可用性。";
+  }
   if (language === "en") {
     return "Reviewed and edited by ALTOS LAB for source context, readability, factual consistency and practical usefulness.";
   }
