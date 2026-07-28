@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 
 type Params = { params: Promise<{ path?: string[] }> | { path?: string[] } };
 
-const UPSTREAM_WONDA_API = "https://wonda-api-kxbpzwq4sa-de.a.run.app/api/v1";
+const UPSTREAM_WONDA_API = "https://wonda-api-free.vercel.app/api/v1";
 
 const corsHeaders = {
   "Access-Control-Allow-Headers": "content-type, authorization",
@@ -29,7 +29,7 @@ function detectVisitorLanguage(input: string) {
   if (/\b(makakatulong|maglagay|namin|ninyo|puwede|kayo|tanong)\b/i.test(text)) return "fil";
   if (/\b(bolehkah|boleh|laman web|sokongan|perkhidmatan|pasukan manusia)\b/i.test(text)) return "ms";
   if (/\b(xin chào|có thể|hỗ trợ|chúng tôi|trang web|khách hàng)\b/i.test(text)) return "vi";
-  if (/\b(apakah|bisa|memasang|kami|pelanggan|website)\b/i.test(text)) return "id";
+  if (/\b(apakah|bisa|memasang|kami|pelanggan)\b/i.test(text)) return "id";
   if (/[\u3400-\u9fff]/.test(text)) return "zh-Hant";
   return "en";
 }
@@ -38,13 +38,16 @@ const forbiddenAnswerPattern =
   /Recommended first-wave|Webhook URL|Channel access|Channel secret|BotFather|Phone Number ID|Meta Cloud API|App Review|permanent access token|subscribe the `?messages`? webhook|LINE \/ Telegram/i;
 const cjkPattern = /[\u3400-\u9fff]/;
 const nonEnglishScriptPattern = /[\u3040-\u30ff\u3400-\u9fff\uac00-\ud7af\u0e00-\u0e7f]/;
+const nonEnglishLatinPattern =
+  /\b(bisa|dapat|kami|anda|biasanya|membantu|boleh|laman|sokongan|chúng tôi|hỗ trợ|makakatulong|namin|ninyo|puwede|mga)\b/i;
 
 function answerLooksWrongForLanguage(answer: string, language: string) {
   if (!answer.trim()) return true;
   if (forbiddenAnswerPattern.test(answer)) return true;
   if (["en", "id", "vi", "ms", "fil"].includes(language) && nonEnglishScriptPattern.test(answer)) return true;
+  if (language === "en" && nonEnglishLatinPattern.test(answer)) return true;
   if (language === "ms" && /\b(bisa|situs anda|layanan pelanggan)\b/i.test(answer)) return true;
-  if (language === "fil" && !/\b(oo|makakatulong|website|namin|ninyo|puwede|customer|support)\b/i.test(answer)) {
+  if (language === "fil" && !/\b(oo|makakatulong|namin|ninyo|puwede|inyong|kayo|mga)\b/i.test(answer)) {
     return true;
   }
   if (language === "ja" && !/[\u3040-\u30ff]/.test(answer)) return true;

@@ -12,9 +12,11 @@ const description =
   "ALTOS LAB 深耕互聯網產品開發與 AI 系統整合，協助企業導入 AI Skill、AI Agent、系統串接與智能行銷。";
 const image = `${siteUrl}/geo-cover.png`;
 const adsenseClient = (process.env.NEXT_PUBLIC_ADSENSE_CLIENT || "ca-pub-8663357592872896").trim();
-const DEFAULT_WONDA_WIDGET_SCRIPT_SRC = "https://wonda-web-kxbpzwq4sa-de.a.run.app/widget.js";
-const DEFAULT_WONDA_WIDGET_CHANNEL_ID = "cmqb6hynd002hs619tqxc3pe5";
+const DEFAULT_WONDA_WIDGET_SCRIPT_SRC = "https://wonda-ai.altoslab-ai.workers.dev/widget.js";
+const DEFAULT_WONDA_WIDGET_CHANNEL_ID = "cms4snnn50001l5045li1fd5h";
 const DEFAULT_WONDA_WIDGET_API = "https://altoslab-ai.cc/api/wonda";
+const DEFAULT_WONDA_WIDGET_TITLE = "ALTOS LAB AI 客服";
+const DEFAULT_WONDA_WIDGET_COLOR = "#B8FF3D";
 
 const verificationEnv = {
   google: "GOOGLE_SITE_VERIFICATION",
@@ -45,7 +47,7 @@ function wondaWidgetSnippet() {
   if (!scriptSrc || !channelId || !api) return "";
   return `<script id="wonda-ai-widget" src="${escapeHtmlAttribute(scriptSrc)}" data-channel-id="${escapeHtmlAttribute(
     channelId
-  )}" data-api="${escapeHtmlAttribute(api)}" async></script>`;
+  )}" data-api="${escapeHtmlAttribute(api)}" data-title="${DEFAULT_WONDA_WIDGET_TITLE}" data-color="${DEFAULT_WONDA_WIDGET_COLOR}" async></script>`;
 }
 
 function searchVerificationMetaTags() {

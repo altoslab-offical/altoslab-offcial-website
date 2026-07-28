@@ -246,9 +246,11 @@ function blogAdSlotHtml(env, placement) {
   </aside>`;
 }
 
-const DEFAULT_WONDA_WIDGET_SCRIPT_SRC = "https://wonda-web-kxbpzwq4sa-de.a.run.app/widget.js";
-const DEFAULT_WONDA_WIDGET_CHANNEL_ID = "cmqb6hynd002hs619tqxc3pe5";
+const DEFAULT_WONDA_WIDGET_SCRIPT_SRC = "https://wonda-ai.altoslab-ai.workers.dev/widget.js";
+const DEFAULT_WONDA_WIDGET_CHANNEL_ID = "cms4snnn50001l5045li1fd5h";
 const DEFAULT_WONDA_WIDGET_API = "https://altoslab-ai.cc/api/wonda";
+const DEFAULT_WONDA_WIDGET_TITLE = "ALTOS LAB AI 客服";
+const DEFAULT_WONDA_WIDGET_COLOR = "#B8FF3D";
 
 function isWondaWidgetDisabled(value) {
   return ["0", "false", "off", "disabled", "no"].includes(String(value || "").trim().toLowerCase());
@@ -262,7 +264,7 @@ function wondaWidgetHtml(env = {}) {
   if (!scriptSrc || !channelId || !api) return "";
   return `<script id="wonda-ai-widget" src="${escapeAttribute(scriptSrc)}" data-channel-id="${escapeAttribute(
     channelId
-  )}" data-api="${escapeAttribute(api)}" async></script>`;
+  )}" data-api="${escapeAttribute(api)}" data-title="${DEFAULT_WONDA_WIDGET_TITLE}" data-color="${DEFAULT_WONDA_WIDGET_COLOR}" async></script>`;
 }
 
 function articleJsonLd(post, canonical, image) {

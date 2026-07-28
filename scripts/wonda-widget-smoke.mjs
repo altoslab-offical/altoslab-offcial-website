@@ -2,9 +2,12 @@ import fs from "node:fs";
 import { execFileSync } from "node:child_process";
 
 const root = new URL("../", import.meta.url);
-const EXPECTED_SCRIPT = "https://wonda-web-kxbpzwq4sa-de.a.run.app/widget.js";
-const EXPECTED_CHANNEL = "cmqb6hynd002hs619tqxc3pe5";
+const EXPECTED_SCRIPT = "https://wonda-ai.altoslab-ai.workers.dev/widget.js";
+const EXPECTED_CHANNEL = "cms4snnn50001l5045li1fd5h";
 const EXPECTED_API = "https://altoslab-ai.cc/api/wonda";
+const EXPECTED_VERCEL_API = "https://wonda-api-free.vercel.app/api/v1";
+const EXPECTED_TITLE = "ALTOS LAB AI 客服";
+const EXPECTED_COLOR = "#B8FF3D";
 
 function assert(condition, message) {
   if (!condition) {
@@ -27,6 +30,7 @@ const component = read("components/WonDaWidgetScript.tsx");
 const route = read("app/route.ts");
 const sync = read("scripts/sync-cloudflare-homepage.mjs");
 const directBlog = read("cloudflare/blog-html-direct-worker.js");
+const proxy = read("app/api/wonda/[...path]/route.ts");
 const homepage = existing("public/altoslab-homepage.html");
 const docs = [
   existing("docs/wonda/altoslab-direct-qa-ai-support-widget.md"),
@@ -40,6 +44,9 @@ assert(layout.includes("<WonDaWidgetScript pathname={pathname} />"), "Next layou
 assert(component.includes("next/script"), "WonDa widget uses next/script");
 assert(component.includes("pathname.startsWith(\"/admin\")"), "WonDa widget is excluded from admin routes");
 assert(component.includes("pathname.startsWith(\"/api\")"), "WonDa widget is excluded from API routes");
+assert(component.includes('process.env.VERCEL === "1"'), "Vercel Widget embeds use the direct public WonDa API");
+assert(component.includes(EXPECTED_VERCEL_API), "Vercel Widget API fallback is present");
+assert(route.includes(EXPECTED_VERCEL_API), "Vercel homepage Widget API fallback is present");
 
 // `public/altoslab-homepage.html` is a generated Cloudflare artifact and is
 // intentionally absent in a clean checkout. Validate it only when a build has
@@ -49,10 +56,15 @@ for (const source of renderSurfaces) {
   assert(source.includes(EXPECTED_SCRIPT), "WonDa widget script src is present in every render surface");
   assert(source.includes(EXPECTED_CHANNEL), "WonDa widget channel id is present in every render surface");
   assert(source.includes(EXPECTED_API), "WonDa widget API base is present in every render surface");
+  assert(source.includes(EXPECTED_TITLE), "ALTOS LAB widget title is present in every render surface");
+  assert(source.includes(EXPECTED_COLOR), "ALTOS LAB widget color is present in every render surface");
 }
 
 assert(route.includes("withCloudflareHomepageAssetHeaders(await readCloudflareHomepageResponse(request))"), "homepage still returns static Cloudflare asset");
 assert(directBlog.includes("wondaWidgetHtml(env)"), "direct Cloudflare blog renderer injects the widget script");
+assert(!proxy.includes("pelanggan|website"), "English website questions are not misclassified as Indonesian");
+assert(proxy.includes('language === "en" && nonEnglishLatinPattern.test(answer)'), "English replies reject Indonesian, Malay, Vietnamese, and Filipino markers");
+assert(proxy.includes('language === "fil" && !/\\b(oo|makakatulong|namin'), "Filipino replies require Filipino-specific language markers");
 assert(docs.includes("ALTOS LAB 客服回答邊界"), "WonDa knowledge base documents customer-service boundaries");
 assert(docs.includes("不要回答或透露"), "WonDa knowledge base blocks internal secret disclosure");
 assert(docs.includes("語言匹配"), "WonDa knowledge base documents language matching behavior");

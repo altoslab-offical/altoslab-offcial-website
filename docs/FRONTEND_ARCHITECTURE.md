@@ -30,6 +30,10 @@ evidence before deploy.
 
 Current approved public UI baseline: commit `1ae34d3c2f931836226a2bf1528ae408a335c5e0` is the source of truth for future protected UI work. The review flow lives in `docs/design-review/current-approved-baseline.md`; protected UI changes must add a new `docs/design-review/*.md` record and pass `npm run review:design`.
 
+WonDa runtime ownership: `components/WonDaWidgetScript.tsx`, `app/route.ts`, `scripts/sync-cloudflare-homepage.mjs`, and `cloudflare/blog-html-direct-worker.js` must share one public Widget script/channel/API contract. `app/api/wonda/[...path]/route.ts` remains the same-origin browser proxy and multilingual response guard. A channel cutover may change only these runtime values and their smoke assertions; it must not change public Widget placement or surrounding page structure.
+
+Runtime routing differs only at the API hop: AWS/custom-domain and Cloudflare builds use the same-origin `https://altoslab-ai.cc/api/wonda` guard, while Vercel deployments use the direct WonDa Vercel API because `altoslab-ai.cc` is still served by AWS. This branch is explicit through `process.env.VERCEL` and covered by the Widget smoke.
+
 ## Homepage UI Stability Contract
 
 The homepage route is a wrapper, not a redesign surface.

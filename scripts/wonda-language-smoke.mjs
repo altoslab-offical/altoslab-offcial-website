@@ -1,5 +1,5 @@
 const DEFAULT_API = "https://altoslab-ai.cc/api/wonda";
-const DEFAULT_CHANNEL = "cmqb6hynd002hs619tqxc3pe5";
+const DEFAULT_CHANNEL = "cms4snnn50001l5045li1fd5h";
 
 const api = process.env.WONDA_WIDGET_API || DEFAULT_API;
 const channel = process.env.WONDA_WIDGET_CHANNEL_ID || DEFAULT_CHANNEL;
@@ -10,6 +10,8 @@ const forbiddenPattern =
 const nonLatinPattern = /[\u3040-\u30ff\u3400-\u9fff\uac00-\ud7af\u0e00-\u0e7f]/;
 const koWrongScriptPattern = /[\u3040-\u30ff\u3400-\u9fff\u0e00-\u0e7f]/;
 const thWrongScriptPattern = /[\u3040-\u30ff\u3400-\u9fff\uac00-\ud7af]/;
+const nonEnglishLatinPattern =
+  /\b(bisa|dapat|kami|anda|biasanya|membantu|boleh|laman|sokongan|chúng tôi|hỗ trợ|makakatulong|namin|ninyo|puwede|mga)\b/i;
 
 const cases = [
   {
@@ -21,8 +23,8 @@ const cases = [
   {
     id: "en",
     question: "Hello, we want an AI customer service assistant on our company website. Can ALTOS LAB help?",
-    languageSignal: /\b(yes|can|help|support|website|ALTOS LAB)\b/i,
-    antiSignal: nonLatinPattern,
+    languageSignal: /\b(yes|can|help|we|you|your)\b/i,
+    antiSignal: new RegExp(`${nonLatinPattern.source}|${nonEnglishLatinPattern.source}`, "i"),
   },
   {
     id: "ja",
@@ -63,7 +65,7 @@ const cases = [
   {
     id: "fil",
     question: "Hello, makakatulong ba ang ALTOS LAB na maglagay ng AI support widget sa website namin?",
-    languageSignal: /\b(oo|makakatulong|website|namin|support|widget|ALTOS LAB)\b/i,
+    languageSignal: /\b(oo|makakatulong|namin|ninyo|puwede|inyong|kayo|mga)\b/i,
     antiSignal: nonLatinPattern,
   },
 ];
