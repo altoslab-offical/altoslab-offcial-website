@@ -6,7 +6,7 @@ const channel = process.env.WONDA_WIDGET_CHANNEL_ID || DEFAULT_CHANNEL;
 const runId = `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
 
 const forbiddenPattern =
-  /channelId|widget script|data-channel-id|API base|backend|Cloudflare|GCP|GitHub|n8n|Chrome profile|後台|登入|token|secret/i;
+  /channelId|widget script|data-channel-id|API base|backend|Cloudflare|GCP|GitHub|n8n|Chrome profile|WonDa 後台|管理後台|登入憑證|token|secret/i;
 const nonLatinPattern = /[\u3040-\u30ff\u3400-\u9fff\uac00-\ud7af\u0e00-\u0e7f]/;
 const koWrongScriptPattern = /[\u3040-\u30ff\u3400-\u9fff\u0e00-\u0e7f]/;
 const thWrongScriptPattern = /[\u3040-\u30ff\u3400-\u9fff\uac00-\ud7af]/;

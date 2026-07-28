@@ -234,7 +234,7 @@ evidence before deploy.
 
 Current approved public UI baseline: commit `1ae34d3c2f931836226a2bf1528ae408a335c5e0` is the source of truth for future protected homepage, Blog index, Blog article shell, shared chrome, and visual-token changes. Start from `docs/design-review/current-approved-baseline.md`, add a new `docs/design-review/*.md` record for intentional differences, and keep `npm run review:design` passing.
 
-The 2026-07-29 WonDa demo-channel cutover preserves the approved floating launcher position, animation, window dimensions, typography, page layout, and admin exclusion. Every embed explicitly supplies the ALTOS LAB accessible title and existing signal-lime launcher color; tenant-owned Widget configuration supplies the support subtitle and conversation copy after initialization.
+The 2026-07-29 WonDa demo-channel cutover preserves the approved floating launcher position, animation, window dimensions, typography, page layout, and admin exclusion. Every embed explicitly supplies the ALTOS LAB accessible title and existing signal-lime launcher color; tenant-owned Widget configuration supplies the support subtitle and conversation copy after initialization. Both the custom domain and the public Vercel backup keep this presentation stable while routing through their matching website guard proxy, so language recovery does not vary by release surface.
 
 ## Blog AdSense Design Guardrail
 

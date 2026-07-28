@@ -28,7 +28,7 @@ const DEFAULT_WONDA_WIDGET_SCRIPT_SRC = "https://wonda-ai.altoslab-ai.workers.de
 const DEFAULT_WONDA_WIDGET_CHANNEL_ID = "cms4snnn50001l5045li1fd5h";
 const DEFAULT_WONDA_WIDGET_API =
   process.env.VERCEL === "1"
-    ? "https://wonda-api-free.vercel.app/api/v1"
+    ? "https://altoslab-ai-wonda.vercel.app/api/wonda"
     : "https://altoslab-ai.cc/api/wonda";
 const DEFAULT_WONDA_WIDGET_TITLE = "ALTOS LAB AI 客服";
 const DEFAULT_WONDA_WIDGET_COLOR = "#B8FF3D";
