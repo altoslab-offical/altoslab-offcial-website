@@ -1,13 +1,8 @@
 import Script from "next/script";
 
-const DEFAULT_WONDA_WIDGET_SCRIPT_SRC = "https://wonda-ai.altoslab-ai.workers.dev/widget.js";
-const DEFAULT_WONDA_WIDGET_CHANNEL_ID = "cms4snnn50001l5045li1fd5h";
-const DEFAULT_WONDA_WIDGET_API =
-  process.env.VERCEL === "1"
-    ? "https://wonda-api-free.vercel.app/api/v1"
-    : "https://altoslab-ai.cc/api/wonda";
-const DEFAULT_WONDA_WIDGET_TITLE = "ALTOS LAB AI 客服";
-const DEFAULT_WONDA_WIDGET_COLOR = "#B8FF3D";
+const DEFAULT_WONDA_WIDGET_SCRIPT_SRC = "https://wonda-web-kxbpzwq4sa-de.a.run.app/widget.js";
+const DEFAULT_WONDA_WIDGET_CHANNEL_ID = "cmqb6hynd002hs619tqxc3pe5";
+const DEFAULT_WONDA_WIDGET_API = "https://altoslab-ai.cc/api/wonda";
 
 function isDisabled(value: string | undefined) {
   return ["0", "false", "off", "disabled", "no"].includes(String(value || "").trim().toLowerCase());
@@ -38,8 +33,6 @@ export function WonDaWidgetScript({ pathname = "" }: { pathname?: string }) {
       async
       data-api={config.api}
       data-channel-id={config.channelId}
-      data-color={DEFAULT_WONDA_WIDGET_COLOR}
-      data-title={DEFAULT_WONDA_WIDGET_TITLE}
       id="wonda-ai-widget"
       src={config.scriptSrc}
       strategy="lazyOnload"

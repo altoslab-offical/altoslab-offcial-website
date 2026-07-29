@@ -11,11 +11,9 @@
 ```html
 <script
   id="wonda-ai-widget"
-  src="https://wonda-ai.altoslab-ai.workers.dev/widget.js"
-  data-channel-id="cms4snnn50001l5045li1fd5h"
+  src="https://wonda-web-kxbpzwq4sa-de.a.run.app/widget.js"
+  data-channel-id="cmqb6hynd002hs619tqxc3pe5"
   data-api="https://altoslab-ai.cc/api/wonda"
-  data-title="ALTOS LAB AI 客服"
-  data-color="#B8FF3D"
   async
 ></script>
 ```
@@ -34,10 +32,6 @@
 - `NEXT_PUBLIC_WONDA_WIDGET_SCRIPT_SRC`：覆蓋 widget script URL。
 - `NEXT_PUBLIC_WONDA_WIDGET_CHANNEL_ID`：覆蓋 public channel id。
 - `NEXT_PUBLIC_WONDA_WIDGET_API`：覆蓋 public API base。
-
-目前 production channel 綁定 ALTOS LAB demo tenant；前端只使用公開 channel ID，demo 登入密碼、JWT 與 DeepSeek API key 不得進入網站原始碼或 `NEXT_PUBLIC_*` 變數。
-
-AWS/custom-domain production 使用 `https://altoslab-ai.cc/api/wonda`，保留同源 proxy 與多語 guard。Vercel production/preview backup 因 custom domain 仍由 AWS 承接，直接使用 `https://wonda-api-free.vercel.app/api/v1`，避免繞回尚未更新的 AWS proxy。
 
 ## 驗證
 

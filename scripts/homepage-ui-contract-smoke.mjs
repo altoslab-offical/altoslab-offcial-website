@@ -85,7 +85,7 @@ assert(route.includes("withCloudflareHomepageAssetHeaders(await readCloudflareHo
 
 if (publicHomepage) {
   assert(publicHomepage.includes("id=\"wonda-ai-widget\""), "Cloudflare homepage asset includes the WonDa widget script");
-  assert(publicHomepage.includes("data-channel-id=\"cms4snnn50001l5045li1fd5h\""), "Cloudflare homepage asset uses the configured WonDa channel id");
+  assert(publicHomepage.includes("data-channel-id=\"cmqb6hynd002hs619tqxc3pe5\""), "Cloudflare homepage asset uses the configured WonDa channel id");
 }
 
 assert(contactForm.includes("formRef.current?.reset()"), "contact form resets only after a successful submit");

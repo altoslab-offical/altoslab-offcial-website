@@ -52,8 +52,6 @@ Any intentional UI/design change requires explicit source-of-truth approval, upd
 
 2026-06-18 approved baseline: commit `1ae34d3c2f931836226a2bf1528ae408a335c5e0` is the current public UI source of truth. Future protected UI/design changes must compare against `docs/design-review/current-approved-baseline.md`, add a new `docs/design-review/*.md` review record, and pass `npm run review:design`.
 
-WonDa runtime contract (2026-07-29): the existing public Widget placement and visual behavior stay unchanged, while every homepage, App Router, and direct Cloudflare blog render surface must use the same approved ALTOS LAB public demo channel. The API proxy must forward to the matching WonDa production API; no demo login credential, JWT, or model key may enter public source.
-
 ## Homepage UI Stability Contract
 
 The public homepage (`/`) is a protected brand/design surface. The current production contract is the original static homepage bundle, not a modular replacement page.

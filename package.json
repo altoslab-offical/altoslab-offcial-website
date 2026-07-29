@@ -66,26 +66,23 @@
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1071.0",
-    "@next/third-parties": "^16.2.12",
+    "@next/third-parties": "^16.2.6",
     "@opennextjs/cloudflare": "^1.19.11",
     "@vercel/blob": "^2.4.0",
     "lucide-react": "latest",
-    "next": "16.2.12",
-    "postcss": "8.5.24",
+    "next": "latest",
+    "postcss": "^8.5.10",
     "react": "latest",
     "react-dom": "latest"
   },
   "overrides": {
-    "body-parser": "2.3.0",
-    "brace-expansion": "5.0.8",
-    "postcss": "8.5.24",
-    "sharp": "0.35.3"
+    "postcss": "^8.5.10"
   },
   "devDependencies": {
     "@types/node": "latest",
     "@types/react": "latest",
     "@types/react-dom": "latest",
     "typescript": "latest",
-    "wrangler": "^4.114.0"
+    "wrangler": "^4.105.0"
   }
 }

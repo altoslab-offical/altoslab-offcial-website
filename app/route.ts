@@ -24,14 +24,9 @@ const FAVICON_LINKS = `<link rel="icon" href="/icon.svg" type="image/svg+xml" />
     <link rel="shortcut icon" href="/icon.svg" type="image/svg+xml" />
     <link rel="mask-icon" href="/icon.svg" color="#A4FF00" />
     <link rel="manifest" href="/manifest.webmanifest" />`;
-const DEFAULT_WONDA_WIDGET_SCRIPT_SRC = "https://wonda-ai.altoslab-ai.workers.dev/widget.js";
-const DEFAULT_WONDA_WIDGET_CHANNEL_ID = "cms4snnn50001l5045li1fd5h";
-const DEFAULT_WONDA_WIDGET_API =
-  process.env.VERCEL === "1"
-    ? "https://wonda-api-free.vercel.app/api/v1"
-    : "https://altoslab-ai.cc/api/wonda";
-const DEFAULT_WONDA_WIDGET_TITLE = "ALTOS LAB AI 客服";
-const DEFAULT_WONDA_WIDGET_COLOR = "#B8FF3D";
+const DEFAULT_WONDA_WIDGET_SCRIPT_SRC = "https://wonda-web-kxbpzwq4sa-de.a.run.app/widget.js";
+const DEFAULT_WONDA_WIDGET_CHANNEL_ID = "cmqb6hynd002hs619tqxc3pe5";
+const DEFAULT_WONDA_WIDGET_API = "https://altoslab-ai.cc/api/wonda";
 const HOMEPAGE_CACHE_CONTROL = "public, max-age=300, stale-while-revalidate=1800";
 
 function escapeHtmlAttribute(value: string) {
@@ -50,7 +45,7 @@ function wondaWidgetSnippet() {
   if (!scriptSrc || !channelId || !api) return "";
   return `<script id="wonda-ai-widget" src="${escapeHtmlAttribute(scriptSrc)}" data-channel-id="${escapeHtmlAttribute(
     channelId
-  )}" data-api="${escapeHtmlAttribute(api)}" data-title="${DEFAULT_WONDA_WIDGET_TITLE}" data-color="${DEFAULT_WONDA_WIDGET_COLOR}" async></script>`;
+  )}" data-api="${escapeHtmlAttribute(api)}" async></script>`;
 }
 
 function homepageInjectionParts() {

@@ -79,7 +79,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const language = htmlLanguage(blogLanguageFromPath(pathname) || "zh-Hant");
   const adsenseSrc = isAdsenseConfigured() ? adsenseScriptSrc() : "";
 
-  const wondaOrigin = "https://wonda-ai.altoslab-ai.workers.dev";
+  const wondaOrigin = "https://wonda-web-kxbpzwq4sa-de.a.run.app";
 
   return (
     <html lang={language}>
