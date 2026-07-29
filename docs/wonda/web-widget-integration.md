@@ -37,7 +37,7 @@
 
 目前 production channel 綁定 ALTOS LAB demo tenant；前端只使用公開 channel ID，demo 登入密碼、JWT 與 DeepSeek API key 不得進入網站原始碼或 `NEXT_PUBLIC_*` 變數。
 
-AWS/custom-domain production 使用 `https://altoslab-ai.cc/api/wonda`；Vercel production/preview backup 使用 `https://altoslab-ai-wonda.vercel.app/api/wonda`。兩者都先經過官網的多語與供應商資訊 guard，再轉送到 WonDa API，避免備援站繞回尚未更新的 AWS proxy，也不讓不同網域出現回答品質落差。
+AWS/custom-domain production 使用 `https://altoslab-ai.cc/api/wonda`，保留同源 proxy 與多語 guard。Vercel production/preview backup 因 custom domain 仍由 AWS 承接，直接使用 `https://wonda-api-free.vercel.app/api/v1`，避免繞回尚未更新的 AWS proxy。
 
 ## 驗證
 

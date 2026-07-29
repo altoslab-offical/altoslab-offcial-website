@@ -29,7 +29,7 @@ Affected URL(s): `/`, `/blog`, localized public blog pages, public App Router pa
 - Mobile browser evidence: `2026-07-29-wonda-mobile-local.png` and `2026-07-29-wonda-mobile-production.png`; the Widget measured 390 × 844 after its entrance animation.
 - Production smoke evidence after deploy: PASS on `https://altoslab-ai-wonda.vercel.app` for homepage, Blog presence, admin exclusion, grounded answer, handoff, feedback, close/reopen, mobile, and network-error recovery. The AWS ECS custom-domain release remains blocked until the correct account `487316829524` has an authenticated `altoslab` AWS CLI v2 profile; the only current local AWS credentials belong to account `108964701175` and were not used.
 
-The nine-language live smoke passed through the website proxy after three false-positive QA gaps were fixed: English `website` questions no longer classify as Indonesian, Filipino requires Filipino-specific language markers rather than generic `website/support` words, and the leak detector distinguishes legitimate references to a customer's website backend from WonDa/admin credential guidance. The public Vercel alias now uses its own website proxy too, so the same guard applies on both release surfaces.
+The nine-language live smoke passed through the website proxy after two false-positive QA gaps were fixed: English `website` questions no longer classify as Indonesian, and Filipino requires Filipino-specific language markers rather than generic `website/support` words.
 
 ## Rollback Notes
 

@@ -32,7 +32,7 @@ Current approved public UI baseline: commit `1ae34d3c2f931836226a2bf1528ae408a33
 
 WonDa runtime ownership: `components/WonDaWidgetScript.tsx`, `app/route.ts`, `scripts/sync-cloudflare-homepage.mjs`, and `cloudflare/blog-html-direct-worker.js` must share one public Widget script/channel/API contract. `app/api/wonda/[...path]/route.ts` remains the same-origin browser proxy and multilingual response guard. A channel cutover may change only these runtime values and their smoke assertions; it must not change public Widget placement or surrounding page structure.
 
-Runtime routing differs only at the public proxy origin: AWS/custom-domain and Cloudflare builds use `https://altoslab-ai.cc/api/wonda`, while Vercel deployments use `https://altoslab-ai-wonda.vercel.app/api/wonda`. Both paths apply the same language and provider-leak guard before forwarding to WonDa. This branch is explicit through `process.env.VERCEL` and covered by the Widget smoke.
+Runtime routing differs only at the API hop: AWS/custom-domain and Cloudflare builds use the same-origin `https://altoslab-ai.cc/api/wonda` guard, while Vercel deployments use the direct WonDa Vercel API because `altoslab-ai.cc` is still served by AWS. This branch is explicit through `process.env.VERCEL` and covered by the Widget smoke.
 
 ## Homepage UI Stability Contract
 
