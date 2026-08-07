@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="refresh" content="60">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'/%3E">
+<title>Hermes CMO 工作室</title>
+<style>
+:root{--cream:#fff1c9;--paper:#fff8df;--ink:#2b2114;--line:#8a672e;--shadow:#c08d3d;--muted:#725c3c;--green:#35b653;--amber:#efa52e;--red:#db4a3e;--blue:#2387d1}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:#ffe6a1;color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Noto Sans TC","PingFang TC","Segoe UI",sans-serif;letter-spacing:0}body{overflow-x:hidden;background-image:linear-gradient(rgba(120,82,22,.12) 1px,transparent 1px),linear-gradient(90deg,rgba(120,82,22,.12) 1px,transparent 1px);background-size:24px 24px}a{color:inherit;text-decoration:none}.viewport{width:100vw;min-height:100vh;overflow:auto;padding:8px}.stage{position:relative;width:1536px;height:1024px;transform-origin:top left;background:linear-gradient(#fff4cf,#ffe0a1);border:6px solid #392813;box-shadow:inset 0 0 0 4px #f5d37a,0 0 0 2px #fdf1c6;image-rendering:pixelated}.card{background:rgba(255,248,223,.95);border:3px solid var(--line);box-shadow:4px 4px 0 var(--shadow);border-radius:7px}
+.brand{position:absolute;left:18px;top:16px;width:490px;height:82px;display:flex;align-items:center;gap:16px;padding:10px 16px}.brand h1{margin:0;font-size:38px;line-height:1}.brand p{margin:7px 0 0;color:var(--muted);font-size:17px}.bot{position:relative;width:76px;height:72px;flex:0 0 auto}.bot i,.bot b,.bot span,.bot em{position:absolute;display:block}.bot i{left:15px;top:11px;width:46px;height:32px;background:#fff8ea;border:4px solid #1f2937;border-radius:5px}.bot i:before,.bot i:after{content:"";position:absolute;top:-15px;width:13px;height:18px;background:#fff8ea;border:4px solid #1f2937;border-bottom:0}.bot i:before{left:0;transform:skewX(-12deg)}.bot i:after{right:0;transform:skewX(12deg)}.bot b{left:25px;top:22px;width:8px;height:8px;background:#1884ff;box-shadow:18px 0 0 #1884ff}.bot span{left:11px;top:42px;width:56px;height:21px;background:#4aa3ff;border:4px solid #1f2937;border-radius:4px}.bot em{left:2px;bottom:0;width:22px;height:14px;background:#fff8ea;border:4px solid #1f2937;box-shadow:50px 0 0 -4px #1f2937,50px 0 0 0 #fff8ea}
+.status{position:absolute;left:520px;top:16px;width:615px;height:82px;display:grid;grid-template-columns:1fr 1fr 1.1fr;align-items:center;padding:10px 12px}.status div{display:grid;grid-template-columns:38px 1fr;gap:8px;align-items:center;border-right:2px solid #d6b56f;padding:0 16px}.status div:last-child{border-right:0}.status i{font-style:normal;font-size:28px}.status b,.status span{display:block}.status b{font-size:13px;color:var(--muted)}.status span{font-size:19px;font-weight:800}.ok{color:var(--green)}.warn{color:var(--amber)}.fail{color:var(--red)}.date{position:absolute;left:1150px;top:16px;width:170px;height:82px;text-align:center;padding-top:14px}.date b,.date span{display:block}.date b{font-size:17px}.date span{font-size:24px;margin-top:4px}.refresh-card{position:absolute;right:18px;top:16px;width:188px;height:82px;display:flex;align-items:center;justify-content:center}.refresh{display:flex;align-items:center;gap:10px;padding:12px 18px;border:2px solid #d0a24e;background:#fff0bf;border-radius:6px;font-weight:900}.refresh kbd{font-family:inherit;font-size:12px;border:1px solid #c3974b;background:#fff8df;padding:1px 5px;border-radius:3px}
+.office{position:absolute;left:20px;top:110px;width:1248px;height:595px;background:#bee4f8;border:5px solid #3a2a15;box-shadow:inset 0 0 0 4px #f5d37a;overflow:hidden}.sky{position:absolute;left:0;top:0;width:100%;height:118px;background:linear-gradient(#93d3f2,#dff8ff)}.sky:before{content:"";position:absolute;left:18px;right:18px;top:12px;height:86px;background:repeating-linear-gradient(90deg,rgba(255,255,255,.34) 0 32px,rgba(255,255,255,.1) 32px 64px);border-bottom:4px solid rgba(58,42,21,.3)}.sky:after{content:"";position:absolute;left:0;right:0;bottom:0;height:72px;background:#6599bd;clip-path:polygon(0 58%,4% 35%,8% 55%,12% 28%,17% 62%,23% 35%,29% 66%,35% 22%,41% 58%,47% 33%,54% 64%,60% 26%,67% 59%,73% 37%,80% 65%,88% 25%,94% 55%,100% 42%,100% 100%,0 100%)}.floor-base{position:absolute;left:16px;right:16px;top:94px;bottom:14px;background:#c69258;border:4px solid #3a2a15;box-shadow:inset 0 0 0 5px #efca87;overflow:hidden}.floor-base:before{content:"";position:absolute;inset:0;background-image:linear-gradient(45deg,rgba(255,255,255,.17) 25%,transparent 25%),linear-gradient(-45deg,rgba(0,0,0,.08) 25%,transparent 25%),linear-gradient(45deg,transparent 75%,rgba(255,255,255,.17) 75%),linear-gradient(-45deg,transparent 75%,rgba(0,0,0,.08) 75%);background-size:46px 46px;background-position:0 0,0 23px,23px -23px,-23px 0}.floor-base:after{content:"";position:absolute;left:330px;top:0;width:12px;height:100%;background:#f3d9a4;border-left:4px solid #6b4a24;border-right:4px solid #6b4a24;box-shadow:342px 0 0 #f3d9a4,346px 0 0 #6b4a24,338px 0 0 #6b4a24,0 208px 0 220px rgba(243,217,164,.86);opacity:.88}.room{position:absolute;border:4px solid #2d2112;background:var(--bg);box-shadow:7px 7px 0 rgba(45,33,18,.28);overflow:hidden;z-index:2}.wall{position:absolute;inset:0 0 auto;height:42%;background:linear-gradient(180deg,var(--bg),rgba(255,255,255,.15));border-bottom:4px solid rgba(45,33,18,.6)}.wall span{position:absolute;left:10px;top:12px;color:var(--accent);font-weight:900;font-size:14px;text-shadow:2px 2px 0 #2d2112;transform:rotate(-5deg)}.wall i{position:absolute;right:9px;top:9px;width:45px;height:25px;border:3px solid #2d2112;background:#a9dff5;box-shadow:inset 15px 0 0 rgba(255,255,255,.22),inset 30px 0 0 rgba(255,255,255,.14)}.floor{position:absolute;inset:42% 0 0;background:repeating-linear-gradient(90deg,rgba(255,255,255,.17) 0 28px,rgba(0,0,0,.08) 28px 56px)}.desk{position:absolute;left:21px;bottom:17px;width:62px;height:34px;background:#8a5a2d;border:4px solid #2d2112;box-shadow:0 14px 0 -5px #5e3a1e}.avatar{position:absolute;left:49px;bottom:43px;width:38px;height:50px;animation:bob 1.2s steps(2,end) infinite}.avatar i{position:absolute;left:8px;top:0;width:24px;height:20px;background:#ffd9a3;border:3px solid #2d2112}.avatar b{position:absolute;left:5px;top:22px;width:30px;height:22px;background:#2468ad;border:3px solid #2d2112}.avatar span{position:absolute;left:1px;bottom:0;width:38px;height:5px;background:#2d2112;box-shadow:0 7px 0 #2d2112}.room.pass .avatar b{background:#45b865}.room.warn .avatar b{background:#f5b64e}.room.fail .avatar b{background:#dd685d}@keyframes bob{50%{transform:translateY(-3px)}}.prop{position:absolute;right:18px;bottom:18px;width:42px;height:42px;display:grid;place-items:center;background:rgba(255,255,255,.22);border:3px solid #2d2112;color:var(--accent);font-weight:900;font-size:24px}.bubble{position:absolute;left:92px;right:13px;top:20px;min-height:78px;background:#fff;border:3px solid #9d7b49;border-radius:8px;padding:8px;box-shadow:4px 4px 0 rgba(45,33,18,.2);z-index:3}.bubble:before{content:"";position:absolute;left:-12px;bottom:22px;border:8px solid transparent;border-right-color:#9d7b49}.bubble b,.bubble span,.bubble em{display:block;font-style:normal;line-height:1.35}.bubble b{font-size:14px}.bubble span{font-size:13px;margin-top:3px}.bubble em{font-size:12px;color:#5c6675;margin-top:3px;max-height:31px;overflow:hidden}
+.side{position:absolute;right:20px;top:110px;width:246px;height:820px;display:grid;grid-template-rows:170px 210px 210px 180px;gap:12px}.side-card{padding:12px;overflow:hidden}.side-card h2{font-size:17px;margin:0 0 9px}.stat-list,.task-list,.meter-list,.pulse-list{list-style:none;margin:0;padding:0;display:grid;gap:7px}.stat-list li{display:flex;justify-content:space-between;border-bottom:2px dotted #d2b375;padding:3px 0;font-size:13px}.task-list li{position:relative;min-height:38px;border:2px solid #d2b375;background:#fffdf2;border-radius:6px;padding:6px 43px 6px 8px}.task-list b,.task-list span,.task-list em{display:block;font-size:11px;line-height:1.2}.task-list span{color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.task-list em{position:absolute;right:7px;top:8px;border:1px solid #d2b375;background:#fff0bf;border-radius:4px;padding:2px 4px;max-width:38px;overflow:hidden}.progress{height:10px;background:#ecd29a;border:2px solid #8a672e;margin-top:9px}.progress i{display:block;height:100%;width:42%;background:linear-gradient(90deg,var(--green),#9dda4c)}
+.dock{position:absolute;left:20px;top:720px;width:1248px;height:48px;display:grid;grid-template-columns:repeat(8,1fr);gap:8px}.dock-item{display:flex;align-items:center;justify-content:center;gap:8px;background:#fff8df;border:3px solid var(--line);box-shadow:3px 3px 0 var(--shadow);border-radius:6px;font-size:14px;font-weight:900}.dock-item i{width:22px;height:22px;display:grid;place-items:center;border:2px solid #2d2112;background:#fff0bf;font-style:normal}.dock-item.pass i{background:#9be078}.dock-item.warn i{background:#ffc35e}.dock-item.fail i{background:#ff8b80}
+.pulse{position:absolute;left:20px;top:780px;width:854px;height:166px;padding:12px}.pulse h2,.resource h2{margin:0 0 10px;font-size:18px}.pulse-list{grid-template-columns:repeat(2,1fr);gap:7px 14px}.pulse-list li{display:grid;grid-template-columns:66px 110px 1fr;gap:8px;align-items:center;border-bottom:2px dotted #d8bb78;padding:4px 0}.pulse-list time,.pulse-list b,.pulse-list span{font-size:12px}.pulse-list b{border:1px solid #b9d6f2;background:#eaf5ff;border-radius:4px;padding:3px 5px;text-align:center}.pulse-list span{overflow:hidden;white-space:nowrap;text-overflow:ellipsis;color:#5e513f}.resource{position:absolute;left:894px;top:780px;width:374px;height:166px;padding:12px;display:grid;grid-template-columns:1fr 102px;gap:12px}.meter-list li{display:grid;grid-template-columns:62px 1fr 44px;gap:8px;align-items:center;font-size:12px}.meter-list em{height:9px;background:#ead49d;border:1px solid #8a672e}.meter-list i{display:block;height:100%;background:var(--green)}.cat{position:relative}.cat:before{content:"運行順暢！";position:absolute;right:0;top:0;background:#fff;border:2px solid #2d2112;border-radius:50%;padding:9px;font-size:12px;font-weight:900}.cat:after{content:"";position:absolute;left:22px;bottom:8px;width:58px;height:34px;background:#fff8ea;border:4px solid #1f2937;border-radius:8px;box-shadow:0 22px 0 -8px #4aa3ff,0 22px 0 -4px #1f2937}
+.bottom{position:absolute;left:20px;right:20px;bottom:16px;height:42px;display:grid;grid-template-columns:1fr 130px 180px 210px;gap:10px}.tip{display:flex;align-items:center;gap:14px;padding:0 12px}.add{display:grid;place-items:center;background:#39ac3f;color:#fff;border:3px solid #1d6a23;box-shadow:3px 3px 0 #1d6a23;border-radius:6px;font-weight:900}.learning{display:grid;place-items:center;font-weight:900}.train{display:grid;grid-template-columns:1fr 80px;gap:10px;align-items:center;padding:0 12px}.train em{height:9px;background:#ead49d;border:1px solid #8a672e}.train i{display:block;height:100%;width:12%;background:var(--green)}
+.radar{position:absolute;left:20px;top:956px;display:none}table{width:100%;border-collapse:collapse}th,td{border-bottom:2px solid #dec37e;padding:8px;text-align:left;font-size:12px}.sr-data{position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden}
+
+	/* Product-fit overrides: match the 1280x853 pixel studio reference while keeping live data. */
+	.viewport{padding:4px;background:#ffe6a1}
+	.stage{width:1280px;height:853px;border-width:5px;box-shadow:inset 0 0 0 3px #f5d37a,0 0 0 2px #fdf1c6}
+	.brand{left:18px;top:16px;width:405px;height:74px;padding:8px 14px;gap:12px}
+	.brand h1{font-size:30px;white-space:nowrap}.brand p{font-size:16px;margin-top:6px}.bot{transform:scale(.86);transform-origin:left center}
+	.status{left:435px;top:16px;width:510px;height:74px;grid-template-columns:1fr 1fr 1.05fr;padding:8px 10px}
+	.status div{grid-template-columns:32px 1fr;gap:7px;padding:0 12px}.status i{font-size:26px}.status span{font-size:17px}.status b{font-size:12px}
+	.date{left:958px;top:16px;width:142px;height:74px;padding-top:12px}.date b{font-size:15px}.date span{font-size:21px}
+	.refresh-card{right:18px;top:16px;width:150px;height:74px}.refresh{padding:10px 12px;font-size:13px;gap:8px}
+	.office{left:20px;top:100px;width:1040px;height:490px;border-width:4px}
+	.sky{height:108px}.sky:before{height:78px}.sky:after{height:66px}
+	.floor-base{left:14px;right:14px;top:88px;bottom:12px}.floor-base:after{left:320px;box-shadow:342px 0 0 #f3d9a4,346px 0 0 #6b4a24,338px 0 0 #6b4a24,0 202px 0 220px rgba(243,217,164,.86)}
+	.room{box-shadow:6px 6px 0 rgba(45,33,18,.26)}
+	.wall span{font-size:13px}.wall i{width:41px;height:23px}
+	.desk{left:18px;bottom:16px;width:56px;height:30px}.avatar{left:44px;bottom:39px;transform:scale(.92);transform-origin:bottom left}
+	.prop{right:13px;bottom:15px;width:38px;height:38px;font-size:21px}
+	.bubble{left:84px;right:10px;top:22px;min-height:72px;padding:7px}.bubble b{font-size:13px}.bubble span{font-size:12px}.bubble em{font-size:11px;max-height:30px}
+	#rest .bubble{left:14px;right:10px;top:18px;min-height:58px}#rest .avatar,#rest .desk,#rest .prop{display:none}
+	.side{right:20px;top:100px;width:190px;height:704px;grid-template-rows:160px 185px 185px 144px;gap:10px}
+	.side-card{padding:10px}.side-card h2{font-size:16px;margin-bottom:7px}.stat-list li{font-size:12px}.task-list{gap:6px}.task-list li{min-height:34px;padding:5px 38px 5px 7px}.task-list b,.task-list span,.task-list em{font-size:10px}
+	.dock{left:20px;top:604px;width:1040px;height:44px;gap:7px}.dock-item{font-size:12px;gap:6px}.dock-item i{width:20px;height:20px}
+	.pulse{left:20px;top:662px;width:690px;height:142px;padding:10px}.pulse h2,.resource h2{font-size:17px;margin-bottom:8px}.pulse-list{gap:5px 12px}.pulse-list li{grid-template-columns:58px 98px 1fr;padding:3px 0}.pulse-list time,.pulse-list b,.pulse-list span{font-size:11px}
+	.resource{left:724px;top:662px;width:336px;height:142px;padding:10px;grid-template-columns:1fr 92px}.meter-list li{grid-template-columns:64px 1fr 42px;font-size:11px}.cat:before{font-size:11px;padding:8px}.cat:after{left:21px;bottom:7px;width:54px;height:31px}
+	.bottom{left:20px;right:20px;bottom:10px;height:34px;grid-template-columns:1fr 124px 174px 198px;gap:8px}.tip{font-size:12px}.add,.learning,.train{font-size:12px}.train b{white-space:nowrap}
+	.sr-data{position:absolute;left:-9999px}
+	@media(max-width:1280px){.viewport{overflow:hidden}.stage{transform-origin:top left}}
+	
+	/* Real dashboard interaction layer: reference-like pixels with usable DOM controls. */
+	.viewport{padding:0;background:#f8dea2}
+	.stage{width:1280px;height:853px;border:4px solid #2d2010;box-shadow:inset 0 0 0 2px #fce8aa,inset 0 0 0 6px #a97d37;background:#fff2bf}
+	.brand{left:18px;top:16px;width:406px;height:68px;border:0;background:url("ui-match-artifacts/reference-brand.png") center/100% 100% no-repeat;box-shadow:none;padding:0;gap:0}
+	.brand h1,.brand p{position:absolute;left:-9999px}.bot{display:none}
+	.status{left:434px;top:18px;width:512px;height:64px;border-radius:7px;box-shadow:none;background:#fff6d9}.status div{grid-template-columns:42px 1fr}.status i{display:block;width:34px;height:34px;border:0;border-radius:0;background:url("ui-match-artifacts/reference-status-system-icon.png") center/contain no-repeat!important;color:transparent;font-size:0;image-rendering:pixelated}.status div:nth-child(2) i{background-image:url("ui-match-artifacts/reference-status-health-icon.png")!important}.status div:nth-child(3) i{background-image:url("ui-match-artifacts/reference-status-clock-icon.png")!important}.status b{font-size:11px}.status span{font-size:15px}.status div:first-child span{display:inline-grid;place-items:center;width:max-content;min-width:58px;height:24px;padding:0 9px;border:1px solid #55a05b;border-radius:4px;background:#b9f0a3;color:#1e6a2a;font-size:13px;font-weight:900;line-height:1}.status div:first-child span.warn{border-color:#b8791b;background:#ffe19a;color:#7a4d00}.status div:first-child span.fail{border-color:#b64a35;background:#ffd1c8;color:#8d2d20}.status div:nth-child(2) span{display:flex;align-items:center;gap:6px}.status div:nth-child(2) span:before{content:"";width:8px;height:8px;border-radius:50%;background:#35b653;box-shadow:0 0 0 1px rgba(45,33,18,.18)}
+	.date{left:958px;top:18px;width:140px;height:64px;box-shadow:none}.refresh-card{right:20px;top:18px;width:142px;height:64px;box-shadow:none}.refresh{height:42px;border:1px solid #d5ae69;background:#fff9e6;border-radius:8px;font-size:12px}
+	.office{left:18px;top:92px;width:1044px;height:501px;border:0;box-shadow:none;background:url("ui-match-artifacts/reference-office.png") center/100% 100% no-repeat}
+	.office .sky{display:none}.floor-base{inset:0;background:transparent;border:0;box-shadow:none;overflow:visible}.floor-base:before,.floor-base:after{display:none}
+	.room{background:transparent!important;border:2px solid transparent;box-shadow:none;overflow:visible;cursor:pointer;z-index:5;border-radius:7px;transition:border-color .14s,box-shadow .14s,background .14s}
+	.room:hover{border-color:transparent;box-shadow:none;background:transparent!important;outline:none}.room:focus-visible,.room.is-active{border-color:#fff3a4;box-shadow:0 0 0 2px rgba(61,39,17,.62),0 0 0 5px rgba(255,220,89,.45);background:rgba(255,241,170,.06)!important;outline:none}
+	.room .wall,.room .floor,.room .desk,.room .avatar,.room .prop{display:none}.room .floor{display:block;position:absolute;inset:0;background:transparent}
+		.room .bubble{left:18px;right:auto;top:12px;width:182px;min-height:82px;background:linear-gradient(180deg,rgba(255,255,255,.98),var(--note-bg,#fffdf8) 68%);border:2px solid var(--note-line,#9d7b49);border-radius:6px;padding:6px 18px 7px 9px;box-shadow:3px 3px 0 rgba(45,33,18,.14),inset 0 1px 0 rgba(255,255,255,.55);opacity:1;transform:none;pointer-events:auto;transition:box-shadow .14s,transform .14s;z-index:20}
+		#binance{--note-bg:#fff1ff;--note-line:#b178c8;--note-title:#5f3e93}#blog{--note-bg:#f2fff5;--note-line:#64b778;--note-title:#2f7d52}#social{--note-bg:#f1f8ff;--note-line:#61a9d7;--note-title:#256c9a}#creative{--note-bg:#fff0fa;--note-line:#c66bad;--note-title:#9a3f8a}#data{--note-bg:#f2f8ff;--note-line:#6fa6d4;--note-title:#315f86}#debug{--note-bg:#fff2f6;--note-line:#d46b7b;--note-title:#a94755}#rest{--note-bg:#f2fbff;--note-line:#70a9cf;--note-title:#347397}
+		.room .bubble:before{content:"";position:absolute;left:16px;bottom:-9px;width:13px;height:10px;background:inherit;border-left:2px solid var(--note-line,#9d7b49);border-bottom:2px solid var(--note-line,#9d7b49);clip-path:polygon(0 0,100% 0,0 100%)}.room .bubble:after{content:"";position:absolute;right:7px;top:8px;width:7px;height:7px;border:2px solid #2d2112;border-radius:50%;background:#35b653}.room.warn .bubble:after{background:#efa52e}.room.fail .bubble:after{background:#db4a3e}.room .bubble b{position:relative;display:block;padding-left:13px;font-size:12px;line-height:1.16;color:var(--note-title,#243041);text-shadow:0 1px 0 rgba(255,255,255,.32)}.room .bubble b:before{content:"";position:absolute;left:0;top:3px;width:7px;height:7px;border:1px solid #2d2112;border-radius:50%;background:#42505e}.room .bubble span{font-size:11px;line-height:1.28;color:#263141;font-weight:800}.room .bubble em{font-size:10px;line-height:1.24;color:#5c6675;max-height:32px;overflow:hidden}
+	.room:focus-visible .bubble,.room.is-active .bubble{box-shadow:0 0 0 2px rgba(255,220,89,.44),4px 4px 0 rgba(45,33,18,.18);transform:translateY(-1px)}
+		.live-agent{position:absolute;z-index:18;image-rendering:pixelated;pointer-events:none;transform-origin:50% 100%;background-position:center;background-size:100% 100%;background-repeat:no-repeat;filter:drop-shadow(2px 2px 0 rgba(45,33,18,.22));will-change:transform}
+		.live-agent>*{display:none}.live-agent:after{display:none}
+		.room.syncing .live-agent{animation:agentSync .78s steps(2,end) infinite}.room.working .live-agent,.room.executing .live-agent{animation:agentWork .68s steps(2,end) infinite}.room.error .live-agent{animation:agentAlert .52s steps(2,end) infinite}.room.idle .live-agent{opacity:.98;animation:agentIdle 1.2s steps(2,end) infinite}
+		#blog .live-agent,#data .live-agent{animation-delay:.12s}#social .live-agent,#debug .live-agent{animation-delay:.24s}#creative .live-agent,#rest .live-agent{animation-delay:.36s}
+		@keyframes agentSync{50%{transform:translateY(-8px)}}@keyframes agentWork{50%{transform:translateX(7px) translateY(-4px)}}@keyframes agentAlert{50%{transform:translateX(8px)}}@keyframes agentIdle{50%{transform:translateY(5px)}}
+	#binance{left:28px!important;top:36px!important;width:334px!important;height:168px!important}#blog{left:382px!important;top:34px!important;width:254px!important;height:238px!important}#social{left:638px!important;top:34px!important;width:342px!important;height:180px!important}
+	#creative{left:26px!important;top:284px!important;width:254px!important;height:196px!important}#data{left:294px!important;top:280px!important;width:274px!important;height:206px!important}#debug{left:590px!important;top:278px!important;width:244px!important;height:204px!important}#rest{left:798px!important;top:304px!important;width:206px!important;height:170px!important}
+	#binance .bubble{left:150px;top:31px;width:164px;min-height:92px}#binance .live-agent{left:60px;top:69px;width:68px;height:73px;background-image:url("ui-match-artifacts/agent-binance.png")}
+	#blog .bubble{left:46px;top:32px;width:161px;min-height:102px}#blog .live-agent{left:48px;top:148px;width:78px;height:90px;background-image:url("ui-match-artifacts/agent-blog.png")}
+	#social .bubble{left:152px;top:31px;width:144px;min-height:101px}#social .live-agent{left:67px;top:68px;width:75px;height:78px;background-image:url("ui-match-artifacts/agent-social.png")}
+	#creative .bubble{left:96px;top:-2px;width:166px;min-height:84px}#creative .live-agent{left:52px;top:72px;width:76px;height:92px;background-image:url("ui-match-artifacts/agent-creative.png")}
+	#data .bubble{left:72px;top:12px;width:184px;min-height:83px}#data .live-agent{left:64px;top:82px;width:82px;height:96px;background-image:url("ui-match-artifacts/agent-data.png")}
+	#debug .bubble{left:18px;top:15px;width:186px;min-height:84px}#debug .live-agent{left:-2px;top:82px;width:76px;height:96px;background-image:url("ui-match-artifacts/agent-debug.png")}
+	#rest .bubble{left:0;top:12px;width:145px;min-height:84px;padding:7px 9px}#rest .bubble em{display:none}#rest .live-agent{left:98px;top:16px;width:82px;height:90px;background-image:url("ui-match-artifacts/agent-rest.png")}
+		.side{right:18px;top:92px;width:194px;height:708px;grid-template-rows:144px 174px 174px 160px;gap:10px}.side-card{padding:9px 10px 8px;border-width:2px;box-shadow:2px 2px 0 #b88331}.side-card h2{display:flex;align-items:center;justify-content:space-between;font-size:14px;margin-bottom:7px;cursor:pointer}.side-card h2:after{content:"−";font-size:13px}.side-card.is-collapsed{grid-template-rows:auto}.side-card.is-collapsed h2{margin-bottom:0}.side-card.is-collapsed ul,.side-card.is-collapsed .progress{display:none}.side-card.is-collapsed h2:after{content:"+"}
+		.side-card h2 span{margin-right:auto}.side-icon{position:relative;width:24px;height:24px;display:inline-block;flex:0 0 auto;margin-right:6px;background:url("ui-match-artifacts/reference-side-note-icon.png") center/contain no-repeat;image-rendering:pixelated}.side-icon:before,.side-icon:after{display:none}.side-icon.data{background-image:url("ui-match-artifacts/reference-side-data-icon.png")}.side-icon.repair{background-image:url("ui-match-artifacts/reference-side-repair-icon.png")}.side-icon.gift{background-image:url("ui-match-artifacts/reference-side-gift-icon.png")}
+		.stat-list li{font-size:12px;padding:4px 0}.task-list{gap:2px}.task-list li{min-height:28px;border:0;border-bottom:1px dotted #d4af66;background:transparent;border-radius:0;padding:3px 38px 3px 16px;box-shadow:none}.task-list li:before{content:"";position:absolute;left:2px;top:8px;width:8px;height:8px;border-radius:50%;background:#e5b73c;border:1px solid #7a5b23}.task-list li.fail:before{background:#eec64a}.task-list li.warn:before{background:#eec64a}.task-list b{font-size:10px;line-height:1.16;color:#6b2b22;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.task-list span{font-size:9px;line-height:1.16;color:#5d5140;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.task-list em{right:2px;top:5px;min-width:28px;max-width:36px;text-align:center;font-size:8px;line-height:1.08;white-space:nowrap;border-color:#e4b15f;background:#fff2c8}.task-list li.more-row{min-height:22px;background:transparent;border-style:dotted}.task-list li.more-row span{display:none}.task-list li.more-row em{top:3px}.side-card .progress{height:8px;margin-top:7px}.task-list li,.pulse-list li{cursor:pointer}.task-list li:hover,.pulse-list li:hover{background:#fff7d5}
+		.dock{left:18px;top:604px;width:1044px;height:44px;grid-template-columns:118px repeat(7,1fr) 70px;gap:5px;background:url("ui-match-artifacts/reference-dock.png") center/100% 100% no-repeat}.dock-item{height:44px;border:0;box-shadow:none;border-radius:0;background:transparent;color:transparent;text-shadow:none;font-size:12px}.dock-item i,.dock-item span{opacity:0}.dock-item.is-active{background:rgba(255,240,170,.18);box-shadow:inset 0 0 0 2px rgba(57,172,63,.34)}.dock-mascot{padding:0;background:transparent}.dock-mascot i{width:30px;height:28px;border:0;background:url("ui-match-artifacts/reference-logo.png") center/contain no-repeat}.dock-mascot span{display:none}
+		.pulse{left:18px;top:646px;width:710px;height:150px}.pulse h2:after{content:"  ● 運行中   ● 警告   ● 錯誤   ● 空閒";font-size:11px;color:#5b4d33;margin-left:18px}.pulse-list{gap:3px 10px}.pulse-list li{position:relative;grid-template-columns:58px 84px 1fr;min-height:25px;border-bottom:1px solid #e0c786;padding-left:18px;transition:background .16s,transform .16s}.pulse-list li:before{content:"";position:absolute;left:4px;top:9px;width:7px;height:7px;border-radius:50%;background:#455065;border:1px solid #2d2112}.pulse-list li.pass:before{background:#35b653}.pulse-list li.warn:before{background:#efa52e}.pulse-list li.fail:before{background:#db4a3e}.pulse-list li.is-current{background:#fff0aa;transform:translateX(3px)}.pulse-list time,.pulse-list b,.pulse-list span{font-size:10px}.pulse-list b{border-radius:3px;background:#eaf5ff;border:1px solid #b9d6f2;padding:3px 4px}.pulse-list span,.task-list span,.task-list b,.detail-drawer p{overflow-wrap:anywhere;word-break:break-word}
+		.resource{left:742px;top:658px;width:300px;height:128px;grid-template-columns:1fr 78px}.resource h2{margin-bottom:5px}.meter-list{gap:4px}.meter-list li{grid-template-columns:52px 1fr 40px;font-size:10px}.meter-list em{height:7px}.cat{position:relative;width:78px;height:96px}.cat:before{display:none}.cat span{position:absolute;right:-4px;top:0;background:#fff;border:2px solid #2d2112;border-radius:50%;padding:8px;font-size:10px;font-weight:900;z-index:2;white-space:nowrap}.cat:after{content:"";position:absolute;left:12px;bottom:5px;width:58px;height:55px;background:url("ui-match-artifacts/reference-logo.png") center/contain no-repeat;border:0;border-radius:0;box-shadow:none;image-rendering:pixelated;filter:drop-shadow(2px 2px 0 rgba(45,33,18,.25))}
+		.bottom{left:18px;right:18px;bottom:17px;height:32px;grid-template-columns:812px 114px 128px 184px;gap:8px}.tip{position:relative;padding-left:108px;font-size:11px}.tip:before{content:"";position:absolute;left:0;top:0;width:43px;height:32px;background:url("ui-match-artifacts/reference-footer-star.png") center/100% 100% no-repeat;border-right:2px solid #8c672e}.tip b{position:absolute;left:43px;top:0;display:inline-grid;place-items:center;width:65px;height:32px;background:#fff2bd;border-right:2px solid #8c672e;margin-left:0;font-size:11px}.tip span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1.15}.add,.learning,.train{border-radius:4px;font-size:11px}.add{font-size:12px}.learning{display:flex;align-items:center;justify-content:center;gap:5px;padding:0 6px}.learning i{display:block;width:26px;height:20px;background:url("ui-match-artifacts/reference-footer-learning-icon.png") center/contain no-repeat;image-rendering:pixelated}.learning span{white-space:nowrap}.train{background:#fff8df;grid-template-columns:24px 1fr 42px;gap:5px;padding:0 8px}.train>i{display:block;width:22px;height:22px;background:url("ui-match-artifacts/reference-footer-train-icon.png") center/contain no-repeat;image-rendering:pixelated}.train b{font-size:11px;white-space:nowrap}.train em{height:8px;border-width:1px;background:#ead49d}.train em i{width:12%;background:#35b653}
+	.status div:first-child i{animation:none}
+	.detail-drawer{position:absolute;right:216px;top:96px;width:300px;min-height:172px;background:#fff8df;border:3px solid #8c672e;box-shadow:4px 4px 0 #b88331;border-radius:8px;padding:12px;z-index:40;display:none}.detail-drawer.is-open{display:block}.detail-drawer h3{margin:0 0 8px;font-size:17px}.detail-drawer p{margin:0 0 8px;font-size:12px;line-height:1.45}.drawer-actions{display:flex;gap:8px;margin-top:10px}.drawer-actions button,.drawer-actions a{border:2px solid #8c672e;background:#fff0bf;border-radius:5px;padding:6px 9px;font:inherit;font-size:12px;font-weight:900;color:#2b2114}.drawer-actions button:hover,.drawer-actions a:hover{background:#ffe28d}
+	.toast{position:absolute;left:20px;bottom:56px;background:#2d2010;color:#fff8df;border:2px solid #fff0bf;border-radius:6px;padding:8px 10px;font-size:12px;z-index:60;opacity:0;transform:translateY(8px);transition:opacity .16s,transform .16s}.toast.is-open{opacity:1;transform:translateY(0)}
+	.sr-data{position:absolute;left:-9999px}
+	a:focus-visible,button:focus-visible,.room:focus-visible,.side-card h2:focus-visible{outline:3px solid #2179d8;outline-offset:2px}
+	@media(max-width:1280px){.viewport{overflow:hidden}.stage{transform-origin:top left}}
+	</style>
+</head>
+<body>
+<main class="viewport"><section class="stage">
+  <header class="brand card"><div class="bot"><i></i><b></b><span></span><em></em></div><div><h1>Hermes CMO 工作室</h1><p>全平台營運總控台</p></div></header>
+  <section class="status card" aria-live="polite"><div><i class="ok">◆</i><p><b>系統狀態</b><span class="fail">需檢查</span></p></div><div><i>♥</i><p><b>整體健康度</b><span>42%</span></p></div><div><i>◷</i><p><b>最後刷新</b><span class="js-last-refresh">15:24:02</span></p></div></section>
+  <section class="date card"><b>2026-06-17</b><span class="js-clock">☀ 15:24</span></section>
+  <section class="refresh-card card"><a class="refresh" href="/refresh">⟳ 手動刷新 <kbd>R</kbd></a></section>
+  <section id="pixel-map" class="office"><div class="sky"></div><div class="floor-base">
+        <article id="binance" class="room pass syncing" data-full-status="1 posts" data-full-copy="Refresh fresh-post metrics and compare angle performance." style="left:34px;top:58px;width:266px;height:142px;--bg:#5b3189;--accent:#ffd454">
+          <div class="wall"><span>BINANCE</span><i></i></div>
+          <div class="floor">
+            <div class="desk"></div><div class="avatar"><i></i><b></b><span></span></div><div class="prop">₿</div>
+            <div class="bubble">
+              <b>幣安戰情室</b>
+              <span>已發 1 篇</span>
+              <em>補粉絲/收益/互動成效</em>
+            </div>
+          </div>
+          <div class="live-agent" aria-hidden="true" data-agent="BN"><i></i><b></b><span></span><em>BN</em></div>
+        </article>
+
+        <article id="blog" class="room fail error" data-full-status="2/3 unique column groups" data-full-copy="Official blog needs 3 unique live 9-language original columns per day; current verified unique column groups=2/3 and min todayColumn=3/3. Produce/release the next distinct column group and keep qualified news fast-lane separate." style="left:392px;top:58px;width:266px;height:142px;--bg:#2e8157;--accent:#d9ffd0">
+          <div class="wall"><span>BLOG</span><i></i></div>
+          <div class="floor">
+            <div class="desk"></div><div class="avatar"><i></i><b></b><span></span></div><div class="prop">▣</div>
+            <div class="bubble">
+              <b>官網編輯室</b>
+              <span>專欄群組 2/3</span>
+              <em>需補第 3 組專欄與公開證據</em>
+            </div>
+          </div>
+          <div class="live-agent" aria-hidden="true" data-agent="BG"><i></i><b></b><span></span><em>BG</em></div>
+        </article>
+
+        <article id="social" class="room fail error" data-full-status="6 publish, 0 replies/comments, 0 engagement actions" data-full-copy="Social CMO has partial proof-backed activity, but the six-platform daily gate is not closed. Finish publish/reply/engagement ledger evidence or record exact platform blockers." style="left:750px;top:58px;width:254px;height:142px;--bg:#1d5d91;--accent:#bce9ff">
+          <div class="wall"><span>SOCIAL</span><i></i></div>
+          <div class="floor">
+            <div class="desk"></div><div class="avatar"><i></i><b></b><span></span></div><div class="prop">✦</div>
+            <div class="bubble">
+              <b>社群互動室</b>
+              <span>發文6｜回覆0｜互動0</span>
+              <em>六平台未關，補 ledger</em>
+            </div>
+          </div>
+          <div class="live-agent" aria-hidden="true" data-agent="CM"><i></i><b></b><span></span><em>CM</em></div>
+        </article>
+
+        <article id="creative" class="room fail error" data-full-status="AI 感/同質化待降 · 12 個案例" data-full-copy="下一輪先換 hook、proof type、視覺語法，再產文與產圖。" style="left:112px;top:230px;width:266px;height:132px;--bg:#ba5aa9;--accent:#ffd7f4">
+          <div class="wall"><span>CREATIVE</span><i></i></div>
+          <div class="floor">
+            <div class="desk"></div><div class="avatar"><i></i><b></b><span></span></div><div class="prop">✎</div>
+            <div class="bubble">
+              <b>創意訓練室</b>
+              <span>AI 感/同質化待降 · 12 個案例</span>
+              <em>下一輪先換 hook、proof type…</em>
+            </div>
+          </div>
+          <div class="live-agent" aria-hidden="true" data-agent="CR"><i></i><b></b><span></span><em>CR</em></div>
+        </article>
+
+        <article id="data" class="room warn working" data-full-status="17 個來源待授權" data-full-copy="需登入來源不再算系統壞；Hermes 只顯示真實來源缺口。" style="left:410px;top:230px;width:266px;height:132px;--bg:#345f86;--accent:#c8ecff">
+          <div class="wall"><span>DATA</span><i></i></div>
+          <div class="floor">
+            <div class="desk"></div><div class="avatar"><i></i><b></b><span></span></div><div class="prop">▤</div>
+            <div class="bubble">
+              <b>數據追蹤室</b>
+              <span>17 個來源待授權</span>
+              <em>需登入來源不再算系統壞；Hermes 只顯…</em>
+            </div>
+          </div>
+          <div class="live-agent" aria-hidden="true" data-agent="DT"><i></i><b></b><span></span><em>DT</em></div>
+        </article>
+
+        <article id="debug" class="room warn working" data-full-status="26 個修復包 · 品質 16" data-full-copy="把每個紅黃燈轉成修復 artifact、驗證命令與下一輪 owner wakeup。" style="left:690px;top:230px;width:250px;height:132px;--bg:#bd3d3a;--accent:#ffd0c9">
+          <div class="wall"><span>DEBUG</span><i></i></div>
+          <div class="floor">
+            <div class="desk"></div><div class="avatar"><i></i><b></b><span></span></div><div class="prop">⚙</div>
+            <div class="bubble">
+              <b>Debug 修復區</b>
+              <span>26 個修復包 · 品質 16</span>
+              <em>把每個紅黃燈轉成修復 artifact、驗…</em>
+            </div>
+          </div>
+          <div class="live-agent" aria-hidden="true" data-agent="FX"><i></i><b></b><span></span><em>FX</em></div>
+        </article>
+
+        <article id="rest" class="room pass idle" data-full-status="待命" data-full-copy="任務結束後清 Chrome tab、壓低資源、保持 Mac mini 長跑。" style="left:880px;top:294px;width:142px;height:88px;--bg:#4e8a5b;--accent:#d7ffc9">
+          <div class="wall"><span>REST</span><i></i></div>
+          <div class="floor">
+            <div class="desk"></div><div class="avatar"><i></i><b></b><span></span></div><div class="prop">Z</div>
+            <div class="bubble">
+              <b>休息區</b>
+              <span>待命</span>
+              <em></em>
+            </div>
+          </div>
+          <div class="live-agent" aria-hidden="true" data-agent="ID"><i></i><b></b><span></span><em>ID</em></div>
+        </article></div></section>
+  <aside class="side">
+    <section class="side-card card"><h2><i class="side-icon note"></i><span>昨日小記</span></h2><ul class="stat-list"><li><span>公開動作</span><b>6</b></li>
+<li><span>自修任務包</span><b>26</b></li>
+<li><span>待授權來源</span><b>17</b></li>
+<li><span>品質訓練</span><b>16</b></li>
+<li><span>視野學習</span><b>17</b></li></ul><div class="progress"><i></i></div></section>
+    <section class="side-card card"><h2><i class="side-icon data"></i><span>待補數據</span></h2><ul class="task-list"><li class='fail'><b>幣安收益/粉絲快照</b><span>Binance Square</span><em>需授權</em></li>
+<li class='fail'><b>Binance Square 粉絲來源</b><span>Binance Square</span><em>需授權</em></li>
+<li class='fail'><b>幣安內容收益來源</b><span>Binance Square</span><em>需授權</em></li><li class='more-row'><b>另 4 項待處理</b><span>點 JSON 看完整隊列</span><em>更多</em></li></ul></section>
+    <section class="side-card card"><h2><i class="side-icon repair"></i><span>修復任務</span></h2><ul class="task-list"><li class='warn'><b>官網今日專欄收尾</b><span>Official Blog</span><em>自修</em></li>
+<li class='warn'><b>創意去 AI 感訓練</b><span>Ops Health</span><em>自修</em></li>
+<li class='warn'><b>社群自動化體檢</b><span>Social CMO</span><em>自修</em></li><li class='more-row'><b>另 4 項待處理</b><span>點 JSON 看完整隊列</span><em>更多</em></li></ul></section>
+    <section class="side-card card"><h2><i class="side-icon gift"></i><span>今日產出</span></h2><ul class="stat-list"><li><span>公開動作</span><b>6</b></li>
+<li><span>自修任務包</span><b>26</b></li>
+<li><span>待授權來源</span><b>17</b></li>
+<li><span>品質訓練</span><b>16</b></li></ul></section>
+  </aside>
+  <nav class="dock"><a class='dock-item fail' href='#pixel-map'><i>⌂</i><span>全景總覽</span></a>
+<a class='dock-item pass' href='#binance'><i>◉</i><span>幣安戰情室</span></a>
+<a class='dock-item fail' href='#blog'><i>▤</i><span>官網編輯室</span></a>
+<a class='dock-item fail' href='#social'><i>☵</i><span>社群互動室</span></a>
+<a class='dock-item fail' href='#creative'><i>✹</i><span>創意訓練室</span></a>
+<a class='dock-item warn' href='#data'><i>▥</i><span>數據追蹤室</span></a>
+<a class='dock-item warn' href='#debug'><i>⚒</i><span>Debug 修復區</span></a>
+<a class='dock-item pass' href='#settings'><i>⚙</i><span>設定中心</span></a><button class='dock-item dock-mascot' type='button' aria-label='Hermes 訓練狀態'><i></i><span></span></button></nav>
+  <section class="pulse card"><h2>即時工作脈動</h2><ul class="pulse-list"><li class='pass' title='Facebook 發文：原生排程完成，已讀回。'><time>發文</time><b>Facebook 發文</b><span>原生排程完成，已讀回。</span></li>
+<li class='pass' title='X 發文：原生排程完成，已讀回。'><time>發文</time><b>X 發文</b><span>原生排程完成，已讀回。</span></li>
+<li class='pass' title='Threads 發文：讀回已驗證，ledger 已存。'><time>發文</time><b>Threads 發文</b><span>讀回已驗證，ledger 已存。</span></li>
+<li class='pass' title='Facebook 發文：排程已驗證，ledger 已存。'><time>發文</time><b>Facebook 發文</b><span>排程已驗證，ledger 已存。</span></li>
+<li class='pass' title='X 發文：原生排程完成，已讀回。'><time>發文</time><b>X 發文</b><span>原生排程完成，已讀回。</span></li>
+<li class='pass' title='Threads 發文：編輯器已驗證，缺 URL 不補假。'><time>發文</time><b>Threads 發文</b><span>編輯器已驗證，缺 URL 不補假。</span></li></ul></section>
+  <section class="resource card"><div><h2>系統資源監控</h2><ul class="meter-list"><li><span>CPU</span><em><i style='width:25%'></i></em><b>25%</b></li>
+<li><span>記憶體</span><em><i style='width:76%'></i></em><b>76%</b></li>
+<li><span>硬碟</span><em><i style='width:93%'></i></em><b>93%</b></li>
+<li><span>Gateway/Cron</span><em><i style='width:100%'></i></em><b>OK</b></li></ul></div><div class="cat"><span>需清理！</span></div></section>
+  <footer class="bottom"><div class="tip card"><b>今日提示</b><span>AI 感下降重點：加入個人經驗、反直覺觀點、具體案例，避免模板語句與單一圖表類型。</span></div><a class="add" href="http://127.0.0.1:9119/chat?profile=ops">＋ 新增任務</a><a class="learning card" href="./hermes-ops-control-room-data.json"><i aria-hidden="true"></i><span>學習資料庫</span></a><div class="train card"><i aria-hidden="true"></i><b>Hermes 訓練中 16%</b><em><i style="width:16%"></i></em></div></footer>
+  <section class="sr-data"><h2>創意品質雷達</h2><table><tbody><tr class='fail'><td>binance</td><td>90</td><td>100</td><td>kol_reaction + source_screenshot</td></tr>
+<tr class='fail'><td>social</td><td>90</td><td>100</td><td>platform_native_mix + mixed_visual_proof</td></tr>
+<tr class='fail'><td>facebook</td><td>77</td><td>90</td><td>community_prompt + source_screenshot</td></tr>
+<tr class='fail'><td>medium</td><td>77</td><td>92</td><td>official_column + editorial_cover</td></tr>
+<tr class='fail'><td>reddit</td><td>75</td><td>95</td><td>source_proof + no_image</td></tr>
+<tr class='warn'><td>threads</td><td>73</td><td>83</td><td>community_prompt + source_screenshot</td></tr>
+<tr class='warn'><td>x</td><td>72</td><td>83</td><td>opinion + no_image</td></tr>
+<tr class='warn'><td>instagram</td><td>68</td><td>74</td><td>case_study + carousel</td></tr></tbody></table><p>缺 follower、收益、GA4、AdSense、平台互動來源時，dashboard 只能顯示 missing/fail 與 exact source contract，不能推論假數字。</p></section>
+</section></main>
+	<script>
+	function fitStage(){const stage=document.querySelector('.stage');const viewport=document.querySelector('.viewport');const mobile=window.innerWidth<760;const s=mobile?1:Math.min(1,window.innerWidth/1280,window.innerHeight/853);stage.style.transform='scale('+s+')';viewport.style.height=mobile?'100vh':Math.ceil(853*s)+'px';viewport.style.overflow=mobile?'auto':'hidden';}
+	window.addEventListener('resize',fitStage);fitStage();
+	document.querySelector('.refresh')?.addEventListener('click',async event=>{event.preventDefault();const link=event.currentTarget;link.textContent='刷新中...';try{const response=await fetch('/refresh.json?ts='+Date.now(),{cache:'no-store'});if(!response.ok)throw new Error('refresh failed');location.href='/hermes-ops-control-room.html?refreshed='+Date.now();}catch(error){link.textContent='刷新失敗，重試';link.dataset.error=String(error);}});
+	document.addEventListener('keydown',event=>{if(event.key&&event.key.toLowerCase()==='r'){event.preventDefault();document.querySelector('.refresh')?.click();}});
+	function tickClock(){const now=new Date();const hh=String(now.getHours()).padStart(2,'0');const mm=String(now.getMinutes()).padStart(2,'0');const ss=String(now.getSeconds()).padStart(2,'0');const clock=document.querySelector('.js-clock');if(clock)clock.textContent='☀ '+hh+':'+mm+':'+ss;}
+	function advancePulse(){const rows=[...document.querySelectorAll('.pulse-list li')];if(!rows.length)return;const current=rows.findIndex(row=>row.classList.contains('is-current'));rows.forEach(row=>row.classList.remove('is-current'));rows[(current+1)%rows.length].classList.add('is-current');}
+	setInterval(tickClock,1000);setInterval(advancePulse,1800);tickClock();advancePulse();
+	const roomLabels={binance:'幣安戰情室',blog:'官網編輯室',social:'社群互動室',creative:'創意訓練室',data:'數據追蹤室',debug:'Debug 修復區',rest:'休息區'};
+	function ensureDrawer(){let drawer=document.querySelector('.detail-drawer');if(drawer)return drawer;drawer=document.createElement('section');drawer.className='detail-drawer';drawer.setAttribute('aria-live','polite');drawer.innerHTML='<h3></h3><p class="drawer-status"></p><p class="drawer-copy"></p><div class="drawer-actions"><button type="button" data-close>關閉</button><a href="./hermes-ops-control-room-data.json">查看資料</a></div>';document.querySelector('.stage').appendChild(drawer);drawer.querySelector('[data-close]').addEventListener('click',()=>drawer.classList.remove('is-open'));return drawer;}
+	function toast(message){let node=document.querySelector('.toast');if(!node){node=document.createElement('div');node.className='toast';document.querySelector('.stage').appendChild(node);}node.textContent=message;node.classList.add('is-open');clearTimeout(window.__hermesToastTimer);window.__hermesToastTimer=setTimeout(()=>node.classList.remove('is-open'),2200);}
+	function setActiveDock(href){document.querySelectorAll('.dock-item').forEach(item=>item.classList.toggle('is-active',item.getAttribute('href')===href));}
+	function openDrawer(title,status,copy){const drawer=ensureDrawer();drawer.querySelector('h3').textContent=title;drawer.querySelector('.drawer-status').textContent=status;drawer.querySelector('.drawer-copy').textContent=copy;drawer.classList.add('is-open');return drawer;}
+	function selectRoom(room){if(!room)return;document.querySelectorAll('.room').forEach(item=>item.classList.toggle('is-active',item===room));setActiveDock('#'+room.id);const title=room.querySelector('.bubble b')?.textContent||roomLabels[room.id]||room.id;const status=room.dataset.fullStatus||room.querySelector('.bubble span')?.textContent||'等待資料更新';const copy=room.dataset.fullCopy||room.querySelector('.bubble em')?.textContent||'資料後續可串接到此房間。';openDrawer(title,status,copy);toast('已選取 '+title);}
+	function showOverview(){document.querySelectorAll('.room').forEach(item=>item.classList.remove('is-active'));setActiveDock('#pixel-map');document.querySelector('.detail-drawer')?.classList.remove('is-open');toast('已回到全景總覽');}
+	function showSettings(){document.querySelectorAll('.room').forEach(item=>item.classList.remove('is-active'));setActiveDock('#settings');openDrawer('設定中心','快捷鍵與資料入口','R：刷新。1-8：切換 dock。Esc：關閉詳情。資料後續串接前，此頁先保留所有互動、狀態、入口與可驗證 UI。');toast('已開啟設定中心');}
+	function showTraining(){document.querySelectorAll('.room').forEach(item=>item.classList.remove('is-active'));setActiveDock('');openDrawer('Hermes 訓練中','品質訓練與自修隊列','目前保留真實數據入口、修復隊列與品質訓練狀態；缺來源不補假數字。');toast('Hermes 訓練狀態');}
+	document.querySelectorAll('.room').forEach(room=>{room.tabIndex=0;room.setAttribute('role','button');room.setAttribute('aria-label',(roomLabels[room.id]||room.id)+' 詳細狀態');room.addEventListener('click',()=>selectRoom(room));room.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();selectRoom(room);}});});
+	document.querySelectorAll('.dock-item').forEach((item,index)=>{item.addEventListener('click',event=>{const id=item.getAttribute('href')?.slice(1);const room=document.getElementById(id);if(room&&room.classList.contains('room')){event.preventDefault();selectRoom(room);room.focus({preventScroll:true});return;}if(id==='pixel-map'){event.preventDefault();showOverview();return;}if(id==='settings'){event.preventDefault();showSettings();}});item.dataset.index=String(index+1);});
+	document.querySelectorAll('.side-card h2').forEach(title=>{title.tabIndex=0;title.setAttribute('role','button');title.setAttribute('aria-expanded','true');title.addEventListener('click',()=>{const card=title.closest('.side-card');const collapsed=card.classList.toggle('is-collapsed');title.setAttribute('aria-expanded',String(!collapsed));});title.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();title.click();}});});
+	document.querySelector('.dock-mascot')?.addEventListener('click',showTraining);
+	document.querySelectorAll('.task-list li,.pulse-list li').forEach(item=>{item.tabIndex=0;item.addEventListener('click',()=>toast(item.textContent.trim().replace(/\s+/g,' ').slice(0,80)));item.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();item.click();}});});
+	document.addEventListener('keydown',event=>{if(event.key==='Escape'){document.querySelector('.detail-drawer')?.classList.remove('is-open');}if(/^[1-8]$/.test(event.key)){const target=document.querySelector(`.dock-item[data-index="${event.key}"]`);if(target){event.preventDefault();target.click();}}if(event.key==='?'){toast('快捷鍵：R 刷新，1-8 切換 dock，Esc 關閉詳情');}});
+	</script>
+	</body></html>
